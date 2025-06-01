@@ -34,6 +34,7 @@ local cantLootID                     = 0
 local itemNoValue                    = nil
 local noDropItems, loreItems         = {}, {}
 local allItems                       = {}
+local foragingLoot                   = false
 -- Constants
 local spawnSearch                    = '%s radius %d zradius 50'
 local shouldLootActions              = { Ask = false, CanUse = false, Keep = true, Bank = true, Sell = true, Destroy = false, Ignore = false, Tribute = false, }
@@ -265,6 +266,7 @@ LNS.TempSettings.SortedSettingsKeys = {}
 LNS.TempSettings.SortedToggleKeys   = {}
 LNS.TempSettings.UpdateSettings     = false
 LNS.TempSettings.SendSettings       = false
+LNS.PauseLooting                    = false
 
 local tableList                     = {
     "Global_Items", "Normal_Items", LNS.PersonalTableName,
@@ -458,122 +460,8 @@ function LNS.SortKeys(input_table)
     return keys
 end
 
----comment: Returns a table containing all the data from the INI file.
----@param fileName string The name of the INI file to parse. [string]
----@param sec string The section of the INI file to parse. [string]
----@return table DataTable containing all data from the INI file. [table]
-function LNS.load(fileName, sec)
-    if sec == nil then sec = "items" end
-    -- this came from Knightly's LIP.lua
-    assert(type(fileName) == 'string', 'Parameter "fileName" must be a string.');
-    local file  = assert(io.open(fileName, 'r'), 'Error loading file : ' .. fileName);
-    local data  = {};
-    local section;
-    local count = 0
-    for line in file:lines() do
-        local tempSection = line:match('^%[([^%[%]]+)%]$');
-        if (tempSection) then
-            -- print(tempSection)
-            section = tonumber(tempSection) and tonumber(tempSection) or tempSection;
-            -- data[section]                                    = data[section] or {};
-            count   = 0
-        end
-        local param, value = line:match("^([%w|_'.%s-]+)=%s-(.+)$");
-
-        if (param and value ~= nil) then
-            if (tonumber(value)) then
-                value = tonumber(value);
-            elseif (value == 'true') then
-                value = true;
-            elseif (value == 'false') then
-                value = false;
-            end
-            if (tonumber(param)) then
-                param = tonumber(param);
-            end
-            if string.find(tostring(param), 'Spawn') then
-                count = count + 1
-                param = string.format("Spawn%d", count)
-            end
-            if sec == "items" and param ~= nil then
-                if section ~= "Settings" and section ~= "GlobalItems" then
-                    data[param] = value;
-                end
-            elseif section == sec and param ~= nil then
-                data[param] = value;
-            end
-        end
-    end
-    file:close();
-    Logger.Debug(LNS.guiLoot.console, "Loot::load()")
-    return data;
-end
-
-function LNS.UpdateDataBases()
-    -- Ensure we only update if the version is outdated
-    if LNS.TempSettings.VersionInfo and LNS.TempSettings.VersionInfo.version >= 6 then
-        return
-    end
-    Logger.Info(LNS.guiLoot.console, "Loot::UpdateDataBases()\ay Begin Database Update\ax")
-
-    local db = LNS.OpenItemsSQL()
-    if not db then
-        print("Error: Could not open Items database.")
-        return
-    end
-
-    db:exec("BEGIN TRANSACTION")
-    db:exec([[UPDATE Items
-        SET link = x'12' || 0 ||
-        printf('%05X', item_id) ||
-        '0000000000000000000000000000000' ||
-        name ||
-        x'12';]])
-    db:exec("COMMIT")
-    db:close()
-
-    db = SQLite3.open(RulesDB)
-    if not db then
-        print("Error: Could not open Rules database.")
-        return
-    end
-
-    db:exec("BEGIN TRANSACTION")
-    -- Get all rule tables dynamically
-    local tables = {}
-    for row in db:nrows("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%_Rules'") do
-        table.insert(tables, row.name)
-    end
-
-    -- SQL query template
-    local query_template = [[
-        UPDATE %s
-        SET item_link = X'12' || 0 ||
-            printf('%%05X', item_id) ||
-            '0000000000000000000000000000000' ||
-            item_name ||
-            X'12'
-    ]]
-    local bdgTbl = {}
-    -- Run the update for each table
-    for _, table_name in ipairs(tables) do
-        local query = string.format(query_template, table_name)
-        local success, err = pcall(db.exec, db, query)
-        if not success then
-            Logger.Error(LNS.guiLoot.console, "Error updating table " .. table_name .. ": " .. err)
-        else
-            bdgTbl[table_name] = 'true'
-        end
-    end
-
-    db:exec("COMMIT")
-    db:close()
-    Logger.Info(LNS.guiLoot.console, bdgTbl)
-    Logger.Info(LNS.guiLoot.console, "\aoDatabase \ayUpdate Complete\ax")
-    mq.pickle(lootDBUpdateFile, { version = version, })
-end
-
 function LNS.writeSettings()
+    mq.cmdf("/squelch /mapfilter CastRadius %d", LNS.Settings.CorpseRadius)
     LNS.Settings.BuyItemsTable = LNS.BuyItemsTable
     mq.pickle(SettingsFile, LNS.Settings)
     Logger.Debug(LNS.guiLoot.console, "Loot::writeSettings()")
@@ -765,17 +653,6 @@ function LNS.loadSettings(firstRun)
     return needSave
 end
 
-function LNS.split(input, sep)
-    if sep == nil then
-        sep = "|"
-    end
-    local t = {}
-    for str in string.gmatch(input, "([^" .. sep .. "]+)") do
-        table.insert(t, str)
-    end
-    return t
-end
-
 local function convertTimestamp(timeStr)
     local h, mi, s = timeStr:match("(%d+):(%d+):(%d+)")
     local hour = tonumber(h)
@@ -869,15 +746,10 @@ function LNS.setupEvents()
     mq.event("CantLoot", "#*#may not loot this corpse#*#", LNS.eventCantLoot)
     mq.event("NoSlot", "#*#There are no open slots for the held item in your inventory#*#", LNS.eventNoSlot)
     mq.event("Sell", "#*#You receive#*# for the #1#(s)#*#", LNS.eventSell)
-    mq.event("ForageExtras", "Your forage mastery has enabled you to find something else!", LNS.eventForage)
+    -- mq.event("ForageExtras", "Your forage mastery has enabled you to find something else!", LNS.eventForage)
     mq.event("Forage", "You have scrounged up #*#", LNS.eventForage)
     mq.event("Novalue", "#*#give you absolutely nothing for the #1#.#*#", LNS.eventNovalue)
     mq.event("Tribute", "#*#We graciously accept your #1# as tribute, thank you!#*#", LNS.eventTribute)
-end
-
-function LNS.setGlobalBind(value)
-    local itemID = mq.TLO.Cursor.ID()
-    LNS.setGlobalItem(itemID, value)
 end
 
 ------------------------------------
@@ -913,6 +785,14 @@ function LNS.commandHandler(...)
         LNS.writeSettings()
         LNS.sendMySettings()
         return
+    end
+    if args[1] == 'pause' then
+        LNS.PauseLooting = true
+        Logger.Info(LNS.guiLoot.console, "\ayLooting\ax is now \aoPaused\ax")
+        return
+    elseif args[1] == 'unpause' or args[1] == 'resume' then
+        LNS.PauseLooting = false
+        Logger.Info(LNS.guiLoot.console, "\ayLooting\ax is now \agUnPaused\ax")
     end
     local dbgTbl = {
         CommandHandler = "/lns command issued",
@@ -1286,6 +1166,23 @@ function LNS.LoadDateHistory(lookup_Date)
     db:close()
 end
 
+function LNS.LoadItemHistory(lookup_name)
+    local db = SQLite3.open(HistoryDB)
+    db:exec("PRAGMA journal_mode=WAL;")
+    db:exec("BEGIN TRANSACTION")
+
+    LNS.HistoryItemData = {}
+    local stmt = db:prepare("SELECT * FROM LootHistory WHERE Item LIKE ?")
+    stmt:bind_values(string.format("%%%s%%", lookup_name))
+    for row in stmt:nrows() do
+        table.insert(LNS.HistoryItemData, row)
+    end
+
+    stmt:finalize()
+    db:exec("COMMIT")
+    db:close()
+end
+
 ---comment
 ---@param itemName string the name of the item
 ---@param corpseName string the name of the corpse
@@ -1295,9 +1192,9 @@ end
 ---@param link string the item link
 ---@param looter string the name of the looter
 ---@param zone string the zone the item was looted in (ShortName)
----@param allItems table items table sent to looted.
+---@param items_table table items table sent to looted.
 ---@param cantWear boolean|nil if the item can be worn
-function LNS.insertIntoHistory(itemName, corpseName, action, date, timestamp, link, looter, zone, allItems, cantWear)
+function LNS.insertIntoHistory(itemName, corpseName, action, date, timestamp, link, looter, zone, items_table, cantWear)
     if itemName == nil then return end
     local db = SQLite3.open(HistoryDB)
     if not db then
@@ -1311,7 +1208,7 @@ function LNS.insertIntoHistory(itemName, corpseName, action, date, timestamp, li
     local currentTime = convertTimestamp(timestamp)
 
     -- Skip if a duplicate "Ignore" or "Left" action exists within the last minute
-    if action == "Ignore" or action == "Left" then
+    if action == "Ignore" or action == "Left" or action == "CanUse" then
         local checkStmt = db:prepare([[
 SELECT Date, TimeStamp FROM LootHistory
 WHERE Item = ? AND CorpseName = ? AND Action = ? AND Date = ?
@@ -1357,7 +1254,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     if action ~= 'Destroy' and action ~= 'Ignore' then
         actLabel = 'Looted'
     end
-    table.insert(allItems,
+
+    table.insert(items_table,
         {
             Name = itemName,
             CorpseName = corpseName,
@@ -1439,45 +1337,6 @@ function LNS.LoadRuleDB()
 
     -- Load icons
     LNS.LoadIcons()
-end
-
-function LNS.GetIconID(itemID)
-    if not itemID or type(itemID) ~= "number" then
-        print("LNS.GetIconID: Invalid itemID")
-        return 0
-    end
-
-    local db = LNS.OpenItemsSQL()
-    if not db then
-        Logger.Debug(LNS.guiLoot.console, "LNS.GetIconID: Failed to open database")
-        return 0
-    end
-
-    local iconID = 0
-    local qry = string.format("SELECT icon FROM Items WHERE item_id = %d", itemID)
-    local stmt = db:prepare(qry)
-
-    if not stmt then
-        Logger.Debug(LNS.guiLoot.console, "LNS.GetIconID: Failed to prepare statement:", qry)
-        db:close()
-        return 0
-    end
-
-    local found = false
-    for row in stmt:nrows() do
-        iconID = row.icon
-        LNS.ItemIcons[itemID] = iconID
-        found = true
-    end
-
-    stmt:finalize()
-    db:close()
-
-    if not found then
-        Logger.Debug(LNS.guiLoot.console, "LNS.GetIconID: Item ID %d not found in database", itemID)
-    end
-
-    return iconID
 end
 
 ---comment Retrieve item data from the DB
@@ -2045,7 +1904,7 @@ end
 ---@return string link
 ---@return string which_table
 function LNS.lookupLootRule(itemID, tablename)
-    if not itemID then
+    if itemID == nil or itemID == 0 then
         return 'NULL', 'All', 'NULL', 'None'
     end
     local which_table = 'Normal'
@@ -2487,16 +2346,6 @@ function LNS.resolveDuplicateItems(itemName, duplicates, callback)
     ImGui.End()
 end
 
-function LNS.getMatchingItemsByName(itemName)
-    local matches = {}
-    for _, item in pairs(LNS.ALLITEMS) do
-        if item.Name == itemName then
-            table.insert(matches, item)
-        end
-    end
-    return matches
-end
-
 function LNS.getRuleIndex(rule, ruleList)
     for i, v in ipairs(ruleList) do
         if v == rule then
@@ -2514,8 +2363,10 @@ function LNS.retrieveClassList(item)
         for i = 1, numClasses do
             classList = string.format("%s %s", classList, item.Class(i).ShortName())
         end
-    else
+    elseif numClasses == 16 then
         classList = "All"
+    else
+        classList = "None"
     end
     return classList
 end
@@ -2623,7 +2474,6 @@ function LNS.checkDecision(item, lootDecision)
             newDecision = "Sell"
         end
     end
-
     return newDecision
 end
 
@@ -2671,7 +2521,8 @@ end
 --- @return string
 function LNS.checkClasses(decision, allowedClasses, fromFunction, new)
     local ret = decision
-    local tmpClasses = allowedClasses:lower()
+    if fromFunction ~= 'loot' then return ret end
+    local tmpClasses = allowedClasses:lower() or 'all'
     if ret:lower() == 'keep' and not new then
         if not string.find(tmpClasses, LNS.MyClass) then
             ret = "Ignore"
@@ -2800,19 +2651,17 @@ end
 ---@return string Rule The Loot Rule or decision of no Rule
 ---@return integer Count The number of items to keep if Quest Item
 ---@return boolean newRule True if Item does not exist in the Rules Tables
----@return boolean|nil cantWear True if the item is not wearable by the character
+---@return boolean cantWear True if the item is not wearable by the character
 function LNS.getRule(item, fromFunction, index)
-    if item == nil then return 'NULL', 0, false end
+    if item == nil or not item() then return 'NULL', 0, false, true end
     local itemID = item.ID() or 0
-    if itemID == 0 then return 'NULL', 0, false end
+    if itemID == 0 then return 'NULL', 0, false, true end
 
     -- Initialize values
     local lootDecision                              = 'Ignore'
-    local tradeskill                                = item.Tradeskills()
     local sellPrice                                 = (item.Value() or 0) / 1000
     local stackable                                 = item.Stackable()
     local isAug                                     = item.Type() == 'Augmentation'
-    local stackSize                                 = item.StackSize()
     local tributeValue                              = item.Tribute() or 0
 
     local countHave                                 = mq.TLO.FindItemCount(item.Name())() + mq.TLO.FindItemBankCount(item.Name())()
@@ -2838,7 +2687,8 @@ function LNS.getRule(item, fromFunction, index)
     local lootRule, lootClasses, lootLink, ruletype = LNS.lookupLootRule(itemID)
 
 
-    Logger.Info(LNS.guiLoot.console, "\aoLookup Rule\ax: \at%s\ax, \ayClasses\ax: \at%s\ax, Item: \ao%s\ax, \atLink: %s", lootRule, lootClasses, itemName, lootLink)
+    Logger.Info(LNS.guiLoot.console, "\aoLookup Rule\ax: \at%s\ax, \ayClasses\ax: \at%s\ax, Item: \ao%s\ax, ID: \ay%s\ax, \atLink: %s", lootRule, lootClasses, itemName, itemID,
+        lootLink)
 
     newRule = lootRule == 'NULL'
     lootDecision = lootRule
@@ -2859,8 +2709,8 @@ function LNS.getRule(item, fromFunction, index)
         goto skip_new_rule
     end
 
-    if ruletype == ('Global') then
-        lootDecision = LNS.checkClasses(lootRule, lootClasses, 'loot', newRule)
+    if ruletype == 'Global' or ruletype == 'Normal' then
+        lootDecision = LNS.checkClasses(lootRule, lootClasses, fromFunction, newRule)
     end
 
     Logger.Info(LNS.guiLoot.console, 'RuleType: %s', ruletype)
@@ -2878,7 +2728,7 @@ function LNS.getRule(item, fromFunction, index)
 
     -- Re-evaluate settings if AlwaysEval is enabled
     if LNS.Settings.AlwaysEval and ruletype == 'Normal' then
-        if lootRule ~= ("Quest" or "Keep" or "Destroy" or 'CanUse' or 'Ask' or 'Bank') then
+        if lootRule ~= "Quest" and lootRule ~= "Keep" and lootRule ~= "Destroy" and lootRule ~= 'CanUse' and lootRule ~= 'Ask' and lootRule ~= 'Bank' then
             lootRule = 'NULL'
         end
     end
@@ -2902,7 +2752,7 @@ function LNS.getRule(item, fromFunction, index)
         elseif tributeValue > 0 then
             lootRule = 'Tribute'
         end
-
+        lootDecision = LNS.checkClasses(lootDecision, lootClasses, 'loot', false)
         -- local checkVal, checkRule, checkDecision = LNS.checkTS(lootRule, lootDecision, tradeskill)
         -- if checkVal and ruletype == 'Normal' then
         --     lootRule = checkRule
@@ -3121,9 +2971,12 @@ function LNS.getRule(item, fromFunction, index)
 
     ::quest_override::
 
-    if fromFunction == 'loot' then
-        if type(lootDecision) == 'string' and lootLore then
-            LNS.lootItem(index, lootDecision, 'leftmouseup', qKeep, not iCanUse)
+    if fromFunction == 'loot' or fromFunction == 'forage' then
+        if type(lootDecision) == 'string' then
+            if not lootLore then
+                lootDecision = 'Ignore'
+            end
+            -- LNS.lootItem(index, lootDecision, 'leftmouseup', qKeep, not iCanUse)
         end
     end
 
@@ -3132,20 +2985,6 @@ end
 
 function LNS.setBuyItem(itemID, qty)
     LNS.BuyItemsTable[itemID] = qty
-end
-
--- Changes the class restriction for an item
-function LNS.ChangeClasses(itemID, classes, tableName)
-    if tableName == 'GlobalItems' then
-        LNS.GlobalItemsClasses[itemID] = classes
-        LNS.modifyItemRule(itemID, LNS.GlobalItemsRules[itemID], 'Global_Rules', classes)
-    elseif tableName == 'NormalItems' then
-        LNS.NormalItemsClasses[itemID] = classes
-        LNS.modifyItemRule(itemID, LNS.NormalItemsRules[itemID], 'Normal_Rules', classes)
-    elseif tableName == 'PersonalItems' then
-        LNS.PersonalItemsClasses[itemID] = classes
-        LNS.modifyItemRule(itemID, LNS.PersonalItemsRules[itemID], LNS.PersonalTableName, classes)
-    end
 end
 
 -- Sets a Global Item rule
@@ -3203,20 +3042,6 @@ end
 --          ACTORS
 ------------------------------------
 
-
-function LNS.actorAddRule(itemID, itemName, tableName, rule, classes, link)
-    Logger.Info(nil, "\aoloot.actorAddRule\ax \agAdding rule\ax \at%s\ax for item \at%s\ax in table \at%s", rule, itemName, tableName)
-    LNS.ItemNames[itemID]               = itemName
-
-    LNS[tableName .. "Rules"][itemID]   = rule
-    LNS[tableName .. "Classes"][itemID] = classes
-    LNS[tableName .. "Link"][itemID]    = link
-    local tblName                       = tableName == 'Global' and 'Global_Rules' or 'Normal_Rules'
-    if tableName == 'Personal' then
-        tblName = LNS.PersonalTableName
-    end
-    LNS.modifyItemRule(itemID, rule, tblName, classes, link)
-end
 
 function LNS.sendMySettings()
     local message = {
@@ -3417,7 +3242,11 @@ function LNS.RegisterActors()
                         end
                     end
                 end
-                LNS.NewItemsCount = #LNS.TempSettings.NewItemIDs or 0
+                if LNS.TempSettings.NewItemIDs ~= nil then
+                    LNS.NewItemsCount = #LNS.TempSettings.NewItemIDs or 0
+                else
+                    LNS.NewItemsCount = 0
+                end
                 Logger.Info(LNS.guiLoot.console, "loot.RegisterActors: \atNew Item Rule \ax\agUpdated:\ax [\ay%s\ax] NewItemCount Remaining \ag%s\ax", lootMessage.entered,
                     LNS.NewItemsCount)
             end
@@ -3525,9 +3354,10 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
 
             LNS.insertIntoHistory(itemName, corpseName, eval,
                 os.date('%Y-%m-%d'), os.date('%H:%M:%S'), itemLink, MyName, curZone, allItems, cantWear)
-            return
         end
+        return
     end
+
     if mq.TLO.Window('ConfirmationDialogBox').Open() then
         Logger.Warn(LNS.guiLoot.console, "lootItem(): ConfirmationDialogBox is open. Closing it.")
         mq.TLO.Window('ConfirmationDialogBox').DoClose()
@@ -3672,18 +3502,16 @@ function LNS.lootCorpse(corpseID)
 
         for i = 1, items do
             local corpseItem = mq.TLO.Corpse.Item(i)
+            mq.delay(1)
             if corpseItem() then
                 local corpseItemID = corpseItem.ID()
                 local isNoDrop     = corpseItem.NoDrop() or corpseItem.NoTrade()
-                local newNoDrop    = false
-                if LNS.ItemNames[corpseItemID] == nil and isNoDrop then
-                    newNoDrop = true
-                end
                 LNS.addToItemDB(corpseItem)
-                local itemRule, qKeep, newRule = LNS.getRule(corpseItem, 'loot', i)
+                local itemRule, qKeep, newRule, iCanUse = LNS.getRule(corpseItem, 'loot', i)
+                mq.delay(1)
+                LNS.lootItem(i, itemRule, 'leftmouseup', qKeep, not iCanUse)
                 mq.delay(1)
                 Logger.Debug(LNS.guiLoot.console, "LootCorpse(): itemID=\ao%s\ax, Decision=\at%s\ax, qKeep=\ay%s\ax, newRule=\ag%s", corpseItemID, itemRule, qKeep, newRule)
-                newRule = newNoDrop or newRule
             end
 
             mq.delay(1)
@@ -3723,6 +3551,10 @@ function LNS.lootCorpse(corpseID)
 end
 
 function LNS.lootMobs(limit)
+    if LNS.PauseLooting then
+        LNS.finishedLooting()
+        return
+    end
     -- check for normal, undead, animal invis should not see rogue sneak\hide
     if mq.TLO.Me.Invis(1)() or mq.TLO.Me.Invis(2)() or mq.TLO.Me.Invis(3)() then
         Logger.Warn(LNS.guiLoot.console, "lootMobs(): You are Invis and we don't want to break it so skipping.")
@@ -3738,15 +3570,35 @@ function LNS.lootMobs(limit)
 
     -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Entering lootMobs function.')
     local deadCount     = mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', LNS.Settings.CorpseRadius or 100))()
-    local mobsNearby    = mq.TLO.SpawnCount(string.format('xtarhater radius %s zradius 50', LNS.Settings.MobsTooClose or 40))()
+    local mobsNearby    = mq.TLO.SpawnCount(string.format('xtarhater radius %s zradius 50', LNS.Settings.MobsTooClose))()
     local corpseList    = {}
 
     -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Found %s corpses in range.', deadCount)
 
     -- Handle looting of the player's own corpse
-    local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse =%s radius %d zradius 100", mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))()
+    local pcCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius %d zradius 100", mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))()
+    local myCorpseCount = 0
+    local foundMine     = false
+    if pcCorpseCount > 0 then
+        for i = 1, pcCorpseCount do
+            local cps = mq.TLO.NearestSpawn(i, string.format("pccorpse %s radius %d zradius 100", mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))
+            if cps() then
+                local cpsName = cps.CleanName():gsub("'s corpse", "")
+                if cpsName == mq.TLO.Me.CleanName() then
+                    foundMine = true
+                    myCorpseCount = myCorpseCount + 1
+                    if not LNS.Settings.LootMyCorpse and foundMine then
+                        Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Puasing looting until finished looting my own corpse.')
+                        LNS.finishedLooting()
+                        return false
+                    end
+                end
+            end
+        end
+    end
 
-    if LNS.Settings.LootMyCorpse and myCorpseCount > 0 then
+
+    if LNS.Settings.LootMyCorpse and foundMine then
         for i = 1, (limit or myCorpseCount) do
             local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse =%s radius %d zradius 100", i, mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))
             if corpse() then
@@ -3757,7 +3609,7 @@ function LNS.lootMobs(limit)
     end
 
     -- Stop looting if conditions aren't met
-    if (deadCount + myCorpseCount) == 0 or ((mobsNearby > 0 or mq.TLO.Me.Combat()) and not LNS.Settings.CombatLooting) then
+    if (deadCount + myCorpseCount) == 0 or (mobsNearby > 0 and not LNS.Settings.CombatLooting) or (mq.TLO.Me.Combat() and not LNS.Settings.CombatLooting) then
         LNS.finishedLooting()
         return false
     end
@@ -3781,9 +3633,14 @@ function LNS.lootMobs(limit)
     if #corpseList > 0 then
         Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Attempting to loot %d corpses.', #corpseList)
         for _, corpse in ipairs(corpseList) do
-            local corpseID = corpse.ID()
+            local corpseID = corpse.ID() or 0
 
-            if not corpseID or corpseID <= 0 or LNS.corpseLocked(corpseID) or
+            if not mq.TLO.Spawn(corpseID)() then
+                Logger.Info(LNS.guiLoot.console, 'lootMobs(): Corpse ID \ay%d \axis \arNO Longer Valid.\ax \atMoving to Next Corpse...', corpseID)
+                goto continue
+            end
+
+            if not corpseID or corpseID == 0 or LNS.corpseLocked(corpseID) or
                 (mq.TLO.Navigation.PathLength('spawn id ' .. corpseID)() or 100) > LNS.Settings.CorpseRadius then
                 Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Skipping corpse ID: %d.', corpseID)
                 table.remove(corpseList, _)
@@ -3791,7 +3648,7 @@ function LNS.lootMobs(limit)
             end
 
             -- Attempt to move and loot the corpse
-            if corpse.DisplayName() == mq.TLO.Me.DisplayName() then
+            if corpse.DisplayName() == mq.TLO.Me.DisplayName() .. "'s corpse" then
                 Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Pulling own corpse closer. Corpse ID: %d', corpseID)
                 mq.cmdf("/corpse")
                 mq.delay(10)
@@ -3875,8 +3732,10 @@ function LNS.SellToVendor(itemID, bag, slot, name)
             or ('/itemnotify in pack%s %s leftmouseup'):format(bag, slot)
         mq.cmdf(notify)
         mq.delay(5000, function() return mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() == itemName end)
-        mq.cmdf('/nomodkey /shiftkey /notify merchantwnd MW_Sell_Button leftmouseup')
-        mq.delay(5000, function() return mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() == '' end)
+        if mq.TLO.Window("MerchantWnd/MW_SelectedPriceLabel").Text() ~= "0c" then
+            mq.cmdf('/nomodkey /shiftkey /notify merchantwnd MW_Sell_Button leftmouseup')
+            mq.delay(5000, function() return mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() == '' end)
+        end
     end
 end
 
@@ -3919,13 +3778,14 @@ function LNS.RestockItems()
     for itemName, qty in pairs(LNS.BuyItemsTable) do
         Logger.Info(LNS.guiLoot.console, 'Checking \ao%s \axfor \at%s \axto \agRestock', mq.TLO.Target.CleanName(), itemName)
         local tmpVal = tonumber(qty) or 0
+        mq.delay(500, function() return mq.TLO.Window("MerchantWnd/MW_ItemList").List(string.format("=%s", itemName), 2)() end)
         rowNum       = mq.TLO.Window("MerchantWnd/MW_ItemList").List(string.format("=%s", itemName), 2)() or 0
-        mq.delay(200)
         local onHand = mq.TLO.FindItemCount(itemName)()
         local tmpQty = tmpVal - onHand
+        Logger.Debug(LNS.guiLoot.console, "\agHave\ax: \at%s\ax \aoNeed\ax: \ay%s \ax\ayROW\ax: \at%s", onHand, tmpQty, rowNum)
         if rowNum ~= 0 and tmpQty > 0 then
             ::need_more::
-            Logger.Info(LNS.guiLoot.console, "\ayRestocking \ax%s \aoHave\ax: \at%s\ax \agBuying\ax: \ay%s", itemName, onHand, tmpQty)
+            Logger.Debug(LNS.guiLoot.console, "\ayRestocking \ax%s \aoHave\ax: \at%s\ax \agBuying\ax: \ay%s", itemName, onHand, tmpQty)
             mq.TLO.Window("MerchantWnd/MW_ItemList").Select(rowNum)()
             mq.delay(100)
             mq.TLO.Window("MerchantWnd/MW_Buy_Button").LeftMouseUp()
@@ -3939,6 +3799,7 @@ function LNS.RestockItems()
             if onHand < tmpVal then
                 Logger.Info(LNS.guiLoot.console, "\ayStack Max Size \axis \arLess\ax than \ax%s \aoHave\ax: \at%s\ax", tmpVal, onHand)
                 tmpQty = tmpVal - onHand
+                mq.delay(10)
                 goto need_more
             end
         end
@@ -4022,37 +3883,44 @@ end
 -- FORAGING
 
 function LNS.eventForage()
+    if foragingLoot then return end
+    foragingLoot = true
     if not LNS.Settings.LootForage then return end
     Logger.Debug(LNS.guiLoot.console, 'Enter eventForage')
     -- allow time for item to be on cursor incase message is faster or something?
     mq.delay(1000, function() return mq.TLO.Cursor() end)
     -- there may be more than one item on cursor so go until its cleared
-    while mq.TLO.Cursor() do
-        local cursorItem        = mq.TLO.Cursor
-        local foragedItem       = cursorItem.Name()
-        local forageRule        = LNS.split(LNS.getRule(cursorItem, 'forage', 0))
-        local ruleAction        = forageRule[1] -- what to do with the item
-        local ruleAmount        = forageRule[2] -- how many of the item should be kept
-        local currentItemAmount = mq.TLO.FindItemCount('=' .. foragedItem)()
+    local loopStatus = true
+    while loopStatus do
+        local cursorItem  = mq.TLO.Cursor
+        local foragedItem = cursorItem.Name()
+        local cursorID    = cursorItem.ID() or 0
+        mq.delay(10)
+        local ruleAction, ruleAmount = LNS.getRule(cursorItem, 'forage', 0)
+        --LNS.lookupLootRule(itemID,)
+        local currentItemAmount      = mq.TLO.FindItemCount('=' .. foragedItem)()
         -- >= because .. does finditemcount not count the item on the cursor?
         if not shouldLootActions[ruleAction] or (ruleAction == 'Quest' and currentItemAmount >= ruleAmount) then
             if mq.TLO.Cursor.Name() == foragedItem then
                 if LNS.Settings.LootForageSpam then Logger.Info(LNS.guiLoot.console, 'Destroying foraged item ' .. foragedItem) end
                 mq.cmdf('/destroy')
-                mq.delay(500)
+                mq.delay(2000, function() return (mq.TLO.Cursor.ID() or -1) ~= cursorID end)
             end
             -- will a lore item we already have even show up on cursor?
             -- free inventory check won't cover an item too big for any container so may need some extra check related to that?
-        elseif (shouldLootActions[ruleAction] or currentItemAmount < ruleAmount) and (not cursorItem.Lore() or currentItemAmount == 0)
-            and (mq.TLO.Me.FreeInventory() or (cursorItem.Stackable() and cursorItem.FreeStack())) then
+        elseif (shouldLootActions[ruleAction]) and
+            (not cursorItem.Lore() or (cursorItem.Lore() and currentItemAmount == 0)) and
+            (mq.TLO.Me.FreeInventory() > LNS.Settings.SaveBagSlots) or (cursorItem.Stackable() and cursorItem.FreeStack()) then
             if LNS.Settings.LootForageSpam then Logger.Info(LNS.guiLoot.console, 'Keeping foraged item ' .. foragedItem) end
             mq.cmdf('/autoinv')
+            mq.delay(2000, function() return (mq.TLO.Cursor.ID() or -1) ~= cursorID end)
         else
             if LNS.Settings.LootForageSpam then Logger.Warn(LNS.guiLoot.console, 'Unable to process item ' .. foragedItem) end
             break
         end
-        mq.delay(50)
+        if not mq.TLO.Cursor() then loopStatus = false end
     end
+    foragingLoot = false
 end
 
 -- Process Items
@@ -4181,7 +4049,7 @@ function LNS.processItems(action)
         end
         -- totalPlat = math.floor(totalPlat)
         totalPlat = (mq.TLO.Me.Cash() - myCoins) / 1000
-        LNS.report('Plat Spent: \ar%0.3f\ax, Gained: \ag%0.3f\ax, \awTotal Profit\ax: \ag%0.3f', spentVal, soldVal, totalPlat)
+        LNS.report('Plat Spent: \ao%0.3f\ax, Gained: \ag%0.3f\ax, \awTotal Profit\ax: \ag%0.3f', spentVal, soldVal, totalPlat)
         Logger.Info(LNS.guiLoot.console, 'Plat Spent: \ay%0.3f\ax, Gained: \ag%0.3f\ax, \awTotal Profit\ax: \ag%0.3f', spentVal, soldVal, totalPlat)
     elseif action == 'Bank' then
         if mq.TLO.Window('BigBankWnd').Open() then
@@ -5471,18 +5339,78 @@ function LNS.drawSettingIcon(setting)
     end
 end
 
+---@param id string Unique ID for the button
+---@param value boolean Current toggle state
+---@param on_color ImVec4|nil Color when ON default(green)
+---@param off_color ImVec4|nil Color when OFF default(red)
+---@param height number|nil Height of the toggle default(20)
+---@param width number|nil Width of the toggle default(height * 2)
+---@return boolean value New toggle value
+---@return boolean clicked Whether the value changed
+function LNS.DrawToggle(id, value, on_color, off_color, height, width)
+    height = height or 16
+    width = width or height * 2
+    on_color = on_color or ImVec4(0.2, 0.8, 0.2, 1)   -- Default green
+    off_color = off_color or ImVec4(0.8, 0.2, 0.2, 1) -- Default red
+
+    local label = id:match("^(.-)##")                 -- Capture text before ##
+    if not id:find("##") then
+        label = id
+    end
+
+    if label and label ~= "" then
+        ImGui.Text(string.format("%s:", label))
+        ImGui.SameLine()
+    end
+
+    local clicked = false
+    local draw_list = ImGui.GetWindowDrawList()
+    local pos = { x = 0, y = 0, }
+    pos.x, pos.y = ImGui.GetCursorScreenPos()
+    local radius = height * 0.5
+
+    -- Set up bounding box
+    ImGui.InvisibleButton(id, width, height)
+    if ImGui.IsItemClicked() then
+        value = not value
+        clicked = true
+    end
+
+    local t = value and 1.0 or 0.0
+    local knob_x = pos.x + radius + t * (width - height)
+
+    -- Background
+    draw_list:AddRectFilled(
+        ImVec2(pos.x, pos.y),
+        ImVec2(pos.x + width, pos.y + height),
+        ImGui.GetColorU32(value and on_color or off_color),
+        height * 0.5
+    )
+
+    -- Knob
+    draw_list:AddCircleFilled(
+        ImVec2(knob_x, pos.y + radius),
+        radius * 0.8,
+        ImGui.GetColorU32(ImVec4(1, 1, 1, 1)),
+        0
+    )
+
+    return value, clicked
+end
+
 function LNS.drawSwitch(settingName, who)
     if LNS.TempSettings[who] ~= nil then
-        if LNS.TempSettings[who][settingName] then
-            ImGui.TextColored(0.3, 1.0, 0.3, 0.9, Icons.FA_TOGGLE_ON)
-        else
-            ImGui.TextColored(1.0, 0.3, 0.3, 0.8, Icons.FA_TOGGLE_OFF)
-        end
+        -- if LNS.TempSettings[who][settingName] then
+        --     ImGui.TextColored(0.3, 1.0, 0.3, 0.9, Icons.FA_TOGGLE_ON)
+        -- else
+        --     ImGui.TextColored(1.0, 0.3, 0.3, 0.8, Icons.FA_TOGGLE_OFF)
+        -- end
+        LNS.TempSettings[who][settingName] = LNS.DrawToggle("##" .. settingName, LNS.TempSettings[who][settingName],
+            ImVec4(0.4, 1.0, 0.4, 0.4), ImVec4(1.0, 0.4, 0.4, 0.4))
         if ImGui.IsItemHovered() then
             ImGui.SetTooltip("%s %s", settingName, LNS.TempSettings[who][settingName] and "Enabled" or "Disabled")
         end
         if ImGui.IsItemHovered() and ImGui.IsMouseClicked(0) then
-            LNS.TempSettings[who][settingName] = not LNS.TempSettings[who][settingName]
             if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
                 LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
                 if who == MyName then
@@ -5657,9 +5585,6 @@ function LNS.renderSettingsSection(who)
                     end
                     ImGui.Unindent(2)
                     ImGui.TableNextColumn()
-
-                    local posX, posY = ImGui.GetCursorPos()
-                    ImGui.SetCursorPosX(posX + (ImGui.GetColumnWidth(-1) / 2) - 5)
                     LNS.drawSwitch(settingName, who)
                     ImGui.PopID()
                 end
@@ -5843,11 +5768,13 @@ function LNS.RenderModifyItemWindow()
     ImGui.End()
 end
 
-function LNS.drawRecord(tableToDraw)
+function LNS.DrawRecord(tableToDraw)
     if not LNS.TempSettings.PastHistory then return end
     if tableToDraw == nil then tableToDraw = LNS.TempSettings.SessionHistory or {} end
-    if LNS.HistoryDataDate ~= nil then
-        if #LNS.HistoryDataDate > 0 then tableToDraw = LNS.HistoryDataDate end
+    if LNS.HistoryDataDate ~= nil and #LNS.HistoryDataDate > 0 then
+        tableToDraw = LNS.HistoryDataDate
+    elseif LNS.HistoryItemData ~= nil and #LNS.HistoryItemData > 0 then
+        tableToDraw = LNS.HistoryItemData
     end
     local openWin, showRecord = ImGui.Begin("Loot PastHistory##", true)
     if not openWin then
@@ -5870,7 +5797,6 @@ function LNS.drawRecord(tableToDraw)
         ImGui.SameLine()
         if ImGui.SmallButton(Icons.FA_CALENDAR .. "Load Date") then
             LNS.TempSettings.LookUpDateData = true
-            ---@diagnostic disable-next-line: cast-local-type
             lookupDate = LNS.TempSettings.DateLookup
         end
         if ImGui.IsItemHovered() then
@@ -5927,6 +5853,10 @@ function LNS.drawRecord(tableToDraw)
         ImGui.SameLine()
         if ImGui.SmallButton(Icons.MD_DELETE_SWEEP) then
             LNS.TempSettings.FilterHistory = ''
+        end
+        ImGui.SameLine()
+        if ImGui.SmallButton(Icons.MD_SEARCH) then
+            LNS.TempSettings.FindItemHistory = true
         end
         ImGui.SameLine()
         ImGui.Text("Found: ")
@@ -6039,7 +5969,7 @@ function LNS.drawRecord(tableToDraw)
     ImGui.End()
 end
 
-local function renderBtn()
+local function RenderBtn()
     -- apply_style()
 
     ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(9, 9))
@@ -6051,33 +5981,59 @@ local function renderBtn()
     end
 
     if showBtn then
+        local btnLbl = '##LNSBtn'
+        local cursorX, cursorY = ImGui.GetCursorScreenPos() -- grab location for later to draw button over icon.
         if LNS.NewItemsCount > 0 then
-            animMini:SetTextureCell(645 - EQ_ICON_OFFSET)
+            animMini:SetTextureCell(645 - EQ_ICON_OFFSET)   -- gold coin
         else
-            animMini:SetTextureCell(644 - EQ_ICON_OFFSET)
+            animMini:SetTextureCell(644 - EQ_ICON_OFFSET)   -- platinum coin
+        end
+        if LNS.PauseLooting then
+            animMini:SetTextureCell(1436 - EQ_ICON_OFFSET) -- red gem
+            btnLbl = 'Paused##LNSBtn'
         end
         ImGui.DrawTextureAnimation(animMini, 34, 34, true)
-    end
-    if ImGui.IsItemHovered() then
-        ImGui.BeginTooltip()
-        ImGui.Text("LootnScoot")
-        ImGui.Text("Click to Show/Hide")
-        ImGui.Text("Right Click to Show New Items")
-        ImGui.EndTooltip()
-        if ImGui.IsMouseReleased(0) then
+
+        -- draw invis button over icoon
+        ImGui.SetCursorScreenPos(cursorX, cursorY)
+        ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0, 0, 0, 0))
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImVec4(1.0, 0.5, 0.2, 0.5))
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImVec4(0, 0, 0, 0))
+        if ImGui.Button(btnLbl, ImVec2(34, 34)) then
             LNS.ShowUI = not LNS.ShowUI
-        elseif ImGui.IsMouseReleased(1) and LNS.NewItemsCount > 0 then
-            showNewItem = not showNewItem
         end
-    end
-    if (ImGui.IsKeyDown(ImGuiMod.Ctrl) and ImGui.IsMouseClicked(2)) then
-        LNS.ShowUI = not LNS.ShowUI
+        ImGui.PopStyleColor(3)
+        if ImGui.BeginPopupContextItem("##LootNScoot") then
+            if ImGui.MenuItem("Show/Hide LootnScoot") then
+                LNS.ShowUI = not LNS.ShowUI
+            end
+            if ImGui.MenuItem("Show New Items") then
+                showNewItem = not showNewItem
+            end
+            if ImGui.MenuItem("Toggle Pause Looting") then
+                LNS.PauseLooting = not LNS.PauseLooting
+            end
+            ImGui.EndPopup()
+        end
+
+        -- tooltip and right click event
+        if ImGui.IsItemHovered() then
+            ImGui.BeginTooltip()
+            ImGui.Text("LootnScoot")
+            ImGui.Text("Click to Show/Hide")
+            ImGui.EndTooltip()
+        end
+
+        -- ctrl right click toggle option
+        if (ImGui.IsKeyDown(ImGuiMod.Ctrl) and ImGui.IsMouseClicked(2)) then
+            LNS.ShowUI = not LNS.ShowUI
+        end
     end
     ImGui.PopStyleVar(2)
     ImGui.End()
 end
 
-function LNS.renderMainUI()
+function LNS.RenderMainUI()
     if LNS.ShowUI then
         ImGui.SetNextWindowSize(800, 600, ImGuiCond.FirstUseEver)
         local open, show = ImGui.Begin('LootnScoot', true)
@@ -6192,12 +6148,12 @@ function LNS.RenderUIs()
         LNS.processPendingItem()
     end
 
-    LNS.renderMainUI()
+    LNS.RenderMainUI()
 
-    renderBtn()
+    RenderBtn()
 
     if LNS.TempSettings.PastHistory then
-        LNS.drawRecord()
+        LNS.DrawRecord()
     end
 
     if colCount > 0 then ImGui.PopStyleColor(colCount) end
@@ -6406,11 +6362,22 @@ while not LNS.Terminate do
     if LNS.TempSettings.ClearDateData then
         LNS.TempSettings.ClearDateData = false
         LNS.HistoryDataDate = {}
+        LNS.HistoryItemData = {}
     end
 
     if LNS.TempSettings.LookUpDateData then
         LNS.TempSettings.LookUpDateData = false
         LNS.LoadDateHistory(lookupDate)
+        LNS.HistoryItemData = {}
+    end
+
+    if LNS.TempSettings.FindItemHistory then
+        LNS.TempSettings.FindItemHistory = false
+        if LNS.TempSettings.FilterHistory ~= nil and LNS.TempSettings.FilterHistory ~= "" then
+            LNS.LoadItemHistory(LNS.TempSettings.FilterHistory)
+            LNS.HistoryDataDate = {}
+            LNS.TempSettings.FilterHistory = ''
+        end
     end
 
     if LNS.TempSettings.DoGet then
@@ -6466,10 +6433,10 @@ while not LNS.Terminate do
         LNS.processItems('Destroy')
     end
 
-    if LNS.MyClass:lower() == 'brd' and LNS.Settings.DoDestroy then
-        LNS.Settings.DoDestroy = false
-        Logger.Warn(LNS.guiLoot.console, "\ayBard Detected\ax, \arDisabling\ax [\atDoDestroy\ax].")
-    end
+    -- if LNS.MyClass:lower() == 'brd' and LNS.Settings.DoDestroy then
+    --     LNS.Settings.DoDestroy = false
+    --     Logger.Warn(LNS.guiLoot.console, "\ayBard Detected\ax, \arDisabling\ax [\atDoDestroy\ax].")
+    -- end
     mq.delay(5)
 end
 
