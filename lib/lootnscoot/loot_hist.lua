@@ -84,7 +84,7 @@ local ColorCount, ColorCountConf, StyleCount, StyleCountConf = 0, 0, 0, 0
 local ColorCountRep, StyleCountRep                           = 0, 0
 local openConfigGUI, locked, zoom                            = false, false, false
 local themeFile                                              = mq.configDir .. '/MyThemeZ.lua'
-local configFile                                             = mq.configDir .. '/MyUI_Configs.lua'
+local configFile                                             = string.format('%s/Looted/%s/%s_config.lua', mq.configDir, mq.TLO.EverQuest.Server(), MyName)
 local eqServer                                               = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 
 local recordFile                                             = string.format("%s/MyUI/Looted/%s/%s_LootRecord.lua", mq.configDir, mq.TLO.EverQuest.Server(), MyName)
@@ -245,7 +245,7 @@ local function loadSettings()
 	for k, v in pairs(defaults) do
 		if settings[script][k] == nil then
 			settings[script][k] = v
-			Logger.Info("\ay[LOOT]: \atSetting: \ay%s\ao not found in settings file, adding default value \aw[\ag%s\aw].", k, v)
+			Logger.Info(nil, "\ay[LOOT]: \atSetting: \ay%s\ao not found in settings file, adding default value \aw[\ag%s\aw].", k, v)
 		end
 	end
 
@@ -882,7 +882,7 @@ function guiLoot.RegisterActor()
 			local who = lootEntry.LootedBy
 			local cantWear = item.cantWear or false
 			local actionLabel = item.Eval
-
+			local consoleAction = item.Eval
 			if guiLoot.hideNames then
 				if who ~= mq.TLO.Me.Name() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = MyClass end
 			end
@@ -890,9 +890,9 @@ function guiLoot.RegisterActor()
 				addRule(who, what, link, eval)
 			end
 			if cantWear then
-				actionLabel = actionLabel .. ' \ax(\arCant Wear\ax)'
+				consoleAction = consoleAction .. ' \ax(\arCant Wear\ax)'
 			end
-			local text = string.format('\ao[\at%s\ax] \at%s \ax%s %s Corpse \at%s\ax (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, link, corpseName, lootEntry.ID)
+			local text = string.format('\ao[\at%s\ax] \at%s \ax%s %s Corpse \at%s\ax (\at%s\ax)', lootEntry.LootedAt, who, consoleAction, link, corpseName, lootEntry.ID)
 			if item.Action == 'Destroyed' then
 				text = string.format('\ao[\at%s\ax] \at%s \ar%s \ax%s \axCorpse \at%s\ax (\at%s\ax)', lootEntry.LootedAt, who, string.upper(item.Action), link, corpseName,
 					lootEntry.ID)
@@ -911,7 +911,7 @@ function guiLoot.RegisterActor()
 				Looter = who,
 				Item = item.Name,
 				Link = link,
-				Action = actionLabel,
+				Action = cantWear and 'Cant Wear' or item.Action,
 			})
 		end
 	end)
