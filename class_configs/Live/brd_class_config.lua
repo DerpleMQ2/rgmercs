@@ -1193,7 +1193,7 @@ local _ClassConfig = {
                 name = "CrescendoSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseCrescendo') then return false end
+                    if not Config:GetSetting('UseCrescendo') or (mq.TLO.Me.GemTimer(songSpell.RankName())() or -1) > 0 then return false end
                     local pct = Config:GetSetting('GroupManaPct')
                     return (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
                 end,

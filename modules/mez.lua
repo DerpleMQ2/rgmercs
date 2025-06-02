@@ -760,7 +760,7 @@ function Module:ProcessMezList()
                         if self.settings.DoAEMez and not mq.TLO.Target.Mezzed() and mq.TLO.Me.GroupAssistTarget.ID() ~= id then
                             --lets make sure we didn't have more mobs dogpile on, making an AE mez more appropriate
                             local aeMezSpell = self:GetAEMezSpell()
-                            if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1 == 0) or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
+                            if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
                                 Logger.log_debug("High number of targets, let's check if AE Mez is needed again before we start singles.")
                                 self:AEMezCheck()
                             end
@@ -793,7 +793,7 @@ end
 function Module:DoMez()
     local mezSpell = self:GetMezSpell()
     local aeMezSpell = self:GetAEMezSpell()
-    if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1 == 0) or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
+    if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
         self:AEMezCheck()
     end
 
