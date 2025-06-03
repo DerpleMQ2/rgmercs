@@ -818,13 +818,13 @@ local _ClassConfig = {
             name  = 'LowLevelHealPoint', -- Fastheal
             state = 1,
             steps = 1,
-            cond  = function(self, target) return mq.TLO.Me.Level() >= 89 and Targeting.MainHealsNeeded(Core.GetMainAssistSpawn()) end,
+            cond  = function(self, target) return mq.TLO.Me.Level() <= 89 and Targeting.TargetIsMA(target) and Targeting.MainHealsNeeded(target) end,
         },
         {
-            name = 'MainHealPoint', -- Heal
+            name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return Targeting.MainHealsNeeded(Core.GetMainAssistSpawn()) end,
+            cond = function(self, target) return Targeting.TargetIsMA(target) and Targeting.MainHealsNeeded(target) end,
         },
         {
             name = 'GroupHealPoint', -- TotHeal

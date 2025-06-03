@@ -803,7 +803,9 @@ function Casting.DiscReady(discSpell)
 
     if not ready then return false end
 
-    return Casting.CastCheck(discSpell, true)
+    local allowCastWindow = Core.MyClassIs("BRD") and (discSpell.MyCastTime() or -1) == 0
+
+    return Casting.CastCheck(discSpell, true, allowCastWindow)
 end
 
 --- Checks if a specific Alternate Advancement (AA) ability is ready to use.
@@ -843,9 +845,12 @@ end
 --- Checks if a given item is ready to be used.
 function Casting.ItemReady(itemName)
     if not Casting.ItemHasClicky(itemName) then return false end
-    if not mq.TLO.Me.ItemReady(itemName)() then return false end
-
     local me = mq.TLO.Me
+    if not me.ItemReady(itemName)() then
+        Logger.log_verbose("ItemReady for %s: Item appears to be on cooldown! Aborting.", itemName)
+        return false
+    end
+
     local clicky = mq.TLO.FindItem("=" .. itemName).Clicky
     local levelCheck = me.Level() >= (clicky.RequiredLevel() or 0)
     local movingCheck = Core.MyClassIs("brd") or not (me.Moving() and (clicky.CastTime() or -1) > 0)
@@ -859,11 +864,11 @@ function Casting.ItemReady(itemName)
 end
 
 -- Helper function for use in determining whether we are ready to perform other actions.
-function Casting.CastCheck(spell, bAllowMove)
+function Casting.CastCheck(spell, bAllowMove, bAllowCast)
     if not spell or not spell() then return false end
 
     local me = mq.TLO.Me
-    local castingCheck = not (me.Casting() or mq.TLO.Window("CastingWindow").Open())
+    local castingCheck = bAllowCast or (not (me.Casting() or mq.TLO.Window("CastingWindow").Open()))
     local movingCheck = bAllowMove or Core.MyClassIs("brd") or not (me.Moving() and (spell.MyCastTime() or -1) > 0)
 
     local currentMana = me.CurrentMana()
@@ -1068,7 +1073,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
         end
 
         if me.CurrentMana() < spell.Mana() then
-            Logger.log_verbose("\arSinging Failed: I tried to cast a spell %s I don't have mana for it.",
+            Logger.log_debug("\arSinging Failed: I tried to cast a spell %s I don't have mana for it.",
                 songName)
             return false
         end
@@ -1180,7 +1185,8 @@ function Casting.UseDisc(discSpell, targetId)
 
     if not discSpell or not discSpell() then return false end
 
-    if mq.TLO.Window("CastingWindow").Open() or me.Casting() then
+    local allowCastWindow = Core.MyClassIs("BRD") and (discSpell.MyCastTime() or -1) == 0
+    if (mq.TLO.Window("CastingWindow").Open() or me.Casting()) and not allowCastWindow then
         Logger.log_debug("CANT USE Disc - Casting Window Open")
         return false
     else
@@ -1228,36 +1234,36 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     local aaAbility = mq.TLO.Me.AltAbility(aaName)
 
     if not aaAbility() then
-        Logger.log_verbose("\arUseAA(): You dont have the AA: %s!", aaName)
+        Logger.log_debug("\arUseAA(): You dont have the AA: %s!", aaName)
+        return false
+    end
+
+    if not aaAbility.Spell() then
+        Logger.log_debug("\arUseAA(): You can't activate a passive AA: %s!", aaName)
         return false
     end
 
     if not mq.TLO.Me.AltAbilityReady(aaName) then
-        Logger.log_verbose("\ayUseAA(): Ability %s is not ready!", aaName)
+        Logger.log_debug("\ayUseAA(): Ability %s is not ready!", aaName)
         return false
     end
 
-    if mq.TLO.Window("CastingWindow").Open() or me.Casting() then
-        if Core.MyClassIs("brd") then
-            mq.delay("3s", function() return (not mq.TLO.Window("CastingWindow").Open()) end)
-            mq.delay(10)
-            Core.DoCmd("/stopsong")
-        else
-            Logger.log_verbose("\ayUseAA(): CANT CAST AA - Casting Window Open")
-            return false
-        end
+    local allowCastWindow = Core.MyClassIs("BRD") and (aaAbility.Spell.MyCastTime() or -1) == 0
+    if (mq.TLO.Window("CastingWindow").Open() or me.Casting()) and not allowCastWindow then
+        Logger.log_debug("\ayUseAA(): CANT CAST AA - Casting Window Open")
+        return false
     end
 
     local targetSpawn = mq.TLO.Spawn(targetId)
 
     -- If we're combat casting we need to both have the same swimming status
     if targetSpawn() and targetSpawn.FeetWet() ~= me.FeetWet() then
-        Logger.log_verbose("\ayUseAA(): Can't use AA feet wet mismatch!")
+        Logger.log_debug("\ayUseAA(): Can't use AA feet wet mismatch!")
         return false
     end
 
     if not bAllowDead and targetSpawn() and targetSpawn.Dead() then
-        Logger.log_verbose("\ayUseAA(): \arAbility Failed!: I tried to use %s but my target (%d) is dead.",
+        Logger.log_debug("\ayUseAA(): \arAbility Failed!: I tried to use %s but my target (%d) is dead.",
             aaName, targetId)
         return false
     end
@@ -1266,7 +1272,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
 
     if Targeting.GetTargetID() ~= targetId and targetSpawn() then
         if me.Combat() and Targeting.TargetIsType("pc", targetSpawn) then
-            Logger.log_info("\awUseAA():NOTICE:\ax Turning off autoattack to cast on a PC.")
+            Logger.log_debug("\awUseAA():NOTICE:\ax Turning off autoattack to cast on a PC.")
             Core.DoCmd("/attack off")
             mq.delay("2s", function() return not me.Combat() end)
         end
@@ -1326,17 +1332,6 @@ end
 function Casting.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
-    if mq.TLO.Window("CastingWindow").Open() or me.Casting() then
-        if Core.MyClassIs("brd") then
-            mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
-            mq.delay(10)
-            Core.DoCmd("/stopsong")
-        else
-            Logger.log_debug("\awUseItem(\ag%s\aw): \arCANT Use Item - Casting Window Open", itemName or "None")
-            return false
-        end
-    end
-
     if not itemName then
         Logger.log_debug("\awUseItem(\ag%s\aw): \arGiven item name is nil!")
         return false
@@ -1346,6 +1341,12 @@ function Casting.UseItem(itemName, targetId)
 
     if not item() then
         Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but it is not found!", itemName)
+        return false
+    end
+
+    local allowCastWindow = Core.MyClassIs("BRD") and (item.CastTime() or -1) == 0
+    if (mq.TLO.Window("CastingWindow").Open() or me.Casting()) and not allowCastWindow then
+        Logger.log_debug("\awUseItem(\ag%s\aw): \arCANT Use Item - Casting Window Open", itemName or "None")
         return false
     end
 
@@ -1360,7 +1361,7 @@ function Casting.UseItem(itemName, targetId)
             for i = 1, item.Spell.NumEffects() do
                 if item.Spell.Attrib(i)() == 0 then
                     if mq.TLO.Me.CurrentHPs() + item.Spell.Base(i)() <= 0 then
-                        Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but it would kill me!: %s! HPs: %d SpaHP: %d", itemName, item.Spell.Name(),
+                        Logger.log_verbose("\awUseItem(\ag%s\aw): \arTried to use item - but it would kill me!: %s! HPs: %d SpaHP: %d", itemName, item.Spell.Name(),
                             mq.TLO.Me.CurrentHPs(), item.Spell.Base(i)())
                         return false
                     end
@@ -1401,7 +1402,7 @@ function Casting.UseItem(itemName, targetId)
             -- in case very fast casts serverside don't make it to the client
             -- this was originall added for 100ms clickies on laz that don't ever show casting (which has now been addressed above), but left as a fallback
             if not me.ItemReady(itemName) then
-                Logger.log_debug("No start cast noted, but item now reports on cooldown, moving on.")
+                Logger.log_verbose("No start cast noted, but item now reports on cooldown, moving on.")
                 break
             end
             maxWait = maxWait - 50
@@ -1451,7 +1452,8 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
     local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime() or 0) + ((mq.TLO.EverQuest.Ping() * 20) + 1000))
     local maxWait = maxWaitOrig
 
-    while mq.TLO.Me.Casting() do
+    -- test for bard stuck gem fix
+    while mq.TLO.Window("CastingWindow").Open() do
         local currentCast = mq.TLO.Me.Casting()
         Logger.log_super_verbose("WaitCastFinish(): Waiting to Finish Casting...")
         mq.delay(20)
