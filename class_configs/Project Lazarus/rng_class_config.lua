@@ -815,16 +815,10 @@ local _ClassConfig = {
     -- These will run in order and exit after the first valid spell to cast
     ['HealRotationOrder'] = {
         {
-            name  = 'LowLevelHealPoint', -- Fastheal
+            name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return mq.TLO.Me.Level() >= 89 and Targeting.HPInMainHealRange(Core.GetMainAssistSpawn()) end,
-        },
-        {
-            name = 'MainHealPoint', -- Heal
-            state = 1,
-            steps = 1,
-            cond = function(self, target) return Targeting.HPInMainHealRange(Core.GetMainAssistSpawn()) end,
+            cond = function(self, target) return Targeting.TargetIsMA(target) and Targeting.MainHealsNeeded(target) end,
         },
         {
             name = 'GroupHealPoint', -- TotHeal
@@ -834,7 +828,7 @@ local _ClassConfig = {
         },
     },
     ['HealRotations']     = {
-        ["LowLevelHealPoint"] = {
+        ["MainHealPoint"] = {
             {
                 name = "Fastheal",
                 type = "Spell",
@@ -842,9 +836,6 @@ local _ClassConfig = {
                     return Config:GetSetting('DoHeals')
                 end,
             },
-
-        },
-        ["MainHealPoint"] = {
             {
                 name = "Heal",
                 type = "Spell",
