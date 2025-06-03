@@ -457,14 +457,14 @@ local _ClassConfig = {
                 name = "Boastful Bellow",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Config:GetSettting("DoBellow")
+                    return Config:GetSetting("DoBellow")
                 end,
             },
             {
                 name = "Vainglorious Shout",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Config:GetSettting("DoShout")
+                    return Config:GetSetting("DoShout")
                 end,
             },
         },
