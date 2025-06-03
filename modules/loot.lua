@@ -63,6 +63,19 @@ Module.DefaultConfig     = {
 		Answer =
 		"If you turn on Respect Med State in the Group Watch options, your looter will remain medding until those thresholds are reached.\nIf Stand When Done is not enabled, the looter may continue to sit after those thresholds are reached.",
 	},
+	['LootingTimeout']                         = {
+		DisplayName = "Looting Timeout",
+		Category = "Loot N Scoot",
+		Index = 5,
+		Tooltip = "The length of time in seconds that RGMercs will allow LNS to process loot actions in a single check.",
+		Default = 5,
+		Min = 1,
+		Max = 10,
+		FAQ = "Why do my guys take too long to loot, or sometimes miss corpses?",
+		Answer =
+			"While RGMercs doesn't necessary control what LNS is doing, exactly, we do have a timeout setting that dictates how long we will allow it to do it before re-checking for other actions. \n" ..
+			"You can adjust this advanced setting in the Loot options. Please note, if no other actions are required by mercs, we will simply allow LNS to continue.",
+	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
 		Type = "Custom",
@@ -238,7 +251,7 @@ end
 function Module.DoLooting()
 	if not Module.TempSettings.Looting then return end
 
-	local maxWait = 5000
+	local maxWait = Config:GetSetting('LootingTimeout') * 1000
 	while Module.TempSettings.Looting do
 		if mq.TLO.Me.CombatState():lower() == "combat" and not Config:GetSetting('CombatLooting') then
 			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")
