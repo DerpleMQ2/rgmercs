@@ -1139,16 +1139,16 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
                 end
 
                 if (not targetSpawn or not targetSpawn() or Targeting.TargetIsType("corpse", targetSpawn)) and spell.SpellType() == "Detrimental" then
-                    mq.TLO.Me.StopCast()
+                    Core.DoCmd("/stopsong")
                     Logger.log_debug("UseSong(): Canceled singing %s because target is dead or no longer exists.", songName)
                     break
                 elseif targetSpawn() and Targeting.GetTargetID() > 0 and targetSpawn.ID() ~= Targeting.GetTargetID() and spell.SpellType() == "Detrimental" then
-                    mq.TLO.Me.StopCast()
+                    Core.DoCmd("/stopsong")
                     Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%s/%d) is no longer myTarget(%s/%d)", songName, targetSpawn.CleanName() or "",
                         targetSpawn.ID(), Targeting.GetTargetCleanName(), Targeting.GetTargetID())
                     break
                 elseif targetSpawn() and Targeting.GetTargetDistance(targetSpawn) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
-                    mq.TLO.Me.StopCast()
+                    Core.DoCmd("/stopsong")
                     Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%d, range %d) is out of spell range(%d)", songName, targetSpawn.ID(),
                         Targeting.GetTargetDistance(), spellRange)
                     break
@@ -1160,11 +1160,13 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             retryCount = retryCount - 1
         until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
-        -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
-        local clipDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('SongClipDelayFact')
-        mq.delay(clipDelay)
-
-        Core.DoCmd("/stopsong")
+        -- if we interrupted ourselves earlier, we don't need to do this
+        if mq.TLO.Me.Casting() then
+            -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
+            local clipDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('SongClipDelayFact')
+            mq.delay(clipDelay)
+            Core.DoCmd("/stopsong")
+        end
 
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.SwapInst then
             classConfig.HelperFunctions.SwapInst("Weapon")
@@ -1452,8 +1454,7 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
     local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime() or 0) + ((mq.TLO.EverQuest.Ping() * 20) + 1000))
     local maxWait = maxWaitOrig
 
-    -- test for bard stuck gem fix
-    while mq.TLO.Window("CastingWindow").Open() do
+    while mq.TLO.Me.Casting() do
         local currentCast = mq.TLO.Me.Casting()
         Logger.log_super_verbose("WaitCastFinish(): Waiting to Finish Casting...")
         mq.delay(20)

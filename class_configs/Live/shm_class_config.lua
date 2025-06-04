@@ -855,6 +855,9 @@ local _ClassConfig = {
             {
                 name = "RecklessHeal2",
                 type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.SpellLoaded(spell)
+                end,
             },
             {
                 name = "RecklessHeal3",
@@ -1205,7 +1208,7 @@ local _ClassConfig = {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell)
-                    if not (Config:GetSetting('DoSpellCanni') and Config:GetSetting('DoCombatCanni')) then return false end
+                    if not Casting.CastReady(spell) or not (Config:GetSetting('DoSpellCanni') and Config:GetSetting('DoCombatCanni')) then return false end
                     return mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
                 end,
             },
@@ -1214,7 +1217,7 @@ local _ClassConfig = {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    if not Casting.CanUseAA("Luminary's Synergy") or not Config:GetSetting('DoHealOverTime') then return false end
+                    if not Casting.CanUseAA("Luminary's Synergy") or not Config:GetSetting('DoHealOverTime') or not Casting.CastReady(spell) then return false end
                     return Targeting.MobHasLowHP and spell.RankName.Stacks() and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
@@ -1271,8 +1274,8 @@ local _ClassConfig = {
                 name = "CanniSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Config:GetSetting('DoSpellCanni') and Casting.CastReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and
-                        mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
+                    if not Config:GetSetting('DoSpellCanni') or not Casting.CastReady(spell) then return false end
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
                 end,
             },
             {
@@ -1287,7 +1290,7 @@ local _ClassConfig = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not Casting.CanUseAA("Luminary's Synergy") or not Config:GetSetting('DoHealOverTime') then return false end
+                    if not Casting.CanUseAA("Luminary's Synergy") or not Config:GetSetting('DoHealOverTime') or not Casting.CastReady(spell) then return false end
                     return spell.RankName.Stacks() and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
@@ -1759,7 +1762,7 @@ local _ClassConfig = {
             Tooltip = "Select the Combat Mode for this Toon",
             Type = "Custom",
             RequiresLoadoutChange = true,
-            Default = 2,
+            Default = 1,
             Min = 1,
             Max = 2,
             FAQ = "What do the different Modes do?",
