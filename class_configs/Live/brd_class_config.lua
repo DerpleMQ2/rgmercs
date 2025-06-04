@@ -225,13 +225,6 @@ local _ClassConfig = {
             "Blade of Vesagran",
             "Prismatic Dragon Blade",
         },
-        ['Dreadstone'] = {
-            "Possessed Dreadstone Minstrel's Rapier",
-        },
-        ['SymphonyOfBattle'] = {
-            "Rapier of Somber Notes",
-            "Songblade of the Eternal",
-        },
         ['Coating'] = {
             "Spirit Drinker's Coating",
             "Blood Drinker's Coating",
@@ -890,7 +883,7 @@ local _ClassConfig = {
         {
             name = 'Burn',
             state = 1,
-            steps = 1,
+            steps = 4,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck()
@@ -935,12 +928,12 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Song of Stone",
-                type = "AA",
-            },
-            {
                 name = "ThousandBlades",
                 type = "Disc",
+            },
+            {
+                name = "Song of Stone",
+                type = "AA",
             },
             {
                 name = "Flurry of Notes",
@@ -994,14 +987,6 @@ local _ClassConfig = {
                 type = "Song",
                 cond = function(self, songSpell)
                     return Config:GetSetting('DoDispel') and mq.TLO.Target.Beneficial() ~= nil
-                end,
-            },
-            {
-                name = "Dreadstone",
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('UseDreadstone') then return false end
-                    return Casting.DetItemCheck(itemName, target)
                 end,
             },
         },
@@ -1356,14 +1341,6 @@ local _ClassConfig = {
                 end,
                 cond = function(self, songSpell)
                     return not Casting.AuraActiveByName(songSpell.BaseName()) and Config:GetSetting('UseAura') == 2
-                end,
-            },
-            {
-                name = "SymphonyOfBattle",
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('UseSoBItems') then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
@@ -1956,26 +1933,6 @@ local _ClassConfig = {
             FAQ = "What is a Chest Click?",
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
                 "BRD is set to use theirs during burns, so long as the item equipped has a clicky effect.",
-        },
-        ['UseSoBItems']         = {
-            DisplayName = "Symph. of Battle",
-            Category = "Equipment",
-            Index = 3,
-            Tooltip = "Click your Symphony of Battle items.",
-            Default = false,
-            ConfigType = "Advanced",
-            FAQ = "What is Symphony of Battle?",
-            Answer = "Symphony of Battle is a clicky group haste effect found on Rapier of Somber Notes or Songblade of the Eternal.",
-        },
-        ['UseDreadstone']       = {
-            DisplayName = "Dreadstone",
-            Category = "Equipment",
-            Index = 4,
-            Tooltip = "Use your Dreadstone when able.",
-            Default = false,
-            ConfigType = "Advanced",
-            FAQ = "What does the Dreadstone option control?",
-            Answer = "Possessed Dreadstone Minstrel's Rapier is a clicky 55% slow item rewarded by the quest \"The Depths of Fear\".",
         },
         ['DoCoating']           = {
             DisplayName = "Use Coating",
