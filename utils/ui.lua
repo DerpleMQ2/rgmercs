@@ -373,7 +373,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             ImGui.TableNextColumn()
             local changed = false
             enabledRotationEntries[entry.name], changed = Ui.RenderOptionToggle(string.format("tggl_%d", idx), "",
-                entry.name and (enabledRotationEntries[entry.name] == nil and true or enabledRotationEntries[entry.name]) or true)
+                enabledRotationEntries[entry.name] == nil and true or enabledRotationEntries[entry.name])
             if changed then enabledRotationEntriesChanged = true end
             ImGui.TableNextColumn()
             if entry.cond then
