@@ -404,7 +404,7 @@ function Module:SetDynamicNames()
             end
         end
     end
-    for _, data in pairs(self.ClassConfig.HealRotations) do
+    for _, data in pairs(self.ClassConfig.HealRotations or {}) do
         for _, r in ipairs(data) do
             if r.name_func then
                 r.name = Core.SafeCallFunc("SetDynamicName", r.name_func, self) or "Error in name_func!"
