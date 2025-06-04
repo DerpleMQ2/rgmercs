@@ -1267,6 +1267,11 @@ function Module:ShouldPull(campData)
         return false, string.format("PctHPs < %d", self.settings.PullHPPct)
     end
 
+    if me.Casting() then
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am Casting!")
+        return false, string.format("Casting")
+    end
+
     if me.PctEndurance() < self.settings.PullEndPct then
         Logger.log_verbose("\ay::PULL:: \arAborted!\ax PctEnd < %d", self.settings.PullEndPct)
         return false, string.format("PctEnd < %d", self.settings.PullEndPct)
