@@ -817,6 +817,17 @@ local _ClassConfig = {
                     return Targeting.IsNamed(target) and (Casting.CanUseAA("Cascading Theft of Defense") and not Casting.IHaveBuff("Cascading Theft of Defense"))
                 end,
             },
+            {
+                name = "Skin",
+                type = "Spell",
+                tooltip = Tooltips.Skin,
+                cond = function(self, spell, target)
+                    if not Core.IsTanking() or not Targeting.IsNamed(target) then return false end
+                    return Casting.SelfBuffCheck(spell)
+                        --laz specific deconflict
+                        and not Casting.IHaveBuff("Necrotic Pustules")
+                end,
+            },
         },
         ['Snare'] = {
             {

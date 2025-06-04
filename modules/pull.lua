@@ -1430,7 +1430,7 @@ function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
 
     for i, _ in ipairs(groupWatch) do
         local member = mq.TLO.Group.Member(i)
-        if groupWatch[i] and member and member.ID() > 0 then
+        if groupWatch[i] and member() and member.ID() > 0 then
             local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceResumePct or resourcePausePct
             if member.PctHPs() < resourcePct then
                 Comms.HandleAnnounce(string.format("%s is low on hp - Holding pulls!", member.CleanName()), Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'))
