@@ -452,8 +452,13 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.65, 0.65, 1.0, 1.0)
                     ImGui.Text(entry.name)
                     ImGui.PopStyleColor()
+                elseif entry.type:lower() == "item" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.05, .05, 0.9)
+                    local item = mq.TLO.FindItem(entry.name)
+                    ImGui.Text(item and item() and ("Clicky: " .. item.Clicky()) or entry.name)
+                    ImGui.PopStyleColor()
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, .8, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.8, 1.0)
                     ImGui.Text(entry.name)
                     ImGui.PopStyleColor()
                 end
