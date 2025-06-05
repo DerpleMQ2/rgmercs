@@ -1160,7 +1160,7 @@ function Module:GiveTime(combat_state)
 
             self:SelfCheckAndRez()
 
-            if Config:GetSetting('AssistOutside') then
+            if Config:GetSetting('AssistOutside') or mq.TLO.Raid.Members() > 0 then
                 self:OOGCheckAndRez()
             end
 
