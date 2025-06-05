@@ -576,33 +576,24 @@ return {
                 name = "ManaWeave",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and not Casting.IHaveBuff("Weave of Power")
-                end,
-            },
-            {
-                name = "WildNuke",
-                type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke() and Casting.IHaveBuff("Weave of Power")
-                end,
-            },
-            {
-                name = "FireEtherealNuke",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return not Casting.IHaveBuff("Weave of Power")
                 end,
             },
             {
                 name = "ChaosNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.MobHasLowHP(target)
-                end,
+            },
+            {
+                name = "WildNuke",
+                type = "Spell",
             },
             {
                 name = "Scepter of Incantations",
                 type = "Item",
+            },
+            {
+                name = "FireEtherealNuke",
+                type = "Spell",
             },
         },
         ['DPS(FireLowLevel)'] = {
@@ -618,15 +609,12 @@ return {
                 name = "BigFireNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
         },
         ['DPS(IceLowLevel)'] = {
@@ -642,15 +630,12 @@ return {
                 name = "BigIceNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "IceNuke",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
         },
         ['DPS(MagicLowLevel)'] = {
@@ -658,15 +643,12 @@ return {
                 name = "BigMagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
         },
         ['DPS(PBAE)'] = {
