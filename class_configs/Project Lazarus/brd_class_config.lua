@@ -221,7 +221,7 @@ local _ClassConfig = {
             if not Config:GetSetting('SwapInstruments') then return end
             Logger.log_verbose("\ayBard SwapInst(): Swapping to Instrument Type: %s", type)`
             if type == "Percussion Instruments" then
-                if mq.TLO.Me.Bandolier('drum')() then
+                if mq.TLO.Me.Bandolier('drum')() and Config:GetSetting('UseBandolier') then
                     Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atDrum Bandolier")
                     ItemManager.BandolierSwap('drum')
                     return
@@ -231,7 +231,7 @@ local _ClassConfig = {
                     return
                 end
             elseif type == "Wind Instruments" then
-                if mq.TLO.Me.Bandolier('wind')() then
+                if mq.TLO.Me.Bandolier('wind')() and Config:GetSetting('UseBandolier') then
                     Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atWind Bandolier")
                     ItemManager.BandolierSwap('wind')
                     return
@@ -241,7 +241,8 @@ local _ClassConfig = {
                     return
                 end
             elseif type == "Brass Instruments" then
-                if mq.TLO.Me.Bandolier('brass')() then
+                printf("\ayBard SwapInst()\ax:\ao Swapping to Instrument Type: %s", type)
+                if mq.TLO.Me.Bandolier('brass')() and Config:GetSetting('UseBandolier') then
                     Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atBrass Bandolier")
                     ItemManager.BandolierSwap('brass')
                     return
@@ -251,7 +252,7 @@ local _ClassConfig = {
                     return
                 end
             elseif type == "Stringed Instruments" then
-                if mq.TLO.Me.Bandolier('string')() then
+                if mq.TLO.Me.Bandolier('string')() and Config:GetSetting('UseBandolier') then
                     Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atStringed Bandolier")
                     ItemManager.BandolierSwap('string')
                 else
@@ -260,7 +261,7 @@ local _ClassConfig = {
                 end
                 return
             end
-            if mq.TLO.Me.Bandolier('main')() ~= nil then
+            if mq.TLO.Me.Bandolier('main')() and Config:GetSetting('UseBandolier') then
                 ItemManager.BandolierSwap('main')
                 Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atMain Bandolier")
             else
