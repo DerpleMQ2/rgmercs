@@ -1132,29 +1132,37 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
 
             mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
 
+            -- If we /stopsong too soon after a cast, the server will re-open the cast window.
+            -- -- This can be observed with the following:
+            -- -- /multiline ; /cast 2 ; /timed 1 /stopsong
+            local cancelWait = 500
+
             -- while the casting window is open, still do movement if not paused or if movement enabled during pause.
             while mq.TLO.Window("CastingWindow").Open() do
                 if not Config.Globals.PauseMain or Config:GetSetting('RunMovePaused') then
                     Modules:ExecModule("Movement", "GiveTime", "Combat")
                 end
 
-                if (not targetSpawn or not targetSpawn() or Targeting.TargetIsType("corpse", targetSpawn)) and spell.SpellType() == "Detrimental" then
-                    Core.DoCmd("/stopsong")
-                    Logger.log_debug("UseSong(): Canceled singing %s because target is dead or no longer exists.", songName)
-                    break
-                elseif targetSpawn() and Targeting.GetTargetID() > 0 and targetSpawn.ID() ~= Targeting.GetTargetID() and spell.SpellType() == "Detrimental" then
-                    Core.DoCmd("/stopsong")
-                    Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%s/%d) is no longer myTarget(%s/%d)", songName, targetSpawn.CleanName() or "",
-                        targetSpawn.ID(), Targeting.GetTargetCleanName(), Targeting.GetTargetID())
-                    break
-                elseif targetSpawn() and Targeting.GetTargetDistance(targetSpawn) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
-                    Core.DoCmd("/stopsong")
-                    Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%d, range %d) is out of spell range(%d)", songName, targetSpawn.ID(),
-                        Targeting.GetTargetDistance(), spellRange)
-                    break
+                if cancelWait <= 0 then
+                    if (not targetSpawn or not targetSpawn() or Targeting.TargetIsType("corpse", targetSpawn)) and spell.SpellType() == "Detrimental" then
+                        Core.DoCmd("/stopsong")
+                        Logger.log_debug("UseSong(): Canceled singing %s because target is dead or no longer exists.", songName)
+                        break
+                    elseif targetSpawn() and Targeting.GetTargetID() > 0 and targetSpawn.ID() ~= Targeting.GetTargetID() and spell.SpellType() == "Detrimental" then
+                        Core.DoCmd("/stopsong")
+                        Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%s/%d) is no longer myTarget(%s/%d)", songName, targetSpawn.CleanName() or "",
+                            targetSpawn.ID(), Targeting.GetTargetCleanName(), Targeting.GetTargetID())
+                        break
+                    elseif targetSpawn() and Targeting.GetTargetDistance(targetSpawn) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
+                        Core.DoCmd("/stopsong")
+                        Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%d, range %d) is out of spell range(%d)", songName, targetSpawn.ID(),
+                            Targeting.GetTargetDistance(), spellRange)
+                        break
+                    end
                 end
                 mq.doevents()
                 mq.delay(20)
+                cancelWait = cancelWait - 20
             end
 
             retryCount = retryCount - 1
