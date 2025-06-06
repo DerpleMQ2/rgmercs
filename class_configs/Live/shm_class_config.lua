@@ -684,14 +684,15 @@ local _ClassConfig = {
         DoRez = function(self, corpseId)
             local rezAction = false
             local okayToRez = Casting.OkayToRez(corpseId)
+            local combatState = mq.TLO.Me.CombatState():lower() or "unknown"
 
-            if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
+            if combatState == "combat" and Config:GetSetting('DoBattleRez') then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
                     rezAction = okayToRez and Casting.UseItem("Staff of Forbidden Rites", corpseId)
                 elseif Casting.AAReady("Call of the Wild") and corpseId ~= mq.TLO.Me.ID() then
                     rezAction = okayToRez and Casting.UseAA("Call of the Wild", corpseId, true, 1)
                 end
-            elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
+            elseif combatState == "active" or combatState == "resting" then
                 if Casting.AAReady("Rejuvenation of Spirit") then
                     rezAction = okayToRez and Casting.UseAA("Rejuvenation of Spirit", corpseId, true, 1)
                 elseif not Casting.CanUseAA("Rejuvenation of Spirit") and Casting.SpellReady(mq.TLO.Spell("Incarnate Anew"), true) then

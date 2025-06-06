@@ -280,14 +280,15 @@ local _ClassConfig = {
             local rezAction = false
             local rezSpell = self.ResolvedActionMap['RezSpell']
             local okayToRez = Casting.OkayToRez(corpseId)
+            local combatState = mq.TLO.Me.CombatState():lower() or "unknown"
 
-            if mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
+            if combatState == "active" or combatState == "resting" then
                 if mq.TLO.SpawnCount("pccorpse radius 80 zradius 30")() > 2 and Casting.SpellReady(mq.TLO.Spell("Larger Reviviscence"), true) then
                     rezAction = okayToRez and Casting.UseSpell("Larger Reviviscence", corpseId, true, true)
                 end
             end
 
-            if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
+            if combatState == "combat" and Config:GetSetting('DoBattleRez') then
                 if Casting.AAReady("Blessing of Resurrection") then
                     rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
