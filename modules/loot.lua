@@ -248,12 +248,12 @@ function Module:Pop()
 	self:SaveSettings(false)
 end
 
-function Module.DoLooting()
+function Module.DoLooting(combat_state)
 	if not Module.TempSettings.Looting then return end
 
 	local maxWait = Config:GetSetting('LootingTimeout') * 1000
 	while Module.TempSettings.Looting do
-		if mq.TLO.Me.CombatState():lower() == "combat" and not Config:GetSetting('CombatLooting') then
+		if combat_state == "Combat" and not Config:GetSetting('CombatLooting') then
 			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")
 			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
 			Module.TempSettings.Looting = false
@@ -323,7 +323,7 @@ function Module:GiveTime(combat_state)
 
 	if self.TempSettings.Looting then
 		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
-		Module.DoLooting()
+		Module.DoLooting(combat_state)
 	end
 end
 
