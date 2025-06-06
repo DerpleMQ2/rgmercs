@@ -1287,7 +1287,7 @@ function Module:ShouldPull(campData)
         return false, string.format("Meditating")
     end
 
-    if Casting.IHaveBuff("Resurrection Sickness") then
+    if mq.TLO.Me.Buff("=Resurrection Sickness") then
         Logger.log_verbose("\ay::PULL:: \arAborted!\ax Rez Sickness for %d seconds.",
             mq.TLO.Me.Buff("Resurrection Sickness")() and mq.TLO.Me.Buff("Resurrection Sickness").Duration.TotalSeconds() or 0)
         return false, string.format("Resurrection Sickness")
@@ -1315,12 +1315,12 @@ function Module:ShouldPull(campData)
             return false, string.format("Snared")
         end
 
-        if Casting.IHaveBuff("Restless Ice") then
+        if mq.TLO.Me.Song("=Restless Ice") then
             Logger.log_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
             return false, string.format("Restless Ice")
         end
 
-        if Casting.IHaveBuff("Restless Ice Infection") then
+        if mq.TLO.Me.Song("=Restless Ice Infection") then
             Logger.log_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
             return false, string.format("Ice Infection")
         end
