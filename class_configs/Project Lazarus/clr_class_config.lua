@@ -505,7 +505,7 @@ local _ClassConfig = {
         {
             name = 'Burn',
             state = 1,
-            steps = 1,
+            steps = 3,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
