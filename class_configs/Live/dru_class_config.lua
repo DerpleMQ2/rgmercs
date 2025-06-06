@@ -1609,7 +1609,7 @@ local _ClassConfig = {
             local okayToRez = Casting.OkayToRez(corpseId)
             local combatState = mq.TLO.Me.CombatState():lower() or "unknown"
 
-            if combatState == "combat" and Config:GetSetting('DoBattleRez') then
+            if combatState == "combat" and Config:GetSetting('DoBattleRez') and Core.OkayToNotHeal() then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
                     rezAction = okayToRez and Casting.UseItem("Staff of Forbidden Rites", corpseId)
                 elseif Casting.AAReady("Call of the Wild") and corpseId ~= mq.TLO.Me.ID() then

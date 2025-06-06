@@ -864,7 +864,7 @@ function Module:IGCheckAndRez()
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
                 Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
-                if not Config:GetSetting('RezInZonePC') and mq.TLO.Group.Member(ownerName).OtherZone() then
+                if not Config:GetSetting('RezInZonePC') and mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but the player appears to be in-zone.", ownerName or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then

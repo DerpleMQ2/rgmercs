@@ -236,7 +236,7 @@ end
 function Core.OkayToNotHeal()
     if not Core.IsHealing() then return true end
 
-    return Core.GetMainAssistPctHPs() > Config:GetSetting('BigHealPoint')
+    return Core.GetMainAssistPctHPs() > Config:GetSetting('BigHealPoint') and (mq.TLO.Group.Injured(Config:GetSetting('BigHealPoint'))() or 0) < Config:GetSetting('GroupInjureCnt')
 end
 
 --- Retrieves the resolved action map item for a given action.
