@@ -1028,9 +1028,11 @@ function Module:RunCureRotation()
         local peer = mq.TLO.DanNet.Peers(i)()
         if peer and peer:len() > 0 then
 
-            local startindex, endindex = string.find(peer, "_")
-            local peerName = string.sub(peer, endindex + 1)
-            local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peerName))
+            local startindex = string.find(peer, "_")
+            if startindex then
+                peer = string.sub(peer, startindex + 1)
+            end
+            local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
 
             if cureTarget ~= nil and cureTarget() and cureTarget.Distance() < 150 then
                 Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
