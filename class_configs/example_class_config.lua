@@ -470,7 +470,7 @@ local _ClassConfig = {
             --- I have removed a lot of rotations here
 
             -- Good example... No conditions, you ask? They aren't needed!
-            -- Any ability without a condition will be used whenever it is checked!
+            -- Any ability without a condition will be used whenever it is checked (if it is ready)!
             {
                 name = "Visage of Death",
                 type = "AA",
