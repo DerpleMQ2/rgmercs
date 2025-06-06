@@ -287,7 +287,7 @@ return {
         {
             name = 'Burn',
             state = 1,
-            steps = 1,
+            steps = 4,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck()
@@ -602,6 +602,10 @@ return {
                 cond = function(self, discSpell)
                     return not Casting.AAReady("War Cry of the Braxi") and Casting.NoDiscActive() and Casting.SelfBuffCheck(discSpell)
                 end,
+            },
+            {
+                name = "Battered Smuggler's Barrel",
+                type = "Item",
             },
         },
         ['DPS'] = {

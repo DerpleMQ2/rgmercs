@@ -856,7 +856,7 @@ _ClassConfig      = {
         {
             name = 'Burn',
             state = 1,
-            steps = 1,
+            steps = 3,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck()
@@ -1301,6 +1301,10 @@ _ClassConfig      = {
                 cond = function(self, aaName, target)
                     return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint')
                 end,
+            },
+            {
+                name = "Minion's Memento",
+                type = "Item",
             },
             {
                 name = "Replenish Companion",

@@ -663,6 +663,10 @@ return {
                 end,
             },
             {
+                name = "Minion's Memento",
+                type = "Item",
+            },
+            {
                 name = "Mend Companion",
                 type = "AA",
             },
@@ -753,7 +757,7 @@ return {
         {
             name = 'Burn',
             state = 1,
-            steps = 1,
+            steps = 4,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck()
