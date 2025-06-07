@@ -295,7 +295,7 @@ function Module:Init()
 	self:LootMessageHandler()
 
 	self:LoadSettings()
-	if not hasLootnScoot then
+	if not hasLootnScoot and not Config:GetSetting('UseBundled') then
 		Logger.log_error("\ay[LOOT]: \arLootNScoot is not installed, please install it to use this module.")
 	end
 	if not Core.OnEMU() then
@@ -310,7 +310,7 @@ function Module:Init()
 				mq.delay(3000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 			end
 
-			if not hasLootnScoot then
+			if not hasLootnScoot and not Config:GetSetting('UseBundled') then
 				Config:SetSetting('UseBundled', true)
 			end
 
@@ -344,7 +344,7 @@ function Module:Render()
 		Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
 		ImGui.NewLine()
 	end
-	if hasLootnScoot then
+	if hasLootnScoot or Config:GetSetting('UseBundled') then
 		local pressed = false
 		if ImGui.CollapsingHeader("Config Options") then
 			self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
