@@ -1682,16 +1682,21 @@ end
 
 function Config:UpdateCommandHandlers()
     self.CommandHandlers = {}
-
+    local startTime = mq.gettime()
     local submoduleSettings = Modules:ExecAll("GetSettings")
     local submoduleDefaults = Modules:ExecAll("GetDefaultSettings")
+
 
     submoduleSettings["Core"] = self.settings
     submoduleDefaults["Core"] = Config.DefaultConfig
 
     for moduleName, moduleSettings in pairs(submoduleSettings) do
+        local modstartTime = mq.gettime()
         for setting, _ in pairs(moduleSettings or {}) do
+            local setstartTime = mq.gettime()
             local handled, usageString = self:GetUsageText(setting or "", true, submoduleDefaults[moduleName] or {})
+            local setendTime = mq.gettime()
+            Logger.log_debug("\ag[Config] \ayGetUsageText() took %.3f seconds for %s.%s", (setendTime - setstartTime) / 1000, moduleName, setting)
 
             if handled then
                 self.CommandHandlers[setting:lower()] = {
@@ -1703,7 +1708,13 @@ function Config:UpdateCommandHandlers()
                 }
             end
         end
+        local modendTime = mq.gettime()
+        Logger.log_debug("\ag[Config] \ayGetSettings() took %.3f seconds to process module %s.", (modendTime - modstartTime) / 1000, moduleName)
     end
+
+    local endTime = mq.gettime()
+
+    Logger.log_debug("\ag[Config] \ayUpdateCommandHandlers() took %.3f seconds to execute for %d modules.", (endTime - startTime) / 1000, #submoduleSettings)
 end
 
 ---@param config string
