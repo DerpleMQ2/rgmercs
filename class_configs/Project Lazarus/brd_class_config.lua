@@ -246,21 +246,12 @@ local _ClassConfig = {
         RefreshBuffSong = function(songSpell) --determine how close to a buff's expiration we will resing to maintain full uptime
             if not songSpell or not songSpell() then return false end
             local me = mq.TLO.Me
-            local threshold = Config:GetSetting('RefreshCombat')
-            --an earlier version of this function checked your cast speed to add to this value, but cast speed TLO is always rounded down and is virtually always "2"
-            if Targeting.GetXTHaterCount() == 0 then threshold = Config:GetSetting('RefreshDT') end
-
-            local res = Casting.SpellLoaded(songSpell) and
-                ((me.Buff(songSpell.Name()).Duration.TotalSeconds() or 999) <= threshold or
-                    (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= threshold)
-            Logger.log_verbose("\ayRefreshBuffSong(%s) => memed(%s), song: duration(%0.2f) < reusetime(%0.2f) buff: duration(%0.2f) < reusetime(%0.2f) --> result(%s)",
-                songSpell.Name(),
-                Strings.BoolToColorString(me.Gem(songSpell.RankName.Name())() ~= nil),
-                me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, threshold,
-                me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0,
-                threshold,
-                Strings.BoolToColorString(res))
-            return res
+            local threshold = Targeting.GetXTHaterCount() == 0 and Config:GetSetting('RefreshDT') or Config:GetSetting('RefreshCombat')
+            local duration = songSpell.DurationWindow() == 1 and (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) or (me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0)
+            local ret = duration <= threshold
+            Logger.log_verbose("\ayRefreshBuffSong(%s) => memed(%s), duration(%d), threshold(%d), should refresh:(%s)", songSpell,
+                Strings.BoolToColorString(me.Gem(songSpell.RankName.Name())() ~= nil), duration, threshold, Strings.BoolToColorString(ret))
+            return ret
         end,
         UnwantedAggroCheck = function(self) --Self-Explanatory. Add isTanking to this if you ever make a mode for bardtanks!
             if Targeting.GetXTHaterCount() == 0 or Core.IAmMA() or mq.TLO.Group.Puller.ID() == mq.TLO.Me.ID() then return false end
