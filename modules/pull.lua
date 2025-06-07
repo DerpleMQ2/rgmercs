@@ -807,7 +807,7 @@ function Module:RenderMobList(displayName, settingName)
         if mq.TLO.Target() and Targeting.TargetIsType("NPC") then
             ImGui.PushID("##_small_btn_allow_target_" .. settingName)
             if ImGui.SmallButton(string.format("Add Target To %s", displayName)) then
-                self:AddMobToList(settingName, mq.TLO.Target.CleanName())
+                self:AddMobToList(settingName, mq.TLO.Target.DisplayName())
             end
             ImGui.PopID()
         end
@@ -1149,16 +1149,27 @@ function Module:HaveList(listName)
 end
 
 ---@param listName string
----@param mobName string
+---@param mob MQSpawn
 ---@param defaultNoList boolean # Default to return if there is no list.
 ---@return boolean
-function Module:IsMobInList(listName, mobName, defaultNoList)
+function Module:IsMobInList(listName, mob, defaultNoList)
     -- no list so everything is allowed.
-    if not self:HaveList(listName) then return defaultNoList end
+    if mob ~= nil and mob() ~= nil then
+        for _, v in pairs(self.ZonePullList[listName][mq.TLO.Zone.ShortName()] or {}) do
+            local mobName = mob.DisplayName() or 'none'
+            if v == mobName then
+                Logger.log_debug("Found SpawnName: %s in list %s", mobName, listName)
+                return true
+            end
+        end
 
-    for _, v in pairs(self.settings[listName][mq.TLO.Zone.ShortName()]) do
-        if v == mobName then return true end
+        local mobSurName = mob.Surname() or 'none'
+        if (mobSurName:find("'s Pet") or 0) > 0 or (mobSurName:find("'s Doppelganger") or 0) > 0 then
+            Logger.log_debug("Found Pet: %s in list %s", mobSurName, listName)
+            return true
+        end
     end
+    if not self:HaveList(listName) then return defaultNoList end
 
     return false
 end
@@ -1571,12 +1582,12 @@ function Module:GetPullableSpawns()
         end
 
         if self:HaveList("PullAllowList") then
-            if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
+            if self:IsMobInList("PullAllowList", spawn, true) == false then
                 Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
                 return false
             end
         elseif self:HaveList("PullDenyList") then
-            if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
+            if self:IsMobInList("PullDenyList", spawn, false) == true then
                 Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
                 return false
             end
