@@ -39,6 +39,17 @@ local function GetColorEnd()
     return ''
 end
 
+local function FormatTableOutput(message)
+    local output = ''
+    for k, v in pairs(message) do
+        if output ~= '' then
+            output = output .. '\n\t\t'
+        end
+        output = string.format("%s \ao%s\ax: \at%s\ax", output, k, tostring(v))
+    end
+    return output
+end
+
 local function GetCallerString()
     if Write.loglevels[Write.loglevel:lower()].level > Write.callstringlevel then
         return ''
@@ -83,11 +94,7 @@ function Write.Debug(console, message, ...)
         Output('debug', console, message)
     end
     if type(message) == 'table' then
-        local dbgMessage = ''
-        for k, v in pairs(message) do
-            dbgMessage = string.format("%s \ao%s\ax: \at%s\ax", dbgMessage, k, tostring(v))
-        end
-        Output('debug', console, dbgMessage)
+        Output('debug', console, FormatTableOutput(message))
     end
 end
 
@@ -106,6 +113,7 @@ function Write.Info(console, message, ...)
             dbgMessage = string.format("%s \ao%s\ax: \at%s\ax", dbgMessage, k, tostring(v))
         end
         Output('info', console, dbgMessage)
+        -- Output('info', console, FormatTableOutput(message))        local dbgMessage = ''
     end
 end
 
@@ -119,11 +127,7 @@ function Write.Warn(console, message, ...)
         Output('warn', console, message)
     end
     if type(message) == 'table' then
-        local dbgMessage = ''
-        for k, v in pairs(message) do
-            dbgMessage = string.format("%s \ao%s\ax: \at%s\ax", dbgMessage, k, tostring(v))
-        end
-        Output('warn', console, dbgMessage)
+        Output('warn', console, FormatTableOutput(message))
     end
 end
 
@@ -137,11 +141,7 @@ function Write.Error(console, message, ...)
         Output('error', console, message)
     end
     if type(message) == 'table' then
-        local dbgMessage = ''
-        for k, v in pairs(message) do
-            dbgMessage = string.format("%s \ao%s\ax: \at%s\ax", dbgMessage, k, tostring(v))
-        end
-        Output('error', console, dbgMessage)
+        Output('error', console, FormatTableOutput(message))
     end
 end
 
@@ -152,14 +152,10 @@ function Write.Fatal(console, message, ...)
     if type(message) == 'string' then
         if (... ~= nil) then message = string.format(message, ...) end
 
-        Output('error', console, message)
+        Output('fatal', console, message)
     end
     if type(message) == 'table' then
-        local dbgMessage = ''
-        for k, v in pairs(message) do
-            dbgMessage = string.format("%s \ao%s\ax: \at%s\ax", dbgMessage, k, tostring(v))
-        end
-        Output('error', console, dbgMessage)
+        Output('fatal', console, FormatTableOutput(message))
     end
     Terminate()
 end
