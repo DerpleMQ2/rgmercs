@@ -1254,7 +1254,7 @@ local _ClassConfig = {
                 type = "AA",
                 allowDead = true,
                 cond = function(self, aaName)
-                    return mq.TLO.Me.Mount() == nil and Casting.SelfBuffAACheck(aaName)
+                    return not mq.TLO.Me.Mount() and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1263,7 +1263,7 @@ local _ClassConfig = {
                 allowDead = true,
                 cond = function(self, spell)
                     if Casting.CanUseAA("Yaulp") then return false end
-                    return mq.TLO.Me.Mount() == nil and Casting.SelfBuffCheck(spell)
+                    return not mq.TLO.Me.Mount() and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
