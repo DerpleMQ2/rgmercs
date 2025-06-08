@@ -1581,6 +1581,13 @@ function Module:GetPullableSpawns()
             end
         end
 
+        -- check for temporary pets.
+        local mobSurName = spawn.Surname() or 'none'
+        if (mobSurName:find("'s Pet") or 0) > 0 or (mobSurName:find("'s Doppelganger") or 0) > 0 then
+            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: \aoFound Temporary Pet: \at%s \ao -- Skipping", mobSurName)
+            return false
+        end
+
         if self:HaveList("PullAllowList") then
             if self:IsMobInList("PullAllowList", spawn, true) == false then
                 Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
