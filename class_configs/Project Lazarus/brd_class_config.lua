@@ -447,9 +447,6 @@ local _ClassConfig = {
             {
                 name = "Boastful Bellow",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Config:GetSetting("DoBellow")
-                end,
             },
             {
                 name = "Vainglorious Shout",
@@ -1210,6 +1207,15 @@ local _ClassConfig = {
             FAQ = "How do I use my Jonthan song?",
             Answer = "You can enable [UseJonthan] to use your Jonthan song." ..
                 "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
+        },
+        ['UseShout']            = {
+            DisplayName = "Use Vain. Shout",
+            Category = "Offensive",
+            Index = 11,
+            Tooltip = "Use Vainglorious Shout (Conal DD/Resist Debuff) ***WILL BREAK MEZ***",
+            Default = false,
+            FAQ = "Where are my AE checks for Vainglorious Shout?",
+            Answer = "The use of Vainglorious Shout is simply covered by a toggle option at this time, there are no target counts, etc.",
         },
 
         -- Song Duration Adjustment
