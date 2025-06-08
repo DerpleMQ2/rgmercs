@@ -370,9 +370,10 @@ return {
             end,
         },
         {
-            name = 'Weaves',
+            name = 'Force of Will',
             state = 1,
             steps = 1,
+            load_cond = function() return Casting.CanUseAA("Force of Will") end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
@@ -565,7 +566,7 @@ return {
                 end,
             },
         },
-        ['Weaves'] = {
+        ['Force of Will'] = {
             {
                 name = "Force of Will",
                 type = "AA",
