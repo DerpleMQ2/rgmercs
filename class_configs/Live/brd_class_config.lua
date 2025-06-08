@@ -197,7 +197,7 @@ local function generateSongList()
 end
 
 local _ClassConfig = {
-    _version            = "2.1 - Live",
+    _version            = "2.2 - Live",
     _author             = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
     ['Modes']           = { --simply determine the priority you gem spells in. Perhaps one day this could be configured to save different loadouts/change options.
         'General',
