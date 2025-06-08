@@ -1,31 +1,13 @@
 local mq                         = require('mq')
 local Config                     = require('utils.config')
 local Core                       = require("utils.core")
-local Targeting                  = require("utils.targeting")
-local Ui                         = require("utils.ui")
-local Comms                      = require("utils.comms")
-local Logger                     = require("utils.logger")
-local Set                        = require("mq.Set")
-local Icons                      = require('mq.ICONS')
-local CHANNEL_COLOR              = IM_COL32(215, 154, 66)
-
-local Module                     = { _version = '0.1a', _name = "Debug", _author = 'Derple', }
-Module.__index                   = Module
-Module.settings                  = {}
-Module.FAQ                       = {}
-Module.ClassFAQ                  = {}
-
-Module.DefaultConfig             = {}
-Module.DefaultCategories         = {}
--- Sample Basic Class Module
-local mq                         = require('mq')
-local Config                     = require('utils.config')
 local Ui                         = require("utils.ui")
 local Comms                      = require("utils.comms")
 local Logger                     = require("utils.logger")
 local Set                        = require("mq.Set")
 local Icons                      = require('mq.ICONS')
 local Zep                        = require('Zep')
+local CHANNEL_COLOR              = IM_COL32(215, 154, 66)
 
 local Module                     = { _version = '0.1a', _name = "Debug", _author = 'Derple', }
 Module.__index                   = Module
@@ -205,6 +187,7 @@ function Module:Exec(scriptText)
 
     locals.hi      = 3
 
+    ---@diagnostic disable-next-line: deprecated
     setfenv(func, locals)
 
     local success, msg = pcall(func)

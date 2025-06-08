@@ -701,6 +701,13 @@ local _ClassConfig = {
                     return Casting.HaveManaToNuke()
                 end,
             },
+            {
+                name = "Bash",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return Config:GetSetting('DoMelee') and Core.ShieldEquipped()
+                end,
+            },
         },
         ['DPS(AE)'] = {
             {

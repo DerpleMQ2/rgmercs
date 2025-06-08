@@ -61,7 +61,7 @@ Module.DefaultConfig                    = {
         Index = 3,
         Tooltip = "Seconds to wait between the check to use Combat Clickies.\n" ..
             "Please Note: Setting this value too low may interfere with other actions!",
-        Default = 10,
+        Default = 5,
         Min = 1,
         Max = 30,
         ConfigType = "Advanced",
