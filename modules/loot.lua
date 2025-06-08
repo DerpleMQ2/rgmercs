@@ -1,33 +1,37 @@
 -- Sample Basic Class Module
-local mq                 = require('mq')
-local Config             = require('utils.config')
-local Core               = require("utils.core")
-local Casting            = require("utils.casting")
-local Ui                 = require("utils.ui")
-local Comms              = require("utils.comms")
-local Strings            = require("utils.strings")
-local Logger             = require("utils.logger")
-local Files              = require("utils.files")
-local Actors             = require("actors")
-local Set                = require("mq.Set")
-local Icons              = require('mq.ICONS')
-local LootnScootPath     = string.format("%s/lootnscoot/init.lua", mq.luaDir)
-local bundleScriptPath   = string.format("rgmercs/lib/lootnscoot")
-local LootScript         = "lootnscoot"
-local hasLootnScoot      = Files.file_exists(LootnScootPath)
-local url                = "https://www.redguides.com/community/resources/lootnscoot-for-emu.2675/"
+local mq                                = require('mq')
+local Config                            = require('utils.config')
+local Core                              = require("utils.core")
+local Casting                           = require("utils.casting")
+local Ui                                = require("utils.ui")
+local Comms                             = require("utils.comms")
+local Strings                           = require("utils.strings")
+local Logger                            = require("utils.logger")
+local Files                             = require("utils.files")
+local Actors                            = require("actors")
+local Set                               = require("mq.Set")
+local Icons                             = require('mq.ICONS')
+local LootnScootPath                    = string.format("%s/lootnscoot/init.lua", mq.luaDir)
+local bundleScriptPath                  = string.format("rgmercs/lib/lootnscoot")
+local LootScript                        = "lootnscoot"
+local hasLootnScoot                     = Files.file_exists(LootnScootPath)
+local url                               = "https://www.redguides.com/community/resources/lootnscoot-for-emu.2675/"
 
-local Module             = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier, Aquietone (lootnscoot lua)', }
-Module.__index           = Module
-Module.settings          = {}
-Module.DefaultCategories = {}
-Module.ModuleLoaded      = false
-Module.TempSettings      = {}
+local Module                            = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier, Aquietone (lootnscoot lua)', }
+Module.__index                          = Module
+Module.settings                         = {}
+Module.DefaultCategories                = {}
+Module.ModuleLoaded                     = false
+Module.TempSettings                     = {}
+Module.TempSettings.CorpsesToIgnore     = {}
+Module.TempSettings.LootMyCorpse        = false
+Module.TempSettings.IgnoreMyNearCorpses = false
+Module.TempSettings.CombatLooting       = false
 
-Module.FAQ               = {}
-Module.ClassFAQ          = {}
+Module.FAQ                              = {}
+Module.ClassFAQ                         = {}
 
-Module.DefaultConfig     = {
+Module.DefaultConfig                    = {
 	['UseBundled']                             = {
 		DisplayName = "Use Bundled LootNScoot",
 		Category = "Loot N Scoot",
@@ -55,36 +59,36 @@ Module.DefaultConfig     = {
 		FAQ = "I have LootNScoot loaded, why am I not looting?",
 		Answer = "Ensure you have enabled Loot Corpses, and note that Combat Looting is the setting that controls looting while in combat.",
 	},
-	['CombatLooting']                          = {
-		DisplayName = "Combat Looting",
-		Category = "Loot N Scoot",
-		Index = 4,
-		Tooltip = "Enables looting during combat.",
-		Default = false,
-		FAQ = "How do i make sure my guys are looting during combat?, incase I die or something.",
-		Answer = "You can enable [CombatLooting] to loot during combat, I recommend only having one or 2 characters do this and NOT THE MA!!.",
-	},
-	['LNSLootMyCorpse']                        = {
-		DisplayName = "Loot My Corpse",
-		Category = "Loot N Scoot",
-		Index = 5,
-		Tooltip = "Enable LootNScoot to loot your corpse.",
-		Default = false,
-		FAQ = "Why do my guys not loot my corpse?",
-		Answer =
-			"RGMercs will only loot your corpse if you have this setting enabled. If you have a corpse that is outside of the radius, it will not be looted.\n" ..
-			"You can adjust this advanced setting in the Loot options.",
-	},
-	['IgnoreNearbyCorpses']                    = {
-		DisplayName = "Ignore Nearby Corpses",
-		Category = "Loot N Scoot",
-		Index = 6,
-		Tooltip = "Ignore My Corpses that are within the radius of your character.",
-		Default = false,
-		FAQ = "Why do my guys not loot corpses that are close to them?",
-		Answer =
-		"You probably have one of your own corpses nearby, enable [IgnoreNearbyCorpses] to ignore your own corpses that are within the radius of your character.",
-	},
+	-- ['CombatLooting']                          = {
+	-- 	DisplayName = "Combat Looting",
+	-- 	Category = "Loot N Scoot",
+	-- 	Index = 4,
+	-- 	Tooltip = "Enables looting during combat.",
+	-- 	Default = false,
+	-- 	FAQ = "How do i make sure my guys are looting during combat?, incase I die or something.",
+	-- 	Answer = "You can enable [CombatLooting] to loot during combat, I recommend only having one or 2 characters do this and NOT THE MA!!.",
+	-- },
+	-- ['LNSLootMyCorpse']                        = {
+	-- 	DisplayName = "Loot My Corpse",
+	-- 	Category = "Loot N Scoot",
+	-- 	Index = 5,
+	-- 	Tooltip = "Enable LootNScoot to loot your corpse.",
+	-- 	Default = false,
+	-- 	FAQ = "Why do my guys not loot my corpse?",
+	-- 	Answer =
+	-- 		"RGMercs will only loot your corpse if you have this setting enabled. If you have a corpse that is outside of the radius, it will not be looted.\n" ..
+	-- 		"You can adjust this advanced setting in the Loot options.",
+	-- },
+	-- ['IgnoreNearbyCorpses']                    = {
+	-- 	DisplayName = "Ignore Nearby Corpses",
+	-- 	Category = "Loot N Scoot",
+	-- 	Index = 6,
+	-- 	Tooltip = "Ignore My Corpses that are within the radius of your character.",
+	-- 	Default = false,
+	-- 	FAQ = "Why do my guys not loot corpses that are close to them?",
+	-- 	Answer =
+	-- 	"You probably have one of your own corpses nearby, enable [IgnoreNearbyCorpses] to ignore your own corpses that are within the radius of your character.",
+	-- },
 	['LootRespectMedState']                    = {
 		DisplayName = "Respect Med State",
 		Category = "Loot N Scoot",
@@ -132,7 +136,7 @@ Module.DefaultConfig     = {
 	},
 }
 
-Module.FAQ               = {
+Module.FAQ                              = {
 	[1] = {
 		Questions = "How can I set the same settings on all of my characters?",
 		Answer =
@@ -150,11 +154,11 @@ Module.FAQ               = {
 	},
 }
 
-Module.CommandHandlers   = {
+Module.CommandHandlers                  = {
 
 }
 
-Module.DefaultCategories = Set.new({})
+Module.DefaultCategories                = Set.new({})
 for k, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
@@ -199,40 +203,19 @@ function Module:SaveSettings(doBroadcast)
 				Core.DoCmd("/lua run %s directed rgmercs %s", scriptName, scriptName)
 			end
 
-			if self.TempSettings.LastCombatSetting == nil then
-				self.TempSettings.LastCombatSetting = Config:GetSetting('CombatLooting')
-			end
-
 			if self.TempSettings.LastRadiusSetting == nil then
 				self.TempSettings.LastRadiusSetting = Config:GetSetting('CorpseRadius')
 			end
 
-			if self.TempSettings.LastLootMyCorpseSetting == nil then
-				self.TempSettings.LastLootMyCorpseSetting = Config:GetSetting('LNSLootMyCorpse')
-			end
-
-			if self.TempSettings.LastIgnoreNearbyCorpsesSetting == nil then
-				self.TempSettings.LastIgnoreNearbyCorpsesSetting = Config:GetSetting('IgnoreNearbyCorpses')
-			end
-
-			if (self.TempSettings.LastCombatSetting ~= Config:GetSetting('CombatLooting') or
-					self.TempSettings.LastRadiusSetting ~= Config:GetSetting('CorpseRadius') or
-					self.TempSettings.LastLootMyCorpseSetting ~= Config:GetSetting('LNSLootMyCorpse') or
-					self.TempSettings.LastIgnoreNearbyCorpsesSetting ~= Config:GetSetting('IgnoreNearbyCorpses')) then
-				self.TempSettings.LastCombatSetting = Config:GetSetting('CombatLooting')
+			if self.TempSettings.LastRadiusSetting ~= Config:GetSetting('CorpseRadius') then
 				self.TempSettings.LastRadiusSetting = Config:GetSetting('CorpseRadius')
-				self.TempSettings.LastLootMyCorpseSetting = Config:GetSetting('LNSLootMyCorpse')
-				self.TempSettings.LastIgnoreNearbyCorpsesSetting = Config:GetSetting('IgnoreNearbyCorpses')
 
 				if mq.gettime() - (self.TempSettings.LastSent or 0) > 500 then
 					self.Actor:send({ mailbox = 'lootnscoot', script = scriptName, },
 						{
 							who = Config.Globals.CurLoadedChar,
 							directions = 'setsetting_directed',
-							CombatLooting = Config:GetSetting('CombatLooting'),
 							CorpseRadius = Config:GetSetting('CorpseRadius'),
-							LootMyCorpse = Config:GetSetting('LNSLootMyCorpse'),
-							IgnoreNearby = Config:GetSetting('IgnoreNearbyCorpses'),
 						})
 					self.TempSettings.LastSent = mq.gettime()
 				end
@@ -306,8 +289,7 @@ function Module:Init()
 			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING'
 			if lnsRunning then
 				Core.DoCmd("/lns quit")
-				mq.delay(1) -- give it a moment to stop
-				mq.delay(3000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
+				mq.delay(1000, function() return not mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 			end
 
 			if not hasLootnScoot and not Config:GetSetting('UseBundled') then
@@ -317,8 +299,7 @@ function Module:Init()
 			local scriptName = Config:GetSetting('UseBundled') and bundleScriptPath or LootScript
 
 			Core.DoCmd("/lua run %s directed rgmercs %s", scriptName, scriptName)
-			mq.delay(1) -- give it a moment to start
-			mq.delay(1000, function() return mq.TLO.Lua.Script(scriptName).Status() ~= 'RUNNING' end)
+			mq.delay(3000, function() return mq.TLO.Lua.Script(scriptName).Status() ~= 'RUNNING' end)
 
 			self.Actor:send({ mailbox = 'lootnscoot', script = scriptName, },
 				{ who = Config.Globals.CurLoadedChar, directions = 'getsettings_directed', })
@@ -369,21 +350,21 @@ end
 function Module:DoLooting(combat_state)
 	if not self.TempSettings.Looting then return end
 
-	local maxWait = Config:GetSetting('LootingTimeout') * 1000
+	local maxWait = Config:GetSetting('LootingTimeout')
 	while self.TempSettings.Looting do
 		if combat_state == "Combat" and not Config:GetSetting('CombatLooting') then
-			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")
+			Logger.log_warn("\ay[LOOT]: Aborting Actions due to \arCombat!")
 			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
 			self.TempSettings.Looting = false
 			break
 		end
 
-		mq.delay(20, function() return not self.TempSettings.Looting end)
+		-- changed time check and shotend the delay so event checks can happen more frequently
+		mq.delay(1)
 
-		maxWait = maxWait - 20
-
-		if maxWait <= 0 then
-			Logger.log_debug("\ay[LOOT]: Aborting Actions due to timeout.")
+		if os.clock() - (self.TempSettings.LootCalledAt or 0) > maxWait and mq.TLO.Corpse() == 'FALSE' then
+			Logger.log_warn("\ay[LOOT]: \awLoot Actions\ar Timeout: \ay%s\aw seconds", maxWait)
+			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
 			self.TempSettings.Looting = false
 			break
 		end
@@ -401,10 +382,7 @@ function Module:LootMessageHandler()
 		local RadiusSetting = mail.CorpseRadius or 0
 		local LootMyCorpse = mail.LootMyCorpse
 		local IgnoreNearbyCorpses = mail.IgnoreNearby
-		local currCombatSetting = Config:GetSetting('CombatLooting')
 		local currRadiusSetting = Config:GetSetting('CorpseRadius')
-		local currLootMyCorpse = Config:GetSetting('LNSLootMyCorpse')
-		local currIgnoreNearbyCorpses = Config:GetSetting('IgnoreNearbyCorpses')
 		local needSave = false
 
 		if mail.Bundle ~= nil and who ~= Config.Globals.CurLoadedChar then
@@ -418,32 +396,40 @@ function Module:LootMessageHandler()
 
 		if who ~= Config.Globals.CurLoadedChar then return end
 
+		self.TempSettings.CorpsesToIgnore = mail.CorpsesToIgnore ~= nil and mail.CorpsesToIgnore or {}
+
 		if subject == 'done_looting' or subject == 'done_processing' then
-			Logger.log_verbose("\ay[LOOT]: \atFinishing Looting: \agResuming")
 			self.TempSettings.Looting = false
 		elseif subject == 'processing' then
 			Logger.log_verbose("\ay[LOOT]: \atProcessing Loot Actions")
 			self.TempSettings.Looting = true
 		else
+			-- these settings and values are sent from LNS to help Mercs throttle the number of times we call LNS to loot. (prechecks)
 			if CombatLooting ~= nil then
-				if currCombatSetting ~= CombatLooting then
-					Config:SetSetting('CombatLooting', CombatLooting)
+				if self.TempSettings.CombatLooting ~= CombatLooting then
+					self.TempSettings.CombatLooting = CombatLooting
 					needSave = true
 				end
 			end
+
+			--[[ Radius is synced on both sides, so we aren't haveing mismatch issues where say mercs is higher than lns.
+				Should stop instances where we keep chain calling loot and exiting because LNS doesn't see a corpse in that range.]]
 			if (RadiusSetting or 0) > 0 and currRadiusSetting ~= RadiusSetting then
 				Config:SetSetting('CorpseRadius', RadiusSetting)
 				needSave = true
 			end
+
+			-- LootMyCorpse and IgnoreNearbyCorpses are sent from LNS to help Mercs throttle the number of times we call LNS to loot.
 			if LootMyCorpse ~= nil then
-				if currLootMyCorpse ~= LootMyCorpse then
-					Config:SetSetting('LNSLootMyCorpse', LootMyCorpse)
+				if self.TempSettings.LootMyCorpse ~= LootMyCorpse then
+					self.TempSettings.LootMyCorpse = LootMyCorpse
 					needSave = true
 				end
 			end
+
 			if IgnoreNearbyCorpses ~= nil then
-				if currIgnoreNearbyCorpses ~= IgnoreNearbyCorpses then
-					Config:SetSetting('IgnoreNearbyCorpses', IgnoreNearbyCorpses)
+				if self.TempSettings.IgnoreMyNearCorpses ~= IgnoreNearbyCorpses then
+					self.TempSettings.IgnoreMyNearCorpses = IgnoreNearbyCorpses
 					needSave = true
 				end
 			end
@@ -473,23 +459,58 @@ function Module:GiveTime(combat_state)
 		return
 	end
 
-	local deadCount = mq.TLO.SpawnCount(string.format("npccorpse radius %s zradius 50", Config:GetSetting('CorpseRadius') or 100))()
-	local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse \"%s\" radius %s zradius 50", (mq.TLO.Me.CleanName() .. "'s corpse"), Config:GetSetting('CorpseRadius') or 100))()
-	if Config:GetSetting('LNSLootMyCorpse') and myCorpseCount > 0 then deadCount = deadCount + 1 end
+	if mq.TLO.Corpse() == 'TRUE' then
+		mq.TLO.Window('LootWnd').DoClose()
+		Logger.log_debug("\ay[LOOT]: \agLoot Window\ax is \arOpen\ax, \aoClosing it.")
+		return
+	end
+
+	local radiusCorpse = Config:GetSetting('CorpseRadius')
+
+	local deadCount = mq.TLO.SpawnCount(string.format("npccorpse radius %s zradius 50", radiusCorpse))()
+	local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse \"%s\" radius %s zradius 50", (mq.TLO.Me.CleanName() .. "'s corpse"), radiusCorpse))()
+
+	-- check the already looted corpses list and if all corpses have been looted, skip the loot actions
+	if deadCount > 0 then
+		local found = true
+		for i = 1, deadCount do
+			local corpse = mq.TLO.NearestSpawn(string.format("%d, npccorpse radius %d zradius 50", i, radiusCorpse))
+			if corpse() then
+				if not self.TempSettings.CorpsesToIgnore[corpse.ID()] then
+					Logger.log_debug("\ay[LOOT]: \ax\at%s\ax Corpse has Not been Looted Yet, \ayPreparing to check corpse.", corpse.CleanName())
+					found = false
+					break
+				end
+			end
+		end
+		if found then
+			Logger.log_debug("\ay[LOOT]: \ax\atAll Corpses\ax have been \agChecked\ax, \aoSkipping Loot Actions.")
+			return
+		end
+	end
+
+	if self.TempSettings.LootMyCorpse and myCorpseCount > 0 then deadCount = deadCount + myCorpseCount end
+
+	--
+	if myCorpseCount > 0 and (not self.TempSettings.IgnoreMyNearCorpses and not self.TempSettings.LootMyCorpse) then
+		Logger.log_debug("\ay[LOOT]: \arYou have a corpse\ax, \aoSkipping Loot Actions.")
+		return
+	end
 
 	if self.Actor == nil then self:LootMessageHandler() end
 	-- send actors message to loot
-	if (combat_state ~= "Combat" or Config:GetSetting('CombatLooting')) and deadCount > 0 then
+	if (combat_state ~= "Combat" or self.TempSettings.CombatLooting) and (deadCount > 0) then
 		if not self.TempSettings.Looting then
 			local scriptName = Config:GetSetting('UseBundled') and bundleScriptPath or LootScript
 			self.Actor:send({ mailbox = 'lootnscoot', script = scriptName, },
-				{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
+				{ who = Config.Globals.CurLoadedChar, directions = 'doloot', limit = 1, })
 			self.TempSettings.Looting = true
+			self.TempSettings.LootCalledAt = os.clock()
 		end
 	end
 
 	if self.TempSettings.Looting then
-		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
+		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions\aw, \aoCombat State\ax: [\at%s\ax]", combat_state)
 		self:DoLooting(combat_state)
 	end
 end

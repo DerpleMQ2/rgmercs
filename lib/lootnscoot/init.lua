@@ -114,6 +114,7 @@ local settingsEnum                      = {
     showinfomessages = 'ShowInfoMessages',
     showconsole = 'ShowConsole',
     showreport = 'ShowReport',
+    maxcorpsespercycle = 'MaxCorpsesPerCycle',
     ignorebagslot = 'IgnoreBagSlot',
     processingeval = 'ProcessingEval',
     alwaysglobal = 'AlwaysGlobal',
@@ -205,6 +206,7 @@ LNS.Settings    = {
     ShowInfoMessages    = true,
     ShowConsole         = false,
     ShowReport          = false,
+    MaxCorpsesPerCycle  = 5,     -- Maximum number of corpses to loot per cycle
     IgnoreBagSlot       = 0,     -- Ignore this Bag Slot when buying, selling, tributing and destroying of items.
     AlwaysGlobal        = false, -- Always assign new rules to global as well as normal rules.
     IgnoreMyNearCorpses = false, -- Ignore my own corpses when looting nearby corpses, some servers you spawn after death with all your gear so this setting is handy.
@@ -262,6 +264,7 @@ LNS.Tooltips    = {
     ShowConsole         = "Show or Hide the Loot Console window",
     ShowReport          = "Prints report to the Console also toggles the report table window open if its closed.",
     IgnoreBagSlot       = "gnore this Bag Slot when buying, selling, tributing and destroying of items.",
+    MaxCorpsesPerCycle  = "Maximum number of corpses to loot per cycle.",
     AlwaysGlobal        = "lways assign new rules to global as well as normal rules.",
     IgnoreMyNearCorpses = "gnore my own corpses when looting nearby corpses, some servers you spawn after death with all your gear so this setting is handy.",
 }
@@ -932,7 +935,7 @@ function LNS.commandHandler(...)
         elseif command == 'shownew' or command == 'newitems' then
             showNewItem = not showNewItem
         elseif command == 'loot' then
-            LNS.lootMobs()
+            LNS.lootMobs(LNS.Settings.MaxCorpsesPerCycle)
         elseif command == 'show' then
             LNS.ShowUI = not LNS.ShowUI
         elseif command == 'tsbank' then
@@ -1056,12 +1059,12 @@ function LNS.reportSkippedItems(noDropItems, loreItems, corpseName, corpseID)
 
     -- Log skipped items
     if next(noDropItems) then
-        Logger.Info(LNS.guiLoot.console, "Skipped NoDrop items from corpse %s (ID: %s): %s",
+        Logger.Info(LNS.guiLoot.console, "\aySkipped NoDrop\ax items from corpse \at%s\ax (ID:\at %s\ax):\ay %s\ax",
             corpseName, tostring(corpseID), table.concat(noDropItems, ", "))
     end
 
     if next(loreItems) then
-        Logger.Info(LNS.guiLoot.console, "Skipped Lore items from corpse %s (ID: %s): %s",
+        Logger.Info(LNS.guiLoot.console, "\aySkipped Lore\ax items from corpse \at%s\ax (ID:\at %s\ax):\ay %s\ax",
             corpseName, tostring(corpseID), table.concat(loreItems, ", "))
     end
 end
@@ -1329,6 +1332,7 @@ function LNS.insertIntoHistory(itemName, corpseName, action, date, timestamp, li
         print("Error: Failed to open database.")
         return
     end
+    local eval = action == 'Ignore' and 'Left' or action
 
     db:exec("PRAGMA journal_mode=WAL;")
 
@@ -1377,7 +1381,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     db:exec("COMMIT")
     db:close()
 
-    local eval = action == 'Ignore' and 'Left' or action
     local actLabel = action == 'Destroy' and 'Destroyed' or action
     if action ~= 'Destroy' and action ~= 'Ignore' then
         actLabel = 'Looted'
@@ -3212,6 +3215,7 @@ function LNS.finishedLooting()
                 CorpseRadius = LNS.Settings.CorpseRadius,
                 LootMyCorpse = LNS.Settings.LootMyCorpse,
                 IgnoreNearby = LNS.Settings.IgnoreMyNearCorpses,
+                CorpsesToIgnore = lootedCorpses or {},
 
             })
     end
@@ -3228,6 +3232,8 @@ function LNS.informProcessing()
                 CombatLooting = LNS.Settings.CombatLooting,
                 CorpseRadius = LNS.Settings.CorpseRadius,
                 LootMyCorpse = LNS.Settings.LootMyCorpse,
+                CorpsesToIgnore = lootedCorpses or {},
+
             })
     end
 end
@@ -3243,6 +3249,7 @@ function LNS.doneProcessing()
                 CorpseRadius = LNS.Settings.CorpseRadius,
                 LootMyCorpse = LNS.Settings.LootMyCorpse,
                 IgnoreNearby = LNS.Settings.IgnoreMyNearCorpses,
+                CorpsesToIgnore = lootedCorpses or {},
 
             })
     end
@@ -3297,6 +3304,9 @@ function LNS.RegisterActors()
                     LNS.TempSettings.DirectedLoot = os.time()
                     Logger.Debug(LNS.guiLoot.console, dbgTbl)
                 end
+                if lootMessage.limit then
+                    LNS.TempSettings.LootLimit = lootMessage.limit
+                end
                 LNS.LootNow = true
                 return
             end
@@ -3326,7 +3336,7 @@ function LNS.RegisterActors()
                         CorpseRadius = LNS.Settings.CorpseRadius,
                         LootMyCorpse = LNS.Settings.LootMyCorpse,
                         IgnoreNearby = LNS.Settings.IgnoreMyNearCorpses,
-
+                        CorpsesToIgnore = lootedCorpses or {},
                     })
                 LNS.TempSettings.SentSettings = true
                 LNS.TempSettings.NeedSave = true
@@ -3610,7 +3620,7 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
             }
             Logger.Debug(LNS.guiLoot.console, dbgTbl)
 
-            LNS.insertIntoHistory(itemName, corpseName, eval,
+            LNS.insertIntoHistory(itemName, corpseName, actionToTake,
                 os.date('%Y-%m-%d'), os.date('%H:%M:%S'), itemLink, MyName, LNS.Zone, allItems, cantWear)
         end
         return
@@ -3706,7 +3716,7 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
         end
 
         Logger.Debug(LNS.guiLoot.console, "\aoINSERT HISTORY CHECK 4\ax: \ayAction\ax: \at%s\ax, Item: \ao%s\ax, \atLink: %s", eval, itemName, itemLink)
-        LNS.insertIntoHistory(itemName, corpseName, eval,
+        LNS.insertIntoHistory(itemName, corpseName, actionToTake,
             os.date('%Y-%m-%d'), os.date('%H:%M:%S'), itemLink, MyName, LNS.Zone, allItems, cantWear)
     end
 end
@@ -3720,6 +3730,8 @@ function LNS.lootCorpse(corpseID)
         return false
     end
     allItems = {}
+    noDropItems, loreItems = {}, {}
+
     if mq.TLO.Cursor() then LNS.checkCursor() end
 
     for i = 1, 3 do
@@ -3742,9 +3754,14 @@ function LNS.lootCorpse(corpseID)
     mq.delay(1000, function() return mq.TLO.Corpse.Items() end)
     local items = mq.TLO.Corpse.Items() or 0
     Logger.Debug(LNS.guiLoot.console, "lootCorpse(): Loot window open. Items: %s", items)
+    if items == 0 then
+        Logger.Debug(LNS.guiLoot.console, "lootCorpse(): \arNo items\ax to loot on corpse \at%s\ax (\ay%s\ax)", corpseName, corpseID)
+        return true
+    end
+
+    local corpseName = mq.TLO.Corpse.CleanName():lower() or 'none'
 
     if mq.TLO.Window('LootWnd').Open() and items > 0 then
-        local corpseName = mq.TLO.Corpse.CleanName():lower() or 'none'
         local myCorpse = mq.TLO.Me.DisplayName():lower() .. "'s corpse"
         if (mq.TLO.Corpse.DisplayName() == mq.TLO.Me.DisplayName()) or (corpseName == myCorpse) then
             if LNS.Settings.LootMyCorpse then
@@ -3753,8 +3770,6 @@ function LNS.lootCorpse(corpseID)
             end
             return false
         end
-
-        noDropItems, loreItems = {}, {}
 
         for i = 1, items do
             local corpseItem = mq.TLO.Corpse.Item(i)
@@ -3775,8 +3790,6 @@ function LNS.lootCorpse(corpseID)
             mq.delay(1)
             if not mq.TLO.Window('LootWnd').Open() then break end
         end
-
-        LNS.reportSkippedItems(noDropItems, loreItems, corpseName, corpseID)
     end
 
     if mq.TLO.Cursor() then LNS.checkCursor() end
@@ -3787,35 +3800,22 @@ function LNS.lootCorpse(corpseID)
         cantLootList[corpseID] = os.time()
     end
 
-    if allItems ~= nil and #allItems > 0 then
-        local message = {
-            ID = corpseID,
-            Items = allItems,
-            Zone = LNS.Zone,
-            Server = eqServer,
-            LootedAt = mq.TLO.Time(),
-            CorpseName = corpseName,
-            LootedBy = MyName,
-        }
-        LNS.lootActor:send({ mailbox = 'looted', script = 'lootnscoot', }, message)
-        if Mode == 'directed' and LNS.DirectorLNSPath ~= 'lootnscoot' then
-            LNS.lootActor:send({ mailbox = 'looted', script = LNS.DirectorLNSPath, }, message)
-        end
-        allItems = nil
-    end
+    LNS.reportSkippedItems(noDropItems, loreItems, corpseName, corpseID)
+
     return true
 end
 
 function LNS.lootMobs(limit)
+    local didLoot = false
     if LNS.PauseLooting or LNS.SafeZones[LNS.Zone] then
         LNS.finishedLooting()
-        return
+        return false
     end
     -- check for normal, undead, animal invis should not see rogue sneak\hide
     if mq.TLO.Me.Invis(1)() or mq.TLO.Me.Invis(2)() or mq.TLO.Me.Invis(3)() then
         Logger.Warn(LNS.guiLoot.console, "lootMobs(): You are Invis and we don't want to break it so skipping.")
         LNS.finishedLooting()
-        return
+        return false
     end
 
     if zoneID ~= mq.TLO.Zone.ID() then
@@ -3832,25 +3832,12 @@ function LNS.lootMobs(limit)
     -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Found %s corpses in range.', deadCount)
 
     -- Handle looting of the player's own corpse
-    local pcCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius %d zradius 100", mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))()
-    local myCorpseCount = 0
-    local foundMine     = false
-    if pcCorpseCount > 0 then
-        for i = 1, pcCorpseCount do
-            local cps = mq.TLO.NearestSpawn(i, string.format("pccorpse %s radius %d zradius 100", mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))
-            if cps() then
-                local cpsName = cps.CleanName():gsub("'s corpse", "")
-                if cpsName == mq.TLO.Me.CleanName() then
-                    foundMine = true
-                    myCorpseCount = myCorpseCount + 1
-                    if not LNS.Settings.LootMyCorpse and foundMine then
-                        Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Puasing looting until finished looting my own corpse.')
-                        LNS.finishedLooting()
-                        return false
-                    end
-                end
-            end
-        end
+    local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse \"%s\" radius %s zradius 50", LNS.Settings.CorpseRadius, (mq.TLO.Me.CleanName() .. "'s corpse")))()
+    local foundMine     = myCorpseCount > 0
+    if not LNS.Settings.LootMyCorpse and foundMine then
+        Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Puasing looting until finished looting my own corpse.')
+        LNS.finishedLooting()
+        return false
     end
 
 
@@ -3858,7 +3845,6 @@ function LNS.lootMobs(limit)
         for i = 1, (limit or myCorpseCount) do
             local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse \"=%s's corpse\" radius %d zradius 100", i, mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))
             if corpse() then
-                -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Adding my corpse to loot list. Corpse ID: %d', corpse.ID())
                 table.insert(corpseList, corpse)
             end
         end
@@ -3871,7 +3857,7 @@ function LNS.lootMobs(limit)
     end
 
     -- Add other corpses to the loot list if not limited by the player's own corpse
-    if (myCorpseCount == 0 or LNS.Settings.IgnoreMyNearCorpses) and LNS.Settings.DoLoot then
+    if (myCorpseCount == 0 or (myCorpseCount > 0 and LNS.Settings.IgnoreMyNearCorpses)) and LNS.Settings.DoLoot then
         for i = 1, (limit or deadCount) do
             local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', LNS.Settings.CorpseRadius))
             if corpse() and (not lootedCorpses[corpse.ID()] or not LNS.Settings.CheckCorpseOnce) then
@@ -3880,14 +3866,15 @@ function LNS.lootMobs(limit)
         end
     else
         Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Skipping other corpses due to nearby player corpse.')
+        LNS.finishedLooting()
+        return false
     end
 
     if Mode == 'directed' and not LNS.LootNow then return end
 
     -- Process the collected corpse list
-    local didLoot = false
     if #corpseList > 0 then
-        Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Attempting to loot %d corpses.', #corpseList)
+        Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Attempting to loot \at%d\ax corpses.', #corpseList)
         for _, corpse in ipairs(corpseList) do
             local corpseID = corpse.ID() or 0
 
@@ -3896,39 +3883,54 @@ function LNS.lootMobs(limit)
                 goto continue
             end
 
-            if not corpseID or corpseID == 0 or LNS.corpseLocked(corpseID) or
+            if LNS.corpseLocked(corpseID) or
                 (mq.TLO.Navigation.PathLength('spawn id ' .. corpseID)() or 100) > LNS.Settings.CorpseRadius then
-                Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Skipping corpse ID: %d.', corpseID)
+                Logger.Debug(LNS.guiLoot.console, 'lootMobs(): \atCorpse Locked\ax Skipping corpse ID: \ay%d.', corpseID)
                 table.remove(corpseList, _)
                 goto continue
             end
 
             -- Attempt to move and loot the corpse
             if corpse.DisplayName() == mq.TLO.Me.DisplayName() .. "'s corpse" then
-                Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Pulling own corpse closer. Corpse ID: %d', corpseID)
+                Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Pulling own corpse closer. Corpse ID: \ag%d', corpseID)
                 mq.cmdf("/corpse")
                 mq.delay(10)
             end
 
-            Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Navigating to corpse ID=%d.', corpseID)
+            Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Navigating to corpse ID\at %d.', corpseID)
             while mq.TLO.Me.Casting() ~= nil do
                 mq.delay(10)
             end
             LNS.navToID(corpseID)
 
             if mobsNearby > 0 and not LNS.Settings.CombatLooting then
-                Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Stopping looting due to aggro.')
-                LNS.finishedLooting()
-                return didLoot
+                Logger.Debug(LNS.guiLoot.console, 'lootMobs(): \arStopping\ax looting due to \ayAGGRO!')
+                break
             end
 
             corpse.DoTarget()
             local check             = LNS.lootCorpse(corpseID)
-            didLoot                 = check
             lootedCorpses[corpseID] = check
 
+            if allItems ~= nil and #allItems > 0 then
+                local message = {
+                    ID = corpseID,
+                    Items = allItems,
+                    Zone = LNS.Zone,
+                    Server = eqServer,
+                    LootedAt = mq.TLO.Time(),
+                    CorpseName = corpse.DisplayName() or 'unknown',
+                    LootedBy = MyName,
+                }
+                LNS.lootActor:send({ mailbox = 'looted', script = 'lootnscoot', }, message)
+                if Mode == 'directed' and LNS.DirectorLNSPath ~= 'lootnscoot' then
+                    LNS.lootActor:send({ mailbox = 'looted', script = LNS.DirectorLNSPath, }, message)
+                end
+                allItems = nil
+            end
             ::continue::
         end
+        didLoot = true
         -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Finished processing corpse list.')
     end
 
@@ -5651,6 +5653,10 @@ function LNS.DrawToggle(id, value, on_color, off_color, height, width)
                 LNS.DrawToolTip(LNS.Tooltips[id:gsub("##", "")])
             end
         end
+        if ImGui.IsItemClicked() then
+            value = not value
+            clicked = true
+        end
         ImGui.SameLine()
     end
 
@@ -6410,16 +6416,16 @@ function LNS.RenderMainUI()
             local sizeY = ImGui.GetWindowHeight() - 10
             if ImGui.BeginChild('Main', 0.0, 400, bit32.bor(ImGuiChildFlags.ResizeY, ImGuiChildFlags.Border)) then
                 ImGui.PushStyleColor(ImGuiCol.PopupBg, ImVec4(0.002, 0.009, 0.082, 0.991))
-                local pushColor = debugPrint and ImVec4(1.0, 0.4, 0.4, 0.4) or ImVec4(0.4, 1.0, 0.4, 0.4)
-                ImGui.PushStyleColor(ImGuiCol.Button, pushColor)
-                if ImGui.SmallButton(Icons.FA_BUG) then
-                    debugPrint = not debugPrint
+                local clicked = false
+                debugPrint, clicked = LNS.DrawToggle("Debug##Toggle",
+                    debugPrint,
+                    ImVec4(0.4, 1.0, 0.4, 0.4),
+                    ImVec4(1.0, 0.4, 0.4, 0.4),
+                    16, 36)
+                if clicked then
                     Logger.Warn(LNS.guiLoot.console, "\ayDebugging\ax is now %s", debugPrint and "\agon" or "\aroff")
                 end
-                ImGui.PopStyleColor(1)
-                if ImGui.IsItemHovered() then
-                    ImGui.SetTooltip("Toggle Debug Print")
-                end
+
                 ImGui.SameLine()
                 if ImGui.SmallButton(string.format("%s Report", Icons.MD_INSERT_CHART)) then
                     -- loot.guiLoot.showReport = not loot.guiLoot.showReport
@@ -6575,7 +6581,7 @@ function LNS.processArgs(args)
         LNS.TempSettings.NeedsCleanup = true
         -- LNS.processItems('Destroy')
     elseif args[1] == 'once' then
-        LNS.lootMobs()
+        LNS.lootMobs(LNS.Settings.MaxCorpsesPerCycle)
     elseif args[1] == 'standalone' then
         if LNS.guiLoot ~= nil then
             LNS.guiLoot.GetSettings(LNS.Settings.HideNames,
@@ -6630,6 +6636,8 @@ function LNS.init(args)
                 CorpseRadius = LNS.Settings.CorpseRadius,
                 LootMyCorpse = LNS.Settings.LootMyCorpse,
                 IgnoreNearby = LNS.Settings.IgnoreMyNearCorpses,
+                CorpsesToIgnore = lootedCorpses or {},
+
             })
     end
     return needsSave
@@ -6670,9 +6678,26 @@ function LNS.MainLoop()
         end
 
         if LNS.TempSettings.LastZone ~= LNS.Zone then
+            mq.delay(5000, function() return not mq.TLO.Me.Zoning() end) -- wait for zoning to finish.
+
             lootedCorpses = {}
             if LNS.SafeZones[LNS.Zone] then
                 Logger.Warn(LNS.guiLoot.console, "You are in a safe zone: \at%s\ax \ayLooting Disabled", LNS.Zone)
+            end
+
+            if Mode == 'directed' then
+                -- send them our combat setting
+                LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
+                    {
+                        Subject = 'settings',
+                        Who = MyName,
+                        CombatLooting = LNS.Settings.CombatLooting,
+                        CorpseRadius = LNS.Settings.CorpseRadius,
+                        LootMyCorpse = LNS.Settings.LootMyCorpse,
+                        IgnoreNearby = LNS.Settings.IgnoreMyNearCorpses,
+                        CorpsesToIgnore = lootedCorpses or {},
+
+                    })
             end
             LNS.TempSettings.LastZone = LNS.Zone
         end
@@ -6716,6 +6741,7 @@ function LNS.MainLoop()
                         CorpseRadius = LNS.Settings.CorpseRadius,
                         LootMyCorpse = LNS.Settings.LootMyCorpse,
                         IgnoreNearby = LNS.Settings.IgnoreMyNearCorpses,
+                        CorpsesToIgnore = lootedCorpses or {},
 
                     })
             end
@@ -6729,9 +6755,10 @@ function LNS.MainLoop()
             Logger.loglevel = 'info'
         end
 
-        if (LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse) and
-            (Mode ~= 'directed' or (LNS.LootNow and Mode == 'directed')) then
-            LNS.lootMobs()
+        if (LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse) and Mode ~= 'directed' then
+            LNS.lootMobs(LNS.Settings.MaxCorpsesPerCycle)
+        elseif LNS.LootNow and Mode == 'directed' then
+            LNS.lootMobs(LNS.TempSettings.LootLimit)
         end
 
         if doSell then
