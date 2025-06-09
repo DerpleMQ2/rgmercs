@@ -12,6 +12,7 @@ Config:LoadSettings()
 local Logger = require("utils.logger")
 Logger.set_log_level(Config:GetSettings().LogLevel)
 Logger.set_log_to_file(Config:GetSettings().LogToFile)
+Logger.set_log_to_mq_console(Config:GetSettings().LogToMQConsole)
 
 local Binds = require('utils.binds')
 require('utils.event_handlers')

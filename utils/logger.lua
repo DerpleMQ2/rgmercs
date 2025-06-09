@@ -12,6 +12,7 @@ local logLeaderEnd    = '\ar]\ax\aw >>>'
 --- @type number
 local currentLogLevel = 3
 local logToFileAlways = false
+local logToMQConsole  = false
 local filters         = {}
 
 local logFileHandle   = nil
@@ -19,6 +20,8 @@ local logFileHandle   = nil
 function actions.get_log_level() return currentLogLevel end
 
 function actions.set_log_level(level) currentLogLevel = level end
+
+function actions.set_log_to_mq_console(value) logToMQConsole = value end
 
 function actions.set_log_to_file(logToFile)
 	if logToFileAlways ~= logToFile then
@@ -111,9 +114,12 @@ local function log(logLevel, output, ...)
 	if RGMercsConsole ~= nil then
 		local consoleText = string.format('[%s] %s', logLevels[logLevel].header, output)
 		RGMercsConsole:AppendText(consoleText)
+		if logToMQConsole then
+			printf(consoleText)
+		end
+	else
+		printf('%s\aw:%s \aw<\at%s\aw> \aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, now, callerTracer, logLeaderEnd, output)
 	end
-
-	printf('%s\aw:%s \aw<\at%s\aw> \aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, now, callerTracer, logLeaderEnd, output)
 end
 
 function actions.GenerateShortcuts()
