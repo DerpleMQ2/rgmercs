@@ -219,21 +219,55 @@ local _ClassConfig = {
     ['HelperFunctions'] = {
         SwapInst = function(type)
             if not Config:GetSetting('SwapInstruments') then return end
-            Logger.log_verbose("\ayBard SwapInst(): Swapping to Instrument Type: %s", type)
+            Logger.log_verbose("\ayBard SwapInst(): Swapping to Instrument Type: %s", type)`
             if type == "Percussion Instruments" then
-                ItemManager.SwapItemToSlot("offhand", Config:GetSetting('PercInst'))
-                return
+                if mq.TLO.Me.Bandolier('drum')() and Config:GetSetting('UseBandolier') then
+                    Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atDrum Bandolier")
+                    ItemManager.BandolierSwap('drum')
+                    return
+                else
+                    Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atPercussion Instrument")
+                    ItemManager.SwapItemToSlot("offhand", Config:GetSetting('PercInst'))
+                    return
+                end
             elseif type == "Wind Instruments" then
-                ItemManager.SwapItemToSlot("offhand", Config:GetSetting('WindInst'))
-                return
+                if mq.TLO.Me.Bandolier('wind')() and Config:GetSetting('UseBandolier') then
+                    Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atWind Bandolier")
+                    ItemManager.BandolierSwap('wind')
+                    return
+                else
+                    Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atWind Instrument")
+                    ItemManager.SwapItemToSlot("offhand", Config:GetSetting('WindInst'))
+                    return
+                end
             elseif type == "Brass Instruments" then
-                ItemManager.SwapItemToSlot("offhand", Config:GetSetting('BrassInst'))
-                return
+                printf("\ayBard SwapInst()\ax:\ao Swapping to Instrument Type: %s", type)
+                if mq.TLO.Me.Bandolier('brass')() and Config:GetSetting('UseBandolier') then
+                    Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atBrass Bandolier")
+                    ItemManager.BandolierSwap('brass')
+                    return
+                else
+                    Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atBrass Instrument")
+                    ItemManager.SwapItemToSlot("offhand", Config:GetSetting('BrassInst'))
+                    return
+                end
             elseif type == "Stringed Instruments" then
-                ItemManager.SwapItemToSlot("offhand", Config:GetSetting('StringedInst'))
+                if mq.TLO.Me.Bandolier('string')() and Config:GetSetting('UseBandolier') then
+                    Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atStringed Bandolier")
+                    ItemManager.BandolierSwap('string')
+                else
+                    Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atStringed Instrument")
+                    ItemManager.SwapItemToSlot("offhand", Config:GetSetting('StringedInst'))
+                end
                 return
             end
-            ItemManager.SwapItemToSlot("offhand", Config:GetSetting('Offhand'))
+            if mq.TLO.Me.Bandolier('main')() and Config:GetSetting('UseBandolier') then
+                ItemManager.BandolierSwap('main')
+                Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atMain Bandolier")
+            else
+                Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atOffhand Weapon")
+                ItemManager.SwapItemToSlot("offhand", Config:GetSetting('Offhand'))
+            end
         end,
         CheckSongStateUse = function(self, config)   --determine whether a song should be song by comparing combat state to settings
             local usestate = Config:GetSetting(config)
@@ -1024,9 +1058,18 @@ local _ClassConfig = {
             Answer = "Auto Swap Instruments can be enabled and configured on the Instruments tab.",
 
         },
+        ['UseBandolier']        = {
+            DisplayName = "Use Bandolier",
+            Index = 2,
+            Category = "Instruments",
+            Tooltip = "Auto swap instruments using bandolier if avail, valid names (wind, drum, brass, string or main), if a bandolier is missing we will direct swap instead.",
+            Default = true,
+            FAQ = "Does RGMercs BRD support instrument swapping?",
+            Answer = "Auto Swap Instruments via Bandolier if they exist otherwise default to direct swapping.",
+        },
         ['Offhand']             = {
             DisplayName = "Offhand",
-            Index = 2,
+            Index = 3,
             Category = "Instruments",
             Tooltip = "Item to swap in when no instrument is available or needed.",
             Type = "ClickyItem",
@@ -1038,7 +1081,7 @@ local _ClassConfig = {
         },
         ['BrassInst']           = {
             DisplayName = "Brass Instrument",
-            Index = 3,
+            Index = 4,
             Category = "Instruments",
             Tooltip = "Brass Instrument to Swap in as needed.",
             Type = "ClickyItem",
@@ -1049,7 +1092,7 @@ local _ClassConfig = {
         },
         ['WindInst']            = {
             DisplayName = "Wind Instrument",
-            Index = 4,
+            Index = 5,
             Category = "Instruments",
             Tooltip = "Wind Instrument to Swap in as needed.",
             Type = "ClickyItem",
@@ -1060,7 +1103,7 @@ local _ClassConfig = {
         },
         ['PercInst']            = {
             DisplayName = "Percussion Instrument",
-            Index = 5,
+            Index = 6,
             Category = "Instruments",
             Tooltip = "Percussion Instrument to Swap in as needed.",
             Type = "ClickyItem",
@@ -1071,7 +1114,7 @@ local _ClassConfig = {
         },
         ['StringedInst']        = {
             DisplayName = "Stringed Instrument",
-            Index = 6,
+            Index = 7,
             Category = "Instruments",
             Tooltip = "Stringed Instrument to Swap in as needed.",
             Type = "ClickyItem",
