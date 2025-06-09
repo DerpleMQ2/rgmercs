@@ -1021,20 +1021,20 @@ function Module:RunCureRotation()
         { type = "Corruption", check = "Me.Corrupted.ID", },
         { type = "Mezzed",     check = "Me.Mezzed.ID", },
     }
-    
+
     -- Me.TotalCounters does not work on emu we need to check everything.
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet.Peers(i)()
         if peer and peer:len() > 0 then
-
             local startindex = string.find(peer, "_")
             if startindex then
                 peer = string.sub(peer, startindex + 1)
             end
             local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
 
-            if cureTarget ~= nil and cureTarget() and cureTarget.Distance() < 150 then
+            --current max range on live with raid gear is 137, radiant cure still limited to 100, but CureNow includes range checks
+            if cureTarget and cureTarget() and cureTarget.Distance() < 150 then
                 Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
                 for _, data in ipairs(checks) do
                     local effectId = DanNet.query(peer, data.check, 1000) or "null"
@@ -1043,17 +1043,15 @@ function Module:RunCureRotation()
                     if effectId:lower() ~= "null" and effectId ~= "0" then
                         -- Cure it!
                         if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                            Comms.HandleAnnounce(
-                                string.format('Attempting to cure %s of %s', cureTarget.CleanName() or "Target", data.type),
-                                Config:GetSetting('CureAnnounceGroup'),
+                            Comms.HandleAnnounce(string.format('Attempting to cure %s of %s', cureTarget.CleanName() or "Target", data.type), Config:GetSetting('CureAnnounceGroup'),
                                 Config:GetSetting('CureAnnounce'))
                             Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, cureTarget.ID())
                         end
                     end
                 end
+            else
+                Logger.log_verbose("\ao[Cures] %d::%s is in \arNOT\ao range", i, peer or "Unknown")
             end
-        else
-            Logger.log_verbose("\ao[Cures] %d::%s is in \arNOT\ao range", i, peer or "Unknown")
         end
     end
 end

@@ -11,4 +11,5 @@ return {
     "cannonballdex",
     "RobbanEQ",
     "mackal",
+    "guest01",
 }
