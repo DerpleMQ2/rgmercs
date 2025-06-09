@@ -1707,7 +1707,7 @@ end
 --- Function to execute use of modrods.
 function Casting.ClickModRod()
     local me = mq.TLO.Me
-    if not Config.Constants.RGCasters:contains(me.Class.ShortName()) or me.PctMana() > Config:GetSetting('ModRodManaPct') or me.PctHPs() < 60 or Casting.IAmFeigning() or mq.TLO.Me.Invis() then
+    if not Config.Constants.RGCasters:contains(me.Class.ShortName()) or me.PctMana() > Config:GetSetting('ModRodManaPct') or me.PctHPs() < 60 or Casting.IAmFeigning() or mq.TLO.Me.Invis() or (Core.MyClassIs("BRD") and Core.OnEMU()) then
         return
     end
 

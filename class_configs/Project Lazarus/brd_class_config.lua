@@ -452,7 +452,7 @@ local _ClassConfig = {
                 name = "Vainglorious Shout",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Config:GetSetting("DoShout")
+                    return Config:GetSetting("UseShout")
                 end,
             },
         },
@@ -858,10 +858,11 @@ local _ClassConfig = {
             DisplayName = "Use Resist Debuff",
             Category = "Debuffs",
             Index = 3,
+            Tooltip = "Use the Harmony of Sound Resist Debuff.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my Dispel song?",
-            Answer = "You can enable Use Dispel to use your Dispel song when the target has beneficial effects.",
+            FAQ = "How do I use my the Harmony of Sound resist debuff?",
+            Answer = "You can enable this on the Debuff tab of the class options.",
         },
         ['DoDispel']            = {
             DisplayName = "Use Dispel",
