@@ -219,7 +219,7 @@ local _ClassConfig = {
     ['HelperFunctions'] = {
         SwapInst = function(type)
             if not Config:GetSetting('SwapInstruments') then return end
-            Logger.log_verbose("\ayBard SwapInst(): Swapping to Instrument Type: %s", type)`
+            Logger.log_verbose("\ayBard SwapInst(): Swapping to Instrument Type: %s", type)
             if type == "Percussion Instruments" then
                 if mq.TLO.Me.Bandolier('drum')() and Config:GetSetting('UseBandolier') then
                     Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atDrum Bandolier")
