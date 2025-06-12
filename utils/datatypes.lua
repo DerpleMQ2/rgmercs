@@ -28,12 +28,20 @@ local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
 
 ---@class RGMercsMainType
 ---@field State string
+---@field Config string
 ---@field Paused boolean
 ---@type DataType
 local rgMercsMainType   = mq.DataType.new('RGMercsMain', {
     Members = {
         Paused = function(_, self)
             return 'bool', Config.Globals.PauseMain
+        end,
+        Config = function(param, self)
+            if not param or param:len() == 0 then
+                return 'string', "false"
+            end
+
+            return 'string', Config:GetSetting(param)
         end,
         State = function(_, self)
             return 'string', Config.Globals.PauseMain and "Paused" or "Running"
