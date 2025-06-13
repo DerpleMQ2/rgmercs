@@ -540,7 +540,9 @@ function Casting.GetBuffableGroupIDs()
     local groupIds = {}
 
     if Casting.AmIBuffable() then
-        table.insert(groupIds, mq.TLO.Me.ID())
+        if mq.TLO.EverQuest.Foreground() then
+            table.insert(groupIds, mq.TLO.Me.ID())
+        end
 
         local count = mq.TLO.Group.Members()
         for i = 1, count do
@@ -552,6 +554,10 @@ function Casting.GetBuffableGroupIDs()
             else
                 table.insert(groupIds, mq.TLO.Group.Member(i).ID())
             end
+        end
+
+        if not Tables.TableContains(groupIds, mq.TLO.Me.ID()) then
+            table.insert(groupIds, mq.TLO.Me.ID())
         end
 
         -- check OA list
