@@ -43,9 +43,10 @@ local function FormatTableOutput(message)
     local output = ''
     for k, v in pairs(message) do
         if output ~= '' then
-            output = output .. '\n\t\t'
+            --     output = output .. '\n\t\t'
+            -- end
+            output = string.format("%s \ao%s\ax: \at%s\ax", output, k, tostring(v))
         end
-        output = string.format("%s \ao%s\ax: \at%s\ax", output, k, tostring(v))
     end
     return output
 end

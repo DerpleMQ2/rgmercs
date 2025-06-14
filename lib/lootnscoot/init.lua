@@ -1,5 +1,5 @@
----@diagnostic disable: undefined-global, param-type-mismatch
----@diagnostic disable: undefined-field
+-- -@diagnostic disable: undefined-global, param-type-mismatch
+-- -@diagnostic disable: undefined-field
 
 local mq              = require 'mq'
 local PackageMan      = require('mq.PackageMan')
@@ -104,7 +104,7 @@ local settingsEnum                      = {
     addnewsales = 'AddNewSales',
     addnewtributes = 'AddNewTributes',
     gmlselect = 'GMLSelect',
-    lootlagdelay = 'LootLagDelay',
+    lootcheckdelay = 'LootCheckDelay',
     hidenames = 'HideNames',
     recorddata = 'RecordData',
     autotag = 'AutoTag',
@@ -140,7 +140,6 @@ local settingsNoDraw                    = {
     SettingsFile = true,
     NoDropDefaults = true,
     CorpseRotTime = true,
-    LootLagDelay = true,
     Terminate = true,
     BuyItemsTable = true,
     ShowReport = true,
@@ -192,7 +191,7 @@ LNS.Settings    = {
     AddNewSales         = true,   -- Adds 'Sell' Flag to items automatically if you sell them while the script is running.
     AddNewTributes      = true,   -- Adds 'Tribute' Flag to items automatically if you Tribute them while the script is running.
     GMLSelect           = true,   -- not implimented yet
-    LootLagDelay        = 0,      -- not implimented yet
+    LootCheckDelay      = 0,      -- How long between checks to wait before checking again (seconds)
     HideNames           = false,  -- Hides names and uses class shortname in looted window
     RecordData          = true,   -- Enables recording data to report later.
     AutoTag             = false,  -- Automatically tag items to sell if they meet the MinSellPrice
@@ -249,7 +248,7 @@ LNS.Tooltips    = {
     AddNewSales         = "Adds 'Sell' Flag to items automatically if you sell them while the script is running.",
     AddNewTributes      = "Adds 'Tribute' Flag to items automatically if you Tribute them while the script is running.",
     GMLSelect           = "not implimented yet",
-    LootLagDelay        = "not implimented yet",
+    LootCheckDelay      = "How log to wait between loot checks.",
     HideNames           = "Hides names and uses class shortname in looted window",
     RecordData          = "Enables recording data to report later.",
     AutoTag             = "Automatically tag items to sell if they meet the MinSellPrice",
@@ -595,26 +594,26 @@ function LNS.loadSettings(firstRun)
         Logger.Info(LNS.guiLoot.console, "\agAdded\ax \ayNEW\ax \aySetting\ax: \atBuyItemsTable\ax")
     end
     -- -- check for deprecated settings and remove them
-    -- for k, v in pairs(tmpSettings) do
-    --     if type(tmpSettings[k]) ~= 'table' then
-    --         if loot.Settings[k] == nil and settingsNoDraw[k] == nil then
-    --             tmpSettings[k] = nil
-    --             needSave       = true
-    --             Logger.Warn(loot.guiLoot.console, "\arRemoved\ax \atdeprecated setting\ax: \ao%s", k)
-    --         end
-    --     end
-    -- end
-    Logger.loglevel = LNS.Settings.ShowInfoMessages and 'info' or 'warn'
+    for k, v in pairs(tmpSettings) do
+        if type(v) ~= 'table' then
+            if LNS.Settings[k] == nil then
+                tmpSettings[k] = nil
+                needSave       = true
+                Logger.Info(LNS.guiLoot.console, "\rRemoving\ax \ayOLD\ax \aySetting\ax: \at%s ", k)
+            end
+        end
+    end
+    Logger.loglevel = tmpSettings.ShowInfoMessages and 'info' or 'warn'
 
-    tmpCmd = LNS.Settings.GroupChannel or 'dgge'
+    tmpCmd = tmpSettings.GroupChannel or 'dgge'
     if tmpCmd == string.find(tmpCmd, 'dg') then
         tmpCmd = '/' .. tmpCmd
     elseif tmpCmd == string.find(tmpCmd, 'bc') then
         tmpCmd = '/' .. tmpCmd .. ' /'
     end
 
-    shouldLootActions.Destroy = LNS.Settings.DoDestroy
-    shouldLootActions.Tribute = LNS.Settings.TributeKeep
+    shouldLootActions.Destroy = tmpSettings.DoDestroy
+    shouldLootActions.Tribute = tmpSettings.TributeKeep
     LNS.BuyItemsTable         = tmpSettings.BuyItemsTable
 
     if firstRun then
@@ -760,7 +759,7 @@ function LNS.checkCursor()
 end
 
 function LNS.navToID(spawnID)
-    mq.cmdf('/nav id %d log=off', spawnID)
+    mq.cmdf('/nav id %d dist=10 log=off', spawnID)
     mq.delay(50)
     if mq.TLO.Navigation.Active() then
         local startTime = os.time()
@@ -841,7 +840,8 @@ function LNS.commandHandler(...)
                 LNS.Settings[settingName] = settingVal
             end
             Logger.Info(LNS.guiLoot.console, "Setting \ay%s\ax to \ag%s\ax", settingName, settingVal)
-            needSave = true
+            LNS.TempSettings[MyName] = nil
+            LNS.TempSettings.NeedSave = true
         else
             Logger.Warn(LNS.guiLoot.console, "Invalid setting name: %s", setting)
         end
@@ -2596,9 +2596,9 @@ end
 ---@param lootDecision string the current decision
 ---@return string @the new decision
 function LNS.checkDecision(item, lootDecision)
-    if item == nil then return lootDecision end
+    if lootDecision == nil then return 'Ask' end
+    if item == nil or lootDecision == 'Ask' then return lootDecision end
     local newDecision  = lootDecision or 'Keep'
-
     local sellPrice    = (item.Value() or 0) / 1000
     local stackable    = item.Stackable()
     local tributeValue = item.Tribute() or 0
@@ -2628,11 +2628,11 @@ end
 ---@return boolean isTSRule True if the rule is a TradeSkill Rule and we are supposed to follow it
 ---@return string tsRule The rule to follow if isTSRule is true
 ---@return string tsDecision The decision to follow if isTSRule is true
-function LNS.checkTS(rule, decision, isTradeSkill)
+function LNS.checkTS(item, rule, decision, isTradeSkill)
     local tsDecision = decision
     local tsRule = rule ~= 'NULL' and rule or decision
     local isTSRule = false
-
+    local dbgTbl = {}
     if isTradeSkill and LNS.Settings.BankTradeskills then
         tsRule = 'Bank'
         tsDecision = "Bank"
@@ -2643,11 +2643,10 @@ function LNS.checkTS(rule, decision, isTradeSkill)
         dbgTbl.Decision = tsDecision
     end
 
-    local dbgTbl = {
+    dbgTbl = {
         Lookup = '\ax\ag Check for TRADESKILLS',
         TS = isTradeSkill,
         BankTS = LNS.Settings.BankTradeskills,
-        RuleType = ruletype,
         CurrentRule = rule,
         Decision = tsDecision,
     }
@@ -2783,7 +2782,7 @@ function LNS.checkLore(itemName, itemLink, decision, countHave, isLore)
         Have = (countHave > 0),
         Decision = ret,
         Item = itemName,
-        Link = lootLink,
+        Link = itemLink,
     }
     Logger.Debug(LNS.guiLoot.console, dbgTbl)
     return ret, lootable
@@ -2811,6 +2810,7 @@ function LNS.getRule(item, fromFunction, index)
     local countHave                                 = mq.TLO.FindItemCount(item.Name())() + mq.TLO.FindItemBankCount(item.Name())()
     local itemName                                  = item.Name()
     local newRule                                   = false
+    local NewItemRule                               = 'NULL'
     local alwaysAsk                                 = false
     local qKeep
     local iCanUse                                   = true
@@ -2834,7 +2834,7 @@ function LNS.getRule(item, fromFunction, index)
     Logger.Info(LNS.guiLoot.console, "\aoLookup Rule\ax: \at%s\ax, \ayClasses\ax: \at%s\ax, Item: \ao%s\ax, ID: \ay%s\ax, \atLink: %s", lootRule, lootClasses, itemName, itemID,
         lootLink)
 
-    newRule = lootRule == 'NULL'
+    newRule = lootRule == 'NULL' or false
     lootDecision = lootRule
 
     if lootRule == 'NULL' and isNoDrop then
@@ -3011,7 +3011,7 @@ function LNS.getRule(item, fromFunction, index)
         --     lootDecision = 'Bank'
         --     lootNewItemRule = 'Bank'
         -- end
-        lootDecision = LNS.checkDecision(item, newRule)
+        lootDecision = LNS.checkDecision(item, lootNewItemRule)
         -- tsCheck, lootNewItemRule, lootDecision = LNS.checkTS(lootNewItemRule, lootDecision, tradeskill)
     end
 
@@ -3106,7 +3106,7 @@ function LNS.getRule(item, fromFunction, index)
     end
 
     if newRule then
-        LNS.addNewItem(item, lootNewItemRule, itemLink, corpseID)
+        LNS.addNewItem(item, lootNewItemRule, itemLink, mq.TLO.Corpse.ID() or 0)
     end
 
     if lootRule == 'Destroy' then
@@ -3123,7 +3123,10 @@ function LNS.getRule(item, fromFunction, index)
             -- LNS.lootItem(index, lootDecision, 'leftmouseup', qKeep, not iCanUse)
         end
     end
-
+    if type(lootDecision) ~= 'string' then
+        Logger.Warn(LNS.guiLoot.console, "Invalid lootDecision type: %s for item: %s", type(lootDecision), itemName)
+        lootDecision = 'Ignore'
+    end
     return lootDecision, qKeep, newRule, iCanUse
 end
 
@@ -3216,7 +3219,6 @@ function LNS.finishedLooting()
                 LootMyCorpse = LNS.Settings.LootMyCorpse,
                 IgnoreNearby = LNS.Settings.IgnoreMyNearCorpses,
                 CorpsesToIgnore = lootedCorpses or {},
-
             })
     end
     LNS.LootNow = false
@@ -3326,7 +3328,7 @@ function LNS.RegisterActors()
                 LNS.TempSettings[MyName] = nil
                 LNS.TempSettings.NeedSave = true
             end
-            if directions == 'getsettings_directed' or direction == 'getcombatsetting' then
+            if directions == 'getsettings_directed' or directions == 'getcombatsetting' then
                 Logger.Debug(LNS.guiLoot.console, dbgTbl)
                 LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
                     {
@@ -3581,6 +3583,7 @@ end
 ---@param cantWear boolean|nil @ Whether the character canwear the item
 function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
     Logger.Debug(LNS.guiLoot.console, 'Enter lootItem')
+    if doWhat == nil or type(doWhat) ~= 'string' then return end
     local actionToTake = doWhat:gsub("%s$", "")
     local actionLower = actionToTake:lower()
     local corpseName = mq.TLO.Corpse.CleanName() or 'none'
@@ -3751,6 +3754,8 @@ function LNS.lootCorpse(corpseID)
         return false
     end
 
+    local corpseName = mq.TLO.Corpse.CleanName():lower() or 'none'
+
     mq.delay(1000, function() return mq.TLO.Corpse.Items() end)
     local items = mq.TLO.Corpse.Items() or 0
     Logger.Debug(LNS.guiLoot.console, "lootCorpse(): Loot window open. Items: %s", items)
@@ -3759,11 +3764,9 @@ function LNS.lootCorpse(corpseID)
         return true
     end
 
-    local corpseName = mq.TLO.Corpse.CleanName():lower() or 'none'
 
     if mq.TLO.Window('LootWnd').Open() and items > 0 then
-        local myCorpse = mq.TLO.Me.DisplayName():lower() .. "'s corpse"
-        if (mq.TLO.Corpse.DisplayName() == mq.TLO.Me.DisplayName()) or (corpseName == myCorpse) then
+        if (mq.TLO.Corpse.DisplayName():lower() == mq.TLO.Me.DisplayName():lower() .. "'s corpse") then
             if LNS.Settings.LootMyCorpse then
                 mq.cmdf('/lootall')
                 mq.delay("45s", function() return not mq.TLO.Window('LootWnd').Open() end)
@@ -3807,6 +3810,8 @@ end
 
 function LNS.lootMobs(limit)
     local didLoot = false
+    LNS.TempSettings.LastCheck = os.clock()
+
     if LNS.PauseLooting or LNS.SafeZones[LNS.Zone] then
         LNS.finishedLooting()
         return false
@@ -3817,7 +3822,7 @@ function LNS.lootMobs(limit)
         LNS.finishedLooting()
         return false
     end
-
+    if limit == nil then limit = 50 end
     if zoneID ~= mq.TLO.Zone.ID() then
         zoneID        = mq.TLO.Zone.ID()
         lootedCorpses = {}
@@ -3825,27 +3830,38 @@ function LNS.lootMobs(limit)
 
 
     -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Entering lootMobs function.')
-    local deadCount     = mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', LNS.Settings.CorpseRadius or 100))()
-    local mobsNearby    = mq.TLO.SpawnCount(string.format('xtarhater radius %s zradius 50', LNS.Settings.MobsTooClose))()
-    local corpseList    = {}
-
+    local deadCount      = mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', LNS.Settings.CorpseRadius or 100))()
+    local mobsNearby     = mq.TLO.SpawnCount(string.format('xtarhater radius %s zradius 50', LNS.Settings.MobsTooClose + LNS.Settings.CorpseRadius))()
+    local corpseList     = {}
     -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Found %s corpses in range.', deadCount)
 
     -- Handle looting of the player's own corpse
-    local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse \"%s\" radius %s zradius 50", LNS.Settings.CorpseRadius, (mq.TLO.Me.CleanName() .. "'s corpse")))()
-    local foundMine     = myCorpseCount > 0
-    if not LNS.Settings.LootMyCorpse and foundMine then
+    local pcCorpseFilter = string.format("pccorpse %s's radius %s zradius 50", mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius)
+    local myCorpseCount  = mq.TLO.SpawnCount(pcCorpseFilter)()
+    local foundMine      = myCorpseCount > 0
+
+    if not LNS.Settings.LootMyCorpse and not LNS.Settings.IgnoreMyNearCorpses and foundMine then
         Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Puasing looting until finished looting my own corpse.')
         LNS.finishedLooting()
         return false
     end
 
 
-    if LNS.Settings.LootMyCorpse and foundMine then
-        for i = 1, (limit or myCorpseCount) do
-            local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse \"=%s's corpse\" radius %d zradius 100", i, mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))
+    if LNS.Settings.LootMyCorpse and not LNS.Settings.IgnoreMyNearCorpses and foundMine then
+        Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Found my own corpse, attempting to loot it.')
+        for i = 1, myCorpseCount do
+            local corpse = mq.TLO.NearestSpawn(string.format("%d, %s", i, pcCorpseFilter))
             if corpse() then
-                table.insert(corpseList, corpse)
+                if (corpse.DisplayName():lower() == mq.TLO.Me.DisplayName():lower()) then
+                    corpse.DoTarget()
+                    mq.delay(2000, function() return (mq.TLO.Target.ID() or 0) == corpse.ID() end)
+                    mq.cmd("/corpse")
+                    mq.delay(2000, function() return mq.TLO.Target.Distance() <= 10 end)
+                    corpse.RightClick()
+                    mq.delay(2000, function() return mq.TLO.Window('LootWnd').Open() end)
+                    mq.cmdf('/lootall')
+                    mq.delay("45s", function() return not mq.TLO.Window('LootWnd').Open() end)
+                end
             end
         end
     end
@@ -3858,7 +3874,7 @@ function LNS.lootMobs(limit)
 
     -- Add other corpses to the loot list if not limited by the player's own corpse
     if (myCorpseCount == 0 or (myCorpseCount > 0 and LNS.Settings.IgnoreMyNearCorpses)) and LNS.Settings.DoLoot then
-        for i = 1, (limit or deadCount) do
+        for i = 1, deadCount do
             local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', LNS.Settings.CorpseRadius))
             if corpse() and (not lootedCorpses[corpse.ID()] or not LNS.Settings.CheckCorpseOnce) then
                 table.insert(corpseList, corpse)
@@ -3870,16 +3886,31 @@ function LNS.lootMobs(limit)
         return false
     end
 
-    if Mode == 'directed' and not LNS.LootNow then return end
+    if Mode == 'directed' and not LNS.LootNow then
+        LNS.finishedLooting()
+        return false
+    end
 
     -- Process the collected corpse list
+    local counter = 0
     if #corpseList > 0 then
         Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Attempting to loot \at%d\ax corpses.', #corpseList)
         for _, corpse in ipairs(corpseList) do
+            local check = false
             local corpseID = corpse.ID() or 0
+
+            if mq.TLO.Window('LootWnd').Open() then
+                mq.TLO.Window('LootWnd').DoClose()
+                mq.delay(2000, function() return not mq.TLO.Window('LootWnd').Open() end)
+            end
 
             if not mq.TLO.Spawn(corpseID)() then
                 Logger.Info(LNS.guiLoot.console, 'lootMobs(): Corpse ID \ay%d \axis \arNO Longer Valid.\ax \atMoving to Next Corpse...', corpseID)
+                goto continue
+            end
+
+            if lootedCorpses[corpseID] and LNS.Settings.CheckCorpseOnce then
+                Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Corpse ID \ay%d\ax has already been looted. Skipping.', corpseID)
                 goto continue
             end
 
@@ -3893,23 +3924,26 @@ function LNS.lootMobs(limit)
             -- Attempt to move and loot the corpse
             if corpse.DisplayName() == mq.TLO.Me.DisplayName() .. "'s corpse" then
                 Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Pulling own corpse closer. Corpse ID: \ag%d', corpseID)
+                corpse.DoTarget()
+                mq.delay(1)
                 mq.cmdf("/corpse")
                 mq.delay(10)
             end
 
             Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Navigating to corpse ID\at %d.', corpseID)
-            while mq.TLO.Me.Casting() ~= nil do
-                mq.delay(10)
+            if mq.TLO.Me.Casting() ~= nil then
+                goto continue
             end
             LNS.navToID(corpseID)
 
             if mobsNearby > 0 and not LNS.Settings.CombatLooting then
                 Logger.Debug(LNS.guiLoot.console, 'lootMobs(): \arStopping\ax looting due to \ayAGGRO!')
-                break
+                LNS.finishedLooting()
+                return false
             end
 
             corpse.DoTarget()
-            local check             = LNS.lootCorpse(corpseID)
+            check                   = LNS.lootCorpse(corpseID)
             lootedCorpses[corpseID] = check
 
             if allItems ~= nil and #allItems > 0 then
@@ -3929,7 +3963,13 @@ function LNS.lootMobs(limit)
                 allItems = nil
             end
             ::continue::
+            counter = check and counter + 1 or counter
+            if counter >= limit then
+                Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Reached loot limit of \at%d\ax corpses.', limit)
+                goto limit_reached
+            end
         end
+        ::limit_reached::
         didLoot = true
         -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Finished processing corpse list.')
     end
@@ -3990,10 +4030,10 @@ function LNS.SellToVendor(itemID, bag, slot, name)
             and ('/itemnotify %s leftmouseup'):format(bag)
             or ('/itemnotify in pack%s %s leftmouseup'):format(bag, slot)
         mq.cmdf(notify)
-        mq.delay(1000, function() return mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() == itemName end)
+        mq.delay(1000, function() return mq.TLO.Window("MerchantWnd/MW_Sell_Button")() == "TRUE" and mq.TLO.Window("MerchantWnd/MW_Sell_Button").Enabled() end)
         if mq.TLO.Window("MerchantWnd/MW_SelectedPriceLabel").Text() ~= "0c" then
             mq.cmdf('/nomodkey /shiftkey /notify merchantwnd MW_Sell_Button leftmouseup')
-            mq.delay(5000, function() return mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() == '' end)
+            mq.delay(5000, function() return mq.TLO.Window("MerchantWnd/MW_Sell_Button")() ~= "TRUE" end)
         end
     end
 end
@@ -4035,6 +4075,7 @@ end
 function LNS.RestockItems()
     local rowNum = 0
     for itemName, qty in pairs(LNS.BuyItemsTable) do
+        ::try_again::
         Logger.Info(LNS.guiLoot.console, 'Checking \ao%s \axfor \at%s \axto \agRestock', mq.TLO.Target.CleanName(), itemName)
         local tmpVal = tonumber(qty) or 0
         mq.delay(500, function() return mq.TLO.Window("MerchantWnd/MW_ItemList").List(string.format("=%s", itemName), 2)() end)
@@ -4046,7 +4087,10 @@ function LNS.RestockItems()
             ::need_more::
             Logger.Debug(LNS.guiLoot.console, "\ayRestocking \ax%s \aoHave\ax: \at%s\ax \agBuying\ax: \ay%s", itemName, onHand, tmpQty)
             mq.TLO.Window("MerchantWnd/MW_ItemList").Select(rowNum)()
-            mq.delay(100)
+            mq.delay(3000, function() return mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() == itemName end)
+            if mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() ~= itemName then
+                goto try_again
+            end
             mq.TLO.Window("MerchantWnd/MW_Buy_Button").LeftMouseUp()
             mq.delay(500, function() return mq.TLO.Window("QuantityWnd").Open() end)
             mq.TLO.Window("QuantityWnd/QTYW_SliderInput").SetText(tostring(tmpQty))()
@@ -4062,7 +4106,7 @@ function LNS.RestockItems()
                 goto need_more
             end
         end
-        mq.delay(500, function() return mq.TLO.FindItemCount(itemName)() == qty end)
+        mq.delay(500, function() return mq.TLO.FindItemCount(itemName)() >= qty end)
     end
     -- close window when done buying
     return mq.TLO.Window('MerchantWnd').DoClose()
@@ -4355,10 +4399,11 @@ end
 ---comment
 ---@param label string Menu Item Display Label
 ---@param setting_name string Setting Name in LNS.Settings
----@param value string Setting Value in LNS.Settings
+---@param value boolean Setting Value in LNS.Settings
 ---@param tooltip string|nil Optional Tooltip Text
 function LNS.DrawMenuItemToggle(label, setting_name, value, tooltip)
-    local changed, value = ImGui.MenuItem(label, nil, value)
+    local changed = false
+    changed, value = ImGui.MenuItem(label, nil, value)
     if changed then
         LNS.TempSettings.NeedSaveToggle = true
         LNS.Settings[setting_name] = value
@@ -5641,7 +5686,8 @@ function LNS.DrawToggle(id, value, on_color, off_color, height, width)
     on_color = on_color or ImVec4(0.2, 0.8, 0.2, 1)   -- Default green
     off_color = off_color or ImVec4(0.8, 0.2, 0.2, 1) -- Default red
 
-    local label = id:match("^(.-)##")                 -- Capture text before ##
+    local clicked = false
+    local label = id:match("^(.-)##") -- Capture text before ##
     if not id:find("##") then
         label = id
     end
@@ -5660,7 +5706,6 @@ function LNS.DrawToggle(id, value, on_color, off_color, height, width)
         ImGui.SameLine()
     end
 
-    local clicked = false
     local draw_list = ImGui.GetWindowDrawList()
     local pos = { x = 0, y = 0, }
     pos.x, pos.y = ImGui.GetCursorScreenPos()
@@ -6654,8 +6699,6 @@ if LNS.guiLoot ~= nil then
     LNS.guiLoot.init(true, true, 'lootnscoot')
     LNS.guiExport()
 end
-
-
 function LNS.MainLoop()
     while not LNS.Terminate do
         local directorRunning = mq.TLO.Lua.Script(LNS.DirectorScript).Status() == 'RUNNING' or false
@@ -6755,10 +6798,23 @@ function LNS.MainLoop()
             Logger.loglevel = 'info'
         end
 
+        local checkDif = os.clock() - (LNS.TempSettings.LastCheck or 0)
+
         if (LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse) and Mode ~= 'directed' then
-            LNS.lootMobs(LNS.Settings.MaxCorpsesPerCycle)
+            if checkDif > LNS.Settings.LootCheckDelay then
+                LNS.lootMobs(LNS.Settings.MaxCorpsesPerCycle or 1)
+            else
+                Logger.Debug(LNS.guiLoot.console, "\atToo Soon\ax CheckDelay: \ag%s\ax seconds, LastCheck: \ag%0.2f\ax seconds ago",
+                    LNS.Settings.LootCheckDelay, checkDif)
+            end
         elseif LNS.LootNow and Mode == 'directed' then
-            LNS.lootMobs(LNS.TempSettings.LootLimit)
+            if checkDif > LNS.Settings.LootCheckDelay then
+                LNS.lootMobs(LNS.TempSettings.LootLimit or 1)
+            else
+                -- Logger.Debug(LNS.guiLoot.console, "\atToo Soon\ax CheckDelay: \ag%s\ax seconds, LastCheck: \ag%0.2f\ax seconds ago",
+                -- LNS.Settings.LootCheckDelay, checkDif)
+                LNS.finishedLooting()
+            end
         end
 
         if doSell then

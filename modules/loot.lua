@@ -355,6 +355,7 @@ function Module:DoLooting(combat_state)
 		if combat_state == "Combat" and not Config:GetSetting('CombatLooting') then
 			Logger.log_warn("\ay[LOOT]: Aborting Actions due to \arCombat!")
 			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
+			mq.delay(1)
 			self.TempSettings.Looting = false
 			break
 		end
@@ -365,6 +366,7 @@ function Module:DoLooting(combat_state)
 		if os.clock() - (self.TempSettings.LootCalledAt or 0) > maxWait and mq.TLO.Corpse() == 'FALSE' then
 			Logger.log_warn("\ay[LOOT]: \awLoot Actions\ar Timeout: \ay%s\aw seconds", maxWait)
 			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
+			mq.delay(1)
 			self.TempSettings.Looting = false
 			break
 		end
@@ -423,14 +425,12 @@ function Module:LootMessageHandler()
 			if LootMyCorpse ~= nil then
 				if self.TempSettings.LootMyCorpse ~= LootMyCorpse then
 					self.TempSettings.LootMyCorpse = LootMyCorpse
-					needSave = true
 				end
 			end
 
 			if IgnoreNearbyCorpses ~= nil then
 				if self.TempSettings.IgnoreMyNearCorpses ~= IgnoreNearbyCorpses then
 					self.TempSettings.IgnoreMyNearCorpses = IgnoreNearbyCorpses
-					needSave = true
 				end
 			end
 		end
@@ -454,22 +454,21 @@ function Module:GiveTime(combat_state)
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 
+	if combat_state == "Combat" and not self.TempSettings.CombatLooting then return end
+
+	if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
+
 	if Config:GetSetting('LootRespectMedState') and Config.Globals.InMedState then
 		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Meditating.")
 		return
 	end
 
-	if mq.TLO.Corpse() == 'TRUE' then
-		mq.TLO.Window('LootWnd').DoClose()
-		Logger.log_debug("\ay[LOOT]: \agLoot Window\ax is \arOpen\ax, \aoClosing it.")
-		return
-	end
-
 	local radiusCorpse = Config:GetSetting('CorpseRadius')
-
-	local deadCount = mq.TLO.SpawnCount(string.format("npccorpse radius %s zradius 50", radiusCorpse))()
-	local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse \"%s\" radius %s zradius 50", (mq.TLO.Me.CleanName() .. "'s corpse"), radiusCorpse))()
-
+	local searchString = string.format("npccorpse radius %s zradius 50", radiusCorpse or 100)
+	local deadCount = mq.TLO.SpawnCount(searchString)()
+	searchString = string.format("pccorpse %s's corpse radius %s zradius 50", mq.TLO.Me.DisplayName(), radiusCorpse or 100)
+	local myCorpseCount = mq.TLO.SpawnCount(searchString)()
+	local foundMyCorpse = myCorpseCount > 0
 	-- check the already looted corpses list and if all corpses have been looted, skip the loot actions
 	if deadCount > 0 then
 		local found = true
@@ -477,22 +476,22 @@ function Module:GiveTime(combat_state)
 			local corpse = mq.TLO.NearestSpawn(string.format("%d, npccorpse radius %d zradius 50", i, radiusCorpse))
 			if corpse() then
 				if not self.TempSettings.CorpsesToIgnore[corpse.ID()] then
-					Logger.log_debug("\ay[LOOT]: \ax\at%s\ax Corpse has Not been Looted Yet, \ayPreparing to check corpse.", corpse.CleanName())
+					Logger.log_debug("[\at%s\ax]\ay[LOOT]: \ax\at%s\ax Corpse has Not been Looted Yet, \ayPreparing to check corpse.", mq.TLO.Time.Time24(), corpse.CleanName())
 					found = false
 					break
 				end
 			end
 		end
-		if found then
-			Logger.log_debug("\ay[LOOT]: \ax\atAll Corpses\ax have been \agChecked\ax, \aoSkipping Loot Actions.")
+		if found and not foundMyCorpse then
+			Logger.log_verbose("[\at%s\ax]\ay[LOOT]: \ax\atAll Corpses\ax have been \agChecked\ax, \aoSkipping Loot Actions.", mq.TLO.Time.Time24())
 			return
 		end
 	end
 
-	if self.TempSettings.LootMyCorpse and myCorpseCount > 0 then deadCount = deadCount + myCorpseCount end
+	if self.TempSettings.LootMyCorpse and foundMyCorpse then deadCount = deadCount + myCorpseCount end
 
 	--
-	if myCorpseCount > 0 and (not self.TempSettings.IgnoreMyNearCorpses and not self.TempSettings.LootMyCorpse) then
+	if foundMyCorpse and (not self.TempSettings.IgnoreMyNearCorpses and not self.TempSettings.LootMyCorpse) then
 		Logger.log_debug("\ay[LOOT]: \arYou have a corpse\ax, \aoSkipping Loot Actions.")
 		return
 	end
@@ -510,9 +509,10 @@ function Module:GiveTime(combat_state)
 	end
 
 	if self.TempSettings.Looting then
-		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions\aw, \aoCombat State\ax: [\at%s\ax]", combat_state)
+		Logger.log_verbose("[\at%s\ax]\ay[LOOT]: \aoPausing for \atLoot Actions\aw, \aoCombat State\ax: [\at%s\ax]", mq.TLO.Time.Time24(), combat_state)
 		self:DoLooting(combat_state)
 	end
+	mq.doevents()
 end
 
 function Module:OnDeath()
