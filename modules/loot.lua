@@ -10,11 +10,8 @@ local Logger             = require("utils.logger")
 local Actors             = require("actors")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
-local LootnScootPath     = string.format("\"%s/rgmercs/lib/lootnscoot\"", mq.luaDir)
-local LootScript         = "rgmercs/lib/lootnscoot"
-local sNameStripped      = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 
-local Module             = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier, Aquietone (lootnscoot lua)', }
+local Module             = { _version = '1.1 for LNS', _name = "Loot", _author = 'Derple, Grimmier, Algar', }
 Module.__index           = Module
 Module.settings          = {}
 Module.DefaultCategories = {}
@@ -131,21 +128,16 @@ function Module:SaveSettings(doBroadcast)
 	if self.SettingsLoaded then
 		if self.settings.DoLoot == true then
 			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
-			local localLNSRunning = mq.TLO.Lua.Script(LootScript).Status() == 'RUNNING' or false
-			if lnsRunning then
-				Core.DoCmd("/lua stop lootnscoot")
-			end
-
-			if not localLNSRunning then
-				Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
+			if not lnsRunning then
+				Core.DoCmd("/lua run lootnscoot directed rgmercs")
 			end
 
 			if not self.Actor then Module:LootMessageHandler() end
 
-			self.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
+			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
 				{ who = Config.Globals.CurLoadedChar, directions = 'combatlooting', CombatLooting = self.settings.CombatLooting, })
 		else
-			Core.DoCmd("/lua stop %s", LootnScootPath)
+			Core.DoCmd("/lua stop lootnscoot")
 		end
 	end
 	if doBroadcast == true then
@@ -208,8 +200,8 @@ function Module:Init()
 				Core.DoCmd("/lua stop lootnscoot")
 				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 			end
-			Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
-			self.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
+			Core.DoCmd("/lua run lootnscoot directed rgmercs")
+			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
 				{ who = Config.Globals.CurLoadedChar, directions = 'getcombatsetting', })
 		end
 		self.TempSettings.Looting = false
@@ -232,6 +224,8 @@ function Module:Render()
 		end
 		Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
 		ImGui.NewLine()
+		ImGui.Text(
+			"PLEASE NOTE: The LootNScoot script is no longer bundled with RGMercs.\nThis module has been adjusted to work with the standalone version!\nPlease see the RG forums for details. ")
 	end
 	local pressed = false
 	if ImGui.CollapsingHeader("Config Options") then
@@ -315,7 +309,7 @@ function Module:GiveTime(combat_state)
 	-- send actors message to loot
 	if (combat_state ~= "Combat" or Config:GetSetting('CombatLooting')) and deadCount > 0 then
 		if not self.TempSettings.Looting then
-			self.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
+			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
 				{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
 			self.TempSettings.Looting = true
 		end
@@ -378,7 +372,7 @@ end
 
 function Module:Shutdown()
 	Logger.log_debug("\ay[LOOT]: \axEMU Loot Module Unloaded.")
-	Core.DoCmd("/lua stop %s", LootnScootPath)
+	Core.DoCmd("/lua stop lootnscoot")
 end
 
 return Module
