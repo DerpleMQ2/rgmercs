@@ -446,35 +446,13 @@ return {
                 type = "AA",
             },
             {
-                name = "Volatile Mana Blaze",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoManaBurn') or mq.TLO.Me.PctAggro() > 70 then return false end
-                    return not Casting.TargetHasBuff(aaName) and Casting.HaveManaToNuke()
+                name_func = function(self)
+                    return Casting.GetFirstAA({ "Volatile Mana Blaze", "Mana Blaze", "Mana Blast", "Mana Burn", })
                 end,
-            },
-            {
-                name = "Mana Blaze",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoManaBurn') or mq.TLO.Me.PctAggro() > 70 then return false end
-                    return not Casting.TargetHasBuff(aaName) and Casting.HaveManaToNuke()
-                end,
-            },
-            {
-                name = "Mana Blast",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoManaBurn') or mq.TLO.Me.PctAggro() > 70 then return false end
-                    return not Casting.TargetHasBuff(aaName) and Casting.HaveManaToNuke()
-                end,
-            },
-            {
-                name = "Mana Burn",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoManaBurn') or mq.TLO.Me.PctAggro() > 70 then return false end
-                    return not Casting.TargetHasBuff(aaName) and Casting.HaveManaToNuke()
+                    if not Config:GetSetting('DoManaBurn') then return false end
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() < 70 and Casting.HaveManaToNuke() and not mq.TLO.Target.FindBuff("detspa 350")()
                 end,
             },
             {
@@ -950,7 +928,7 @@ return {
             DisplayName = "Use Mana Burn AA",
             Category = "Damage",
             Index = 2,
-            Tooltip = "Enable usage of Mana Burn",
+            Tooltip = "Enable usage of the Mana Burn series of AA.",
             Default = true,
             FAQ = "Can I use Mana Burn?",
             Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
