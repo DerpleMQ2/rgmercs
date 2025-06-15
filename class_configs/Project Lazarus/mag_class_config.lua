@@ -89,7 +89,7 @@ _ClassConfig      = {
         --     "Scorching Sands",
         --     "Scalding Sands",
         --     "Sun Vortex",
-        --     "Star Strike",
+        --     "Star Strike", -- Changed to another spell on Lazarus
         --     "Ancient: Nova Strike",
         --     "Burning Sand",
         --     "Shock of Fiery Blades",
@@ -798,6 +798,9 @@ _ClassConfig      = {
         ['PBAE1'] = {
             "Wind of the Desert",
         },
+        ['Myriad'] = {
+            "Shock of Myriad Minions",
+        },
     },
     ['HealRotationOrder'] = {
 
@@ -848,6 +851,7 @@ _ClassConfig      = {
             state = 1,
             steps = 1,
             load_cond = function() return Config:GetSetting('DoMalo') or Config:GetSetting('DoAEMalo') end,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
@@ -1585,14 +1589,21 @@ _ClassConfig      = {
             {
                 name = "Bladegusts",
                 type = "Spell",
-                cond = function(self, _)
+                cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
-                cond = function(self, _)
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "Myriad",
+                type = "Spell",
+                cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
             },
@@ -1647,8 +1658,30 @@ _ClassConfig      = {
                     return Targeting.TargetBodyIs(target, "Undead Pet")
                 end,
             },
+            {
+                name = "Bladegusts",
+                type = "Spell",
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "ChaoticNuke",
+                type = "Spell",
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
         },
         ['Malo'] = {
+            {
+                name = "Wind of Malosinete",
+                type = "AA",
+                cond = function(self, aaName)
+                    if not Config:GetSetting('DoAEMalo') then return false end
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.DetAACheck(aaName)
+                end,
+            },
             {
                 name = "Malosinete",
                 type = "AA",
@@ -1662,14 +1695,6 @@ _ClassConfig      = {
                 cond = function(self, spell)
                     if Casting.CanUseAA("Malosinete") then return false end
                     return Casting.DetSpellCheck(spell)
-                end,
-            },
-            {
-                name = "Wind of Malosinete",
-                type = "AA",
-                cond = function(self, aaName)
-                    if not Config:GetSetting('DoAEMalo') then return false end
-                    return Casting.DetAACheck(aaName)
                 end,
             },
         },
@@ -1809,126 +1834,46 @@ _ClassConfig      = {
             },
         },
     },
-    ['Spells']            = {
+    ['SpellList']         = {
         {
-            gem = 1,
-            spells = {
-                { name = "SpearNuke", },
+            name = "Low Level", --This name is abitrary, it is simply what shows up in the UI when this spell list is loaded.
+            cond = function(self) return mq.TLO.Me.Level() < 70 end,
+            spells = {          -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
                 { name = "FireDD", },
-            },
-        },
-        {
-            gem = 2,
-            spells = {
-                { name = "ChaoticNuke", },
                 { name = "BigFireDD", },
-            },
-        },
-        {
-            gem = 3,
-            spells = {
-
-                { name = "SwarmPet", cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
                 { name = "MagicDD", },
-            },
-        },
-        {
-            gem = 4,
-            spells = {
                 { name = "Bladegusts", },
-                { name = "PBAE1",        cond = function(self) return Core.IsModeActive("PBAE") end, },
-                { name = "PBAE2",        cond = function(self) return Core.IsModeActive("PBAE") end, },
-                { name = "MaloDebuff",   cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
-                { name = "PetHealSpell", },
-            },
-        },
-        {
-            gem = 5,
-            spells = {
-                { name = "PBAE1",         cond = function(self) return Core.IsModeActive("PBAE") end, },
-                { name = "PBAE2",         cond = function(self) return Core.IsModeActive("PBAE") end, },
-                { name = "MaloDebuff",    cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
-                { name = "PetHealSpell", },
-                { name = "FireOrbSummon", },
-            },
-        },
-        {
-            gem = 6,
-            spells = {
-                { name = "PBAE2",         cond = function(self) return Core.IsModeActive("PBAE") end, },
-                { name = "MaloDebuff",    cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
-                { name = "PetHealSpell", },
-                { name = "FireOrbSummon", },
-                { name = "GroupCotH", },
-            },
-        },
-        {
-            gem = 7,
-            spells = {
+                { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
+                { name = "PBAE2",            cond = function(self) return Core.IsModeActive("PBAE") end, },
                 { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
                 { name = "PetHealSpell", },
                 { name = "FireOrbSummon", },
                 { name = "GroupCotH", },
                 { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
                 { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
-                { name = "LongDurDmgShield", },
                 { name = "FireShroud", },
+                { name = "LongDurDmgShield", },
             },
         },
         {
-            gem = 8,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
+            name = "Level 70", --This name is abitrary, it is simply what shows up in the UI when this spell list is loaded.
+            cond = function(self) return mq.TLO.Me.Level() >= 70 end,
+            spells = {         -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
+                { name = "SpearNuke", },
+                { name = "ChaoticNuke", },
+                { name = "SwarmPet", },
+                { name = "Bladegusts", },
+                { name = "Myriad", },
+                { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
+                { name = "PBAE2",            cond = function(self) return Core.IsModeActive("PBAE") end, },
+                { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
                 { name = "PetHealSpell", },
                 { name = "FireOrbSummon", },
                 { name = "GroupCotH", },
                 { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
                 { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
-                { name = "LongDurDmgShield", },
                 { name = "FireShroud", },
-            },
-        },
-        {
-            gem = 9,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "FireOrbSummon", },
-                { name = "GroupCotH", },
-                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
-                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "LongDurDmgShield", },
-                { name = "FireShroud", },
-            },
-        },
-        {
-            gem = 10,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "GroupCotH", },
-                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
-                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
-                { name = "LongDurDmgShield", },
-                { name = "FireShroud", },
-            },
-        },
-        {
-            gem = 11,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
-                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
-                { name = "LongDurDmgShield", },
-                { name = "FireShroud", },
-            },
-        },
-        {
-            gem = 12,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
-                { name = "LongDurDmgShield", },
-                { name = "FireShroud", },
-
             },
         },
     },
@@ -2064,6 +2009,7 @@ _ClassConfig      = {
         ['DoMalo']         = {
             DisplayName = "Cast Malo",
             Category = "Debuffs",
+            Index = 1,
             Tooltip = "Do Malo Spells/AAs",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
@@ -2073,10 +2019,23 @@ _ClassConfig      = {
         ['DoAEMalo']       = {
             DisplayName = "Cast AE Malo",
             Category = "Debuffs",
+            Index = 2,
             Tooltip = "Do AE Malo Spells/AAs",
             Default = false,
             FAQ = "I want to use AE Malo in my rotation, how do I do that?",
             Answer = "You can use the [DoAEMalo] feature to use AE Malo in your rotation.",
+        },
+        ['AESlowCount']    = {
+            DisplayName = "AE Slow Count",
+            Category = "Debuffs",
+            Index = 3,
+            Tooltip = "Number of XT Haters before we use AE Slow.",
+            Min = 1,
+            Default = 2,
+            Max = 30,
+            ConfigType = "Advanced",
+            FAQ = "We are fighting more than one mob, why am I not using my AE Malo?",
+            Answer = "AE Malo Count governs the minimum number of targets before the AE Malo is used.",
         },
         ['CombatModRod']   = {
             DisplayName = "Combat Mod Rods",
