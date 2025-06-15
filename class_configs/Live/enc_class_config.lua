@@ -1137,6 +1137,14 @@ local _ClassConfig = {
         },
         ['StripBuff'] = {
             {
+                name = "Eradicate Magic",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoStripBuff') or mq.TLO.Target.ID() == 0 then return false end
+                    return mq.TLO.Target.Beneficial() ~= nil and Casting.DetAACheck(aaName)
+                end,
+            },
+            {
                 name = "StripBuffSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1449,7 +1457,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1476,7 +1484,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1502,7 +1510,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1527,7 +1535,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1551,7 +1559,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1574,7 +1582,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1596,7 +1604,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1617,7 +1625,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1638,7 +1646,7 @@ local _ClassConfig = {
             spells = {
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1658,7 +1666,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1677,7 +1685,7 @@ local _ClassConfig = {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
