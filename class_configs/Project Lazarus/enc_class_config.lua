@@ -806,22 +806,6 @@ local _ClassConfig = {
         },
         ['DPS'] = {
             {
-                name = "MindDot",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoMindDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Targeting.IsNamed(target) or not Casting.IHaveBuff(spell and spell.Trigger()))
-                end,
-            },
-            {
-                name = "StrangleDot",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoStrangleDot') then return false end
-                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
-                end,
-            },
-            {
                 name = "ColoredNuke",
                 type = "Spell",
                 cond = function(self)
@@ -835,6 +819,22 @@ local _ClassConfig = {
                 cond = function(self)
                     if not Config:GetSetting('DoChroma') then return false end
                     return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "MindDot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoMindDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    return not mq.TLO.Me.Buff("Mind Shatter Recourse") or Casting.DotSpellCheck(spell)
+                end,
+            },
+            {
+                name = "StrangleDot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoStrangleDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
@@ -1001,8 +1001,8 @@ local _ClassConfig = {
                 { name = "ColoredNuke",      cond = function(self) return Config:GetSetting('DoColored') end, },
                 { name = "Chromaburst",      cond = function(self) return Config:GetSetting('DoChroma') end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') end, },
-                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') end, },
                 { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') end, },
                 { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
                 { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
                 { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
@@ -1251,7 +1251,7 @@ local _ClassConfig = {
             Index = 2,
             Tooltip = "Use the Colored Chaos magic nuke.",
             RequiresLoadoutChange = true,
-            Default = false,
+            Default = true,
             FAQ = "How can I use my Colored Chaos?",
             Answer = "You can enable the Colored Chaos line in the Spells and Abilities tab.",
         },
@@ -1261,7 +1261,7 @@ local _ClassConfig = {
             Index = 3,
             Tooltip = "Use the Chromaburst magic nuke.",
             RequiresLoadoutChange = true,
-            Default = false,
+            Default = true,
             FAQ = "How can I use my Chromaburst nuke?",
             Answer = "You can enable the Chromaburst nuke line in the Spells and Abilities tab.",
         },
@@ -1271,7 +1271,7 @@ local _ClassConfig = {
             Index = 4,
             Tooltip = "Use your magic damage (Strangle Line) Dot.",
             RequiresLoadoutChange = true,
-            Default = true,
+            Default = false,
             FAQ = "I turned Cast DOTS off, why am I still using them?",
             Answer = "The Modern Era mode does not respect this setting, as DoTs are integral to the DPS rotation.",
         },
@@ -1284,6 +1284,16 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why am I not using my Mind Dot when I have it selected?",
             Answer = "This Dot is set to be used on named or when you don't already have the recourse active.",
+        },
+        ['DotNamedOnly']       = {
+            DisplayName = "Only Dot Named",
+            Category = "DPS",
+            Index = 6,
+            Tooltip = "Any selected dot above will only be used on a named mob.",
+            Default = true,
+            FAQ = "Why am I not using my dots?",
+            Answer = "Make sure the dot is enabled in your class settings and make sure that the mob is named if that option is selected.\n" ..
+                "You can read more about named mobs on the RGMercs named tab (and learn how to add one on your own!)",
         },
 
         -- Crystal Summoning
