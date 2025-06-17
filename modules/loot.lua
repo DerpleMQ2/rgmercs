@@ -318,8 +318,6 @@ function Module:DoLooting(combat_state)
 	while self.TempSettings.Looting do
 		if combat_state == "Combat" and not Config:GetSetting('CombatLooting') then
 			Logger.log_warn("\ay[LOOT]: Aborting Actions due to \arCombat!")
-			mq.TLO.Window('LootWnd').DoClose()
-			mq.delay(1)
 			self.TempSettings.Looting = false
 			break
 		end
@@ -329,8 +327,6 @@ function Module:DoLooting(combat_state)
 
 		if os.clock() - (self.TempSettings.LootCalledAt or 0) > maxWait then
 			Logger.log_warn("\ay[LOOT]: \awLoot Actions\ar Timeout: \ay%s\aw seconds", maxWait)
-			mq.TLO.Window('LootWnd').DoClose()
-			mq.delay(1)
 			self.TempSettings.Looting = false
 			break
 		end
