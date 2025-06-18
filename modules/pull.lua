@@ -261,7 +261,7 @@ Module.DefaultConfig                   = {
         Tooltip = "The max number of seconds we will navigate to our intended pull target without reassessing targets.",
         Default = 5,
         Min = 1,
-        Max = 30,
+        Max = 60,
         FAQ = "Why does my puller stop every so often before running again to the same target?",
         Answer = "The puller will periodically reassess targets if navigation has been active for a while.\n" ..
             "This can be adjusted by changing the Max Move Time on the Pull Distance tab.",
@@ -2096,6 +2096,7 @@ function Module:GiveTime(combat_state)
             Logger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
 
             local successFn = function() return Targeting.GetXTHaterCount() > 0 end
+            local maxMove = self.settings.MaxMoveTime * 1000
 
             if self:IsPullMode("Chain") then
                 successFn = function() return Targeting.GetXTHaterCount() >= self.settings.ChainCount end
@@ -2160,7 +2161,7 @@ function Module:GiveTime(combat_state)
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     Core.DoCmd("/ranged %d", self.TempSettings.PullID)
