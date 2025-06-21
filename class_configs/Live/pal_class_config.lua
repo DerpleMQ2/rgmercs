@@ -1211,7 +1211,7 @@ return {
                 name = "Disruptive Persecution",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.AltAbility(aaName).Rank() >= 3 and not Casting.IHaveBuff("Knight's Yaulp")
+                    return (mq.TLO.Me.AltAbility(aaName).Rank() or 0) >= 3 and not Casting.IHaveBuff("Knight's Yaulp")
                 end,
             },
             { --Chest Click, name function stops errors in rotation window when slot is empty
