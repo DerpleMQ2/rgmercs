@@ -6,7 +6,7 @@ ImagesUI.__index      = ImagesUI
 ImagesUI.derpImg      = nil
 ImagesUI.burnImg      = nil
 ImagesUI.grimImg      = nil
-ImagesUI.imgDisplayed = nil
+ImagesUI.imgDisplayed = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
 
 function ImagesUI:InitLoader()
     self.derpImg = self.derpImg or mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
