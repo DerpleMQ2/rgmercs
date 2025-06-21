@@ -43,18 +43,6 @@ Binds.Handlers    = {
             Logger.log_info("[RGConfigShare] :: %s", encodedConfig)
         end,
     },
-    ['import_config'] = {
-        usage = "/rgl import_config <filename>",
-        about = "Imports a RGMercs configuration from a file.",
-        handler = function(filename)
-            if not filename or filename:len() == 0 then
-                Logger.log_error("Please provide a valid filename to import your config!")
-                return
-            end
-            ConfigShare:ImportConfig(filename)
-        end,
-    },
-
     ['set'] = {
         usage = "/rgl set [show | <setting> <value>]",
         about = "Show all settings or set a specific RGMercs setting.",
