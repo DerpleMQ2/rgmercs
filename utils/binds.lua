@@ -2,10 +2,10 @@ local mq          = require('mq')
 local Config      = require('utils.config')
 local Core        = require("utils.core")
 local Modules     = require("utils.modules")
-local Casting     = require("utils.casting")
 local Targeting   = require("utils.targeting")
 local Strings     = require("utils.strings")
 local Logger      = require("utils.logger")
+local ConfigShare = require("utils.rg_config_share")
 
 local Binds       = { _version = '0.1a', _name = "Binds", _author = 'Derple', }
 
@@ -27,6 +27,34 @@ Binds.MainHandler = function(cmd, ...)
 end
 
 Binds.Handlers    = {
+    ['export_config'] = {
+        usage = "/rgl export_config <module>",
+        about = "Exports your current RGMercs configuration to chat",
+        handler = function(module)
+            local configTable = {}
+
+            if not module or module:len() == 0 then
+                configTable = Config:GetSettings()
+            else
+                configTable = Modules:ExecModule(module, "GetSettings")
+            end
+
+            local encodedConfig = ConfigShare.ExportConfig(configTable)
+            Logger.log_info("[RGConfigShare] :: %s", encodedConfig)
+        end,
+    },
+    ['import_config'] = {
+        usage = "/rgl import_config <filename>",
+        about = "Imports a RGMercs configuration from a file.",
+        handler = function(filename)
+            if not filename or filename:len() == 0 then
+                Logger.log_error("Please provide a valid filename to import your config!")
+                return
+            end
+            ConfigShare:ImportConfig(filename)
+        end,
+    },
+
     ['set'] = {
         usage = "/rgl set [show | <setting> <value>]",
         about = "Show all settings or set a specific RGMercs setting.",
