@@ -1481,7 +1481,7 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
             Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%s/%d) is no longer myTarget(%s/%d)", currentCast, target.CleanName() or "",
                 target.ID(), Targeting.GetTargetCleanName(), Targeting.GetTargetID())
             return
-        elseif target() and Targeting.GetTargetDistance(target) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
+        elseif target() and not Targeting.TargetIsMyself(target) and Targeting.GetTargetDistance(target) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
             mq.TLO.Me.StopCast()
             Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%d, range %d) is out of spell range(%d)", currentCast, target.ID(),
                 Targeting.GetTargetDistance(), spellRange)

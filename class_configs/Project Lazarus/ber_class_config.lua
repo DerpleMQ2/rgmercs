@@ -794,7 +794,7 @@ return {
             if mq.TLO.Cursor.ID() ~= nil then Core.DoCmd("/autoinv") end
             local ret = Casting.UseDisc(axeDisc, mq.TLO.Me.ID())
             Logger.log_verbose("\aySummonAxe(): Waiting for Summon to Finish")
-            Casting.WaitCastFinish(mq.TLO.Me, false)
+            Casting.WaitCastFinish(mq.TLO.Me, false, axeDisc.Range() or 0)
             Logger.log_verbose("\agSummonAxe(): Done!")
             mq.delay(500, function() return mq.TLO.Cursor.ID() ~= nil end)
             while mq.TLO.Cursor.ID() ~= nil do Core.DoCmd("/autoinv") end
