@@ -1604,7 +1604,7 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions']   = {
-        DoRez = function(self, corpseId)
+        DoRez = function(self, corpseId, ownerName)
             local rezAction = false
             local okayToRez = Casting.OkayToRez(corpseId)
             local combatState = mq.TLO.Me.CombatState():lower() or "unknown"
@@ -1612,7 +1612,7 @@ local _ClassConfig = {
             if combatState == "combat" and Config:GetSetting('DoBattleRez') and Core.OkayToNotHeal() then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
                     rezAction = okayToRez and Casting.UseItem("Staff of Forbidden Rites", corpseId)
-                elseif Casting.AAReady("Call of the Wild") and corpseId ~= mq.TLO.Me.ID() then
+                elseif Casting.AAReady("Call of the Wild") and not mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
                     rezAction = okayToRez and Casting.UseAA("Call of the Wild", corpseId, true, 1)
                 end
             elseif combatState == "active" or combatState == "resting" then
