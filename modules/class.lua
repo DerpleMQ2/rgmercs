@@ -872,7 +872,7 @@ function Module:IGCheckAndRez()
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Logger.log_debug("\atIGCheckAndRez(): Attempting to Res: %s", rezSpawn.CleanName())
-                    Core.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
+                    Core.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName)
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                     self:ResetRotationTimer("GroupBuff")
                 end
@@ -898,7 +898,7 @@ function Module:OOGCheckAndRez()
                     Logger.log_debug("\atOOGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
-                    Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
+                    Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName)
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                     self:ResetRotationTimer("GroupBuff")
                 end
