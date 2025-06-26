@@ -29,6 +29,11 @@ function Movement.DoStick(targetId)
     end
 end
 
+-- Clears the last stick timer.
+function Movement.ClearLastStickTimer()
+    Movement.LastDoStick = 0
+end
+
 --- Navigates to a target during combat.
 --- @param targetId number The ID of the target to navigate to.
 --- @param distance number The distance to maintain from the target.

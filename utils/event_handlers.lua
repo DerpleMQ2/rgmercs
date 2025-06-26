@@ -22,6 +22,7 @@ mq.event("CantSee", "You cannot see your target.", function()
     local target = mq.TLO.Target
     if mq.TLO.Stick.Active() then
         Core.DoCmd("/stick off")
+        Movement.ClearLastStickTimer()
     end
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
@@ -121,6 +122,7 @@ local function tooFarHandler()
     if Config.Globals.PauseMain then return end
     if mq.TLO.Stick.Active() then
         Core.DoCmd("/stick off")
+        Movement.ClearLastStickTimer()
     end
     local target = mq.TLO.Target
 
