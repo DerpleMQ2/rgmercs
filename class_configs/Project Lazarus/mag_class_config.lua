@@ -356,7 +356,6 @@ _ClassConfig      = {
         },
         ['PetAura'] = {
             -- Mage Pet Aura
-            "Arcane Distillect",
             "Rathe's Strength",
             "Earthen Strength",
         },
@@ -1332,14 +1331,14 @@ _ClassConfig      = {
                     return self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
                 end,
             },
-            -- { --this is currently commented out because of numerous stacking check errors (e.g, Talisman of Unification) and issues with the buff being clicked off causing a spam condition until the pet is released
-            --     name = "PetAura",
-            --     type = "Spell",
-            --     cond = function(self, spell)
-            --         local auraBuff = string.format("%s Effect", spell.Name())
-            --         return Casting.PetBuffCheck(spell) and not mq.TLO.Me.PetBuff(auraBuff)()
-            --     end,
-            -- },
+            { --if the buff is removed from the pet, the invisible rathe aura object remains; if we don't check for it, a spam condition could ensue
+                -- buff will be lost on zone
+                name = "PetAura",
+                type = "Spell",
+                cond = function(self, spell)
+                    return Casting.PetBuffCheck(spell) and mq.TLO.SpawnCount("untargetable _strength radius 200 zradius 50")() == 0
+                end,
+            },
             {
                 name = "PetIceFlame",
                 type = "Spell",

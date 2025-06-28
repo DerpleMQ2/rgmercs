@@ -41,9 +41,14 @@ mq.event("CantSee", "You cannot see your target.", function()
             if Config:GetSetting('DoAutoEngage') then
                 if Combat.OkToEngage(target.ID() or 0) then
                     Core.DoCmd("/squelch /face fast")
-                    if Targeting.GetTargetDistance() < 10 then
+                    if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then
                         Logger.log_debug("Can't See target (%s [%d]). Moving back 10.", target.CleanName() or "", target.ID() or 0)
                         Core.DoCmd("/stick 10 moveback uw")
+                        -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
+                        mq.delay(100, function() return mq.TLO.Stick.Active() end)
+                        mq.delay(500, function() return not mq.TLO.Me.Moving() end)
+                        Core.DoCmd("/stick off")
+                        Movement.ClearLastStickTimer()
                     else
                         local desiredDistance = (target.MaxRangeTo() or 0) * 0.7
                         if not Config:GetSetting('DoMelee') then
@@ -147,6 +152,11 @@ local function tooFarHandler()
                     if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then --not sure if this is necessary or still happening since we changed distance to use 3D.
                         Logger.log_debug("Too Far from Target (%s [%d]). Possible flyer detected. Moving back 10.", target.CleanName() or "", target.ID() or 0)
                         Core.DoCmd("/stick 10 moveback uw")
+                        -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
+                        mq.delay(100, function() return mq.TLO.Stick.Active() end)
+                        mq.delay(500, function() return not mq.TLO.Me.Moving() end)
+                        Core.DoCmd("/stick off")
+                        Movement.ClearLastStickTimer()
                     else
                         Logger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
                             (target.MaxRangeTo() or 0) * 0.7)

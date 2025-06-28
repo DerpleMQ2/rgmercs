@@ -361,7 +361,7 @@ local _ClassConfig = {
                 type = "Ability",
                 cond = function(self, abilityName)
                     if not Config:GetSetting('AggroFeign') then return false end
-                    return Targeting.IHaveAggro(95) and not Core.IAmMA
+                    return Targeting.IHaveAggro(80) and not Core.IAmMA
                 end,
             },
             {
