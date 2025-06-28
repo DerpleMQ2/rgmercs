@@ -410,39 +410,54 @@ function Module:MezNow(mezId, useAE, useAA)
     if useAE then
         if not aeMezSpell or not aeMezSpell() then return end
         Logger.log_debug("Performing AE MEZ --> %d", mezId)
-        -- Only Enchanters have an AA AE Mez but we'll prefer the AE Spell if we can.
-        -- TODO CHECK IF ITS READY
-        if useAA and Core.MyClassIs("enc") and
-            not Casting.SpellReady(aeMezSpell) and
-            Casting.AAReady("Beam of Slumber") and self.settings.DoAAMez then
-            -- This is a beam AE so I need ot face the target and  cast.
-            Core.DoCmd("/face fast")
-            -- Delay to wait till face finishes
-            mq.delay(5)
-            Comms.HandleAnnounce(string.format("\aw I AM \ar AE AA MEZZING \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
-                Config:GetSetting('MezAnnounce'))
-            Casting.UseAA("Beam of Slumber", mezId)
-            Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
-                Config:GetSetting('MezAnnounce'))
-            -- reset timers
-        elseif Casting.SpellReady(aeMezSpell) then
-            -- If we're here we're not doing AA-based AE Mezzing. We're either using our bard song or
-            -- ENCH/NEC Spell
-            Comms.HandleAnnounce(string.format("\aw I AM \ar AE SPELL MEZZING \ag %s", aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
-                Config:GetSetting('MezAnnounce'))
-            -- Added this If to avoid rewriting SpellNow to be bard friendly.
-            -- we can just invoke The bard SongNow which already accounts for all the weird bard stuff
-            -- Setting the recast time for the bard ae song after cast.
-            -- TODO: Make spell now use songnow for brds
-            if Core.MyClassIs("brd") then
-                Casting.UseSong(aeMezSpell.RankName(), mezId, false, 3)
-            else
-                Casting.UseSpell(aeMezSpell.RankName(), mezId, false)
-            end
-            Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE SPELL MEZ \ag %s", aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
-                Config:GetSetting('MezAnnounce'))
-        end
 
+        if not Casting.SpellReady(aeMezSpell) then
+            -- previous code checked for the enchanter class, but AAready will simply return false on any other class
+            -- lets only try to use beam of slumber if we are in global, since a beam may not catch everything.
+            if useAA and self.settings.DoAAMez and Casting.AAReady("Beam of Slumber") then
+                -- This is a beam AE so I need ot face the target and cast.
+                Core.DoCmd("/face fast")
+                -- Delay to wait till face finishes
+                mq.delay(5)
+                Comms.HandleAnnounce(string.format("\aw I AM \ar AE AA MEZZING \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
+                    Config:GetSetting('MezAnnounce'))
+                Casting.UseAA("Beam of Slumber", mezId)
+                Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
+                    Config:GetSetting('MezAnnounce'))
+                mq.doevents()
+                return
+            elseif (mq.TLO.Me.GemTimer(aeMezSpell)() or -1) == 0 then
+                local maxWaitToMez = 1500 + (mq.TLO.Window("CastingWindow").Open() and (mq.TLO.Me.Casting.MyCastTime() or 3000) or 0)
+                while maxWaitToMez > 0 do
+                    Logger.log_verbose("MEZ: Waiting for cast or movement to finish to use AE Mez.")
+                    if Casting.SpellReady(aeMezSpell) then
+                        break
+                    end
+                    mq.delay(50)
+                    mq.doevents()
+                    maxWaitToMez = maxWaitToMez - 50
+                end
+                if maxWaitToMez <= 0 and not Casting.SpellReady(aeMezSpell) then
+                    Logger.log_verbose("Mez: Timeout while waiting to use AE Mez (%s).", aeMezSpell)
+                    return
+                end
+            else
+                Logger.log_verbose("Mez: Our AEMez Spell (%s) or AA does not appear to be ready.", aeMezSpell)
+            end
+
+            if Casting.SpellReady(aeMezSpell) then
+                Comms.HandleAnnounce(string.format("\aw I AM \ar AE SPELL MEZZING \ag %s", aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
+                    Config:GetSetting('MezAnnounce'))
+
+                if Core.MyClassIs("brd") then
+                    Casting.UseSong(aeMezSpell.RankName(), mezId, false, 2)
+                else
+                    Casting.UseSpell(aeMezSpell.RankName(), mezId, false, true, true, 2)
+                end
+                Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE SPELL MEZ \ag %s", aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
+                    Config:GetSetting('MezAnnounce'))
+            end
+        end
         -- In case they're mez immune
         mq.doevents()
     else
@@ -474,16 +489,38 @@ function Module:MezNow(mezId, useAE, useAA)
 
         if not mezSpell or not mezSpell() then return end
 
-        -- Added this If to avoid rewriting SpellNow to be bard friendly.
-        -- we can just invoke The bard SongNow which already accounts for all the weird bard stuff
-        -- TODO: Make spell now use songnow for brds
+        if not Casting.SpellReady(mezSpell) then
+            if (mq.TLO.Me.GemTimer(mezSpell)() or -1) == 0 then
+                local maxWaitToMez = 1500 + (mq.TLO.Window("CastingWindow").Open() and (mq.TLO.Me.Casting.MyCastTime() or 3000) or 0)
+                while maxWaitToMez > 0 do
+                    Logger.log_verbose("MEZ: Waiting for cast or movement to finish to use ST Mez.")
+                    if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
+                        Logger.log_debug("Mez: Waiting for single mez to be ready, but high number of targets, let's check if AE Mez is needed again before we start singles.")
+                        self:AEMezCheck()
+                        return
+                    end
+                    if Casting.SpellReady(mezSpell) then
+                        break
+                    end
+                    mq.delay(50)
+                    mq.doevents()
+                    maxWaitToMez = maxWaitToMez - 50
+                end
+                if maxWaitToMez <= 0 and not Casting.SpellReady(mezSpell) then
+                    Logger.log_verbose("Mez: Timeout while waiting to use ST Mez (%s).", mezSpell)
+                end
+            else
+                Logger.log_verbose("Mez: Our ST Mez Spell (%s) does not appear to be ready.", mezSpell)
+            end
+        end
+
         if Casting.SpellReady(mezSpell) then
             if Core.MyClassIs("brd") then
                 -- TODO SongNow MezSpell
-                Casting.UseSong(mezSpell.RankName(), mezId, false, 3)
+                Casting.UseSong(mezSpell.RankName(), mezId, false, 2)
             else
                 -- This may not work for Bards but will work for NEC/ENCs
-                Casting.UseSpell(mezSpell.RankName(), mezId, false)
+                Casting.UseSpell(mezSpell.RankName(), mezId, false, false, true, 2)
             end
 
             -- In case they're mez immune
@@ -550,19 +587,11 @@ function Module:AEMezCheck()
         end
         if mobCount > angryMobCount then return end
     end
-    -- Checking to see if we are auto attacking, or if we are actively casting a spell (Algar comment: we turn attack off, why do we care about auto-attacking enchanters here?)
-    -- purpose for this is to catch auto attacking enchanters and bards who never are not casting.
-    if mq.TLO.Me.Combat() or mq.TLO.Me.Casting() then
-        Logger.log_debug("\awNOTICE:\ax Stopping cast or song so I can cast AE mez.")
-        Core.DoCmd("/stopcast")
-        Core.DoCmd("/stopsong")
-    end
+
+    self:StopCast()
 
     -- Call MezNow and pass the AE flag and allow it to use the AA if the Spell isn't ready.
-    -- This won't effect bards at all.
-    -- We target autoassist id as we don't want to swap targets and we want to continue meleeing
     Logger.log_debug("\awNOTICE:\ax Re-targeting to our main assist's mob.")
-    --Combat.SetControlToon() --don't think we need to revalidate our MA to do this, will revisit. Algar 1/7/2025
 
     if Combat.FindBestAutoTargetCheck() then
         Combat.FindBestAutoTarget()
@@ -589,6 +618,8 @@ function Module:AddCCTarget(mobId)
         Logger.log_debug("\awNOTICE:\ax Unable to mez %d - it is immune", mobId)
         return false
     end
+
+    self:StopAttack()
 
     Targeting.SetTarget(mobId)
 
@@ -697,7 +728,7 @@ function Module:ProcessMezList()
 
     if Tables.GetTableSize(self.TempSettings.MezTracker) <= 1 then
         -- If we have only one spawn we're tracking, we don't need to be mezzing
-        Logger.log_debug("\ayProcessMezList(%d) :: Only 1 Spawn - let it break")
+        Logger.log_debug("\ayProcessMezList(%d) :: No Mob requires mez.")
         return
     end
 
@@ -736,17 +767,10 @@ function Module:ProcessMezList()
                         table.insert(removeList, id)
                     else
                         Logger.log_debug("\ayProcessMezList(%d) :: Mob needs mezed.", id)
-                        if mq.TLO.Me.Combat() then
-                            Logger.log_debug(
-                                " \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start mez.")
-                            Core.DoCmd("/attack off")
-                            mq.delay("3s", function() return not mq.TLO.Me.Combat() end)
-                        end
-                        if mq.TLO.Me.Casting() then
-                            Core.DoCmd("/stopcast")
-                            Core.DoCmd("/stopsong")
-                            mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
-                        end
+
+                        self:StopAttack()
+
+                        self:StopCast()
 
                         -- Algar note 4/5/2025: This entire thing could likely be refactored. It works much better than before, where we would have ae mez checked once and then we would use 6 single target mezzes instead.
                         -- The choice of using the autotarget for an AEMez really sucks on targets that die quickly; but I suppose the mez isn't as important if they do.
@@ -768,7 +792,7 @@ function Module:ProcessMezList()
 
                         --lets check to see if it is mezzed now/again and use a single target mez if necessary:
                         Targeting.SetTarget(id)
-                        if self.settings.DoSTMez and not mq.TLO.Target.Mezzed() then
+                        if id ~= Config.Globals.AutoTargetID and self.settings.DoSTMez and not mq.TLO.Target.Mezzed() then
                             Logger.log_debug("Single target mez is (still) needed.")
                             self:MezNow(id, false, true)
                         end
@@ -883,5 +907,21 @@ end
 mq.bind("/rgupmez", function()
     Modules:ExecModule("Mez", "UpdateMezList")
 end)
+
+function Module:StopAttack()
+    if mq.TLO.Me.Combat() then
+        Logger.log_debug("\awMEZ:\ax Stopping attack to avoid breaking mez.")
+        Core.DoCmd("/attack off")
+        mq.delay(500, function() return not mq.TLO.Me.Combat() end)
+    end
+end
+
+function Module:StopCast()
+    if mq.TLO.Me.Casting() then
+        Logger.log_debug("\awMEZ:\ax Stopping cast or song so I can mez.")
+        mq.TLO.Me.StopCast()
+        mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
+    end
+end
 
 return Module
