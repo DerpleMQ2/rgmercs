@@ -1662,7 +1662,7 @@ local _ClassConfig = {
             Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility.RankName.Name() or "None")
 
             if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= Config:GetSetting("ManaToNuke") and Casting.SpellReady(openerAbility) then
-                Core.DoCmd("/squelch /face")
+                Core.DoCmd("/squelch /face fast")
                 Casting.UseSpell(openerAbility.RankName.Name(), target.ID(), false)
                 Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility.RankName.Name() or "None")
             else
