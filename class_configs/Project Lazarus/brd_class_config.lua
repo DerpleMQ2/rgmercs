@@ -83,6 +83,7 @@ local _ClassConfig = {
             "Ancient: Call of Power",
             "Eriki's Psalm of Power",
             "Yelhun's Mystic Call",
+            "Echo of the Trusik",
             "Rizlona's Call of Flame",   -- overhaste/spell damage
             "Battlecry of the Vah Shir", -- overhaste only
             "Warsong of the Vah Shir",   -- overhaste only

@@ -1178,7 +1178,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
         if mq.TLO.Me.Casting() then
             -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
             local clipDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('SongClipDelayFact')
-            mq.delay(clipDelay)
+            mq.delay(clipDelay, function() return Casting.IHaveBuff(spell) end) --callback for buffs. not perfect, but should help
             Core.DoCmd("/stopsong")
         end
 

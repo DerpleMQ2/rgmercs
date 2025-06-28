@@ -10,7 +10,7 @@ Movement.LastDoStick = 0
 --- Sticks the player to the specified target.
 --- @param targetId number The ID of the target to stick to.
 function Movement.DoStick(targetId)
-    if os.clock() - Movement.LastDoStick < 1.5 then
+    if os.clock() - Movement.LastDoStick < 1 then
         Logger.log_debug(
             "\ayIgnoring DoStick because we just stuck a second ago - let's give it some time.")
         return

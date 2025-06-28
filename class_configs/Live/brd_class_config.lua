@@ -262,6 +262,7 @@ local _ClassConfig = {
             "Yelhun's Mystic Call",
             "Ancient: Call of Power",
             "Eriki's Psalm of Power",
+            "Echo of the Trusik",
             "Rizlona's Call of Flame",
             "Rizlona's Fire",
             "Rizlona's Embers",

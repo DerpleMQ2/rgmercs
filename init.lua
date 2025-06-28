@@ -335,7 +335,7 @@ local function Main()
         --if os.clock() - Config.Globals.LastFaceTime > 6 then
         if Config:GetSetting('FaceTarget') and not Targeting.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
             --Config.Globals.LastFaceTime = os.clock()
-            Core.DoCmd("/squelch /face")
+            Core.DoCmd("/squelch /face fast")
         end
 
         if Config:GetSetting('DoMed') == 3 then
