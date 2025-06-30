@@ -483,9 +483,9 @@ local _ClassConfig = {
             {
                 name = "Epic",
                 type = "Item",
-                allowDead = true,
-                cond = function(self, itemName, target)
-                    return Casting.SelfBuffItemCheck(itemName)
+                cond = function(self, itemName)
+                    if Config:GetSetting('UseEpic') == 1 then return false end
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
             },
             {
@@ -1005,10 +1005,25 @@ local _ClassConfig = {
             FAQ = "Why do my druid and mage constantly both try to use the damage shield?",
             Answer = "You can disable the group damage shield (DS) buff option on the Buffs tab.",
         },
+        ['UseEpic']           = {
+            DisplayName = "Epic Use:",
+            Category = "Buffs",
+            Index = 5,
+            Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my DRU using Epic on these trash mobs?",
+            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
+                "This can be adjusted in the Buffs tab.",
+        },
         ['SpireChoice']       = {
             DisplayName = "Spire Choice:",
             Category = "Buffs",
-            Index = 5,
+            Index = 6,
             Tooltip = "Choose which Fundament you would like to use during burns:\n" ..
                 "First Spire: Spell Crit Buff to Self.\n" ..
                 "Second Spire: Healing Power Buff to Self.\n" ..
@@ -1024,7 +1039,7 @@ local _ClassConfig = {
         ['WolfSpiritChoice']  = {
             DisplayName = "Self Wolfbuff Choice:",
             Category = "Buffs",
-            Index = 6,
+            Index = 7,
             Tooltip = "Choose which wolf spirit buff you would like to maintain on yourself:\n" ..
                 "White: Increased healing and reduced mana cost for healing spells. Mana Regeneration and Cold Resist.\n" ..
                 "Black: Increased damage and reduced mana cost for damage spells. Mana Regeneration and Fire Resist.",
