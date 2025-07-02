@@ -1015,14 +1015,16 @@ function Module:RunCureRotation()
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
     local checks = {
-        { type = "Poison",     check = "Me.Poisoned.ID", },
-        { type = "Disease",    check = "Me.Diseased.ID", },
-        { type = "Curse",      check = "Me.Cursed.ID", },
-        { type = "Corruption", check = "Me.Corrupted.ID", },
-        { type = "Mezzed",     check = "Me.Mezzed.ID", },
+        { type = "Poison",  check = "Me.Poisoned.ID", },
+        { type = "Disease", check = "Me.Diseased.ID", },
+        { type = "Curse",   check = "Me.Cursed.ID", },
+        { type = "Mezzed",  check = "Me.Mezzed.ID", },
     }
 
-    -- Me.TotalCounters does not work on emu we need to check everything.
+    if not Core.OnEMU() then
+        table.insert(checks, { type = "Corruption", check = "Me.Corrupted.ID", })
+    end
+
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet.Peers(i)()
@@ -1033,7 +1035,7 @@ function Module:RunCureRotation()
             end
             local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
 
-            --current max range on live with raid gear is 137, radiant cure still limited to 100, but CureNow includes range checks
+            --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
             if cureTarget and cureTarget() and cureTarget.Distance() < 150 then
                 Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
                 for _, data in ipairs(checks) do
