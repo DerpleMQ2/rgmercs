@@ -1036,7 +1036,7 @@ function Module:RunCureRotation()
             local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
 
             --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
-            if cureTarget and cureTarget() and cureTarget.Distance() < 150 then
+            if cureTarget and cureTarget() and (cureTarget.Distance() or 999) < 150 then
                 Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
                 for _, data in ipairs(checks) do
                     local effectId = DanNet.query(peer, data.check, 1000) or "null"
