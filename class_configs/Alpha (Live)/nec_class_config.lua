@@ -883,6 +883,23 @@ local _ClassConfig = {
         },
         ['DPS'] = {
             {
+                name_func = function(self)
+                    return Config:GetSetting('PetType') == 1 and "PetSpellWar" or "PetSpellRog"
+                end,
+                type = "Spell",
+                cond = function(self, spell)
+                    return Casting.ReagentCheck(spell)
+                end,
+                post_activate = function(self, spell, success)
+                    local pet = mq.TLO.Me.Pet
+                    if success and pet.ID() > 0 then
+                        Comms.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
+            },
+            {
                 name = "Wake the Dead",
                 type = "AA",
                 cond = function(self, aaName)
@@ -1097,27 +1114,12 @@ local _ClassConfig = {
         },
         ['PetSummon'] = { --TODO: Double check these lists to ensure someone leveling doesn't have to change options to keep pets current at lower levels
             {
-                name = "PetSpellWar",
-                type = "Spell",
-                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == ("war" or "mnk") end,
-                cond = function(self, spell)
-                    return Config:GetSetting('PetType') == 1 and Casting.ReagentCheck(spell)
+                name_func = function(self)
+                    return Config:GetSetting('PetType') == 1 and "PetSpellWar" or "PetSpellRog"
                 end,
-                post_activate = function(self, spell, success)
-                    local pet = mq.TLO.Me.Pet
-                    if success and pet.ID() > 0 then
-                        Comms.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
-                        mq.delay(50) -- slight delay to prevent chat bug with command issue
-                        self:SetPetHold()
-                    end
-                end,
-            },
-            {
-                name = "PetSpellRog",
                 type = "Spell",
-                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == "rog" end,
                 cond = function(self, spell)
-                    return Config:GetSetting('PetType') == 2 and Casting.ReagentCheck(spell)
+                    return Casting.ReagentCheck(spell)
                 end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
@@ -1179,93 +1181,39 @@ local _ClassConfig = {
             end
         end,
     },
-    ['Spells']          = {
+    -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
+    -- The list name ("Default" in the list below) is abitrary, it is simply what shows up in the UI when this spell list is loaded.
+    -- Virtually any helper function or TLO can be used as a condition. Example: Mode or level-based lists.
+    -- The first list without conditions or whose conditions returns true will be loaded, all subsequent lists will be ignored.
+    -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
+    -- Loadout checks (such as scribing a spell or using the "Rescan Loadout" or "Reload Spells" buttons) will re-check these lists and may load a different set if things have changed.
+    ['SpellList']       = {
         {
-            gem = 1,
+            name = "Default",
+            -- cond = function(self) return true end, --Kept here for illustration, this line could be removed in this instance since we aren't using conditions.
             spells = {
                 { name = "FireNuke", },
-            },
-        },
-        {
-            gem = 2,
-            spells = {
                 { name = "PoisonNuke2", },
-            },
-        },
-        {
-            gem = 3,
-            spells = {
                 { name = "SwarmPet", },
-            },
-        },
-        {
-            gem = 4,
-            spells = {
                 { name = "FireDot2", },
-            },
-        },
-        {
-            gem = 5,
-            spells = {
                 { name = "Combo", },
-            },
-        },
-        {
-            gem = 6,
-            spells = {
                 { name = "Poison2", },
-            },
-        },
-        {
-            gem = 7,
-            spells = {
                 { name = "Magic2", },
-            },
-        },
-        {
-            gem = 8,
-            spells = {
                 { name = "GroupLeech", },
-            },
-        },
-        {
-            gem = 9,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
                 { name = "ManaDrain", },
-            },
-        },
-        {
-            gem = 10,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
                 { name = "FleshBuff", },
-            },
-        },
-        {
-            gem = 11,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
                 { name = "BestowBuff", },
-            },
-        },
-        {
-            gem = 12,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
                 { name = "PetBuff", },
-            },
-        },
-        {
-            gem = 13,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
+                {
+                    name_func = function(self)
+                        return Config:GetSetting('PetType') == 1 and "PetSpellWar" or "PetSpellRog"
+                    end,
+                    cond = function(self) return Config:GetSetting('KeepPetMemmed') end,
+                },
                 { name = "LichSpell", },
             },
         },
-
     },
-
     ['DefaultConfig']   = {
         ['Mode']              = {
             DisplayName = "Mode",
@@ -1281,7 +1229,8 @@ local _ClassConfig = {
         },
         ['PetType']           = {
             DisplayName = "Pet Class",
-            Category = "Combat",
+            Category = "Pet",
+            Index = 1,
             Tooltip = "1 = War, 2 = Rog",
             Type = "Combo",
             ComboOptions = { 'War', 'Rog', },
@@ -1290,6 +1239,15 @@ local _ClassConfig = {
             Max = 2,
             FAQ = "I want to only use a Rogue Pet for the Backstabs, how do I do that?",
             Answer = "Set the [PetType] setting to Rog and the Necro will only summon Rogue pets.",
+        },
+        ['KeepPetMemmed']     = {
+            DisplayName = "Always Mem Pet",
+            Category = "Pet",
+            Index = 2,
+            Tooltip = "Keep your pet spell memorized (allows combat resummoning).",
+            Default = false,
+            FAQ = "Why won't I resummon my pet on combat?",
+            Answer = "Enable the setting to Always Mem your Pet on the Pet Management tab in the class options.",
         },
         ['BattleRez']         = {
             DisplayName = "Battle Rez",
