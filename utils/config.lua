@@ -609,7 +609,7 @@ Config.DefaultConfig = {
         Index = 7,
         Tooltip = "Automatically change targets.",
         Default = true,
-        ConfigType = "Normal",
+        ConfigType = "Advanced",
         FAQ = "Why am I Always changing targets?",
         Answer = "You can set the [DoAutoTarget] option to false to stop automatically changing targets.",
     },
