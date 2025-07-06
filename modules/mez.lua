@@ -426,7 +426,7 @@ function Module:MezNow(mezId, useAE, useAA)
                     Config:GetSetting('MezAnnounce'))
                 mq.doevents()
                 return
-            elseif (mq.TLO.Me.GemTimer(aeMezSpell)() or -1) == 0 then
+            elseif (mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 then
                 local maxWaitToMez = 1500 + (mq.TLO.Window("CastingWindow").Open() and (mq.TLO.Me.Casting.MyCastTime() or 3000) or 0)
                 while maxWaitToMez > 0 do
                     Logger.log_verbose("MEZ: Waiting for cast or movement to finish to use AE Mez.")
@@ -490,7 +490,7 @@ function Module:MezNow(mezId, useAE, useAA)
         if not mezSpell or not mezSpell() then return end
 
         if not Casting.SpellReady(mezSpell) then
-            if (mq.TLO.Me.GemTimer(mezSpell)() or -1) == 0 then
+            if (mq.TLO.Me.GemTimer(mezSpell.RankName())() or -1) == 0 then
                 local maxWaitToMez = 1500 + (mq.TLO.Window("CastingWindow").Open() and (mq.TLO.Me.Casting.MyCastTime() or 3000) or 0)
                 while maxWaitToMez > 0 do
                     Logger.log_verbose("MEZ: Waiting for cast or movement to finish to use ST Mez.")
