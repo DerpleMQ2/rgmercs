@@ -869,7 +869,8 @@ return {
                 name = "Forceful Rejuvenation",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not self.ClassConfig.HelperFunctions.FlurryActive(self) and (mq.TLO.Me.GemTimer(self.ResolvedActionMap['DichoSpell'])() or -1) > 15
+                    local dichoSpell = self.ResolvedActionMap['DichoSpell'].RankName() or "None"
+                    return not self.ClassConfig.HelperFunctions.FlurryActive(self) and (mq.TLO.Me.GemTimer(dichoSpell)() or -1) > 15
                 end,
             },
             {

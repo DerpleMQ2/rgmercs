@@ -1259,10 +1259,6 @@ _ClassConfig      = {
 
             return true
         end,
-        --function to make sure we don't use single target nukes when we could be AEing in PBAEMode
-        PBAEReady = function(self)
-            return (mq.TLO.Me.GemTimer(self.ResolvedActionMap['PBAE1'])() or -1) == 0 or (mq.TLO.Me.GemTimer(self.ResolvedActionMap['PBAE2'])() or -1) == 0
-        end,
     },
     ['Rotations']         = {
         ['PetSummon'] = {
@@ -1537,7 +1533,7 @@ _ClassConfig      = {
                 cond = function(self, aaName, target)
                     if mq.TLO.Me.Pet.ID() == 0 then return false end
                     local pet = mq.TLO.Me.Pet
-                    return not pet.Combat() and (pet.Distance3D() or 0 > 200)
+                    return not pet.Combat() and (pet.Distance3D() or 0) > 200
                 end,
             },
             {
