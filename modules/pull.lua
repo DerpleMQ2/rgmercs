@@ -1340,7 +1340,8 @@ function Module:ShouldPull(campData)
             return false, string.format("Cursed")
         end
 
-        if (me.Corrupted.ID() or 0 > 0) then
+        -- Laz Marr's and GM Buffs are Corruption effects.
+        if not Core.OnLaz() and (me.Corrupted.ID() or 0 > 0) then
             Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am corrupted!")
             return false, string.format("Corrupted")
         end
