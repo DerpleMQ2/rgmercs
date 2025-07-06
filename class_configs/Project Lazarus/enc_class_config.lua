@@ -822,6 +822,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    if Config:GetSetting('UseEpic') == 1 then return false end
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
+                end,
+            },
+            {
                 name = "MindDot",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1176,10 +1184,25 @@ local _ClassConfig = {
         },
 
         --Combat
+        ['UseEpic']            = {
+            DisplayName = "Epic Use:",
+            Category = "Buffs",
+            Index = 1,
+            Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my SHM using Epic on these trash mobs?",
+            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
+                "This can be adjusted in the Buffs tab.",
+        },
         ['AECount']            = {
             DisplayName = "AE Count",
             Category = "Combat",
-            Index = 1,
+            Index = 2,
             Tooltip = "Number of XT Haters before we will use AE Slow, Tash, or Stun.",
             Min = 1,
             Default = 3,
@@ -1190,7 +1213,7 @@ local _ClassConfig = {
         ['DoAEStun']           = {
             DisplayName = "PBAE Stun use:",
             Category = "Combat",
-            Index = 2,
+            Index = 3,
             Tooltip = "When to use your PBAE Stun Line.",
             RequiresLoadoutChange = true,
             Type = "Combo",
@@ -1205,7 +1228,7 @@ local _ClassConfig = {
         ['EmergencyStart']     = {
             DisplayName = "Emergency Start",
             Category = "Combat",
-            Index = 3,
+            Index = 4,
             Tooltip = "The HP % emergency abilities will be used (Abilities used depend on whose health is low, the ENC or the MA).",
             Default = 50,
             Min = 1,
@@ -1217,7 +1240,7 @@ local _ClassConfig = {
         ['DoChestClick']       = {
             DisplayName = "Do Chest Click",
             Category = "Combat",
-            Index = 4,
+            Index = 5,
             Tooltip = "Click your equipped chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "Why am I not clicking my chest item?",
@@ -1227,7 +1250,7 @@ local _ClassConfig = {
         ['DoSoothing']         = {
             DisplayName = "Do Soothing Words",
             Category = "Combat",
-            Index = 5,
+            Index = 6,
             Tooltip = "Use the Soothing Words AA (large aggro reduction) on a named whose target is not our MA.",
             Default = false,
             FAQ = "Why won't I use the Soothing Words AA?",

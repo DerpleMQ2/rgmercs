@@ -888,7 +888,7 @@ local _ClassConfig = {
                 end,
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.ReagentCheck(spell)
+                    return mq.TLO.Me.Pet.ID() == 0 and not Core.IsCharming() and Casting.ReagentCheck(spell)
                 end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
