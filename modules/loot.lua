@@ -10,6 +10,8 @@ local Logger             = require("utils.logger")
 local Actors             = require("actors")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
+-- Server name formatted for LNS to recognize
+local serverLNSFormat    = mq.TLO.EverQuest.Server():gsub(" ", "_")
 
 local Module             = { _version = '1.1 for LNS', _name = "Loot", _author = 'Derple, Grimmier, Algar', }
 Module.__index           = Module
@@ -32,20 +34,11 @@ Module.DefaultConfig     = {
 		FAQ = "What is this silver coin thing? How do I turn it off?",
 		Answer = "The silver coin is our integration of LootNScoot, looting automation for Emu. It can be disabled as you choose.",
 	},
-	['LootCorpses']                            = {
-		DisplayName = "Loot Corpses",
-		Category = "Loot N Scoot",
-		Index = 2,
-		Tooltip = "Enable LootNScoot to loot corpses for you.",
-		Default = true,
-		FAQ = "I have LootNScoot loaded, why am I not looting?",
-		Answer = "Ensure you have enabled Loot Corpses, and note that Combat Looting is the setting that controls looting while in combat.",
-	},
 	['CombatLooting']                          = {
 		DisplayName = "Combat Looting",
 		Category = "Loot N Scoot",
-		Index = 3,
-		Tooltip = "Enables looting during combat.",
+		Index = 2,
+		Tooltip = "Enables looting during RGMercs-defined combat.",
 		Default = false,
 		FAQ = "How do i make sure my guys are looting during combat?, incase I die or something.",
 		Answer = "You can enable [CombatLooting] to loot during combat, I recommend only having one or 2 characters do this and NOT THE MA!!.",
@@ -53,7 +46,7 @@ Module.DefaultConfig     = {
 	['LootRespectMedState']                    = {
 		DisplayName = "Respect Med State",
 		Category = "Loot N Scoot",
-		Index = 4,
+		Index = 3,
 		Tooltip = "Hold looting if you are currently meditating.",
 		Default = false,
 		FAQ = "Why is the PC sitting there and not medding?",
@@ -63,11 +56,11 @@ Module.DefaultConfig     = {
 	['LootingTimeout']                         = {
 		DisplayName = "Looting Timeout",
 		Category = "Loot N Scoot",
-		Index = 5,
+		Index = 4,
 		Tooltip = "The length of time in seconds that RGMercs will allow LNS to process loot actions in a single check.",
 		Default = 5,
 		Min = 1,
-		Max = 10,
+		Max = 30,
 		FAQ = "Why do my guys take too long to loot, or sometimes miss corpses?",
 		Answer =
 			"While RGMercs doesn't necessary control what LNS is doing, exactly, we do have a timeout setting that dictates how long we will allow it to do it before re-checking for other actions. \n" ..
@@ -135,7 +128,7 @@ function Module:SaveSettings(doBroadcast)
 			if not self.Actor then Module:LootMessageHandler() end
 
 			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, directions = 'combatlooting', CombatLooting = self.settings.CombatLooting, })
+				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'combatlooting', CombatLooting = self.settings.CombatLooting, })
 		else
 			Core.DoCmd("/lua stop lootnscoot")
 		end
@@ -202,7 +195,7 @@ function Module:Init()
 			end
 			Core.DoCmd("/lua run lootnscoot directed rgmercs")
 			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, directions = 'getcombatsetting', })
+				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'getcombatsetting', })
 		end
 		self.TempSettings.Looting = false
 		--pass settings to lootnscoot lib
@@ -291,7 +284,7 @@ function Module:LootMessageHandler()
 end
 
 function Module:GiveTime(combat_state)
-	if not Config:GetSetting('DoLoot') or not Config:GetSetting('LootCorpses') then return end
+	if not Config:GetSetting('DoLoot') then return end
 	if Config.Globals.PauseMain then return end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
@@ -310,7 +303,7 @@ function Module:GiveTime(combat_state)
 	if (combat_state ~= "Combat" or Config:GetSetting('CombatLooting')) and deadCount > 0 then
 		if not self.TempSettings.Looting then
 			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
+				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'doloot', })
 			self.TempSettings.Looting = true
 		end
 	end
