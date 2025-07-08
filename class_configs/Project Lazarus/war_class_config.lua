@@ -27,217 +27,74 @@ local _ClassConfig = {
             "Gladiator's Plate Chestguard of War",
         },
         ['Coating'] = {
-            "Spirit Drinker's Coating",
             "Blood Drinker's Coating",
         },
     },
     ['AbilitySets']     = {
-        ['StandDisc'] = {
-            "Climactic Stand",
-            "Resolute Stand",
-            "Ultimate Stand Discipline",
-            "Culminating Stand Discipline",
-            "Last Stand Discipline",
-            "Final Stand Discipline",
-            --[] = "Stonewall Discipline",
+        ['StandDisc'] = {           -- Timer 2
+            "Stonewall Discipline", -- no lost movement on laz, more mitigation than defensive
             "Defensive Discipline",
+            "Evasive Discipline",
         },
-        ['Fortitude'] = {
+        ['Fortitude'] = { -- Timer 3
             "Fortitude Discipline",
-        },
-        ['AbsorbDisc'] = {
-            "Finish the Fight",
-            "Pain Doesn't Hurt",
-            "No Time to Bleed",
-        },
-        ['Flash'] = {
-            "Flash of Anger",
-        },
-        ['ShieldHit'] = {
-            "Shield Sunder",
-            "Shield Break",
-            "Shield Topple",
-            "Shield Splinter",
-            "Shield Rupture",
-            "Shield Split",
+            "Furious Discipline",
         },
         ['GroupACBuff'] = {
-            "Field Bulwark",
-            "Full Moon's Champion",
-            "Paragon Champion",
-            "Field Champion",
-            "Field Protector",
-            "Field Guardian",
-            "Field Defender",
-            "Field Outfitter",
             "Field Armorer",
         },
         ['GroupDodgeBuff'] = {
             "Commanding Voice",
         },
-        ['DefenseACBuff'] = {
-            "Vigorous Defense",
-            "Primal Defense",
-            "Courageous Defense",
-            "Resolute Defense",
-            "Stout Defense",
-            "Steadfast Defense",
-            "Stalwart Defense",
-            "Staunch Defense",
-            "Bracing Defense",
-        },
-        ['DichoShield'] = {
-            "Reciprocal Shield",
-            "Ecliptic Shield",
-            "Composite Shield",
-            "Dissident Shield",
-            "Dichotomic Shield",
-        },
-        ['AERoar'] = { --does not appear to be worthwhile, very limited level range and low hate value
-            "Roar of Challenge",
-            "Rallying Roar",
-        },
-        ['SelfBuffAE'] = {
-            "Wade into Battle",
-            "Wade into Conflict",
-        },
-        ['SelfBuffSingle'] = {
-            "Determined Reprisal",
-        },
-        ['HealHateAE'] = {
-            "Paradoxical Expanse",
-            "Penumbral Expanse",
-            "Confluent Expanse",
-            "Concordant Expanse",
-            "Harmonious Expanse",
-        },
-        ['HealHateSingle'] = {
-            "Paradoxical Precision",
-            "Penumbral Precision",
-            "Confluent Precision",
-            "Concordant Precision",
-            "Harmonious Precision",
-        },
         ['AEBlades'] = {
-            "Tempest Blades",
-            "Dragonstrike Blades",
-            "Stormstrike Blades",
-            "Stormwheel Blades",
-            "Cyclonic Blades",
-            "Wheeling Blades",
-            "Maelstrom Blade",
-            "Whorl Blade",
             "Vortex Blade",
             "Cyclone Blade",
             "Whirlwind Blade",
-            "Hurricane Blades",
-            "Spiraling Blades",
         },
         ['AddHate1'] = {
-            "Mortimus' Roar",
-            "Namdrows' Roar",
-            "Kragek's Roar",
-            "Kluzen's Roar",
-            "Cyclone Roar",
-            "Krondal's Roar",
-            "Grendlaen Roar",
-            "Bazu Roar",
             "Ancient: Chaos Cry",
-            "Bazu Bluster",
-            "Bazu Bellow",
             "Bellow of the Mastruq",
             "Incite",
             "Berate",
             "Bellow",
             "Provoke",
         },
-        ['AddHate2'] = {
-            "Distressing Shout",
-            "Twilight Shout",
-            "Oppressing Shout",
-            "Burning Shout",
-            "Tormenting Shout",
-            "Harassing Shout",
-        },
         ['AbsorbTaunt'] = {
-            "Infuriate",
-            "Bristle",
-            "Aggravate",
-            "Slander",
-            "Insult",
-            "Ridicule",
-            "Scorn",
-            "Scoff",
-            "Jeer",
-            "Sneer",
-            "Scowl",
             "Mock",
         },
-        ['StrikeDisc'] = {
-            "Decisive Strike",
-            "Precision Strike",
-            "Cunning Strike",
-            "Calculated Strike",
-            "Vital Strike",
-            "Strategic Strike",
-            "Opportunistic Strike",
-            "Exploitive Strike",
-        },
         ['EndRegen'] = {
-            "Convalesce",
-            "Night's Calming",
-            "Hiatus",
-            "Breather",
-            "Rest",
-            "Reprieve",
-            "Respite",
-            "Fourth Wind",
-            "Third Wind",
             "Second Wind",
+            "Third Wind", -- also does HP
         },
         ['AuraBuff'] = {
             "Champion's Aura",
             "Myrmidon's Aura",
         },
         ['Attention'] = {
-            "Unending Attention",
             "Unyielding Attention",
-            "Unflinching Attention",
-            "Unbroken Attention",
             "Undivided Attention",
-            "Unrelenting Attention",
-            "Unconditional Attention",
-        },
-        ['AgroPet'] = {
-            "Phantom Aggressor",
         },
         ['Onslaught'] = {
             "Savage Onslaught Discipline",
             "Brutal Onslaught Discipline",
-            "Brightfeld's Onslaught Discipline",
         },
-        ['RuneShield'] = {
-            "Warrior's Auspice",
-            "Warrior's Bulwark",
-            "Warrior's Bastion",
-            "Warrior's Rampart",
-            "Warrior's Aegis",
-            "Warrior's Resolve",
-        },
-        ['TongueDisc'] = {
-            "Razor Tongue Discipline",
-            "Biting Tongue Discipline",
-            "Barbed Tongue Discipline",
-        },
-        ['ChargeDisc'] = {
-            "Charge Discipline",
-        },
-        ['OffensiveDisc'] = {
-            "Offensive Discipline",
-        },
-        ['MightyStrike'] = {
+        ['StrikeDisc'] = {
+            "Fellstrike Discipline",
             "Mighty Strike Discipline",
         },
+        ['Throat'] = {
+            "Throat Jab",
+        },
+        ['Flaunt'] = {
+            "Flaunt",
+        },
+        ['ShockDisc'] = { -- Timer 7, defensive stun proc
+            "Shocking Defense Discipline",
+        },
+        ['Elbow'] = {
+            "Elbow Strike",
+        },
+        -- Where does Jeer go?
     },
     ['HelperFunctions'] = {
         --function to determine if we should AE taunt and optionally, if it is safe to do so
@@ -305,7 +162,7 @@ local _ClassConfig = {
         end,
         BurnDiscCheck = function(self)
             if mq.TLO.Me.ActiveDisc.Name() == "Fortitude Discipline" or mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') then return false end
-            local burnDisc = { "Onslaught", "MightyStrike", "ChargeDisc", "OffensiveDisc", }
+            local burnDisc = { "Onslaught", "StrikeDisc", "ChargeDisc", }
             for _, buffName in ipairs(burnDisc) do
                 local resolvedDisc = self:GetResolvedActionMapItem(buffName)
                 if resolvedDisc and resolvedDisc.RankName() == mq.TLO.Me.ActiveDisc.Name() then return false end
@@ -422,69 +279,13 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "DefenseACBuff",
-                type = "Disc",
-                active_cond = function(self, discSpell)
-                    return mq.TLO.Me.ActiveDisc.ID() == discSpell.ID()
-                end,
-                cond = function(self, discSpell)
-                    return Core.IsTanking() and Casting.NoDiscActive()
-                end,
-            },
-            {
-                name = "Brace for Impact",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "HealHateAE",
-                type = "Disc",
-                cond = function(self, discSpell, target)
-                    if not Config:GetSetting('DoAETaunt') or Config:GetSetting('SafeAETaunt') then return false end
-                    return Core.IsTanking() and Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
-                name = "HealHateSingle",
-                type = "Disc",
-                cond = function(self, discSpell, target)
-                    if Config:GetSetting('DoAETaunt') and not Config:GetSetting('SafeAETaunt') then return false end
-                    return Core.IsTanking() and Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
                 name = "Infused by Rage",
                 type = "AA",
                 cond = function(self, aaName)
                     return Core.IsTanking() and Casting.SelfBuffAACheck(aaName)
                 end,
             },
-            {
-                name = "Blade Guardian",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            { --Charm Click, name function stops errors in rotation window when slot is empty
-                name_func = function() return mq.TLO.Me.Inventory("Charm").Name() or "CharmClick(Missing)" end,
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoCharmClick') or not Casting.ItemHasClicky(itemName) then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
-                end,
-            },
-            {
-                name = "Huntsman's Ethereal Quiver",
-                type = "Item",
-                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
-                cond = function(self)
-                    if not Config:GetSetting('SummonArrows') then return false end
-                    return mq.TLO.FindItemCount("Ethereal Arrow")() < 101
-                end,
-            },
+
         },
         ['HateTools'] = {
             --used when we've lost hatred after it is initially established
@@ -554,25 +355,6 @@ local _ClassConfig = {
                     return Casting.DetSpellCheck(discSpell)
                 end,
             },
-            {
-                name = "AddHate2",
-                type = "Disc",
-            },
-            {
-                name = "AgroPet",
-                type = "Disc",
-                cond = function(self, discSpell, target)
-                    return Targeting.IsNamed(target)
-                end,
-            },
-            -- { --this appears to have incredibly limited usage and the line was discontinued
-            --     name = "AERoar",
-            --     type = "Disc",
-            --     cond = function(self, discSpell)
-            --         return Core.IsModeActive("Tank") and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
-            --             Config:GetSetting('DoAEAgro')
-            --     end,
-            -- },
         },
         ['EmergencyDefenses'] = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
@@ -593,23 +375,12 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Flash",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.Name() ~= "Fortitude Discipline" and not Casting.IHaveBuff("Blade Whirl")
-                end,
-            },
-            {
                 name = "Warlord's Tenacity",
                 type = "AA",
             },
             {
                 name = "Warlord's Resurgence",
                 type = "AA",
-            },
-            {
-                name = "RuneShield",
-                type = "Disc",
             },
             {
                 name = "Mark of the Mage Hunter",
@@ -650,24 +421,6 @@ local _ClassConfig = {
             },
         },
         ['Defenses'] = {
-            --helper function(s) for ability stacking checks may reduce code, but this is functional.
-            { --shares effect with modern chest click
-                name = "DichoShield",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    local chestClicky = Casting.GetClickySpell(mq.TLO.Me.Inventory("Chest").Name())
-                    return not Casting.IHaveBuff(chestClicky or "None")
-                end,
-            },
-            { --shares effect with Dicho Shield --Chest Click, name function stops errors in rotation window when slot is empty
-                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
-                    local dichoShield = Core.GetResolvedActionMapItem('DichoShield')
-                    return not mq.TLO.Me.Buff(dichoShield)() and Casting.SelfBuffItemCheck(itemName)
-                end,
-            },
             { --shares effect with OoW Chest and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
                 name = "StandDisc",
                 type = "Disc",
@@ -718,7 +471,7 @@ local _ClassConfig = {
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
-            { --incredibly weak at high level, but low opportunity cost for use and optional
+            {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
@@ -728,11 +481,9 @@ local _ClassConfig = {
         },
         ['Burn'] = {
             {
-                name = "Spire of the Warlord",
-                type = "AA",
-            },
-            {
-                name = "Imperator's Command",
+                name_func = function(self)
+                    return string.format("%s Spire of the Warlord", Core.IsTanking() and "Third" or "Second")
+                end,
                 type = "AA",
             },
             {
@@ -743,14 +494,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "MightyStrike",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return not Core.IsTanking() and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
-            },
-            {
-                name = "OffensiveDisc",
+                name = "StrikeDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return not Core.IsTanking() and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
@@ -771,8 +515,7 @@ local _ClassConfig = {
                 name = "Warlord's Fury",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    local dichoShield = Core.GetResolvedActionMapItem('DichoShield')
-                    return Core.IsTanking() and not mq.TLO.Me.Buff(dichoShield)
+                    return Core.IsTanking() and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -782,29 +525,6 @@ local _ClassConfig = {
             {
                 name = "Battered Smuggler's Barrel",
                 type = "Item",
-            },
-            {
-                name = "SelfBuffAE",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    if not Config:GetSetting('DoAETaunt') or Config:GetSetting('SafeAETaunt') then return false end
-                    return Core.IsTanking()
-                end,
-            },
-            {
-                name = "SelfBuffSingle",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    if Config:GetSetting('DoAETaunt') and not Config:GetSetting('SafeAETaunt') then return false end
-                    return Core.IsTanking()
-                end,
-            },
-            {
-                name = "TongueDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Core.IsTanking()
-                end,
             },
             {
                 name = "Resplendent Glory",
@@ -823,10 +543,6 @@ local _ClassConfig = {
         },
         ['Combat'] = {
             {
-                name = "ShieldHit",
-                type = "Disc",
-            },
-            {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
@@ -844,6 +560,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Flaunt",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return not Core.IsTanking()
+                end,
+            },
+            {
                 name = "Gut Punch",
                 type = "AA",
                 cond = function(self, aaName, target)
@@ -853,6 +576,10 @@ local _ClassConfig = {
             {
                 name = "Knee Strike",
                 type = "AA",
+            },
+            {
+                name = "Throat",
+                type = "Disc",
             },
             {
                 name = "Rampage",
@@ -893,27 +620,9 @@ local _ClassConfig = {
                 name = "Kick",
                 type = "Ability",
             },
-            -- { --todo:homework
-            --     name = "Disarm",
-            --     type = "Ability",
-            --     cond = function(self, abilityName)
-            --         return mq.TLO.Me.AbilityReady(abilityName)() and
-            --             Targeting.GetTargetDistance() < 15
-            --     end,
-            -- },
             {
-                name = "StrikeDisc",
+                name = "Elbow",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Targeting.GetTargetPctHPs() <= 20
-                end,
-            },
-            {
-                name = "DefenseACBuff",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Core.IsTanking() and Casting.NoDiscActive()
-                end,
             },
         },
     },
@@ -1079,24 +788,6 @@ local _ClassConfig = {
         },
 
         --Equipment
-        ['DoChestClick']     = {
-            DisplayName = "Do Chest Click",
-            Category = "Equipment",
-            Index = 1,
-            Tooltip = "Click your equipped chest.",
-            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "What the heck is a chest click?",
-            Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The WAR's is generally an absorbe rune for large hits.",
-        },
-        ['DoCharmClick']     = {
-            DisplayName = "Do Charm Click",
-            Category = "Equipment",
-            Index = 2,
-            Tooltip = "Click your charm for Geomantra.",
-            Default = false,
-            FAQ = "Why is my Warrior not clicking his charm?",
-            Answer = "Charm clicks won't happen if you are in combat.",
-        },
         ['DoCoating']        = {
             DisplayName = "Use Coating",
             Category = "Equipment",
@@ -1160,15 +851,6 @@ local _ClassConfig = {
             Default = false,
             FAQ = "How do I use my Epic Weapon?",
             Answer = "Enable Do Epic to click your Epic Weapon.",
-        },
-        ['SummonArrows']     = {
-            DisplayName = "Use Huntsman's Quiver",
-            Category = "Equipment",
-            Index = 9,
-            Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
-            Default = false,
-            FAQ = "How do I summon arrows?",
-            Answer = "If you are at least level 90, keep a Huntsman's Ethereal Quiver in your inventory and enable its use in the options.",
         },
     },
 }
