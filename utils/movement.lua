@@ -24,7 +24,8 @@ function Movement.DoStick(targetId)
         if Core.IAmMA() then
             Core.DoCmd("/stick 10 id %d %s uw", targetId, Config:GetSetting('MovebackWhenTank') and "moveback" or "")
         else
-            Core.DoCmd("/stick 10 id %d behindonce moveback uw", targetId)
+            local stickDist = (mq.TLO.Spawn(targetId).Height() or 5) > 15 and 20 or 10
+            Core.DoCmd("/stick %d id %d behindonce moveback uw", stickDist, targetId)
         end
     end
 end
