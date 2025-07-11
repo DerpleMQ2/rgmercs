@@ -40,18 +40,15 @@ local _ClassConfig = {
             "Fortitude Discipline",
             "Furious Discipline",
         },
-        ['GroupACBuff'] = {
+        ['GroupACBuff'] = { -- Has Commanding Voice (Dodge Buff) baked in
             "Field Armorer",
-        },
-        ['GroupDodgeBuff'] = {
-            "Commanding Voice",
         },
         ['AEBlades'] = {
             "Vortex Blade",
             "Cyclone Blade",
             "Whirlwind Blade",
         },
-        ['AddHate1'] = {
+        ['AddHate'] = {
             "Ancient: Chaos Cry",
             "Bellow of the Mastruq",
             "Incite",
@@ -155,17 +152,21 @@ local _ClassConfig = {
             end
             return false
         end,
-        DiscOverwriteCheck = function(self)
-            local defenseBuff = Core.GetResolvedActionMapItem('DefenseACBuff')
-            if mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.ActiveDisc.Name() ~= (defenseBuff and defenseBuff.RankName() or "None") then return false end
-            return true
-        end,
         BurnDiscCheck = function(self)
             if mq.TLO.Me.ActiveDisc.Name() == "Fortitude Discipline" or mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') then return false end
             local burnDisc = { "Onslaught", "StrikeDisc", "ChargeDisc", }
             for _, buffName in ipairs(burnDisc) do
                 local resolvedDisc = self:GetResolvedActionMapItem(buffName)
                 if resolvedDisc and resolvedDisc.RankName() == mq.TLO.Me.ActiveDisc.Name() then return false end
+            end
+            return true
+        end,
+        DefenseBuffCheck = function(self)
+            local standDisc = Core.GetResolvedActionMapItem('StandDisc')
+            if standDisc() and mq.TLO.Me.ActiveDisc.Name() == standDisc.RankName() then return false end
+            local defBuff = { "Guardian's Boon", "Guardian's Bravery", "Warlord's Bravery", }
+            for _, buffName in ipairs(defBuff) do
+                if mq.TLO.Me.Buff(buffName)() then return false end
             end
             return true
         end,
@@ -182,10 +183,38 @@ local _ClassConfig = {
             name = 'HateTools',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             load_cond = function() return Core.IsTanking() end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                ---@diagnostic disable-next-line: undefined-field -- doesn't like secondarypct
+                return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget()))
+            end,
+        },
+        { --Actions that establish or maintain hatred
+            name = 'AEHateTools',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            load_cond = function()
+                return Core.IsTanking() and Config:GetSetting('DoAETaunt') and
+                    (Casting.CanUseAA("Area Taunt") or Core.GetResolvedActionMapItem("Epic") or Core.GetResolvedActionMapItem("AEBlades"))
+            end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+            end,
+        },
+        { --Dynamic weapon swapping if UseBandolier is toggled
+            name = 'Weapon Management',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('UseBandolier') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
             end,
         },
         { --Defensive actions triggered by low HP
@@ -198,26 +227,14 @@ local _ClassConfig = {
                 return combat_state == "Combat" and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
             end,
         },
-        { --Dynamic weapon swapping if UseBandolier is toggled
-            name = 'Weapon Management',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Config:GetSetting('UseBandolier') end,
-            doFullRotation = true,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
-            end,
-        },
         { --Defensive actions used proactively to prevent emergencies
             name = 'Defenses',
             state = 1,
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                --need to look at rotation and decide if it should fire during emergencies. leaning towards no
-                return combat_state == "Combat" and Core.IsTanking() and (mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') or
-                    Targeting.IsNamed(Targeting.GetAutoTarget()) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Targeting.IsNamed(Targeting.GetAutoTarget()) or
+                    self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true)
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
@@ -226,16 +243,18 @@ local _ClassConfig = {
             steps = 4,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
-        { --DPS and Utility discs
+        { --Non-threat combat actions
             name = 'Combat',
             state = 1,
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat"
             end,
         },
     },
@@ -269,16 +288,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "GroupDodgeBuff",
-                type = "Disc",
-                active_cond = function(self, discSpell)
-                    return Casting.IHaveBuff(discSpell)
-                end,
-                cond = function(self, discSpell)
-                    return Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
                 name = "Infused by Rage",
                 type = "AA",
                 cond = function(self, aaName)
@@ -288,12 +297,18 @@ local _ClassConfig = {
 
         },
         ['HateTools'] = {
-            --used when we've lost hatred after it is initially established
-            {
+            { --more valuable on laz because we have less hate tools and no other hatelist + 1 abilities
+                name = "Taunt",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
+                end,
+            },
+            { --8min reuse, save for named or if we still can't get a mob back on us
                 name = "Ageless Enmity",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
+                    return Targeting.GetAutoTargetPctHPs() < 90 and (mq.TLO.Me.PctAggro() < 100 or Targeting.IsNamed(target))
                 end,
             },
             --used to jumpstart hatred on named from the outset and prevent early rips from burns
@@ -314,14 +329,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Area Taunt",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    --if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
                 name = "Projection of Fury",
                 type = "AA",
                 cond = function(self, aaName, target)
@@ -330,29 +337,31 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Taunt",
-                type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
+                name = "AddHate",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return Casting.DetSpellCheck(discSpell)
                 end,
             },
+        },
+        ['AEHateTools'] = {
             {
-                name = "AbsorbTaunt",
-                type = "Disc",
+                name = "Area Taunt",
+                type = "AA",
+            },
+            {
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    if not Config:GetSetting('DoEpic') then return false end
+                    return Config:GetSetting('DoAEDamage')
+                end,
             },
             {
                 name = "AEBlades",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if not Config:GetSetting('DoAEDamage') then return false end
-                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
-                end,
-            },
-            {
-                name = "AddHate1",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DetSpellCheck(discSpell)
+                    return Config:GetSetting('DoAEDamage')
                 end,
             },
         },
@@ -362,16 +371,15 @@ local _ClassConfig = {
             {
                 name = "Armor of Experience",
                 type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() < 25 and Config:GetSetting('DoVetAA')
+                cond = function(self)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') and Config:GetSetting('DoVetAA')
                 end,
             },
             {
                 name = "Fortitude",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and not Casting.IHaveBuff("Flash of Anger") and
-                        not Casting.IHaveBuff("Blade Whirl")
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -390,7 +398,7 @@ local _ClassConfig = {
                 name = "StandDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Core.IsTanking() and self.ClassConfig.HelperFunctions.DiscOverwriteCheck(self)
+                    return Core.IsTanking() and Casting.NoDiscActive()
                 end,
             },
         },
@@ -421,39 +429,25 @@ local _ClassConfig = {
             },
         },
         ['Defenses'] = {
-            { --shares effect with OoW Chest and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
+            { --shares effect with OoW Chest and Warlord's Bravery
                 name = "StandDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
-                    return not mq.TLO.Me.Song(absorbDisc)() and self.ClassConfig.HelperFunctions.DiscOverwriteCheck(self)
+                    return self.ClassConfig.HelperFunctions.DefenseBuffCheck(self)
                 end,
             },
-            { --offset from StandDisc for automation flow/coverage
-                name = "AbsorbDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    local standDisc = self:GetResolvedActionMapItem('StandDisc')
-                    return (not standDisc or mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName())
-                end,
-            },
-            { --shares effect with StandDisc and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
+            { --shares effect with StandDisc and Warlord's Bravery
                 name = "OoW_Chest",
                 type = "Item",
                 cond = function(self, itemName)
-                    local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
-                    local standDisc = Core.GetResolvedActionMapItem('StandDisc')
-                    return (not standDisc or mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName()) and not mq.TLO.Me.Song(absorbDisc)()
+                    return self.ClassConfig.HelperFunctions.DefenseBuffCheck(self)
                 end,
             },
-            { --See above entries for notes
+            { --shares effect with StandDisc and OoW_Chest
                 name = "Warlord's Bravery",
                 type = "AA",
                 cond = function(self, aaName)
-                    local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
-                    local standDisc = Core.GetResolvedActionMapItem('StandDisc')
-                    return (not standDisc or mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName()) and mq.TLO.Me.Song(absorbDisc)() and not Casting.IHaveBuff("Guardian's Boon") and
-                        not Casting.IHaveBuff("Guardian's Bravery")
+                    return self.ClassConfig.HelperFunctions.DefenseBuffCheck(self)
                 end,
             },
             {
@@ -469,13 +463,6 @@ local _ClassConfig = {
                 cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
                     return Casting.SelfBuffItemCheck(itemName)
-                end,
-            },
-            {
-                name = "Epic",
-                type = "Item",
-                cond = function(self, itemName)
-                    return Config:GetSetting('DoEpic')
                 end,
             },
         },
@@ -560,6 +547,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "AbsorbTaunt",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Core.IsTanking()
+                end,
+            },
+            {
                 name = "Flaunt",
                 type = "Disc",
                 cond = function(self, discSpell, target)
@@ -627,7 +621,7 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig']   = {
-        ['Mode']             = {
+        ['Mode']            = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this Toon",
@@ -639,7 +633,7 @@ local _ClassConfig = {
             FAQ = "What do the different Modes Do?",
             Answer = "Tank Mode is for when you are the main tank. DPS Mode is for when you are not the main tank and want to focus on damage.",
         },
-        ['DoBattleLeap']     = {
+        ['DoBattleLeap']    = {
             DisplayName = "Do Battle Leap",
             Category = "Abilities",
             Tooltip = "Do Battle Leap",
@@ -647,7 +641,7 @@ local _ClassConfig = {
             FAQ = "How do I use Battle Leap?",
             Answer = "Enable [DoBattleLeap] in the settings and you will use Battle Leap.",
         },
-        ['DoPress']          = {
+        ['DoPress']         = {
             DisplayName = "Do Press the Attack",
             Category = "Abilities",
             Tooltip = "Use the Press to Attack stun/push AA.",
@@ -655,7 +649,7 @@ local _ClassConfig = {
             FAQ = "Why isn't Press the Attack working?",
             Answer = "This ability must be turned on in the Abilities tab.",
         },
-        ['DoSnare']          = {
+        ['DoSnare']         = {
             DisplayName = "Use Snares",
             Category = "Abilities",
             Tooltip = "Enable casting Snare abilities.",
@@ -663,7 +657,7 @@ local _ClassConfig = {
             FAQ = "How do I use Snares?",
             Answer = "Enable [DoSnare] in the settings and you will use Snares.",
         },
-        ['DoVetAA']          = {
+        ['DoVetAA']         = {
             DisplayName = "Use Vet AA",
             Category = "Abilities",
             Index = 8,
@@ -672,7 +666,7 @@ local _ClassConfig = {
             FAQ = "What Vet AA's does WAR use?",
             Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
-        ['DoAEDamage']       = {
+        ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
             Category = "Abilities",
             Index = 1,
@@ -681,7 +675,7 @@ local _ClassConfig = {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['AETargetCnt']      = {
+        ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
             Category = "Abilities",
             Index = 2,
@@ -693,7 +687,7 @@ local _ClassConfig = {
             Answer =
             "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
-        ['MaxAETargetCnt']   = {
+        ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
             Category = "Abilities",
             Index = 3,
@@ -706,7 +700,7 @@ local _ClassConfig = {
             Answer =
             "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
         },
-        ['SafeAEDamage']     = {
+        ['SafeAEDamage']    = {
             DisplayName = "AE Proximity Check",
             Category = "Abilities",
             Index = 4,
@@ -717,7 +711,7 @@ local _ClassConfig = {
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
-        ['DoAETaunt']        = {
+        ['DoAETaunt']       = {
             DisplayName = "Do AE Taunts",
             Category = "Hate Tools",
             Index = 1,
@@ -726,7 +720,7 @@ local _ClassConfig = {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['AETauntCnt']       = {
+        ['AETauntCnt']      = {
             DisplayName = "AE Taunt Count",
             Category = "Hate Tools",
             Index = 2,
@@ -738,7 +732,7 @@ local _ClassConfig = {
             Answer =
             "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
         },
-        ['SafeAETaunt']      = {
+        ['SafeAETaunt']     = {
             DisplayName = "AE Taunt Safety Check",
             Category = "Hate Tools",
             Index = 3,
@@ -749,7 +743,7 @@ local _ClassConfig = {
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the taunt not being used when it is safe to do so.",
         },
         --Defenses
-        ['DiscCount']        = {
+        ['DiscCount']       = {
             DisplayName = "Def. Disc. Count",
             Category = "Defenses",
             Index = 1,
@@ -761,34 +755,47 @@ local _ClassConfig = {
             FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
             Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
         },
-        ['EmergencyStart']   = {
-            DisplayName = "Emergency Start",
+        ['DefenseStart']    = {
+            DisplayName = "Defense HP",
             Category = "Defenses",
             Index = 2,
-            Tooltip = "Your HP % before we begin to use emergency abilities.",
-            Default = 55,
+            Tooltip = "The HP % where we will use defensive actions like discs, epics, etc.\nNote that fighting a named will also trigger these actions.",
+            Default = 60,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "My WAR health spikes up and down a lot and abilities aren't being triggered, what gives?",
+            FAQ = "My SHD health spikes up and down a lot and abilities aren't being triggered, what gives?",
             Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
-        ['EmergencyLockout'] = {
-            DisplayName = "Emergency Only",
+        ['EmergencyStart']  = {
+            DisplayName = "Emergency Start",
             Category = "Defenses",
             Index = 3,
-            Tooltip = "Your HP % before standard DPS rotations are cut in favor of emergency abilities.",
-            Default = 35,
+            Tooltip = "The HP % before all but essential rotations are cut in favor of emergency or defensive abilities.",
+            Default = 40,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What rotations are cut during Emergency Lockout?",
-            Answer = "Hate Tools - death will cause a bigger issue with aggro. Defenses - we stop using preemptives and go for the oh*#$#.\n" ..
-                "Debuffs, Weaves and other (non-LifeTap) DPS will also be cut.",
+            FAQ = "What rotations are cut during emergencies?",
+            Answer = "Snare, Burn, Combat Weave and Combat rotations are disabled when your health is at emergency levels.\nAdditionally, we will only use non-spell hate tools.",
+        },
+        ['HPCritical']      = {
+            DisplayName = "HP Critical",
+            Category = "Defenses",
+            Index = 4,
+            Tooltip =
+            "The HP % that we will use disciplines like Deflection, Leechcurse, and Leech Touch.\nMost other rotations are cut to give our full focus to survival (See FAQ).",
+            Default = 20,
+            Min = 1,
+            Max = 100,
+            ConfigType = "Advanced",
+            FAQ = "What rotations are cut when HP % is critical?",
+            Answer =
+            "Hate Tools (including AE) and Leech Effect rotations are cut when HP% is critical.\nAdditionally, reaching the emergency threshold would've also cut the Snare, Burn, Combat Weave and Combat Rotations.",
         },
 
         --Equipment
-        ['DoCoating']        = {
+        ['DoCoating']       = {
             DisplayName = "Use Coating",
             Category = "Equipment",
             Index = 3,
@@ -797,7 +804,7 @@ local _ClassConfig = {
             FAQ = "What is a Coating?",
             Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
-        ['UseBandolier']     = {
+        ['UseBandolier']    = {
             DisplayName = "Dynamic Weapon Swap",
             Category = "Equipment",
             Index = 4,
@@ -808,7 +815,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"DW\" to use this function.",
         },
-        ['EquipShield']      = {
+        ['EquipShield']     = {
             DisplayName = "Equip Shield",
             Category = "Equipment",
             Index = 5,
@@ -821,7 +828,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"DW\" to use this function.",
         },
-        ['EquipDW']          = {
+        ['EquipDW']         = {
             DisplayName = "Equip DW",
             Category = "Equipment",
             Index = 6,
@@ -834,7 +841,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"DW\" to use this function.",
         },
-        ['NamedShieldLock']  = {
+        ['NamedShieldLock'] = {
             DisplayName = "Shield on Named",
             Category = "Equipment",
             Index = 7,
@@ -843,11 +850,11 @@ local _ClassConfig = {
             FAQ = "Why does my WAR switch to a Shield on puny gray named?",
             Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
         },
-        ['DoEpic']           = {
+        ['DoEpic']          = {
             DisplayName = "Do Epic",
             Category = "Equipment",
             Index = 8,
-            Tooltip = "Click your Epic Weapon when defenses are triggered.",
+            Tooltip = "Click your Epic Weapon when AE Threat is needed. Also relies on Do AE Damage setting.",
             Default = false,
             FAQ = "How do I use my Epic Weapon?",
             Answer = "Enable Do Epic to click your Epic Weapon.",
