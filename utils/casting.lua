@@ -295,10 +295,16 @@ function Casting.PeerBuffCheck(spellId, target)
         return false
     end
 
-    if DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000):lower() == spellName:lower() then
-        Logger.log_verbose("PeerBuffCheck: Tried to check a peer's buff, but that peer seems to have it blocked. Spell:%s(ID:%d), Target:%s(ID:%d)", spellName, spellId, targetName,
-            targetId)
+    local blockedResult = DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000)
+    if not blockedResult then
+        Logger.log_error(
+            "PeerBuffCheck: Tried to check buff blocking, but something seems to have gone wrong! Your character may not be responding. If this persists, please report it. Spell:%s(ID:%d), Target:%s(ID:%d)",
+            spellName, spellId, targetName, targetId)
+    elseif blockedResult:lower() == spellName:lower() then
+        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) appears to be blocked on %s(ID:%d). Aborting Check.", spellName, spellId, targetName, targetId)
         return false
+    else
+        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not appear to be blocked on %s(ID:%d).", spellName, spellId, targetName, targetId)
     end
 
     local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spellId), 1000)
@@ -342,7 +348,9 @@ function Casting.PeerBuffCheck(spellId, target)
         Logger.log_verbose("PeerBuffCheck: %s(ID:%d) found on %s(ID:%d), ending check.", spellName, spellId, targetName, targetId)
         return false
     else
-        Logger.log_error("PeerBuffCheck: Tried to check buff presence for %s(ID:%d), but something seems to have gone wrong! Please report this.")
+        Logger.log_error(
+            "PeerBuffCheck: Tried to check buff presence, but something seems to have gone wrong! Your character may not be responding. If this persists, please report it. Spell:%s(ID:%d), Target:%s(ID:%d)",
+            spellName, spellId, targetName, targetId)
         return false
     end
 
