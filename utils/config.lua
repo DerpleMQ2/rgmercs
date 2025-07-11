@@ -845,6 +845,16 @@ Config.DefaultConfig = {
         Default = false,
         ConfigType = "Advanced",
     },
+    ['AggroStopNuke']        = {
+        DisplayName = "Aggo Stop Nuking Pct",
+        Category = "Spells/Abils",
+        Index = 4,
+        Tooltip = "Stop casting nukes if aggro is above this percent.",
+        Default = 80,
+        Min = 1,
+        Max = 101,
+        ConfigType = "Advanced",
+    },
     ['WaitOnGlobalCooldown'] = {
         DisplayName = "Wait on Global Cooldown",
         Category = "Spells/Abils",
@@ -1366,6 +1376,14 @@ Config.DefaultConfig = {
         FAQ = "There are a lot of options on the main panel, how do I hide some of them?",
         Answer = "You can set the [ShowAllOptionsMain] option to false to hide some of the options on the main panel.",
     },
+    ['ShowVarNames']         = {
+        DisplayName = "Show Variable names",
+        Category = "UI",
+        Tooltip = "Show Variable Names on the main panel",
+        Default = false,
+        FAQ = "How do I see the variable names instead of the display names?",
+        Answer = "You can set the [ShowVarNames] to see variable names instead of display names.",
+    },
     ['FrameEdgeRounding']    = {
         DisplayName = "Frame Edge Rounding",
         Category = "UI",
@@ -1479,7 +1497,20 @@ Config.DefaultConfig = {
         FAQ = "How do I log to a file?",
         Answer = "You can set the [LogToFile] option to true to write all logs to the mqlog file.",
     },
-
+    ['LogToMQConsole']       = {
+        DisplayName = "Log To Console",
+        Category = "Debug",
+        Tooltip = "Write all logs to the mq console as well as RG Console.",
+        Type = "Custom",
+        Default = false,
+        ConfigType = "Advanced",
+        FAQ = "How do I hide the logs in the MQ console?",
+        Answer = "You can set the [LogToMQConsole] option to false to hide logging to MQ Console.",
+    },
+    ['LastFilter']           = {
+        Type = "Custom",
+        Default = '',
+    },
     -- [ ANNOUNCEMENTS ] --
     ['AnnounceTarget']       = {
         DisplayName = "Announce Target",
@@ -1639,6 +1670,7 @@ function Config:SaveSettings()
     mq.pickle(self:GetConfigFileName(), self.settings)
     Logger.set_log_level(Config:GetSetting('LogLevel'))
     Logger.set_log_to_file(Config:GetSetting('LogToFile'))
+    Logger.set_log_to_mq_console(Config:GetSetting('LogToMQConsole'))
 end
 
 function Config:LoadSettings()
@@ -1966,6 +1998,12 @@ function Config:DeleteOA(idx)
     else
         Logger.log_error("\ar%d is not a valid OA ID!", idx)
     end
+end
+
+--- Clear the OA list completely
+function Config:ClearOA()
+    self.settings['OutsideAssistList'] = {}
+    self:SaveSettings()
 end
 
 --- Moves the OA with the given ID up.
