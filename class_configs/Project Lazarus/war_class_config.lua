@@ -8,7 +8,7 @@ local Logger       = require("utils.logger")
 local Set          = require('mq.set')
 
 local _ClassConfig = {
-    _version            = "2.2 - Project Lazarus",
+    _version            = "3.0 - Project Lazarus",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -196,6 +196,7 @@ local _ClassConfig = {
             name = 'AEHateTools',
             state = 1,
             steps = 1,
+            timer = 1, -- Don't check this more often than once a second to avoid blowing every ability at once (aggro takes time to update)
             doFullRotation = true,
             load_cond = function()
                 return Core.IsTanking() and Config:GetSetting('DoAETaunt') and
@@ -325,7 +326,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
+                    return Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() or (mq.TLO.Target.SecondaryPctAggro() or 0) > 70)
                 end,
             },
             {
@@ -333,7 +334,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Targeting.IsNamed(target) and (mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() or (mq.TLO.Target.SecondaryPctAggro() or 0) > 80)
                 end,
             },
             {
@@ -575,8 +576,9 @@ local _ClassConfig = {
                 name = "Rampage",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting("DoAEDamage") then return false end
-                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    if not Config:GetSetting("DoAEDamage") or Config:GetSetting('UseRampage') == 1 then return false end
+                    return (Config:GetSetting('UseRampage') == 3 or (Config:GetSetting('UseRampage') == 2 and Casting.BurnCheck())) and
+                        self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
@@ -629,6 +631,8 @@ local _ClassConfig = {
             FAQ = "What do the different Modes Do?",
             Answer = "Tank Mode is for when you are the main tank. DPS Mode is for when you are not the main tank and want to focus on damage.",
         },
+
+        --Abilities
         ['DoBattleLeap']    = {
             DisplayName = "Do Battle Leap",
             Category = "Abilities",
@@ -648,7 +652,7 @@ local _ClassConfig = {
         ['DoSnare']         = {
             DisplayName = "Use Snares",
             Category = "Abilities",
-            Tooltip = "Enable casting Snare abilities.",
+            Tooltip = "Use Call of Challenge to snare enemies.",
             Default = true,
             FAQ = "How do I use Snares?",
             Answer = "Enable [DoSnare] in the settings and you will use Snares.",
@@ -662,9 +666,11 @@ local _ClassConfig = {
             FAQ = "What Vet AA's does WAR use?",
             Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
+
+        --AE Damage
         ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
-            Category = "Abilities",
+            Category = "AE Damage",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
             Default = false,
@@ -673,7 +679,7 @@ local _ClassConfig = {
         },
         ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
-            Category = "Abilities",
+            Category = "AE Damage",
             Index = 2,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
@@ -685,7 +691,7 @@ local _ClassConfig = {
         },
         ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
-            Category = "Abilities",
+            Category = "AE Damage",
             Index = 3,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -698,7 +704,7 @@ local _ClassConfig = {
         },
         ['SafeAEDamage']    = {
             DisplayName = "AE Proximity Check",
-            Category = "Abilities",
+            Category = "AE Damage",
             Index = 4,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -707,14 +713,32 @@ local _ClassConfig = {
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
+        ['UseRampage']      = {
+            DisplayName = "Rampage Use:",
+            Category = "AE Damage",
+            Index = 5,
+            Tooltip = "Use Rampage 1-Never 2-Burns 3-Always",
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my WAR using Rampage on these trash mobs?",
+            Answer = "By default, we use the Rampage in any combat with enough AE targets (per your AE settings).\n" ..
+                "This can be adjusted in the Buffs tab.",
+        },
+
+        --Hate Tools
         ['DoAETaunt']       = {
             DisplayName = "Do AE Taunts",
             Category = "Hate Tools",
             Index = 1,
-            Tooltip = "Use AE hatred Discs and AA.",
+            Tooltip = "Use AE hatred Discs and AA (see FAQ for specifics).",
             Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+            FAQ = "What AE Taunts are used?",
+            Answer =
+            "If Do AE Taunts is enabled, we will use (Enhanced) Area Taunt as needed. If we also enable Do AE Damage, we will use the blades line, and if the epic is enabled, it will be used.",
         },
         ['AETauntCnt']      = {
             DisplayName = "AE Taunt Count",
@@ -732,7 +756,8 @@ local _ClassConfig = {
             DisplayName = "AE Taunt Safety Check",
             Category = "Hate Tools",
             Index = 3,
-            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE taunts are used. May result in non-use due to false positives.",
+            Tooltip =
+            "*THIS IS NOT A CHECK FOR MEZ SETTING* Check to ensure there aren't neutral mobs in range we could aggro if AE taunts are used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Taunt Safety Check?",
             Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the taunt.\n" ..
@@ -791,10 +816,19 @@ local _ClassConfig = {
         },
 
         --Equipment
+        ['DoEpic']          = {
+            DisplayName = "Do Epic",
+            Category = "Equipment",
+            Index = 1,
+            Tooltip = "Click your Epic Weapon when AE Threat is needed. Also relies on Do AE Damage setting.",
+            Default = false,
+            FAQ = "How do I use my Epic Weapon?",
+            Answer = "Enable Do Epic to click your Epic Weapon.",
+        },
         ['DoCoating']       = {
             DisplayName = "Use Coating",
             Category = "Equipment",
-            Index = 3,
+            Index = 2,
             Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
             Default = false,
             FAQ = "What is a Coating?",
@@ -803,7 +837,7 @@ local _ClassConfig = {
         ['UseBandolier']    = {
             DisplayName = "Dynamic Weapon Swap",
             Category = "Equipment",
-            Index = 4,
+            Index = 3,
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"DW\" TO USE THIS FUNCTION.***",
             RequiresLoadoutChange = true,
             Default = false,
@@ -814,7 +848,7 @@ local _ClassConfig = {
         ['EquipShield']     = {
             DisplayName = "Equip Shield",
             Category = "Equipment",
-            Index = 5,
+            Index = 4,
             Tooltip = "Under this HP%, you will swap to your \"Shield\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 50,
             Min = 1,
@@ -827,7 +861,7 @@ local _ClassConfig = {
         ['EquipDW']         = {
             DisplayName = "Equip DW",
             Category = "Equipment",
-            Index = 6,
+            Index = 5,
             Tooltip = "Over this HP%, you will swap to your \"DW\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 75,
             Min = 1,
@@ -840,20 +874,11 @@ local _ClassConfig = {
         ['NamedShieldLock'] = {
             DisplayName = "Shield on Named",
             Category = "Equipment",
-            Index = 7,
+            Index = 6,
             Tooltip = "Keep Shield equipped for Named mobs(must be in SpawnMaster or named.lua)",
             Default = true,
             FAQ = "Why does my WAR switch to a Shield on puny gray named?",
             Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
-        },
-        ['DoEpic']          = {
-            DisplayName = "Do Epic",
-            Category = "Equipment",
-            Index = 8,
-            Tooltip = "Click your Epic Weapon when AE Threat is needed. Also relies on Do AE Damage setting.",
-            Default = false,
-            FAQ = "How do I use my Epic Weapon?",
-            Answer = "Enable Do Epic to click your Epic Weapon.",
         },
     },
 }
