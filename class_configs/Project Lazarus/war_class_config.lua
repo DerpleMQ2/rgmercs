@@ -346,10 +346,6 @@ local _ClassConfig = {
         },
         ['AEHateTools'] = {
             {
-                name = "Area Taunt",
-                type = "AA",
-            },
-            {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
@@ -363,6 +359,10 @@ local _ClassConfig = {
                 cond = function(self, discSpell)
                     return Config:GetSetting('DoAEDamage')
                 end,
+            },
+            {
+                name_func = function(self) return Casting.GetFirstAA({ "Enhanced Area Taunt", "Area Taunt", }) end,
+                type = "AA",
             },
         },
         ['EmergencyDefenses'] = {
@@ -504,10 +504,6 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     return Core.IsTanking() and Casting.SelfBuffAACheck(aaName)
                 end,
-            },
-            {
-                name = "Wars Sheol's Heroic Blade",
-                type = "AA",
             },
             {
                 name = "Battered Smuggler's Barrel",
