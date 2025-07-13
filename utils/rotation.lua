@@ -1,4 +1,5 @@
 local mq         = require('mq')
+local Set        = require("mq.Set")
 local Config     = require("utils.config")
 local Core       = require("utils.core")
 local Logger     = require("utils.logger")
@@ -207,9 +208,15 @@ end
 --- @param entry table RotationEntry object from class config.
 --- @return any The argument associated with the entry condition.
 function Rotation.GetEntryConditionArg(map, entry)
-    local condArg = map[entry.name] or mq.TLO.Spell(entry.name)
+    local condArg
     local entryType = entry.type:lower()
-    if (entryType ~= "spell" and entryType ~= "song") and (not condArg or entryType == "aa" or entryType == "ability") then
+    local spellTypes = Set.new({ "spell", "song", "disc", })
+
+    if spellTypes:contains(entryType) then -- spell, song, disc need a spell type returned so we can check ranks later
+        condArg = map[entry.name] or mq.TLO.Spell(entry.name)
+    elseif entryType == "item" then        -- item mapping is optional, entry.name can be an actual item name
+        condArg = map[entry.name] or entry.name
+    else                                   -- AA/abils needs to return a name directly in case they share a name with a map
         condArg = entry.name
     end
 
