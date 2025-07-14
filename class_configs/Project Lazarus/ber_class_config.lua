@@ -1,19 +1,12 @@
 local mq        = require('mq')
 local Config    = require('utils.config')
-local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
-local Strings   = require("utils.strings")
 local Logger    = require("utils.logger")
 
 return {
-    _version            = "1.4 - Project Lazarus",
-    -- 1.1 added Dicho to rotation -SCVOne
-    -- 1.2 added Bfrenzy  timer 11 -SCVOne
-    -- 1.3 seperated DPS into 3 sections to increase freq of attacks -SCVOne
-    -- 1.4 Added toggle for Disconcering Disc, Fixed errors in burn phase with minor refactors --Algar
-
-    _author             = "Derple, SCVOne, Algar",
+    _version            = "2.0 - Project Lazarus",
+    _author             = "Algar, Derple",
     ['Modes']           = {
         'DPS',
     },
@@ -22,184 +15,38 @@ return {
             "Vengeful Taelosian Blood Axe",
             "Raging Taelosian Alloy Axe",
         },
-        ['Coat'] = {
-            "Cohort's Warmonger Coat",
+        ['OoW_Chest'] = {
+            "Wrathbringer's Chain Chestguard of the Vindicator",
+            "Ragebound Chain Chestguard",
         },
     },
     ['AbilitySets']     = {
         ['EndRegen'] = {
-            "Second Wind",
             "Third Wind",
-            "Fourth Wind",
-            "Respite",
-            "Reprieve",
-            "Rest",
-            "Breather",
-            "Hiatus",
-            "Relax",
-            "Night's Calming",
-            "Convalesce",
+            "Second Wind",
         },
         ['BerAura'] = {
             "Aura of Rage",
             "Bloodlust Aura",
         },
-        ['Dicho'] = {
-            "Dichotomic Rage",
-            "Dissident Rage",
-            "Composite Rage",
-            "Ecliptic Rage",
-            "Reciprocal Rage",
-        },
-        ['Dfrenzy'] = {
-            "Eviscerating Frenzy",
-            "Oppressing Frenzy",
+        ['FrenzyDisc'] = {
             "Overpowering Frenzy",
-            "Overwhelming Frenzy",
-            "Conquering Frenzy",
-            "Vanquishing Frenzy",
-            "Demolishing Frenzy",
-            "Mangling Frenzy",
-            "Vindicating Frenzy",
         },
-        ['Bfrenzy'] = {
-            "Torrid Frenzy",
-            "Steel Frenzy",
-            "Augmented Frenzy",
-            "Stormwild Frenzy",
-            "Fighting Frenzy",
-            "Combat Frenzy",
-            "Restless Frenzy",
-            "Battle Frenzy",
-            "Amplified Frenzy",
-            "Fearless Frenzy",
-            "Buttressed Frenzy",
-            "Blinding Frenzy",
-            "Heightened Frenzy",
-            -- "Desperate Frenzy",
-            "Magnified Frenzy",
-            "Bolstered Frenzy",
-        },
-        ['Dvolley'] = {
+        ['VolleyDisc'] = {
             "Rage Volley",
             "Destroyer's Volley",
-            "Annihilator's Volley",
-            "Decimator's Volley",
-            "Eradicator's Volley",
-            "Savage Volley",
-            "Sundering Volley",
-            "Brutal Volley",
-            "Demolishing Volley",
-            "Mangling Volley",
-            "Vindicating Volley",
-            "Pulverizing Volley",
-            "Eviscerating Volley",
-        },
-        ['Daxethrow'] = {
-            "Maiming Axe Throw",
-            "Vigorous Axe Throw",
-            "Energetic Axe Throw",
-            "Spirited Axe Throw",
-            "Brutal Axe Throw",
-            "Demolishing Axe Throw",
-            "Mangling Axe Throw",
-            "Vindicating Axe Throw",
-            "Rending Axe Throw",
-        },
-        ['Daxeof'] = {
-            "Axe of Rallos",
-            "Axe of Graster",
-            "Axe of Illdaera",
-            "Axe of Zurel",
-            "Axe of the Aeons",
-            "Axe of Empyr",
-            "Axe of Derakor",
-            "Axe of Xin Diabo",
-            "Axe of Orrak",
-        },
-        ['Phantom'] = {
-            "Phantom Assailant",
-        },
-        ['Alliance'] = {
-            "Demolisher's Alliance,",
-            "Mangler's Covenant",
-            "Vindicator's Coalition",
-            "Conqueror's Conjunction",
-            "Eviscerator's Covariance",
-
-        },
-        ['CheapShot'] = {
-            "Slap in the Face",
-            "Kick in the Teeth",
-            "Punch in The Throat",
-            "Kick in the Shins",
-            "Sucker Punch",
-            "Rabbit Punch",
-            "Swift Punch",
-        },
-        ['AESlice'] = {
-            "Arcblade",
-            "Arcslice",
-            "Arcsteel",
-            "Arcslash",
-            "Arcshear",
-            "Arcscale",
-        },
-        ['AEVicious'] = {
-            "Vicious Spiral",
-            "Vicious Cyclone",
-            "Vicious Cycle",
-            "Vicious Revolution",
-            "Vicious Whirl",
-        },
-        ['FrenzyBoost'] = {
-            "Augmented Frenzy",
-            "Amplified Frenzy",
-            "Bolstered Frenzy",
-            "Magnified Frenzy",
-            "Buttressed Frenzy",
-            "Heightened Frenzy",
-        },
-        ['RageStrike'] = {
-            "Roiling Rage",
-            "Festering Rage",
-            "Bubbling Rage",
-            "Smoldering Rage",
-            "Seething Rage",
-            "Frothing Rage",
-        },
-        ['SharedBuff'] = {
-            "Shared Barbarism",
-            "Shared Bloodlust",
-            "Shared Brutality",
-            "Shared Savagery",
-            "Shared Viciousness",
-            "Shared Cruelty",
-            "Shared Ruthlessness",
-            "Shared Atavism",
-            "Shared Violence",
-        },
-        ['PrimaryBurnDisc'] = {
-            "Berserking Discipline",
-            "Sundering Discipline",
-            "Brutal Discipline",
-        },
-        ['CleavingDisc'] = {
-            "Cleaving Rage Discipline",
-            "Cleaving Anger Discipline",
-            "Cleaving Acrimony Discipline",
         },
         ['FlurryDisc'] = {
             "Vengeful Flurry Discipline",
-            "Avenging Flurry Discipline",
         },
-        ['DisconDisc'] = {
-            "Disconcerting Discipline",
+        ['RageDisc'] = {
+            "Blind Rage Discipline",
+            "Cleaving Rage Discipline",
         },
-        ['ResolveDisc'] = {
-            "Frenzied Resolve Discipline",
+        ['AngerDisc'] = {
+            "Cleaving Anger Discipline",
         },
-        ['HHEBuff'] = {
+        ['CryDisc'] = {
             "Battle Cry",
             "War Cry",
             "Battle Cry of Dravel",
@@ -207,81 +54,71 @@ return {
             "Battle Cry of the Mastruq",
             "Ancient: Cry of Chaos",
         },
-        ['CryDmg'] = {
+        ['GroupCrit'] = {
             "Cry Havoc",
-            "Cry Carnage",
         },
-        ['Tendon'] = {
-            "Tendon Slice",
-            "Tendon Shred",
-            "Tendon Cleave",
-            "Tendon Sever",
-            "Tendon Shear",
-            "Tendon Lacerate",
-            "Tendon Slash",
-            "Tendon Gash",
-            "Tendon Tear",
-            "Tendon Rupture",
-            "Tendon Rip",
+        ['Scream'] = { -- Stun, Throwing/Archery Dmg taken debuff
+            "Bloodcurdling Scream",
+            "Bewildering Scream",
+            "Unsettling Scream",
         },
-        ['SappingStrike'] = {
-            "Sapping Strikes",
-            "Shriveling Strikes",
-            "Draining Strikes",
+        ['StunStrike'] = {
+            "Mind Strike",
+            "Head Crush",
+            "Head Pummel",
+            "Head Strike",
         },
-        ['ReflexDisc'] = {
-            "Reflexive Retaliation",
-            "Instinctive Retaliation",
+        ['SnareStrike'] = {
+            "Crippling Strike",
+            "Leg Slice",
+            "Leg Cut",
+            "Leg Strike",
         },
-        ['RestFrenzy'] = {
-            "Desperate Frenzy",
-            "Blinding Frenzy",
-            "Restless Frenzy",
-
-        },
-        ['RetaliationDodge'] = {
-            "Preemptive Retaliation",
-            "Primed Retaliation",
-            "Premature Retaltion",
-            "Proactive Retaliation",
-            "Prior Retaliation",
-            "Advanced Retaliation",
-            "Early Retaliation",
-        },
-        ['TempleStun'] = {
-            "Temple Shatter",
-            "Temple Bash",
-            "Temple Blow",
-            "Temple Chop",
-            "Temple Crack",
-            "Temple Crush",
-            "Temple Demolish",
-            "Temple Shatter",
-            "Temple Slam",
-            "Temple Smash",
-            "Temple Strike",
-        },
-        ['JarringStrike'] = {
-            "Jarring Crash",
-            "Jarring Strike",
-            "Jarring Smash",
-            "Jarring Clash",
-            "Jarring Slam",
-            "Jarring Blow",
-            "Jarring Crush",
-            "Jarring Smite",
-            "Jarring Jolt",
-            "Jarring Shock",
-            "Jarring Impact",
+        ['DmgModProc'] = {
+            "Unpredictable Rage Discipline",
         },
     },
     ['RotationOrder']   = {
-        -- Downtime doesn't have state because we run the whole rotation at once.
         {
-            name = 'Downtime',
-            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            name = 'Buffs',
+            state = 1,
+            steps = 1,
+            targetId = function(self)
+                return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or { mq.TLO.Me.ID(), }
+            end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.OkayToBuff() and Casting.AmIBuffable()
+                return combat_state == "Combat" or (combat_state == "Downtime" and Casting.OkayToBuff())
+            end,
+        },
+        {
+            name = 'Emergency',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return Targeting.GetXTHaterCount() > 0 and
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
+            end,
+        },
+        { --Keep things from running
+            name = 'Snare',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoSnare') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Targeting.IsNamed(Targeting.GetAutoTarget()) and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+            end,
+        },
+        {
+            name           = 'Burn(Active Discs)',
+            state          = 1,
+            steps          = 1,
+            doFullRotation = true,
+            targetId       = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond           = function(self, combat_state)
+                return combat_state == "Combat" and Casting.BurnCheck() and Casting.NoDiscActive()
             end,
         },
         {
@@ -302,132 +139,14 @@ return {
                 return combat_state == "Combat"
             end,
         },
-        {
-            name = 'DPS2',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
-            end,
-        },
-        {
-            name = 'DPS3',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
-            end,
-        },
     },
-
     ['Rotations']       = {
-        ['Downtime'] = {
-            {
-                name = "Summon Axes",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    if not Config:GetSetting('SummonAxes') then return false end
-
-                    local AxeSkills = {
-                        "Corroded Axe",
-                        "Blunt Axe",
-                        "Steel Axe",
-                        "Bearded Axe",
-                        "Mithril Axe",
-                        "Balanced War Axe",
-                        "Bonesplicer Axe",
-                        "Fleshtear Axe",
-                        "Cold Steel Cleaving Axe",
-                        "Mithril Bloodaxe",
-                        "Rage Axe",
-                        "Bloodseeker's Axe",
-                        "Battlerage Axe",
-                        "Deathfury Axe",
-                        "Tainted Axe of Hatred",
-                        "Axe of The Destroyer",
-                        "Axe of The Annihilator",
-                        "Axe of The Decimator",
-                        "Axe of The Eradicator",
-                        "Axe of The Savage",
-                        "Axe of the Sunderer",
-                        "Axe of The Brute",
-                        "Axe of The Demolisher",
-                        "Axe of The Mangler",
-                        "Axe of The Vindicator",
-                        "Axe of the Conqueror",
-                        "Axe of the Eviscerator",
-                    }
-
-                    if not self.TempSettings.CachedAxeMap then
-                        Logger.log_debug("\atCaching Axe Skill to Item Mapping...")
-                        self.TempSettings.CachedAxeMap = {}
-                        for _, axeSkill in ipairs(AxeSkills) do
-                            local itemID = Casting.GetSummonedItemIDFromSpell(mq.TLO.Spell(axeSkill))
-                            if itemID > 0 then
-                                Logger.log_debug("\ayCached: \at%s\aw summons \am%d", axeSkill, itemID)
-                                self.TempSettings.CachedAxeMap[itemID] = axeSkill
-                            end
-                        end
-                    end
-
-                    local abilitiesThatNeedAxes = {
-                        { name = 'Dvolley',   count_name = 'AutoAxeCount', },
-                        { name = 'Daxethrow', count_name = 'AutoAxeCount', },
-                        { name = 'Daxeof',    count_name = 'AutoAxeCount', },
-                        { name = 'Dicho',     count_name = 'DichoAxeCount', },
-                    }
-
-                    local summonNeededItem = function(summonSkill, itemId, count)
-                        local maxLoops = 10
-                        while mq.TLO.FindItemCount(itemId)() < count do
-                            Logger.log_debug("\ayWe need more %d because we dont have %d - using %s", itemId, count, summonSkill)
-                            self.ClassConfig.HelperFunctions.SummonAxe(mq.TLO.Spell(summonSkill))
-                            maxLoops = maxLoops - 1
-                            if maxLoops <= 0 then return end
-                        end
-                    end
-
-                    for _, ability in ipairs(abilitiesThatNeedAxes) do
-                        local spell = self:GetResolvedActionMapItem(ability.name)
-                        if spell and spell() then
-                            for i = 1, 4 do
-                                local requiredItemID = spell.ReagentID(i)()
-                                if requiredItemID > 0 then
-                                    local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
-                                    if summonSkill then
-                                        Logger.log_verbose("\ayReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
-                                        summonNeededItem(summonSkill, requiredItemID, Config:GetSetting(ability.count_name))
-                                    end
-                                end
-                            end
-                            for i = 1, 4 do
-                                local requiredItemID = spell.NoExpendReagentID(i)()
-                                if requiredItemID > 0 then
-                                    local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
-                                    if summonSkill then
-                                        Logger.log_verbose("\ayNoExpendReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
-                                        summonNeededItem(summonSkill, requiredItemID, Config:GetSetting(ability.count_name))
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end,
-            },
-            {
-                name = "Communion of Blood",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctEndurance() <= 75
-                end,
-            },
+        ['Buffs'] = {
             {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() <= 21
+                    return mq.TLO.Me.PctEndurance() <= 15
                 end,
             },
             {
@@ -438,170 +157,116 @@ return {
                 end,
             },
             {
-                name = "Emergency Rage Cancel",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    if mq.TLO.Me.PctHPs() < 10 and mq.TLO.Me.Buff("Untamed Rage")() then
-                        Core.DoCmd("/removebuff \"Untamed Rage\"")
-                    end
-                end,
-            },
-            {
-                name = "ReflexDisc",
+                name = "GroupCrit",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.SelfBuffCheck(discSpell)
                 end,
             },
-        },
-        ['Burn'] = { --This really needs to be refactored with helper functions sometime. Other prioriities atm. Algar 3/2/25
             {
-                name = "PrimaryBurnDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    local discondisc = self:GetResolvedActionMapItem('DisconDisc')
-                    return Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName()
-                end,
-            },
-            {
-                name = "Savage Spirit",
+                name = "Decapitation",
                 type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Juggernaut Surge",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Blood Pact",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Blinding Fury",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Silent Strikes",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Spire of the Juggernaut",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Desperation",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Focused Furious Rampage",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Untamed Rage",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Coat",
-                type = "Item",
-                cond = function(self, itemName)
-                    return not mq.TLO.Me.PetBuff("Primal Fusion")()
-                end,
-            },
-            {
-                name = "CleavingDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.NoDiscActive() and not Casting.DiscReady(burndisc)
-                end,
-            },
-            {
-                name = "Reckless Abandon",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "Vehement Rage",
-                type = "AA",
-                cond = function(self, aaName)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
-                end,
-            },
-            {
-                name = "ResolveDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    local cleavingdisc = self:GetResolvedActionMapItem('CleavingDisc')
-                    local discondisc = self:GetResolvedActionMapItem('DisconDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
-                        and not (Casting.DiscReady(burndisc) or Casting.DiscReady(cleavingdisc))
-                end,
-            },
-            {
-                name = "FlurryDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    local cleavingdisc = self:GetResolvedActionMapItem('CleavingDisc')
-                    local discondisc = self:GetResolvedActionMapItem('DisconDisc')
-                    local resolvedisc = self:GetResolvedActionMapItem('ResolveDisc')
-                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
-                        and not (Casting.DiscReady(burndisc) or Casting.DiscReady(cleavingdisc) or Casting.DiscReady(resolvedisc))
-                end,
-            },
-            {
-                name = "War Cry of the Braxi",
-                type = "Disc",
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName)
                 end,
             },
+        },
+        ['Emergency'] = {
             {
-                name = "HHEBuff",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return not Casting.AAReady("War Cry of the Braxi") and Casting.NoDiscActive() and Casting.SelfBuffCheck(discSpell)
+                name = "Armor of Experience",
+                type = "AA",
+                cond = function(self, aaName)
+                    if not Config:GetSetting('DoVetAA') then return false end
+                    return mq.TLO.Me.PctHPs() < 35
                 end,
+            },
+            {
+                name = "Uncanny Resilience",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Targeting.IHaveAggro(100)
+                end,
+            },
+            {
+                name = "Blood Drinker's Coating",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoCoating') then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
+                end,
+            },
+        },
+        ['Snare'] = {
+            {
+                name = "SnareStrike",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.DetSpellCheck(discSpell) and Targeting.MobHasLowHP(target)
+                end,
+            },
+        },
+        ['Burn(Active Discs)'] = {
+            { -- Goes to disc window on laz
+                name = "Savage Spirit",
+                type = "AA",
+            },
+            {
+                name = "AngerDisc",
+                type = "Disc",
+            },
+            {
+                name = "RageDisc",
+                type = "Disc",
+            },
+            {
+                name = "FlurryDisc",
+                type = "Disc",
+            },
+            { --goes to disc window on laz
+                name_func = function(self) return Casting.GetFirstAA({ "Cascading Rage", "Untamed Rage", }) end,
+                type = "AA",
+            },
+            {
+                name = "DmgModProc",
+                type = "Disc",
+            },
+        },
+        ['Burn'] = {
+            {
+                name = "OoW_Chest",
+                type = "Item",
+            },
+            {
+                name = "Juggernaut Surge",
+                type = "AA",
+            },
+            {
+                name = "Fundament: Third Spire of Savagery",
+                type = "AA",
+            },
+            {
+                name = "CryDisc",
+                type = "Disc",
+            },
+            {
+                name = "Blinding Fury",
+                type = "AA",
+            },
+            {
+                name = "Blood Pact",
+                type = "AA",
+            },
+            {
+                name = "Vehement Rage",
+                type = "AA",
+            },
+            {
+                name = "Desperation",
+                type = "AA",
+            },
+            {
+                name = "Reckless Abandon",
+                type = "AA",
             },
             {
                 name = "Battered Smuggler's Barrel",
@@ -612,212 +277,89 @@ return {
             {
                 name = "Epic",
                 type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoEpic') then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
+                cond = function(self, itemName)
+                    if Config:GetSetting('UseEpic') == 1 then return false end
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and Casting.SelfBuffItemCheck(itemName)
                 end,
+            },
+            { --TODO: Verify all of this for laz. cursory exam shows it being the same
+                name = "Battle Leap",
+                type = "AA",
+                cond = function(self, aaName)
+                    if not Config:GetSetting('DoBattleLeap') then return false end
+                    return not Casting.IHaveBuff("Battle Leap Warcry") and not Casting.IHaveBuff("Group Bestial Alignment")
+                        ---@diagnostic disable-next-line: undefined-field --Defs are not updated with HeadWet
+                        and not mq.TLO.Me.HeadWet() --Stops Leap from launching us above the water's surface
+                end,
+            },
+            {
+                name = "Rampage",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting("DoAEDamage") or Config:GetSetting('UseRampage') == 1 then return false end
+                    return (Config:GetSetting('UseRampage') == 3 or (Config:GetSetting('UseRampage') == 2 and Casting.BurnCheck())) and
+                        self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                end,
+            },
+            {
+                name = "Scream",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.DetSpellCheck(discSpell, target)
+                end,
+            },
+            {
+                name = "FrenzyDisc",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.DetSpellCheck(discSpell, target)
+                end,
+            },
+            {
+                name = "VolleyDisc",
+                type = "Disc",
             },
             {
                 name = "Frenzy",
                 type = "Ability",
             },
             {
-                name = "Dfrenzy",
-                type = "Disc",
-            },
-            {
-                name = "Dvolley",
-                type = "Disc",
-            },
-            {
-                name = "Daxeof",
-                type = "Disc",
-            },
-            {
-                name = "Daxethrow",
-                type = "Disc",
-            },
-            {
-                name = "SharedBuff",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
-                name = "RageStrike",
-                type = "Disc",
-            },
-            {
-                name = "Phantom",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Config:GetSetting('DoPet')
-                end,
-            },
-            {
-                name = "SappingStrike",
-                type = "Disc",
-            },
-            {
-                name = "Decapitation",
-                type = "AA",
-                cond = function(self, aaName)
-                    -- on emu this is activated on live it is passive.
-                    return not Casting.IHaveBuff(Casting.GetAASpell(aaName))
-                end,
-            },
-            {
-                name = "Binding Axe",
+                name = "Distraction Attack",
                 type = "AA",
             },
             {
-                name = "Intimidation",
-                type = "Ability",
-                cond = function(self, abilityName)
-                    return Config:GetSetting('DoIntimidate')
-                end,
-            },
-            {
-                name = "AESlice",
+                name = "StunStrike",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Config:GetSetting('DoAoe')
+                cond = function(self, discSpell, target)
+                    if not Config:GetSetting('DoStun') then return false end
+                    return Casting.DetSpellCheck(discSpell)
                 end,
-            },
-            {
-                name = "Alliance",
-                type = "spell",
-                cond = function(self, spell)
-                    return Config:GetSetting('DoAlliance') and Casting.CanAlliance() and
-                        not Casting.TargetHasBuff(spell)
-                end,
-            },
-            {
-                name = "BraxiChain",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    if not Casting.AAReady("Braxi's Howl") then return false end
-                    local ret = false
-                    ret = ret or Casting.UseAA("Braxi's Howl", Config.Globals.AutoTargetID)
-                    ret = ret or Casting.UseDisc(self.ResolvedActionMap['Dicho'], Config.Globals.AutoTargetID)
-
-                    return ret
-                end,
-            },
-            {
-                name = "DisconDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    if not Config:GetSetting('DoDisconDisc') then return false end
-                    return Casting.NoDiscActive()
-                end,
-            },
-            {
-                name = "Bloodfury",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.DiscReady(self.ResolvedActionMap['FrenzyBoost']) and mq.TLO.Me.PctHPs() >= 90
-                end,
-            },
-            {
-                name = "FrenzyBoost",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
-                name = "CryDmg",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
-                name = "Communion of Blood",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctEndurance() <= 75
-                end,
-            },
-            {
-                name = "Intimidation",
-                type = "Ability",
-                cond = function(self, abilityName)
-                    return Config:GetSetting('DoIntimidate')
-                end,
-            },
-        },
-        ['DPS2'] = {
-            {
-                name = "Battle Leap",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoBattleLeap') and not Casting.IHaveBuff("Battle Leap Warcry") and
-                        not Casting.IHaveBuff("Group Bestial Alignment")
-                        ---@diagnostic disable-next-line: undefined-field --Defs are not updated with HeadWet
-                        and not mq.TLO.Me.HeadWet() --Stops Leap from launching us above the water's surface
-                end,
-            },
-            {
-                name = "Drawn to Blood",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Targeting.GetTargetDistance() > 15
-                end,
-            },
-        },
-        ['DPS3'] = {
-            {
-                name = "Dicho",
-                type = "Disc",
-            },
-            {
-                name = "Bfrenzy",
-                type = "Disc",
             },
         },
     },
     ['HelperFunctions'] = {
-        SummonAxe = function(axeDisc)
-            if not axeDisc or not axeDisc() then return false end
-            Logger.log_verbose("\aySummonAxe(): Checking if %s is ready.", axeDisc.Name())
-            if not Casting.DiscReady(axeDisc) then return false end
-            Logger.log_verbose("\aySummonAxe(): Checking AutoAxeAcount")
-            if Config:GetSetting('AutoAxeCount') == 0 then return false end
-            if mq.TLO.FindItemCount(axeDisc)() > Config:GetSetting('AutoAxeCount') then return false end
+        AETargetCheck = function(printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < Config:GetSetting('AETargetCnt') or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
 
-            Logger.log_verbose("\aySummonAxe(): Checking For Reagents")
-            if mq.TLO.FindItemCount(axeDisc.ReagentID(1)())() == 0 then return false end
-
-            if mq.TLO.Cursor.ID() ~= nil then Core.DoCmd("/autoinv") end
-            local ret = Casting.UseDisc(axeDisc, mq.TLO.Me.ID())
-            Logger.log_verbose("\aySummonAxe(): Waiting for Summon to Finish")
-            Casting.WaitCastFinish(mq.TLO.Me, false, axeDisc.Range() or 0)
-            Logger.log_verbose("\agSummonAxe(): Done!")
-            mq.delay(500, function() return mq.TLO.Cursor.ID() ~= nil end)
-            while mq.TLO.Cursor.ID() ~= nil do Core.DoCmd("/autoinv") end
-            return ret
-        end,
-        PreEngage = function(target)
-            local openerAbility = Core.GetResolvedActionMapItem('CheapShot')
-
-            if not openerAbility then return end
-
-            Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
-
-            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.PctEndurance() >= 5 and Config:GetSetting("DoOpener") and Targeting.GetTargetDistance() < 50 then
-                Casting.UseDisc(openerAbility, target)
-                Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
-            else
-                Logger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Distance to Target = %d, Endurance = %d", openerAbility or "None",
-                    Strings.BoolToColorString(Config:GetSetting("DoOpener")), Targeting.GetTargetDistance(), mq.TLO.Me.PctEndurance() or 0)
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+                    end
+                    return false
+                end
             end
+
+            return true
         end,
     },
     ['DefaultConfig']   = {
-        ['Mode']            = {
+        ['Mode']           = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this Toon",
@@ -829,90 +371,155 @@ return {
             FAQ = "What do the different modes do?",
             Answer = "Currently Berserkers Only have DPS mode. More modes will be added in the future.",
         },
-        ['DoEpic']          = {
-            DisplayName = "Do Epic",
-            Category = "Abilities",
-            Tooltip = "Enable using your epic clicky",
-            Default = true,
-            FAQ = "Why am I not using my Epic clicky?",
-            Answer = "Make sure you have [DoEpic] enabled.",
+
+        --Equipment
+        ['UseEpic']        = {
+            DisplayName = "Epic Use:",
+            Category = "Equipment",
+            Index = 1,
+            Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my BER using Epic on these trash mobs?",
+            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
+                "This can be adjusted in the Buffs tab.",
         },
-        ['DoOpener']        = {
-            DisplayName = "Use Openers",
-            Category = "Abilities",
-            Tooltip = "Use Opening Arrow Shot Silent Shot Line.",
-            Default = true,
-            FAQ = "Why am I not using my opener?",
-            Answer = "Make sure you have [DoOpener] enabled.",
+        ['DoCoating']      = {
+            DisplayName = "Use Coating",
+            Category = "Equipment",
+            Index = 2,
+            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Default = false,
+            FAQ = "What is a Coating?",
+            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
-        ['DoBattleLeap']    = {
+
+        -- Combat
+        ['DoBattleLeap']   = {
             DisplayName = "Do Battle Leap",
-            Category = "Abilities",
+            Category = "Combat",
+            Index = 1,
             Tooltip = "Enable using Battle Leap",
             Default = true,
             FAQ = "Why am I not using Battle Leap?",
             Answer = "Make sure you have [DoBattleLeap] enabled.",
         },
-        ['DoIntimidate']    = {
-            DisplayName = "Do Intimidate",
-            Category = "Abilities",
-            Tooltip = "Enable using Intimidate",
+        ['DoSnare']        = {
+            DisplayName = "Do Snare",
+            Category = "Combat",
+            Index = 2,
+            Tooltip = "Snare opponents with low health.",
             Default = false,
-            FAQ = "Why am I not using Intimidate?",
-            Answer = "Make sure you have [DoIntimidate] enabled.\n" ..
-                "Early levels of Intimidate can fear the target.\nUSE WITH CAUTION!",
+            FAQ = "Why am I not snaring mobs?",
+            Answer = "You can enable the Snare discs in your class options.",
         },
-        ['DoAoe']           = {
-            DisplayName = "Do AoE",
-            Category = "Abilities",
-            Tooltip = "Enable using AoE Abilities",
+        ['SnareCount']     = {
+            DisplayName = "Snare Max Mob Count",
+            Category = "Combat",
+            Index = 3,
+            Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
+            Default = 3,
+            Min = 1,
+            Max = 99,
+            FAQ = "Why is my berserker not using snare?",
+            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
+                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
+        },
+        ['DoStun']         = {
+            DisplayName = "Do Stun",
+            Category = "Combat",
+            Index = 4,
+            Tooltip = "Attempt to stun your opponents.",
+            Default = false,
+            FAQ = "Why am I using Stun discs on an immune mob?",
+            Answer = "If enabled, these abilities fires blindly. You can turn it off in your Class options.",
+        },
+        ['EmergencyStart'] = {
+            DisplayName = "Emergency HP%",
+            Category = "Combat",
+            Index = 4,
+            Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
+            Default = 50,
+            Min = 1,
+            Max = 100,
+            ConfigType = "Advanced",
+            FAQ = "How do I use my Emergency Mitigation Abilities?",
+            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
+        },
+        ['DoVetAA']        = {
+            DisplayName = "Use Vet AA",
+            Category = "Combat",
+            Index = 5,
+            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
-            FAQ = "Why am I not using AoE?",
-            Answer = "Make sure you have [DoAoe] enabled.",
+            FAQ = "What Vet AA's does SHD use?",
+            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
-        ['SummonAxes']      = {
-            DisplayName = "Summon Axes",
-            Category = "Abilities",
-            Tooltip = "Enable Summon Axes",
-            Default = true,
-            FAQ = "Why am I not summoning Axes?",
-            Answer = "Make sure you have [SummonAxes] enabled.",
+
+        --AE Damage
+        ['DoAEDamage']     = {
+            DisplayName = "Do AE Damage",
+            Category = "AE Damage",
+            Index = 1,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['AutoAxeCount']    = {
-            DisplayName = "Auto Axe Count",
-            Category = "Abilities",
-            Tooltip = "Summon more Primary Axes when you hit [x] left.",
-            Default = 100,
-            Min = 0,
-            Max = 600,
-            FAQ = "I keep running out of Axes, what do I do?",
-            Answer = "Increase the [AutoAxeCount] to summon more Axes when you hit this threshold remaining.",
+        ['AETargetCnt']    = {
+            DisplayName = "AE Target Count",
+            Category = "AE Damage",
+            Index = 2,
+            Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
+            Default = 2,
+            Min = 1,
+            Max = 10,
+            FAQ = "Why am I using AE abilities on only a couple of targets?",
+            Answer =
+            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
-        ['DichoAxeCount']   = {
-            DisplayName = "Auto Dicho Axe Count",
-            Category = "Abilities",
-            Tooltip = "Summon more Dicho Axes when you hit [x] left.",
-            Default = 100,
-            Min = 0,
-            Max = 600,
-            FAQ = "I keep running out of Dicho Axes, what do I do?",
-            Answer = "Increase the [DichoAxeCount] to summon more Dicho Axes when you hit this threshold remaining.",
+        ['MaxAETargetCnt'] = {
+            DisplayName = "Max AE Targets",
+            Category = "AE Damage",
+            Index = 3,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 5,
+            Min = 2,
+            Max = 30,
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
+            Answer =
+            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
         },
-        ['SummonDichoAxes'] = {
-            DisplayName = "Summon Dicho Axes",
-            Category = "Abilities",
-            Tooltip = "Enable Summon Dicho Axes",
-            Default = true,
-            FAQ = "Why am I not summoning Dicho Axes?",
-            Answer = "Make sure you have [SummonDichoAxes] enabled.",
+        ['SafeAEDamage']   = {
+            DisplayName = "AE Proximity Check",
+            Category = "AE Damage",
+            Index = 4,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
-        ['DoDisconDisc']    = {
-            DisplayName = "Do Discon Disc",
-            Category = "Abilities",
-            Tooltip = "Enable using Disconcerting Discipline",
-            Default = true,
-            FAQ = "Why am I not using Disconcerting Discipline?",
-            Answer = "Make sure you have [DoDisconDisc] enabled.",
+        ['UseRampage']     = {
+            DisplayName = "Rampage Use:",
+            Category = "AE Damage",
+            Index = 5,
+            Tooltip = "Use Rampage 1-Never 2-Burns 3-Always",
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my BER using Rampage on these trash mobs?",
+            Answer = "By default, we use the Rampage in any combat with enough AE targets (per your AE settings).\n" ..
+                "This can be adjusted in the Buffs tab.",
         },
     },
 }
