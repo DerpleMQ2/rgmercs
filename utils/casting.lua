@@ -1690,13 +1690,13 @@ end
 --- @param aaList table The list of AA to check.
 --- @return string The name of the selected AA (or "None" if no ability was found).
 function Casting.GetFirstAA(aaList)
-    if not aaList or type(aaList) ~= "table" then return "None" end
-
-    local ret = "None"
-    for _, abil in ipairs(aaList) do
-        if Casting.CanUseAA(abil) then
-            ret = abil
-            break
+    local ret = "Unpurchased AA"
+    if aaList and type(aaList) == "table" then
+        for _, abil in ipairs(aaList) do
+            if Casting.CanUseAA(abil) then
+                ret = abil
+                break
+            end
         end
     end
     return ret
@@ -1706,13 +1706,13 @@ end
 --- @param mapList table The list of mapped actions to check.
 --- @return string The name of the selected map (or "None" if no ability was found).
 function Casting.GetFirstMapItem(mapList)
-    if not mapList or type(mapList) ~= "table" then return "None" end
-
-    local ret = "None"
-    for _, abil in ipairs(mapList) do
-        if Core.GetResolvedActionMapItem(abil) then
-            ret = abil
-            break
+    local ret = "Unlearned Spell/Ability"
+    if mapList and type(mapList) == "table" then
+        for _, abil in ipairs(mapList) do
+            if Core.GetResolvedActionMapItem(abil) then
+                ret = abil
+                break
+            end
         end
     end
     return ret
