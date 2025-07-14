@@ -60,8 +60,8 @@ local _ClassConfig = {
             "Mock",
         },
         ['EndRegen'] = {
-            "Second Wind",
             "Third Wind", -- also does HP
+            "Second Wind",
         },
         ['AuraBuff'] = {
             "Champion's Aura",
@@ -88,10 +88,6 @@ local _ClassConfig = {
         ['ShockDisc'] = { -- Timer 7, defensive stun proc
             "Shocking Defense Discipline",
         },
-        ['Elbow'] = {
-            "Elbow Strike",
-        },
-        -- Where does Jeer go?
     },
     ['HelperFunctions'] = {
         --function to determine if we should AE taunt and optionally, if it is safe to do so
@@ -611,10 +607,6 @@ local _ClassConfig = {
             {
                 name = "Kick",
                 type = "Ability",
-            },
-            {
-                name = "Elbow",
-                type = "Disc",
             },
         },
     },
