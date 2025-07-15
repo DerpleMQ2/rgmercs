@@ -535,4 +535,20 @@ function Targeting.AggroCheckOkay()
     return (mq.TLO.Target.PctAggro() or 0) < Config:GetSetting('MobMaxAggro') or not Config:GetSetting('AggroThrottling')
 end
 
+function Targeting.TargetNotStunned()
+    local autoTarget = Targeting.GetAutoTarget()
+    if not autoTarget or not autoTarget() then return false end
+    return not autoTarget.Stunned()
+end
+
+function Targeting.LostAutoTargetAggro()
+    if Config.Globals.AutoTargetID == 0 or mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then return false end
+    return mq.TLO.Me.PctAggro() < 100
+end
+
+function Targeting.HateToolsNeeded()
+    if Config.Globals.AutoTargetID == 0 or mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then return false end
+    return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget())
+end
+
 return Targeting

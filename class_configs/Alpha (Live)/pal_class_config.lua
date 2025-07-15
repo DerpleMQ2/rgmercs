@@ -1768,7 +1768,7 @@ local _ClassConfig = {
             Tooltip = "Minimum number of haters before using AE Taunt Spells or AA.",
             Default = 2,
             Min = 1,
-            Max = 10,
+            Max = 30,
             FAQ = "Why don't we use AE taunts on single targets?",
             Answer =
             "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",

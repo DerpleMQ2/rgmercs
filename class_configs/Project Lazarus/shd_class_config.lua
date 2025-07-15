@@ -17,7 +17,7 @@ local Tooltips     = {
     Blade               = "Ability Line: Double 2HS Attack w/ Accuracy Mod",
     Crimson             = "Disicpline Line: Triple Attack w/ Accuracy Mod",
     MeleeMit            = "Discipline Line: Absorb Incoming Dmg",
-    Deflection          = "Discipline: Shield Block Chance 100%",
+    BlockDisc           = "Discipline: Shield Block Chance 98-99%",
     LeechCurse          = "Discipline: Melee LifeTap w/ Increase Hit Chance",
     UnholyAura          = "Discipline: Increase LifeTap Spell Damage",
     Guardian            = "Discipline: Melee Mitigation w/ Defensive LifeTap & Lowered Melee DMG Output",
@@ -127,7 +127,7 @@ local _ClassConfig = {
             "Soul Guard",
             "Ichor Guard", -- Level 56, Timer 5
         },
-        ['Deflection'] = {
+        ['BlockDisc'] = {
             "Rampart Discipline",
             "Deflection Discipline",
         },
@@ -391,8 +391,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
-                ---@diagnostic disable-next-line: undefined-field -- doesn't like secondarypct
-                return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget()))
+                return combat_state == "Combat" and Targeting.HateToolsNeeded()
             end,
         },
         { --Actions that establish or maintain hatred
@@ -637,9 +636,9 @@ local _ClassConfig = {
                 tooltip = Tooltips.OoW_BP,
             },
             { --Note that on named we may already have a defensive disc running already, could make this remove other discs, but we have other options.
-                name = "Deflection",
+                name = "BlockDisc",
                 type = "Disc",
-                tooltip = Tooltips.Deflection,
+                tooltip = Tooltips.BlockDisc,
                 pre_activate = function(self)
                     if Config:GetSetting('UseBandolier') then
                         Core.SafeCallFunc("Equip Shield", ItemManager.BandolierSwap, "Shield")
@@ -681,33 +680,28 @@ local _ClassConfig = {
                 type = "Ability",
                 tooltip = Tooltips.Taunt,
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
+                    return Targeting.LostAutoTargetAggro() and Targeting.GetTargetDistance(target) < 30
+                end,
+            },
+
+            { --8min reuse, save for we still can't get a mob back after trying to taunt
+                name = "Ageless Enmity",
+                type = "AA",
+                tooltip = Tooltips.AgelessEnmity,
+                cond = function(self, aaName, target)
+                    return (Targeting.IsNamed(target) or Targeting.GetAutoTargetPctHPs() < 90) and Targeting.LostAutoTargetAggro()
                 end,
             },
             { --pull does not work on Laz, it is just a hate tool
                 name = "Hate's Attraction",
                 type = "AA",
-                tooltip = Tooltips.AgelessEnmity,
-                cond = function(self, aaName, target)
-                    return (Targeting.GetAutoTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100) or Targeting.IsNamed(target)
-                end,
-            },
-
-            { --8min reuse, save for named or if we still can't get a mob back on us
-                name = "Ageless Enmity",
-                type = "AA",
-                tooltip = Tooltips.AgelessEnmity,
-                cond = function(self, aaName, target)
-                    return Targeting.GetAutoTargetPctHPs() < 90 and (mq.TLO.Me.PctAggro() < 100 or Targeting.IsNamed(target))
-                end,
             },
             {
                 name = "Projection of Doom",
                 type = "AA",
                 tooltip = Tooltips.ProjectionofDoom,
                 cond = function(self, aaName, target)
-                    ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Targeting.IsNamed(target)
                 end,
             },
             {
@@ -715,9 +709,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                    ---@diagnostic disable-next-line: undefined-field
-                    return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                    return Config:GetSetting('DoTerror')
                 end,
             },
             {
@@ -725,9 +717,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                    ---@diagnostic disable-next-line: undefined-field
-                    return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                    return Config:GetSetting('DoTerror')
                 end,
             },
         },
@@ -1418,7 +1408,7 @@ local _ClassConfig = {
             Tooltip = "Minimum number of haters before using AE Taunt Spells or AA.",
             Default = 2,
             Min = 1,
-            Max = 10,
+            Max = 30,
             FAQ = "Why don't we use AE taunts on single targets?",
             Answer =
             "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
@@ -1476,7 +1466,7 @@ local _ClassConfig = {
             Category = "Defenses",
             Index = 4,
             Tooltip =
-            "The HP % that we will use disciplines like Deflection, Leechcurse, and Leech Touch.\nMost other rotations are cut to give our full focus to survival (See FAQ).",
+            "The HP % that we will use abilities like Leechcurse and Leech Touch.\nMost other rotations are cut to give our full focus to survival (See FAQ).",
             Default = 20,
             Min = 1,
             Max = 100,
