@@ -853,7 +853,7 @@ _ClassConfig      = {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -884,7 +884,7 @@ _ClassConfig      = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if not Config:GetSetting('DoAEDamage') then return false end
-                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
+                return combat_state == "Combat" and Targeting.AggroCheckOkay() and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
             end,
         },
         {
@@ -894,7 +894,7 @@ _ClassConfig      = {
             load_cond = function(self) return not Core.IsModeActive("PetTank") and self:GetResolvedActionMapItem('SpearNuke') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Targeting.AggroCheckOkay()
             end,
         },
         {
@@ -904,7 +904,7 @@ _ClassConfig      = {
             load_cond = function(self) return not Core.IsModeActive("PetTank") and not self:GetResolvedActionMapItem('SpearNuke') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Targeting.AggroCheckOkay()
             end,
         },
         {
@@ -1539,6 +1539,9 @@ _ClassConfig      = {
             {
                 name = "Force of Elements",
                 type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.AggroCheckOkay()
+                end,
             },
             {
                 name = "FireOrbItem",
@@ -1560,7 +1563,7 @@ _ClassConfig      = {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.InSpellRange(spell, target)
                 end,
             },
             {
@@ -1568,7 +1571,7 @@ _ClassConfig      = {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.InSpellRange(spell, target)
                 end,
             },
         },
@@ -1584,30 +1587,18 @@ _ClassConfig      = {
             {
                 name = "Bladegusts",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
             {
                 name = "Myriad",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
             {
                 name = "SpearNuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
-                end,
             },
             {
                 name = "Turn Summoned",
@@ -1627,7 +1618,7 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('ElementChoice') ~= 1 then return false end
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target)
                 end,
             },
             {
@@ -1635,15 +1626,14 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('ElementChoice') ~= 1 then return false end
-                    return Casting.HaveManaToNuke() and Targeting.MobHasLowHP(target)
+                    return Targeting.MobHasLowHP(target)
                 end,
             },
             {
                 name = "MagicDD",
                 type = "Spell",
                 cond = function(self)
-                    if Config:GetSetting('ElementChoice') ~= 2 then return false end
-                    return Casting.HaveManaToNuke()
+                    return Config:GetSetting('ElementChoice') == 2
                 end,
             },
             {
@@ -1656,16 +1646,10 @@ _ClassConfig      = {
             {
                 name = "Bladegusts",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
         },
         ['Malo'] = {

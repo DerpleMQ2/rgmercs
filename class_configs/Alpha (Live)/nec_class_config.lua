@@ -953,21 +953,21 @@ local _ClassConfig = {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Targeting.MobHasLowHP or Targeting.IsNamed(target)) and Casting.HaveManaToNuke()
+                    return (Targeting.MobHasLowHP or Targeting.IsNamed(target)) and Casting.OkayToNuke()
                 end,
             },
             {
                 name = "PoisonNuke2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Targeting.MobHasLowHP and Casting.HaveManaToNuke()
+                    return Targeting.MobHasLowHP and Casting.OkayToNuke()
                 end,
             },
             {

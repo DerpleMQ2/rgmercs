@@ -681,7 +681,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Targeting.AggroCheckOkay()
             end,
         },
         {
@@ -692,7 +692,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Targeting.AggroCheckOkay()
             end,
         },
         {
@@ -703,7 +703,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
+                return combat_state == "Combat" and Targeting.AggroCheckOkay() and
                     not (Core.IsModeActive('PBAE(LowLevel)') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
@@ -715,7 +715,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
+                return combat_state == "Combat" and Targeting.AggroCheckOkay() and
                     not (Core.IsModeActive('PBAE(LowLevel)') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
@@ -727,7 +727,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
+                return combat_state == "Combat" and Targeting.AggroCheckOkay() and
                     not (Core.IsModeActive('PBAE(LowLevel)') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
@@ -739,7 +739,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
+                return combat_state == "Combat" and Targeting.AggroCheckOkay() and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
             end,
         },
         {
@@ -748,7 +748,7 @@ return {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Targeting.AggroCheckOkay()
             end,
         },
         {
@@ -810,7 +810,7 @@ return {
                 type = "AA",
                 cond = function(self)
                     if not Config:GetSetting('DoManaBurn') then return false end
-                    return not Casting.TargetHasBuff("Mana Burn") and Casting.HaveManaToNuke()
+                    return not Casting.TargetHasBuff("Mana Burn") and Casting.OkayToNuke(true)
                 end,
             },
             {
@@ -1045,23 +1045,19 @@ return {
                 name = "FireRain",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
-                    return Casting.HaveManaToNuke()
+                    return self.ClassConfig.HelperFunctions.RainCheck(target)
                 end,
             },
             {
                 name = "BigFireNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
         },
         ['IceDPS(1-70)'] = {
@@ -1069,23 +1065,19 @@ return {
                 name = "IceRain",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
-                    return Casting.HaveManaToNuke()
+                    return self.ClassConfig.HelperFunctions.RainCheck(target)
                 end,
             },
             {
                 name = "BigIceNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "IceNuke",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
         },
         ['MagicDPS(1-70)'] = {
@@ -1093,15 +1085,12 @@ return {
                 name = "BigMagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
-                end,
             },
         },
         ['DPS(PBAELowLevel)'] = {
@@ -1110,7 +1099,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.InSpellRange(spell, target)
                 end,
             },
             {
@@ -1118,7 +1107,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.InSpellRange(spell, target)
                 end,
             },
             {
@@ -1126,7 +1115,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.InSpellRange(spell, target)
                 end,
             },
             {
@@ -1134,7 +1123,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.InSpellRange(spell, target)
                 end,
             },
         },

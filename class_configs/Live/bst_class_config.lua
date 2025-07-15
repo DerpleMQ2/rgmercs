@@ -740,7 +740,7 @@ return {
             load_cond = function() return Config:GetSetting('DoSlow') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -1035,28 +1035,28 @@ return {
                 name = "Maelstrom",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "FrozenPoi",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "PoiBite",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "Icelance1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1064,7 +1064,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting("DoAERoar") then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1072,7 +1072,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not (Config:GetSetting("DoAERoar") and Config:GetSetting("DoAEDamage")) then return false end
-                    return Casting.HaveManaToNuke() and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    return Casting.OkayToNuke() and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {

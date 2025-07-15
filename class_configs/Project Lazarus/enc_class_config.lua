@@ -349,7 +349,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoTash') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         { --Slow and Tash separated so we use both before we start DPS
@@ -359,7 +359,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoSlow') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -369,7 +369,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoStripBuff') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -810,7 +810,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self)
                     if not Config:GetSetting('DoNuke') then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -818,7 +818,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self)
                     if not Config:GetSetting('DoChroma') then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -850,7 +850,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoColored') then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
         },

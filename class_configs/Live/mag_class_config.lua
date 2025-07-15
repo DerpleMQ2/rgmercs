@@ -886,7 +886,7 @@ _ClassConfig      = {
             load_cond = function() return Config:GetSetting('DoMalo') or Config:GetSetting('DoAEMalo') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -1545,35 +1545,35 @@ _ClassConfig      = {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("DPS") or Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
                 cond = function(self, _)
-                    return Core.IsModeActive("DPS") or Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "SpearNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("DPS") or Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "VolleyNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("DPS") or Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "Turn Summoned",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.TargetBodyIs(target, "Undead Pet")
+                    return Targeting.TargetBodyIs(target, "Undead Pet") and Targeting.AggroCheckOkay()
                 end,
             },
             {
@@ -1596,7 +1596,7 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('ElementChoice') ~= 1 then return false end
-                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                    return Casting.OkayToNuke() and Targeting.MobNotLowHP(target)
                 end,
             },
             {
@@ -1604,7 +1604,7 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('ElementChoice') ~= 1 then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1612,14 +1612,14 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('ElementChoice') ~= 2 then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "Turn Summoned",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.TargetBodyIs(target, "Undead Pet")
+                    return Targeting.TargetBodyIs(target, "Undead Pet") and Targeting.AggroCheckOkay()
                 end,
             },
         },

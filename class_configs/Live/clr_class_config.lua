@@ -1226,7 +1226,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not Config:GetSetting('DoHealStun') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToNuke()
+                    return Casting.DetSpellCheck(spell) and Casting.OkayToNuke()
                 end,
             },
             {
@@ -1296,7 +1296,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoUndeadNuke') or not Targeting.TargetBodyIs(target, "Undead") then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1304,7 +1304,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self)
                     if not Config:GetSetting('DoMagicNuke') then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
