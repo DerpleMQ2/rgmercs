@@ -766,7 +766,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoScentDebuff') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.OkayToDebuff()
             end,
         },
         {
@@ -985,12 +985,12 @@ local _ClassConfig = {
             {
                 name = "PoisonNuke2",
                 type = "Spell",
-                cond = function(self, _) return Targeting.GetTargetPctHPs() > 50 and Casting.HaveManaToNuke() end,
+                cond = function(self, _) return Targeting.GetTargetPctHPs() > 50 and Casting.OkayToNuke() end,
             },
             {
                 name = "PoisonNuke1",
                 type = "Spell",
-                cond = function(self, _) return Casting.HaveManaToNuke() end,
+                cond = function(self, _) return Casting.OkayToNuke() end,
             },
             {
                 name = "HealthTaps",

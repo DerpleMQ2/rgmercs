@@ -942,7 +942,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -1070,7 +1070,7 @@ local _ClassConfig = {
                 name = "WinterFireDD",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("Mana") and Casting.DetSpellCheck(spell) and Config:GetSetting('DoFire') and Casting.HaveManaToNuke()
+                    return Core.IsModeActive("Mana") and Casting.DetSpellCheck(spell) and Config:GetSetting('DoFire') and Casting.OkayToNuke()
                 end,
             },
             {
@@ -1078,7 +1078,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return Core.IsModeActive("Mana") and Casting.DetSpellCheck(spell) and not Config:GetSetting('DoFire') and Config:GetSetting('DoRain') and
-                        Casting.HaveManaToNuke()
+                        Casting.OkayToNuke()
                 end,
             },
             {
@@ -1086,7 +1086,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return Core.IsModeActive("Mana") and Casting.DetSpellCheck(spell) and not Config:GetSetting('DoFire') and
-                        Casting.HaveManaToNuke()
+                        Casting.OkayToNuke()
                 end,
             },
             {
@@ -1094,7 +1094,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return Core.IsModeActive("Mana") and mq.TLO.Me.PctMana() > 50 and
-                        (not Core.IsModeActive("Heal") or (Core.IsModeActive("Heal") and not Config:GetSetting('DoFire') and Casting.HaveManaToNuke()))
+                        (not Core.IsModeActive("Heal") or (Core.IsModeActive("Heal") and not Config:GetSetting('DoFire') and Casting.OkayToNuke()))
                 end,
             },
             {
@@ -1102,7 +1102,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return mq.TLO.Me.PctMana() > 50 and Config:GetSetting('DoNuke') and
-                        (not Core.IsModeActive("Heal") or (Core.IsModeActive("Heal") and Config:GetSetting('DoFire') and Casting.HaveManaToNuke()))
+                        (not Core.IsModeActive("Heal") or (Core.IsModeActive("Heal") and Config:GetSetting('DoFire') and Casting.OkayToNuke()))
                 end,
             },
             {

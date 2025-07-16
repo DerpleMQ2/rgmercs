@@ -1287,7 +1287,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.CalledShotsArrow,
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1295,7 +1295,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.FocusedArrows,
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1303,7 +1303,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.DichoSpell,
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1311,7 +1311,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Heartshot,
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1351,7 +1351,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.AEArrows,
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and Config:GetSetting('DoAoE')
+                    return Casting.OkayToNuke() and Config:GetSetting('DoAoE')
                 end,
             },
             {
@@ -1375,7 +1375,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Firenuke,
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1383,7 +1383,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Icenuke,
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {

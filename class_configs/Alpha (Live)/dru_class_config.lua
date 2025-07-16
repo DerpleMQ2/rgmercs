@@ -844,7 +844,7 @@ local _ClassConfig = {
             steps = 2,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.OkayToNotHeal() and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Core.OkayToNotHeal() and Casting.OkayToDebuff()
             end,
         },
         { --Keep things from running
@@ -905,7 +905,7 @@ local _ClassConfig = {
                 name = "NaturesWrathDot",
                 type = "Spell",
                 cond = function(self)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
@@ -926,7 +926,7 @@ local _ClassConfig = {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and Targeting.LightHealsNeeded(mq.TLO.Me.TargetOfTarget)
+                    return Casting.OkayToNuke() and Targeting.LightHealsNeeded(mq.TLO.Me.TargetOfTarget)
                 end,
             },
             {
@@ -940,21 +940,21 @@ local _ClassConfig = {
                 name = "Nature's Frost",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
                 name = "Nature's Fire",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
                 name = "Nature's Bolt",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
         },
@@ -963,35 +963,35 @@ local _ClassConfig = {
                 name = "StunDD",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToNuke()
+                    return Casting.DetSpellCheck(spell) and Casting.OkayToNuke()
                 end,
             },
             {
                 name = "WinterFireDD",
                 type = "Spell",
                 cond = function(self)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
                 name = "Nature's Frost",
                 type = "AA",
                 cond = function(self)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
                 name = "Nature's Fire",
                 type = "AA",
                 cond = function(self)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
                 name = "Nature's Bolt",
                 type = "AA",
                 cond = function(self)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
         },

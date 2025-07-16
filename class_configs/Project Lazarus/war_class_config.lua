@@ -466,7 +466,7 @@ local _ClassConfig = {
         ['Burn'] = {
             {
                 name_func = function(self)
-                    return string.format("%s Spire of the Warlord", Core.IsTanking() and "Third" or "Second")
+                    return string.format("Fundament: %s Spire of the Warlord", Core.IsTanking() and "Third" or "Second")
                 end,
                 type = "AA",
             },

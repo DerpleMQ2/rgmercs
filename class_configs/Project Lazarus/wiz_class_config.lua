@@ -452,7 +452,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoManaBurn') then return false end
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() < 70 and Casting.HaveManaToNuke() and not mq.TLO.Target.FindBuff("detspa 350")()
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() < 70 and Casting.OkayToNuke(true) and not mq.TLO.Target.FindBuff("detspa 350")()
                 end,
             },
             {
@@ -581,19 +581,22 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
-                    return Casting.HaveManaToNuke()
+                    return Targeting.AggroCheckOkay()
                 end,
             },
             {
                 name = "BigFireNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target) and Targeting.AggroCheckOkay()
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
+                cond = function(self, spell, target)
+                    return Targeting.AggroCheckOkay()
+                end,
             },
         },
         ['DPS(IceLowLevel)'] = {
@@ -602,19 +605,22 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
-                    return Casting.HaveManaToNuke()
+                    return Targeting.AggroCheckOkay()
                 end,
             },
             {
                 name = "BigIceNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target) and Targeting.AggroCheckOkay()
                 end,
             },
             {
                 name = "IceNuke",
                 type = "Spell",
+                cond = function(self, spell, target)
+                    return Targeting.AggroCheckOkay()
+                end,
             },
         },
         ['DPS(MagicLowLevel)'] = {
@@ -622,12 +628,15 @@ return {
                 name = "BigMagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target) and Targeting.AggroCheckOkay()
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
+                cond = function(self, spell, target)
+                    return Targeting.AggroCheckOkay()
+                end,
             },
         },
         ['DPS(PBAE)'] = {
@@ -636,7 +645,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.AggroCheckOkay() and Targeting.InSpellRange(spell, target)
                 end,
             },
             {
@@ -644,7 +653,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.AggroCheckOkay() and Targeting.InSpellRange(spell, target)
                 end,
             },
             {
@@ -652,7 +661,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.AggroCheckOkay() and Targeting.InSpellRange(spell, target)
                 end,
             },
             {
@@ -660,7 +669,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
+                    return Targeting.AggroCheckOkay() and Targeting.InSpellRange(spell, target)
                 end,
             },
         },

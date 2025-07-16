@@ -826,7 +826,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoTash') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         { --Slow and Tash separated so we use both before we start DPS
@@ -836,7 +836,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoSlow') or Config:GetSetting('DoCripple') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -846,7 +846,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoStripBuff') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -1268,7 +1268,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoNuke') then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1276,7 +1276,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoManaDrain') then return false end
-                    return (target.CurrentMana() or 0) > 10 and Casting.HaveManaToNuke()
+                    return (target.CurrentMana() or 0) > 10 and Casting.OkayToNuke()
                 end,
             },
         },
@@ -1285,7 +1285,7 @@ local _ClassConfig = {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToNuke()
+                    return Casting.DetSpellCheck(spell) and Casting.OkayToNuke()
                 end,
             },
             {
@@ -1299,21 +1299,21 @@ local _ClassConfig = {
                 name = "MagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             { --Mana check used instead of dot mana check because this is spammed like a nuke
                 name = "StrangleDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             { --this is not an error, we want the spell twice in a row as part of the rotation.
                 name = "StrangleDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {

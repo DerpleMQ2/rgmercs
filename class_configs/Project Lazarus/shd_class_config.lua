@@ -717,7 +717,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
                     ---@diagnostic disable-next-line: undefined-field
-                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                    return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
             },
             {
@@ -727,7 +727,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
                     ---@diagnostic disable-next-line: undefined-field
-                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                    return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
             },
         },
@@ -767,11 +767,10 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Fundament: Third Spire of the Reavers",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Core.IsTanking()
+                name_func = function(self)
+                    return string.format("Fundament: %s Spire of Holiness", Core.IsTanking() and "Third" or "Second")
                 end,
+                type = "AA",
             },
             { -- for DPS mode
                 name = "UnholyAura",

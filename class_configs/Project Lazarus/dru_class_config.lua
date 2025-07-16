@@ -421,7 +421,7 @@ local _ClassConfig = {
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.OkayToNotHeal() and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Core.OkayToNotHeal() and Casting.OkayToDebuff()
             end,
         },
         { --Keep things from running
@@ -453,7 +453,8 @@ local _ClassConfig = {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.OkayToNotHeal() and Config:GetSetting('DoAEDamage') and
+                if not Config:GetSetting('DoAEDamage') then return false end
+                return combat_state == "Combat" and Core.OkayToNotHeal() and Targeting.AggroCheckOkay() and
                     self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('AETargetCnt'), true)
             end,
         },
@@ -491,6 +492,9 @@ local _ClassConfig = {
             {
                 name = "Storm Strike",
                 type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.AggroCheckOkay()
+                end,
             },
             {
                 name = "Nature Walkers Scimitar",
@@ -537,7 +541,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoTwinHealNuke') then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -545,7 +549,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoFireNuke') then return false end
-                    return Casting.HaveManaToNuke(true)
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
@@ -553,7 +557,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoIceNuke') then return false end
-                    return Casting.HaveManaToNuke(true)
+                    return Casting.OkayToNuke(true)
                 end,
             },
         },

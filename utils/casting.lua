@@ -526,12 +526,21 @@ end
 
 --- Checks if the PC should use debuffs based off of con color or named settings.
 --- @return boolean True if the target matches the Con requirements for debuffing.
-function Casting.OkayToDebuff()
+function Casting.OkayToDebuff(bIgnoreAggro)
+    local enoughMana = Casting.HaveManaToDebuff()
+    local lowAggro = bIgnoreAggro or Targeting.AggroCheckOkay()
     local named = Targeting.IsNamed(Targeting.GetAutoTarget())
     local debuffChoice = Config.Constants.DebuffChoice[Config:GetSetting(named and 'NamedDebuff' or 'MobDebuff')]
     local conLevel = (Config.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
 
-    return debuffChoice == "Always" or (debuffChoice == "Based on Con Color" and conLevel >= Config:GetSetting('DebuffMinCon'))
+    return lowAggro and enoughMana and (debuffChoice == "Always" or (debuffChoice == "Based on Con Color" and conLevel >= Config:GetSetting('DebuffMinCon')))
+end
+
+function Casting.OkayToNuke(bRestrictBurns)
+    local lowAggro = Targeting.AggroCheckOkay()
+    local enoughMana = Casting.HaveManaToNuke(bRestrictBurns)
+
+    return lowAggro and enoughMana
 end
 
 --- Determines if the PC can/should use buffs if their corpse is nearby.

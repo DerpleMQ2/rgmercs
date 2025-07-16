@@ -315,7 +315,7 @@ return {
             load_cond = function() return Config:GetSetting('DoSlow') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -342,7 +342,7 @@ return {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Targeting.AggroCheckOkay()
             end,
         },
     },
@@ -518,14 +518,22 @@ return {
                 name = "Icelance1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "Icelance2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
+                end,
+            },
+            {
+                name = "Nature's Salve",
+                type = "AA",
+                cond = function(self, aaName)
+                    ---@diagnostic disable-next-line: undefined-field
+                    return mq.TLO.Me.TotalCounters() > 0
                 end,
             },
         },
@@ -561,14 +569,6 @@ return {
             {
                 name = "Chameleon Strike",
                 type = "AA",
-            },
-            {
-                name = "Nature's Salve",
-                type = "AA",
-                cond = function(self, aaName)
-                    ---@diagnostic disable-next-line: undefined-field
-                    return mq.TLO.Me.TotalCounters() > 0
-                end,
             },
         },
         ['GroupBuff'] = {

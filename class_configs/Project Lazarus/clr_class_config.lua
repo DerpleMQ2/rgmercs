@@ -682,7 +682,7 @@ local _ClassConfig = {
                 name = "Turn Undead",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.TargetBodyIs(target, "Undead")
+                    return Targeting.TargetBodyIs(target, "Undead") and Targeting.AggroCheckOkay()
                 end,
             },
             {
@@ -690,7 +690,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoUndeadNuke') or not Targeting.TargetBodyIs(target, "Undead") then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -698,7 +698,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self)
                     if not Config:GetSetting('DoMagicNuke') then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -723,7 +723,7 @@ local _ClassConfig = {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke(true) and Targeting.InSpellRange(spell, target)
+                    return Casting.OkayToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
         },
