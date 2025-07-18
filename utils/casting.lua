@@ -1747,7 +1747,7 @@ function Casting.ClickModRod()
         end
 
         local item = mq.TLO.FindItem(itemName)
-        if item() and item.TimerReady() == 0 then
+        if item() and item.Clicky() and item.TimerReady() == 0 then
             Casting.UseItem(item.Name(), mq.TLO.Me.ID())
             return
         end
