@@ -184,8 +184,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
-                ---@diagnostic disable-next-line: undefined-field -- doesn't like secondarypct
-                return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget()))
+                return combat_state == "Combat" and Targeting.HateToolsNeeded()
             end,
         },
         { --Actions that establish or maintain hatred
@@ -298,31 +297,32 @@ local _ClassConfig = {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
+                    return Targeting.LostAutoTargetAggro() and Targeting.GetTargetDistance(target) < 30
                 end,
             },
-            { --8min reuse, save for named or if we still can't get a mob back on us
+            { --8min reuse, save for we still can't get a mob back after trying to taunt, try not to use it on the pull
                 name = "Ageless Enmity",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.GetAutoTargetPctHPs() < 90 and (mq.TLO.Me.PctAggro() < 100 or Targeting.IsNamed(target))
+                    return (Targeting.IsNamed(target) or Targeting.GetAutoTargetPctHPs() < 90) and Targeting.LostAutoTargetAggro()
                 end,
             },
-            --used to jumpstart hatred on named from the outset and prevent early rips from burns
-            {
+            { --used to jumpstart hatred on named from the outset and prevent early rips from burns
                 name = "Attention",
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Targeting.IsNamed(target)
                 end,
             },
-            --used to reinforce hatred after it is initially established
             {
                 name = "Blast of Anger",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() or (mq.TLO.Target.SecondaryPctAggro() or 0) > 70)
+            },
+            {
+                name = "AddHate",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return Casting.DetSpellCheck(discSpell)
                 end,
             },
             {
@@ -330,14 +330,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.IsNamed(target) and (mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() or (mq.TLO.Target.SecondaryPctAggro() or 0) > 80)
-                end,
-            },
-            {
-                name = "AddHate",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DetSpellCheck(discSpell)
+                    return Targeting.IsNamed(target)
                 end,
             },
         },
@@ -739,7 +732,7 @@ local _ClassConfig = {
             Tooltip = "Minimum number of haters before using AE Taunt Discs or AA.",
             Default = 2,
             Min = 1,
-            Max = 10,
+            Max = 30,
             FAQ = "Why don't we use AE taunts on single targets?",
             Answer =
             "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
