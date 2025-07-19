@@ -332,7 +332,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     if not Config:GetSetting('DoStun') then return false end
-                    return Casting.DetSpellCheck(discSpell)
+                    return Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
         },

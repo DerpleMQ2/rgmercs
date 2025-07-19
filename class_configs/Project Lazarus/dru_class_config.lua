@@ -533,7 +533,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoStunNuke') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToNuke()
+                    return Casting.HaveManaToNuke() and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             { -- in-game description is incorrect, mob must be targeted.

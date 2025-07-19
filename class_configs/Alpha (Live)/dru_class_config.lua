@@ -962,8 +962,8 @@ local _ClassConfig = {
             {
                 name = "StunDD",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.DetSpellCheck(spell) and Casting.OkayToNuke()
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             {

@@ -1055,16 +1055,10 @@ return {
             {
                 name = "StunTimer4",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.DetSpellCheck(spell)
-                end,
             },
             {
                 name = "StunTimer5",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.DetSpellCheck(spell)
-                end,
             },
             {
                 name = "LessonStun",
