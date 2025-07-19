@@ -1226,7 +1226,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not Config:GetSetting('DoHealStun') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.OkayToNuke()
+                    return Casting.OkayToNuke()
                 end,
             },
             {
@@ -1281,7 +1281,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not Config:GetSetting('DoLLStun') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff()
+                    return Targeting.TargetNotStunned() and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff()
                 end,
             },
             {

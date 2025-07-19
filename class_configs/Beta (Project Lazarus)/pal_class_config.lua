@@ -808,30 +808,17 @@ return {
                 type = "Spell",
             },
         },
-        ['Debuff(Undead)'] = {
-            {
-                name = "Helix of the Undying",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.DetAACheck(aaName, target)
-                end,
-            },
-        },
         ['Combat'] = {
             {
-                name = "SereneStun",
+                name = "StunTimer4",
                 type = "Spell",
+                cond = function(self, spell, target)
+                    return Targeting.TargetNotStunned()
+                end,
             },
             {
                 name = "TwincastNuke",
                 type = "Spell",
-            },
-            {
-                name = "Disruptive Persecution",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return mq.TLO.Target.SecondaryPctAggro() or 999 < 60 or not Core.IsTanking()
-                end,
             },
             {
                 name = "Yaulp",
@@ -841,12 +828,8 @@ return {
                 end,
             },
             {
-                name = "Epic",
-                type = "Item",
-                cond = function(self, itemName)
-                    if Config:GetSetting('UseEpic') == 1 then return false end
-                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and Casting.SelfBuffItemCheck(itemName)
-                end,
+                name = "SereneStun",
+                type = "Spell",
             },
             {
                 name = "StunTimer5",
@@ -856,10 +839,11 @@ return {
                 end,
             },
             {
-                name = "StunTimer4",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Targeting.TargetNotStunned()
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    if Config:GetSetting('UseEpic') == 1 then return false end
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
@@ -879,10 +863,17 @@ return {
                 end,
             },
             {
+                name = "Disruptive Persecution",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return (mq.TLO.Target.SecondaryPctAggro() or 999 < 60) or not Core.IsTanking()
+                end,
+            },
+            {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self)
-                    return (Core.ShieldEquipped() or Casting.CanUseAA("2 Hand Bash"))
+                    return Core.ShieldEquipped() or Casting.CanUseAA("2 Hand Bash")
                 end,
             },
             {
@@ -1251,16 +1242,6 @@ return {
             Default = true,
             FAQ = "How can I use my Undead Nuke?",
             Answer = "You can enable the undead nuke line in the Spells and Abilities tab.",
-        },
-        ['DebuffUndead']     = {
-            DisplayName = "Debuff Undead",
-            Category = "Combat",
-            Index = 3,
-            Tooltip = "Use the Helix of the Undying debuff AA on undead.",
-            RequiresLoadoutChange = true,
-            Default = false,
-            FAQ = "How can I use my Undead Debuff?",
-            Answer = "You can enable the undead debuff line on the combat tab.",
         },
 
         --Buffs

@@ -129,11 +129,9 @@ local _ClassConfig = {
             "Color Shift",
             "Color Flux",
         },
-        -- ['SingleStunSpell1'] = {
-        --     "Largarn's Lamentation",
-        --     "Dyn's Dizzying Draught",
-        --     "Whirl till you hurl",
-        -- },
+        ['SpinStunSpell'] = {
+            "Whirl Till You Hurl",
+        },
         ['CharmSpell'] = {
             "Ancient: Voice of Muram",
             "True Name",
@@ -373,12 +371,14 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'Burn',
+            name = 'Emergency',
             state = 1,
-            steps = 3,
+            steps = 1,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck()
+                return Targeting.GetXTHaterCount() > 0 and
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         { --AA Stuns, Runes, etc, moved from previous home in DPS
@@ -388,6 +388,15 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
+            end,
+        },
+        {
+            name = 'Burn',
+            state = 1,
+            steps = 3,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
         {
@@ -693,97 +702,19 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Reactive Rune",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() < 40)
+                name = "SpinStunSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if Config:GetSetting('DoSpinStun') == 1 or (Config:GetSetting('DoSpinStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) then return false end
+                    return Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             {
                 name = "PBAEStunSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (Config:GetSetting('DoAEStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) or Config:GetSetting('DoAEStun') == 1 then return false end
-                    return Casting.DetSpellCheck(spell) and Targeting.GetXTHaterCount() >= Config:GetSetting("AECount")
-                end,
-            },
-            { --this can be readded once we creat a post_activate to cancel the debuff you receive after
-                name = "Self Stasis",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30
-                end,
-                post_activate = function(self, aaName, success)
-                    if success and mq.TLO.Me.Buff("Self Stasis")() then
-                        Comms.PrintGroupMessage("We're out of combat, removing the Self Statis buff so we can act again.")
-                        Core.DoCmd('/removebuff =Self Stasis')
-                    end
-                end,
-            },
-            -- { --This can interrupt spellcasting which can just make something worse. Let us trust healers and tanks.
-            --     name = "Dimensional Instability",
-            --     type = "AA",
-            --     cond = function(self, aaName)
-            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30            --     end,
-            -- },
-            {
-                name = "Beguiler's Directed Banishment",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if target.ID() == Config.Globals.AutoTargetID then return false end
-                    return mq.TLO.Me.PctAggro() > 99 and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
-                end,
-
-            },
-            {
-                name = "Beguiler's Banishment",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and mq.TLO.SpawnCount("npc radius 20")() > 2
-                end,
-
-            },
-            {
-                name = "Doppelganger",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
-                end,
-            },
-            -- { --This can interrupt spellcasting which can just make something worse. Let us trust healers and tanks.
-            --     name = "Dimensional Shield",
-            --     type = "AA",
-            --     cond = function(self, aaName)
-            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 80            --     end,
-
-            -- },
-            {
-                name = "Veil of Mindshadow",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= 80 and Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Arcane Whisper",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() >= 90
-                end,
-
-            },
-            {
-                name = "Color Shock",
-                type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctAggro() >= 90
-                end,
-            },
-            {
-                name = "Silent Casting",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() >= 60
+                    if Config:GetSetting('DoAEStun') == 1 or (Config:GetSetting('DoAEStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) then return false end
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting("AECount")
                 end,
             },
             {
@@ -793,7 +724,66 @@ local _ClassConfig = {
                     if not Config:GetSetting("DoSoothing") then return false end
                     return Targeting.IsNamed(target) and (mq.TLO.Me.TargetOfTarget.ID() or Core.GetMainAssistId()) ~= Core.GetMainAssistId()
                 end,
-            }, },
+            },
+
+        },
+        ['Emergency'] = {
+            {
+                name = "Self Stasis",
+                type = "AA",
+                cond = function(self, aaName)
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID
+                end,
+                post_activate = function(self, aaName, success)
+                    if success and mq.TLO.Me.Buff("Self Stasis")() then
+                        Comms.PrintGroupMessage("We're out of combat, removing the Self Stasis buff so we can act again.")
+                        Core.DoCmd('/removebuff =Self Stasis')
+                    end
+                end,
+            },
+            {
+                name = "Veil of Mindshadow",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Beguiler's Directed Banishment",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoBeguilers') then return false end
+                    if target.ID() == Config.Globals.AutoTargetID then return false end
+                    return Targeting.IHaveAggro(100) and not Targeting.IsNamed(target)
+                end,
+            },
+            {
+                name = "Beguiler's Banishment",
+                type = "AA",
+                cond = function(self, aaName)
+                    if not Config:GetSetting('DoBeguilers') then return false end
+                    return Targeting.IHaveAggro(100) and mq.TLO.SpawnCount("npc radius 20")() > 2
+                end,
+            },
+            {
+                name = "Doppelganger",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Targeting.IHaveAggro(100)
+                end,
+            },
+            {
+                name = "Color Shock",
+                type = "AA",
+            },
+            {
+                name = "Arcane Whisper",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.IsNamed(target)
+                end,
+            },
+        },
         ['StripBuff'] = {
             {
                 name = "StripBuffSpell",
@@ -923,6 +913,10 @@ local _ClassConfig = {
                 name = "Forceful Rejuvenation",
                 type = "AA",
             },
+            {
+                name = "Silent Casting",
+                type = "AA",
+            },
         },
         ['Tash'] = {
             {
@@ -1002,6 +996,7 @@ local _ClassConfig = {
                 { name = "TashSpell",        cond = function(self) return Config:GetSetting('DoTash') end, },
                 { name = "SlowSpell",        cond = function(self) return Config:GetSetting('DoSlow') and not Casting.CanUseAA("Dreary Deeds") end, },
                 { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCrippleSpell') end, },
+                { name = "SpinStunSpell",    cond = function(self) return Config:GetSetting('DoSpinStun') > 1 end, },
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
@@ -1210,10 +1205,25 @@ local _ClassConfig = {
             FAQ = "Why am I not using AE Abilities?",
             Answer = "Adjust your AE Count on the Combat Tab.",
         },
+        ['DoSpinStun']         = {
+            DisplayName = "Spin Stun use:",
+            Category = "Combat",
+            Index = 3,
+            Tooltip = "When to use your Spin Stun Line.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'At low MA health', 'Whenever Possible', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why am I stunning everything?!??",
+            Answer = "You can choose the conditions under which you will use your Spin Stun on the Combat tab.",
+        },
         ['DoAEStun']           = {
             DisplayName = "PBAE Stun use:",
             Category = "Combat",
-            Index = 3,
+            Index = 4,
             Tooltip = "When to use your PBAE Stun Line.",
             RequiresLoadoutChange = true,
             Type = "Combo",
@@ -1228,7 +1238,7 @@ local _ClassConfig = {
         ['EmergencyStart']     = {
             DisplayName = "Emergency Start",
             Category = "Combat",
-            Index = 4,
+            Index = 5,
             Tooltip = "The HP % emergency abilities will be used (Abilities used depend on whose health is low, the ENC or the MA).",
             Default = 50,
             Min = 1,
@@ -1255,6 +1265,15 @@ local _ClassConfig = {
             Default = false,
             FAQ = "Why won't I use the Soothing Words AA?",
             Answer = "Ensure the option is selected on the combat tab and that the current target is designated as a named (check named tab or add in spawnmaster).",
+        },
+        ['DoBeguilers']        = {
+            DisplayName = "Do Beguiler's",
+            Category = "Combat",
+            Index = 7,
+            Tooltip = "Use Beguiler's (Directed) Banishment AA when you have aggro.",
+            Default = false,
+            FAQ = "Why won't I use either of the Beguiler's Banishment AA?",
+            Answer = "Ensure the option is selected on the combat tab.",
         },
 
         --DPS

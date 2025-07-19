@@ -222,10 +222,10 @@ local _ClassConfig = {
         ['YaulpSpell'] = {
             "Yaulp VII",
             "Yaulp VI",
-            "Yaulp V",     -- Level 56, first rank with haste/mana regen. We won't use it before this.
+            "Yaulp V",           -- Level 56, first rank with haste/mana regen. We won't use it before this.
         },
-        ['StunTimer6'] = { -- Timer 6 Stun, Fast Cast, Level 63+ (with ToT Heal 88+)
-            "Sound of Divinity",
+        ['StunTimer6'] = {       -- Timer 6 Stun, Fast Cast, Level 63+ (with ToT Heal 88+)
+            "Sound of Divinity", -- works up to level 70
             "Sound of Might",
             --Filler before this
             "Tarnation",     -- Timer 4, up to Level 65
@@ -665,17 +665,17 @@ local _ClassConfig = {
             {
                 name = "StunTimer6",
                 type = "Spell",
-                cond = function(self, spell)
+                cond = function(self, spell, target)
                     if not Config:GetSetting('DoHealStun') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToNuke()
+                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             {
                 name = "LowLevelStun",
                 type = "Spell",
-                cond = function(self, spell)
+                cond = function(self, spell, target)
                     if not Config:GetSetting('DoLLStun') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff()
+                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             {

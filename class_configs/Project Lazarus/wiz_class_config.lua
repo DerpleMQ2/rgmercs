@@ -519,8 +519,8 @@ return {
             {
                 name = "StunSpell",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToDebuff() and Casting.DetSpellCheck(spell)
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDebuff() and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
         },
