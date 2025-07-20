@@ -511,18 +511,6 @@ return {
                 return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
-        {
-            name = 'Debuff(Undead)',
-            state = 1,
-            steps = 1,
-            load_cond = function(self) return Config:GetSetting('DebuffUndead') and Casting.CanUseAA("Helix of the Undying") end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                return combat_state == "Combat" and (mq.TLO.Target.ID() == Targeting.GetAutoTargetID() and Targeting.TargetBodyIs(mq.TLO.Target, "Undead"))
-            end,
-
-        },
         { --DPS Spells, includes recourse/gift maintenance
             name = 'Combat',
             state = 1,
@@ -616,7 +604,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSalvation') then return false end
-                    return Casting.GroupBuffAACheck(aaName, target)
+                    return not Targeting.TargetIsATank(target) and Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
         },
