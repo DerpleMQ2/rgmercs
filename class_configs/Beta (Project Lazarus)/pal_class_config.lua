@@ -457,7 +457,7 @@ return {
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                if (Config:GetSetting('AEStu') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) or Config:GetSetting('DoAEStun') == 1 then return false end
+                if (Config:GetSetting('AEStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) or Config:GetSetting('DoAEStun') == 1 then return false end
                 return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETargetCheck(true)
             end,
         },
