@@ -30,7 +30,7 @@ Module.DefaultConfig     = {
 		Category = "Loot N Scoot",
 		Index = 1,
 		Tooltip = "Load the integrated LootNScoot in directed mode. Turning this off will unload the looting script.",
-		Default = true,
+		Default = false,
 		FAQ = "What is this silver coin thing? How do I turn it off?",
 		Answer = "The silver coin is our integration of LootNScoot, looting automation for Emu. It can be disabled as you choose.",
 	},
