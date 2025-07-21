@@ -14,6 +14,7 @@ local Files                               = require("utils.files")
 local Logger                              = require("utils.logger")
 local Set                                 = require("mq.Set")
 local Icons                               = require('mq.ICONS')
+local Tables                              = require("utils.tables")
 
 local Module                              = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
 Module.__index                            = Module
@@ -26,6 +27,7 @@ Module.TempSettings.TargetSpawnID         = 0
 Module.TempSettings.CurrentWP             = 1
 Module.TempSettings.PullTargets           = {}
 Module.TempSettings.PullTargetsMetaData   = {}
+Module.TempSettings.PullIgnoreTargets     = {}
 Module.TempSettings.AbortPull             = false
 Module.TempSettings.PullID                = 0
 Module.TempSettings.LastPullAbilityCheck  = 0
@@ -37,6 +39,7 @@ Module.TempSettings.HuntZ                 = 0
 Module.TempSettings.MyPaths               = {}
 Module.TempSettings.LastGroupUpdateTime   = os.clock()
 Module.TempSettings.SelectedPath          = "None"
+Module.TempSettings.PullAttemptStarted    = 0
 Module.FAQ                                = {}
 Module.ClassFAQ                           = {}
 
@@ -242,6 +245,16 @@ Module.DefaultConfig                   = {
         Default = 5,
         Min = 1,
         Max = 300,
+        FAQ = "I want to adjust the time between pulls so I have time to Manually Loot, how do I do that?",
+        Answer = "You can adjust the time between pulls with [PullDelay].",
+    },
+    ['PullIgnoreTime']                         = {
+        DisplayName = "Ignore Timer",
+        Category = "Pulling",
+        Tooltip = "How long we will attempt to pull a target before adding it to an ignore list.",
+        Default = 15,
+        Min = 5,
+        Max = 60,
         FAQ = "I want to adjust the time between pulls so I have time to Manually Loot, how do I do that?",
         Answer = "You can adjust the time between pulls with [PullDelay].",
     },
@@ -662,6 +675,14 @@ Module.CommandHandlers = {
             return true
         end,
     },
+    pullignoreclear = {
+        usage = "/rgl pullignoreclear",
+        about = "Clears the Pull Ignore List.",
+        handler = function(self, name)
+            self:ClearIgnoreList()
+            return true
+        end,
+    },
     -- These are broken. Would need to adjust the delete function to look up the ID with name
     -- pulldenyrm = {
     --     usage = "/rgl pulldenyrm \"<name>\"",
@@ -877,6 +898,49 @@ function Module:RenderPullTargets()
     end
 end
 
+function Module:RenderIgnoreTargets()
+    ImGui.PushID("##_small_btn_clear_ignore_list")
+    if ImGui.SmallButton("Clear Pull Ignore List") then
+        self:ClearIgnoreList()
+    end
+    ImGui.PopID()
+    if ImGui.BeginTable("Pull Targets", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
+        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.None), 250.0)
+        ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 60.0)
+        ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
+        ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthFixed), 160.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        for idx, spawn in ipairs(self.TempSettings.PullIgnoreTargets) do
+            if spawn.ID() > 0 then
+                ImGui.TableNextColumn()
+                ImGui.Text("%d", idx)
+                ImGui.TableNextColumn()
+                ImGui.PushStyleColor(ImGuiCol.Text, Ui.GetConColorBySpawn(spawn))
+                ImGui.PushID(string.format("##select_pull_npc_%d", idx))
+                local _, clicked = ImGui.Selectable(spawn.CleanName() or "Unknown")
+                if clicked then
+                    Logger.log_debug("Targeting: %d", spawn.ID() or 0)
+                    spawn.DoTarget()
+                end
+                ImGui.PopID()
+                ImGui.TableNextColumn()
+                ImGui.Text("%d", spawn.Level() or 0)
+                ImGui.PopStyleColor()
+                ImGui.TableNextColumn()
+                ImGui.Text("%0.2f", spawn.Distance() or 0)
+                ImGui.TableNextColumn()
+                Ui.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
+            end
+        end
+
+        ImGui.EndTable()
+    end
+end
+
 function Module:ShouldRender()
     return true
 end
@@ -1034,6 +1098,9 @@ function Module:Render()
             if ImGui.CollapsingHeader("Pull Targets") then
                 self:RenderPullTargets()
             end
+            if ImGui.CollapsingHeader("Ignored Targets") then
+                self:RenderIgnoreTargets()
+            end
         end
 
         if ImGui.CollapsingHeader("Farm Waypoints") then
@@ -1186,6 +1253,19 @@ function Module:DeleteMobFromList(list, idx)
     -- if we are pulling start over.
     if Config:GetSetting('DoPull') then
         Core.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
+    end
+end
+
+function Module:ClearIgnoreList()
+    self.TempSettings.PullIgnoreTargets = {}
+end
+
+function Module:ValidateIgnoreList()
+    for _, spawn in ipairs(self.TempSettings.PullIgnoreTargets) do
+        if spawn.ID() == 0 or spawn.Dead() then
+            Logger.log_debug("PULL: Cleaning up ignore list, it seems %s is no longer present.", spawn)
+            table.remove(self.TempSettings.PullIgnoreTargets, spawn)
+        end
     end
 end
 
@@ -1583,6 +1663,13 @@ function Module:GetPullableSpawns()
             end
         end
 
+        for _, ignoredMob in ipairs(self.TempSettings.PullIgnoreTargets) do
+            if spawn.ID() == ignoredMob.ID() then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Ignore List!", spawn.CleanName(), spawn.ID())
+                return false
+            end
+        end
+
         if spawn.FeetWet() and not Config:GetSetting('PullMobsInWater') then
             Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water", spawn.CleanName(), spawn.ID())
             return false
@@ -1705,7 +1792,7 @@ end
 
 ---@param pullID number
 ---@return boolean
-function Module:CheckForAbort(pullID)
+function Module:CheckForAbort(pullID, bNavigating)
     if self.TempSettings.AbortPull then
         Logger.log_debug("\ar ALERT: Aborting pull on user request. \ax")
         self.TempSettings.AbortPull = false
@@ -1727,7 +1814,7 @@ function Module:CheckForAbort(pullID)
         return true
     end
 
-    -- ignore distance if this is a manually requested pull
+    -- ignore distance and time if this is a manually requested pull
     if pullID ~= self.TempSettings.TargetSpawnID then
         if not self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadius then
             Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
@@ -1742,6 +1829,12 @@ function Module:CheckForAbort(pullID)
 
         if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
             Logger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targeting is enabled! \ax")
+            return true
+        end
+
+        if not bNavigating and os.clock() - self.TempSettings.PullAttemptStarted >= Config:GetSetting('PullIgnoreTime') then
+            Logger.log_debug("\ar ALERT: Aborting due to timeout, adding mob to Pull Ignore List! \ax")
+            table.insert(self.TempSettings.PullIgnoreTargets, mq.TLO.Spawn(pullID))
             return true
         end
     end
@@ -1846,21 +1939,31 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    if not Config:GetSetting('DoPull') and (self.TempSettings.HuntX ~= 0 or self.TempSettings.HuntY ~= 0 or self.TempSettings.HuntZ ~= 0) then
-        self.TempSettings.HuntX = 0
-        self.TempSettings.HuntY = 0
-        self.TempSettings.HuntZ = 0
-        Core.DoCmd("/mapfilter pullradius off")
+    if not Config:GetSetting('DoPull') then
+        if self.TempSettings.HuntX ~= 0 or self.TempSettings.HuntY ~= 0 or self.TempSettings.HuntZ ~= 0 then
+            self.TempSettings.HuntX = 0
+            self.TempSettings.HuntY = 0
+            self.TempSettings.HuntZ = 0
+            Core.DoCmd("/mapfilter pullradius off")
+        end
+        if #self.TempSettings.PullIgnoreTargets > 0 then
+            self:ClearIgnoreList()
+        end
     end
 
     Logger.log_verbose("PULL:GiveTime() - DoPull: %s", Strings.BoolToColorString(Config:GetSetting('DoPull')))
     if not Config:GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
-    if Config:GetSetting('DoPull') and self:IsPullMode("Hunt") and ((self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) or Config:GetSetting('HuntFromPlayer')) then
-        self.TempSettings.HuntX = mq.TLO.Me.X()
-        self.TempSettings.HuntY = mq.TLO.Me.Y()
-        self.TempSettings.HuntZ = mq.TLO.Me.Z()
-        Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadiusHunt'))
+    if Config:GetSetting('DoPull') then
+        if self:IsPullMode("Hunt") and ((self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) or Config:GetSetting('HuntFromPlayer')) then
+            self.TempSettings.HuntX = mq.TLO.Me.X()
+            self.TempSettings.HuntY = mq.TLO.Me.Y()
+            self.TempSettings.HuntZ = mq.TLO.Me.Z()
+            Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadiusHunt'))
+        end
+        if #self.TempSettings.PullIgnoreTargets > 0 then
+            self:ValidateIgnoreList()
+        end
     end
 
     if not mq.TLO.Navigation.MeshLoaded() then
@@ -2062,7 +2165,7 @@ function Module:GiveTime(combat_state)
             end
         end
 
-        if self:CheckForAbort(self.TempSettings.PullID) then
+        if self:CheckForAbort(self.TempSettings.PullID, true) then
             abortPull = true
             break
         end
@@ -2105,6 +2208,7 @@ function Module:GiveTime(combat_state)
 
             if self.settings.PullAbility == PullAbilityIDToName.PetPull then -- PetPull
                 Combat.PetAttack(self.TempSettings.PullID, false)
+                self.TempSettings.PullAttemptStarted = os.clock()
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on pet pull to finish...")
                     Combat.PetAttack(self.TempSettings.PullID, false)
@@ -2131,6 +2235,7 @@ function Module:GiveTime(combat_state)
                 Core.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
+                self.TempSettings.PullAttemptStarted = os.clock()
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
@@ -2155,6 +2260,7 @@ function Module:GiveTime(combat_state)
                 Core.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
+                self.TempSettings.PullAttemptStarted = os.clock()
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
@@ -2182,6 +2288,7 @@ function Module:GiveTime(combat_state)
                 Core.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
+                self.TempSettings.PullAttemptStarted = os.clock()
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
@@ -2205,6 +2312,7 @@ function Module:GiveTime(combat_state)
                 end
             else -- AA/Spell/Ability pull
                 mq.delay(5)
+                self.TempSettings.PullAttemptStarted = os.clock()
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on ability pull to finish...%s", Strings.BoolToColorString(successFn()))
                     Targeting.SetTarget(self.TempSettings.PullID)
@@ -2370,6 +2478,7 @@ function Module:OnZone()
         local campData = Modules:ExecModule("Movement", "GetCampData")
         self.settings.DoPull = campData.returnToCamp and campData.campSettings.CampZoneId == mq.TLO.Zone.ID()
     end
+    self:ClearIgnoreList()
 end
 
 function Module:DoGetState()
