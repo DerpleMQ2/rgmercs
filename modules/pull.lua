@@ -1261,10 +1261,10 @@ function Module:ClearIgnoreList()
 end
 
 function Module:ValidateIgnoreList()
-    for _, spawn in ipairs(self.TempSettings.PullIgnoreTargets) do
+    for entry, spawn in ipairs(self.TempSettings.PullIgnoreTargets) do
         if spawn.ID() == 0 or spawn.Dead() then
             Logger.log_debug("PULL: Cleaning up ignore list, it seems %s is no longer present.", spawn)
-            table.remove(self.TempSettings.PullIgnoreTargets, spawn)
+            table.remove(self.TempSettings.PullIgnoreTargets, entry)
         end
     end
 end

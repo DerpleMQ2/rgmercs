@@ -1718,7 +1718,7 @@ function Config:UpdateCommandHandlers()
             local setstartTime = mq.gettime()
             local handled, usageString = self:GetUsageText(setting or "", true, submoduleDefaults[moduleName] or {})
             local setendTime = mq.gettime()
-            Logger.log_debug("\ag[Config] \ayGetUsageText() took %.3f seconds for %s.%s", (setendTime - setstartTime) / 1000, moduleName, setting)
+            Logger.log_super_verbose("\ag[Config] \ayGetUsageText() took %.3f seconds for %s.%s", (setendTime - setstartTime) / 1000, moduleName, setting)
 
             if handled then
                 self.CommandHandlers[setting:lower()] = {
