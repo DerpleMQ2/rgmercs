@@ -40,6 +40,7 @@ Module.TempSettings.MyPaths               = {}
 Module.TempSettings.LastGroupUpdateTime   = os.clock()
 Module.TempSettings.SelectedPath          = "None"
 Module.TempSettings.PullAttemptStarted    = 0
+Module.TempSettings.PullRadius            = 0
 Module.FAQ                                = {}
 Module.ClassFAQ                           = {}
 
@@ -1619,18 +1620,19 @@ function Module:FixPullerMerc()
 end
 
 function Module:GetPullableSpawns()
-    local pullRadius = Config:GetSetting('PullRadius')
     local maxPathRange = Config:GetSetting('MaxPathRange')
 
     local metaDataCache = {}
 
     if self:IsPullMode("Farm") then
-        pullRadius = Config:GetSetting('PullRadiusFarm')
+        self.TempSettings.PullRadius = Config:GetSetting('PullRadiusFarm')
     elseif self:IsPullMode("Hunt") then
-        pullRadius = Config:GetSetting('PullRadiusHunt')
+        self.TempSettings.PullRadius = Config:GetSetting('PullRadiusHunt')
+    else
+        self.TempSettings.PullRadius = Config:GetSetting('PullRadius')
     end
 
-    local pullRadiusSqr = pullRadius * pullRadius
+    local pullRadiusSqr = self.TempSettings.PullRadius * self.TempSettings.PullRadius
 
     local spawnFilter = function(spawn)
         if not spawn() or spawn.ID() == 0 then return false end
@@ -1816,13 +1818,7 @@ function Module:CheckForAbort(pullID, bNavigating)
 
     -- ignore distance and time if this is a manually requested pull
     if pullID ~= self.TempSettings.TargetSpawnID then
-        if not self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadius then
-            Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
-            return true
-        end
-
-
-        if self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadiusFarm then
+        if spawn.Distance() > self.TempSettings.PullRadius then
             Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
             return true
         end
@@ -2297,7 +2293,7 @@ function Module:GiveTime(combat_state)
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     mq.doevents()
@@ -2326,7 +2322,7 @@ function Module:GiveTime(combat_state)
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay(500, function() return mq.TLO.Navigation.Active() end)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     if pullAbility.Type:lower() == "ability" then
