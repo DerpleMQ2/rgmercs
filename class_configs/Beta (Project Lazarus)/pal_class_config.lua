@@ -252,7 +252,7 @@ return {
             name = "Default",
             -- cond = function(self) return true end, --Kept here for illustration, this line could be removed in this instance since we aren't using conditions.
             spells = {
-                { name = "TouchHeal", },
+                { name = "TouchHeal",    cond = function(self) return Config:GetSetting('DoTouchHeal') < 3 end, },
                 { name = "LightHeal", },
                 { name = "WaveHeal", },
                 { name = "Cleansing",    cond = function(self) return Config:GetSetting('DoCleansing') end, },
@@ -383,7 +383,14 @@ return {
                 name = "Hand of Piety",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return self.CombatState == "Combat" and Targeting.BigHealsNeeded(target) and Targeting.TargetIsMyself(target)
+                    return self.CombatState == "Combat" and Targeting.GetTargetPctHPs() < Config:GetSetting('HPCritical')
+                end,
+            },
+            {
+                name = "TouchHeal",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Config:GetSetting("DoTouchHeal") == 1 and Targeting.BigHealsNeeded(target)
                 end,
             },
             {
@@ -397,6 +404,9 @@ return {
             {
                 name = "TouchHeal",
                 type = "Spell",
+                cond = function(self, spell, target)
+                    return Config:GetSetting("DoTouchHeal") == 2
+                end,
             },
         },
     },
@@ -568,11 +578,9 @@ return {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if not Core.GetResolvedActionMapItem(spell) then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
-
         },
         ['GroupBuff'] = {
             {
@@ -639,7 +647,6 @@ return {
                     end
                 end,
                 cond = function(self, discSpell)
-                    if not Core.IsTanking() then return false end
                     return Casting.NoDiscActive()
                 end,
             },
@@ -684,6 +691,13 @@ return {
             {
                 name = "Beacon of the Righteous",
                 type = "AA",
+            },
+            {
+                name = "Forsaken Fayguard Bladecatcher",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    return Config:GetSetting('DoAEDamage')
+                end,
             },
             {
                 name = "AEStun",
@@ -819,6 +833,14 @@ return {
             {
                 name = "SereneStun",
                 type = "Spell",
+            },
+            {
+                name = "PBAEStun",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Core.IsTanking() or not Config:GetSetting('DoAEDamage') then return false end
+                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                end,
             },
             {
                 name = "StunTimer5",
@@ -1186,10 +1208,25 @@ return {
         },
 
         --Heals/Cures
+        ['DoTouchHeal']      = {
+            DisplayName = "Touch Heal Use:",
+            Category = "Heals/Cures",
+            Index = 1,
+            Tooltip =
+            "Choose when the Paladin will use the single-target Touch-line healing spell.",
+            Type = "Combo",
+            ComboOptions = { 'Emergency Use(BigHealPoint)', 'Standard Use(MainHealPoint)', 'Never', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my paladin changing targets to heal so often?",
+            Answer = "You can control when a Paladin will use their single target heals on the Heals/Cures tab in Class options.",
+        },
         ['DoCleansing']      = {
             DisplayName = "Do Cleansing HoT",
             Category = "Heals/Cures",
-            Index = 1,
+            Index = 2,
             Tooltip = "Use your single-target HoT line.",
             RequiresLoadoutChange = true,
             Default = false,
@@ -1199,7 +1236,7 @@ return {
         ['KeepPurityMemmed'] = {
             DisplayName = "Mem Crusader's Cure",
             Category = "Heals/Cures",
-            Index = 2,
+            Index = 3,
             Tooltip = "Memorize your Crusader's xxx line (Cure poi/dis/curse) when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
             RequiresLoadoutChange = true,
@@ -1211,7 +1248,7 @@ return {
         ['KeepCurseMemmed']  = {
             DisplayName = "Mem Remove Curse",
             Category = "Heals/Cures",
-            Index = 3,
+            Index = 4,
             Tooltip = "Memorize remove curse spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
             RequiresLoadoutChange = true,
