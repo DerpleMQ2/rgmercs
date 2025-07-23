@@ -538,7 +538,7 @@ return {
                 name = "Yaulp",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.SelfBuffAACheck()
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -827,7 +827,7 @@ return {
                 name = "Yaulp",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.SelfBuffAACheck()
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -942,11 +942,11 @@ return {
         {
             id = 'Force of Disruption',
             Type = "AA",
-            DisplayName = function() return Casting.CanUseAA("Force of Disruption") or "" end,
-            AbilityName = function() return Casting.CanUseAA("Force of Disruption") or "" end,
+            DisplayName = function() return Casting.CanUseAA("Force of Disruption") and "Force of Disruption" or "" end,
+            AbilityName = function() return Casting.CanUseAA("Force of Disruption") and "Force of Disruption" or "" end,
             AbilityRange = 150,
             cond = function(self)
-                return Casting.CanUseAA("Force of Disruption")
+                return Casting.CanUseAA("Force of Disruption") and "Force of Disruption"
             end,
         },
     },

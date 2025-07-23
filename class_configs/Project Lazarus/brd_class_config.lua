@@ -490,6 +490,10 @@ local _ClassConfig = {
                     return Config:GetSetting("UseShout")
                 end,
             },
+            {
+                name = "Kick",
+                type = "Ability",
+            },
         },
         ['CombatSongs'] = {
             {
