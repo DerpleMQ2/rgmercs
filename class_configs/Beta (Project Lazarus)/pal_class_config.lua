@@ -232,6 +232,9 @@ return {
             "Rampart Discipline",
             "Deflection Discipline",
         },
+        ['SancDisc'] = {
+            "Sanctification Discipline",
+        },
         ['TwincastNuke'] = {
             "Justice of Marr",
         },
@@ -648,6 +651,15 @@ return {
                 end,
                 cond = function(self, discSpell)
                     return Casting.NoDiscActive()
+                end,
+            },
+            { -- use this only when we have no better active disc to use
+                name = "SancDisc",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    local blockReady = mq.TLO.Me.CombatAbilityReady(Core.GetResolvedActionMapItem('BlockDisc') or "")()
+                    local guardReady = mq.TLO.Me.CombatAbilityReady(Core.GetResolvedActionMapItem('GuardDisc') or "")()
+                    return Casting.NoDiscActive() and not blockReady and not guardReady
                 end,
             },
         },
