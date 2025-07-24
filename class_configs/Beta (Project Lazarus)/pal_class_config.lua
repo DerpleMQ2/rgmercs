@@ -1345,5 +1345,14 @@ return {
             Answer = "If you have elected to use the Standard DD proc (default) and it is not yet available, we will use the Undead proc still.\n" ..
                 "Your desired proc can be adjusted on the Abilities tab.",
         },
+        ['DoVetAA']          = {
+            DisplayName = "Use Vet AA",
+            Category = "Buffs",
+            Index = 6,
+            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Default = true,
+            FAQ = "What Vet AA's does PAL use?",
+            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
+        },
     },
 }
