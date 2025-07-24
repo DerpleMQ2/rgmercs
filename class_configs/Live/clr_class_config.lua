@@ -345,10 +345,6 @@ local _ClassConfig = {
             "Unified Hand of Infallibility",
         },
         ['ACBuff'] = { --Sometimes single, sometimes group, used on tank before Aego or until it is rolled into Unified (Symbol)
-            "Ward of the Avowed",
-            "Ward of the Guileless",
-            "Ward of Sincerity",
-            "Ward of the Merciful",
             "Order of the Earnest",
             "Ward of the Earnest",
             "Order of the Devout",
@@ -534,8 +530,8 @@ local _ClassConfig = {
             "Avowed Acquittal",
         },
         ['SpellBlessing'] = {
-            -- Spell Speed Blessings 15-92(112)Becomes Defunct due to Unifieds.)
-            -- [] = "Benediction of Resplendence",
+            -- Spell haste Blessings 15-92, defunct at 95 due to Unifieds.
+            -- -- Do not add future version unless you have verified that they are not simply Symbol/Aego Unified triggers.
             "Blessing of Piety",
             "Blessing of Faith",
             "Blessing of Reverence",
@@ -550,10 +546,6 @@ local _ClassConfig = {
             "Aura of Loyalty",
             "Blessing of Will",
             "Hand of Will",
-            "Blessing of Fervor",
-            "Hand of Fervor",
-            "Benediction of Piety",
-            "Hand of Zeal",
         },
         ['CureAll'] = {
             "Sanctified Blood",
@@ -1398,7 +1390,7 @@ local _ClassConfig = {
                 name = "SpellBlessing",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if mq.TLO.Me.Level() > 91 then return false end
+                    if mq.TLO.Me.Level() > 94 then return false end -- could check to make sure we know a unified. This is cheaper.
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
