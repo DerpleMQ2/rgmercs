@@ -263,8 +263,8 @@ return {
                 { name = "SereneStun", },
                 { name = "StunTimer4",   cond = function(self) return Core.IsTanking() end, },
                 { name = "StunTimer5",   cond = function(self) return Core.IsTanking() end, },
-                { name = "AEStun",       cond = function(self) return Config:GetSetting('DoAEStun') end, },
                 { name = "PBAEStun",     cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
+                { name = "AEStun",       cond = function(self) return Config:GetSetting('DoAEStun') end, },
                 { name = "CureCurse",    cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 { name = "PurityCure",   cond = function(self) return Config:GetSetting('KeepPurityMemmed') end, },
                 { name = "UndeadNuke",   cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
@@ -712,18 +712,17 @@ return {
                 end,
             },
             {
-                name = "AEStun",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Config:GetSetting('DoAEDamage') or spell.Name() ~= "The Sacred Word" -- Sacred Word does damage
-                end,
-
-            },
-            {
                 name = "PBAEStun",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Config:GetSetting('DoAEDamage')
+                end,
+            },
+            {
+                name = "AEStun",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Config:GetSetting('DoAEDamage') or spell.Name() ~= "The Sacred Word" -- Sacred Word does damage
                 end,
             },
         },
@@ -1274,12 +1273,30 @@ return {
         ['DoUndeadNuke']     = {
             DisplayName = "Do Undead Nuke",
             Category = "Combat",
-            Index = 3,
+            Index = 1,
             Tooltip = "Use the Undead nuke line (standard and timed w/debuff component).",
             RequiresLoadoutChange = true,
             Default = true,
             FAQ = "How can I use my Undead Nuke?",
             Answer = "You can enable the undead nuke line in the Spells and Abilities tab.",
+        },
+        ['DoValorousRage']   = {
+            DisplayName = "Valorous Rage",
+            Category = "Combat",
+            Index = 2,
+            Tooltip = "Use the Valorous Rage AA during burns.",
+            Default = false,
+            FAQ = "What is Valorous Rage and how can I use it?",
+            Answer = "Valorous Rage is an AA that increases your damage output while hurting your ability to heal and can be toggled in the Combat tab of the Class options.",
+        },
+        ['DoVetAA']          = {
+            DisplayName = "Use Vet AA",
+            Category = "Combat",
+            Index = 3,
+            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Default = true,
+            FAQ = "What Vet AA's does PAL use?",
+            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
 
         --Buffs
@@ -1344,15 +1361,6 @@ return {
             FAQ = "Why am I using and Undead proc, I'm not fighting any undead?",
             Answer = "If you have elected to use the Standard DD proc (default) and it is not yet available, we will use the Undead proc still.\n" ..
                 "Your desired proc can be adjusted on the Abilities tab.",
-        },
-        ['DoVetAA']          = {
-            DisplayName = "Use Vet AA",
-            Category = "Buffs",
-            Index = 6,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
-            Default = true,
-            FAQ = "What Vet AA's does PAL use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
     },
 }
