@@ -145,6 +145,33 @@ Config.Constants.DebuffChoice = { "Never", "Based on Con Color", "Always", }
 -- Defaults
 Config.DefaultConfig = {
 
+    -- Custom: These use custom UI elements and do not display in normal settings windows.
+    ['ClassConfigDir']       = {
+        DisplayName = "Class Config Dir",
+        Category = "Main",
+        Tooltip = "Which version of class configs to Load",
+        Type = "Custom",
+        Default = mq.TLO.EverQuest.Server() == "Project Lazarus" and "Project Lazarus" or "Live",
+        FAQ = "How do I load configuration file for different servers types?",
+        Answer = "You can change the config type by selecting a different Server Type from the main panel.",
+    },
+    ['AssistOutside']        = {
+        DisplayName = "Assist Outside of Group",
+        Tooltip = "Allow assisting characters outside of your group.",
+        Type = "Custom",
+        Default = false,
+        FAQ = "How do I use the Outside Assist List?",
+        Answer = "You can add characters to the list on the main tab, and enable the assist outside option to allow you to assist them.",
+    },
+    ['OutsideAssistList']    = {
+        DisplayName = "List of Outsiders to Assist",
+        Tooltip = "List of Outsiders to Assist",
+        Type = "Custom",
+        Default = {},
+        FAQ = "How do I Setup who to assist from outside of my group?",
+        Answer = "You can add characters to the [OutsideAssistList] to allow you to assist them.",
+    },
+
     -- [ CLICKIES ] --
     ['ClickyItem1']          = {
         DisplayName = "Downtime Item 1",
@@ -547,17 +574,6 @@ Config.DefaultConfig = {
         Answer = "You can set the [SafeTargeting] option to true to avoid targeting mobs that are fighting other players.",
 
     },
-    ['AssistOutside']        = {
-        DisplayName = "Assist Outside of Group",
-        Category = "Engage",
-        Index = 13,
-        Tooltip = "Allow assisting characters outside of your group.",
-        Default = false,
-        ConfigType = "Advanced",
-        FAQ = "I want to Power Level and assist my friends, how do I do this?",
-        Answer = "You can set the [AssistOutside] option to true to allow assisting characters outside of your group." ..
-            "You can also add characters to the [OutsideAssistList] to allow you to assist them.",
-    },
     ['AssistRange']          = {
         DisplayName = "Assist Range",
         Category = "Engage",
@@ -663,37 +679,29 @@ Config.DefaultConfig = {
         FAQ = "Why am I getting warnings about not facing my target?",
         Answer = "You can set the [FaceTarget] option to true to periodically /face your target while in combat.",
     },
+    ['RaidAssistTarget']     = {
+        DisplayName = "Raid Assist Target",
+        Category = "Engage",
+        Index = 15,
+        Tooltip = "Which Raid Assist target to follow. Please note that we will not fallback if this is not set properly.",
+        Type = "Combo",
+        ComboOptions = { 'First', 'Second', 'Third', },
+        Default = 1,
+        Min = 1,
+        Max = 3,
+        ConfigType = "Normal",
+        FAQ = "Why am I not following the Raid Assist target I want?",
+        Answer = "You can set the preferred Raid Assist Target on the Engage tab of the main options.",
+    },
     ['FollowMarkTarget']     = {
         DisplayName = "Follow Mark Target",
         Category = "Engage",
-        Index = 15,
+        Index = 16,
         Tooltip = "Auto target MA target Marks.",
         Default = false,
         ConfigType = "Advanced",
         FAQ = "Why am I not following the Marked target?",
         Answer = "You can set the [FollowMarkTarget] option to true to automatically target the MA's Marked target.",
-    },
-    ['OutsideAssistList']    = {
-        DisplayName = "List of Outsiders to Assist",
-        Category = "Engage",
-        Index = 14,
-        Tooltip = "List of Outsiders to Assist",
-        Type = "Custom",
-        Default = {},
-        ConfigType = "Advanced",
-        FAQ = "How do I Setup who to assist from outside of my group?",
-        Answer = "You can add characters to the [OutsideAssistList] to allow you to assist them.",
-    },
-    ['ClassConfigDir']       = {
-        DisplayName = "Class Config Dir",
-        Category = "Main",
-        Index = 14,
-        Tooltip = "Which version of class configs to Load",
-        Type = "Custom",
-        Default = mq.TLO.EverQuest.Server() == "Project Lazarus" and "Project Lazarus" or "Live",
-        ConfigType = "Advanced",
-        FAQ = "How do I load configuration file for different servers types?",
-        Answer = "You can change the config type by selecting a different Server Type from the main panel.",
     },
 
     -- [SPELLS/ABILS] --
@@ -1075,25 +1083,29 @@ Config.DefaultConfig = {
     },
 
     -- [ HEAL/REZ] --
-    ['PriorityHealing']      = {
-        DisplayName = "Priority Healing",
+    ['MaxHealPoint']         = {
+        DisplayName = "Healing Threshold",
         Category = "Heal/Rez",
-        Index = 10,
-        Tooltip = "Standby for healing over engaging in combat actions.",
-        Default = false,
+        Index = 1,
+        Tooltip = "Minimum PctHPs to check if a target needs healing.",
+        Default = 90,
+        Min = 1,
+        Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why are my healers attacking the mob and not healing?",
-        Answer = "You can set the [PriorityHealing] option to true to enforce healing over engaging in combat actions.",
+        FAQ = "Why am I not healing?",
+        Answer = "You can set the [MaxHealPoint] option to the percent health you would like to start healing at.",
     },
-    ['BreakInvis']           = {
-        DisplayName = "Break Invis",
+    ['LightHealPoint']       = {
+        DisplayName = "Light Heal Point",
         Category = "Heal/Rez",
-        Index = 9,
-        Tooltip = "Break invis to heal, cure and rez when out of combat (Does not affect combat actions).",
-        Default = false,
+        Index = 2,
+        Tooltip = "Minimum PctHPs to use the Light Heal Rotation.",
+        Default = mq.TLO.Me.Class.ShortName() == "CLR" and 95 or 90,
+        Min = 1,
+        Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why aren't I being healed outside of combat?",
-        Answer = "Outside of combat, healers won't break invis to heal unless the \"Break Invis\" option is toggled in the Heal/Rez settings.",
+        FAQ = "Why am I not healing with my LIGHT HEAL?",
+        Answer = "You can set the [LightHealPoint] option to the percent health you would like to start using the Light Heal Rotation at.",
     },
     ['MainHealPoint']        = {
         DisplayName = "Main Heal Point",
@@ -1132,19 +1144,6 @@ Config.DefaultConfig = {
         Answer = "You can set the [GroupHealPoint] option to the percent health you would like to start using the Group Heal Rotation at.\n" ..
             "You can also set the [GroupInjureCnt] option to the number of group members that must be under the above threshold.",
     },
-    ['PetHealPoint']         = {
-        DisplayName = "Pet Heal Point",
-        Category = "Heal/Rez",
-        Index = 8,
-        Tooltip = "Minimum PctHPs to use the Pet Heal Rotation.",
-        Default = 50,
-        Min = 1,
-        Max = 100,
-        ConfigType = "Advanced",
-        FAQ = "Why am I not healing pets?",
-        Answer = "You can set the [PetHealPoint] option to the percent health you would like to start using the Pet Heal Rotation at.\n" ..
-            "You also need to set the [DoPetHeals] option to true to heal pets in your group.",
-    },
     ['GroupInjureCnt']       = {
         DisplayName = "Group Injured Count",
         Category = "Heal/Rez",
@@ -1167,34 +1166,54 @@ Config.DefaultConfig = {
         FAQ = "Why am I not healing pets?",
         Answer = "You can set the [DoPetHeals] option to true to heal pets in your group.",
     },
-    ['MaxHealPoint']         = {
-        DisplayName = "Healing Threshold",
+    ['PetHealPoint']         = {
+        DisplayName = "Pet Heal Point",
         Category = "Heal/Rez",
-        Index = 1,
-        Tooltip = "Minimum PctHPs to check if a target needs healing.",
-        Default = 90,
+        Index = 8,
+        Tooltip = "Minimum PctHPs to use the Pet Heal Rotation.",
+        Default = 50,
         Min = 1,
-        Max = 99,
+        Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not healing?",
-        Answer = "You can set the [MaxHealPoint] option to the percent health you would like to start healing at.",
+        FAQ = "Why am I not healing pets?",
+        Answer = "You can set the [PetHealPoint] option to the percent health you would like to start using the Pet Heal Rotation at.\n" ..
+            "You also need to set the [DoPetHeals] option to true to heal pets in your group.",
     },
-    ['LightHealPoint']       = {
-        DisplayName = "Light Heal Point",
+    ['BreakInvis']           = {
+        DisplayName = "Break Invis",
         Category = "Heal/Rez",
-        Index = 2,
-        Tooltip = "Minimum PctHPs to use the Light Heal Rotation.",
-        Default = mq.TLO.Me.Class.ShortName() == "CLR" and 95 or 90,
-        Min = 1,
-        Max = 99,
+        Index = 9,
+        Tooltip = "Break invis to heal, cure and rez when out of combat (Does not affect combat actions).",
+        Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why am I not healing with my LIGHT HEAL?",
-        Answer = "You can set the [LightHealPoint] option to the percent health you would like to start using the Light Heal Rotation at.",
+        FAQ = "Why aren't I being healed outside of combat?",
+        Answer = "Outside of combat, healers won't break invis to heal unless the \"Break Invis\" option is toggled in the Heal/Rez settings.",
+    },
+    ['PriorityHealing']      = {
+        DisplayName = "Priority Healing",
+        Category = "Heal/Rez",
+        Index = 10,
+        Tooltip = "Standby for healing over engaging in combat actions.",
+        Default = false,
+        ConfigType = "Advanced",
+        FAQ = "Why are my healers attacking the mob and not healing?",
+        Answer = "You can set the [PriorityHealing] option to true to enforce healing over engaging in combat actions.",
+    },
+    ['HealOutside']          = {
+        DisplayName = "Heal Outside",
+        Category = "Heal/Rez",
+        Index = 11,
+        Tooltip =
+        "If enabled this setting will heal friendly xtargets (even if not in group) and attempt to rez dannet peers, raid/guildmates, and anyone in the outside assist list.",
+        Default = true,
+        ConfigType = "Advanced",
+        FAQ = "Why are my healers attacking the mob and not healing?",
+        Answer = "You can set the [PriorityHealing] option to true to enforce healing over engaging in combat actions.",
     },
     ['DoCureSpells']         = {
         DisplayName = "Do Cure Spells",
         Category = "Heal/Rez",
-        Index = 11,
+        Index = 12,
         Tooltip = "Use Cure spells to clear detrimental effects from your group or yourself.",
         Default = true,
         ConfigType = "Advanced",
@@ -1204,7 +1223,7 @@ Config.DefaultConfig = {
     ['DoCureAA']             = {
         DisplayName = "Do Cure AA",
         Category = "Heal/Rez",
-        Index = 12,
+        Index = 13,
         Tooltip = "Use Cure AA to clear detrimental effects from your group or yourself.",
         Default = true,
         ConfigType = "Advanced",
@@ -1214,7 +1233,7 @@ Config.DefaultConfig = {
     ['CureInterval']         = {
         DisplayName = "Cure Check Interval",
         Category = "Heal/Rez",
-        Index = 13,
+        Index = 14,
         Tooltip = "Perform check to see if cures are needed every X seconds. ***WARNING: RESOURCE INTENSIVE*** Default: 5",
         Default = 5,
         Min = 1,
@@ -1227,7 +1246,7 @@ Config.DefaultConfig = {
     ['DoRez']                = {
         DisplayName = "Do Rez",
         Category = "Heal/Rez",
-        Index = 14,
+        Index = 15,
         Tooltip = "Use Rezes. If disabled, no rez spells will be used at any time.",
         Default = true,
         ConfigType = "Advanced",
@@ -1237,7 +1256,7 @@ Config.DefaultConfig = {
     ['DoBattleRez']          = {
         DisplayName = "Do Battle Rez",
         Category = "Heal/Rez",
-        Index = 15,
+        Index = 16,
         Tooltip = "Use Rez while in combat",
         Default = mq.TLO.Me.Class.ShortName():lower() == "clr",
         ConfigType = "Advanced",
@@ -1247,7 +1266,7 @@ Config.DefaultConfig = {
     ['ConCorpseForRez']      = {
         DisplayName = "Check for Previous Rez",
         Category = "Heal/Rez",
-        Index = 16,
+        Index = 17,
         Tooltip = "If this setting is enabled, we will attempt to con a corpse and rez only if that corpse has not yet taken one.",
         Default = (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu",
         ConfigType = "Advanced",
@@ -1257,7 +1276,7 @@ Config.DefaultConfig = {
     ['RezInZonePC']          = {
         DisplayName = "Rez In-Zone PCs",
         Category = "Heal/Rez",
-        Index = 17,
+        Index = 18,
         Tooltip = "Rez corpses of live PCs in the zone (If disabled, we will only rez corpses of PCs not in our current zone).",
         Default = true,
         ConfigType = "Advanced",
@@ -1268,7 +1287,7 @@ Config.DefaultConfig = {
     ['RetryRezDelay']        = {
         DisplayName = "Retry Rez Delay",
         Category = "Heal/Rez",
-        Index = 18,
+        Index = 19,
         Tooltip = "Attempt to rez a corpse every X seconds.",
         Default = 6,
         Min = 1,
@@ -1280,7 +1299,7 @@ Config.DefaultConfig = {
     ['InstantRelease']       = {
         DisplayName = "Instant Release",
         Category = "Heal/Rez",
-        Index = 19,
+        Index = 20,
         Tooltip = "Instantly release when you die.",
         Default = false,
         ConfigType = "Advanced",
