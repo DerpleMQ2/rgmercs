@@ -363,8 +363,8 @@ local _ClassConfig = {
             {
                 name = "Elixir",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoElixir') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoElixir') or Targeting.BigHealsNeeded(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -507,56 +507,59 @@ local _ClassConfig = {
             {
                 name = "FlameLickDot",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoFlameLickDot') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoFlameLickDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
                 name = "SwarmDot",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoSwarmDot') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSwarmDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
                 name = "VengeanceDot",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoVengeanceDot') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoVengeanceDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
                 name = "StunNuke",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoStunNuke') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoStunNuke') then return false end
                     return Casting.HaveManaToNuke() and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             { -- in-game description is incorrect, mob must be targeted.
                 name = "TwinHealNuke",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoTwinHealNuke') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoTwinHealNuke') then return false end
                     return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoFireNuke') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoFireNuke') then return false end
                     return Casting.OkayToNuke(true)
                 end,
             },
             {
                 name = "IceNuke",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoIceNuke') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoIceNuke') then return false end
                     return Casting.OkayToNuke(true)
                 end,
             },
@@ -632,32 +635,32 @@ local _ClassConfig = {
                     return Casting.GetFirstAA({ "Blessing of Ro", "Hand of Ro", })
                 end,
                 type = "AA",
+                load_cond = function() return Config:GetSetting('DoFireDebuff') and Casting.CanUseAA("Hand of Ro") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoFireDebuff') then return false end
                     return Casting.DetAACheck(aaName)
                 end,
             },
             {
                 name = "FireDebuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoFireDebuff') or Casting.CanUseAA("Hand of Ro") then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "ColdDebuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoColdDebuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoColdDebuff') then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "ATKDebuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoATKDebuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoATKDebuff') then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
@@ -666,6 +669,7 @@ local _ClassConfig = {
             {
                 name = "Entrap",
                 type = "AA",
+                load_cond = function() return Casting.CanUseAA("Entrap") end,
                 cond = function(self, aaName, target)
                     return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target)
                 end,
@@ -673,8 +677,8 @@ local _ClassConfig = {
             {
                 name = "SnareSpell",
                 type = "Spell",
+                load_cond = function() return not Casting.CanUseAA("Entrap") end,
                 cond = function(self, spell, target)
-                    if Casting.CanUseAA("Entrap") then return false end
                     return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target)
                 end,
             },
@@ -683,28 +687,28 @@ local _ClassConfig = {
             {
                 name = "Communion of the Cheetah",
                 type = "AA",
+                load_cond = function() return Config:GetSetting('DoMoveBuffs') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoMoveBuffs') then return false end
                     return Casting.GroupBuffAACheck(aaName)
                 end,
             },
             {
                 name = "Flight of Eagles",
                 type = "AA",
+                load_cond = function() return Config:GetSetting('DoMoveBuffs') and Casting.CanUseAA("Flight of Eagles") end,
                 active_cond = function(self, aaName)
                     return Casting.IHaveBuff(Casting.GetAASpell(aaName))
                 end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoMoveBuffs') then return false end
                     return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
             {
                 name = "MoveSpells",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoMoveBuffs') and not Casting.CanUseAA("Flight of Eagles") end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting("DoMoveBuffs") or Casting.CanUseAA("Flight of Eagles") then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -727,27 +731,28 @@ local _ClassConfig = {
             {
                 name = "HPTypeOneGroup",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoHPBuff') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHPBuff') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "GroupRegenBuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoGroupRegen') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoGroupRegen') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "GroupDmgShield",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoGroupDmgShield') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoGroupDmgShield') or ((spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsMA(target)) then return false end
+                    if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsMA(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -765,8 +770,8 @@ local _ClassConfig = {
             {
                 name = "Communion of the Cheetah",
                 type = "AA",
+                load_cond = function() return Config:GetSetting('DoMoveBuffs') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoMoveBuffs') then return false end
                     return Casting.SelfBuffAACheck(aaName)
                 end,
             },
@@ -775,7 +780,6 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.AuraActiveByName(spell.BaseName()) end,
                 cond = function(self, spell)
-                    if self:GetResolvedActionMapItem('IceAura') then return false end
                     return (spell and spell() and not Casting.AuraActiveByName(spell.BaseName()))
                 end,
             },
@@ -977,6 +981,7 @@ local _ClassConfig = {
             Category = "Buffs",
             Index = 1,
             Tooltip = "Cast Movement Spells/AA.",
+            RequiresLoadoutChange = true,
             Default = false,
             FAQ = "Why am I spamming movement buffs?",
             Answer = "Some move spells freely overwrite those of other classes, so if multiple movebuffs are being used, a buff loop may occur.\n" ..
@@ -987,6 +992,7 @@ local _ClassConfig = {
             Category = "Buffs",
             Index = 2,
             Tooltip = "Use your group HP Buff. Disable as desired to prevent conflicts with CLR or PAL buffs.",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I in a buff war with my Paladin or Druid? We are constantly overwriting each other's buffs.",
             Answer = "Disable [DoHPBuff] to prevent issues with Aego/Symbol lines overwriting. Alternatively, you can adjust the settings for the other class instead.",
@@ -996,6 +1002,7 @@ local _ClassConfig = {
             Category = "Buffs",
             Index = 3,
             Tooltip = "Use your Group Regen buff.",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I spamming my Group Regen buff?",
             Answer = "Certain Shaman and Druid group regen buffs report cross-stacking. You should deselect the option on one of the PCs if they are grouped together.",
@@ -1005,6 +1012,7 @@ local _ClassConfig = {
             Category = "Buffs",
             Index = 4,
             Tooltip = "Use your group damage shield buff.",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why do my druid and mage constantly both try to use the damage shield?",
             Answer = "You can disable the group damage shield (DS) buff option on the Buffs tab.",
@@ -1125,6 +1133,7 @@ local _ClassConfig = {
             Category = "Damage",
             Index = 1,
             Tooltip = "Use your single-target fire nukes.",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I nuking? A druid is a healer.",
             Answer = "You can disable this in your class settings.",
@@ -1134,6 +1143,7 @@ local _ClassConfig = {
             Category = "Damage",
             Index = 2,
             Tooltip = "Use your single-target cold nukes.",
+            RequiresLoadoutChange = true,
             Default = false,
             FAQ = "Why am I using fire nukes? The mobs are fire-resistant.",
             Answer = "You can change which nukes you are using in your class settings.",

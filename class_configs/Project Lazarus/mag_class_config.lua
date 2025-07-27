@@ -1364,14 +1364,6 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "Epic",
-                type = "Item",
-                cond = function(self, itemName)
-                    if mq.TLO.Me.Pet.ID() == 0 then return false end
-                    return Casting.PetBuffItemCheck(itemName)
-                end,
-            },
-            {
                 name = "Second Wind Ward",
                 type = "AA",
                 cond = function(self, aaName)
@@ -1382,7 +1374,7 @@ _ClassConfig      = {
                 name = "Host in the Shell",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.PetBuffAACheck(aaName) and Core.IsModeActive("PetTank")
+                    return Casting.PetBuffAACheck(aaName)
                 end,
             },
             {
@@ -1397,13 +1389,6 @@ _ClassConfig      = {
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.PetBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Companion's Intervening Divine Aura",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.PetBuffAACheck(aaName) and Core.IsModeActive("PetTank")
                 end,
             },
         },
@@ -1452,7 +1437,7 @@ _ClassConfig      = {
             {
                 name = "Heart of Flames",
                 type = "AA",
-                cond = function(self, aaName, target) return not Casting.CanUseAA("Fire Core") end,
+                load_cond = function() return not Casting.CanUseAA("Fire Core") end,
             },
             {
                 name = "Focus of Arcanum",
@@ -1579,8 +1564,8 @@ _ClassConfig      = {
             {
                 name = "SwarmPet",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoSwarmPet') > 1 end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoSwarmPet') == 1 then return false end
                     return Casting.HaveManaToNuke() and not (Config:GetSetting('DoSwarmPet') == 2 and not Targeting.IsNamed(target))
                 end,
             },
@@ -1616,25 +1601,23 @@ _ClassConfig      = {
             {
                 name = "BigFireDD",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('ElementChoice') == 1 end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('ElementChoice') ~= 1 then return false end
                     return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "FireDD",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('ElementChoice') == 1 end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('ElementChoice') ~= 1 then return false end
                     return Targeting.MobHasLowHP(target)
                 end,
             },
             {
                 name = "MagicDD",
                 type = "Spell",
-                cond = function(self)
-                    return Config:GetSetting('ElementChoice') == 2
-                end,
+                load_cond = function() return Config:GetSetting('ElementChoice') == 2 end,
             },
             {
                 name = "Turn Summoned",
@@ -1656,14 +1639,15 @@ _ClassConfig      = {
             {
                 name = "Wind of Malosinete",
                 type = "AA",
+                load_cond = function() return Config:GetSetting('DoAEMalo') end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoAEMalo') then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.DetAACheck(aaName)
                 end,
             },
             {
                 name = "Malosinete",
                 type = "AA",
+                load_cond = function() return Casting.CanUseAA("Malosinete") end,
                 cond = function(self, aaName)
                     return Casting.DetAACheck(aaName)
                 end,
@@ -1671,8 +1655,8 @@ _ClassConfig      = {
             {
                 name = "MaloDebuff",
                 type = "Spell",
+                load_cond = function() return not Casting.CanUseAA("Malosinete") end,
                 cond = function(self, spell)
-                    if Casting.CanUseAA("Malosinete") then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1761,8 +1745,9 @@ _ClassConfig      = {
                     return Casting.GetFirstAA({ "Large Modulation Shard", "Medium Modulation Shard", "Small Modulation Shard", })
                 end,
                 type = "AA",
+                load_cond = function() return Casting.CanUseAA("Small Modulation Shard") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('SummonModRods') or not Targeting.TargetIsACaster(target) then return false end
+                    if not Targeting.TargetIsACaster(target) then return false end
                     local modRodItem = mq.TLO.Spell(aaName).RankName.Base(1)()
                     return modRodItem and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
                         (mq.TLO.Cursor.ID() or 0) == 0
@@ -1776,8 +1761,9 @@ _ClassConfig      = {
             {
                 name = "ManaRodSummon",
                 type = "Spell",
+                load_cond = function() return not Casting.CanUseAA("Small Modulation Shard") end,
                 cond = function(self, spell, target)
-                    if Casting.CanUseAA("Small Modulation Shard") or not Config:GetSetting('SummonModRods') then return false end
+                    if not Targeting.TargetIsACaster(target) then return false end
                     local modRodItem = spell.RankName.Base(1)()
                     return modRodItem and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
                         (mq.TLO.Cursor.ID() or 0) == 0
@@ -1932,6 +1918,7 @@ _ClassConfig      = {
             Category = "Mana",
             Index = 1,
             Tooltip = "Summon Mod Rods",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Can I summon mod rods for my group?",
             Answer = "Yes, you can summon mod rods for your group by setting the [SummonModRods] setting.",
@@ -2000,6 +1987,7 @@ _ClassConfig      = {
             Category = "Debuffs",
             Index = 2,
             Tooltip = "Do AE Malo Spells/AAs",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = false,
             FAQ = "I want to use AE Malo in my rotation, how do I do that?",
             Answer = "You can use the [DoAEMalo] feature to use AE Malo in your rotation.",
