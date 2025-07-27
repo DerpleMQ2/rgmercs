@@ -449,9 +449,9 @@ local _ClassConfig = {
             {
                 name = "SelfRune1",
                 type = "Spell",
+                load_cond = function() return not Casting.CanUseAA("Eldritch Rune") end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if Casting.CanUseAA("Eldritch Rune") then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -607,38 +607,39 @@ local _ClassConfig = {
             {
                 name = "GroupSpellShield",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoGroupSpellShield') end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoGroupSpellShield') then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
             {
                 name = "NdtBuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoNDTBuff') end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     --Single target versions of the spell will only be used on Melee, group versions will be cast if they are missing from any groupmember
-                    if not Config:GetSetting('DoNDTBuff') or ((spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target)) then return false end
-
+                    if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "SpellProcBuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoProcBuff') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoProcBuff') or not Targeting.TargetIsACaster(target) then return false end
+                    if not Targeting.TargetIsACaster(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "GroupRune",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('RuneChoice') == 2 end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('RuneChoice') ~= 2 then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
@@ -654,17 +655,18 @@ local _ClassConfig = {
             {
                 name = "SingleRune",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('RuneChoice') == 1 end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('RuneChoice') ~= 1 then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
             {
                 name = "Azure Mind Crystal",
                 type = "AA",
+                load_cond = function() return Config:GetSetting('SummonAzure') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('SummonAzure') or not Targeting.GroupedWithTarget(target) then return false end
+                    if not Targeting.GroupedWithTarget(target) then return false end
                     local crystal = mq.TLO.Spell(aaName).RankName.Base(1)()
                     return crystal and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", crystal), 1000) == "0" and (mq.TLO.Cursor.ID() or 0) == 0
                 end,
@@ -677,8 +679,9 @@ local _ClassConfig = {
             {
                 name = "Sanguine Mind Crystal",
                 type = "AA",
+                load_cond = function() return Config:GetSetting('SummonSanguine') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('SummonSanguine') or not Targeting.GroupedWithTarget(target) then return false end
+                    if not Targeting.GroupedWithTarget(target) then return false end
                     local crystal = mq.TLO.Spell(aaName).RankName.Base(1)()
                     return crystal and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", crystal), 1000) == "0" and (mq.TLO.Cursor.ID() or 0) == 0
                 end,
@@ -704,24 +707,26 @@ local _ClassConfig = {
             {
                 name = "SpinStunSpell",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoSpinStun') > 1 end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoSpinStun') == 1 or (Config:GetSetting('DoSpinStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) then return false end
+                    if (Config:GetSetting('DoSpinStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) then return false end
                     return Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             {
                 name = "PBAEStunSpell",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoAEStun') > 1 end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoAEStun') == 1 or (Config:GetSetting('DoAEStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) then return false end
+                    if (Config:GetSetting('DoAEStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting("AECount")
                 end,
             },
             {
                 name = "Soothing Words",
                 type = "AA",
+                load_cond = function() return Config:GetSetting("DoSoothing") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting("DoSoothing") then return false end
                     return Targeting.IsNamed(target) and (mq.TLO.Me.TargetOfTarget.ID() or Core.GetMainAssistId()) ~= Core.GetMainAssistId()
                 end,
             },
@@ -751,8 +756,8 @@ local _ClassConfig = {
             {
                 name = "Beguiler's Directed Banishment",
                 type = "AA",
+                load_cond = function() return Config:GetSetting("DoBeguilers") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoBeguilers') then return false end
                     if target.ID() == Config.Globals.AutoTargetID then return false end
                     return Targeting.IHaveAggro(100) and not Targeting.IsNamed(target)
                 end,
@@ -760,8 +765,8 @@ local _ClassConfig = {
             {
                 name = "Beguiler's Banishment",
                 type = "AA",
+                load_cond = function() return Config:GetSetting("DoBeguilers") end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoBeguilers') then return false end
                     return Targeting.IHaveAggro(100) and mq.TLO.SpawnCount("npc radius 20")() > 2
                 end,
             },
@@ -789,7 +794,7 @@ local _ClassConfig = {
                 name = "StripBuffSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoStripBuff') or mq.TLO.Target.ID() == 0 then return false end
+                    if mq.TLO.Target.ID() == 0 then return false end
                     return mq.TLO.Target.Beneficial() ~= nil
                 end,
             },
@@ -798,16 +803,16 @@ local _ClassConfig = {
             {
                 name = "ColoredNuke",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting("DoNuke") end,
                 cond = function(self)
-                    if not Config:GetSetting('DoNuke') then return false end
                     return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "Chromaburst",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting("DoChroma") end,
                 cond = function(self)
-                    if not Config:GetSetting('DoChroma') then return false end
                     return Casting.OkayToNuke()
                 end,
             },
@@ -822,24 +827,26 @@ local _ClassConfig = {
             {
                 name = "MindDot",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting("DoMindDot") end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoMindDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
                     return not mq.TLO.Me.Buff("Mind Shatter Recourse") or Casting.DotSpellCheck(spell)
                 end,
             },
             {
                 name = "StrangleDot",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting("DoStrangleDot") end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoStrangleDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting("DoColored") end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoColored') then return false end
                     return Casting.OkayToNuke()
                 end,
             },
@@ -887,8 +894,8 @@ local _ClassConfig = {
             {
                 name = "Crippling Aurora",
                 type = "AA",
+                load_cond = function() return Config:GetSetting("DoCrippleAA") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoCrippleAA') then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AECount') or
                         (not Config:GetSetting('DoCrippleSpell') and Targeting.IsNamed(target) and Casting.DetSpellAACheck(aaName))
                 end,
@@ -896,8 +903,8 @@ local _ClassConfig = {
             {
                 name = "CrippleSpell",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting("DoCrippleSpell") end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoCrippleSpell') then return false end
                     return Targeting.IsNamed(target) and Casting.DetSpellCheck(spell)
                 end,
             },
@@ -947,6 +954,7 @@ local _ClassConfig = {
             {
                 name = "Dreary Deeds",
                 type = "AA",
+                load_cond = function() return Casting.CanUseAA("Dreary Deeds") end,
                 cond = function(self, aaName)
                     local aaSpell = Casting.GetAASpell(aaName)
                     return Casting.DetAACheck(aaName) and (aaSpell.SlowPct() or 0) > Targeting.GetTargetSlowedPct()
@@ -955,8 +963,8 @@ local _ClassConfig = {
             {
                 name = "SlowSpell",
                 type = "Spell",
+                load_cond = function() return not Casting.CanUseAA("Dreary Deeds") end,
                 cond = function(self, spell)
-                    if Casting.CanUseAA("Dreary Deeds") then return false end
                     return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct())
                 end,
             },
@@ -1162,6 +1170,7 @@ local _ClassConfig = {
             DisplayName = "Use AE Cripple AA",
             Category = "Debuffs",
             Tooltip = "Enable casting Crippling Aurora when we meet the AE threshold, or on a named if we don't have the spell above selected.",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I not AE Crippling?",
             Answer = "The [DoCrippleAA] setting determines whether or not your PC will cast AE Cripple spells.\n" ..
@@ -1261,6 +1270,7 @@ local _ClassConfig = {
             DisplayName = "Do Soothing Words",
             Category = "Combat",
             Index = 6,
+            RequiresLoadoutChange = true,
             Tooltip = "Use the Soothing Words AA (large aggro reduction) on a named whose target is not our MA.",
             Default = false,
             FAQ = "Why won't I use the Soothing Words AA?",
@@ -1270,6 +1280,7 @@ local _ClassConfig = {
             DisplayName = "Do Beguiler's",
             Category = "Combat",
             Index = 7,
+            RequiresLoadoutChange = true,
             Tooltip = "Use Beguiler's (Directed) Banishment AA when you have aggro.",
             Default = false,
             FAQ = "Why won't I use either of the Beguiler's Banishment AA?",

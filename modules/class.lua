@@ -45,6 +45,8 @@ Module.TempSettings.CurrentRotationStateId   = 0
 Module.TempSettings.CurrentRotationStateType = 0 -- 0 : Invalid, 1 : Combat, 2 : Healing
 Module.TempSettings.RotationStates           = {}
 Module.TempSettings.HealRotationStates       = {}
+Module.TempSettings.RotationTable            = {}
+Module.TempSettings.HealRotationTable        = {}
 Module.TempSettings.RotationTimers           = {}
 Module.TempSettings.RezTimers                = {}
 Module.TempSettings.CureCheckTimer           = 0
@@ -618,7 +620,7 @@ function Module:Render()
                 Ui.RenderRotationTableKey()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
-                    self:RenderRotationWithToggle(r, self.ClassConfig.Rotations)
+                    self:RenderRotationWithToggle(r, self.TempSettings.RotationTable)
                 end
                 ImGui.Unindent()
             end
@@ -630,7 +632,7 @@ function Module:Render()
                 Ui.RenderRotationTableKey()
 
                 for _, r in pairs(self.TempSettings.HealRotationStates) do
-                    self:RenderRotationWithToggle(r, self.ClassConfig.HealRotations)
+                    self:RenderRotationWithToggle(r, self.TempSettings.HealRotationTable)
                 end
                 ImGui.Unindent()
             end
@@ -664,11 +666,11 @@ function Module:ResetRotation()
 end
 
 function Module:GetRotationTable(mode)
-    return self.ClassConfig and self.ClassConfig.Rotations[mode] or {}
+    return self.ClassConfig and self.TempSettings.RotationTable[mode] or {}
 end
 
 function Module:GetHealRotationTable(mode)
-    return self.ClassConfig and self.ClassConfig.HealRotations[mode] or {}
+    return self.ClassConfig and self.TempSettings.HealRotationTable[mode] or {}
 end
 
 function Module:GetSetting(setting)
@@ -785,41 +787,51 @@ function Module:GetClassConfig()
 end
 
 function Module:GetRotations()
-    --check rotation load conditions
-    self.TempSettings.ValidRotations = {}
-    for _, m in pairs(self.ClassConfig.RotationOrder or {}) do
-        if m.load_cond then
-            local valid = Core.SafeCallFunc("CheckLoadConditions", m.load_cond, self)
-            if valid then
-                table.insert(self.TempSettings.ValidRotations, m)
-            end
-        else
-            table.insert(self.TempSettings.ValidRotations, m)
+    -- filter rotations for load conditions, populate rotation states
+    self.TempSettings.RotationStates = {} -- clear the array for loadout rescans
+    self.TempSettings.RotationTable = {}
+    for _, rotation in ipairs(self.ClassConfig.RotationOrder or {}) do
+        if self:LoadConditionPass(rotation) then
+            table.insert(self.TempSettings.RotationStates, rotation)
+            self.TempSettings.RotationTable[rotation.name] = {}
         end
-    end
-    -- move the valid rotations to a useable table
-    self.TempSettings.RotationStates = {}
-    for i, m in ipairs(self.TempSettings.ValidRotations) do
-        self.TempSettings.RotationStates[i] = m
     end
 
-    --check heal rotation conditions
-    self.TempSettings.ValidHealRotations = {}
-    for _, m in pairs(self.ClassConfig.HealRotationOrder or {}) do
-        if m.load_cond then
-            local valid = Core.SafeCallFunc("CheckLoadConditions", m.load_cond, self)
-            if valid then
-                table.insert(self.TempSettings.ValidHealRotations, m)
+    -- filter rotation entries for load conditions
+    for rname, entries in pairs(self.ClassConfig.Rotations or {}) do
+        if self.TempSettings.RotationTable[rname] then
+            for _, entry in ipairs(entries) do
+                if self:LoadConditionPass(entry) then
+                    table.insert(self.TempSettings.RotationTable[rname], entry)
+                end
             end
-        else
-            table.insert(self.TempSettings.ValidHealRotations, m)
         end
     end
-    -- move the valid heal rotations to a useable table
-    self.TempSettings.HealRotationStates = {}
-    for i, m in ipairs(self.TempSettings.ValidHealRotations) do
-        self.TempSettings.HealRotationStates[i] = m
+
+    -- Do it all again for heal rotations
+    self.TempSettings.HealRotationStates = {} -- clear the array for loadout rescans
+    self.TempSettings.HealRotationTable = {}
+    for _, rotation in ipairs(self.ClassConfig.HealRotationOrder or {}) do
+        if self:LoadConditionPass(rotation) then
+            table.insert(self.TempSettings.HealRotationStates, rotation)
+            self.TempSettings.HealRotationTable[rotation.name] = {}
+        end
     end
+
+    -- filter rotation entries for load conditions
+    for rname, entries in pairs(self.ClassConfig.HealRotations or {}) do
+        if self.TempSettings.HealRotationTable[rname] then
+            for _, entry in ipairs(entries) do
+                if self:LoadConditionPass(entry) then
+                    table.insert(self.TempSettings.HealRotationTable[rname], entry)
+                end
+            end
+        end
+    end
+end
+
+function Module:LoadConditionPass(entry)
+    return not entry.load_cond or Core.SafeCallFunc("CheckLoadCondition", entry.load_cond, self)
 end
 
 function Module:SelfCheckAndRez()
@@ -1332,7 +1344,7 @@ function Module:DoGetState()
 
     local rotationStates = "Current Rotation States\n-=-=-=-=-=-=-=-\n"
     for idx, r in ipairs(self.TempSettings.RotationStates) do
-        local actionEntry = self.ClassConfig.Rotations[r.name][r.state or 1]
+        local actionEntry = self.TempSettings.RotationTable[r.name][r.state or 1]
         rotationStates = rotationStates ..
             string.format("[%d] %s :: %d :: Type: %s Action: %s\n", idx, r.name, r.state or 0, actionEntry.type,
                 self.ResolvedActionMap[actionEntry.name] and self.ResolvedActionMap[actionEntry.name] or actionEntry

@@ -61,7 +61,7 @@ return {
         },
     },
     ['AbilitySets']       = {
-        ["Preservation"] = {
+        ["WardProc"] = {
             -- Timer 12 - Preservation
             "Ward of Tunare", -- Level 70
         },
@@ -269,7 +269,7 @@ return {
                 { name = "PurityCure",   cond = function(self) return Config:GetSetting('KeepPurityMemmed') end, },
                 { name = "UndeadNuke",   cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "DebuffNuke",   cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
-                { name = "Preservation", },
+                { name = "WardProc", },
             },
         },
     },
@@ -392,24 +392,23 @@ return {
             {
                 name = "TouchHeal",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting("DoTouchHeal") == 1 end,
                 cond = function(self, spell, target)
-                    return Config:GetSetting("DoTouchHeal") == 1 and Targeting.BigHealsNeeded(target)
+                    return Targeting.BigHealsNeeded(target)
                 end,
             },
             {
                 name = "Cleansing",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoCleansing') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoCleansing') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "TouchHeal",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Config:GetSetting("DoTouchHeal") == 2
-                end,
+                load_cond = function() return Config:GetSetting("DoTouchHeal") == 2 end,
             },
         },
     },
@@ -556,8 +555,9 @@ return {
             --I considered creating a function (helper or utils) to govern this as I use it on multiple classes but the difference between buff window/song window/aa/spell etc makes it unwieldy
             -- if using duration checks, dont use SelfBuffCheck() (as it could return false when the effect is still on)
             {
-                name = "Preservation",
+                name = "WardProc",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoWardProc') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return spell.RankName.Stacks() and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 60
@@ -589,32 +589,34 @@ return {
             {
                 name = "AegoBuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('AegoSymbol') < 3 end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('AegoSymbol') > 2 then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "SymbolBuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('AegoSymbol') == 3 or Config:GetSetting('AegoSymbol') == 3 end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('AegoSymbol') == (1 or 4) or ((spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId()) then return false end
+                    if (spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId() then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "ACBuff",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('DoACBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoACBuff') or ((spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId()) then return false end
+                    if (spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId() then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "Marr's Salvation",
                 type = "AA",
+                load_cond = function() return Config:GetSetting('DoSalvation') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoSalvation') then return false end
                     return not Targeting.TargetIsATank(target) and Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
@@ -757,22 +759,19 @@ return {
             {
                 name = "Valorous Rage",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Config:GetSetting('DoValorousRage')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoValorousRage') end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
             {
-                name = "Preservation",
+                name = "WardProc",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoWardProc') and Core.IsTanking() end,
                 cond = function(self, spell, target)
-                    if not Core.IsTanking() or not Targeting.IsNamed(target) then return false end
+                    if not Targeting.IsNamed(target) then return false end
                     return Casting.SelfBuffCheck(spell)
                         --laz specific deconflict
                         and not Casting.IHaveBuff("Necrotic Pustules")
@@ -781,8 +780,9 @@ return {
             { -- for DPS mode
                 name = "ForgeDisc",
                 type = "Disc",
+                load_cond = function(self) return not Core.IsTanking() end,
                 cond = function(self, discSpell, target)
-                    if Core.IsTanking() or not Targeting.TargetBodyIs(target, "Undead") then return false end
+                    if not Targeting.TargetBodyIs(target, "Undead") then return false end
                     return Targeting.IsNamed(target) and Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
                 end,
             },
@@ -791,16 +791,16 @@ return {
             {
                 name = "GuardDisc",
                 type = "Disc",
+                load_cond = function(self) return Core.IsTanking() end,
                 cond = function(self, discSpell, target)
-                    if not Core.IsTanking() then return false end
                     return Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
                 end,
             },
             {
                 name = "Coating",
                 type = "Item",
+                load_cond = function(self) return Config:GetSetting('DoCoating') end,
                 cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoCoating') then return false end
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
@@ -848,8 +848,9 @@ return {
             {
                 name = "PBAEStun",
                 type = "Spell",
+                load_cond = function(self) return Core.IsTanking() end,
                 cond = function(self, spell, target)
-                    if not Core.IsTanking() or not Config:GetSetting('DoAEDamage') then return false end
+                    if not Config:GetSetting('DoAEDamage') then return false end
                     return self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
@@ -871,16 +872,16 @@ return {
             {
                 name = "DebuffNuke",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoUndeadNuke') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoUndeadNuke') then return false end
                     return Targeting.TargetBodyIs(target, "Undead")
                 end,
             },
             {
                 name = "UndeadNuke",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoUndeadNuke') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoUndeadNuke') then return false end
                     return Targeting.TargetBodyIs(target, "Undead")
                 end,
             },
@@ -1337,10 +1338,19 @@ return {
             FAQ = "Why am I not casting Brells?",
             Answer = "Make sure you have the [DoBrells] setting enabled.",
         },
+        ['DoWardProc']       = {
+            DisplayName = "Do Ward Proc",
+            Category = "Buffs",
+            Index = 4,
+            Tooltip = "Use your Ward of Tunare defensive proc buff.",
+            Default = true,
+            FAQ = "I'd rather use Reptile, how do I turn off my Ward of Tunare?",
+            Answer = "Select the option in the Buffs tab to disable the ward proc buff, it is enabled by default.",
+        },
         ['DoSalvation']      = {
             DisplayName = "Marr's Salvation",
             Category = "Buffs",
-            Index = 4,
+            Index = 5,
             Tooltip = "Use your group hatred reduction buff AA.",
             Default = true,
             FAQ = "Why is Marr's Salvation being used?",
@@ -1349,7 +1359,7 @@ return {
         ['ProcChoice']       = {
             DisplayName = "Proc Buff Choice:",
             Category = "Buffs",
-            Index = 5,
+            Index = 6,
             Tooltip =
                 "Choose which DD proc buff you prefer. The Undead proc does higher damage but is restricted to that target type.\n" ..
                 "Please note that we will use the undead proc at low levels if you select Standard and it is not yet available.",
