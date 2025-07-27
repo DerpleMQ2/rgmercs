@@ -322,7 +322,8 @@ end
 --- Sets the AutoTarget to that of your group or raid MA.
 function Combat.SetAutoTargetToGroupOrRaidTarget()
     if mq.TLO.Raid.Members() > 0 then
-        Config.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(1) and mq.TLO.Me.RaidAssistTarget(1).ID()) or 0)
+        local assistTarg = Config:GetSetting('RaidAssistTarget')
+        Config.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(assistTarg) and mq.TLO.Me.RaidAssistTarget(assistTarg).ID()) or 0)
     elseif mq.TLO.Group.Members() > 0 then
         --- @diagnostic disable-next-line: undefined-field
         Config.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)

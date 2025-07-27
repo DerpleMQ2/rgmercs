@@ -1007,7 +1007,7 @@ function Module:RunHealRotation()
     Logger.log_verbose("\ao[Heals] Checking for injured friends...")
     self:HealById(Combat.FindWorstHurtGroupMember(Config:GetSetting('MaxHealPoint')))
 
-    if Config:GetSetting('AssistOutside') then
+    if Config:GetSetting('HealOutside') then
         self:HealById(Combat.FindWorstHurtXT(Config:GetSetting('MaxHealPoint')))
     end
 
@@ -1175,7 +1175,7 @@ function Module:GiveTime(combat_state)
 
             self:SelfCheckAndRez()
 
-            if Config:GetSetting('AssistOutside') or mq.TLO.Raid.Members() > 0 then
+            if Config:GetSetting('HealOutside') then
                 self:OOGCheckAndRez()
             end
 
