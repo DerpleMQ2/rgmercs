@@ -128,6 +128,14 @@ return {
             "Wave of Healing",
             "Wave of Life",
         },
+        ["WaveHeal2"] = {
+            "Wave of Piety",
+            "Wave of Trushar",
+            "Wave of Marr",
+            "Healing Wave of Prexus",
+            "Wave of Healing",
+            "Wave of Life",
+        },
         ["Cleansing"] = {
             "Pious Cleansing",     -- Level 69
             "Supernal Cleansing",  -- Level 64
@@ -209,9 +217,6 @@ return {
             "Hallowforge Discipline",
             "Holyforge Discipline",
         },
-        -- ["Spellblock"] = {
-        --     "Sanctification Discipline",
-        -- },
         ['RezSpell'] = {
             'Resurrection',
             'Restoration',
@@ -235,7 +240,7 @@ return {
         ['SancDisc'] = {
             "Sanctification Discipline",
         },
-        ['TwincastNuke'] = {
+        ['TwinHealNuke'] = {
             "Justice of Marr",
         },
         ['GuardDisc'] = {
@@ -257,9 +262,10 @@ return {
             spells = {
                 { name = "TouchHeal",    cond = function(self) return Config:GetSetting('DoTouchHeal') < 3 end, },
                 { name = "LightHeal", },
-                { name = "WaveHeal", },
+                { name = "WaveHeal",     cond = function(self) return Config:GetSetting('DoWaveHeal') < 3 end, },
+                { name = "WaveHeal2",    cond = function(self) return Config:GetSetting('DoWaveHeal') == 2 end, },
                 { name = "Cleansing",    cond = function(self) return Config:GetSetting('DoCleansing') end, },
-                { name = "TwincastNuke", },
+                { name = "TwinHealNuke", cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
                 { name = "SereneStun", },
                 { name = "StunTimer4",   cond = function(self) return Core.IsTanking() end, },
                 { name = "StunTimer5",   cond = function(self) return Core.IsTanking() end, },
@@ -348,20 +354,31 @@ return {
     },
     ['HealRotationOrder'] = {
         {
-            name = 'GroupHealPoint',
+            name = 'GroupHeal',
             state = 1,
             steps = 1,
-            cond = function(self, target) return Targeting.GroupHealsNeeded() end,
+            cond = function(self, target) Targeting.GroupHealsNeeded() end,
         },
         {
-            name = 'MainHealPoint',
+            name = 'BigHeal',
             state = 1,
             steps = 1,
-            cond = function(self, target) return Targeting.MainHealsNeeded(target) end,
+            cond = function(self, target)
+                return Targeting.BigHealsNeeded(target)
+            end,
+        },
+        {
+            name = 'MainHeal',
+            state = 1,
+            steps = 1,
+            load_cond = function(self) return Config:GetSetting('DoCleansing') or Config:GetSetting("DoTouchHeal") == 2 end,
+            cond = function(self, target)
+                return Targeting.MainHealsNeeded(target)
+            end,
         },
     },
     ['HealRotations']     = {
-        ["GroupHealPoint"] = {
+        ["GroupHeal"] = {
             {
                 name = "Hand of Piety",
                 type = "AA",
@@ -373,8 +390,13 @@ return {
                 name = "WaveHeal",
                 type = "Spell",
             },
+            {
+                name = "WaveHeal2",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoWaveHeal') == 2 end,
+            },
         },
-        ["MainHealPoint"] = {
+        ["BigHeal"] = {
             {
                 name = "Lay on Hands",
                 type = "AA",
@@ -390,13 +412,22 @@ return {
                 end,
             },
             {
+                name = "WaveHeal",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('WaveHealUse') == 1 end,
+            },
+            {
+                name = "WaveHeal2",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoWaveHeal') == 2 and Config:GetSetting('WaveHealUse') == 1 end,
+            },
+            {
                 name = "TouchHeal",
                 type = "Spell",
                 load_cond = function() return Config:GetSetting("DoTouchHeal") == 1 end,
-                cond = function(self, spell, target)
-                    return Targeting.BigHealsNeeded(target)
-                end,
             },
+        },
+        ["MainHeal"] = {
             {
                 name = "Cleansing",
                 type = "Spell",
@@ -404,6 +435,16 @@ return {
                 cond = function(self, spell, target)
                     return Casting.GroupBuffCheck(spell, target)
                 end,
+            },
+            {
+                name = "WaveHeal",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('WaveHealUse') == 2 end,
+            },
+            {
+                name = "WaveHeal2",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoWaveHeal') == 2 and Config:GetSetting('WaveHealUse') == 2 end,
             },
             {
                 name = "TouchHeal",
@@ -831,8 +872,9 @@ return {
                 end,
             },
             {
-                name = "TwincastNuke",
+                name = "TwinHealNuke",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoTwinHealNuke') end,
             },
             {
                 name = "Yaulp",
@@ -1224,10 +1266,10 @@ return {
             DisplayName = "Touch Heal Use:",
             Category = "Heals/Cures",
             Index = 1,
-            Tooltip =
-            "Choose when the Paladin will use the single-target Touch-line healing spell.",
+            Tooltip = "Choose when the Paladin will use the single-target Touch-line healing spell.",
+            RequiresLoadoutChange = true,
             Type = "Combo",
-            ComboOptions = { 'Emergency Use(BigHealPoint)', 'Standard Use(MainHealPoint)', 'Never', },
+            ComboOptions = { 'Emergency Use(BigHeal)', 'Standard Use(MainHeal)', 'Never', },
             Default = 1,
             Min = 1,
             Max = 3,
@@ -1235,10 +1277,40 @@ return {
             FAQ = "Why is my paladin changing targets to heal so often?",
             Answer = "You can control when a Paladin will use their single target heals on the Heals/Cures tab in Class options.",
         },
+        ['DoWaveHeal']       = {
+            DisplayName = "Wave Heal Use:",
+            Category = "Heals/Cures",
+            Index = 2,
+            Tooltip = "Choose how many group heals to keep memorized, if any.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Current Tier', 'Current Tier + Last Tier', 'Never', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my paladin changing targets to heal so often?",
+            Answer = "You can control when a Paladin will use their group heals on the Heals/Cures tab in Class options.",
+        },
+        ['WaveHealUse']      = {
+            DisplayName = "Use Waves for ST:",
+            Category = "Heals/Cures",
+            Index = 3,
+            Tooltip = "Use your Wave Heals as single-target heals as needed.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Emergency Use(BigHeal)', 'Standard Use(MainHeal)', 'Never', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my paladin changing targets to heal so often?",
+            Answer = "You can control when a Paladin will use their heals on the Heals/Cures tab in Class options.",
+        },
         ['DoCleansing']      = {
             DisplayName = "Do Cleansing HoT",
             Category = "Heals/Cures",
-            Index = 2,
+            Index = 4,
             Tooltip = "Use your single-target HoT line.",
             RequiresLoadoutChange = true,
             Default = false,
@@ -1248,7 +1320,7 @@ return {
         ['KeepPurityMemmed'] = {
             DisplayName = "Mem Crusader's Cure",
             Category = "Heals/Cures",
-            Index = 3,
+            Index = 5,
             Tooltip = "Memorize your Crusader's xxx line (Cure poi/dis/curse) when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
             RequiresLoadoutChange = true,
@@ -1260,7 +1332,7 @@ return {
         ['KeepCurseMemmed']  = {
             DisplayName = "Mem Remove Curse",
             Category = "Heals/Cures",
-            Index = 4,
+            Index = 6,
             Tooltip = "Memorize remove curse spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
             RequiresLoadoutChange = true,
@@ -1271,10 +1343,22 @@ return {
         },
 
         --Combat
+        ['DoTwinHealNuke']   = {
+            DisplayName = "Twin Heal Nuke",
+            Category = "Combat",
+            Index = 1,
+            Tooltip = "Use Twin Heal Nuke Spells",
+            RequiresLoadoutChange = true,
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I using the Twin Heal Nuke?",
+            Answer =
+            "You can turn off the Twin Heal Nuke in the Spells and Abilities tab.",
+        },
         ['DoUndeadNuke']     = {
             DisplayName = "Do Undead Nuke",
             Category = "Combat",
-            Index = 1,
+            Index = 2,
             Tooltip = "Use the Undead nuke line (standard and timed w/debuff component).",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1284,7 +1368,7 @@ return {
         ['DoValorousRage']   = {
             DisplayName = "Valorous Rage",
             Category = "Combat",
-            Index = 2,
+            Index = 3,
             Tooltip = "Use the Valorous Rage AA during burns.",
             Default = false,
             FAQ = "What is Valorous Rage and how can I use it?",
@@ -1293,7 +1377,7 @@ return {
         ['DoVetAA']          = {
             DisplayName = "Use Vet AA",
             Category = "Combat",
-            Index = 3,
+            Index = 4,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
             FAQ = "What Vet AA's does PAL use?",
