@@ -757,6 +757,7 @@ return {
             {
                 name = "PBAEStun",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self, spell, target)
                     return Config:GetSetting('DoAEDamage')
                 end,
@@ -781,6 +782,7 @@ return {
             {
                 name = "PBAEStun",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self, spell, target)
                     return Config:GetSetting('DoAEDamage')
                 end,
@@ -891,6 +893,7 @@ return {
                 name = "PBAEStun",
                 type = "Spell",
                 load_cond = function(self) return Core.IsTanking() end,
+                allowDead = true,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoAEDamage') then return false end
                     return self.ClassConfig.HelperFunctions.AETargetCheck(true)
