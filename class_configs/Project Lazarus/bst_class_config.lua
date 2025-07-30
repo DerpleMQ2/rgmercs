@@ -602,7 +602,9 @@ return {
                 cond = function(self, spell, target)
                     -- Only use the single target versions on classes that need it
                     if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target) then return false end
-                    return Casting.GroupBuffCheck(spell, target) and not Casting.TargetHasBuff("Brell's Vibrant Barricade", target, true)
+                    return Casting.GroupBuffCheck(spell, target)
+                        --laz specific deconflict with brell's vibrant barricade
+                        and Casting.PeerBuffCheck(40583, target)
                 end,
             },
             {

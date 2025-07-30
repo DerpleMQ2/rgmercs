@@ -1677,8 +1677,10 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Targeting.TargetIsMA(target) then return false end
-                    return Casting.GroupBuffCheck(spell, target) and not Casting.TargetHasBuff("Decrepit Skin", target, true) and
-                        not Casting.TargetHasBuff("Necrotic Pustules", target, true) --temp laz workaround
+                    return Casting.GroupBuffCheck(spell, target)
+                        -- workarounds for laz
+                        and Casting.PeerBuffCheck(19847, target) -- necrotic pustules
+                        and Casting.PeerBuffCheck(8484, target)  -- decrepit skin
                 end,
                 post_activate = function(self, spell, success)
                     local petName = mq.TLO.Me.Pet.CleanName() or "None"
