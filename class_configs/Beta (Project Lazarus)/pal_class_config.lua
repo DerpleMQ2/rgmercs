@@ -387,8 +387,14 @@ return {
                 end,
             },
             {
+                name = "Imbued Rune of Piety",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Imbued Rune of Piety")() end,
+            },
+            {
                 name = "WaveHeal",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoWaveHeal') < 3 end,
             },
             {
                 name = "WaveHeal2",
@@ -408,13 +414,18 @@ return {
                 name = "Hand of Piety",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return self.CombatState == "Combat" and Targeting.GetTargetPctHPs() < Config:GetSetting('HPCritical')
+                    return self.CombatState == "Combat" and (Targeting.TargetIsMyself(target) or Targeting.GetTargetPctHPs() < Config:GetSetting('HPCritical'))
                 end,
+            },
+            {
+                name = "Imbued Rune of Piety",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Imbued Rune of Piety")() and Config:GetSetting('WaveHealUse') == 1 end,
             },
             {
                 name = "WaveHeal",
                 type = "Spell",
-                load_cond = function(self) return Config:GetSetting('WaveHealUse') == 1 end,
+                load_cond = function(self) return Config:GetSetting('DoWaveHeal') < 3 and Config:GetSetting('WaveHealUse') == 1 end,
             },
             {
                 name = "WaveHeal2",
@@ -437,9 +448,14 @@ return {
                 end,
             },
             {
+                name = "Imbued Rune of Piety",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Imbued Rune of Piety")() and Config:GetSetting('WaveHealUse') == 2 end,
+            },
+            {
                 name = "WaveHeal",
                 type = "Spell",
-                load_cond = function(self) return Config:GetSetting('WaveHealUse') == 2 end,
+                load_cond = function(self) return Config:GetSetting('DoWaveHeal') < 3 and Config:GetSetting('WaveHealUse') == 2 end,
             },
             {
                 name = "WaveHeal2",
