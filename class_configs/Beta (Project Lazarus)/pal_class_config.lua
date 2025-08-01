@@ -690,10 +690,6 @@ return {
                 end,
             },
             {
-                name = "Marr's Gift",
-                type = "AA",
-            },
-            {
                 name = "OoW_Chest",
                 type = "Item",
                 cond = function(self, itemName, target)
