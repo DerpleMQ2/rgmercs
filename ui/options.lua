@@ -154,41 +154,48 @@ function OptionsUI:GetCombinedSettings()
     --Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
     local moduleList = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
-    for _, module in ipairs(moduleList) do
+    -- Get the Default Configs from all modules + config lumped together.
+    for name, setting in pairs(Config.DefaultConfig) do
+        self.DefaultConfigs[name] = setting
+    end
+
+    for _, module in pairs(moduleList) do
         -- get a combined settings list from all modules
-        local moduleSettings = Modules:ExecModule(module, "GetSettings") --These are the actual setting values from the character specific files
+        -- local moduleSettings = Modules:ExecModule(module, "GetSettings") --These are the actual setting values from the character specific files
 
         -- get default settings and category list from all modules
         local moduleDefaults = Modules:ExecModule(module, "GetDefaultSettings") --This is a list of all settings, with a default value
 
-
-        -- Get the Default Configs from all modules + config lumped together.
-        for k, _ in pairs(Config.DefaultConfig) do
-            table.insert(self.DefaultConfigs, k)
+        for name, setting in pairs(moduleDefaults) do
+            self.DefaultConfigs[name] = setting
         end
-        -- is this moving everything?
-        for k, _ in pairs(moduleDefaults) do
-            table.insert(self.DefaultConfigs, k)
+    end
+
+    -- sort by indexes, if there are any, before they are added to the list (so there is no conflict between indexing from different modules in the same category).
+
+    local sortedKeys = {}
+
+    for name, _ in pairs(self.DefaultConfigs) do
+        table.insert(sortedKeys, name)
+    end
+
+    table.sort(sortedKeys, function(k1, k2)
+        local configKeyOne = self.DefaultConfigs[k1]
+        local configKeyTwo = self.DefaultConfigs[k2]
+        if (configKeyOne.Index ~= nil or configKeyTwo.Index ~= nil) and (configKeyOne.Index ~= configKeyTwo.Index) then
+            return (configKeyOne.Index or 999) < (configKeyTwo.Index or 999)
+        elseif configKeyOne.Category == configKeyTwo.Category then
+            return (configKeyOne.DisplayName or "") < (configKeyTwo.DisplayName or "")
+        else
+            return (configKeyOne.Category or "") < (configKeyTwo.Category or "")
         end
+    end)
 
-        -- sort by indexes, if there are any, before they are added to the list (so there is no conflict between indexing from different modules in the same category).
-        table.sort(self.DefaultConfigs,
-            function(k1, k2)
-                if (moduleDefaults[k1].Index ~= nil or moduleDefaults[k2].Index ~= nil) and (moduleDefaults[k1].Index ~= moduleDefaults[k2].Index) then
-                    return (moduleDefaults[k1].Index or 999) < (moduleDefaults[k2].Index or 999)
-                elseif moduleDefaults[k1].Category == moduleDefaults[k2].Category then
-                    return (moduleDefaults[k1].DisplayName or "") < (moduleDefaults[k2].DisplayName or "")
-                else
-                    return (moduleDefaults[k1].Category or "") < (moduleDefaults[k2].Category or "")
-                end
-            end)
-        -- break out names and categories for rendering later
-        for k, v in pairs(self.DefaultConfigs) do
-            table.insert(self.SettingNames, k)
-
-            if v.Type ~= "Custom" then
-                self.SettingCategories:add(v.Category)
-            end
+    for _, key in ipairs(sortedKeys) do
+        local setting = self.DefaultConfigs[key]
+        table.insert(self.SettingNames, key)
+        if setting.Type ~= "Custom" then
+            self.SettingCategories:add(setting.Category)
         end
     end
 end
