@@ -8,6 +8,9 @@ local Modules   = require('utils.modules')
 local Set       = require("mq.Set")
 
 
+
+
+
 -- Using the following terms:
 -- Group: Broad category of options, found on the left panel
 -- Header: Which collapsing header on the right panel the option should be listed under
@@ -81,6 +84,7 @@ OptionsUI.Groups            = {
 OptionsUI.Settings          = {}
 OptionsUI.SettingNames      = {}
 OptionsUI.SettingCategories = Set.new({})
+OptionsUI.DefaultConfigs    = {}
 
 -- Premise:
 
@@ -103,12 +107,11 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     end
 end
 
-
 function OptionsUI:RenderOptionsPanel(groupName)
     for _, c in ipairs(self.SettingCategories) do
         local shouldShow = false
-        for _, k in ipairs(self.SettingNames) 
-        -- stolen from elsewhere, examine/adapt once tables are properly set up
+        for _, k in ipairs(self.SettingNames) do
+            -- stolen from elsewhere, examine/adapt once tables are properly set up
             -- if defaults[k].Category == c then
             --     if Config:GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
             --         shouldShow = true
@@ -149,25 +152,27 @@ end
 
 function OptionsUI:GetCombinedSettings()
     --Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
-    local modules = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
+    local moduleList = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
-    for _, module in ipairs(modules) do
+    for _, module in ipairs(moduleList) do
         -- get a combined settings list from all modules
-        local moduleSettings = Modules:ExecModule(module, "GetSettings")
-
-
+        local moduleSettings = Modules:ExecModule(module, "GetSettings") --These are the actual setting values from the character specific files
 
         -- get default settings and category list from all modules
-        local moduleDefaults = Modules:ExecModule(module, "GetDefaultSettings")
-        local defaults = {}
+        local moduleDefaults = Modules:ExecModule(module, "GetDefaultSettings") --This is a list of all settings, with a default value
 
+
+        -- Get the Default Configs from all modules + config lumped together.
+        for k, _ in pairs(Config.DefaultConfig) do
+            table.insert(self.DefaultConfigs, k)
+        end
         -- is this moving everything?
         for k, _ in pairs(moduleDefaults) do
-            table.insert(defaults, k)
+            table.insert(self.DefaultConfigs, k)
         end
 
         -- sort by indexes, if there are any, before they are added to the list (so there is no conflict between indexing from different modules in the same category).
-        table.sort(defaults,
+        table.sort(self.DefaultConfigs,
             function(k1, k2)
                 if (moduleDefaults[k1].Index ~= nil or moduleDefaults[k2].Index ~= nil) and (moduleDefaults[k1].Index ~= moduleDefaults[k2].Index) then
                     return (moduleDefaults[k1].Index or 999) < (moduleDefaults[k2].Index or 999)
@@ -178,7 +183,7 @@ function OptionsUI:GetCombinedSettings()
                 end
             end)
         -- break out names and categories for rendering later
-        for k, v in pairs(defaults) do
+        for k, v in pairs(self.DefaultConfigs) do
             table.insert(self.SettingNames, k)
 
             if v.Type ~= "Custom" then
