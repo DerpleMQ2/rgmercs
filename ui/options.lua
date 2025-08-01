@@ -154,6 +154,8 @@ function OptionsUI:GetCombinedSettings()
     -- Get the Default Configs from all modules + config lumped together.
 
     -- Get Config settings copied into the new table, pull the keys and sort first so we don't have index number conflicts with modules
+    -- TO DO : Pull the actual setting values from the file
+
     local sortedConfigKeys = {}
     for name, setting in pairs(Config.DefaultConfig) do
         self.DefaultConfigs[name] = setting
@@ -186,6 +188,8 @@ function OptionsUI:GetCombinedSettings()
 
     for _, module in pairs(moduleList) do
         -- get a combined settings list from all modules
+
+        -- TO DO: Lump these in so we pull the actual settings later
         -- local moduleSettings = Modules:ExecModule(module, "GetSettings") --These are the actual setting values from the character specific files
 
         local moduleDefaults = Modules:ExecModule(module, "GetDefaultSettings") --This is a list of all settings, with a default value
