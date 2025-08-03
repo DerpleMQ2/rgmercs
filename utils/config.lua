@@ -654,7 +654,7 @@ Config.DefaultConfig = {
         Category = "Engage",
         Index = 4,
         Tooltip = "Melee targets.",
-        Default = Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass),
+        Default = Config.Globals.CurLoadedClass ~= "RNG" and Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass),
         ConfigType = "Normal",
         FAQ = "Why am I not attacking the mob?",
         Answer = "You can set the [DoMelee] option to true to enable melee combat.",
