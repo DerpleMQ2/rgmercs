@@ -1030,7 +1030,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
 
         Casting.ActionPrep()
 
-        retryCount = retryCount or 3
+        retryCount = retryCount or 2
 
         if targetId > 0 then
             Targeting.SetTarget(targetId, true)
@@ -1320,7 +1320,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
         Targeting.SetTarget(targetId, true)
     end
 
-    retryCount = retryCount or 3
+    retryCount = retryCount or 2
     local cmd = string.format("/alt act %d", aaAbility.ID())
 
     Logger.log_debug("\ayUseAA():Activating AA: '%s' [t: %dms]", cmd, aaAbility.Spell.MyCastTime())
@@ -1752,6 +1752,24 @@ function Casting.ClickModRod()
             return
         end
     end
+
+    --- Function to tally up the players who have mana under the passed percent. Accounts for the fact that LowMana does not include the pc on emu.
+    function GroupLowManaCount(percent)
+        local count = mq.TLO.Group.LowMana(percent or 50)() or 0
+        if Core.OnEMU() then
+            count = count + (mq.TLO.Me.PctMana() < (percent or 50) and 1 or 0)
+        end
+        return count
+    end
+end
+
+--- Function to tally up the players who have mana under the passed percent. Accounts for the fact that LowMana does not include the pc on emu.
+function Casting.GroupLowManaCount(percent)
+    local count = mq.TLO.Group.LowMana(percent or 50)() or 0
+    if Core.OnEMU() then
+        count = count + (mq.TLO.Me.PctMana() < (percent or 50) and 1 or 0)
+    end
+    return count
 end
 
 return Casting
