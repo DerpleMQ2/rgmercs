@@ -6,7 +6,7 @@ Module.__index           = Module
 Module.settings          = {}
 Module.DefaultConfig     = {}
 Module.DefaultCategories = Set.new({})
-Module.Contributors      = require("extras.contributors")
+Module.Credits           = require("extras.credits")
 Module.ColorWheel        = {}
 Module.ColorWheelTimer   = {}
 Module.FAQ               = {}
@@ -81,10 +81,18 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    ImGui.Text("Contributors - Thank You!")
+    if ImGui.CollapsingHeader("Developers", ImGuiTreeNodeFlags.DefaultOpen) then
+        for _, c in ipairs(self.Credits.Devs) do
+            self:RenderName(c)
+        end
+    end
 
-    for _, c in ipairs(self.Contributors) do
-        self:RenderName(c)
+    ImGui.NewLine()
+
+    if ImGui.CollapsingHeader("Contributors - Thank You!") then
+        for _, c in ipairs(self.Credits.Contributors) do
+            self:RenderName(c)
+        end
     end
 end
 

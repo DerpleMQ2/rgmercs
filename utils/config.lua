@@ -11,7 +11,7 @@ local Config                         = {
     _subVersion = "The Outer Brood",
     _name =
     "RGMercs Lua Edition",
-    _author = 'Derple, Morisato, Greyn, Algar, Grimmier',
+    _author = 'Lead Devs: Derple, Algar',
 }
 Config.__index                       = Config
 Config.settings                      = {}
