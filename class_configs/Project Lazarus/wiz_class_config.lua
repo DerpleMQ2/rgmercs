@@ -5,7 +5,6 @@
 
 local mq        = require('mq')
 local Config    = require('utils.config')
-local Modules   = require("utils.modules")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
 local Core      = require("utils.core")
@@ -541,6 +540,14 @@ return {
                 load_cond = function(self) return not Casting.CanUseAA("Harvest of Druzzil") end,
                 allowDead = true,
                 cond = function(self)
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
+                end,
+            },
+            {
+                name = "Forsaken Fungus Covered Scale Tunic",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Fungus Covered Scale Tunic")() end,
+                cond = function(self, itemName, target)
                     return mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
                 end,
             },

@@ -697,7 +697,15 @@ local _ClassConfig = {
                 name = "Fundament: Second Spire of Enchantment",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return ((mq.TLO.Group.LowMana(30)() or 0) + (mq.TLO.Me.PctMana() < 30 and 1 or 0)) > 1
+                    return Casting.GroupLowManaCount(30) > 1
+                end,
+            },
+            {
+                name = "Tome of Nife's Mercy",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Tome of Nife's Mercy")() end,
+                cond = function(self, itemName, target)
+                    return Casting.GroupLowManaCount(50) > 1
                 end,
             },
             {

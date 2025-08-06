@@ -696,6 +696,11 @@ return {
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
+            {
+                name = "Forsaken Fungus Covered Scale Tunic",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Fungus Covered Scale Tunic")() end,
+            },
             { --Note that on named we may already have a defensive disc running already, could make this remove other discs, but we have other options.
                 name = "BlockDisc",
                 type = "Disc",
@@ -959,6 +964,14 @@ return {
             {
                 name = "Slam",
                 type = "Ability",
+            },
+            {
+                name = "Forsaken Fungus Covered Scale Tunic",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Fungus Covered Scale Tunic")() end,
+                cond = function(self, itemName, target)
+                    return mq.TLO.Me.PctMana() < 30 or mq.TLO.Me.PctEndurance() < 30
+                end,
             },
         },
         ['Weapon Management'] = {

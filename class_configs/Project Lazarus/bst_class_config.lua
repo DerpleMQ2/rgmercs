@@ -491,7 +491,15 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('DoParagon') then return false end
-                    return (mq.TLO.Group.LowMana(Config:GetSetting('ParaPct'))() or -1) > 0
+                    return Casting.GroupLowManaCount(Config:GetSetting('ParaPct')) > 0
+                end,
+            },
+            {
+                name = "Tome of Nife's Mercy",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Tome of Nife's Mercy")() end,
+                cond = function(self, itemName, target)
+                    return Casting.GroupLowManaCount(Config:GetSetting('ParaPct')) > 1
                 end,
             },
             {
@@ -809,7 +817,7 @@ return {
             Category = "Mana Mgmt.",
             Index = 2,
             Tooltip = "Minimum mana % before we use Paragon of Spirit.",
-            Default = 80,
+            Default = 50,
             Min = 1,
             Max = 99,
             ConfigType = "Advanced",
