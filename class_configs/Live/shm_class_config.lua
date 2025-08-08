@@ -989,7 +989,8 @@ local _ClassConfig = {
                 type = "CustomFunc",
                 cond = function(self, spell, target)
                     if Casting.IHaveBuff("Healing Twincast") then return false end
-                    return Casting.CastReady(spell)
+                    local twinHeal = Core.GetResolvedActionMapItem("TwinHealNuke")
+                    return Casting.CastReady(twinHeal)
                 end,
                 custom_func = function(self)
                     local twinHeal = Core.GetResolvedActionMapItem("TwinHealNuke")
