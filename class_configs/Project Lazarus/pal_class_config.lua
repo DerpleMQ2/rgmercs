@@ -266,7 +266,7 @@ return {
                 { name = "WaveHeal2",    cond = function(self) return Config:GetSetting('DoWaveHeal') == 2 end, },
                 { name = "Cleansing",    cond = function(self) return Config:GetSetting('DoCleansing') end, },
                 { name = "TwinHealNuke", cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "SereneStun", },
+                { name = "SereneStun",   cond = function(self) return Config:GetSetting('DoSereneStun') end, },
                 { name = "StunTimer4",   cond = function(self) return Core.IsTanking() end, },
                 { name = "StunTimer5",   cond = function(self) return Core.IsTanking() end, },
                 { name = "PBAEStun",     cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
@@ -415,6 +415,14 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     return self.CombatState == "Combat" and (Targeting.TargetIsMyself(target) or Targeting.GetTargetPctHPs() < Config:GetSetting('HPCritical'))
+                end,
+            },
+            {
+                name = "Forsaken Deepwater Helm",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Deepwater Helm")() end,
+                cond = function(self, itemName, target)
+                    return self.CombatState == "Combat" and Targeting.TargetIsMyself(target)
                 end,
             },
             {
@@ -878,6 +886,11 @@ return {
                 end,
             },
             {
+                name = "Forsaken Deepwater Gauntlets",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Deepwater Gauntlets")() end,
+            },
+            {
                 name = "LightHeal",
                 type = "Spell",
             },
@@ -903,10 +916,6 @@ return {
                 end,
             },
             {
-                name = "SereneStun",
-                type = "Spell",
-            },
-            {
                 name = "PBAEStun",
                 type = "Spell",
                 load_cond = function(self) return Core.IsTanking() end,
@@ -922,6 +931,11 @@ return {
                 cond = function(self, spell, target)
                     return Targeting.TargetNotStunned()
                 end,
+            },
+            {
+                name = "SereneStun",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSereneStun') end,
             },
             {
                 name = "Epic",
@@ -1380,23 +1394,32 @@ return {
             Default = true,
             ConfigType = "Advanced",
             FAQ = "Why am I using the Twin Heal Nuke?",
-            Answer =
-            "You can turn off the Twin Heal Nuke in the Spells and Abilities tab.",
+            Answer = "You can turn off the Twin Heal Nuke on the Combat tab of your Class options.",
+        },
+        ['DoSereneStun']     = {
+            DisplayName = "Do Serene Stun",
+            Category = "Combat",
+            Index = 3,
+            Tooltip = "Use the Quellious/Serene stun line (long duration stun with DD component).",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "How can I use my Serene Stun?",
+            Answer = "You can enable the Serene stun line on the Combat tab of your Class options.",
         },
         ['DoUndeadNuke']     = {
             DisplayName = "Do Undead Nuke",
             Category = "Combat",
-            Index = 2,
+            Index = 3,
             Tooltip = "Use the Undead nuke line (standard and timed w/debuff component).",
             RequiresLoadoutChange = true,
             Default = true,
             FAQ = "How can I use my Undead Nuke?",
-            Answer = "You can enable the undead nuke line in the Spells and Abilities tab.",
+            Answer = "You can enable the undead nuke line on the Combat tab of your Class options.",
         },
         ['DoValorousRage']   = {
             DisplayName = "Valorous Rage",
             Category = "Combat",
-            Index = 3,
+            Index = 4,
             Tooltip = "Use the Valorous Rage AA during burns.",
             Default = false,
             FAQ = "What is Valorous Rage and how can I use it?",
@@ -1405,7 +1428,7 @@ return {
         ['DoVetAA']          = {
             DisplayName = "Use Vet AA",
             Category = "Combat",
-            Index = 4,
+            Index = 5,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
             FAQ = "What Vet AA's does PAL use?",

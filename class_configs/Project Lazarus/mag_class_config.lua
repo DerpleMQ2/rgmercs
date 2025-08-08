@@ -800,6 +800,9 @@ _ClassConfig      = {
         ['Myriad'] = {
             "Shock of Myriad Minions",
         },
+        ['FranticDS'] = {
+            "Frantic Flames",
+        },
     },
     ['HealRotationOrder'] = {
 
@@ -1316,6 +1319,7 @@ _ClassConfig      = {
             {
                 name = "PetHealSpell",
                 type = "Spell",
+                load_cond = function(self) Config:GetSetting('DoPetHealSpell') end,
             },
         },
         ['PetBuff'] = {
@@ -1455,6 +1459,19 @@ _ClassConfig      = {
                 name = "Servant of Ro",
                 type = "AA",
             },
+            {
+                name = "FranticDS",
+                type = "CustomFunc",
+                load_cond = function(self) return Config:GetSetting('DoFranticDS') end,
+                cond = function(self, spell, target)
+                    local shieldSpell = Core.GetResolvedActionMapItem("FranticDS")
+                    return Casting.CastReady(shieldSpell)
+                end,
+                custom_func = function(self)
+                    local shieldSpell = Core.GetResolvedActionMapItem("FranticDS")
+                    Casting.UseSpell(shieldSpell.RankName(), Core.GetMainAssistId(), false, false, false, 0)
+                end,
+            },
         },
         ['DPS PET'] = {
             {
@@ -1539,6 +1556,14 @@ _ClassConfig      = {
                         return Casting.UseItem(invItem.Name(), Config.Globals.AutoTargetID)
                     end
                     return false
+                end,
+            },
+            {
+                name = "Forsaken Fungus Covered Scale Tunic",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Fungus Covered Scale Tunic")() end,
+                cond = function(self, itemName, target)
+                    return mq.TLO.Me.PctMana() < 40 or mq.TLO.Me.PctHPs() < 40
                 end,
             },
         },
@@ -1813,7 +1838,7 @@ _ClassConfig      = {
                 { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
                 { name = "PBAE2",            cond = function(self) return Core.IsModeActive("PBAE") end, },
                 { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
-                { name = "PetHealSpell", },
+                { name = "PetHealSpell",     cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "FireOrbSummon", },
                 { name = "GroupCotH", },
                 { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
@@ -1834,12 +1859,13 @@ _ClassConfig      = {
                 { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
                 { name = "PBAE2",            cond = function(self) return Core.IsModeActive("PBAE") end, },
                 { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
-                { name = "PetHealSpell", },
+                { name = "PetHealSpell",     cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "FireOrbSummon", },
+                { name = "FranticDS",        cond = function(self) return Config:GetSetting('DoFranticDS') end, },
                 { name = "GroupCotH", },
                 { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
-                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "FireShroud", },
+                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1904,6 +1930,17 @@ _ClassConfig      = {
             FAQ = "I want to make sure my pet is always Heirloomed, how do I do that?",
             Answer = "You can use the [DoPetHeirlooms] feature to summon pet Heirlooms.",
         },
+        ['DoPetHealSpell'] = {
+            DisplayName = "Pet Heal Spell",
+            Category = "Pet",
+            Index = 2,
+            Tooltip = "Mem and cast your Pet Heal spell. AA Pet Heals are always used in emergencies.",
+            Default = true,
+            RequiresLoadoutChange = true,
+            FAQ = "My Pet Keeps Dying, What Can I Do?",
+            Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
+                "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
+        },
         ['PetHealPct']     = {
             DisplayName = "Pet Heal %",
             Category = "Pet",
@@ -1951,6 +1988,15 @@ _ClassConfig      = {
             RequiresLoadoutChange = true,
             FAQ = "Why am I not using my swarmp pet?",
             Answer = "Do to mana constraints with fresh level 70's, the swarm pet will only be used on named by default. You can change this in the options.",
+        },
+        ['DoFranticDS']    = {
+            DisplayName = "Frantic Flames",
+            Category = "Spells and Abilities",
+            Tooltip = "Use Frantic Flames during burns.",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = true,
+            FAQ = "I want to use Frantic Flames in my rotation, how do I do that?",
+            Answer = "You can enable the Frantic DS in your class options.",
         },
         ['AISelfDelay']    = {
             DisplayName = "Autoinv Delay (Self)",
