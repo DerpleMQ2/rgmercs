@@ -208,6 +208,11 @@ function Module:GenerateFilteredPortsList()
     self.TempSettings.FilteredList = {}
     self.TempSettings.FilteredList.Tabs = {}
     self.TempSettings.FilteredList.SortedTabNames = {}
+
+    if #self.TempSettings.PorterList == 0 or not self.TempSettings.PorterList[self.TempSettings.SelectedPorter] then
+        return
+    end
+
     for porter, data in pairs(self.TransportSpells or {}) do
         if porter == self.TempSettings.PorterList[self.TempSettings.SelectedPorter] then
             for subCat, spellList in pairs(data.Tabs or {}) do
