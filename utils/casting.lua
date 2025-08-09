@@ -191,7 +191,7 @@ function Casting.GroupBuffCheck(spell, target, spellId)
         end
         if mq.TLO.DanNet(mq.TLO.Spawn(target.ID()).CleanName())() then
             Logger.log_verbose("GroupBuffCheck: Target is a DanNet peer, using PeerBuffCheck.")
-            ret = Casting.PeerBuffCheck(spellId, target)
+            ret = Casting.PeerBuffCheck(spellId, target, false)
         else
             Logger.log_verbose("GroupBuffCheck: Target is not myself or a DanNet peer, using TargetSpellCheck.")
             local allowTargetChange = not mq.TLO.Me.CombatState():lower() == "combat"
@@ -286,8 +286,9 @@ end
 --- Complex buff check that will check for presence and stacking of the buff (and any triggers) on a DanNet peer.
 --- @param spellId integer The name of the spell to check.
 --- @param target MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @param bSkipBlockCheck boolean whether to check the peers blocked spells, this needs to be skipped for certain manual stacking checks
 --- @return boolean True if the PC checking should cast the buff, false otherwise.
-function Casting.PeerBuffCheck(spellId, target)
+function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
     if not spellId then return false end
     if not (target and target()) then return false end
 
@@ -301,16 +302,18 @@ function Casting.PeerBuffCheck(spellId, target)
         return false
     end
 
-    local blockedResult = DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000)
-    if not blockedResult then
-        Logger.log_error(
-            "PeerBuffCheck: Tried to check buff blocking, but something seems to have gone wrong! Your character may not be responding. If this persists, please report it. Spell:%s(ID:%d), Target:%s(ID:%d)",
-            spellName, spellId, targetName, targetId)
-    elseif blockedResult:lower() == spellName:lower() then
-        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) appears to be blocked on %s(ID:%d). Aborting Check.", spellName, spellId, targetName, targetId)
-        return false
-    else
-        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not appear to be blocked on %s(ID:%d).", spellName, spellId, targetName, targetId)
+    if not bSkipBlockCheck then
+        local blockedResult = DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000)
+        if not blockedResult then
+            Logger.log_error(
+                "PeerBuffCheck: Tried to check buff blocking, but something seems to have gone wrong! Your character may not be responding. If this persists, please report it. Spell:%s(ID:%d), Target:%s(ID:%d)",
+                spellName, spellId, targetName, targetId)
+        elseif blockedResult:lower() == spellName:lower() then
+            Logger.log_verbose("PeerBuffCheck: %s(ID:%d) appears to be blocked on %s(ID:%d). Aborting Check.", spellName, spellId, targetName, targetId)
+            return false
+        else
+            Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not appear to be blocked on %s(ID:%d).", spellName, spellId, targetName, targetId)
+        end
     end
 
     local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spellId), 1000)
