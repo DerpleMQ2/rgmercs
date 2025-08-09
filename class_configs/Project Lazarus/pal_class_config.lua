@@ -192,7 +192,7 @@ return {
             "Crusader's Purity",
             "Crusader's Touch",
         },
-        ["Aura"] = {
+        ["HealReceivedAura"] = {
             -- Aura Buffs
             "Blessed Aura",
             "Holy Aura",
@@ -666,6 +666,22 @@ return {
                 cond = function(self, spell, target)
                     if (spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId() then return false end
                     return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "Brells",
+                type = "Spell",
+                load_cond = function() return Config:GetSetting('DoBrells') end,
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "HealReceivedAura",
+                type = "Spell",
+                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.BaseName()) end,
+                cond = function(self, spell)
+                    return (spell and spell() and not Casting.AuraActiveByName(spell.BaseName()))
                 end,
             },
             {

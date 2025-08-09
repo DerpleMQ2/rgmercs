@@ -1752,15 +1752,6 @@ function Casting.ClickModRod()
             return
         end
     end
-
-    --- Function to tally up the players who have mana under the passed percent. Accounts for the fact that LowMana does not include the pc on emu.
-    function GroupLowManaCount(percent)
-        local count = mq.TLO.Group.LowMana(percent or 50)() or 0
-        if Core.OnEMU() then
-            count = count + (mq.TLO.Me.PctMana() < (percent or 50) and 1 or 0)
-        end
-        return count
-    end
 end
 
 --- Function to tally up the players who have mana under the passed percent. Accounts for the fact that LowMana does not include the pc on emu.
