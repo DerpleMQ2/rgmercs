@@ -220,9 +220,6 @@ return {
             {
                 name_func = function() return Casting.CanUseAA("Replenish Companion") and "Replenish Companion" or "Mend Companion" end,
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint')
-                end,
             },
             {
                 name = "Minion's Memento",
@@ -236,13 +233,6 @@ return {
             },
         },
         ['BigHealPoint'] = {
-            {
-                name = "VigorBuff",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
             {
                 name = "HealSpell",
                 type = "Spell",
@@ -612,7 +602,7 @@ return {
                     if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                         --laz specific deconflict with brell's vibrant barricade
-                        and Casting.PeerBuffCheck(40583, target)
+                        and Casting.PeerBuffCheck(40583, target, true)
                 end,
             },
             {
