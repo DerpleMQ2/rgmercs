@@ -181,6 +181,13 @@ return {
             "Light of Order", -- Level 65
             "Light of Piety", -- Level 68
         },
+        ["LightHeal2"] = {
+            -- ToT Light Heal
+            "Light of Life",  -- Level 52
+            "Light of Nife",  -- Level 63
+            "Light of Order", -- Level 65
+            "Light of Piety", -- Level 68
+        },
         -- ["Pacify"] = {
         --     "Pacify",
         --     "Calm",
@@ -261,7 +268,8 @@ return {
             -- cond = function(self) return true end, --Kept here for illustration, this line could be removed in this instance since we aren't using conditions.
             spells = {
                 { name = "TouchHeal",    cond = function(self) return Config:GetSetting('DoTouchHeal') < 3 end, },
-                { name = "LightHeal", },
+                { name = "LightHeal",    cond = function(self) return Config:GetSetting('DoLightHeal') < 3 end, },
+                { name = "LightHeal2",   cond = function(self) return Config:GetSetting('DoLightHeal') == 2 end, },
                 { name = "WaveHeal",     cond = function(self) return Config:GetSetting('DoWaveHeal') < 3 end, },
                 { name = "WaveHeal2",    cond = function(self) return Config:GetSetting('DoWaveHeal') == 2 end, },
                 { name = "Cleansing",    cond = function(self) return Config:GetSetting('DoCleansing') end, },
@@ -626,8 +634,6 @@ return {
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return spell.RankName.Stacks() and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 60
-                        --laz specific deconflict
-                        and not Casting.IHaveBuff("Necrotic Pustules")
                 end,
             },
             {
@@ -855,10 +861,7 @@ return {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoWardProc') and Core.IsTanking() end,
                 cond = function(self, spell, target)
-                    if not Targeting.IsNamed(target) then return false end
                     return Casting.SelfBuffCheck(spell)
-                        --laz specific deconflict
-                        and not Casting.IHaveBuff("Necrotic Pustules")
                 end,
             },
             { -- for DPS mode
@@ -909,6 +912,12 @@ return {
             {
                 name = "LightHeal",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLightHeal') < 3 end,
+            },
+            {
+                name = "LightHeal2",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLightHeal') == 2 end,
             },
         },
         ['Combat'] = {
@@ -1335,10 +1344,25 @@ return {
             FAQ = "Why is my paladin changing targets to heal so often?",
             Answer = "You can control when a Paladin will use their single target heals on the Heals/Cures tab in Class options.",
         },
+        ['DoLightHeal']      = {
+            DisplayName = "Light Heal Use:",
+            Category = "Heals/Cures",
+            Index = 2,
+            Tooltip = "Choose how many ToT heals (\"Light of\" line) to keep memorized, if any.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Current Tier', 'Current Tier + Last Tier', 'Never', },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my paladin memorizing these weak ToT Light of heals?",
+            Answer = "You can control which ToT/Light heals (if any) a Paladin will use on the Heals/Cures tab in Class options.",
+        },
         ['DoWaveHeal']       = {
             DisplayName = "Wave Heal Use:",
             Category = "Heals/Cures",
-            Index = 2,
+            Index = 3,
             Tooltip = "Choose how many group heals to keep memorized, if any.",
             RequiresLoadoutChange = true,
             Type = "Combo",
@@ -1353,7 +1377,7 @@ return {
         ['WaveHealUse']      = {
             DisplayName = "Use Waves for ST:",
             Category = "Heals/Cures",
-            Index = 3,
+            Index = 4,
             Tooltip = "Use your Wave Heals as single-target heals as needed.",
             RequiresLoadoutChange = true,
             Type = "Combo",
@@ -1368,7 +1392,7 @@ return {
         ['DoCleansing']      = {
             DisplayName = "Do Cleansing HoT",
             Category = "Heals/Cures",
-            Index = 4,
+            Index = 5,
             Tooltip = "Use your single-target HoT line.",
             RequiresLoadoutChange = true,
             Default = false,
@@ -1378,7 +1402,7 @@ return {
         ['KeepPurityMemmed'] = {
             DisplayName = "Mem Crusader's Cure",
             Category = "Heals/Cures",
-            Index = 5,
+            Index = 6,
             Tooltip = "Memorize your Crusader's xxx line (Cure poi/dis/curse) when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
             RequiresLoadoutChange = true,
@@ -1390,7 +1414,7 @@ return {
         ['KeepCurseMemmed']  = {
             DisplayName = "Mem Remove Curse",
             Category = "Heals/Cures",
-            Index = 6,
+            Index = 7,
             Tooltip = "Memorize remove curse spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
             RequiresLoadoutChange = true,
@@ -1418,7 +1442,7 @@ return {
             Index = 3,
             Tooltip = "Use the Quellious/Serene stun line (long duration stun with DD component).",
             RequiresLoadoutChange = true,
-            Default = true,
+            Default = false,
             FAQ = "How can I use my Serene Stun?",
             Answer = "You can enable the Serene stun line on the Combat tab of your Class options.",
         },
