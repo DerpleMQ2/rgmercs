@@ -289,7 +289,7 @@ local function RGInit(...)
 end
 
 local function Main()
-    if mq.TLO.Zone.ID() ~= Config.Globals.CurZoneId then
+    if mq.TLO.Zone.ID() ~= Config.Globals.CurZoneId or mq.TLO.Me.Instance() ~= Config.Globals.CurInstance then
         if notifyZoning then
             Modules:ExecAll("OnZone")
             notifyZoning = false
@@ -298,6 +298,7 @@ local function Main()
         end
         mq.delay(100)
         Config.Globals.CurZoneId = mq.TLO.Zone.ID()
+        Config.Globals.CurInstance = mq.TLO.Me.Instance()
         return
     end
 

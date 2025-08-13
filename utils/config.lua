@@ -32,6 +32,7 @@ Config.Globals.InMedState            = false
 Config.Globals.LastPetCmd            = 0
 Config.Globals.LastFaceTime          = 0
 Config.Globals.CurZoneId             = mq.TLO.Zone.ID()
+Config.Globals.CurInstance           = mq.TLO.Me.Instance()
 Config.Globals.CurLoadedChar         = mq.TLO.Me.DisplayName()
 Config.Globals.CurLoadedClass        = mq.TLO.Me.Class.ShortName()
 Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
