@@ -817,13 +817,6 @@ _ClassConfig      = {
             end,
         },
         {
-            name = 'PetHealPoint',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
-            cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 and (mq.TLO.Me.Pet.PctHPs() or 100) < Config:GetSetting('PetHealPct') end,
-        },
-        {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
@@ -837,6 +830,14 @@ _ClassConfig      = {
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
             end,
+        },
+        {
+            name = 'PetHealing',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
+            cond = function(self, target) return (mq.TLO.Me.Pet.PctHPs() or 100) < Config:GetSetting('PetHealPct') end,
         },
         {
             name = 'GroupBuff',
@@ -1296,12 +1297,12 @@ _ClassConfig      = {
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
             },
         },
-        ['PetHealPoint'] = {
+        ['PetHealing'] = {
             {
                 name = "Companion's Blessing",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint')
+                    return (mq.TLO.Me.Pet.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
                 end,
             },
             {
@@ -1309,11 +1310,7 @@ _ClassConfig      = {
                 type = "Item",
             },
             {
-                name = "Replenish Companion",
-                type = "AA",
-            },
-            {
-                name = "Mend Companion",
+                name_func = function() return Casting.CanUseAA("Replenish Companion") and "Replenish Companion" or "Mend Companion" end,
                 type = "AA",
             },
             {
@@ -1945,7 +1942,7 @@ _ClassConfig      = {
             DisplayName = "Pet Heal %",
             Category = "Pet",
             Tooltip = "Heal pet at [X]% HPs",
-            Default = 80,
+            Default = 60,
             Min = 1,
             Max = 99,
             FAQ = "My pet keeps dying, how do I keep it alive?",
