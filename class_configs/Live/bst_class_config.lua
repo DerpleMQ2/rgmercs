@@ -632,20 +632,6 @@ return {
     },
     ['HealRotationOrder'] = {
         {
-            name = 'PetHealAA',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Casting.CanUseAA("Mend Companion") end,
-            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and Targeting.MainHealsNeeded(mq.TLO.Me.Pet) end,
-        },
-        {
-            name = 'PetHealSpell',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Config:GetSetting('DoPetHealSpell') end,
-            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and Targeting.BigHealsNeeded(mq.TLO.Me.Pet) end,
-        },
-        {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
@@ -654,18 +640,6 @@ return {
         },
     },
     ['HealRotations']     = {
-        ['PetHealAA'] = {
-            {
-                name = "Mend Companion",
-                type = "AA",
-            },
-        },
-        ['PetHealSpell'] = {
-            {
-                name = "PetHealSpell",
-                type = "Spell",
-            },
-        },
         ['MainHealPoint'] = {
             {
                 name = "HealSpell",
@@ -706,6 +680,14 @@ return {
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
             end,
+        },
+        {
+            name = 'PetHealing',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
+            cond = function(self, target) return (mq.TLO.Me.Pet.PctHPs() or 100) < Config:GetSetting('PetHealPct') end,
         },
         {
             name = 'Emergency',
@@ -971,6 +953,18 @@ return {
             {
                 name = "Focused Paragon of Spirits",
                 type = "AA",
+            },
+        },
+        ['PetHealAA'] = {
+            {
+                name = "Mend Companion",
+                type = "AA",
+            },
+        },
+        ['PetHealSpell'] = {
+            {
+                name = "PetHealSpell",
+                type = "Spell",
             },
         },
         ['DPS'] = {
@@ -1588,7 +1582,7 @@ return {
                 "Disable [DoTankPet] to use abilities designed for your pet to DPS.",
         },
         ['DoPetHealSpell'] = {
-            DisplayName = "Do Pet Heals",
+            DisplayName = "Pet Heal Spell",
             Category = "Pet Mgmt.",
             Index = 2,
             Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.",
@@ -1598,10 +1592,22 @@ return {
             Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
                 "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
         },
+        ['PetHealPct']     = {
+            DisplayName = "Pet Heal %",
+            Category = "Pet Mgmt.",
+            Index = 3,
+            Tooltip = "Heal pet at [X]% HPs",
+            Default = 80,
+            Min = 1,
+            Max = 99,
+            FAQ = "My pet keeps dying, how do I keep it alive?",
+            Answer = "You can set the [PetHealPct] to a lower value to heal your pet sooner.\n" ..
+                "Also make sure that [DoPetHeals] is enabled.",
+        },
         ['DoPetSlow']      = {
             DisplayName = "Pet Slow Proc",
             Category = "Pet Mgmt.",
-            Index = 3,
+            Index = 4,
             Tooltip = "Use your Pet Slow Proc Buff (does not stack with Pet Damage or Snare Proc Buff).",
             Default = false,
             FAQ = "Why am I not buffing my pet with (Slow, Damage, Snare) proc buff?",
@@ -1612,7 +1618,7 @@ return {
         ['DoPetSnare']     = {
             DisplayName = "Pet Snare Proc",
             Category = "Pet Mgmt.",
-            Index = 4,
+            Index = 5,
             Tooltip = "Use your Pet Snare Proc Buff (does not stack with Pet Damage or Slow Proc Buff).",
             Default = false,
             FAQ = "Why am I continually buffing my pet?",
@@ -1622,7 +1628,7 @@ return {
         ['DoSpellGuard']   = {
             DisplayName = "Do Spellguard",
             Category = "Pet Mgmt.",
-            Index = 5,
+            Index = 6,
             Tooltip = "Do Pet Spell Guard. (Warning! Long refresh time.)",
             Default = false,
             ConfigType = "Advanced",
@@ -1633,7 +1639,7 @@ return {
         ['DoFeralgia']     = {
             DisplayName = "Do Feralgia",
             Category = "Pet Mgmt.",
-            Index = 6,
+            Index = 7,
             Tooltip = "Use Feralgia for the Growl Effect on your Pet instead of the Growl Spell.",
             Default = true,
             RequiresLoadoutChange = true,
@@ -1644,7 +1650,7 @@ return {
         ['DoSwarmPet']     = {
             DisplayName = "Do Swarm Pet",
             Category = "Pet Mgmt.",
-            Index = 7,
+            Index = 8,
             Tooltip = "Use your Swarm Pet spell in addition to Feralgia",
             Default = false,
             RequiresLoadoutChange = true,
@@ -1656,7 +1662,7 @@ return {
         ['DoEpic']         = {
             DisplayName = "Do Epic",
             Category = "Pet Mgmt.",
-            Index = 8,
+            Index = 9,
             Tooltip = "Click your Epic Weapon.",
             Default = false,
             FAQ = "How do I use my Epic Weapon?",

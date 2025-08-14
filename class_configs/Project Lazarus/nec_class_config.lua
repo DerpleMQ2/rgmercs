@@ -327,6 +327,7 @@ local _ClassConfig = {
         },
         {
             name = 'Pustules',
+            timer = 10,
             load_cond = function() return Config:GetSetting('DoPustules') end,
             targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
             cond = function(self, combat_state)
@@ -437,11 +438,12 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'PetHealPoint',
+            name = 'PetHealing',
             state = 1,
             steps = 1,
-            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
-            cond = function(self, target) return Targeting.MainHealsNeeded(mq.TLO.Me.Pet) end,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
+            cond = function(self, target) return (mq.TLO.Me.Pet.PctHPs() or 100) < Config:GetSetting('PetHealPct') end,
         },
     },
     ['Rotations']       = {
@@ -755,12 +757,12 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['PetHealPoint']    = {
+        ['PetHealing']      = {
             {
                 name = "Companion's Blessing",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint')
+                    return (mq.TLO.Me.Pet.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
                 end,
             },
             {
@@ -774,7 +776,7 @@ local _ClassConfig = {
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('DoPetHealSpell') end,
+                load_cond = function(self) Config:GetSetting('DoPetHealSpell') end,
             },
         },
         ['ArcanumWeave']    = {
@@ -993,7 +995,7 @@ local _ClassConfig = {
             Answer = "Set the [PetType] setting to Rog and the Necro will only summon Rogue pets.",
         },
         ['DoPetHealSpell']    = {
-            DisplayName = "Do Pet Heals",
+            DisplayName = "Pet Heal Spell",
             Category = "Pet",
             Index = 2,
             Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.",
@@ -1002,6 +1004,18 @@ local _ClassConfig = {
             FAQ = "My Pet Keeps Dying, What Can I Do?",
             Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
                 "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
+        },
+        ['PetHealPct']        = {
+            DisplayName = "Pet Heal %",
+            Category = "Pet",
+            Index = 3,
+            Tooltip = "Heal pet at [X]% HPs",
+            Default = 60,
+            Min = 1,
+            Max = 99,
+            FAQ = "My pet keeps dying, how do I keep it alive?",
+            Answer = "You can set the [PetHealPct] to a lower value to heal your pet sooner.\n" ..
+                "Also make sure that [DoPetHeals] is enabled.",
         },
 
         --Debuffs
