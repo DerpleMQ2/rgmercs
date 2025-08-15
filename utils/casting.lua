@@ -219,7 +219,7 @@ end
 --- @param target MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
 --- @param bAllowTargetChange boolean|nil Allows the function to set the target to check buffs if true.
 --- @return boolean True if the PC checking should cast the buff, false otherwise.
-function Casting.TargetBuffCheck(spellId, target, bAllowTargetChange)
+function Casting.TargetBuffCheck(spellId, target, bAllowTargetChange, bAllowDuplicates)
     if not spellId then return false end
     if not target then target = mq.TLO.Target end
     if not (target and target()) then return false end
@@ -237,8 +237,9 @@ function Casting.TargetBuffCheck(spellId, target, bAllowTargetChange)
     local targetName = target.CleanName()
     local targetId = target.ID()
     local spellName = mq.TLO.Spell(spellId).Name()
+    local buffSearch = bAllowDuplicates and string.format("id %d caster %d", spellId, mq.TLO.Me.ID()) or string.format("id %d", spellId)
 
-    if not mq.TLO.Target.FindBuff("id " .. spellId)() then
+    if not mq.TLO.Target.FindBuff(buffSearch)() then
         Logger.log_verbose("TargetBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellId, targetName, targetId)
         local numEffects = mq.TLO.Spell(spellId).NumEffects()
         local triggerCount = 0
@@ -249,7 +250,8 @@ function Casting.TargetBuffCheck(spellId, target, bAllowTargetChange)
             if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
                 local triggerName = triggerSpell.Name()
                 local triggerID = triggerSpell.ID()
-                if not mq.TLO.Target.FindBuff("id " .. triggerID)() then
+                local triggerSearch = bAllowDuplicates and string.format("id %d caster %d", triggerID, mq.TLO.Me.ID()) or string.format("id %d", triggerID)
+                if not mq.TLO.Target.FindBuff(triggerSearch)() then
                     Logger.log_verbose("TargetBuffCheck: %s(ID:%d) not found on %s(ID:%d), checking stacking.", triggerName, triggerID, targetName, targetId)
                     if triggerSpell.StacksTarget() then
                         Logger.log_verbose("TargetBuffCheck: %s(ID:%d) seems to stack on %s(ID:%d), let's do it!", triggerName, triggerID, targetName, targetId)
@@ -784,7 +786,17 @@ function Casting.DotSpellCheck(spell, target)
     ---@diagnostic disable-next-line: undefined-field
     local spellId = mq.TLO.Me.Spell(spell()).ID() or spell.RankName.ID()
 
-    return Casting.TargetBuffCheck(spellId, target)
+    return Casting.TargetBuffCheck(spellId, target, true, true)
+end
+
+function Casting.DotItemCheck(itemName, target)
+    local clickySpell = Casting.GetClickySpell(itemName)
+    if not (clickySpell and clickySpell()) then return false end
+    if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
+
+    if Targeting.MobHasLowHP(target) then return false end
+
+    return Casting.TargetBuffCheck(clickySpell.ID(), target, true, true)
 end
 
 --- Checks if a player character's spell is ready to be cast.

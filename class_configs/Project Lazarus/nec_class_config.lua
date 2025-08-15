@@ -565,41 +565,41 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['DPS(MobHighHP)']  = { -- we aren't using DotSpellCheck because we already check autotarget health percent as a rotation condition
+        ['DPS(MobHighHP)']  = {
             {
                 name = "PoisonDotDD",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Targeting.IsNamed(target) then return false end
-                    return Casting.DetSpellCheck(spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
                 name = "FireDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
                 name = "CurseDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
                 name = "PoisonDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
                 name = "PlagueDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
@@ -607,35 +607,37 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Targeting.IsNamed(target) then return false end
-                    return Casting.DetSpellCheck(spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
                 name = "FireDot2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
                 name = "CurseDot2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
                 name = "Scythe of the Shadowed Soul",
                 type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Scythe of the Shadowed Soul")() end,
                 cond = function(self, itemName, target)
-                    return Casting.DetItemCheck(itemName, target)
+                    return Casting.DotItemCheck(itemName, target)
                 end,
             },
             {
                 name = "Dagger of Death",
                 type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Dagger of Death")() end,
                 cond = function(self, itemName, target)
-                    return Casting.DetItemCheck(itemName, target)
+                    return Casting.DotItemCheck(itemName, target)
                 end,
             },
             {

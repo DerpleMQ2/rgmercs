@@ -617,14 +617,6 @@ return {
                 end,
             },
             {
-                name = "VigorBuff",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Targeting.TargetIsMA() then return false end
-                    return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-            {
                 name = "FocusSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
