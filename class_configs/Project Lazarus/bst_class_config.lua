@@ -13,9 +13,9 @@ return {
         'DPS',
     },
     ['ModeChecks']        = {
-        IsHealing = function() return true end,
+        IsHealing = function() return Config:GetSetting('DoHeals') end,
     },
-    ['ItemSets']          = {                  --TODO: Add Omens Chest
+    ['ItemSets']          = {
         ['Epic'] = {
             "Savage Lord's Totem",             -- Epic    -- Epic 1.5
             "Spiritcaller Totem of the Feral", -- Epic    -- Epic 2.0

@@ -237,7 +237,7 @@ function Casting.TargetBuffCheck(spellId, target, bAllowTargetChange, bAllowDupl
     local targetName = target.CleanName()
     local targetId = target.ID()
     local spellName = mq.TLO.Spell(spellId).Name()
-    local buffSearch = bAllowDuplicates and string.format("id %d caster %d", spellId, mq.TLO.Me.ID()) or string.format("id %d", spellId)
+    local buffSearch = bAllowDuplicates and string.format("id %d and caster %d", spellId, mq.TLO.Me.ID()) or string.format("id %d", spellId)
 
     if not mq.TLO.Target.FindBuff(buffSearch)() then
         Logger.log_verbose("TargetBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellId, targetName, targetId)
@@ -250,7 +250,7 @@ function Casting.TargetBuffCheck(spellId, target, bAllowTargetChange, bAllowDupl
             if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
                 local triggerName = triggerSpell.Name()
                 local triggerID = triggerSpell.ID()
-                local triggerSearch = bAllowDuplicates and string.format("id %d caster %d", triggerID, mq.TLO.Me.ID()) or string.format("id %d", triggerID)
+                local triggerSearch = bAllowDuplicates and string.format("id %d and caster %d", triggerID, mq.TLO.Me.ID()) or string.format("id %d", triggerID)
                 if not mq.TLO.Target.FindBuff(triggerSearch)() then
                     Logger.log_verbose("TargetBuffCheck: %s(ID:%d) not found on %s(ID:%d), checking stacking.", triggerName, triggerID, targetName, targetId)
                     if triggerSpell.StacksTarget() then
