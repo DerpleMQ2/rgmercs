@@ -80,6 +80,10 @@ function Modules:GetModule(m)
 end
 
 function Modules:ExecModule(m, fn, ...)
+    if self.ModuleList[m] == nil then
+        return self.ModuleList[m][fn](self.ModuleList[m], ...)
+    end
+
     for name, module in pairs(self.ModuleList) do
         if name:lower() == m:lower() then
             return module[fn](module, ...)

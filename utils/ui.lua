@@ -5,6 +5,7 @@ local Logger        = require("utils.logger")
 local Core          = require("utils.core")
 local Targeting     = require("utils.targeting")
 local Icons         = require('mq.ICONS')
+local Strings       = require("utils.strings")
 
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
 local ICON_SIZE     = 20
@@ -344,8 +345,9 @@ end
 --- @return boolean, table, boolean returns showFailed input and current enablement config table and bool if the enablement changed
 function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotationState, showFailed, enabledRotationEntries)
     local enabledRotationEntriesChanged = false
+    local showDebugTiming = Config:GetSetting('ShowDebugTiming')
 
-    if ImGui.BeginTable("Rotation_" .. name, 6, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
+    if ImGui.BeginTable("Rotation_" .. name, showDebugTiming and 7 or 6, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn(rotationState > 0 and 'Cur' or '-', ImGuiTableColumnFlags.WidthFixed, 20.0)
@@ -353,6 +355,10 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed, 250.0)
         ImGui.TableSetupColumn('Resolved Action', ImGuiTableColumnFlags.WidthStretch, 250.0)
+
+        if showDebugTiming then
+            ImGui.TableSetupColumn('Timing', ImGuiTableColumnFlags.WidthStretch, 250.0)
+        end
 
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
@@ -462,6 +468,17 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     ImGui.Text(entry.name)
                     ImGui.PopStyleColor()
                 end
+            end
+
+            if Config:GetSetting('ShowDebugTiming') then
+                ImGui.TableNextColumn()
+
+                ImGui.Text(string.format("C: %s RC: %s E: %s PF: %s T: %s",
+                    Strings.FormatTimeMS((entry.lastCondTimeSpent or 0) * 1000),
+                    Strings.FormatTimeMS((entry.lastRotationCondTimeSpent or 0) * 1000),
+                    Strings.FormatTimeMS((entry.lastExecTimeSpent or 0) * 1000),
+                    Strings.FormatTimeMS((entry.lastFollowTimeSpent or 0) * 1000),
+                    Strings.FormatTimeMS((entry.lastTotalTimeSpent or 0) * 1000)))
             end
         end
 

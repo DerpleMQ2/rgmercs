@@ -539,10 +539,11 @@ function Module:RenderRotationWithToggle(r, rotationTable)
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - toggleOffset, cursorScreenPos.y)
     Ui.RenderOptionToggle("##EnableDrawn" .. rotationName, "", not rotationDisabled)
 
-    -- Draw Timing Data
-    ImGui.SetCursorPos(ImGui.GetWindowWidth() - timingOffset, cursorScreenPos.y)
-    ImGui.Text(r.lastTimeSpent and ("<" .. Strings.FormatTimeMS(r.lastTimeSpent * 1000) .. ">") or "")
-
+    if Config:GetSetting('ShowDebugTiming') then
+        -- Draw Timing Data
+        ImGui.SetCursorPos(ImGui.GetWindowWidth() - timingOffset, cursorScreenPos.y)
+        ImGui.Text(r.lastTimeSpent and ("<" .. Strings.FormatTimeMS(r.lastTimeSpent * 1000) .. ">") or "")
+    end
     -- Now set the rendering cursor back to where we were after the Header / Tables were rendered
     ImGui.SetCursorPos(cursorScreenPosAfterRender)
 
@@ -1240,8 +1241,8 @@ function Module:GiveTime(combat_state)
                 timeCheckPassed = self.CombatState ~= "Downtime" and true or ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= 1)
             end
 
-            local start = string.format("%.03f", mq.gettime() / 1000)
             if timeCheckPassed then
+                local start = string.format("%.03f", mq.gettime() / 1000)
                 local targetTable = Core.SafeCallFunc("Rotation Target Table", r.targetId)
                 if targetTable ~= false then
                     for _, targetId in ipairs(targetTable) do
@@ -1263,15 +1264,15 @@ function Module:GiveTime(combat_state)
                         end
                     end
                 end
+                local stop = string.format("%.03f", mq.gettime() / 1000)
+
+                r.lastTimeSpent = stop - start
             else
                 Logger.log_verbose(
                     "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
                     Strings.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
                     Strings.FormatTime((r.timer or 1) - (os.clock() - self.TempSettings.RotationTimers[r.name])))
             end
-            local stop = string.format("%.03f", mq.gettime() / 1000)
-
-            r.lastTimeSpent = stop - start
         end
     end
 

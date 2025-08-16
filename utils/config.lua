@@ -1,62 +1,65 @@
-local mq                             = require('mq')
-local Modules                        = require("utils.modules")
-local Tables                         = require("utils.tables")
-local Strings                        = require("utils.strings")
-local Files                          = require("utils.files")
-local Logger                         = require("utils.logger")
-local Set                            = require("mq.Set")
+local mq                                 = require('mq')
+local Modules                            = require("utils.modules")
+local Tables                             = require("utils.tables")
+local Strings                            = require("utils.strings")
+local Files                              = require("utils.files")
+local Logger                             = require("utils.logger")
+local Set                                = require("mq.Set")
 
-local Config                         = {
+local Config                             = {
     _version = '1.2',
     _subVersion = "The Outer Brood",
     _name =
     "RGMercs Lua Edition",
     _author = 'Lead Devs: Derple, Algar',
 }
-Config.__index                       = Config
-Config.settings                      = {}
-Config.FAQ                           = {}
+Config.__index                           = Config
+Config.settings                          = {}
+Config.FAQ                               = {}
+
+Config.TempSettings                      = {}
+Config.TempSettings.SettingToModuleCache = {}
 
 -- Global State
-Config.Globals                       = {}
-Config.Globals.MainAssist            = ""
-Config.Globals.ScriptDir             = ""
-Config.Globals.AutoTargetID          = 0
-Config.Globals.ForceTargetID         = 0
-Config.Globals.LastPulledID          = 0
-Config.Globals.SubmodulesLoaded      = false
-Config.Globals.PauseMain             = false
-Config.Globals.LastMove              = nil
-Config.Globals.BackOffFlag           = false
-Config.Globals.InMedState            = false
-Config.Globals.LastPetCmd            = 0
-Config.Globals.LastFaceTime          = 0
-Config.Globals.CurZoneId             = mq.TLO.Zone.ID()
-Config.Globals.CurInstance           = mq.TLO.Me.Instance()
-Config.Globals.CurLoadedChar         = mq.TLO.Me.DisplayName()
-Config.Globals.CurLoadedClass        = mq.TLO.Me.Class.ShortName()
-Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
-Config.Globals.CastResult            = 0
-Config.Globals.BuildType             = mq.TLO.MacroQuest.BuildName()
-Config.Globals.Minimized             = false
-Config.Globals.LastUsedSpell         = "None"
-Config.Globals.CorpseConned          = false
-Config.Globals.RezzedCorpses         = {}
+Config.Globals                           = {}
+Config.Globals.MainAssist                = ""
+Config.Globals.ScriptDir                 = ""
+Config.Globals.AutoTargetID              = 0
+Config.Globals.ForceTargetID             = 0
+Config.Globals.LastPulledID              = 0
+Config.Globals.SubmodulesLoaded          = false
+Config.Globals.PauseMain                 = false
+Config.Globals.LastMove                  = nil
+Config.Globals.BackOffFlag               = false
+Config.Globals.InMedState                = false
+Config.Globals.LastPetCmd                = 0
+Config.Globals.LastFaceTime              = 0
+Config.Globals.CurZoneId                 = mq.TLO.Zone.ID()
+Config.Globals.CurInstance               = mq.TLO.Me.Instance()
+Config.Globals.CurLoadedChar             = mq.TLO.Me.DisplayName()
+Config.Globals.CurLoadedClass            = mq.TLO.Me.Class.ShortName()
+Config.Globals.CurServer                 = mq.TLO.EverQuest.Server():gsub(" ", "")
+Config.Globals.CastResult                = 0
+Config.Globals.BuildType                 = mq.TLO.MacroQuest.BuildName()
+Config.Globals.Minimized                 = false
+Config.Globals.LastUsedSpell             = "None"
+Config.Globals.CorpseConned              = false
+Config.Globals.RezzedCorpses             = {}
 
 -- Constants
-Config.Constants                     = {}
-Config.Constants.RGCasters           = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
+Config.Constants                         = {}
+Config.Constants.RGCasters               = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
     "SHM", "WIZ", })
-Config.Constants.RGMelee             = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
-Config.Constants.RGHybrid            = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
-Config.Constants.RGTank              = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGPetClass          = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
-Config.Constants.RGMezAnims          = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
-Config.Constants.ModRods             = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
-Config.Constants.SpellBookSlots      = 1120
-Config.Constants.CastCompleted       = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
+Config.Constants.RGMelee                 = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
+Config.Constants.RGHybrid                = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
+Config.Constants.RGTank                  = Set.new({ "WAR", "PAL", "SHD", })
+Config.Constants.RGPetClass              = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
+Config.Constants.RGMezAnims              = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
+Config.Constants.ModRods                 = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
+Config.Constants.SpellBookSlots          = 1120
+Config.Constants.CastCompleted           = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
 
-Config.Constants.CastResults         = {
+Config.Constants.CastResults             = {
     ['CAST_RESULT_NONE'] = 0,
     ['CAST_SUCCESS']     = 1,
     ['CAST_BLOCKED']     = 2,
@@ -82,7 +85,7 @@ Config.Constants.CastResults         = {
     ['CAST_OVERWRITTEN'] = 22,
 }
 
-Config.Constants.CastResultsIdToName = {}
+Config.Constants.CastResultsIdToName     = {}
 for k, v in pairs(Config.Constants.CastResults) do Config.Constants.CastResultsIdToName[v] = k end
 
 Config.Constants.ExpansionNameToID = {
@@ -1496,6 +1499,13 @@ Config.DefaultConfig = {
         FAQ = "The UI is overwhelming how can I make it simpler?",
         Answer = "You can click off the Use Full UI option under UI settings for a simpler version of the UI.",
     },
+    ['ShowDebugTiming']      = {
+        DisplayName = "Show Roation Debug Timing",
+        Category = "UI",
+        ConfigType = "Advanced",
+        Tooltip = "Enable displaying the timing of each rotation step.",
+        Default = false,
+    },
 
     -- [ Debug ] --
     ['LogLevel']             = {
@@ -1820,6 +1830,18 @@ end
 function Config:GetSetting(setting, failOk)
     local ret = { module = "Base", value = self:GetSettings()[setting], }
 
+    -- Speed up lookups because they happen often and we do not need to spam about multiple keys every frame, just the one time.
+    if Config.TempSettings.SettingToModuleCache[setting] ~= nil then
+        if Config.TempSettings.SettingToModuleCache[setting] == "Base" then
+            return self:GetSettings()[setting]
+        end
+
+        local settings = Modules:ExecModule(Config.TempSettings.SettingToModuleCache[setting], "GetSettings")
+        return settings[setting]
+    end
+
+    if ret.value ~= nil then Config.TempSettings.SettingToModuleCache[setting] = "Base" end
+
     -- if we found it in the Global table we should alert if it is duplicated anywhere
     -- else as that could get confusing.
     if Modules then -- this could be run before we are fully done loading.
@@ -1828,6 +1850,7 @@ function Config:GetSetting(setting, failOk)
             if settings[setting] ~= nil then
                 if not ret.value then
                     ret = { module = name, value = settings[setting], }
+                    Config.TempSettings.SettingToModuleCache[setting] = name
                 else
                     Logger.log_error(
                         "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Returning first but this should be fixed!",

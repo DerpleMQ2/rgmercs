@@ -282,6 +282,7 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
     for idx, entry in ipairs(rotationTable) do
         if enabledRotationEntries[entry.name] ~= false then
             if idx >= start_step then
+                local tStart = string.format("%.03f", mq.gettime() / 1000)
                 caller:SetCurrentRotationState(idx)
 
                 if Config.Globals.PauseMain then
@@ -289,26 +290,43 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
                 end
 
                 if fnRotationCond then
+                    local start = string.format("%.03f", mq.gettime() / 1000)
                     local curState = Targeting.GetXTHaterCount() > 0 and "Combat" or "Downtime"
 
                     if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, curState) then
                         Logger.log_verbose("\arStopping Rotation Due to condition check failure!")
                         break
                     end
+                    local stop = string.format("%.03f", mq.gettime() / 1000)
+                    entry.lastRotationCondTimeSpent = stop - start
                 end
 
-                if Config.ShouldPriorityFollow() then
-                    break
+                if Config:GetSetting('ChaseOn') then
+                    local start = string.format("%.03f", mq.gettime() / 1000)
+                    if Config.ShouldPriorityFollow() then
+                        break
+                    end
+                    local stop = string.format("%.03f", mq.gettime() / 1000)
+                    entry.lastFollowTimeSpent = stop - start
+                else
+                    entry.lastFollowTimeSpent = 0
                 end
 
                 Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
                 lastStepIdx = idx
                 if entry.cond then
+                    local start = string.format("%.03f", mq.gettime() / 1000)
                     local pass = Rotation.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
+                    local stop = string.format("%.03f", mq.gettime() / 1000)
+                    entry.lastCondTimeSpent = stop - start
                     Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: TestConditionsForEntry() => %s", start_step, steps,
                         idx, Strings.BoolToColorString(pass))
+
                     if pass == true then
+                        local rStart = string.format("%.03f", mq.gettime() / 1000)
                         local res = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
+                        local rStop = string.format("%.03f", mq.gettime() / 1000)
+                        entry.lastExecTimeSpent = rStop - rStart
                         Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: ExecEntry() => %s", start_step, steps,
                             idx, Strings.BoolToColorString(res))
                         if res == true then
@@ -327,7 +345,10 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
                         Logger.log_verbose("\aoFailed Condition RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
                     end
                 else
+                    local start = string.format("%.03f", mq.gettime() / 1000)
                     local res = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
+                    local stop = string.format("%.03f", mq.gettime() / 1000)
+                    entry.lastExecTimeSpent = stop - start
                     if res == true then
                         stepsThisTime = stepsThisTime + 1
 
@@ -336,6 +357,8 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
                         end
                     end
                 end
+                local tStop = string.format("%.03f", mq.gettime() / 1000)
+                entry.lastTotalTimeSpent = tStop - tStart
             end
         end
     end
