@@ -1354,6 +1354,18 @@ Config.DefaultConfig = {
         FAQ = "Why am I not burning the named?",
         Answer = "You can set the [BurnNamed] option to true to automatically burn named mobs.",
     },
+    ['NamedMinLevel']        = {
+        DisplayName = "Named Min Level",
+        Category = "Burns",
+        Index = 5,
+        Tooltip = "The minimum level we will treat a Named as a threat (if below this level, we will treat them as trash mobs).",
+        Default = 1,
+        Min = 1,
+        Max = 150,
+        ConfigType = "Advanced",
+        FAQ = "Why am I using burns on weak, low-level named?",
+        Answer = "Adjust the min level to treat a named as such on the Burns Tab.",
+    },
 
     --[ EVENTS ] --
     ['HandleCantSeeTarget']  = {
