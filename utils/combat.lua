@@ -128,10 +128,17 @@ function Combat.EngageTarget(autoTargetId)
                 end
             else
                 Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Targeting.GetTargetCleanName())
-            end
 
-            if not Config:GetSetting('DoMelee') and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
-                Core.DoCmd("/stick pin 40")
+                if not Config:GetSetting('DoMelee') and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Body.Name() == "Dragon" and Targeting.IsNamed(target) then
+                    Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Dragon Named detected, sticking for belly cast.", Targeting.GetTargetCleanName())
+                    Core.DoCmd("/stick pin 40")
+                end
+
+                if Core.MyClassIs("RNG") and not mq.TLO.Me.AutoFire() then
+                    Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) turning autofire on.", Targeting.GetTargetCleanName())
+                    Core.DoCmd('/squelch face fast')
+                    Core.DoCmd('/autofire on')
+                end
             end
 
             -- TODO: why are we doing this after turning stick on just now?

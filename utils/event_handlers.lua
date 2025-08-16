@@ -106,7 +106,7 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
             Logger.log_debug("TooCloseHandler: Pull State not detected, using Combat Nav.")
             local classConfig = Modules:ExecModule("Class", "GetClassConfig")
             if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
-                Core.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, true)
+                Core.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, false)
             end
         end
     end

@@ -885,9 +885,10 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'Ranged Combat',
+            name = 'Circle Nav',
             state = 1,
             steps = 1,
+            load_cond = function(self) return Config:GetSetting('NavCircle') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Config:GetSetting('DoMelee') and not Core.IsModeActive("Healer")
@@ -1254,12 +1255,10 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Ranged Combat'] = {
+        ['Circle Nav'] = {
             {
                 name = "Ranged Mode",
                 type = "CustomFunc",
-                tooltip = Tooltips.RangedMode,
-                cond = function(self, combat_state) return not Config:GetSetting('DoMelee') end,
                 custom_func = function(self)
                     Core.SafeCallFunc("Ranger Custom Nav", self.ClassConfig.HelperFunctions.combatNav, false)
                 end,
@@ -1636,21 +1635,42 @@ local _ClassConfig = {
     },
     ['HelperFunctions']   = {
         combatNav = function(forceMove)
-            if not Config:GetSetting('DoMelee') and not mq.TLO.Me.AutoFire() then
-                Core.DoCmd('/squelch face')
-                Core.DoCmd('/autofire on')
-            end
+            if not Config:GetSetting('DoMelee') then
+                if not mq.TLO.Me.AutoFire() then
+                    Core.DoCmd('/squelch face fast')
+                    Core.DoCmd('/autofire on')
+                end
 
-            if Config:GetSetting('NavCircle') and ((Targeting.GetTargetDistance() <= 30 or Targeting.GetTargetDistance() >= 75) or forceMove) then
-                Movement.NavAroundCircle(mq.TLO.Target, Config:GetSetting('NavCircleDist'))
-            end
+                local targetDistance = Targeting.GetTargetDistance()
+                local chaseDistance = Config:GetSetting('ChaseDistance')
+                local useChaseDistance = chaseDistance > 75 and chaseDistance < 200
+                local tooClose = targetDistance < 30
+                --- the distance of 200 could be further refined by checking actual distances based off range + ammo distance if desired.
+                local tooFar = useChaseDistance and targetDistance > chaseDistance or targetDistance > 75
 
-            if not Config:GetSetting('NavCircle') and Targeting.GetTargetDistance() <= 30 then
-                Core.DoCmd("/stick %d moveback", Config:GetSetting('NavCircleDist'))
-            end
+                Logger.log_verbose("Custom Ranger combatNav engaged. TargetDistance: %d, LOS:%s, ChaseDistance: %d, forceMove: %s, tooClose: %s, tooFar: %s", targetDistance,
+                    mq.TLO.Target.LineOfSight(), chaseDistance, Strings.BoolToColorString(forceMove), Strings.BoolToColorString(tooClose), Strings.BoolToColorString(tooFar))
 
-            if not Config:GetSetting('NavCircle') and (Targeting.GetTargetDistance() >= 75 or forceMove) then
-                Core.DoCmd("/squelch /nav id %d facing=backward distance=%d lineofsight=on", Config.Globals.AutoTargetID, Config:GetSetting('NavCircleDist'))
+                if forceMove and mq.TLO.Target.LineOfSight() then
+                    Logger.log_warning(
+                        "Custom Ranger combatNav: \arWarning! \aw Mercs has detected a \"Can't See\" condition, but MQ is reporting line of sight. \ayManual intervention may be required.")
+                end
+                if Config:GetSetting('NavCircle') then
+                    if tooClose or tooFar or forceMove then
+                        Movement.NavAroundCircle(mq.TLO.Target, Config:GetSetting('BowNavDistance'))
+                    end
+                elseif tooClose then
+                    if chaseDistance < 30 then
+                        Logger.log_warning(
+                            "Custom Ranger combatNav: \arWarning! \awChase distance is %d. \ayThis may interfere with ranged combat, depending on chase target movement!",
+                            chaseDistance)
+                    end
+                    Core.DoCmd('/squelch face fast')
+                    Core.DoCmd("/stick 10 moveback")
+                elseif tooFar or forceMove then
+                    Core.DoCmd("/squelch /nav id %d distance=%d lineofsight=on", Config.Globals.AutoTargetID, Config:GetSetting('BowNavDistance'))
+                    Core.DoCmd('/squelch face fast')
+                end
             end
         end,
 
@@ -1702,23 +1722,29 @@ local _ClassConfig = {
                 "3. Healer - This mode is used when you are healing.\n" ..
                 "4. Hybrid - This mode is a combination of the other 3 and will attempt to be a jack of all trades.",
         },
-        ['NavCircle']         = {
-            DisplayName = "Nav Circle",
-            Category = "Combat",
-            Tooltip = "Use Nav to Circle your target.",
-            Default = true,
-            FAQ = "Can Circle the target on my map?",
-            Answer = "Enabling [NavCircle] will draw a circle around your target on the map.",
-        },
-        ['NavCircleDist']     = {
-            DisplayName = "Nav Circle Dist",
-            Category = "Combat",
-            Tooltip = "Use Nav to Circle your target.",
+        --Archery
+        ['BowNavDistance']    = {
+            DisplayName = "Bow Nav Distance",
+            Category = "Archery",
+            Index = 1,
+            Tooltip = "The distance from your target you should nav to for ranged attacks when necessary.\n" ..
+                "If Nav Circle is enabled, the distance to circle at.",
             Default = 45,
             Min = 30,
-            Max = 150,
-            FAQ = "I want a larger / smaller circle around my target?",
-            Answer = "You can adjust the size of the circle by changing the [NavCircleDist] setting.",
+            Max = 200,
+            FAQ = "Why is my ranger rubber-banding, charging back and forth or changing heading constantly?",
+            Answer = "Some terrain blocks line of sight while MQ reports that the ranger has line of sight.\n" ..
+                "Reducing Bow Nav Distance to a value near the minimum or maximum may solve for some of these (not RG-Mercs) issues, as a workaround.",
+        },
+        ['NavCircle']         = {
+            DisplayName = "Nav Circle",
+            Category = "Archery",
+            Index = 2,
+            Tooltip = "Use Nav to Circle your target while autofiring.",
+            Default = false,
+            RequiresLoadoutChange = true, -- this is a load condition
+            FAQ = "Can Circle the target on my map?",
+            Answer = "Enabling [NavCircle] will run in a circle around your target on the map.",
         },
         ['DoSnare']           = {
             DisplayName = "Cast Snares",
