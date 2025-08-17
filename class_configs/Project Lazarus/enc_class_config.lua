@@ -103,10 +103,10 @@ local _ClassConfig = {
             "Rune of Rikkukin",
             "Rune of the Scale",
         },
-        -- ['AggroBuff'] = {
-        --     "Horrifying Visage",
-        --     "Haunting Visage",
-        -- },
+        ['HateBuff'] = {
+            "Horrifying Visage",
+            "Haunting Visage",
+        },
         -- ['SingleSpellShield'] = {
         --     "Wall of Alendar",
         --     "Bulwark of Alendar",
@@ -475,25 +475,12 @@ local _ClassConfig = {
                 cond = function(self, aaName) return mq.TLO.Me.PctMana() < 30 end,
             },
             {
-                name = "Auroria Mastery",
-                type = "AA",
-                active_cond = function(self) return Casting.AuraActiveByName("Aura of Bedazzlement") end,
-                pre_activate = function(self) -- remove the old aura if we leveled up, otherwise we will be spammed because of no focus.
-                    if not Casting.AuraActiveByName("Aura of Bedazzlement") then
-                        ---@diagnostic disable-next-line: undefined-field
-                        mq.TLO.Me.Aura(1).Remove()
-                    end
-                end,
-                cond = function(self, aaName)
-                    return not Casting.AuraActiveByName("Aura of Bedazzlement")
-                end,
-            },
-            {
                 name = "SpellProcAura",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('UseAura') == 1 end,
                 active_cond = function(self, spell)
                     local aura = string.sub(spell.Name() or "", 1, 8)
-                    return Casting.AuraActiveByName(aura) or Casting.AuraActiveByName("Aura of Bedazzlement")
+                    return Casting.AuraActiveByName(aura)
                 end,
                 pre_activate = function(self, spell)                  -- remove the old aura if we leveled up or changed options, otherwise we will be spammed because of no focus.
                     local aura = string.sub(spell.Name() or "", 1, 8) -- we use a string sub because aura name doesn't have the apostrophe the spell name does
@@ -503,7 +490,6 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, spell)
-                    if Casting.CanUseAA('Auroria Mastery') or Config:GetSetting('UseAura') ~= 1 then return false end
                     local aura = string.sub(spell.Name() or "", 1, 8)
                     return not Casting.AuraActiveByName(aura)
                 end,
@@ -511,6 +497,7 @@ local _ClassConfig = {
             {
                 name = "TwincastAura",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('UseAura') == 2 end,
                 active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
                 pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
                     if not Casting.AuraActiveByName(spell.Name()) then
@@ -519,13 +506,13 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, spell)
-                    if Casting.CanUseAA('Auroria Mastery') or Config:GetSetting('UseAura') ~= 2 then return false end
                     return not Casting.AuraActiveByName(spell.Name())
                 end,
             },
             {
                 name = "VisageAura",
                 type = "Spell",
+                load_cond = function() return Config:GetSetting('UseAura') == 3 end,
                 active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
                 pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
                     if not Casting.AuraActiveByName(spell.Name()) then
@@ -534,8 +521,22 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, spell)
-                    if Casting.CanUseAA('Auroria Mastery') or Config:GetSetting('UseAura') ~= 3 then return false end
                     return not Casting.AuraActiveByName(spell.Name())
+                end,
+            },
+            {
+                name = "Auroria Mastery",
+                type = "AA",
+                load_cond = function() return Config:GetSetting('UseAura') == 4 end,
+                active_cond = function(self) return Casting.AuraActiveByName("Aura of Bedazzlement") end,
+                pre_activate = function(self) -- remove the old aura if we leveled up, otherwise we will be spammed because of no focus.
+                    if not Casting.AuraActiveByName("Aura of Bedazzlement") then
+                        ---@diagnostic disable-next-line: undefined-field
+                        mq.TLO.Me.Aura(1).Remove()
+                    end
+                end,
+                cond = function(self, aaName)
+                    return not Casting.AuraActiveByName("Aura of Bedazzlement")
                 end,
             },
         },
@@ -602,6 +603,15 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if self:GetResolvedActionMapItem('HasteManaCombo') or not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.GroupBuffCheck(mq.TLO.Spell("Unified Alacrity"), target) -- Fixes bad stacking check
+                end,
+            },
+            {
+                name = "HateBuff",
+                type = "Spell",
+                load_cond = function() return Config:GetSetting('DoHateBuff') end,
+                cond = function(self, spell, target)
+                    if not Targeting.TargetIsMA(target) then return false end
+                    return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -808,6 +818,14 @@ local _ClassConfig = {
             },
         },
         ['DPS'] = {
+            { -- This triggers two nukes so we cast it whether the dot is up or not. Treat is as a nuke.
+                name = "MindDot",
+                type = "Spell",
+                load_cond = function() return Config:GetSetting("DoMindDot") end,
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke()
+                end,
+            },
             {
                 name = "ColoredNuke",
                 type = "Spell",
@@ -830,15 +848,6 @@ local _ClassConfig = {
                 cond = function(self, itemName)
                     if Config:GetSetting('UseEpic') == 1 then return false end
                     return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
-                end,
-            },
-            {
-                name = "MindDot",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting("DoMindDot") end,
-                cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
-                    return not mq.TLO.Me.Buff("Mind Shatter Recourse") or Casting.DotSpellCheck(spell)
                 end,
             },
             {
@@ -1022,6 +1031,7 @@ local _ClassConfig = {
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') end, },
                 { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') end, },
+                { name = "HateBuff",         cond = function(self) return Config:GetSetting('DoHateBuff') end, },
                 { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
                 { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
                 { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
@@ -1073,13 +1083,13 @@ local _ClassConfig = {
             DisplayName = "Aura Selection:",
             Category = "Buffs",
             Index = 1,
-            Tooltip = "Select the Aura to be used, if any, prior to purchasing the Auroria Mastery AA.",
+            Tooltip = "Select the Aura to be used, if any.",
             Type = "Combo",
-            ComboOptions = { 'Spell Proc', 'Twincast', 'Visage', 'None', },
+            ComboOptions = { 'Spell Proc', 'Twincast', 'Visage', 'Auroria', 'None', },
             RequiresLoadoutChange = true,
             Default = 1,
             Min = 1,
-            Max = 4,
+            Max = 5,
             FAQ = "Why am I using the wrong aura?",
             Answer = "Aura choice can be made on the buff tab.\n" ..
                 "Once the PC has purchased Auroria Mastery, this setting is ignored in favor of using the AA.",
@@ -1131,10 +1141,20 @@ local _ClassConfig = {
             Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
                 "Please note that the single target versions are only set to be used on melee.",
         },
+        ['DoHateBuff']         = {
+            DisplayName = "Do Hate Visage",
+            Category = "Buffs",
+            Index = 6,
+            Tooltip = "Use your hatred visage buff on your tank.",
+            RequiresLoadoutChange = true,
+            Default = false,
+            FAQ = "How can I use my hate buff on the tank?",
+            Answer = "You can change this option on the Buffs tab.",
+        },
         ['DoArcanumWeave']     = {
             DisplayName = "Weave Arcanums",
             Category = "Buffs",
-            Index = 6,
+            Index = 7,
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
