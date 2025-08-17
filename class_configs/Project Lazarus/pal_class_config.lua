@@ -509,7 +509,7 @@ return {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.OkayToBuff() and Casting.AmIBuffable()
+                return combat_state == "Downtime" and Casting.OkayToBuff() and Core.OkayToNotHeal() and Casting.AmIBuffable()
             end,
         },
         {
@@ -519,7 +519,7 @@ return {
                 return Casting.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.OkayToBuff()
+                return combat_state == "Downtime" and Casting.OkayToBuff() and Core.OkayToNotHeal()
             end,
         },
         { --Actions that establish or maintain hatred
@@ -612,7 +612,7 @@ return {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                return combat_state == "Combat" and Casting.BurnCheck()
+                return combat_state == "Combat" and Casting.BurnCheck() and Core.OkayToNotHeal()
             end,
         },
         { --DPS Spells, includes recourse/gift maintenance
@@ -622,7 +622,7 @@ return {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Core.OkayToNotHeal()
             end,
         },
     },
@@ -941,6 +941,16 @@ return {
         },
         ['Combat'] = {
             {
+                name = "PBAEStun",
+                type = "Spell",
+                load_cond = function(self) return Core.IsTanking() end,
+                allowDead = true,
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                end,
+            },
+            {
                 name = "StunTimer4",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -957,16 +967,6 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "PBAEStun",
-                type = "Spell",
-                load_cond = function(self) return Core.IsTanking() end,
-                allowDead = true,
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAEDamage') then return false end
-                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
