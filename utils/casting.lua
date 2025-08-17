@@ -45,6 +45,7 @@ end
 --- @param bAllowTargetChange boolean|nil Allows the function to set the target to check buffs if true.
 --- @return boolean Returns true if the target has the buff, false otherwise.
 function Casting.TargetHasBuff(effect, target, bAllowTargetChange)
+    if not target then target = mq.TLO.Target end
     if not (target and target()) then return false end
     if not effect then return false end
     if type(effect) ~= "string" then effect = tostring(effect) end

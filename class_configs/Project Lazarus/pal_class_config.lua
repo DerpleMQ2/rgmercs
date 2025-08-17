@@ -550,21 +550,6 @@ return {
                 return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETauntCheck(true)
             end,
         },
-        { --Stun enemies per your settings
-            name = 'AEStun(DPS Mode)',
-            state = 1,
-            steps = 1,
-            load_cond = function()
-                local aeSpell = Config:GetSetting('DoAEStun') and Core.GetResolvedActionMapItem('AEStun')
-                local pbaeSpell = Config:GetSetting('DoPBAEStun') and Core.GetResolvedActionMapItem('PBAEStun')
-                return not Core.IsTanking() and (aeSpell or pbaeSpell)
-            end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                if (Config:GetSetting('AEStunUse') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) or Config:GetSetting('AEStunUse') == 1 then return false end
-                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETargetCheck(true)
-            end,
-        },
         { --Dynamic weapon swapping if UseBandolier is toggled
             name = 'Weapon Management',
             state = 1,
@@ -613,6 +598,21 @@ return {
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
                 return combat_state == "Combat" and Casting.BurnCheck() and Core.OkayToNotHeal()
+            end,
+        },
+        { --Stun and damage enemies per your settings
+            name = 'AECombat',
+            state = 1,
+            steps = 1,
+            load_cond = function()
+                local aeSpell = Config:GetSetting('DoAEStun') and Core.GetResolvedActionMapItem('AEStun')
+                local pbaeSpell = Config:GetSetting('DoPBAEStun') and Core.GetResolvedActionMapItem('PBAEStun')
+                return (Core.IsTanking() or Config:GetSetting('AEStunUse') > 1) and (aeSpell or pbaeSpell)
+            end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                if not Config:GetSetting('DoAEDamage') or (Core.IsTanking() and mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical')) then return false end
+                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETargetCheck(true)
             end,
         },
         { --DPS Spells, includes recourse/gift maintenance
@@ -814,13 +814,6 @@ return {
                 type = "AA",
             },
             {
-                name = "Forsaken Fayguard Bladecatcher",
-                type = "Item",
-                cond = function(self, itemName, target)
-                    return Config:GetSetting('DoAEDamage')
-                end,
-            },
-            {
                 name = "PBAEStun",
                 type = "Spell",
                 allowDead = true,
@@ -836,12 +829,12 @@ return {
                 end,
             },
         },
-        ['AEStun(DPS Mode)'] = {
+        ['AECombat'] = {
             {
                 name = "AEStun",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoAEDamage') or spell.Name() ~= "The Sacred Word" -- Sacred Word does damage
+                    return Core.IsTanking() or Config:GetSetting('AEStunUse') == 3 or Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')
                 end,
 
             },
@@ -850,8 +843,13 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoAEDamage')
+                    return Core.IsTanking() or Config:GetSetting('AEStunUse') == 3 or Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')
                 end,
+            },
+            {
+                name = "Forsaken Fayguard Bladecatcher",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Fayguard Bladecatcher")() end,
             },
         },
         ['Burn'] = {
@@ -1091,7 +1089,7 @@ return {
         },
     },
     ['DefaultConfig']     = {
-        ['Mode']       = {
+        ['Mode']             = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this Toon",
@@ -1105,9 +1103,9 @@ return {
         },
 
         --AE(All Modes)
-        ['DoAEDamage'] = {
+        ['DoAEDamage']       = {
             DisplayName = "Do AE Damage",
-            Category = "AE(All Modes)",
+            Category = "AE Damage",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE stuns that cause damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
@@ -1115,31 +1113,28 @@ return {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['DoAEStun']   = {
+        ['DoAEStun']         = {
             DisplayName = "Do AE Stun",
-            Category = "AE(All Modes)",
+            Category = "AE Damage",
             Index = 2,
             Tooltip = "Use your Targeted AE Stun (Stun Command or Sacred Word) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
             Default = true,
             FAQ = "Why am I not using my AE Stun?",
             Answer = "The AE stun is set to be used to reclaim aggro on AE targets when necessary.",
         },
-        ['DoPBAEStun'] = {
+        ['DoPBAEStun']       = {
             DisplayName = "Do PBAE Stun",
-            Category = "AE(All Modes)",
+            Category = "AE Damage",
             Index = 3,
             Tooltip = "Use your PBAE Stun (The Silent Command) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
             Default = true,
             FAQ = "Why am I memorizing an AE stun as a DPS?",
             Answer = "You can select which AE stuns you will keep memorized (if any) in your class options.",
         },
-
-
-        --AE(DPS Mode)
         ['AEStunUse']        = {
-            DisplayName = "AEStun Use:",
-            Category = "AE(DPS Mode)",
-            Index = 1,
+            DisplayName = "AEStun Use(DPS Mode):",
+            Category = "AE Damage",
+            Index = 4,
             Tooltip = "When to use your AE Stun Lines in DPS Mode.",
             RequiresLoadoutChange = true,
             Type = "Combo",
@@ -1152,8 +1147,8 @@ return {
         },
         ['AETargetCnt']      = {
             DisplayName = "AE Target Count",
-            Category = "AE(DPS Mode)",
-            Index = 2,
+            Category = "AE Damage",
+            Index = 5,
             Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
             Default = 2,
             Min = 1,
@@ -1164,10 +1159,10 @@ return {
         },
         ['MaxAETargetCnt']   = {
             DisplayName = "Max AE Targets",
-            Category = "AE(DPS Mode)",
-            Index = 3,
+            Category = "AE Damage",
+            Index = 6,
             Tooltip =
-            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            "Maximum number of valid targets to use AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
             Default = 5,
             Min = 2,
             Max = 30,
@@ -1177,8 +1172,8 @@ return {
         },
         ['SafeAEDamage']     = {
             DisplayName = "AE Proximity Check",
-            Category = "AE(DPS Mode)",
-            Index = 4,
+            Category = "AE Damage",
+            Index = 7,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             ConfigType = "Advanced",
@@ -1188,22 +1183,20 @@ return {
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
 
-        --AE(Tank Mode)
+        --Hate Tools
         ['AETauntAA']        = {
             DisplayName = "Use Beacon",
-            Category = "AE(Tank Mode)",
+            Category = "Hate Tools",
             Index = 1,
-            Tooltip = "Use Beacon of the Righteous to maintain AE aggro in Tank Mode.",
+            Tooltip = "Use Beacon of the Righteous to regain AE aggro in Tank Mode.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why do we treat the Explosions the same? One is targeted, one is PBAE",
-            Answer = "There are currently no scripted conditions where Hatred would be used at long range, thus, for ease of use, we can treat them similarly.",
         },
         ['AETauntCnt']       = {
-            DisplayName = "AE Stun Count",
-            Category = "AE(Tank Mode)",
+            DisplayName = "AE Taunt Count",
+            Category = "Hate Tools",
             Index = 2,
-            Tooltip = "Minimum number of haters before using AE Stun Spells or AA.",
+            Tooltip = "Minimum number of haters before using AE Taunt AA or Stuns(when used as taunts).",
             Default = 2,
             Min = 1,
             Max = 30,
@@ -1212,10 +1205,10 @@ return {
             "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
         },
         ['SafeAETaunt']      = {
-            DisplayName = "AE Stun Safety Check",
-            Category = "AE(Tank Mode)",
+            DisplayName = "AE Taunt Safety Check",
+            Category = "Hate Tools",
             Index = 3,
-            Tooltip = "Limit unintended pulls with AE Stun Spells or AA. May result in non-use due to false positives.",
+            Tooltip = "Limit unintended pulls with AE Taunts or Stuns(when used as taunts). May result in non-use due to false positives.",
             Default = false,
             ConfigType = "Advanced",
             FAQ = "Can you better explain the AE Stun Safety Check?",
