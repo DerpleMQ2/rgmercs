@@ -425,6 +425,11 @@ return {
                 type = "AA",
             },
             {
+                name = "Forsaken Sorceror's Shoes",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Sorceror's Shoes")() end,
+            },
+            {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
