@@ -609,7 +609,7 @@ end
 --- Checks if the character is currently feigning death.
 --- @return boolean True if the character is feigning death, false otherwise.
 function Casting.IAmFeigning()
-    return mq.TLO.Me.State():lower() == "feign"
+    return mq.TLO.Me.Feigning()
 end
 
 --- Checks if a spell is loaded on the spellbar.
