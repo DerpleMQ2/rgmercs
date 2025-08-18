@@ -1050,11 +1050,11 @@ function Module:CheckPeerForCures(checks, peer, cureTarget)
         if effectId:lower() ~= "null" and effectId ~= "0" then
             -- Cure it!
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                Comms.HandleAnnounce(string.format('Adding to cure list to cure %s of %s', cureTarget.CleanName() or "Target", data.type), Config:GetSetting('CureAnnounceGroup'),
-                    Config:GetSetting('CureAnnounce'))
                 self.TempSettings.NeedCutesList[cureTarget.ID()] = self.TempSettings.NeedCutesList[cureTarget.ID()] or Set.new({})
 
                 if not self.TempSettings.NeedCutesList[cureTarget.ID()]:contains(data.type) then
+                    Comms.HandleAnnounce(string.format('Adding to cure list to cure %s of %s', cureTarget.CleanName() or "Target", data.type), Config:GetSetting('CureAnnounceGroup'),
+                        Config:GetSetting('CureAnnounce'))
                     self.TempSettings.NeedCutesList[cureTarget.ID()]:add(data.type)
                 end
             end
