@@ -7,89 +7,41 @@ local Strings   = require("utils.strings")
 local Logger    = require("utils.logger")
 
 return {
-    _version            = "2.0 - Project Lazarus",
+    _version            = "2.1 - Project Lazarus",
     _author             = "Derple, Algar, mackal",
     ['Modes']           = {
         'DPS',
     },
     ['ItemSets']        = {
+        ['OoW_Chest'] = {
+            "Whisperer's Ascendant Tunic of Shadows",
+            "Whispering Tunic of Shadows",
+            "Darkraider's Vest",
+        },
         ['Epic'] = {
             "Fatestealer",
             "Nightshade, Blade of Entropy",
         },
-        ['Coating'] = {
-            "Spirit Drinker's Coating",
-            "Blood Drinker's Coating",
-        },
     },
     ['AbilitySets']     = {
-        ["ConditionedReflexes"] = {
-            "Conditioned Reflexes",
-            "Practiced Reflexes",
-        },
-        ["PracticedReflexes"] = {
-            "Practiced Reflexes",
-        },
         ["ThiefBuff"] = {
-            "Thief's Sight",  -- Level 117
-            "Thief's Vision", -- Level 96
-            "Thief's Eyes",   -- Level 68
+            "Brigand's Gaze", -- Level 70
+            "Thief's Eyes",   -- Level 65
         },
-        ["DaggerThrow"] = {
-            "Queseris' Dagger",       -- Level 122
-            "Shadow-Hunter's Dagger", -- Level 102
-        },
-        ["Slice"] = {                 --Timer 1
-            "Carve",                  -- Level 123
-            "Lance",                  -- Level 118
-            "Slash",                  -- Level 113
-            "Slice",                  -- Level 108
-            "Hack",                   -- Level 103
-            "Gash",                   -- Level 98
-            "Lacerate",               -- Level 93
-            "Wound",                  -- Level 88
-            "Bleed",                  -- Level 83
-        },
-        ["Executioner"] = {
-            "Executioner Discipline",  -- Level 100
-            "Eradicator's Discipline", -- Level 95
-            "Assassin Discipline",     -- Level 75
-            "Duelist Discipline",      -- Level 59
+        ["Kinesthetics"] = {
             "Kinesthetics Discipline", -- Level 57
         },
-        ["Twisted"] = {
+        ['Duelist'] = {
+            "Duelist Discipline", -- Level 59
+        },
+        ["ChanceDisc"] = {
             "Twisted Chance Discipline", -- Level 65
             "Deadeye Discipline",        -- Level 54
-        },
-        ["ProcBuff"] = {
-            "Weapon Covenant",    -- Level 97
-            "Weapon Bond",        -- Level 92
-            "Weapon Affiliation", -- Level 87
         },
         ["Frenzied"] = {
             "Frenzied Stabbing Discipline", -- Level 70
         },
-        ["Ambush"] = {
-            "Bamboozle",       -- Level 121
-            "Ambuscade",       -- Level 116
-            "Bushwhack",       -- Level 111
-            "Lie in Wait",     -- Level 106
-            "Surprise Attack", -- Level 101
-            "Beset",           -- Level 96
-            "Accost",          -- Level 91
-            "Assail",          -- Level 86
-            "Ambush",          -- Level 81
-            "Waylay",          -- Level 76
-        },
         ["SneakAttack"] = {
-            "Daggerslash",           -- Level 115
-            "Daggerslice",           -- Level 110
-            "Daggergash",            -- Level 105
-            "Daggerthrust",          -- Level 100
-            "Daggerstrike",          -- Level 95
-            "Daggerswipe",           -- Level 90
-            "Daggerlunge",           -- Level 85
-            "Swiftblade",            -- Level 80
             "Razorarc",              -- Level 70
             "Daggerfall",            -- Level 69
             "Ancient: Chaos Strike", -- Level 65
@@ -98,144 +50,25 @@ return {
             "Thief's Vengeance",     -- Level 52
             "Sneak Attack",          -- Level 20
         },
-        ["PoisonBlade"] = {
-            "Venomous Blade",    -- Level 123
-            "Netherbian Blade",  -- Level 118
-            "Drachnid Blade",    -- Level 113
-            "Skorpikis Blade",   -- Level 108
-            "Reefcrawler Blade", -- Level 103
-            "Asp Blade",         -- Level 98
-            "Toxic Blade",       -- Level 93
-        },
         ["FellStrike"] = {
-            "Mayhem",       -- Level 125
-            "Shadowstrike", -- Level 120
-            "Blitzstrike",  -- Level 115
-            "Fellstrike",   -- Level 110
-            "Barrage",      -- Level 105
-            "Incursion",    -- Level 100
-            "Onslaught",    -- Level 95
-            "Battery",      -- Level 90
-            "Assault",      -- Level 85
+            "Assault", -- Level 70 on Laz
         },
         ["Pinpoint"] = {
-            "Pinpoint Fault",         -- Level 124
-            "Pinpoint Defects",       -- Level 114
-            "Pinpoint Shortcomings",  -- Level 109
-            "Pinpoint Deficiencies",  -- Level 99
-            "Pinpoint Liabilities",   -- Level 94
-            "Pinpoint Flaws",         -- Level 89
-            "Pinpoint Vitals",        -- Level 84
-            "Pinpoint Weaknesses",    -- Level 79
-            "Pinpoint Vulnerability", -- Level 74
-        },
-        ["Puncture"] = {
-            "Invidious Puncture",      -- Level 124
-            "Disorienting Puncture",   -- Level 119
-            "Vindictive Puncture",     -- Level 114
-            "Vexatious Puncture",      -- Level 109
-            "Disassociative Puncture", -- Level 104
+            "Pinpoint Vulnerability", -- Level 69 on Laz
         },
         ['EndRegen'] = {
-            --Timer 13, can't be used in combat
-            "Second Wind", -- Level 72
             "Third Wind",
-            "Fourth Wind",
-            "Respite",
-            "Reprieve",
-            "Rest",
-            "Breather", --Level 101
-        },
-        ['CombatEndRegen'] = {
-            --Timer 13, can be used in combat.
-            "Hiatus", --Level 106
-            "Relax",
-            "Night's Calming",
-            "Convalesce",
+            "Second Wind",
         },
         ["CADisc"] = {
             "Counterattack Discipline",
         },
-        ["EdgeDisc"] = {
-            "Reckless Edge Discipline", -- Level 121
-            "Ragged Edge Discipline",   -- Level 107
-            "Razor's Edge Discipline",  -- Level 92
-        },
-        ["AspDisc"] = {
-            "Crinotoxin Discipline", -- Level 124
-            "Exotoxin Discipline",   -- Level 119
-            "Chelicerae Discipline", -- Level 114
-            "Aculeus Discipline",    -- Level 109
-            "Arcwork Discipline",    -- Level 104
-            "Aspbleeder Discipline", -- Level 99
-        },
         ["AimDisc"] = {
-            "Baleful Aim Discipline", --  Level 116
-            "Lethal Aim Discipline",  --  Level 108
-            "Fatal Aim Discipline",   --  Level 98
-            "Deadly Aim Discipline",  --  Level 68
+            "Deadly Aim Discipline", --  Level 68
         },
-        ["MarkDisc"] = {
-            "Unsuspecting Mark", -- Level 121
-            "Foolish Mark",      -- Level 116
-            "Naive Mark",        -- Level 111
-            "Dim-Witted Mark",   -- Level 106
-            "Wide-Eyed Mark",    -- Level 101
-            "Gullible Mark",     -- Level 96
-            "Gullible Mark",     -- Level 91
-            "Easy Mark",         -- Level 86
+        ['Precision'] = {
+            "Deadly Precision Discipline",
         },
-        ["Jugular"] = {
-            "Jugular Slash",    -- Level 77
-            "Jugular Slice",    -- Level 82
-            "Jugular Sever",    -- Level 87
-            "Jugular Gash",     -- Level 92
-            "Jugular Lacerate", -- Level 97
-            "Jugular Hack",     -- Level 102
-            "Jugular Strike",   -- Level 107
-            "Jugular Cut",      -- Level 112
-            "Jugular Rend",     -- Level 117
-            "Jugular Hew",      -- Level 122
-        },
-        ["Phantom"] = {
-            "Phantom Assassin", -- Level 100
-        },
-        ["SecretBlade"] = {
-            "Veiled Blade",     -- Level 124
-            "Obfuscated Blade", -- Level 119
-            "Cloaked Blade",    -- Level 114
-            "Secret Blade",     -- Level 109
-            "Hidden Blade",     -- Level 104
-            "Holdout Blade",    -- Level 99
-        },
-        ["DichoSpell"] = {
-            "Reciprocal Weapons", -- Level 121
-            "Ecliptic Weapons",   -- Level 116
-            "Composite Weapons",  -- Level 111
-            "Dissident Weapons",  -- Level 106
-            "Dichotomic Weapons", -- Level 101
-        },
-        ["Alliance"] = {
-            "Poisonous Covariance",  -- Level 123
-            "Poisonous Covenant",    -- Level 118
-            "Poisonous Alliance",    -- Level 113
-            "Poisonous Coalition",   -- Level 108
-            "Poisonous Conjunction", -- Level 103
-        },
-        ["Knifeplay"] = {
-            "Knifeplay Discipline", -- Level 98, Timer 16
-        },
-        ["HateDebuff"] = {          --Timer 11, Aggro reduction and Aggro modifier for current target
-            "Trickery",             -- Level 124
-            "Beguile",              -- Level 119
-            "Cozen",                -- Level 114
-            "Diversion",            -- Level 109
-            "Disorientation",       -- Level 104
-            "Deceit",               -- Level 99
-            "Delusion",             -- Level 94
-            "Misdirection",         -- Level 89
-        },
-
     },
     ['RotationOrder']   = {
         {
@@ -252,7 +85,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctAggro() > (Config:GetSetting('HideAggro') or 90)
+                return combat_state == "Combat" and mq.TLO.Me.PctAggro() > Config:GetSetting('HideAggro')
             end,
         },
         {
@@ -269,19 +102,20 @@ return {
         {
             name = 'Burn',
             state = 1,
-            steps = 4,
+            steps = 3,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
         {
-            name = 'CombatBuff',
+            name = 'BurnDisc',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Casting.BurnCheck() and Casting.NoDiscActive()
             end,
         },
         {
@@ -297,31 +131,10 @@ return {
     ['Rotations']       = {
         ['Burn'] = {
             {
-                name = "Frenzied",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
-            },
-            {
-                name = "Twisted",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
-            },
-            {
-                name = "Executioner",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
-            },
-            {
-                name = "EdgeDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                name = "OoW_Chest",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    return Casting.DetItemCheck(itemName, target)
                 end,
             },
             {
@@ -329,55 +142,19 @@ return {
                 type = "AA",
             },
             {
+                name = "Fundament: Second Spire of the Rake",
+                type = "AA",
+            },
+            {
                 name = "Pinpoint",
                 type = "Disc",
-            },
-            {
-                name = "MarkDisc",
-                type = "Disc",
-            },
-            {
-                name = "Spire of the Rake",
-                type = "AA",
-            },
-            { --Chest Click, name function stops errors in rotation window when slot is empty
-                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
+                cond = function(self, discSpell, target)
+                    return Casting.DetSpellCheck(discSpell, target)
                 end,
             },
             {
-                name = "PoisonBlade",
-                type = "Disc",
-            },
-            {
-                name = "Dicho",
-                type = "Disc",
-            },
-            {
-                name = "Shadow's Flanking",
+                name = "Dirty Fighting",
                 type = "AA",
-            },
-            {
-                name = "Rake's Rampage",
-                type = "AA",
-                cond = function(self, aaName)
-                    if not Config:GetSetting("DoAEDamage") then return false end
-                    return self.ClassConfig.HelperFunctions.AETargetCheck(self)
-                end,
-            },
-            {
-                name = "Focused Rake's Rampage",
-                type = "AA",
-                cond = function(self, aaName)
-                    return not Config:GetSetting("DoAEDamage")
-                end,
-            },
-            {
-                name = "Phantom",
-                type = "Disc",
             },
             {
                 name = "Intensity of the Resolute",
@@ -385,6 +162,28 @@ return {
                 cond = function(self, aaName)
                     return Config:GetSetting('DoVetAA')
                 end,
+            },
+        },
+        ['BurnDisc'] = {
+            {
+                name = "Frenzied",
+                type = "Disc",
+            },
+            {
+                name = "Duelist",
+                type = "Disc",
+            },
+            {
+                name = "ChanceDisc",
+                type = "Disc",
+            },
+            {
+                name = "Kinesthetics",
+                type = "Disc",
+            },
+            {
+                name = "Precision",
+                type = "Disc",
             },
         },
         ["Aggro Management"] = {
@@ -399,10 +198,8 @@ return {
                 name = "Hide",
                 type = "Ability",
                 pre_activate = function(self, abilityName)
-                    if Core.OnEMU() then
-                        Core.DoCmd("/attack off")
-                        mq.delay(100, function() return not mq.TLO.Me.Combat() end)
-                    end
+                    Core.DoCmd("/attack off")
+                    mq.delay(100, function() return not mq.TLO.Me.Combat() end)
                 end,
                 cond = function(self)
                     return mq.TLO.Me.PctAggro() > Config:GetSetting('HideAggro')
@@ -413,8 +210,12 @@ return {
                     end
                 end,
             },
+            {
+                name = "Sleight of Hand",
+                type = "AA",
+            },
         },
-        ['CombatBuff'] = {
+        ['DPS'] = {
             {
                 name = "Epic",
                 type = "Item",
@@ -424,40 +225,26 @@ return {
                 end,
             },
             {
-                name = "Knifeplay",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.NoDiscActive()
+                name = "Ligament Slice",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.DetAACheck(aaName, target)
                 end,
             },
             {
-                name = "AspDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.NoDiscActive()
+                name = "Backstab",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return Casting.CanUseAA("Chaotic Stab") or mq.TLO.Stick.Behind()
                 end,
             },
             {
-                name = "ProcBuff",
+                name = "FellStrike",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.NoDiscActive()
-                end,
             },
             {
-                name = "CombatEndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 15
-                end,
-            },
-            {
-                name = "Alliance",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    if not Config:GetSetting('DoAlliance') then return false end
-                    return not Casting.TargetHasBuff(discSpell.Trigger(1))
-                end,
+                name = "Twisted Shank",
+                type = "AA",
             },
             {
                 name = "PoisonName",
@@ -467,61 +254,10 @@ return {
                 end,
             },
             {
-                name = "Assassin's Premonition",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.BurnCheck()
-                end,
-            },
-        },
-        ['DPS'] = {
-            {
-                name = "Backstab",
-                type = "Ability",
-                cond = function(self, abilityName, target)
-                    return Casting.CanUseAA("Chaotic Stab") or mq.TLO.Stick.Behind()
-                end,
-            },
-            {
-                name = "Carve",
-                type = "Disc",
-            },
-            {
-                name = "SecretBlade",
-                type = "Disc",
-            },
-            {
-                name = "FellStrike",
-                type = "Disc",
-            },
-            {
-                name = "Jugular",
-                type = "Disc",
-            },
-            {
-                name = "Twisted Shank",
-                type = "AA",
-            },
-            {
-                name = "Puncture",
-                type = "Disc",
-            },
-            {
-                name = "DaggerThrow",
-                type = "Disc",
-            },
-            { --Check ToT to ensure we are not boosting the hate generation of someone we shouldn't be
-                name = "HateDebuff",
+                name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.TargetOfTarget.ID() == (mq.TLO.Group.MainTank.ID() or Core.GetMainAssistId())
-                end,
-            },
-            {
-                name = "Intimidation",
-                type = "Ability",
-                cond = function(self, abilityName)
-                    return Casting.AARank("Intimidation") > 1
+                    return mq.TLO.Me.PctEndurance() < 40
                 end,
             },
         },
@@ -539,7 +275,7 @@ return {
                 type = "AA",
             },
             {
-                name = "Coating",
+                name = "Blood Drinker's Coating",
                 type = "Item",
                 cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
@@ -566,15 +302,7 @@ return {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
-                    return mq.TLO.Me.PctEndurance() < 15
-                end,
-            },
-            {
-                name = "CombatEndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 20
                 end,
             },
             {
@@ -645,15 +373,6 @@ return {
                     Strings.BoolToColorString(Config:GetSetting("DoOpener")), Strings.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
                     mq.TLO.Me.AbilityTimer("Hide")(), Strings.BoolToColorString(mq.TLO.Me.Invis()))
             end
-        end,
-        BurnDiscCheck = function(self)
-            if mq.TLO.Me.ActiveDisc.Name() == "Counterattack Discipline" or mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') then return false end
-            local burnDisc = { "Frenzied", "Twisted", "Executioner", "EdgeDisc", }
-            for _, buffName in ipairs(burnDisc) do
-                local resolvedDisc = self:GetResolvedActionMapItem(buffName)
-                if resolvedDisc and resolvedDisc.RankName() == mq.TLO.Me.ActiveDisc.Name() then return false end
-            end
-            return true
         end,
         --function to make sure we don't have non-hostiles in range before we use AE damage
         AETargetCheck = function(printDebug)
@@ -837,17 +556,6 @@ return {
             Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
                 "This can be adjusted in the Utility/Items/Misc tab.",
         },
-        ['DoChestClick']    = {
-            DisplayName = "Do Chest Click",
-            Category = "Equipment",
-            Index = 2,
-            Tooltip = "Click your chest item during burns.",
-            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            ConfigType = "Advanced",
-            FAQ = "What is a Chest Click?",
-            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
-                "ROG is set to use theirs during burns, so long as the item equipped has a clicky effect.",
-        },
         ['DoCoating']       = {
             DisplayName = "Use Coating",
             Category = "Equipment",
@@ -856,17 +564,6 @@ return {
             Default = false,
             FAQ = "What is a Coating?",
             Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
-        },
-        --Orphaned (remove when config goes default)
-        ['DoEpic']          = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
     },
 }
