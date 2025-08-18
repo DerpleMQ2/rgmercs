@@ -57,6 +57,8 @@ Module.TempSettings.MissingSpells            = {}
 Module.TempSettings.MissingSpellsHighestOnly = true
 Module.TempSettings.CorpsesAlreadyRezzed     = {}
 Module.TempSettings.QueuedAbilities          = {}
+Module.TempSettings.CureCoroutines           = {}
+Module.TempSettings.NeedCutesList            = {}
 
 Module.CommandHandlers                       = {
     setmode = {
@@ -1021,6 +1023,41 @@ function Module:RunHealRotation()
     end
 end
 
+function Module:ProcessCuresList()
+    for id, types in pairs(self.TempSettings.NeedCutesList) do
+        local cureTarget = mq.TLO.Spawn(id)
+        if not cureTarget or not cureTarget() then
+            Logger.log_verbose("\ar[Cures] %s is no longer valid, removing from cure list.", id)
+            self.TempSettings.NeedCutesList[id] = nil
+        else
+            for _, type in ipairs(types) do
+                Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, id)
+            end
+            -- clear this person off the cure list.
+            self.TempSettings.NeedCutesList[id] = nil
+            -- only do 1 person per frame.
+            return
+        end
+    end
+end
+
+function Module:CheckPeerForCures(checks, peer, cureTarget)
+    for _, data in ipairs(checks) do
+        local effectId = DanNet.query(peer, data.check, 1000) or "null"
+        Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
+
+        if effectId:lower() ~= "null" and effectId ~= "0" then
+            -- Cure it!
+            if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
+                Comms.HandleAnnounce(string.format('Adding to cure list to cure %s of %s', cureTarget.CleanName() or "Target", data.type), Config:GetSetting('CureAnnounceGroup'),
+                    Config:GetSetting('CureAnnounce'))
+                self.TempSettings.NeedCutesList[cureTarget.ID()] = self.TempSettings.NeedCutesList[cureTarget.ID()] or {}
+                self.TempSettings.NeedCutesList[cureTarget.ID()]:insert(data.type)
+            end
+        end
+    end
+end
+
 function Module:RunCureRotation()
     if (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
 
@@ -1051,18 +1088,15 @@ function Module:RunCureRotation()
             --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
             if cureTarget and cureTarget() and (cureTarget.Distance() or 999) < 150 then
                 Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
-                for _, data in ipairs(checks) do
-                    local effectId = DanNet.query(peer, data.check, 1000) or "null"
-                    Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
+                self:CheckPeerForCures(checks, peer, cureTarget)
+                local newCoroutine = coroutine.create(function()
+                    self:CheckPeerForCures(checks, peer, cureTarget)
+                end)
 
-                    if effectId:lower() ~= "null" and effectId ~= "0" then
-                        -- Cure it!
-                        if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                            Comms.HandleAnnounce(string.format('Attempting to cure %s of %s', cureTarget.CleanName() or "Target", data.type), Config:GetSetting('CureAnnounceGroup'),
-                                Config:GetSetting('CureAnnounce'))
-                            Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, cureTarget.ID())
-                        end
-                    end
+                if newCoroutine then
+                    table.insert(self.TempSettings.CureCoroutines, newCoroutine)
+                else
+                    Logger.log_error("\ar[Cures] Failed to create coroutine for %s", peer)
                 end
             else
                 Logger.log_verbose("\ao[Cures] %d::%s is in \arNOT\ao range", i, peer or "Unknown")
@@ -1195,6 +1229,23 @@ function Module:GiveTime(combat_state)
         if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvis')) then
             Logger.log_verbose("\ao[Cures] Checking for curables...")
             self:RunCureRotation()
+            self:ProcessCuresList()
+        end
+
+        local deadCoroutines = {}
+        for idx, c in ipairs(self.TempSettings.CureCoroutines) do
+            if coroutine.status(c) ~= 'dead' then
+                local success, err = coroutine.resume(c)
+                if not success then
+                    Logger.log_error("\arError in Cure Coroutine: %s", err)
+                end
+            else
+                table.insert(deadCoroutines, idx)
+            end
+        end
+
+        for _, idx in ipairs(deadCoroutines) do
+            table.remove(self.TempSettings.CureCoroutines, idx)
         end
     end
 
