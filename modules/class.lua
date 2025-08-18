@@ -1030,7 +1030,8 @@ function Module:ProcessCuresList()
             Logger.log_verbose("\ar[Cures] %s is no longer valid, removing from cure list.", id)
             self.TempSettings.NeedCutesList[id] = nil
         else
-            for _, type in ipairs(types) do
+            local typeList = types:toList()
+            for _, type in ipairs(typeList) do
                 Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, id)
             end
             -- clear this person off the cure list.
@@ -1051,8 +1052,11 @@ function Module:CheckPeerForCures(checks, peer, cureTarget)
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
                 Comms.HandleAnnounce(string.format('Adding to cure list to cure %s of %s', cureTarget.CleanName() or "Target", data.type), Config:GetSetting('CureAnnounceGroup'),
                     Config:GetSetting('CureAnnounce'))
-                self.TempSettings.NeedCutesList[cureTarget.ID()] = self.TempSettings.NeedCutesList[cureTarget.ID()] or {}
-                self.TempSettings.NeedCutesList[cureTarget.ID()]:insert(data.type)
+                self.TempSettings.NeedCutesList[cureTarget.ID()] = self.TempSettings.NeedCutesList[cureTarget.ID()] or Set.new({})
+
+                if not self.TempSettings.NeedCutesList[cureTarget.ID()]:contains(data.type) then
+                    self.TempSettings.NeedCutesList[cureTarget.ID()]:add(data.type)
+                end
             end
         end
     end
