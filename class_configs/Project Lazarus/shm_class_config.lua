@@ -30,7 +30,8 @@ local _ClassConfig = {
             if Config:GetSetting('DoCureSpells') then
                 local cureSpell
                 --If we have Word of Reconstitution, we can use this as our poison/disease/curse cure. Before that, they don't cure or have low counter count
-                local groupHeal = (Config:GetSetting('GroupHealAsCure') and (Core.GetResolvedActionMapItem('GroupHeal').Level() or 0) >= 70) and "GroupHeal"
+                local ghealSpell = Core.GetResolvedActionMapItem('GroupHeal')
+                local groupHeal = (Config:GetSetting('GroupHealAsCure') and (ghealSpell and ghealSpell.Level() or 0) >= 70) and "GroupHeal"
                 if type:lower() == "disease" then
                     --simply choose the first available option (also based on the groupHeal criteria above)
                     local diseaseCure = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CureDisease", })
