@@ -74,7 +74,7 @@ return {
             "Divine Might", -- Level 45, 65pt
             "Pious Might",  -- Level 63, 150pt
             "Holy Order",   -- Level 65, 180pt
-            "Pious Fury",   -- Level 68, 250pt
+            "Pious Fury",   -- Level 68, 250pt, + 250pt if undead
         },
         ["UndeadProc"] = {
             --- Undead Proc Strike : does not stack with Fury Proc, will be used until Fury is available even if setting not enabled.
