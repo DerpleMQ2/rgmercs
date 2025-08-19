@@ -58,7 +58,8 @@ Module.TempSettings.MissingSpellsHighestOnly = true
 Module.TempSettings.CorpsesAlreadyRezzed     = {}
 Module.TempSettings.QueuedAbilities          = {}
 Module.TempSettings.CureCoroutines           = {}
-Module.TempSettings.NeedCutesList            = {}
+Module.TempSettings.NeedCuresList            = {}
+Module.TempSettings.NeedCuresListMutex       = false
 
 Module.CommandHandlers                       = {
     setmode = {
@@ -833,6 +834,37 @@ function Module:GetRotations()
     end
 end
 
+function Module:ReleaseCuresListMutex()
+    if not self.TempSettings.NeedCuresListMutex then
+        Logger.log_error("\arReleaseCuresListMutex: Mutex was not acquired, cannot release!")
+        return false
+    end
+
+    Logger.log_debug("\amReleaseCuresListMutex: Mutex was released!")
+    self.TempSettings.NeedCuresListMutex = false
+    return true
+end
+
+function Module:GetCuresListMutex(maxWaitTime)
+    if not maxWaitTime then
+        maxWaitTime = 10000 -- default to 10 seconds
+    end
+
+    while self.TempSettings.NeedCuresListMutex do
+        mq.delay(10) -- wait for the mutex to be released
+        maxWaitTime = maxWaitTime - 10
+
+        if maxWaitTime <= 0 then
+            Logger.log_error("\arGetCuresListMutex: Timeout waiting for mutex to be released!")
+            return false
+        end
+    end
+
+    Logger.log_debug("\amReleaseCuresListMutex: Mutex was acquired!")
+    self.TempSettings.NeedCuresListMutex = true
+    return true
+end
+
 function Module:LoadConditionPass(entry)
     return not entry.load_cond or Core.SafeCallFunc("CheckLoadCondition", entry.load_cond, self)
 end
@@ -1023,19 +1055,55 @@ function Module:RunHealRotation()
     end
 end
 
+function Module:ClearCureFromList(id)
+    if self:GetCuresListMutex() then
+        if self.TempSettings.NeedCuresList then
+            if self.TempSettings.NeedCuresList[id] then
+                self.TempSettings.NeedCuresList[id] = nil
+            end
+        end
+        self:ReleaseCuresListMutex()
+    end
+end
+
+function Module:AddCureToList(id, type)
+    if self:GetCuresListMutex() then
+        if not self.TempSettings.NeedCuresList then
+            self.TempSettings.NeedCuresList = {}
+        end
+
+        if not self.TempSettings.NeedCuresList[id] then
+            self.TempSettings.NeedCuresList[id] = Set.new({})
+        end
+
+        if not self.TempSettings.NeedCuresList[id]:contains(type) then
+            Comms.HandleAnnounce(string.format('Adding to cure list to cure %s of %s', mq.TLO.Spawn(id).CleanName() or "Target", type), Config:GetSetting('CureAnnounceGroup'),
+                Config:GetSetting('CureAnnounce'))
+            self.TempSettings.NeedCuresList[id]:add(type)
+        end
+
+        self:ReleaseCuresListMutex()
+    end
+end
+
 function Module:ProcessCuresList()
-    for id, types in pairs(self.TempSettings.NeedCutesList) do
+    -- make a copy just incase it changes in the other coroutine
+    local curesList = self.TempSettings.NeedCuresList
+
+    for id, types in pairs(curesList) do
         local cureTarget = mq.TLO.Spawn(id)
         if not cureTarget or not cureTarget() then
             Logger.log_verbose("\ar[Cures] %s is no longer valid, removing from cure list.", id)
-            self.TempSettings.NeedCutesList[id] = nil
+
+            self:ClearCureFromList(id)
         else
             local typeList = types:toList()
             for _, type in ipairs(typeList) do
                 Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, id)
             end
             -- clear this person off the cure list.
-            self.TempSettings.NeedCutesList[id] = nil
+            self:ClearCureFromList(id)
+
             -- only do 1 person per frame.
             return
         end
@@ -1050,13 +1118,7 @@ function Module:CheckPeerForCures(checks, peer, cureTarget)
         if effectId:lower() ~= "null" and effectId ~= "0" then
             -- Cure it!
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                self.TempSettings.NeedCutesList[cureTarget.ID()] = self.TempSettings.NeedCutesList[cureTarget.ID()] or Set.new({})
-
-                if not self.TempSettings.NeedCutesList[cureTarget.ID()]:contains(data.type) then
-                    Comms.HandleAnnounce(string.format('Adding to cure list to cure %s of %s', cureTarget.CleanName() or "Target", data.type), Config:GetSetting('CureAnnounceGroup'),
-                        Config:GetSetting('CureAnnounce'))
-                    self.TempSettings.NeedCutesList[cureTarget.ID()]:add(data.type)
-                end
+                self:AddCureToList(cureTarget.ID(), data.type)
             end
         end
     end
