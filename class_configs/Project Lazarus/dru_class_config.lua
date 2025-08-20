@@ -17,34 +17,52 @@ local _ClassConfig = {
         'Heal',
     },
     ['Cures']             = {
+        GetCureSpells = function(self)
+            --(re)initialize the table for loadout changes
+            self.TempSettings.CureSpells = {}
+
+            -- Choose whether we should be trying to resolve the groupheal based on our settings and whether it cures at its level
+            local ghealSpell = Core.GetResolvedActionMapItem('GroupHeal')
+            local groupHeal = (Config:GetSetting('GroupHealAsCure') and (ghealSpell and ghealSpell.Level() or 0) >= 70) and "GroupHeal"
+
+            -- Find the map for each cure spell we need, given availability of groupheal, groupcure. fallback to curespell
+            -- Curse is convoluted: If Keepmemmed, always use cure, if not, use groupheal if available and fallback to cure
+            local neededCures = {
+                ['Poison'] = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CurePoison", }),
+                ['Disease'] = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CureDisease", }),
+                ['Curse'] = not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse',
+                -- ['Corruption'] = -- Project Lazarus does not currently have any Corruption Cures.
+            }
+
+            -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
+            for k, v in pairs(neededCures) do
+                local cureSpell = Core.GetResolvedActionMapItem(v)
+                if cureSpell then
+                    self.TempSettings.CureSpells[k] = cureSpell.RankName()
+                end
+            end
+        end,
         CureNow = function(self, type, targetId)
             if Config:GetSetting('DoCureAA') then
-                if Casting.AAReady("Radiant Cure") then
-                    return Casting.UseAA("Radiant Cure", targetId)
-                elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
-                    return Casting.UseAA("Purified Spirits", targetId)
+                local cureAA = Casting.AAReady("Radiant Cure") and "Radiant Cure"
+
+                if not cureAA and targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                    cureAA = "Purified Spirits"
+                end
+
+                if cureAA then
+                    Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")
+                    return Casting.UseAA(cureAA, targetId)
                 end
             end
 
             if Config:GetSetting('DoCureSpells') then
-                local cureSpell
-                --If we have Word of Reconstitution, we can use this as our poison/disease/curse cure. Before that, they don't cure or have low counter count
-                local groupHeal = (Config:GetSetting('GroupHealAsCure') and (Core.GetResolvedActionMapItem('GroupHeal').Level() or 0) >= 70) and "GroupHeal"
-
-                if type:lower() == "disease" then
-                    --simply choose the first available option (also based on the groupHeal criteria above)
-                    local diseaseCure = Casting.GetFirstMapItem({ groupHeal, "PureBlood", "CureDisease", })
-                    cureSpell = Core.GetResolvedActionMapItem(diseaseCure)
-                elseif type:lower() == "poison" then
-                    local poisonCure = Casting.GetFirstMapItem({ groupHeal, "PureBlood", "CurePoison", })
-                    cureSpell = Core.GetResolvedActionMapItem(poisonCure)
-                elseif type:lower() == "curse" then
-                    --if we selected to keep it memmed, prioritize it over the group heal, since RGC clears a LOT more counters
-                    cureSpell = Core.GetResolvedActionMapItem((not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse'))
+                for effectType, cureSpell in pairs(self.TempSettings.CureSpells) do
+                    if type:lower() == effectType:lower() then
+                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell, type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")
+                        return Casting.UseSpell(cureSpell, targetId, true)
+                    end
                 end
-
-                if not cureSpell or not cureSpell() then return false end
-                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
             end
 
             return false
