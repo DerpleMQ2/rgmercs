@@ -1077,7 +1077,7 @@ function Module:AddCureToList(id, type)
         end
 
         if not self.TempSettings.NeedCuresList[id]:contains(type) then
-            Comms.HandleAnnounce(string.format('Adding to cure list to cure %s of %s', mq.TLO.Spawn(id).CleanName() or "Target", type), Config:GetSetting('CureAnnounceGroup'),
+            Comms.HandleAnnounce(string.format('Queueing a %s cure for %s.', type:lower(), mq.TLO.Spawn(id).CleanName() or "Target"), Config:GetSetting('CureAnnounceGroup'),
                 Config:GetSetting('CureAnnounce'))
             self.TempSettings.NeedCuresList[id]:add(type)
         end
@@ -1137,7 +1137,7 @@ function Module:RunCureRotation()
         { type = "Mezzed",  check = "Me.Mezzed.ID", },
     }
 
-    if not Core.OnEMU() then
+    if not Core.OnLaz() then
         table.insert(checks, { type = "Corruption", check = "Me.Corrupted.ID", })
     end
 
@@ -1165,7 +1165,7 @@ function Module:RunCureRotation()
                     Logger.log_error("\ar[Cures] Failed to create coroutine for %s", peer)
                 end
             else
-                Logger.log_verbose("\ao[Cures] %d::%s is in \arNOT\ao range", i, peer or "Unknown")
+                Logger.log_verbose("\ao[Cures] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
             end
         end
     end
@@ -1248,6 +1248,11 @@ function Module:GiveTime(combat_state)
         Logger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[self.settings.Mode])
         self:SetCombatMode(self.ClassConfig.Modes[self.settings.Mode])
         self:GetRotations()
+        if self:IsCuring() then
+            if self.ClassConfig.Cures and self.ClassConfig.Cures.GetCureSpells then
+                Core.SafeCallFunc("GetCureSpells", self.ClassConfig.Cures.GetCureSpells, self)
+            end
+        end
         self.TempSettings.NewCombatMode = false
     end
 
