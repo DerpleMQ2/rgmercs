@@ -834,18 +834,23 @@ function Module:GetRotations()
     end
 end
 
-function Module:ReleaseCuresListMutex()
+---@param reason string
+---@return boolean
+function Module:ReleaseCuresListMutex(reason)
     if not self.TempSettings.NeedCuresListMutex then
-        Logger.log_error("\arReleaseCuresListMutex: Mutex was not acquired, cannot release!")
+        Logger.log_error("\arReleaseCuresListMutex(%s): Mutex was not acquired, cannot release!", reason or "Unknown")
         return false
     end
 
-    Logger.log_debug("\amReleaseCuresListMutex: Mutex was released!")
+    Logger.log_debug("\amReleaseCuresListMutex(%s): Mutex was released!", reason or "Unknown")
     self.TempSettings.NeedCuresListMutex = false
     return true
 end
 
-function Module:GetCuresListMutex(maxWaitTime)
+---@param reason string
+---@param maxWaitTime integer?
+---@return boolean
+function Module:GetCuresListMutex(reason, maxWaitTime)
     if not maxWaitTime then
         maxWaitTime = 10000 -- default to 10 seconds
     end
@@ -855,12 +860,12 @@ function Module:GetCuresListMutex(maxWaitTime)
         maxWaitTime = maxWaitTime - 10
 
         if maxWaitTime <= 0 then
-            Logger.log_error("\arGetCuresListMutex: Timeout waiting for mutex to be released!")
+            Logger.log_error("\arGetCuresListMutex(%s): Timeout waiting for mutex to be released!", reason or "Unknown")
             return false
         end
     end
 
-    Logger.log_debug("\amReleaseCuresListMutex: Mutex was acquired!")
+    Logger.log_debug("\amReleaseCuresListMutex(%s): Mutex was acquired!", reason or "Unknown")
     self.TempSettings.NeedCuresListMutex = true
     return true
 end
@@ -1056,13 +1061,13 @@ function Module:RunHealRotation()
 end
 
 function Module:ClearCureFromList(id)
-    if self:GetCuresListMutex() then
+    if self:GetCuresListMutex(string.format("ClearCureFromList(%d)", id)) then
         if self.TempSettings.NeedCuresList then
             if self.TempSettings.NeedCuresList[id] then
                 self.TempSettings.NeedCuresList[id] = nil
             end
         end
-        self:ReleaseCuresListMutex()
+        self:ReleaseCuresListMutex(string.format("ClearCureFromList(%d)", id))
     end
 end
 
@@ -1073,14 +1078,14 @@ function Module:AddCureToList(id, type)
 
     local contained = false
 
-    if self:GetCuresListMutex() then
+    if self:GetCuresListMutex(string.format("AddCureToList(%d, %s)", id, type)) then
         if self.TempSettings.NeedCuresList[id] then
             contained = self.TempSettings.NeedCuresList[id]:contains(type)
             self.TempSettings.NeedCuresList[id]:add(type)
         else
             self.TempSettings.NeedCuresList[id] = Set.new({ type, })
         end
-        self:ReleaseCuresListMutex()
+        self:ReleaseCuresListMutex(string.format("AddCureToList(%d, %s)", id, type))
     end
 
     if not contained then
