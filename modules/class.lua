@@ -1118,7 +1118,7 @@ function Module:ProcessCuresList()
     end
 end
 
-function Module:CheckPeerForCures(checks, peer, cureTarget)
+function Module:CheckPeerForCures(checks, peer, targetId)
     for _, data in ipairs(checks) do
         local effectId = DanNet.query(peer, data.check, 1000) or "null"
         Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
@@ -1126,7 +1126,7 @@ function Module:CheckPeerForCures(checks, peer, cureTarget)
         if effectId:lower() ~= "null" and effectId ~= "0" then
             -- Cure it!
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                self:AddCureToList(cureTarget.ID(), data.type)
+                self:AddCureToList(targetId, data.type)
             end
         end
     end
@@ -1162,9 +1162,9 @@ function Module:RunCureRotation()
             --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
             if cureTarget and cureTarget() and (cureTarget.Distance() or 999) < 150 then
                 Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
-                self:CheckPeerForCures(checks, peer, cureTarget)
+
                 local newCoroutine = coroutine.create(function()
-                    self:CheckPeerForCures(checks, peer, cureTarget)
+                    self:CheckPeerForCures(checks, peer, cureTarget.ID())
                 end)
 
                 if newCoroutine then
