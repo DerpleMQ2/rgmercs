@@ -58,7 +58,7 @@ return {
         },
         ['EndRegen'] = {
             "Third Wind",
-            "Second Wind",
+            --"Second Wind",
         },
         ["CADisc"] = {
             "Counterattack Discipline",
@@ -257,7 +257,7 @@ return {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 40
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
         },
@@ -296,13 +296,6 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
-                name = "EndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 20
                 end,
             },
             {
