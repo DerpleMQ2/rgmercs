@@ -1067,22 +1067,25 @@ function Module:ClearCureFromList(id)
 end
 
 function Module:AddCureToList(id, type)
+    if not self.TempSettings.NeedCuresList then
+        self.TempSettings.NeedCuresList = {}
+    end
+
+    local contained = false
+
     if self:GetCuresListMutex() then
-        if not self.TempSettings.NeedCuresList then
-            self.TempSettings.NeedCuresList = {}
-        end
-
-        if not self.TempSettings.NeedCuresList[id] then
-            self.TempSettings.NeedCuresList[id] = Set.new({})
-        end
-
-        if not self.TempSettings.NeedCuresList[id]:contains(type) then
-            Comms.HandleAnnounce(string.format('Queueing a %s cure for %s.', type:lower(), mq.TLO.Spawn(id).CleanName() or "Target"), Config:GetSetting('CureAnnounceGroup'),
-                Config:GetSetting('CureAnnounce'))
+        if self.TempSettings.NeedCuresList[id] then
+            contained = self.TempSettings.NeedCuresList[id]:contains(type)
             self.TempSettings.NeedCuresList[id]:add(type)
+        else
+            self.TempSettings.NeedCuresList[id] = Set.new({ type, })
         end
-
         self:ReleaseCuresListMutex()
+    end
+
+    if not contained then
+        Comms.HandleAnnounce(string.format('Queueing a %s cure for %s.', type:lower(), mq.TLO.Spawn(id).CleanName() or "Target"), Config:GetSetting('CureAnnounceGroup'),
+            Config:GetSetting('CureAnnounce'))
     end
 end
 
