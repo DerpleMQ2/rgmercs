@@ -1134,8 +1134,14 @@ end
 
 function Module:RunCureRotation()
     if (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
-
     self.TempSettings.CureCheckTimer = os.clock()
+
+    -- if we are still processing cures from before then just bail for now.
+    local cureCount = Tables.GetTableSize(self.TempSettings.CureCoroutines)
+    if cureCount > 0 then
+        Logger.log_debug("\ay[Cures] Still have %d cures to process, will check agian later.", cureCount)
+        return
+    end
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
     local checks = {
