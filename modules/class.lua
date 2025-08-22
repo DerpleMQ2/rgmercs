@@ -1166,11 +1166,8 @@ function Module:RunCureRotation()
     if (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
     self.TempSettings.CureCheckTimer = os.clock()
 
-    -- if we are still processing cures from before then just bail for now.
-    local cureCount = Tables.GetTableSize(self.TempSettings.CureCoroutines)
-
-    if self.TempSettings.CureCheckCoroutine ~= nil or cureCount > 0 then
-        Logger.log_debug("\ay[Cures] CureCheck still running or we still have %d cures to process, will check agian later.", cureCount)
+    if self.TempSettings.CureCheckCoroutine ~= nil then
+        Logger.log_debug("\ay[Cures] CureCheck still running, will check again later.")
         return
     end
 
@@ -1322,7 +1319,7 @@ function Module:GiveTime(combat_state)
             self:ProcessCuresList()
         end
 
-        if coroutine.status(self.TempSettings.CureCheckCoroutine) ~= 'dead' then
+        if self.TempSettings.CureCheckCoroutine and coroutine.status(self.TempSettings.CureCheckCoroutine) ~= 'dead' then
             local success, err = coroutine.resume(self.TempSettings.CureCheckCoroutine)
             if not success then
                 Logger.log_error("\arError in Cure Coroutine: %s", err)
