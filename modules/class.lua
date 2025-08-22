@@ -57,7 +57,7 @@ Module.TempSettings.MissingSpells            = {}
 Module.TempSettings.MissingSpellsHighestOnly = true
 Module.TempSettings.CorpsesAlreadyRezzed     = {}
 Module.TempSettings.QueuedAbilities          = {}
-Module.TempSettings.CureCoroutines           = {}
+Module.TempSettings.CureCheckCoroutine       = nil
 Module.TempSettings.NeedCuresList            = {}
 Module.TempSettings.NeedCuresListMutex       = false
 
@@ -1118,43 +1118,10 @@ function Module:ProcessCuresList()
     end
 end
 
-function Module:CheckPeerForCures(checks, peer, targetId)
-    for _, data in ipairs(checks) do
-        local effectId = DanNet.query(peer, data.check, 1000) or "null"
-        Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
-
-        if effectId:lower() ~= "null" and effectId ~= "0" then
-            -- Cure it!
-            if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                self:AddCureToList(targetId, data.type)
-            end
-        end
-    end
-end
-
-function Module:RunCureRotation()
-    if (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
-    self.TempSettings.CureCheckTimer = os.clock()
-
-    -- if we are still processing cures from before then just bail for now.
-    local cureCount = Tables.GetTableSize(self.TempSettings.CureCoroutines)
-    if cureCount > 0 then
-        Logger.log_debug("\ay[Cures] Still have %d cures to process, will check agian later.", cureCount)
-        return
-    end
-
+function Module:CheckPeersForCures(checks)
     local dannetPeers = mq.TLO.DanNet.PeerCount()
-    local checks = {
-        { type = "Poison",  check = "Me.Poisoned.ID", },
-        { type = "Disease", check = "Me.Diseased.ID", },
-        { type = "Curse",   check = "Me.Cursed.ID", },
-        { type = "Mezzed",  check = "Me.Mezzed.ID", },
-    }
 
-    if not Core.OnLaz() then
-        table.insert(checks, { type = "Corruption", check = "Me.Corrupted.ID", })
-    end
-
+    -- should this prioritize tanks?
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet.Peers(i)()
@@ -1168,21 +1135,59 @@ function Module:RunCureRotation()
             --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
             if cureTarget and cureTarget() and (cureTarget.Distance() or 999) < 150 then
                 Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
-
-                local newCoroutine = coroutine.create(function()
-                    self:CheckPeerForCures(checks, peer, cureTarget.ID())
-                end)
-
-                if newCoroutine then
-                    table.insert(self.TempSettings.CureCoroutines, newCoroutine)
-                else
-                    Logger.log_error("\ar[Cures] Failed to create coroutine for %s", peer)
+                if self:CheckPeerForCures(checks, peer, cureTarget.ID()) then
+                    -- bail after the first peer that has a cureable effect. otherwise we might use group cures etc needlessly.
+                    return
                 end
             else
                 Logger.log_verbose("\ao[Cures] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
             end
         end
     end
+end
+
+function Module:CheckPeerForCures(checks, peer, targetId)
+    for _, data in ipairs(checks) do
+        local effectId = DanNet.query(peer, data.check, 1000) or "null"
+        Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
+
+        if effectId:lower() ~= "null" and effectId ~= "0" then
+            -- Cure it!
+            if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
+                self:AddCureToList(targetId, data.type)
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function Module:RunCureRotation()
+    if (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
+    self.TempSettings.CureCheckTimer = os.clock()
+
+    -- if we are still processing cures from before then just bail for now.
+    local cureCount = Tables.GetTableSize(self.TempSettings.CureCoroutines)
+
+    if self.TempSettings.CureCheckCoroutine ~= nil or cureCount > 0 then
+        Logger.log_debug("\ay[Cures] CureCheck still running or we still have %d cures to process, will check agian later.", cureCount)
+        return
+    end
+
+    local checks = {
+        { type = "Poison",  check = "Me.Poisoned.ID", },
+        { type = "Disease", check = "Me.Diseased.ID", },
+        { type = "Curse",   check = "Me.Cursed.ID", },
+        { type = "Mezzed",  check = "Me.Mezzed.ID", },
+    }
+
+    if not Core.OnLaz() then
+        table.insert(checks, { type = "Corruption", check = "Me.Corrupted.ID", })
+    end
+
+    self.TempSettings.CureCheckCoroutine = coroutine.create(function()
+        self:CheckPeersForCures(checks)
+    end)
 end
 
 function Module:RunCounterRotation()
@@ -1317,20 +1322,13 @@ function Module:GiveTime(combat_state)
             self:ProcessCuresList()
         end
 
-        local deadCoroutines = {}
-        for idx, c in ipairs(self.TempSettings.CureCoroutines) do
-            if coroutine.status(c) ~= 'dead' then
-                local success, err = coroutine.resume(c)
-                if not success then
-                    Logger.log_error("\arError in Cure Coroutine: %s", err)
-                end
-            else
-                table.insert(deadCoroutines, idx)
+        if coroutine.status(self.TempSettings.CureCheckCoroutine) ~= 'dead' then
+            local success, err = coroutine.resume(self.TempSettings.CureCheckCoroutine)
+            if not success then
+                Logger.log_error("\arError in Cure Coroutine: %s", err)
             end
-        end
-
-        for _, idx in ipairs(deadCoroutines) do
-            table.remove(self.TempSettings.CureCoroutines, idx)
+        else
+            self.TempSettings.CureCheckCoroutine = nil
         end
     end
 
