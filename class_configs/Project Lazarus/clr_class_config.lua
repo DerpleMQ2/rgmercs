@@ -40,19 +40,23 @@ local _ClassConfig = {
             for k, v in pairs(neededCures) do
                 local cureSpell = Core.GetResolvedActionMapItem(v)
                 if cureSpell then
-                    self.TempSettings.CureSpells[k] = cureSpell.RankName()
+                    self.TempSettings.CureSpells[k] = cureSpell
                 end
             end
         end,
         CureNow = function(self, type, targetId)
+            local targetSpawn = mq.TLO.Spawn(targetId)
+            if not targetSpawn and targetSpawn() then return false end
+
             if Config:GetSetting('DoCureAA') then
                 local cureAA = Casting.AAReady("Purify Soul") and "Purify Soul"
-                if Casting.AAReady("Group Purify Soul") and Targeting.GroupedWithTarget(mq.TLO.Spawn(targetId)) then
+                if Casting.AAReady("Group Purify Soul") and Targeting.GroupedWithTarget(targetSpawn) then
                     cureAA = "Group Purify Soul"
                 elseif Casting.AAReady("Radiant Cure") then
                     cureAA = "Radiant Cure"
-                elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
-                    cureAA = "Purified Spirits"
+                    -- I am finding self-cures to be less than helpful when most effects on a healer are group-wide
+                    -- elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                    --   cureAA = "Purified Spirits"
                 end
                 if cureAA then
                     Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")
@@ -63,12 +67,18 @@ local _ClassConfig = {
             if Config:GetSetting('DoCureSpells') then
                 for effectType, cureSpell in pairs(self.TempSettings.CureSpells) do
                     if type:lower() == effectType:lower() then
-                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell, type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")
-                        return Casting.UseSpell(cureSpell, targetId, true)
+                        if cureSpell.TargetType():lower() == "group v1" and not Targeting.GroupedWithTarget(targetSpawn) then
+                            Logger.log_debug("CureNow: We cannot use %s on %s, because it is a group-only spell and they are not in our group!", cureSpell.RankName(),
+                                targetSpawn.CleanName() or "Unknown")
+                            return false
+                        end
+                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                        return Casting.UseSpell(cureSpell.RankName(), targetId, true)
                     end
                 end
             end
 
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
             return false
         end,
     },

@@ -49,6 +49,7 @@ local _ClassConfig = {
             if Config:GetSetting('DoCureAA') then
                 local cureAA = Casting.AAReady("Radiant Cure") and "Radiant Cure"
 
+                -- I am finding self-cures to be less than helpful when most effects on a healer are group-wide
                 -- if not cureAA and targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
                 --     cureAA = "Purified Spirits"
                 -- end
@@ -73,7 +74,7 @@ local _ClassConfig = {
                 end
             end
 
-            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
             return false
         end,
     },
