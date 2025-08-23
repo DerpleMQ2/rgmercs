@@ -1071,6 +1071,16 @@ function Module:ClearCureFromList(id)
     end
 end
 
+function Module:ClearCureList()
+    if self:GetCuresListMutex("ClearCureList") then
+        if self.TempSettings.NeedCuresList then
+            self.TempSettings.NeedCuresList = {}
+        end
+        Logger.log_verbose("[Cures] Cure List cleared to avoid spam-curing. We'll check again soon.")
+        self:ReleaseCuresListMutex("ClearCureList")
+    end
+end
+
 function Module:AddCureToList(id, type)
     if not self.TempSettings.NeedCuresList then
         self.TempSettings.NeedCuresList = {}
@@ -1109,10 +1119,9 @@ function Module:ProcessCuresList()
             for _, type in ipairs(typeList) do
                 Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, id)
             end
-            -- clear this person off the cure list.
-            self:ClearCureFromList(id)
+            -- clear the entire list so we don't chain group cures needlessly
+            self:ClearCureList()
 
-            -- only do 1 person per frame.
             return
         end
     end
@@ -1132,16 +1141,18 @@ function Module:CheckPeerForCures(checks, peer, targetId)
     end
 end
 
-function Module:RunCureRotation()
-    if (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
+function Module:RunCureRotation(combat_state)
+    if combat_state == "Downtime" and (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
     self.TempSettings.CureCheckTimer = os.clock()
 
     -- if we are still processing cures from before then just bail for now.
     local cureCount = Tables.GetTableSize(self.TempSettings.CureCoroutines)
     if cureCount > 0 then
-        Logger.log_debug("\ay[Cures] Still have %d cures to process, will check agian later.", cureCount)
+        Logger.log_debug("\ay[Cures] Still have %d cure checks to process, will check again later.", cureCount)
         return
     end
+
+    Logger.log_verbose("\ao[Cures] Checking for curables...")
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
     local checks = {
@@ -1312,9 +1323,13 @@ function Module:GiveTime(combat_state)
 
     if self:IsCuring() then
         if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvis')) then
-            Logger.log_verbose("\ao[Cures] Checking for curables...")
-            self:RunCureRotation()
-            self:ProcessCuresList()
+            self:RunCureRotation(combat_state)
+
+            if Module.TempSettings.NeedCuresListMutex then
+                Logger.log_debug("\ay[Cures] A coroutine is currently in mutex, bypassing cure list processing.")
+            else
+                self:ProcessCuresList()
+            end
         end
 
         local deadCoroutines = {}
