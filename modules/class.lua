@@ -1196,6 +1196,24 @@ function Module:CureIsQueued()
     return (Tables.GetTableSize(self.TempSettings.NeedCuresList) or 0) > 0
 end
 
+function Module:ManageCureCoroutines()
+    local deadCoroutines = {}
+    for idx, c in ipairs(self.TempSettings.CureCoroutines) do
+        if coroutine.status(c) ~= 'dead' then
+            local success, err = coroutine.resume(c)
+            if not success then
+                Logger.log_error("\arError in Cure Coroutine: %s", err)
+            end
+        else
+            table.insert(deadCoroutines, idx)
+        end
+    end
+
+    for _, idx in ipairs(deadCoroutines) do
+        table.remove(self.TempSettings.CureCoroutines, idx)
+    end
+end
+
 function Module:RunCureRotation(combat_state)
     if combat_state == "Downtime" and (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
     self.TempSettings.CureCheckTimer = os.clock()
@@ -1390,21 +1408,7 @@ function Module:GiveTime(combat_state)
             end
         end
 
-        local deadCoroutines = {}
-        for idx, c in ipairs(self.TempSettings.CureCoroutines) do
-            if coroutine.status(c) ~= 'dead' then
-                local success, err = coroutine.resume(c)
-                if not success then
-                    Logger.log_error("\arError in Cure Coroutine: %s", err)
-                end
-            else
-                table.insert(deadCoroutines, idx)
-            end
-        end
-
-        for _, idx in ipairs(deadCoroutines) do
-            table.remove(self.TempSettings.CureCoroutines, idx)
-        end
+        self:ManageCureCoroutines()
     end
 
     --Counter TOB Debuff with AA Buff, this can be refactored/expanded if they add other similar systems
