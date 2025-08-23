@@ -232,9 +232,14 @@ function Core.ShieldEquipped()
     return mq.TLO.InvSlot("Offhand").Item.Type() and mq.TLO.InvSlot("Offhand").Item.Type() == "Shield"
 end
 
---- Checks if a health is not critically low before a healer performs other actions.
+--- Checks if a health is not critically low or a cure is not queued before a healer performs other actions.
 function Core.OkayToNotHeal()
     if not Core.IsHealing() then return true end
+
+    if Core.IsCuring() and Modules:ExecModule("Class", "CureIsQueued") then
+        Logger.log_verbose("OkayToNotHeal: We have a queued cure to process! Skipping.")
+        return false
+    end
 
     return Core.GetMainAssistPctHPs() > Config:GetSetting('BigHealPoint') and (mq.TLO.Group.Injured(Config:GetSetting('BigHealPoint'))() or 0) < Config:GetSetting('GroupInjureCnt')
 end
