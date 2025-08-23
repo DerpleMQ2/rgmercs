@@ -65,6 +65,7 @@ local _ClassConfig = {
                 end
             end
 
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")
             return false
         end,
     },
