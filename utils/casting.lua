@@ -1529,9 +1529,14 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
             Logger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) for %s is no longer your currentTarget(%d)", target.ID(), currentCast, Targeting.GetTargetID())
         end
 
-        if (maxWaitOrig - maxWait) % 200 == 0 and Combat.DoCombatActions() and not mq.TLO.Me.Pet.Combat() then --alleviate pets standing around at early levels where mob HPs are low and cast times are long
-            if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
-                Combat.PetAttack(Config.Globals.AutoTargetID, true)
+        if (maxWaitOrig - maxWait) % 200 == 0 then
+            if Core.IsCuring() then
+                Modules:ExecModule("Class", "ManageCureCoroutines")
+            end
+            if Combat.DoCombatActions() and not mq.TLO.Me.Pet.Combat() then --alleviate pets standing around at early levels where mob HPs are low and cast times are long
+                if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
+                    Combat.PetAttack(Config.Globals.AutoTargetID, true)
+                end
             end
         end
 
