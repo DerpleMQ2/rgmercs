@@ -1127,15 +1127,52 @@ function Module:ProcessCuresList()
     end
 end
 
-function Module:CheckPeerForCures(checks, peer, targetId)
+function Module:CheckPeerForCures(peer, targetId)
+    local checks = {
+        { type = "Poison",  check = "Me.Poisoned.ID", },
+        { type = "Disease", check = "Me.Diseased.ID", },
+        { type = "Curse",   check = "Me.Cursed.ID", },
+        { type = "Mezzed",  check = "Me.Mezzed.ID", },
+    }
+    if not Core.OnLaz() then
+        table.insert(checks, { type = "Corruption", check = "Me.Corrupted.ID", })
+    end
+
     for _, data in ipairs(checks) do
         local effectId = DanNet.query(peer, data.check, 1000) or "null"
         Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
 
         if effectId:lower() ~= "null" and effectId ~= "0" then
-            -- Cure it!
+            -- Queue it!
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
                 self:AddCureToList(targetId, data.type)
+            end
+        end
+    end
+end
+
+function Module:CheckSelfForCures()
+    local me = mq.TLO.Me
+    local selfChecks = {
+        { type = "Poison",  check = me.Poisoned.ID() or 0, },
+        { type = "Disease", check = me.Diseased.ID() or 0, },
+        { type = "Curse",   check = me.Cursed.ID() or 0, },
+        -- { type = "Mezzed",  check = me.Mezzed.ID() or 0, }, -- to my knowledge we cannot cure ourselves if mezzed
+    }
+    if not Core.OnLaz() then
+        table.insert(selfChecks, { type = "Corruption", check = me.Corrupted.ID() or 0, })
+    end
+
+    for _, data in ipairs(selfChecks) do
+        Logger.log_verbose("\ay[Cures] %s :: [%s] => %s", me.CleanName():lower(), data.type, data.check > 0 and data.check or "none")
+        if data.check > 0 then
+            Comms.HandleAnnounce(string.format('%s effect found on myself, processing cure.', data.type),
+                Config:GetSetting('CureAnnounceGroup'),
+                Config:GetSetting('CureAnnounce'))
+            if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
+                Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, me.ID())
+                self:ClearCureList()
+                return
             end
         end
     end
@@ -1152,31 +1189,8 @@ function Module:RunCureRotation(combat_state)
 
     Logger.log_verbose("\ao[Cures] Checking for curables...")
 
-    local dannetPeers = mq.TLO.DanNet.PeerCount()
-    local checks = {
-        { type = "Poison",  check = "Me.Poisoned.ID", },
-        { type = "Disease", check = "Me.Diseased.ID", },
-        { type = "Curse",   check = "Me.Cursed.ID", },
-        { type = "Mezzed",  check = "Me.Mezzed.ID", },
-    }
-
-    if not Core.OnLaz() then
-        table.insert(checks, { type = "Corruption", check = "Me.Corrupted.ID", })
-    end
-
-    local myID = mq.TLO.Me.ID()
-
-    -- check ourselves locally
-    for type, check in pairs(checks) do
-        if string.format("mq.TLO." .. check .. "()") then
-            Comms.HandleAnnounce(string.format('%s effect found on myself, processing cure.', type),
-                Config:GetSetting('CureAnnounceGroup'),
-                Config:GetSetting('CureAnnounce'))
-            Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, myID)
-            self:ClearCureList()
-            return
-        end
-    end
+    -- check ourselves locally every frame
+    self:CheckSelfForCures()
 
     -- if we are still processing cure checks from before then just bail for now.
     local cureCount = Tables.GetTableSize(self.TempSettings.CureCoroutines)
@@ -1184,6 +1198,8 @@ function Module:RunCureRotation(combat_state)
         Logger.log_debug("\ay[Cures] Still have %d cure checks to process, will check again later.", cureCount)
         return
     end
+
+    local dannetPeers = mq.TLO.DanNet.PeerCount()
 
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
@@ -1197,20 +1213,26 @@ function Module:RunCureRotation(combat_state)
             local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
 
             --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
-            if cureTargetID > 0 and cureTargetID ~= myID and (cureTarget.Distance() or 999) < 150 then
-                Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
+            if cureTargetID > 0 then
+                if cureTargetID == mq.TLO.Me.ID() then
+                    Logger.log_super_verbose("[Cures] Peer is myself, skipping.")
+                elseif (cureTarget.Distance() or 999) < 150 then
+                    Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
 
-                local newCoroutine = coroutine.create(function()
-                    self:CheckPeerForCures(checks, peer, cureTargetID)
-                end)
+                    local newCoroutine = coroutine.create(function()
+                        self:CheckPeerForCures(peer, cureTargetID)
+                    end)
 
-                if newCoroutine then
-                    table.insert(self.TempSettings.CureCoroutines, newCoroutine)
+                    if newCoroutine then
+                        table.insert(self.TempSettings.CureCoroutines, newCoroutine)
+                    else
+                        Logger.log_error("\ar[Cures] Failed to create coroutine for %s", peer)
+                    end
                 else
-                    Logger.log_error("\ar[Cures] Failed to create coroutine for %s", peer)
+                    Logger.log_verbose("\ao[Cures] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
                 end
             else
-                Logger.log_verbose("\ao[Cures] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
+                Logger.log_verbose("\ao[Cures] %d::No valid ID for %s, \arNOT\ao in zone", i, peer or "Unknown")
             end
         end
     end
