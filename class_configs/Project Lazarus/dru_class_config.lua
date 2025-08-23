@@ -46,9 +46,9 @@ local _ClassConfig = {
             if Config:GetSetting('DoCureAA') then
                 local cureAA = Casting.AAReady("Radiant Cure") and "Radiant Cure"
 
-                if not cureAA and targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
-                    cureAA = "Purified Spirits"
-                end
+                -- if not cureAA and targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                --     cureAA = "Purified Spirits"
+                -- end
 
                 if cureAA then
                     Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")

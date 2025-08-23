@@ -60,6 +60,7 @@ Module.TempSettings.QueuedAbilities          = {}
 Module.TempSettings.CureCoroutines           = {}
 Module.TempSettings.NeedCuresList            = {}
 Module.TempSettings.NeedCuresListMutex       = false
+Module.TempSettings.CureChecksStale          = false
 
 Module.CommandHandlers                       = {
     setmode = {
@@ -1079,6 +1080,7 @@ function Module:ClearCureList()
         Logger.log_verbose("[Cures] Cure List cleared to avoid spam-curing. We'll check again soon.")
         self:ReleaseCuresListMutex("ClearCureList")
     end
+    self.TempSettings.CureChecksStale = true
 end
 
 function Module:AddCureToList(id, type)
@@ -1138,16 +1140,24 @@ function Module:CheckPeerForCures(peer, targetId)
         table.insert(checks, { type = "Corruption", check = "Me.Corrupted.ID", })
     end
 
-    for _, data in ipairs(checks) do
-        local effectId = DanNet.query(peer, data.check, 1000) or "null"
-        Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
+    if not self.TempSettings.CureChecksStale then
+        for _, data in ipairs(checks) do
+            local effectId = DanNet.query(peer, data.check, 1000) or "null"
+            Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
 
-        if effectId:lower() ~= "null" and effectId ~= "0" then
-            -- Queue it!
-            if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                self:AddCureToList(targetId, data.type)
+            if effectId:lower() ~= "null" and effectId ~= "0" then
+                -- Queue it!
+                if not self.TempSettings.CureChecksStale then
+                    if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
+                        self:AddCureToList(targetId, data.type)
+                    end
+                else
+                    Logger.log_verbose("\ay[Cures] CheckPeerforCures %s :: Cure Check is stale post-query, skipping.", peer)
+                end
             end
         end
+    else
+        Logger.log_verbose("\ay[Cures] CheckPeerforCures %s :: Cure Check is stale pre-query, skipping.", peer)
     end
 end
 
@@ -1198,6 +1208,8 @@ function Module:RunCureRotation(combat_state)
         Logger.log_debug("\ay[Cures] Still have %d cure checks to process, will check again later.", cureCount)
         return
     end
+
+    self.TempSettings.CureChecksStale = false
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
 
