@@ -1182,7 +1182,7 @@ function Module:CheckSelfForCures()
                 Config:GetSetting('CureAnnounceGroup'),
                 Config:GetSetting('CureAnnounce'))
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                if Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, mq.TLO.Me.ID()) then
+                if Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, mq.TLO.Me.ID()) then
                     -- if succesful, clear the entire list so we don't chain group cures needlessly
                     self:ClearCureList()
                 end
