@@ -1169,6 +1169,9 @@ function Module:RunCureRotation(combat_state)
     -- check ourselves locally
     for type, check in pairs(checks) do
         if string.format("mq.TLO." .. check .. "()") then
+            Comms.HandleAnnounce(string.format('%s effect found on myself, processing cure.', type),
+                Config:GetSetting('CureAnnounceGroup'),
+                Config:GetSetting('CureAnnounce'))
             Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, myID)
             self:ClearCureList()
             return
