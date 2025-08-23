@@ -1141,16 +1141,14 @@ function Module:CheckPeerForCures(checks, peer, targetId)
     end
 end
 
+function Module:CureIsQueued()
+    return (Tables.GetTableSize(self.TempSettings.NeedCuresList) or 0) > 0
+end
+
 function Module:RunCureRotation(combat_state)
     if combat_state == "Downtime" and (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
     self.TempSettings.CureCheckTimer = os.clock()
 
-    -- if we are still processing cures from before then just bail for now.
-    local cureCount = Tables.GetTableSize(self.TempSettings.CureCoroutines)
-    if cureCount > 0 then
-        Logger.log_debug("\ay[Cures] Still have %d cure checks to process, will check again later.", cureCount)
-        return
-    end
 
     Logger.log_verbose("\ao[Cures] Checking for curables...")
 
@@ -1166,6 +1164,24 @@ function Module:RunCureRotation(combat_state)
         table.insert(checks, { type = "Corruption", check = "Me.Corrupted.ID", })
     end
 
+    local myID = mq.TLO.Me.ID()
+
+    -- check ourselves locally
+    for type, check in pairs(checks) do
+        if string.format("mq.TLO." .. check .. "()") then
+            Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, myID)
+            self:ClearCureList()
+            return
+        end
+    end
+
+    -- if we are still processing cure checks from before then just bail for now.
+    local cureCount = Tables.GetTableSize(self.TempSettings.CureCoroutines)
+    if cureCount > 0 then
+        Logger.log_debug("\ay[Cures] Still have %d cure checks to process, will check again later.", cureCount)
+        return
+    end
+
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet.Peers(i)()
@@ -1175,13 +1191,14 @@ function Module:RunCureRotation(combat_state)
                 peer = string.sub(peer, startindex + 1)
             end
             local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
+            local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
 
             --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
-            if cureTarget and cureTarget() and (cureTarget.Distance() or 999) < 150 then
+            if cureTargetID > 0 and cureTargetID ~= myID and (cureTarget.Distance() or 999) < 150 then
                 Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
 
                 local newCoroutine = coroutine.create(function()
-                    self:CheckPeerForCures(checks, peer, cureTarget.ID())
+                    self:CheckPeerForCures(checks, peer, cureTargetID)
                 end)
 
                 if newCoroutine then
