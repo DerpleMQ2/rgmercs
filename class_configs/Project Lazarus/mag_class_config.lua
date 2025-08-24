@@ -1453,6 +1453,11 @@ _ClassConfig      = {
                 end,
             },
             {
+                name = "Forsaken Conjurer's Shoes",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Conjurer's Shoes")() end,
+            },
+            {
                 name = "Servant of Ro",
                 type = "AA",
             },

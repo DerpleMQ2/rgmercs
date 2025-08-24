@@ -544,7 +544,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoTwinHealNuke') end,
                 cond = function(self, spell, target)
-                    return Casting.OkayToNuke()
+                    return Casting.OkayToNuke() and not Casting.IHaveBuff("Twincast")
                 end,
             },
             {
