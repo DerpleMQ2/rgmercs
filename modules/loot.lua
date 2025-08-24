@@ -12,6 +12,7 @@ local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
 -- Server name formatted for LNS to recognize
 local serverLNSFormat    = mq.TLO.EverQuest.Server():gsub(" ", "_")
+local warningMessageSent = false
 
 local Module             = { _version = '1.1 for LNS', _name = "Loot", _author = 'Derple, Grimmier, Algar', }
 Module.__index           = Module
@@ -120,9 +121,9 @@ function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 	if self.SettingsLoaded then
 		if self.settings.DoLoot == true then
-			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
-			if not lnsRunning then
+			if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
 				Core.DoCmd("/lua run lootnscoot directed rgmercs")
+				warningMessageSent = false
 			end
 
 			if not self.Actor then Module:LootMessageHandler() end
@@ -188,8 +189,7 @@ function Module:Init()
 			mq.TLO.MacroQuest.BuildName())
 	else
 		if self.settings.DoLoot then
-			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING'
-			if lnsRunning then
+			if mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' then
 				Core.DoCmd("/lua stop lootnscoot")
 				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 			end
@@ -286,6 +286,14 @@ end
 function Module:GiveTime(combat_state)
 	if not Config:GetSetting('DoLoot') then return end
 	if Config.Globals.PauseMain then return end
+	if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
+		if not warningMessageSent then
+			Logger.log_error("\ar[LOOT]: Looting is enabled, but LNS does not appear to be running!")
+			Comms.PrintGroupMessage("%s has looting enabled, but LNS does not appear to be running!", mq.TLO.Me.CleanName())
+			warningMessageSent = true
+		end
+		return
+	end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 
