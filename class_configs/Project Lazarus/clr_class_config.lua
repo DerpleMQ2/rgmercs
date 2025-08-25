@@ -659,7 +659,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not Config:GetSetting('DoTwinHeal') then return false end
-                    return not Casting.IHaveBuff("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
