@@ -1215,8 +1215,10 @@ function Module:ManageCureCoroutines()
 end
 
 function Module:RunCureRotation(combat_state)
-    if combat_state == "Downtime" and (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
-    self.TempSettings.CureCheckTimer = os.clock()
+    if combat_state == "Downtime" then -- check freely in combat and the first frame of downtime; then avoid spamming
+        if (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
+        self.TempSettings.CureCheckTimer = os.clock()
+    end
 
 
     Logger.log_verbose("\ao[Cures] Checking for curables...")
