@@ -1244,7 +1244,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('TwincastMez') ~= 3 or Modules:ExecModule("Mez", "IsMezImmune", target.ID()) then return false end
-                    return not Casting.IHaveBuff(spell) and not Casting.IHaveBuff("Twincast")
+                    return not Casting.IHaveBuff(spell) and not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {

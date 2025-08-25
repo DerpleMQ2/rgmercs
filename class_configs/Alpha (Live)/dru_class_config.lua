@@ -1008,14 +1008,14 @@ local _ClassConfig = {
                 name = "Distant Conflagration",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.IHaveBuff("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.IHaveBuff("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -1057,7 +1057,7 @@ local _ClassConfig = {
                 name = "TwincastSpell",
                 type = "Spell",
                 cond = function(self)
-                    return not Casting.IHaveBuff("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
         },

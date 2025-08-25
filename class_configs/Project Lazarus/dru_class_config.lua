@@ -544,7 +544,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoTwinHealNuke') end,
                 cond = function(self, spell, target)
-                    return Casting.OkayToNuke() and not Casting.IHaveBuff("Twincast")
+                    return Casting.OkayToNuke() and not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -587,7 +587,7 @@ local _ClassConfig = {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.IHaveBuff("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
