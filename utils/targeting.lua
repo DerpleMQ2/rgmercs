@@ -448,6 +448,11 @@ function Targeting.GroupedWithTarget(target)
     return mq.TLO.Group.Member(targetName)()
 end
 
+--- Checks if the targetid is in the same group.
+function Targeting.GroupedWithTargetId(targetId)
+    return mq.TLO.Group.Member(targetId)()
+end
+
 function Targeting.SetForceBurn(targetId)
     Targeting.ForceBurnTargetID = tonumber(targetId) or mq.TLO.Target.ID()
     local burnNowSpawn = mq.TLO.Spawn(Targeting.ForceBurnTargetID)
