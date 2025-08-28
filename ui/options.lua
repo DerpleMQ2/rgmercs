@@ -19,7 +19,7 @@ local Set       = require("mq.Set")
 local OptionsUI             = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
 OptionsUI.__index           = OptionsUI
 OptionsUI.selectedGroup     = "General"
-OptionsUI.Groups            = {
+OptionsUI.Groups            = { --- Add a default of the same name for any key that has nothing in its table once these are finished
     {
         Name = "Movement",
         Desciption = "Following, Medding, Pulling",
@@ -49,7 +49,7 @@ OptionsUI.Groups            = {
         Icon = Icons.FA_HEART,
         Headers = {
             ['Buffs'] = { "Self", "Pet", "Group", },
-            ['Debuffs'] = { "Resist", "Slow", "Dispel", "Snare", }, -- Resist i.e, Malo, Tash, druid
+            ['Debuffs'] = { "Slow", "Resist", "Snare", "Dispel", }, -- Resist i.e, Malo, Tash, druid
             ['Healing'] = { "General", "Thresholds", "Curing", "Rezzing", },
             ['Damage'] = { "Direct", "AE", "Over Time", "Taps", },
             ['Tanking'] = { "Hate Tools", "Defenses", },
@@ -81,10 +81,12 @@ OptionsUI.Groups            = {
         },
     },
 }
-OptionsUI.Settings          = {}
+OptionsUI.settings          = {}
 OptionsUI.SettingNames      = {}
 OptionsUI.SettingCategories = Set.new({})
 OptionsUI.DefaultConfigs    = {}
+--Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
+OptionsUI.CustomModuleOrder = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
 -- Premise:
 
@@ -150,12 +152,30 @@ function OptionsUI:RenderCategories()
     -- entries should already be indexed in the combined settings table
 end
 
-function OptionsUI:GetCombinedSettings()
+-- TODO: Figure this out. We can load these at the start, but we will also need to update the self.Settings table when we change a setting
+-- -- At start, we will be doing double work when we update settings (like we are doing double on everything else).
+-- -- Even after that, to write to the file *and* update this table will require some fuckery.
+-- -- This is just going to be one of those integration issues and a trade-off for bucking modularity for settings.
+function OptionsUI:GetCombinedCurrentSettings()
+    -- get the current setting value from the RGMercs config file
+    for name, setting in pairs(Config.settings) do
+        self.settings[name] = setting
+    end
+
+    -- get the current setting value from each module's config file
+    for _, module in pairs(OptionsUI.CustomModuleOrder) do
+        local moduleSettings = Modules:ExecModule(module, "GetSettings") --These are the actual setting values from the character specific files
+
+        for name, setting in pairs(moduleSettings) do
+            self.settings[name] = setting
+        end
+    end
+end
+
+function OptionsUI:GetCombinedDefaultSettings()
     -- Get the Default Configs from all modules + config lumped together.
 
     -- Get Config settings copied into the new table, pull the keys and sort first so we don't have index number conflicts with modules
-    -- TO DO : Pull the actual setting values from the file
-
     local sortedConfigKeys = {}
     for name, setting in pairs(Config.DefaultConfig) do
         self.DefaultConfigs[name] = setting
@@ -183,16 +203,8 @@ function OptionsUI:GetCombinedSettings()
 
     -- now iterate over the module List, and do the same thing on a per-module basis
 
-    --Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
-    local moduleList = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
-
-    for _, module in pairs(moduleList) do
-        -- get a combined settings list from all modules
-
-        -- TO DO: Lump these in so we pull the actual settings later
-        -- local moduleSettings = Modules:ExecModule(module, "GetSettings") --These are the actual setting values from the character specific files
-
-        local moduleDefaults = Modules:ExecModule(module, "GetDefaultSettings") --This is a list of all settings, with a default value
+    for _, module in pairs(OptionsUI.CustomModuleOrder) do
+        local moduleDefaults = Modules:ExecModule(module, "GetDefaultSettings") --This is a list of all settings, including their default value
 
         for name, setting in pairs(moduleDefaults) do
             self.DefaultConfigs[name] = setting
