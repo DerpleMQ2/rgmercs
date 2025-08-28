@@ -251,4 +251,8 @@ function Core.GetResolvedActionMapItem(action)
     return Modules:ExecModule("Class", "GetResolvedActionMapItem", action)
 end
 
+function Core.ProcessCureChecks()
+    Modules:ExecModule("Class", "ManageCureCoroutines")
+end
+
 return Core

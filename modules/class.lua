@@ -1122,9 +1122,9 @@ function Module:ProcessCuresList()
                 if Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, id) then
                     -- if succesful, clear the entire list so we don't chain group cures needlessly
                     self:ClearCureList()
+                    return
                 end
             end
-
 
             return
         end

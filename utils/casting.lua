@@ -1531,7 +1531,7 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
 
         if (maxWaitOrig - maxWait) % 200 == 0 then
             if Core.IsCuring() then
-                Modules:ExecModule("Class", "ManageCureCoroutines")
+                Core.ProcessCureChecks()
             end
             if Combat.DoCombatActions() and not mq.TLO.Me.Pet.Combat() then --alleviate pets standing around at early levels where mob HPs are low and cast times are long
                 if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
