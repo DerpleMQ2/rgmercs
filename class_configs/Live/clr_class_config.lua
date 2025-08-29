@@ -20,7 +20,7 @@ local _ClassConfig = {
     ['Cures']             = {
         CureNow = function(self, type, targetId)
             if Config:GetSetting('DoCureAA') then
-                if Casting.AAReady("Group Purify Soul") and Targeting.GroupedWithTargetId(targetId) then
+                if Casting.AAReady("Group Purify Soul") and Targeting.GroupedWithTarget(mq.TLO.Spawn(targetId)) then
                     return Casting.UseAA("Group Purify Soul", targetId)
                 elseif Casting.AAReady("Radiant Cure") then
                     return Casting.UseAA("Radiant Cure", targetId)
