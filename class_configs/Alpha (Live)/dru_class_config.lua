@@ -9,7 +9,7 @@ local _ClassConfig = {
     _author               = "Algar (based on default by Derple)",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
-        IsCuring = function() return Core.IsModeActive("Heal") end,
+        IsCuring = function() return Config:GetSetting('DoCureAA') or Config:GetSetting('DoCureSpells') end,
         IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
