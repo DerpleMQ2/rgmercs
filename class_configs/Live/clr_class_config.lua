@@ -5,6 +5,7 @@ local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 local DanNet       = require('lib.dannet.helpers')
+local Logger       = require("utils.logger")
 
 local _ClassConfig = {
     _version              = "2.0 - Live",
@@ -18,44 +19,67 @@ local _ClassConfig = {
         'Heal',
     },
     ['Cures']             = {
+        GetCureSpells = function(self)
+            --(re)initialize the table for loadout changes
+            self.TempSettings.CureSpells = {}
+
+            -- Choose whether we should be trying to resolve the groupheal based on our settings and whether it cures at its level
+            local ghealSpell = Core.GetResolvedActionMapItem('GroupHealCure')
+            local groupHeal = (Config:GetSetting('KeepCureMemmed') == 3 and (ghealSpell and ghealSpell.Level() or 0) >= 70) and "GroupHeal"
+
+            -- Find the map for each cure spell we need, given availability of groupheal, groupcure. fallback to curespell
+            -- Curse is convoluted: If Keepmemmed, always use cure, if not, use groupheal if available and fallback to cure
+            local neededCures = {
+                ['Poison'] = Casting.GetFirstMapItem({ groupHeal, "CureAll", "CurePoison", }),
+                ['Disease'] = Casting.GetFirstMapItem({ groupHeal, "CureAll", "CureDisease", }),
+                ['Curse'] = Casting.GetFirstMapItem({ groupHeal, "CureAll", "CureDisease", }),
+                ['Corruption'] = 'CureCorrupt',
+            }
+
+            -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
+            for k, v in pairs(neededCures) do
+                local cureSpell = Core.GetResolvedActionMapItem(v)
+                if cureSpell then
+                    self.TempSettings.CureSpells[k] = cureSpell
+                end
+            end
+        end,
+
         CureNow = function(self, type, targetId)
+            local targetSpawn = mq.TLO.Spawn(targetId)
+            if not targetSpawn and targetSpawn() then return false end
+
             if Config:GetSetting('DoCureAA') then
-                if Casting.AAReady("Group Purify Soul") and Targeting.GroupedWithTarget(mq.TLO.Spawn(targetId)) then
-                    return Casting.UseAA("Group Purify Soul", targetId)
+                local cureAA = Casting.AAReady("Purify Soul") and "Purify Soul"
+                if Casting.AAReady("Group Purify Soul") and Targeting.GroupedWithTarget(targetSpawn) then
+                    cureAA = "Group Purify Soul"
                 elseif Casting.AAReady("Radiant Cure") then
-                    return Casting.UseAA("Radiant Cure", targetId)
-                elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
-                    return Casting.UseAA("Purified Spirits", targetId)
-                elseif Casting.AAReady("Purify Soul") then
-                    return Casting.UseAA("Purify Soul", targetId)
+                    cureAA = "Radiant Cure"
+                    -- I am finding self-cures to be less than helpful when most effects on a healer are group-wide
+                    -- elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                    --   cureAA = "Purified Spirits"
+                end
+                if cureAA then
+                    Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")
+                    return Casting.UseAA(cureAA, targetId)
                 end
             end
 
             if Config:GetSetting('DoCureSpells') then
-                local cureSpell = Config:GetSetting('KeepCureMemmed') == 3 and Core.GetResolvedActionMapItem('GroupHealCure') or Core.GetResolvedActionMapItem('CureAll')
-
-                if type:lower() == "disease" then
-                    if not cureSpell then
-                        cureSpell = Core.GetResolvedActionMapItem('CureDisease')
+                for effectType, cureSpell in pairs(self.TempSettings.CureSpells) do
+                    if type:lower() == effectType:lower() then
+                        if cureSpell.TargetType():lower() == "group v1" and not Targeting.GroupedWithTarget(targetSpawn) then
+                            Logger.log_debug("CureNow: We cannot use %s on %s, because it is a group-only spell and they are not in our group!", cureSpell.RankName(),
+                                targetSpawn.CleanName() or "Unknown")
+                            return false
+                        end
+                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                        return Casting.UseSpell(cureSpell.RankName(), targetId, true)
                     end
-                elseif type:lower() == "poison" then
-                    if not cureSpell then
-                        cureSpell = Core.GetResolvedActionMapItem('CurePoison')
-                    end
-                elseif type:lower() == "curse" then
-                    if not cureSpell or cureSpell.Level() == (51 or 57 or 84) then --First two group cures and first cureall don't cure curse
-                        cureSpell = Core.GetResolvedActionMapItem('CureCurse')
-                    end
-                elseif type:lower() == "corruption" then
-                    cureSpell = Core.GetResolvedActionMapItem('CureCorrupt')
-                else
-                    return false
                 end
-
-                if not cureSpell or not cureSpell() then return false end
-                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
             end
 
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
             return false
         end,
     },

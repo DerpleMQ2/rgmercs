@@ -22,31 +22,54 @@ return {
         'DPS',
     },
     ['Cures']             = {
+        GetCureSpells = function(self)
+            --(re)initialize the table for loadout changes
+            self.TempSettings.CureSpells = {}
+
+            -- Find the map for each cure spell we need
+            -- Curse is convoluted: If Keepmemmed, always use cure, if not, use groupheal if available and fallback to cure
+            local neededCures = {
+                ['Poison'] = 'PurityCure',
+                ['Disease'] = 'PurityCure',
+                ['Curse'] = not Config:GetSetting('KeepCurseMemmed') and ('PurityCure' or 'CureCurse') or 'CureCurse',
+                -- ['Corruption'] = -- Project Lazarus does not currently have any Corruption Cures.
+            }
+
+            -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
+            for k, v in pairs(neededCures) do
+                local cureSpell = Core.GetResolvedActionMapItem(v)
+                if cureSpell then
+                    self.TempSettings.CureSpells[k] = cureSpell
+                end
+            end
+        end,
         CureNow = function(self, type, targetId)
+            local targetSpawn = mq.TLO.Spawn(targetId)
+            if not targetSpawn and targetSpawn then return false end
+
             if Config:GetSetting('DoCureAA') then
-                if Casting.AAReady("Radiant Cure") then
-                    return Casting.UseAA("Radiant Cure", Targeting.GetAutoTarget().ID() or targetId, true)
-                elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purification") then
-                    return Casting.UseAA("Purification", Targeting.GetAutoTarget().ID() or targetId, true)
+                local cureAA = Casting.AAReady("Radiant Cure") and "Radiant Cure"
+
+                if not cureAA and targetId == mq.TLO.Me.ID() and Casting.AAReady("Purification") then
+                    cureAA = "Purification"
+                end
+
+                if cureAA then
+                    Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                    return Casting.UseAA(cureAA, targetId)
                 end
             end
 
             if Config:GetSetting('DoCureSpells') then
-                local cureSpell --we need to make sure we only assign a spell for types that spell can effect
-
-                if type:lower() == "disease" then
-                    cureSpell = Core.GetResolvedActionMapItem('PurityCure')
-                elseif type:lower() == "poison" then
-                    cureSpell = Core.GetResolvedActionMapItem('PurityCure')
-                elseif type:lower() == "curse" then
-                    --if we selected to keep it memmed, prioritize it over purity, since RGC clears a LOT more counters
-                    cureSpell = Core.GetResolvedActionMapItem((not Config:GetSetting('KeepCurseMemmed') and ('PurityCure' or 'CureCurse') or 'CureCurse'))
+                for effectType, cureSpell in pairs(self.TempSettings.CureSpells) do
+                    if type:lower() == effectType:lower() then
+                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                        return Casting.UseSpell(cureSpell.RankName(), targetId, true)
+                    end
                 end
-
-                if not cureSpell or not cureSpell() then return false end
-                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
             end
 
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
             return false
         end,
     },
