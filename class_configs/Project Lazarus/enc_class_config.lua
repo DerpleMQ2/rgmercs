@@ -788,6 +788,7 @@ local _ClassConfig = {
                     return Targeting.IHaveAggro(100) and mq.TLO.SpawnCount("npc radius 20")() > 2
                 end,
             },
+
             {
                 name = "Doppelganger",
                 type = "AA",
@@ -804,6 +805,13 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Targeting.IsNamed(target)
+                end,
+            },
+            {
+                name = "Eldritch Rune",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
         },

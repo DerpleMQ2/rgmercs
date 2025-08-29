@@ -12,7 +12,7 @@ local _ClassConfig = {
     _author               = "Algar, Derple, Robban",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
-        IsCuring = function() return true end,
+        IsCuring = function() return Config:GetSetting('DoCureAA') or Config:GetSetting('DoCureSpells') end,
         IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
