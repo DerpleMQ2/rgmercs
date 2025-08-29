@@ -7,11 +7,11 @@ local Comms        = require("utils.comms")
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
-    _version              = "2.1 - Live",
+    _version              = "2.2 - Live",
     _author               = "Algar, Derple",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
-        IsCuring = function() return true end,
+        IsCuring = function() return Config:GetSetting('DoCureAA') or Config:GetSetting('DoCureSpells') end,
         IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
@@ -29,11 +29,11 @@ local _ClassConfig = {
                 local cureSpell
                 --Ensure it is a type the spell can cure (we now check for more than just p/d/c), fallback to earlier spells if needed
                 if type:lower() == "poison" then
-                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPCurePoison')
+                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('CurePoison')
                 elseif type:lower() == "disease" then
-                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPCureDisease')
+                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('CureDisease')
                 elseif type:lower() == "curse" then
-                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPRemoveCurse')
+                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('RemoveCurse')
                 end
                 --todo: Add corruption cure
 
@@ -639,17 +639,17 @@ local _ClassConfig = {
             "Spirit Bolstering",
             "Spirit Quickening",
         },
-        ["TLPCureDisease"] = {
+        ["CureDisease"] = {
             "Cure Disease",
             "Counteract Disease",
             "Eradicate Disease",
         },
-        ["TLPCurePoison"] = {
+        ["CurePoison"] = {
             "Counteract Poison",
             "Abolish Poison",
             "Eradicate Poison",
         },
-        ["TLPRemoveCurse"] = {
+        ["RemoveCurse"] = {
             -- "Eradicate Curse",      -- Level 54 , 30 counters, twice, 400 mana
             "Remove Greater Curse", -- Level 54 , 9 counters, 5 times, 100 mana
             "Remove Curse",         -- Level 38
@@ -754,8 +754,9 @@ local _ClassConfig = {
             {
                 name = "GroupRenewalHoT",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHealOverTime') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHealOverTime') or not Targeting.GroupedWithTarget(target) or not Casting.CastReady(spell) then return false end --avoid constant group buff checks
+                    if not Targeting.GroupedWithTarget(target) or not Casting.CastReady(spell) then return false end --avoid constant group buff checks
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -786,8 +787,9 @@ local _ClassConfig = {
             { --Chest Click, name function stops errors in rotation window when slot is empty
                 name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
+                load_cond = function(self) return Config:GetSetting('DoChestClick') end,
                 cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    if not Casting.ItemHasClicky(itemName) then return false end
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
@@ -798,8 +800,9 @@ local _ClassConfig = {
             {
                 name = "GroupRenewalHoT",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHealOverTime') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHealOverTime') or not Targeting.GroupedWithTarget(target) or not Casting.CastReady(spell) then return false end --avoid constant group buff checks
+                    if not Targeting.GroupedWithTarget(target) or not Casting.CastReady(spell) then return false end --avoid constant group buff checks
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -891,14 +894,6 @@ local _ClassConfig = {
                     Casting.AmIBuffable()
             end,
         },
-        { --Pet Buffs if we have one, timer because we don't need to constantly check this
-            name = 'PetBuff',
-            timer = 60,
-            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
-            cond = function(self, combat_state)
-                return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
-            end,
-        },
         { --Downtime buffs that don't need constant checks
             name = 'SlowDowntime',
             timer = 30,
@@ -916,6 +911,14 @@ local _ClassConfig = {
             end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.OkayToBuff()
+            end,
+        },
+        { --Pet Buffs if we have one, timer because we don't need to constantly check this
+            name = 'PetBuff',
+            timer = 60,
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
             end,
         },
         {
@@ -949,59 +952,43 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'CombatBuff',
+            name = 'ProcBuff',
             timer = 10,
             state = 1,
             steps = 1,
             load_cond = function(self) return self:GetResolvedActionMapItem('MeleeProcBuff') end,
             targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+            end,
+        },
+        {
+            name = 'CombatBuff',
+            timer = 10,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or (Config:GetSetting('DoHealDPS') and Core.OkayToNotHeal()))
             end,
         },
-        {
-            name = 'TwinHeal',
-            state = 1,
-            steps = 1,
-            load_cond = function(self) return Config:GetSetting('DoTwinHeal') and self:GetResolvedActionMapItem('TwinHealNuke') end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
-            end,
-        },
-
     },
     ['Rotations']         = {
-        ['TwinHeal'] = {
-            {
-                name = "TwinHealNuke",
-                type = "CustomFunc",
-                cond = function(self, spell, target)
-                    if Casting.IHaveBuff("Healing Twincast") then return false end
-                    local twinHeal = Core.GetResolvedActionMapItem("TwinHealNuke")
-                    return Casting.CastReady(twinHeal)
-                end,
-                custom_func = function(self)
-                    local twinHeal = Core.GetResolvedActionMapItem("TwinHealNuke")
-                    Casting.UseSpell(twinHeal.RankName(), Core.GetMainAssistId(), false, false, false, 0)
-                end,
-            },
-        },
-        ['CombatBuff'] = {
+        ['ProcBuff'] = {
             {
                 name = "DichoSpell",
                 type = "Spell",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('DichoSpell') end,
                 cond = function(self, spell, target)
                     if not Casting.CastReady(spell) then return false end --avoid constant group buff checks
                     return Casting.GroupBuffCheck(spell, target)
@@ -1010,8 +997,9 @@ local _ClassConfig = {
             {
                 name = "MeleeProcBuff",
                 type = "Spell",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem('DichoSpell') end,
                 cond = function(self, spell, target)
-                    if Core.GetResolvedActionMapItem('DichoSpell') or not Casting.CastReady(spell) then return false end --avoid constant group buff checks
+                    if not Casting.CastReady(spell) then return false end --avoid constant group buff checks
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1059,32 +1047,32 @@ local _ClassConfig = {
             {
                 name = "Wind of Malaise",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoAEMalo') and Casting.CanUseAA("Wind of Malaise") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoAEMalo') then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.DetAACheck(aaName)
                 end,
             },
             {
                 name = "AEMaloSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoAEMalo') and not Casting.CanUseAA("Wind of Malaise") end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAEMalo') or Casting.CanUseAA("Wind of Malaise") then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "Malaise",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoSTMalo') and Casting.CanUseAA("Malaise") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoSTMalo') then return false end
                     return Casting.DetAACheck(aaName)
                 end,
             },
             {
                 name = "MaloSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSTMalo') and not Casting.CanUseAA("Malaise") end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSTMalo') or Casting.CanUseAA("Malaise") then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1093,45 +1081,46 @@ local _ClassConfig = {
             {
                 name = "Turgur's Virulent Swarm",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoAESlow') and Casting.CanUseAA("Turgur's Virulent Swarm") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoAESlow') then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.DetAACheck(aaName)
                 end,
             },
             {
                 name = "AESlowSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoAESlow') and not Casting.CanUseAA("Turgur's Virulent Swarm") end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAESlow') or Casting.CanUseAA("Turgur's Virulent Swarm") then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "Turgur's Swarm",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoSTSlow') and Casting.CanUseAA("Turgur's Swarm") end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoSTSlow') then return false end
                     return Casting.DetAACheck(aaName)
                 end,
             },
             {
                 name = "SlowSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSTSlow') and not Casting.CanUseAA("Turgur's Swarm") end,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoSTSlow') or Casting.CanUseAA("Turgur's Swarm") then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
             {
-                name = "DieaseSlow",
+                name = "DiseaseSlow",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoDiseaseSlow') end,
                 cond = function(self, spell, target)
-                    if not (Config:GetSetting('DoDiseaseSlow') and Config:GetSetting('DoSTSlow')) or Casting.CanUseAA("Turgur's Swarm") then return false end
-                    return Casting.DetSpellCheck(spell)
+                    return not mq.TLO.Target.Slowed() and Casting.DetSpellCheck(spell)
                 end,
             },
         },
-        ['DPS'] = {
+        ['CombatBuff'] = {
             {
                 name = "Epic",
                 type = "Item",
@@ -1141,67 +1130,11 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "ChaoticDot",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
-                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
-                end,
-            },
-            {
-                name = "CurseDot2",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
-                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
-                end,
-            },
-            {
-                name = "PandemicDot",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
-                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
-                end,
-            },
-            {
-                name = "CurseDot1",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('CurseDot2') or not Config:GetSetting('DoHealDPS'))) then return false end
-                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
-                end,
-            },
-            {
-                name = "SaryrnDot",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('ChaoticDot') or not Config:GetSetting('DoHealDPS'))) then return false end
-                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
-                end,
-            },
-            {
-                name = "AfflictionDot",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Core.IsModeActive("Hybrid") then return false end
-                    return Targeting.IsNamed(target) and Casting.DotSpellCheck(spell)
-                end,
-            },
-            {
-                name = "UltorDot",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Core.IsModeActive("Hybrid") or Core.GetResolvedActionMapItem('AfflictionDot') then return false end
-                    return Targeting.IsNamed(target) and Casting.DotSpellCheck(spell)
-                end,
-            },
-            {
                 name = "Cannibalization",
                 type = "AA",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoAACanni') and Config:GetSetting('DoCombatCanni') end,
                 cond = function(self, aaName)
-                    if not (Config:GetSetting('DoAACanni') and Config:GetSetting('DoCombatCanni')) then return false end
                     return mq.TLO.Me.PctMana() < Config:GetSetting('AACanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('AACanniMinHP')
                 end,
             },
@@ -1209,8 +1142,8 @@ local _ClassConfig = {
                 name = "CanniSpell",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoSpellCanni') and Config:GetSetting('DoCombatCanni') end,
                 cond = function(self, spell)
-                    if not Casting.CastReady(spell) or not (Config:GetSetting('DoSpellCanni') and Config:GetSetting('DoCombatCanni')) then return false end
                     return mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
                 end,
             },
@@ -1218,32 +1151,90 @@ local _ClassConfig = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Casting.CanUseAA("Luminary's Synergy") and Config:GetSetting('DoHealOverTime') end,
                 cond = function(self, spell, target)
-                    if not Casting.CanUseAA("Luminary's Synergy") or not Config:GetSetting('DoHealOverTime') or not Casting.CastReady(spell) then return false end
+                    if not Casting.CastReady(spell) then return false end
                     return Targeting.MobHasLowHP and spell.RankName.Stacks() and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
+        },
+        ['DPS'] = {
             {
-                name = "FastPoisonNuke",
-                type = "Spell",
+                name = "TwinHealNuke",
+                type = "CustomFunc",
+                load_cond = function(self) return Config:GetSetting('DoTwinHealNuke') and self:GetResolvedActionMapItem('TwinHealNuke') end,
                 cond = function(self, spell, target)
-                    return Casting.OkayToNuke()
+                    if Casting.IHaveBuff("Healing Twincast") then return false end
+                    local twinHeal = Core.GetResolvedActionMapItem("TwinHealNuke")
+                    return Casting.CastReady(twinHeal)
+                end,
+                custom_func = function(self)
+                    local twinHeal = Core.GetResolvedActionMapItem("TwinHealNuke")
+                    Casting.UseSpell(twinHeal.RankName(), Core.GetMainAssistId(), false, false, false, 0)
+                end,
+            },
+            { -- Calling "GetFirstMapItem" in a function so we don't need an entry for each of the below items... it simply chooses the "best"
+                name_func = function(self)
+                    return Casting.GetFirstMapItem({ "ChaoticDot", "SaryrnDot", })
+                end,
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoPoisonDot') end,
+                cond = function(self, spell, target)
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
+                end,
+            },
+            { -- Calling "GetFirstMapItem" in a function so we don't need an entry for each of the below items... it simply chooses the "best"
+                name_func = function(self)
+                    return Casting.GetFirstMapItem({ "CurseDot2", "CurseDot1", })
+                end,
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoCurseDot') end,
+                cond = function(self, spell, target)
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
-                name = "PoisonNuke",
+                name = "PandemicDot",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoDiseaseDot') end,
                 cond = function(self, spell, target)
-                    if Core.IsModeActive("Heal") and Core.GetResolvedActionMapItem('FastPoisonNuke') then return false end
-                    return Targeting.MobHasLowHP and Casting.OkayToNuke()
+                    if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
-            {
-                name = "IceNuke",
+            { -- for hybrid mode, which will use both curses if we have them
+                name = "CurseDot1",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoCurseDot') and Core.IsModeActive("Hybrid") and Core.GetResolvedActionMapItem('CurseDot2') end,
+                cond = function(self, spell, target)
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
+                end,
+            },
+            { -- for hybrid mode, which loads this even after we get chaotic as a dot to use when chaotic is down
+                name = "SaryrnDot",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoPoisonDot') and Core.IsModeActive("Hybrid") and Core.GetResolvedActionMapItem('ChaoticDot') end,
+                cond = function(self, spell, target)
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
+                end,
+            },
+            { -- Calling "GetFirstMapItem" in a function so we don't need an entry for each of the below items... it simply chooses the "best"
+                name_func = function(self)
+                    return Casting.GetFirstMapItem({ "AfflictionDot", "UltorDot", })
+                end,
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoDiseaseDot') end,
+                cond = function(self, spell, target)
+                    return Targeting.IsNamed(target) and Casting.DotSpellCheck(spell)
+                end,
+            },
+            { -- Calling "GetFirstMapItem" in a function so we don't need an entry for each of the below items... it simply chooses the "best"
+                name_func = function(self)
+                    return Casting.GetFirstMapItem({ "FastPoisonNuke", "PoisonNuke", "IceNuke", })
+                end,
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Core.GetResolvedActionMapItem('PoisonNuke') then return false end
-                    return Targeting.MobHasLowHP and Casting.OkayToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
         },
@@ -1268,15 +1259,17 @@ local _ClassConfig = {
             {
                 name = "Cannibalization",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoAACanni') and Casting.CanUseAA('Cannibalization') end,
                 cond = function(self, aaName)
-                    return Config:GetSetting('DoAACanni') and mq.TLO.Me.PctMana() < Config:GetSetting('AACanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('AACanniMinHP')
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('AACanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('AACanniMinHP')
                 end,
             },
             {
                 name = "CanniSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSpellCanni') end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoSpellCanni') or not Casting.CastReady(spell) then return false end
+                    if not Casting.CastReady(spell) then return false end
                     return mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
                 end,
             },
@@ -1376,8 +1369,8 @@ local _ClassConfig = {
             {
                 name = "TempHPBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoTempHP') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoTempHP') then return false end
                     return Targeting.TargetClassIs("WAR", target) and Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1402,70 +1395,69 @@ local _ClassConfig = {
                     return Targeting.TargetIsATank(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
-            { --Only cast below 86 because past that our focus spells take over
+            { --Only cast below 86 because past that our focus spells take over. Could check which unity we have, but expensive.
                 name = "LowLvlAtkBuff",
                 type = "Spell",
+                load_cond = function(self) return mq.TLO.Me.Level() < 86 end,
                 cond = function(self, spell, target)
-                    return mq.TLO.Me.Level() < 86 and Targeting.TargetIsAMelee(target) and Casting.CastReady(spell) and
+                    return Targeting.TargetIsAMelee(target) and Casting.CastReady(spell) and
                         Casting.GroupBuffCheck(spell, target)
                 end,
             },
-            {
+            { -- Only cast below 111 because past that our focus spells take over. Could check which unity we have, but expensive.
                 name = "Talisman of Celerity",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoHaste') and Casting.CanUseAA("Talisman of Celerity") and mq.TLO.Me.Level() < 111 end,
                 active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoHaste') then return false end
-                    return mq.TLO.Me.Level() < 111 and Casting.GroupBuffAACheck(aaName, target)
+                    return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
             {
                 name = "HasteBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHaste') and not Casting.CanUseAA("Talisman of Celerity") end,
                 active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHaste') or Casting.CanUseAA("Talisman of Celerity") then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "SingleRegenBuff",
                 type = "Spell",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem('GroupRegenBuff') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if Core.GetResolvedActionMapItem('GroupRegenBuff') then return false end --We don't need this once we can use the group version
                     return (Targeting.TargetIsATank(target) or Targeting.TargetIsMyself(target)) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "GroupRegenBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoGroupRegen') and not Core.GetResolvedActionMapItem('DichoSpell') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if Core.GetResolvedActionMapItem('DichoSpell') or not Config:GetSetting('DoGroupRegen') then return false end --Dicho regen overwrites this
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "Lupine Spirit",
                 type = "AA",
+                -- We get Tala'tak at 74, but this doesn't use it until 90. Check Ranks.
+                load_cond = function(self) return Config:GetSetting('DoRunSpeed') and (mq.TLO.Me.AltAbility("Lupine Spirit").Rank() or -1) > 3 end,
                 active_cond = function(self, aaName)
                     return Casting.IHaveBuff(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
                 end,
-                cond = function(self, aaName, target) --check ranks because this won't use Tala'Tak between 74 and 90
-                    if not Config:GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility(aaName).Rank() or 0) < 4 then return false end
-
-                    local speedSpell = mq.TLO.Me.AltAbility(aaName).Spell
-                    if not speedSpell or not speedSpell() then return false end
-
-                    return Casting.GroupBuffCheck(speedSpell, target)
+                cond = function(self, aaName, target)
+                    return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
-                cond = function(self, spell, target) --We get Tala'tak at 74, but don't get the AA version until 90
-                    if not Config:GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility("Lupine Spirit").Rank() or -1) > 3 then return false end
+                -- We get Tala'tak at 74, but Lupine Spirit doesn't use it until 90. Check Ranks.
+                load_cond = function(self) return Config:GetSetting('DoRunSpeed') and (mq.TLO.Me.AltAbility("Lupine Spirit").Rank() or -1) < 4 end,
+                cond = function(self, spell, target)
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1474,260 +1466,154 @@ local _ClassConfig = {
                     return Casting.GetFirstAA({ "Group Shrink", "Shrink", })
                 end,
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoGroupShrink') end,
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoGroupShrink') then return false end
                     return target.Height() > 2.2
                 end,
             },
             {
                 name = "ShrinkSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoGroupShrink') and not (Casting.CanUseAA("Group Shrink") or Casting.CanUseAA("Shrink")) end,
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoGroupShrink') or Casting.CanUseAA("Group Shrink") or Casting.CanUseAA("Shrink") then return false end
                     return target.Height() > 2.2
                 end,
             },
             {
                 name = "LowLvlHPBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLHPBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLHPBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and Targeting.TargetIsATank(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "LowLvlAgiBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLAgiBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLAgiBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and Targeting.TargetIsATank(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "LowLvlStaBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLStaBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLStaBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and Targeting.TargetIsATank(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "LowLvlStrBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLStrBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLStrBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and Targeting.TargetIsAMelee(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },
     },
-    ['Spells']            = {
+    -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
+    -- Conditions are not limited to modes. Virtually any helper function or TLO can be used. Example: Level-based lists.
+    -- The first list whose conditions returns true will be loaded, all subsequent lists will be ignored.
+    -- Loadout checks (such as scribing a spell or using the "Rescan Loadout" or "Reload Spells" buttons) will re-check these lists and may load a different set if things have changed.
+    ['SpellList']         = {
         {
-            gem = 1,
-            spells = {
-                { name = "RecklessHeal1", }, -- 1-125
-            },
-        },
-        {
-            gem = 2,
-            spells = {
-                { name = "RecourseHeal", }, -- 87-125
-                {
-                    name = "AESlowSpell",
-                    cond = function(self)
-                        return not Casting.CanUseAA("Turgur's Virulent Swarm") and Config:GetSetting('DoAESlow')
-                    end,
-                }, -- 58-79
-                {
-                    name = "CanniSpell",
-                    cond = function(self)
-                        return Config:GetSetting('DoSpellCanni')
-                    end,
-                }, -- 23 - ???
-            },
-        },
-        {
-            gem = 3,
-            spells = {
-                { name = "InterventionHeal", }, -- 78-125
-                {
-                    name = "DiseaseSlow",
-                    cond = function(self)
-                        return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow')
-                            and Config:GetSetting('DoDiseaseSlow')
-                    end,
-                }, -- 54-77
-                {
-                    name = "SlowSpell",
-                    cond = function(self)
-                        return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow')
-                    end,
-                }, -- 27-77
-            },
-        },
-        {
-            gem = 4,
-            spells = {
-                { name = "AESpiritualHeal", }, -- 100-125
-                {
-                    name = "AEMaloSpell",
-                    cond = function(self)
-                        return not Casting.CanUseAA("Wind of Malaise")
-                            and Config:GetSetting('DoAEMalo')
-                    end,
-                }, -- 84-94
-                {
-                    name = "MaloSpell",
-                    cond = function(self)
-                        return not Casting.CanUseAA("Malaise") and Config:GetSetting('DoSTMalo')
-                    end,
-                }, -- 47-74
-            },
-        },
-        {
-            gem = 5,
-            spells = {
-                { name = "RecklessHeal2",  cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 90-125
-                { name = "FastPoisonNuke", cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
-                {
-                    name = "PoisonNuke",
-                    cond = function(self)
-                        return mq.TLO.Me.Level() > 33 and mq.TLO.Me.Level() < 73 and not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS'))
-                    end,
-                }, -- 34-72
-                {
-                    name = "IceNuke",
-                    cond = function(self)
-                        return mq.TLO.Me.Level() < 34 and not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS'))
-                    end,
-                }, -- 4-33
-            },
-        },
-        {
-            gem = 6,
-            spells = {
-                { name = "DichoSpell", },                                                                                                             -- 101-125
-                { name = "MeleeProcBuff", },                                                                                                          -- 50-101
-                { name = "CurseDot1",     cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",     cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "UltorDot",      cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
+            name = "Heal Mode", --This name is abitrary, it is simply what shows up in the UI when this spell list is loaded.
+            cond = function(self) return Core.IsModeActive("Heal") end,
+            spells = {          -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
+                -- Role-Critical
+                { name = "RecklessHeal1", },
+                { name = "RecourseHeal", },
+                { name = "InterventionHeal", },
+                { name = "AESpiritualHeal", },
+                { name = "RecklessHeal2", },
+                { name = "SlowSpell",         cond = function(self) return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow') end, },          -- 27-77
+                { name = "DiseaseSlow",       cond = function(self) return Config:GetSetting('DoDiseaseSlow') end, },
+                { name = "AESlowSpell",       cond = function(self) return not Casting.CanUseAA("Turgur's Virulent Swarm") and Config:GetSetting('DoAESlow') end, }, -- 58-79
+                { name = "MaloSpell",         cond = function(self) return not Casting.CanUseAA("Malaise") and Config:GetSetting('DoSTMalo') end, },                 -- 47-74
+                { name = "AEMaloSpell",       cond = function(self) return not Casting.CanUseAA("Wind of Malaise") and Config:GetSetting('DoAEMalo') end, },         -- 84-94
+                { name = "DichoSpell", },
+                { name = "MeleeProcBuff",     cond = function(self) return not Core.GetResolvedActionMapItem('DichoSpell') end, },
+                { name = "LowLvlAtkBuff",     cond = function(self) return mq.TLO.Me.Level() < 86 end, }, -- 60-85
 
+                -- Utility
+                { name = "CanniSpell",        cond = function(self) return Config:GetSetting('DoSpellCanni') end, },   -- 23 - ???
+                { name = "GroupRenewalHoT",   cond = function(self) return Config:GetSetting('DoHealOverTime') end, }, -- 44-125 Heal
+                { name = "SingleRegenBuff",   cond = function(self) return not Core.GetResolvedActionMapItem('GroupRegenBuff') end, },
+                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },       -- 81-125
+                { name = "CureSpell",         cond = function(self) return Config:GetSetting('MemCureSpell') end, },
+
+                -- DPS
+                { name = "ChaoticDot",        cond = function(self) return Config:GetSetting('DoPoisonDot') end, },                                                     -- 104-125
+                { name = "SaryrnDot",         cond = function(self) return not Core.GetResolvedActionMapItem('ChaoticDot') and Config:GetSetting('DoPoisonDot') end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "PandemicDot",       cond = function(self) return Config:GetSetting('DoDiseaseDot') end, },                                                    -- 103-125
+                { name = "TwinHealNuke",      cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },                                                  -- 85-125
+                { name = "FastPoisonNuke",    cond = function(self) return Config:GetSetting('DoNuke') end, },
+                { name = "PoisonNuke",        cond = function(self) return Config:GetSetting('DoNuke') and not Core.GetResolvedActionMapItem('FastPoisonNuke') end, },
+                { name = "IceNuke",           cond = function(self) return Config:GetSetting('DoNuke') and not Core.GetResolvedActionMapItem('PoisonNuke') end, },
+                { name = "CurseDot2",         cond = function(self) return Config:GetSetting('DoCurseDot') end, },                                                          -- 100-125
+                { name = "CurseDot1",         cond = function(self) return Config:GetSetting('DoCurseDot') and not Core.GetResolvedActionMapItem('CurseDot2') end, },       -- 34-??? Heal, 34-125 Hybrid
+                { name = "AfflictionDot",     cond = function(self) return not Core.GetResolvedActionMapItem('PandemicDot') and Config:GetSetting('DoDiseaseDot') end, },   -- 92-125 (Boss Only)
+                { name = "UltorDot",          cond = function(self) return not Core.GetResolvedActionMapItem('AfflictionDot') and Config:GetSetting('DoDiseaseDot') end, }, -- 4-91 (Boss Only)
+
+                -- Filler
+                { name = "CurePoison",        cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
+                { name = "CureDisease",       cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
+                { name = "RemoveCurse",       cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
+                { name = "GroupHealProcBuff", }, -- 101-125,
+                { name = "RecklessHeal3", },
+                { name = "SlowProcBuff", },
             },
         },
         {
-            gem = 7,
+            name = "Hybrid Mode",
+            cond = function(self) return Core.IsModeActive("Hybrid") end,
             spells = {
-                { name = "GroupRenewalHoT", cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoHealOverTime') end, },      -- 44-125 Heal
-                { name = "SingleRegenBuff", cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 22-55 Convenience
-                { name = "AfflictionDot",   cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",        cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
-                { name = "FastPoisonNuke",  cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "CurseDot1",       cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",       cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-            },
-        },
-        { --We will leave this gem open for buffing until we have 9
-            gem = 8,
-            cond = function(self) return mq.TLO.Me.NumGems() >= 9 end,
-            spells = {
-                --Harnessing of Spirit won't be full-time memmed, but will still be used as needed.
-                { name = "LowLvlAtkBuff",     cond = function(self) return mq.TLO.Me.Level() < 86 end, },                                                 -- 60-85
-                { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 101-125,
-                { name = "RecklessHeal3",     cond = function(self) return Core.IsModeActive("Heal") end, },
-                { name = "SlowProcBuff", },
-            },
-        },
-        { --55, we will leave this gem open for buffing until we have 10
-            gem = 9,
-            cond = function(self) return mq.TLO.Me.NumGems() >= 10 end,
-            spells = {
-                { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 101-125,
-                { name = "RecklessHeal3",     cond = function(self) return Core.IsModeActive("Heal") end, },
-                { name = "SlowProcBuff", },
-            },
-        },
-        { --75, we will leave this gem open for buffing until we have 11
-            gem = 10,
-            cond = function(self) return mq.TLO.Me.NumGems() >= 11 end,
-            spells = {
-                { name = "CurseDot2",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 100-125
-                { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 101-125,
-                { name = "RecklessHeal3",     cond = function(self) return Core.IsModeActive("Heal") end, },
-                { name = "SlowProcBuff", },
-            },
-        },
-        { --80, we will leave this gem open for buffing until we have 12
-            gem = 11,
-            cond = function(self) return mq.TLO.Me.NumGems() >= 12 end,
-            spells = {
-                { name = "PandemicDot",       cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 103-125
-                { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 101-125,
-                { name = "RecklessHeal3",     cond = function(self) return Core.IsModeActive("Heal") end, },
-                { name = "SlowProcBuff", },
-            },
-        },
-        { --80, we will allow this gem to be filled for the convenience of buffing at the risk of having it overwritten due to a pause, etc.
-            gem = 12,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "ChaoticDot",        cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 104-125
-                { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 101-125,
-                { name = "RecklessHeal3",     cond = function(self) return Core.IsModeActive("Heal") end, },
-                { name = "SlowProcBuff", },
-            },
-        },
-        { --105, we will allow this gem to be filled for the convenience of buffing (or an extra nuke) at the risk of having it overwritten due to a pause, etc.
-            gem = 13,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, }, -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },     -- 52-125 Heal
-                { name = "GroupHealProcBuff", cond = function(self) return Core.IsModeActive("Heal") end, },     -- 101-125
-                { name = "PoisonNuke",        cond = function(self) return Core.IsModeActive("Hybrid") end, },   -- Hey, why not?
-                { name = "SlowProcBuff", },                                                                      --fallback
+                -- Role-Critical
+                { name = "RecklessHeal1", },
+                { name = "RecourseHeal", },
+                { name = "InterventionHeal", },
+                { name = "AESpiritualHeal", },
+                { name = "SlowSpell",         cond = function(self) return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow') end, },          -- 27-77
+                { name = "DiseaseSlow",       cond = function(self) return Config:GetSetting('DoDiseaseSlow') end, },
+                { name = "AESlowSpell",       cond = function(self) return not Casting.CanUseAA("Turgur's Virulent Swarm") and Config:GetSetting('DoAESlow') end, }, -- 58-79
+                { name = "MaloSpell",         cond = function(self) return not Casting.CanUseAA("Malaise") and Config:GetSetting('DoSTMalo') end, },                 -- 47-74
+                { name = "AEMaloSpell",       cond = function(self) return not Casting.CanUseAA("Wind of Malaise") and Config:GetSetting('DoAEMalo') end, },         -- 84-94
+                { name = "DichoSpell", },
+                { name = "MeleeProcBuff",     cond = function(self) return not Core.GetResolvedActionMapItem('DichoSpell') end, },
+                { name = "LowLvlAtkBuff",     cond = function(self) return mq.TLO.Me.Level() < 86 end, },
 
+                -- DPS
+                { name = "ChaoticDot",        cond = function(self) return Config:GetSetting('DoPoisonDot') end, },                                                     -- 104-125
+                { name = "SaryrnDot",         cond = function(self) return not Core.GetResolvedActionMapItem('ChaoticDot') and Config:GetSetting('DoPoisonDot') end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "PandemicDot",       cond = function(self) return Config:GetSetting('DoDiseaseDot') end, },                                                    -- 103-125
+                { name = "FastPoisonNuke",    cond = function(self) return Config:GetSetting('DoNuke') end, },
+                { name = "PoisonNuke",        cond = function(self) return Config:GetSetting('DoNuke') and not Core.GetResolvedActionMapItem('FastPoisonNuke') end, },
+                { name = "IceNuke",           cond = function(self) return Config:GetSetting('DoNuke') and not Core.GetResolvedActionMapItem('PoisonNuke') end, },
+                { name = "CurseDot2",         cond = function(self) return Config:GetSetting('DoCurseDot') end, },                                                          -- 100-125
+                { name = "CurseDot1",         cond = function(self) return Config:GetSetting('DoCurseDot') end, },                                                          -- 34-??? Heal, 34-125 Hybrid
+                { name = "SaryrnDot",         cond = function(self) return Config:GetSetting('DoPoisonDot') end, },                                                         -- backup for if Chaotic is Down
+                { name = "AfflictionDot",     cond = function(self) return Config:GetSetting('DoDiseaseDot') end, },                                                        -- 92-125 (Boss Only)
+                { name = "UltorDot",          cond = function(self) return not Core.GetResolvedActionMapItem('AfflictionDot') and Config:GetSetting('DoDiseaseDot') end, }, -- 4-91 (Boss Only)
+                { name = "PoisonNuke",        cond = function(self) return Config:GetSetting('DoNuke') end, },
+                { name = "TwinHealNuke",      cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },                                                      -- 85-125
+
+                -- Utility, Filler
+                { name = "CanniSpell",        cond = function(self) return Config:GetSetting('DoSpellCanni') end, },   -- 23 - ???
+                { name = "GroupRenewalHoT",   cond = function(self) return Config:GetSetting('DoHealOverTime') end, }, -- 44-125 Heal
+                { name = "SingleRegenBuff",   cond = function(self) return not Core.GetResolvedActionMapItem('GroupRegenBuff') end, },
+                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },       -- 81-125
+                { name = "TwinHealNuke",      cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, }, -- 85-125
+                { name = "CureSpell",         cond = function(self) return Config:GetSetting('MemCureSpell') end, },
+                { name = "CurePoison",        cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
+                { name = "CureDisease",       cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
+                { name = "RemoveCurse",       cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
+                { name = "RecklessHeal2", },
+                { name = "GroupHealProcBuff", }, -- 101-125,
+                { name = "SlowProcBuff", },
             },
         },
     },
@@ -1740,18 +1626,6 @@ local _ClassConfig = {
             AbilityRange = 150,
             cond = function(self)
                 local resolvedSpell = Core.GetResolvedActionMapItem('SlowSpell')
-                if not resolvedSpell then return false end
-                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
-            end,
-        },
-        {
-            id = 'DDSpell',
-            Type = "Spell",
-            DisplayName = "Burst of Flame",
-            AbilityName = "Burst of Flame",
-            AbilityRange = 150,
-            cond = function(self)
-                local resolvedSpell = mq.TLO.Spell("Burst of Flame")
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
@@ -1771,11 +1645,33 @@ local _ClassConfig = {
             Answer =
             "Heal Mode: Primarily focuses on healing, cures, and maintaining HoTs. Secondary DPS focus with remaining spell gems. Hybrid: Prioritizes slightly more DPS at the expense of keeping a HoT, Cure Spell and second Reckless heal memorized.",
         },
-        ['DoTwinHeal']        = {
+
+        --DPS
+        ['DoHealDPS']         = {
+            DisplayName = "Heal Mode DPS",
+            Category = "DPS",
+            Index = 1,
+            Tooltip = "This is a top-level setting that governs any DPS spells in heal mode, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "I feel that my Shaman is too concerned with DPS, dots and nukes, what can be done?",
+            Answer = "Disabling Use HealDPS will stop the use of these spells. You can control which individual spells you mem with their respective settings.",
+        },
+        ['DoNuke']            = {
+            DisplayName = "Use Nukes",
+            Category = "DPS",
+            Index = 2,
+            Tooltip = "Use a level-appropriate single-target nuke.\n" ..
+                "Heal Mode: We will choose one avaiable nuke: Fast Poison (Bite) > Poison (Venom) > Ice.\n" ..
+                "Hybrid Mode: Uses Fast Poison (Bite) and Poison (Venom), and Ice Nuke before they are available.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoTwinHealNuke']    = {
             DisplayName = "Twin Heal Nuke",
-            Category = "Heal Mode",
+            Category = "DPS",
             Index = 3,
-            Tooltip = "Heal Mode: Use Twin Heal Nuke Spells",
+            Tooltip = "Use Twin Heal Nuke Spells",
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
@@ -1783,20 +1679,42 @@ local _ClassConfig = {
             Answer =
             "Due to the nature of automation, we are likely to have the time to do so, and it helps hedge our bets against spike damage. Drivers that manually target switch may wish to disable this setting to allow for more cross-dotting. ",
         },
-        ['DoHealDPS']         = {
-            DisplayName = "Heal DPS",
-            Category = "Heal Mode",
-            Index = 1,
-            Tooltip = "Heal Mode: Use DoTs and Nukes",
+        ['DoPoisonDot']       = {
+            DisplayName = "Use Poison DoTs",
+            Category = "DPS",
+            Index = 4,
+            Tooltip = "Use one or more mode- and level-appropriate poison dots.\n" ..
+                "Heal Mode: Saryrn line is used until Chaotic line is available.\n" ..
+                "Hybrid Mode: Both Curse lines are used.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I feel that my Shaman is too concerned with DPS, dots and nukes, what can be done?",
-            Answer = "Disabling Use HealDPS will stop the use of these spells and may add extra buffs or heals to their gems.",
         },
+        ['DoDiseaseDot']      = {
+            DisplayName = "Use Disease DoTs",
+            Category = "DPS",
+            Index = 5,
+            Tooltip = "Use one or more mode- and level-appropriate poison dots.\n" ..
+                "Heal Mode: Uses the best of Pandemic > Afflicition > Ultor on named.\n" ..
+                "Hybrid Mode: Uses Pandemic and Affliction on named, and Ultor before they are available.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoCurseDot']        = {
+            DisplayName = "Use Curse DoTs",
+            Category = "DPS",
+            Index = 6,
+            Tooltip = "Use one or more mode- and level-appropriate curse dots.\n" ..
+                "Heal Mode: Curse line is used until X's Curse line is available.\n" ..
+                "Hybrid Mode: Both Curse lines are used.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+
+        -- Healing
         ['DoHealOverTime']    = {
             DisplayName = "Use HoTs",
-            Category = "Heal Mode",
-            Index = 2,
+            Category = "Healing",
+            Index = 1,
             Tooltip = "Heal Mode: Use Heal Over Time Spells",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1804,15 +1722,27 @@ local _ClassConfig = {
             FAQ = "Why does my Shaman randomly use HoTs in downtime?",
             Answer = "Maintaining HoTs prevents emergencies and hopefully allows for better DPS. It also grants Synergy Procs at high level.",
         },
+        ['MemCureSpell']      = {
+            DisplayName = "Mem Cure Spell",
+            Category = "Healing",
+            Index = 2,
+            Tooltip = "Mem your cure spells:\n" ..
+                "Heal Mode: Prioritizes the combined cure spell. Memorizes others if able, if the combined spell isn't available.\n" ..
+                "Hybrid Mode: Will memorize cure spells, if able, after other selected DPS spells have been prioritized.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            ConfigType = "Advanced",
+        },
         ['DoChestClick']      = {
             DisplayName = "Do Chest Click",
-            Category = "Heal Mode",
+            Category = "Healing",
             Index = 3,
             Tooltip = "Click your equipped chest.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "What the heck is a chest click?",
             Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHM's is generally a healing tool (emergency group heal).",
         },
+        --Canni
         ['DoAACanni']         = {
             DisplayName = "Use AA Canni",
             Category = "Canni",
