@@ -664,8 +664,11 @@ return {
             "Armor of Reverence",
             "Armor of Zeal",
         },
-        ["Undeadburn"] = {
+        ["Holyforge"] = {
             "Holyforge Discipline",
+        },
+        ["Pureforge"] = {
+            "Pureforge Discipline",
         },
         ["Pentientarmor"] = {
             -- Pentient Armor Discipline
@@ -891,7 +894,14 @@ return {
                 type = "AA",
             },
             {
-                name = "Undeadburn",
+                name = "Holyforge",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.NoDiscActive() and Targeting.TargetBodyIs(target, "Undead")
+                end,
+            },
+            {
+                name = "Pureforge",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.NoDiscActive()
