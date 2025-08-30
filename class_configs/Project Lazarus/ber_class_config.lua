@@ -23,7 +23,7 @@ return {
     ['AbilitySets']     = {
         ['EndRegen'] = {
             "Third Wind",
-            "Second Wind",
+            --"Second Wind",
         },
         ['BerAura'] = {
             "Aura of Rage",
@@ -146,7 +146,7 @@ return {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() <= 15
+                    return mq.TLO.Me.PctEndurance() <= 15 and mq.TLO.Me.Combat()
                 end,
             },
             {

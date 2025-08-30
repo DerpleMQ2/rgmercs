@@ -257,13 +257,6 @@ local _ClassConfig = {
     ['Rotations']       = {
         ['Downtime'] = {
             {
-                name = "EndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 15
-                end,
-            },
-            {
                 name = "AuraBuff",
                 type = "Disc",
                 active_cond = function(self, discSpell)

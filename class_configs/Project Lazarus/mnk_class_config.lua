@@ -6,7 +6,7 @@ local Logger       = require("utils.logger")
 local Core         = require("utils.core")
 
 local _ClassConfig = {
-    _version            = "2.0 - Project Lazarus",
+    _version            = "2.1 - Project Lazarus",
     _author             = "Algar, Derple",
     ['Modes']           = {
         'DPS',
@@ -16,216 +16,56 @@ local _ClassConfig = {
             "Transcended Fistwraps of Immortality",
             "Fistwraps of Celestial Discipline",
         },
-        ['Coating'] = {
-            "Spirit Drinker's Coating",
-            "Blood Drinker's Coating",
+        ['OoW_Chest'] = {
+            "Fiercehand's Ascendant Shroud of the Focused",
+            "Fiercehand Shroud of the Focused",
+            "Stillmind Tunic",
         },
     },
     ['AbilitySets']     = {
         ['EndRegen'] = {
-            --Timer 13, can't be used in combat
-            "Second Wind", -- Level 72
             "Third Wind",
-            "Fourth Wind",
-            "Respite",
-            "Reprieve",
-            "Rest",
-            "Breather", --Level 101
-        },
-        ['CombatEndRegen'] = {
-            --Timer 13, can be used in combat.
-            "Hiatus", --Level 106
-            "Relax",
-            "Night's Calming",
-            "Convalesce",
+            --"Second Wind",
         },
         ['MonkAura'] = {
-            "Disciple's Aura",
             "Master's Aura",
-        },
-        ['Dicho'] = {
-            "Dichotomic Form",
-            "Dissident Form",
-            "Composite Form",
-            "Ecliptic Form",
-            "Reciprocal Form",
-        },
-        ['Drunken'] = {
-            "Drunken Monkey Style",
-        },
-        ['Curse'] = {
-            -- Curse Line - Alternating expansions
-            "Curse of the Thirteen Fingers", -- 103 TBM
-            "Curse of Fourteen Fists",       -- 108 TBM
-            "Curse of Fifteen Strikes",      -- 113 COV
-            "Curse of Sixteen Shadows",      -- 118 NOS
-            "Curse of Seventeen Facets",     -- 123 TOB
+            "Disciple's Aura",
         },
         ['Fang'] = {
             "Dragon Fang",
-            "Zalikor's Fang",
-            "Hoshkar's Fang",
-            "Zlexak's Fang",
-            "Uncia's Fang",
-        },
-        ['Fists'] = {
-            "Buffeting of Fists",
-            "Wheel of Fists",
-            "Whorl of Fists",
-            "Torrent of Fists",
-            "Firestorm of Fists",
-            "Barrage of Fists",
-            "Flurry of Fists",
-        },
-        ['Precision1'] = {
-            "Doomwalker's Precision Strike",
-            "Firewalker's Precision Strike",
-            "Icewalker's Precision Strike",
-            "Bloodwalker's Precision Strike",
-            "Fatewalker's Precision Strike",
-        },
-        ['Precision2'] = {
-            "Doomwalker's Precision Strike",
-            "Firewalker's Precision Strike",
-            "Icewalker's Precision Strike",
-            "Bloodwalker's Precision Strike",
-            "Fatewalker's Precision Strike",
-        },
-        ['Precision3'] = {
-            "Doomwalker's Precision Strike",
-            "Firewalker's Precision Strike",
-            "Icewalker's Precision Strike",
-            "Bloodwalker's Precision Strike",
-            "Fatewalker's Precision Strike",
-        },
-        ['Precision4'] = {
-            "Doomwalker's Precision Strike",
-            "Firewalker's Precision Strike",
-            "Icewalker's Precision Strike",
-            "Bloodwalker's Precision Strike",
-            "Fatewalker's Precision Strike",
-        },
-        ['Precision5'] = {
-            "Doomwalker's Precision Strike",
-            "Firewalker's Precision Strike",
-            "Icewalker's Precision Strike",
-            "Bloodwalker's Precision Strike",
-            "Fatewalker's Precision Strike",
-        },
-        ['Shuriken'] = {
-            "Vigorous Shuriken",
-        },
-        ['CraneStance'] = {
-            "Crane Stance",
-            "Heron Stance",
-        },
-        ['Synergy'] = {
-            "Fatewalker's Synergy",  -- LS 125
-            "Bloodwalker's Synergy", -- TOL 120
-            "Calanin's Synergy",
-            "Dreamwalker's Synergy",
-            "Veilwalker's Synergy",
-            "Shadewalker's Synergy",
-            "Doomwalker's Synergy",
-            "Firewalker's Synergy",
-            "Icewalker's Synergy",
-        },
-        ['Alliance'] = {
-            -- Alliance line - Alternates expansions
-            "Doomwalker's Alliance",
-            "Firewalker's Covenant",
-            "Icewalker's Coalition",     -- COV
-            "Bloodwalker's Conjunction", -- NOS
-            "Fatewalker's Covariance",   -- TOB
-        },
-        ['Storm'] = {
-            "Eye of the Storm",
-        },
-        ['Breaths'] = {
-            --- Breaths Endurance Line
-            "Five Breaths",
-            "Six Breaths",
-            "Seven Breaths",
-            "Eight Breaths",
-            "Nine Breaths",
-            "Breath of Tranquility",
-            "Breath of Stillness",
-            "Moment of Stillness",
+            "Clawstriker's Flurry",
         },
         ['FistsOfWu'] = {
-            --- Fists of Wu - Double Attack
             "Fists Of Wu",
         },
-        ['EarthDisc'] = {
-            -- EarthDisc - Melee Mitigation
+        ['MeleeMit'] = {
+            "Impenetrable Discipline",
             "Earthwalk Discipline",
-            "Earthforce Discipline",
-        },
-        ['ShadedStep'] = {
-            -- ShadedStep - Dodge Bonus 18 Seconds
-            "Void Step",
-            "Shaded Step",
-        },
-        ['RejectDeath'] = {
-            "Repeal Death",
-            "Delay Death",
-            "Defer Death",
-            "Deny Death",
-            "Decry Death",
-            "Forestall Death",
-            "Refuse Death",
-            "Reject Death",
-            "Rescind Death",
-            "Defy Death",
-        },
-        ['DodgeBody'] = {
-            "Void Body",
-            "Veiled Body",
-        },
-        ['MezSpell'] = {
-            "Echo of Disorientation",
-            "Echo of Flinching",
-            "Echo of Diversion",
+            "Stonestance Discipline",
         },
         ['FistDisc'] = {
-            "Ashenhand Discipline",
             "Scaledfist Discipline",
-            "Ironfist Discipline",
+            "Ashenhand Discipline",
+            "Thunderkick Discipline",
         },
         ['Heel'] = {
-            "Rapid Kick Discipline",
-            "Heel of Kanji",
             "Heel of Kai",
-            "Heel of Kojai",
-            "Heel of Zagali",
+            "Heel of Kanji",
         },
         ['Speed'] = {
-            "Hundred Fists Discipline",
             "Speed Focus Discipline",
         },
         ['Palm'] = {
-            "Innerflame Discipline",
             "Crystalpalm Discipline",
-            "Diamondpalm Discipline",
-            "Terrorpalm Discipline",
+            "Hundred Fists Discipline",
+            "Innerflame Discipline",
         },
-        ['Poise'] = {
-            "Dragon's Poise",
-            "Tiger's Poise",
-            "Eagle's Poise",
-            "Tiger's Symmetry",
-        },
+        -- ['ResistantDisc'] = {
+        --     "Dreamwalk Discipline",
+        --     "Resistant Discipline",
+        -- },
     },
     ['HelperFunctions'] = {
-        BurnDiscCheck = function(self)
-            if mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') then return false end
-            local burnDisc = { "Heel", "Speed", "FistDisc", "Palm", }
-            for _, buffName in ipairs(burnDisc) do
-                local resolvedDisc = self:GetResolvedActionMapItem(buffName)
-                if resolvedDisc and resolvedDisc.RankName() == mq.TLO.Me.ActiveDisc.Name() then return false end
-            end
-            return true
-        end,
         --function to make sure we don't have non-hostiles in range before we use AE damage
         AETargetCheck = function(printDebug)
             local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
@@ -276,6 +116,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'BurnDisc',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Casting.BurnCheck() and Casting.NoDiscActive()
+            end,
+        },
+        {
             name = 'CombatBuff',
             state = 1,
             steps = 1,
@@ -288,16 +138,6 @@ local _ClassConfig = {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
-            end,
-        },
-        {
-            name = 'Precision',
-            state = 1,
-            steps = 1,
-            load_cond = function(self) return self:GetResolvedActionMapItem('Precision1') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning()
@@ -316,42 +156,13 @@ local _ClassConfig = {
                     return not mq.TLO.Me.Aura(1).ID()
                 end,
             },
-            {
-                name = "EndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
-                    return mq.TLO.Me.PctEndurance() < 15
-                end,
-            },
-            {
-                name = "CombatEndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 15
-                end,
-            },
-            {
-                name = "Breaths",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 15
-                end,
-            },
-            {
-                name = "Mend",
-                type = "Ability",
-                cond = function(self, abilityName)
-                    return mq.TLO.Me.PctHPs() < 50
-                end,
-            },
         },
         ['Emergency'] = {
             {
                 name = "Imitate Death",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('AggroFeign') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('AggroFeign') then return false end
                     return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 99)
                         and not Core.IAmMA
                 end,
@@ -359,23 +170,23 @@ local _ClassConfig = {
             {
                 name = "Feign Death",
                 type = "Ability",
+                load_cond = function(self) return Config:GetSetting('AggroFeign') end,
                 cond = function(self, abilityName)
-                    if not Config:GetSetting('AggroFeign') then return false end
                     return Targeting.IHaveAggro(80) and not Core.IAmMA
                 end,
             },
             {
-                name = "Defy Death",
+                name = "MeleeMit",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() < 25
+                cond = function(self, aaName)
+                    return mq.TLO.Me.PctHPs() < 35
                 end,
             },
             {
                 name = "Armor of Experience",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
                     return mq.TLO.Me.PctHPs() < 35
                 end,
             },
@@ -387,10 +198,10 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Coating",
+                name = "Blood Drinker's Coating",
                 type = "Item",
+                load_cond = function(self) return Config:GetSetting('DoCoating') end,
                 cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoCoating') then return false end
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
@@ -398,75 +209,29 @@ local _ClassConfig = {
                 name = "Epic",
                 type = "Item",
             },
+            {
+                name = "OoW_Chest",
+                type = "Item",
+            },
         },
         ['Burn'] = {
-            { -- 5m reuse
-                name = "Dicho",
-                type = "Disc",
-            },
-            { -- 5m reuse
-                name = "Ton Po's Stance",
+            {
+                name = "Fundament: Third Spire of the Sensei",
                 type = "AA",
             },
             {
-                name = "Heel",
-                type = "Disc",
-            },
-            {
-                name = "Speed",
-                type = "Disc",
-            },
-            {
-                name = "FistDisc",
-                type = "Disc",
-            },
-            {
-                name = "Palm",
-                type = "Disc",
-            },
-            {
-                name = "Spire of the Sensei",
+                name = "Zan Fi's Thunderous Whistle", --overwrites infusion of thunder
                 type = "AA",
-            },
-            {
-                name = "Infusion of Thunder",
-                type = "AA",
-            },
-            { --Chest Click, name function stops errors in rotation window when slot is empty
-                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
-            { --10m reuse
-                name = "CraneStance",
-                type = "Disc",
-            },
-            { --20m reuse, using NOT burndisccheck means we will only use this with a burn disc active
-                name = "Poise",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
-            },
-            { --pairs with Speed Focus Disc, AE, T2
+            {
                 name = "Destructive Force",
                 type = "AA",
                 cond = function(self, aaName)
-                    local speedDisc = self:GetResolvedActionMapItem("Speed")
-                    if not Config:GetSetting("DoAEDamage") or not speedDisc then return false end
-                    return mq.TLO.Me.ActiveDisc.Name() == speedDisc.RankName() and self.ClassConfig.HelperFunctions.AETargetCheck()
-                end,
-            },
-            { --pairs with Speed Focus Disc, single target, T2
-                name = "Focused Destructive Force",
-                type = "AA",
-                cond = function(self, aaName)
-                    local speedDisc = self:GetResolvedActionMapItem("Speed")
-                    if Config:GetSetting("DoAEDamage") or not speedDisc then return false end
-                    return mq.TLO.Me.ActiveDisc.Name() == speedDisc.RankName()
+                    if not Config:GetSetting("DoAEDamage") then return false end
+                    return self.ClassConfig.HelperFunctions.AETargetCheck()
                 end,
             },
             {
@@ -477,165 +242,99 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Swift Tails' Chant",
-                type = "AA",
-            },
-            {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
                     return Config:GetSetting('DoVetAA')
                 end,
             },
+            {
+                name = "Five Point Palm",
+                type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoFivePointPalm') end,
+                cond = function(self, aaName)
+                    return Core.GetMainAssistPctHPs() > 80 and mq.TLO.Me.PctHPs() > 80
+                end,
+            },
+        },
+        ['BurnDisc'] = {
+            {
+                name = "Heel",
+                type = "Disc",
+            },
+            {
+                name = "Palm",
+                type = "Disc",
+            },
+            {
+                name = "FistDisc",
+                type = "Disc",
+            },
+            {
+                name = "Speed",
+                type = "Disc",
+            },
         },
         ['CombatBuff'] = {
             {
-                name = "CombatEndRegen",
+                name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
-                name = "Drunken",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
-                name = "Zan Fi's Whistle",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
                 name = "FistsOfWu",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if mq.TLO.Me.Level() >= 100 then return false end
                     return Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
-                name = "Alliance",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    if not Config:GetSetting('DoAlliance') then return false end
-                    return not Casting.TargetHasBuff(discSpell.Trigger(1))
-                end,
-            },
-            {
-                name = "Storm",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.NoDiscActive()
-                end,
-            },
-            {
-                name = "EarthDisc",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.NoDiscActive()
+                name = "Infusion of Thunder",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Me.Buff("Zan Fi's Thunderous Whistle")() then return false end
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
         },
         ['DPS'] = {
             {
-                name = "Synergy",
-                type = "Disc",
-            },
-            {
-                name = "Curse",
-                type = "Disc",
-                cond = function(self, discSpell, target)
-                    return Targeting.MobNotLowHP(target)
-                end,
-            },
-            {
-                name = "Two-Finger Wasp Touch",
+                name = "Eye Gouge",
                 type = "AA",
-                cond = function(self, aaName, target) --DotSpellCheck used in part to not blow this on low-health mobs
-                    return Targeting.MobNotLowHP(target)
+                cond = function(self, aaName, target)
+                    return Casting.DetAACheck(aaName, target)
                 end,
-            },
-            {
-                name = "Fists",
-                type = "Disc",
             },
             {
                 name = "Fang",
                 type = "Disc",
             },
             {
-                name = "Shuriken",
-                type = "Disc",
-            },
-            {
-                name = "Five Point Palm",
-                type = "AA",
-            },
-            {
-                name = "Intimidation",
+                name = "Tiger Claw",
                 type = "Ability",
-                cond = function(self, abilityName)
-                    return Casting.AARank("Intimidation") > 1
-                end,
             },
             {
                 name = "Flying Kick",
                 type = "Ability",
             },
-            {
-                name = "Eagle Strike",
-                type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.PctEndurance() < 25
-                end,
-            },
-            {
-                name = "Tiger Claw",
-                type = "Ability",
-            },
-        },
-        ['Precision'] = {
-            {
-                name = "Precision5",
-                type = "Disc",
-            },
-            {
-                name = "Precision4",
-                type = "Disc",
-            },
-            {
-                name = "Precision3",
-                type = "Disc",
-            },
-            {
-                name = "Precision2",
-                type = "Disc",
-            },
-            {
-                name = "Precision1",
-                type = "Disc",
-            },
         },
     },
     ['PullAbilities']   = {
         {
-            id = 'Distant Strike',
+            id = 'Grappling Strike',
             Type = "AA",
-            DisplayName = 'Distant Strike',
-            AbilityName = 'Distant Strike',
-            AbilityRange = 300,
+            DisplayName = 'Grappling Strike',
+            AbilityName = 'Grappling Strike',
+            AbilityRange = 50,
             cond = function(self)
-                return mq.TLO.Me.AltAbility('Distant Strike')
+                return mq.TLO.Me.AltAbility('Grappling Strike')
             end,
         },
     },
     ['DefaultConfig']   = {
-        ['Mode']           = {
+        ['Mode']            = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this Toon",
@@ -647,26 +346,17 @@ local _ClassConfig = {
             FAQ = "What do the different Modes Do?",
             Answer = "Currently there is only DPS mode for Monks, more modes may be added in the future.",
         },
-        ['DoIntimidation'] = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['DoVetAA']        = {
+        ['DoVetAA']         = {
             DisplayName = "Use Vet AA",
             Category = "Abilities",
             Index = 8,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
+            RequiresLoadoutChange = true,
             FAQ = "What Vet AA's does MNK use?",
             Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
-        ['DoAEDamage']     = {
+        ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
             Category = "Abilities",
             Index = 1,
@@ -675,7 +365,7 @@ local _ClassConfig = {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['AETargetCnt']    = {
+        ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
             Category = "Abilities",
             Index = 2,
@@ -687,7 +377,7 @@ local _ClassConfig = {
             Answer =
             "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
-        ['MaxAETargetCnt'] = {
+        ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
             Category = "Abilities",
             Index = 3,
@@ -700,7 +390,7 @@ local _ClassConfig = {
             Answer =
             "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
         },
-        ['SafeAEDamage']   = {
+        ['SafeAEDamage']    = {
             DisplayName = "AE Proximity Check",
             Category = "Abilities",
             Index = 5,
@@ -711,17 +401,26 @@ local _ClassConfig = {
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
-        ['AggroFeign']     = {
+        ['DoFivePointPalm'] = {
+            DisplayName = "Do Five Point Palm",
+            Category = "Abilities",
+            Index = 6,
+            Tooltip = "Use your Five Point Palm proc AA (slowly drains your life but adds a heavy proc effect).",
+            Default = true,
+            RequiresLoadoutChange = true,
+        },
+        ['AggroFeign']      = {
             DisplayName = "Emergency Feign",
             Category = "Abilities",
             Index = 9,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
+            RequiresLoadoutChange = true,
             FAQ = "How do I use my Feign Death?",
             Answer = "Make sure you have [AggroFeign] enabled.\n" ..
                 "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
         },
-        ['EmergencyStart'] = {
+        ['EmergencyStart']  = {
             DisplayName = "Emergency HP%",
             Category = "Abilities",
             Index = 10,
@@ -733,23 +432,13 @@ local _ClassConfig = {
             FAQ = "How do I use my Emergency Mitigation Abilities?",
             Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
-        ['DoChestClick']   = {
-            DisplayName = "Do Chest Click",
-            Category = "Abilities",
-            Index = 8,
-            Tooltip = "Click your chest item during burns.",
-            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            ConfigType = "Advanced",
-            FAQ = "What is a Chest Click?",
-            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
-                "MNK is set to use theirs during burns, so long as the item equipped has a clicky effect.",
-        },
-        ['DoCoating']      = {
+        ['DoCoating']       = {
             DisplayName = "Use Coating",
             Category = "Equipment",
             Index = 6,
-            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Tooltip = "Click your Blood Drinker's Coating in an emergency.",
             Default = false,
+            RequiresLoadoutChange = true,
             FAQ = "What is a Coating?",
             Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
