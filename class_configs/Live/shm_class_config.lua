@@ -19,28 +19,66 @@ local _ClassConfig = {
         'Hybrid',
     },
     ['Cures']             = {
+        -- this code is slightly ineffecient (we could just check for CureSpell once), but adding corruption or more options would have us change it back to this
+        -- -- since it is only run at startup, i'm fine with it. - Algar 8/29/25
+        GetCureSpells = function(self)
+            --(re)initialize the table for loadout changes
+            self.TempSettings.CureSpells = {}
+
+            -- Find the map for each cure spell we need, given availability of curespell. fallback to individual cures
+            local neededCures = {
+                ['Poison'] = Casting.GetFirstMapItem({ "CureSpell", "CurePoison", }),
+                ['Disease'] = Casting.GetFirstMapItem({ "CureSpell", "CureDisease", }),
+                ['Curse'] = Casting.GetFirstMapItem({ "CureSpell", "CureCurse", }),
+                ['Corruption'] = 'CureCorrupt',
+            }
+
+            -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
+            for k, v in pairs(neededCures) do
+                local cureSpell = Core.GetResolvedActionMapItem(v)
+                if cureSpell then
+                    self.TempSettings.CureSpells[k] = cureSpell
+                end
+            end
+        end,
         CureNow = function(self, type, targetId)
             if Config:GetSetting('DoCureAA') then
                 if Casting.AAReady("Radiant Cure") then
                     return Casting.UseAA("Radiant Cure", targetId)
                 end
             end
-            if Config:GetSetting('DoCureSpells') then
-                local cureSpell
-                --Ensure it is a type the spell can cure (we now check for more than just p/d/c), fallback to earlier spells if needed
-                if type:lower() == "poison" then
-                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('CurePoison')
-                elseif type:lower() == "disease" then
-                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('CureDisease')
-                elseif type:lower() == "curse" then
-                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('RemoveCurse')
-                end
-                --todo: Add corruption cure
+            local targetSpawn = mq.TLO.Spawn(targetId)
+            if not targetSpawn and targetSpawn then return false end
 
-                if not cureSpell or not cureSpell() then return false end
-                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            if Config:GetSetting('DoCureAA') then
+                local cureAA = Casting.AAReady("Radiant Cure") and "Radiant Cure"
+
+                -- I am finding self-cures to be less than helpful when most effects on a healer are group-wide
+                -- if not cureAA and targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                --     cureAA = "Purified Spirits"
+                -- end
+
+                if cureAA then
+                    Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                    return Casting.UseAA(cureAA, targetId)
+                end
             end
 
+            if Config:GetSetting('DoCureSpells') then
+                for effectType, cureSpell in pairs(self.TempSettings.CureSpells) do
+                    if type:lower() == effectType:lower() then
+                        if cureSpell.TargetType():lower() == "group v1" and not Targeting.GroupedWithTarget(targetSpawn) then
+                            Logger.log_debug("CureNow: We cannot use %s on %s, because it is a group-only spell and they are not in our group!", cureSpell.RankName(),
+                                targetSpawn.CleanName() or "Unknown")
+                            return false
+                        end
+                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                        return Casting.UseSpell(cureSpell.RankName(), targetId, true)
+                    end
+                end
+            end
+
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
             return false
         end,
     },
@@ -419,6 +457,18 @@ local _ClassConfig = {
             "Blood of Avoling",
             "Blood of Nadox",
         },
+        ['CureCorrupt'] = {
+            "Chant of the Zelniak",
+            "Chant of the Wulthan",
+            "Chant of the Kromtus",
+            "Chant of Jaerol",
+            "Chant of the Izon",
+            "Chant of the Tae Ew",
+            "Chant of the Burynai",
+            "Chant of the Darkvine",
+            "Chant of the Napaea",
+            "Cure Corruption",
+        },
         ["TwinHealNuke"] = {
             -- Nuke the MA Not the assist target - Levels 85+
             "Gelid Gift",
@@ -649,7 +699,7 @@ local _ClassConfig = {
             "Abolish Poison",
             "Eradicate Poison",
         },
-        ["RemoveCurse"] = {
+        ["CureCurse"] = {
             -- "Eradicate Curse",      -- Level 54 , 30 counters, twice, 400 mana
             "Remove Greater Curse", -- Level 54 , 9 counters, 5 times, 100 mana
             "Remove Curse",         -- Level 38
@@ -1562,7 +1612,7 @@ local _ClassConfig = {
                 -- Filler
                 { name = "CurePoison",        cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
                 { name = "CureDisease",       cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
-                { name = "RemoveCurse",       cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
+                { name = "CureCurse",         cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
                 { name = "GroupHealProcBuff", }, -- 101-125,
                 { name = "RecklessHeal3", },
                 { name = "SlowProcBuff", },
@@ -1610,7 +1660,7 @@ local _ClassConfig = {
                 { name = "CureSpell",         cond = function(self) return Config:GetSetting('MemCureSpell') end, },
                 { name = "CurePoison",        cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
                 { name = "CureDisease",       cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
-                { name = "RemoveCurse",       cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
+                { name = "CureCurse",         cond = function(self) return not Core.GetResolvedActionMapItem('CureSpell') and Config:GetSetting('MemCureSpell') end, },
                 { name = "RecklessHeal2", },
                 { name = "GroupHealProcBuff", }, -- 101-125,
                 { name = "SlowProcBuff", },

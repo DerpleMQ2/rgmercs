@@ -3,6 +3,7 @@ local Config       = require('utils.config')
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
+local Logger       = require("utils.logger")
 
 local _ClassConfig = {
     _version              = "1.1 - Live",
@@ -19,18 +20,56 @@ local _ClassConfig = {
         'Mana',
     },
     ['Cures']             = {
-        CureNow = function(self, type, targetId)
-            if Config:GetSetting('DoCureAA') then
-                if Casting.AAReady("Radiant Cure") then
-                    return Casting.UseAA("Radiant Cure", targetId)
+        -- this code is slightly ineffecient since we only have SingleTgtCure here, but adding more options would have us change it back to this
+        -- -- since it is only run at startup, i'm fine with it. - Algar 8/29/25
+        GetCureSpells = function(self)
+            --(re)initialize the table for loadout changes
+            self.TempSettings.CureSpells = {}
+
+            -- Find the map for each cure spell we need
+            local neededCures = {
+                ['Poison'] = Casting.GetFirstMapItem({ "GroupCure", "SingleTgtCure", }),
+                ['Disease'] = Casting.GetFirstMapItem({ "GroupCure", "SingleTgtCure", }),
+                ['Curse'] = Casting.GetFirstMapItem({ "GroupCure", "SingleTgtCure", }),
+                ['Corruption'] = Casting.GetFirstMapItem({ "CureCorrupt", "SingleTgtCure", }),
+            }
+
+            -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
+            for k, v in pairs(neededCures) do
+                local cureSpell = Core.GetResolvedActionMapItem(v)
+                if cureSpell then
+                    self.TempSettings.CureSpells[k] = cureSpell
                 end
             end
-            if Config:GetSetting('DoCureSpells') then
-                local cureSpell = Core.GetResolvedActionMapItem('SingleTgtCure')
-                if not cureSpell or not cureSpell() then return false end
-                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+        end,
+        CureNow = function(self, type, targetId)
+            local targetSpawn = mq.TLO.Spawn(targetId)
+            if not targetSpawn and targetSpawn then return false end
+
+            if Config:GetSetting('DoCureAA') then
+                local cureAA = Casting.AAReady("Radiant Cure") and "Radiant Cure"
+
+                -- I am finding self-cures to be less than helpful when most effects on a healer are group-wide
+                -- if not cureAA and targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                --     cureAA = "Purified Spirits"
+                -- end
+
+                if cureAA then
+                    Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                    return Casting.UseAA(cureAA, targetId)
+                end
             end
 
+            if Config:GetSetting('DoCureSpells') then
+                for effectType, cureSpell in pairs(self.TempSettings.CureSpells) do
+                    if type:lower() == effectType:lower() then
+                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                        return Casting.UseSpell(cureSpell.RankName(), targetId, true)
+                    end
+                end
+            end
+
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
             return false
         end,
     },
@@ -80,6 +119,18 @@ local _ClassConfig = {
             "Perfected Blood",
             "Purged Blood",
             "Purified Blood",
+        },
+        ['CureCorrupt'] = {
+            "Chant of the Zelniak",
+            "Chant of the Wulthan",
+            "Chant of the Kromtus",
+            "Chant of Jaerol",
+            "Chant of the Izon",
+            "Chant of the Tae Ew",
+            "Chant of the Burynai",
+            "Chant of the Darkvine",
+            "Chant of the Napaea",
+            "Cure Corruption",
         },
         ['GroupCure'] = {
             -- Group Multi-Cure >=91

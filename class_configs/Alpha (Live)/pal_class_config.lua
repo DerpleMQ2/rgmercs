@@ -23,27 +23,54 @@ local _ClassConfig = {
         --'DPS',
     },
     ['Cures']             = {
+        GetCureSpells = function(self)
+            --(re)initialize the table for loadout changes
+            self.TempSettings.CureSpells = {}
+
+            -- Find the map for each cure spell we need
+            local neededCures = {
+                ['Poison'] = 'PurityCure',
+                ['Disease'] = 'PurityCure',
+                ['Curse'] = Casting.GetFirstMapItem({ "PurityCure", "CureCurse", }),
+                -- ['Corruption'] = -- todo, homework
+            }
+
+            -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
+            for k, v in pairs(neededCures) do
+                local cureSpell = Core.GetResolvedActionMapItem(v)
+                if cureSpell then
+                    self.TempSettings.CureSpells[k] = cureSpell
+                end
+            end
+        end,
         CureNow = function(self, type, targetId)
+            local targetSpawn = mq.TLO.Spawn(targetId)
+            if not targetSpawn and targetSpawn then return false end
+
             if Config:GetSetting('DoCureAA') then
-                if Casting.AAReady("Radiant Cure") then
-                    return Casting.UseAA("Radiant Cure", targetId)
+                local cureAA = Casting.AAReady("Radiant Cure") and "Radiant Cure"
+
+                if not cureAA and targetId == mq.TLO.Me.ID() and Casting.AAReady("Purification") then
+                    cureAA = "Purification"
+                end
+
+                if cureAA then
+                    Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                    return Casting.UseAA(cureAA, targetId)
                 end
             end
 
+            if Config:GetSetting('DoCureSpells') then
+                for effectType, cureSpell in pairs(self.TempSettings.CureSpells) do
+                    if type:lower() == effectType:lower() then
+                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                        return Casting.UseSpell(cureSpell.RankName(), targetId, true)
+                    end
+                end
+            end
+
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
             return false
-            --local cureSpell = Core.GetResolvedActionMapItem('Puritycure')
-
-            -- if type:lower() == "poison" then
-            -- cureSpell = Core.GetResolvedActionMapItem('Puritycure')
-            -- elseif type:lower() == "curse" then
-            -- cureSpell = Core.GetResolvedActionMapItem('Puritycure')
-            --TODO: Add corruption AbilitySet
-            -- elseif type:lower() == "corruption" then
-            -- cureSpell = Core.GetResolvedActionMapItem('Puritycure')
-            -- end
-
-            -- if not cureSpell or not cureSpell() then return false end
-            -- return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
         end,
     },
     ['ItemSets']          = {
@@ -563,7 +590,7 @@ local _ClassConfig = {
             "Ecliptic Force",
             "Reciprocal Force",
         },
-        ["Puritycure"] = {
+        ["PurityCure"] = {
             --- Purity Cure Poison/Diease Cure Half Power to curse
             "Balanced Purity",
             "Devoted Purity",
@@ -572,6 +599,13 @@ local _ClassConfig = {
             "Reverent Purity",
             "Ardent Purity",
             "Merciful Purity",
+        },
+        ["CureCurse"] = {
+            -- Curse Cure Line
+            "Remove Minor Curse",
+            "Remove Lesser Curse",
+            "Remove Curse",
+            "Remove Greater Curse",
         },
         ["ForHonor"] = {
             --- Challenge Taunt Over time Debuff

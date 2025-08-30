@@ -215,9 +215,17 @@ local _ClassConfig = {
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
+            local targetSpawn = mq.TLO.Spawn(targetId)
+            if not targetSpawn and targetSpawn() then return false end
+
             local cureSong = Core.GetResolvedActionMapItem('CureSong')
-            if not cureSong or not cureSong() then return false end
-            return Casting.UseSong(cureSong.RankName.Name(), targetId, true)
+            local downtime = mq.TLO.Me.CombatState():lower() ~= "combat"
+            if type:lower() == ("disease" or "poison") and Casting.SongReady(cureSong, downtime) then
+                Logger.log_debug("CureNow: Using %s for %s on %s.", cureSong.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                return Casting.UseSong(cureSong.RankName.Name(), targetId, downtime)
+            end
+            Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+            return false
         end,
     },
     ['ItemSets']        = {
