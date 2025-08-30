@@ -1,17 +1,17 @@
 --- @type Mq
-local mq          = require('mq')
-local Config      = require('utils.config')
-local Core        = require("utils.core")
-local Targeting   = require("utils.targeting")
-local Casting     = require("utils.casting")
-local Strings     = require("utils.strings")
-local Logger      = require("utils.logger")
-local ItemManager = require('utils.item_manager')
+local mq           = require('mq')
+local Config       = require('utils.config')
+local Core         = require("utils.core")
+local Targeting    = require("utils.targeting")
+local Casting      = require("utils.casting")
+local Strings      = require("utils.strings")
+local Logger       = require("utils.logger")
+local ItemManager  = require('utils.item_manager')
 
-local Tooltips    = {
+local Tooltips     = {
     Epic            = 'Item: Casts Epic Weapon Ability',
     BardRunBuff     = "Song Line: Movement Speed Modifier",
-    MainAriaSong    = "Song Line: Spell Damage Focus / Haste v3 Modifier",
+    AriaSong        = "Song Line: Spell Damage Focus / Haste v3 Modifier",
     WarMarchSong    = "Song Line: Melee Haste / DS / STR/ATK Increase",
     SufferingSong   = "Song Line: Melee Proc With Damage and Agro Reduction",
     SpitefulSong    = "Song Line: Increase AC / Agro Increase Proc",
@@ -41,7 +41,6 @@ local Tooltips    = {
     CharmSong       = "Song Line: Charm Mob",
     ReflexStrike    = "Disc Line: Attack 4 times to restore Mana to Group",
     ChordsAE        = "Song Line: PBAE Damage if Target isn't moving",
-    LowAriaSong     = "Song Line: Warsong and BattleCry prior to combination of effects into Aria",
     AmpSong         = "Song Line: Increase Singing Skill",
     DispelSong      = "Song Line: Dispel a Benefical Effect",
     ResistSong      = "Song Line: Damage Shield / Group Resist Increase",
@@ -56,154 +55,11 @@ local Tooltips    = {
     Jonthan         = "Song Line: (Self-only) Haste / Melee Damage Modifier / Melee Min Damage Modifier / Proc Modifier",
 }
 
-local function generateSongList()
-    if mq.TLO.Plugin('MQ2Medley').IsLoaded() then
-        Core.DoCmd("/plugin medley unload")
-    end
-    Logger.log_info(
-        "Bard Gem List being calculated. *** PLEASE NOTE: Click-happy behavior when selecting songs in the configuration may lead to low uptime or songs not being gemmed at all! YOU HAVE BEEN WARNED. ***")
-    local songCache = { CollapseGems = true, }
-    local songCount = 0
-    local myLevel = mq.TLO.Me.Level()
-    --------------------------------------------------------------------------------------
-    local function addSong(songToAdd)
-        if songCount >= mq.TLO.Me.NumGems() then return end
-        songCount = songCount + 1
-        table.insert(songCache, {
-            gem = songCount,
-            spells = {
-                { name = songToAdd, cond = function(self) return true end, },
-            },
-        })
-    end
-
-    local function ConditionallyAddSong(settingToCheck, songToAdd, minLevel, configType)
-        if myLevel < minLevel then return false end
-        if configType == "combo" then
-            if Config:GetSetting(settingToCheck) > 1 then addSong(songToAdd) end
-        else --if a third category is ever needed this can become "toggle" or somesuch
-            if Config:GetSetting(settingToCheck) then addSong(songToAdd) end
-        end
-    end
-
-    local function AddCriticalSongs()
-        ConditionallyAddSong("DoAEMez", "MezAESong", 85)
-        ConditionallyAddSong("DoSTMez", "MezSong", 15)
-        ConditionallyAddSong("DoSTSlow", "SlowSong", 23)
-        ConditionallyAddSong("DoAESlow", "AESlowSong", 20)
-        if Config:GetSetting('UseRunBuff') == 2 and myLevel >= 49 then
-            addSong("LongRunBuff")
-        elseif Config:GetSetting('UseRunBuff') == 3 then
-            addSong("ShortRunBuff")
-        end
-        ConditionallyAddSong("UseEndBreath", "EndBreathSong", 16)
-        ConditionallyAddSong("CharmOn", "CharmSong", 16)
-        ConditionallyAddSong("DoDispel", "DispelSong", 40)
-    end
-
-    local function AddMainGroupDPSSongs()
-        if myLevel >= 10 then addSong('WarMarchSong') end --leaving this mandatory but may revisit pending feedback
-        if myLevel >= 64 or (myLevel >= 45 and Config:GetSetting('AriaBeforeOverhaste')) then addSong('MainAriaSong') end
-        ConditionallyAddSong("UseArcane", "ArcaneSong", 70, "combo")
-        ConditionallyAddSong('UseDicho', 'DichoSong', 101, "combo")
-    end
-
-    local function AddSelfDPSSongs()
-        ConditionallyAddSong("UseAlliance", "AllianceSong", 102)
-        if Config:GetSetting('UseInsult') > 1 and myLevel >= 85 then addSong("InsultSong") end
-        ConditionallyAddSong("UseFireDots", "FireDotSong", 30)
-        ConditionallyAddSong("UseIceDots", "IceDotSong", 30)
-        ConditionallyAddSong("UseDiseaseDots", "DiseaseDotSong", 30)
-        ConditionallyAddSong("UsePoisonDots", "PoisonDotSong", 30)
-        ConditionallyAddSong("UseJonthan", "Jonthan", 7, "combo")
-        if Config:GetSetting('UseInsult') == 3 and myLevel >= 90 then addSong("InsultSong2") end
-    end
-
-    local function AddMeleeDPSSongs()
-        ConditionallyAddSong("UseSuffering", "SufferingSong", 89, "combo")
-    end
-
-    local function AddTankSongs()
-        ConditionallyAddSong("UseSpiteful", "SpitefulSong", 90, "combo")
-        ConditionallyAddSong("UseSpry", "SprySonataSong", 77, "combo")
-        ConditionallyAddSong("UseResist", "ResistSong", 33, "combo")
-    end
-
-    local function AddHealerSongs()
-        ConditionallyAddSong("UseReckless", "RecklessSong", 93, "combo")
-    end
-
-    local function AddCasterDPSSongs()
-        ConditionallyAddSong("UseFireBuff", "FireBuffSong", 78, "combo")
-        ConditionallyAddSong("UseColdBuff", "ColdBuffSong", 72, "combo")
-        ConditionallyAddSong("UseDotBuff", "DotBuffSong", 78, "combo")
-    end
-
-    local function AddRegenSongs()
-        if Config:GetSetting('RegenSong') == 2
-        then
-            addSong("GroupRegenSong")
-        elseif Config:GetSetting('RegenSong') == 3 and myLevel >= 58
-        then
-            addSong("AreaRegenSong")
-        end
-        ConditionallyAddSong("UseCrescendo", "CrescendoSong", 75)
-        ConditionallyAddSong("UseAmp", "AmpSong", 30, "combo")
-    end
-    -----------------------------------------------------------------------------------------
-
-    AddCriticalSongs()
-    if Core.IsModeActive("General") then
-        AddMainGroupDPSSongs()
-        AddRegenSongs()
-        AddSelfDPSSongs()
-        AddMeleeDPSSongs()
-        AddCasterDPSSongs()
-        AddHealerSongs()
-        AddTankSongs()
-    elseif Core.IsModeActive("Tank") then -- Tank
-        AddTankSongs()
-        AddMainGroupDPSSongs()
-        AddHealerSongs()
-        AddMeleeDPSSongs()
-        AddRegenSongs()
-        AddSelfDPSSongs()
-        AddCasterDPSSongs()
-    elseif Core.IsModeActive("Caster") then
-        AddMainGroupDPSSongs()
-        AddCasterDPSSongs()
-        AddRegenSongs()
-        AddSelfDPSSongs()
-        AddMeleeDPSSongs()
-        AddHealerSongs()
-        AddTankSongs()
-    elseif Core.IsModeActive("Healer") then -- Healer
-        AddHealerSongs()
-        AddMainGroupDPSSongs()
-        AddRegenSongs()
-        AddSelfDPSSongs()
-        AddCasterDPSSongs()
-        AddTankSongs()
-        AddMeleeDPSSongs()
-    else
-        Logger.log_warn("Bard Mode not found!  Adding DPS songs, but you should select a mode.")
-        AddMainGroupDPSSongs()
-        AddSelfDPSSongs()
-        AddRegenSongs()
-        AddMeleeDPSSongs()
-        AddCasterDPSSongs()
-    end
-    return songCache
-end
-
 local _ClassConfig = {
-    _version            = "2.2 - Live",
+    _version            = "2.3 - Live",
     _author             = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
-    ['Modes']           = { --simply determine the priority you gem spells in. Perhaps one day this could be configured to save different loadouts/change options.
+    ['Modes']           = {
         'General',
-        'Tank',
-        'Caster',
-        'Healer',
     },
 
     ['ModeChecks']      = {
@@ -239,21 +95,16 @@ local _ClassConfig = {
         },
     },
     ['AbilitySets']     = {
-        ['ShortRunBuff'] = {
-            --runbuffs are split to cover the level spread where we have accelerato but not selo's AA, if not, we force the bard into short duration only.
-            "Selo's Accelerato",
-            "Selo's Accelerando",
-        },
-        ['LongRunBuff'] = {
-            --Removed due to causing Bugs with Invis and rotation.
-            -- "Selo's Accelerating Canto",
-            -- "Selo's Song of Travel",
+        ['RunBuffSong'] = {
+            -- Selo's Accelerato not used so that we don't go back to a short duration
+            -- Other songs omitted due to issues with constant reinvis, etc.
             "Selo's Accelerating Chorus",
+            "Selo's Accelerando",
         },
         ['EndBreathSong'] = {
             "Tarew's Aquatic Ayre", --Level 16
         },
-        ['MainAriaSong'] = {
+        ['AriaSong'] = {
             -- MainAriaSong - Level Ranges 45 - 111
             "Aria of Tenisbre", -- 125
             "Aria of Pli Xin Liako",
@@ -271,9 +122,15 @@ local _ClassConfig = {
             "Ancient: Call of Power",
             "Eriki's Psalm of Power",
             "Echo of the Trusik",
-            "Rizlona's Call of Flame",
-            "Rizlona's Fire",
-            "Rizlona's Embers",
+            "Rizlona's Call of Flame",   -- overhaste/spell damage, level 64
+        },
+        ['OverhasteSong'] = {            -- before effecst are combined in aria
+            "Warsong of the Vah Shir",   -- overhaste only, level 60
+            "Battlecry of the Vah Shir", -- overhaste only, level 52
+        },
+        ['SpellDmgSong'] = {             -- before effecst are combined in aria
+            "Rizlona's Fire",            -- spell damage only, level 53
+            "Rizlona's Embers",          -- spell damage only, level 45
         },
         ['SufferingSong'] = {
             -- SufferingSong - Level Range 89 - 114
@@ -365,6 +222,12 @@ local _ClassConfig = {
             "Hykast's Insult",  -- 95 nopush, timer 3
             "Lyrin's Insult",   -- 90 nopush, timer 6
             "Venimor's Insult", -- 85, nopush, timer 3
+        },
+        ['LLInsultSong'] = {
+            "Venimor's Insult", -- 85, nopush, timer 3
+        },
+        ['LLInsultSong2'] = {
+            "Lyrin's Insult", -- 90 nopush, timer 6
         },
         ['DichoSong'] = {
             -- DichoSong Level Range - 101+
@@ -807,7 +670,7 @@ local _ClassConfig = {
             end
             ItemManager.SwapItemToSlot("offhand", Config:GetSetting('Offhand'))
         end,
-        CheckSongStateUse = function(self, config)   --determine whether a song should be song by comparing combat state to settings
+        CheckSongStateUse = function(self, config)   --determine whether a song should be sung by comparing combat state to settings
             local usestate = Config:GetSetting(config)
             if Targeting.GetXTHaterCount() == 0 then --I have tried this with combat_state nand XTHater, and both have their ups and downs. Keep an eye on this.
                 return usestate > 2                  --I think XTHater will work better if the bard autoassists at 99 or 100.
@@ -839,6 +702,81 @@ local _ClassConfig = {
             return duration
         end,
     },
+    ['SpellList']       = { -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
+        {
+            name = "Default Mode",
+            -- cond = function(self) return true end, --Code kept here for illustration, if there is no condition to check, this line is not required
+            spells = {
+                --role and critical functions
+                { name = "MezAESong",     cond = function(self) return Config:GetSetting('DoAEMez') end, },
+                { name = "MezSong",       cond = function(self) return Config:GetSetting('DoSTMez') end, },
+                { name = "CharmSong",     cond = function(self) return Config:GetSetting('CharmOn') end, },
+                { name = "SlowSong",      cond = function(self) return Config:GetSetting('DoSTSlow') end, },
+                { name = "AESlowSong",    cond = function(self) return Config:GetSetting('DoAESlow') end, },
+                { name = "DispelSong",    cond = function(self) return Config:GetSetting('DoDispel') end, },
+                { name = "CureSong",      cond = function(self) return Config:GetSetting('UseCure') end, },
+                { name = "RunBuffSong",   cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA("Selo's Sonata") end, },
+                { name = "EndBreathSong", cond = function(self) return Config:GetSetting('UseEndBreath') end, },
+                -- main group dps
+                { name = "WarMarchSong",  cond = function(self) return Config:GetSetting('UseMarch') > 1 end, },
+                { name = "AriaSong",      cond = function(self) return Config:GetSetting('UseAria') > 1 end, },
+                {
+                    name = "OverhasteSong",
+                    cond = function(self)
+                        return not Core.GetResolvedActionMapItem('AriaSong') and Config:GetSetting('LLAria') == 2 and Config:GetSetting('UseAria') > 1
+                    end,
+                },
+                {
+                    name = "SpellDamageSong",
+                    cond = function(self)
+                        return not Core.GetResolvedActionMapItem('AriaSong') and Config:GetSetting('LLAria') == 3 and Config:GetSetting('UseAria') > 1
+                    end,
+                },
+                { name = "ArcaneSong",     cond = function(self) return Config:GetSetting('UseArcane') > 1 end, },
+                { name = "DichoSong",      cond = function(self) return Config:GetSetting('UseDicho') > 1 end, },
+                -- regen songs
+                { name = "GroupRegenSong", cond = function(self) return Config:GetSetting('RegenSong') == 2 end, },
+                { name = "AreaRegenSong",  cond = function(self) return Config:GetSetting('RegenSong') == 3 end, },
+                { name = "CrescendoSong",  cond = function(self) return Config:GetSetting('UseCrescendo') end, },
+                { name = "AmpSong",        cond = function(self) return Config:GetSetting('UseAmp') > 1 end, },
+                -- self dps songs
+                { name = "AllianceSong",   cond = function(self) return Config:GetSetting('UseAlliance') end, },
+                {
+                    name = "InsultSong",
+                    cond = function(self)
+                        return Config:GetSetting('UseInsult') > 1 and (not Config:GetSetting('UseLLInsult') or not Core.GetResolvedActionMapItem('LLInsultSong'))
+                    end,
+                },
+                { name = "LLInsultSong",   cond = function(self) return Config:GetSetting('UseInsult') > 1 and Config:GetSetting('UseLLInsult') end, },
+                { name = "FireDotSong",    cond = function(self) return Config:GetSetting('UseFireDots') end, },
+                { name = "IceDotSong",     cond = function(self) return Config:GetSetting('UseIceDots') end, },
+                { name = "PoisonDotSong",  cond = function(self) return Config:GetSetting('UsePoisonDots') end, },
+                { name = "DiseaseDotSong", cond = function(self) return Config:GetSetting('UseDiseaseDots') end, },
+                { name = "Jonthan",        cond = function(self) return Config:GetSetting('UseJonthan') > 1 end, },
+                {
+                    name = "InsultSong2",
+                    cond = function(self)
+                        return Config:GetSetting('UseInsult') == 3 and (not Config:GetSetting('UseLLInsult') or not Core.GetResolvedActionMapItem('LLInsultSong'))
+                    end,
+                },
+                { name = "LLInsultSong2", cond = function(self) return Config:GetSetting('UseInsult') == 3 and Config:GetSetting('UseLLInsult') end, },
+                -- melee dps songs
+                { name = "SufferingSong", cond = function(self) return Config:GetSetting('UseSuffering') > 1 end, },
+                -- caster dps songs
+                { name = "FireBuffSong",  cond = function(self) return Config:GetSetting('UseFireBuff') > 1 end, },
+                { name = "ColdBuffSong",  cond = function(self) return Config:GetSetting('UseColdBuff') > 1 end, },
+                { name = "DotBuffSong",   cond = function(self) return Config:GetSetting('UseDotBuff') > 1 end, },
+                -- healer songs
+                { name = "RecklessSong",  cond = function(self) return Config:GetSetting('UseReckless') > 1 end, },
+                -- tank songs
+                { name = "SpitefulSong",  cond = function(self) return Config:GetSetting('UseSpiteful') > 1 end, },
+                { name = "SprySong",      cond = function(self) return Config:GetSetting('UseSpry') > 1 end, },
+                { name = "ResistSong",    cond = function(self) return Config:GetSetting('UseResist') > 1 end, },
+                -- filler
+                { name = "CalmSong",      cond = function(self) return true end, }, -- condition not needed, for uniformity
+            },
+        },
+    },
     ['RotationOrder']   = {
         {
             name = 'Melody',
@@ -847,8 +785,7 @@ local _ClassConfig = {
             doFullRotation = true,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and
-                    not (Config:GetSetting('BardRespectMedState') and Config.Globals.InMedState)
+                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and not (Config:GetSetting('BardRespectMedState') and Config.Globals.InMedState)
             end,
         },
         {
@@ -962,31 +899,32 @@ local _ClassConfig = {
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
         },
         ['Debuff'] = {
             {
                 name = "AESlowSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('DoAESlow') end,
                 cond = function(self, songSpell)
-                    return Config:GetSetting("DoAESlow") and Casting.DetSpellCheck(songSpell) and Targeting.GetXTHaterCount() > 2 and not mq.TLO.Target.Slowed()
+                    return Casting.DetSpellCheck(songSpell) and Targeting.GetXTHaterCount() > 2 and not mq.TLO.Target.Slowed()
                 end,
             },
             {
                 name = "SlowSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('DoSTSlow') end,
                 cond = function(self, songSpell)
-                    return Config:GetSetting("DoSTSlow") and Casting.DetSpellCheck(songSpell) and not mq.TLO.Target.Slowed()
+                    return Casting.DetSpellCheck(songSpell) and not mq.TLO.Target.Slowed()
                 end,
             },
             {
                 name = "DispelSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('DoDispel') end,
                 cond = function(self, songSpell)
-                    return Config:GetSetting('DoDispel') and mq.TLO.Target.Beneficial() ~= nil
+                    return mq.TLO.Target.Beneficial() ~= nil
                 end,
             },
         },
@@ -1006,16 +944,16 @@ local _ClassConfig = {
             {
                 name = "Epic",
                 type = "Item",
+                load_cond = function(self) return Config:GetSetting('UseEpic') > 1 end,
                 cond = function(self, itemName)
-                    if Config:GetSetting('UseEpic') == 1 then return false end
                     return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
             },
             {
                 name = "Fierce Eye",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('UseFierceEye') > 1 end,
                 cond = function(self, aaName)
-                    if Config:GetSetting('UseFierceEye') == 1 then return false end
                     return (Config:GetSetting('UseFierceEye') == 3 or (Config:GetSetting('UseFierceEye') == 2 and Casting.BurnCheck()))
                 end,
             },
@@ -1031,8 +969,8 @@ local _ClassConfig = {
             {
                 name = "Boastful Bellow",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('UseBellow') > 1 end,
                 cond = function(self, aaName, target)
-                    if Config:GetSetting('UseBellow') == 1 then return false end
                     return ((Config:GetSetting('UseBellow') == 3 and mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct')) or (Config:GetSetting('UseBellow') == 2 and Casting.BurnCheck())) and
                         Casting.DetAACheck(aaName)
                 end,
@@ -1040,17 +978,15 @@ local _ClassConfig = {
             {
                 name = "Intimidation",
                 type = "Ability",
-                cond = function(self, abilityName)
-                    return Casting.AARank("Intimidation") > 1
-                end,
+                load_cond = function(self) return Casting.AARank("Intimidation") > 1 end,
             },
         },
         ['CombatSongs'] = {
             {
                 name = "DichoSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseDicho') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseDicho') == 1 then return false end
                     return (Config:GetSetting('UseDicho') == 3 and (mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct') or Casting.BurnCheck()))
                         or (Config:GetSetting('UseDicho') == 2 and Casting.IHaveBuff(Casting.GetAASpell("Quick Time")))
                 end,
@@ -1058,16 +994,24 @@ local _ClassConfig = {
             {
                 name = "InsultSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseInsult') > 1 and (not Config:GetSetting('UseLLInsult') or not Core.GetResolvedActionMapItem('LLInsultSong')) end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseInsult') then return false end
+                    return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
+                end,
+            },
+            {
+                name = "LLInsultSong",
+                type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseInsult') > 1 and Config:GetSetting('UseLLInsult') and Core.GetResolvedActionMapItem('LLInsultSong') end,
+                cond = function(self, songSpell)
                     return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
                 end,
             },
             {
                 name = "FireDotSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseFireDots') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseFireDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1076,8 +1020,8 @@ local _ClassConfig = {
             {
                 name = "IceDotSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseIceDots') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseIceDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1086,8 +1030,8 @@ local _ClassConfig = {
             {
                 name = "PoisonDotSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UsePoisonDots') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UsePoisonDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1096,8 +1040,8 @@ local _ClassConfig = {
             {
                 name = "DiseaseDotSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseDiseaseDots') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseDiseaseDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1106,23 +1050,34 @@ local _ClassConfig = {
             {
                 name = "InsultSong2",
                 type = "Song",
+                load_cond = function(self)
+                    return Config:GetSetting('UseInsult') == 3 and (not Config:GetSetting('UseLLInsult') or not Core.GetResolvedActionMapItem('LLInsultSong'))
+                end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseInsult') then return false end
+                    return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
+                end,
+            },
+            {
+                name = "LLInsultSong2",
+                type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseInsult') == 3 and Config:GetSetting('UseLLInsult') and Core.GetResolvedActionMapItem('LLInsultSong') end,
+                cond = function(self, songSpell)
                     return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
                 end,
             },
             {
                 name = "AllianceSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseAlliance') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseAlliance') then return false end
                     return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck()) and Casting.DetSpellCheck(songSpell)
                 end,
             },
             --used in combat when we have nothing else to refresh rather than standing there. Initial testing good, need more to ensure this doesn't interfere with Melody.
             {
-                name = "MainAriaSong",
+                name = "AriaSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('AriaSong') and Config:GetSetting('UseAria') > 1 end,
                 cond = function(self, songSpell)
                     return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 18
                 end,
@@ -1130,6 +1085,7 @@ local _ClassConfig = {
             {
                 name = "WarMarchSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('WarMarchSong') and Config:GetSetting('UseMarch') > 1 end,
                 cond = function(self, songSpell)
                     return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 18
                 end,
@@ -1139,46 +1095,66 @@ local _ClassConfig = {
             {
                 name = "EndBreathSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('EndBreathSong') and Config:GetSetting('UseEndBreath') end,
                 cond = function(self, songSpell)
-                    if not (Config:GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
+                    if not mq.TLO.Me.FeetWet() and not mq.TLO.Zone.ShortName() == 'thegrey' then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
-                name = "MainAriaSong",
+                name = "AriaSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('AriaSong') and Config:GetSetting('UseAria') > 1 end,
                 cond = function(self, songSpell)
-                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
+                    return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAria") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
+                end,
+            },
+            {
+                name = "OverhasteSong",
+                type = "Song",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem('AriaSong') and Config:GetSetting('LLAria') == 2 and Config:GetSetting('UseAria') > 1 end,
+                cond = function(self, songSpell)
+                    return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAria") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
+                end,
+            },
+            {
+                name = "SpellDmgSong",
+                type = "Song",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem('AriaSong') and Config:GetSetting('LLAria') == 3 and Config:GetSetting('UseAria') > 1 end,
+                cond = function(self, songSpell)
+                    return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAria") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "WarMarchSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('WarMarchSong') and Config:GetSetting('UseMarch') > 1 end,
                 cond = function(self, songSpell)
-                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
+                    return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseMarch") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "Jonthan",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('Jonthan') and Config:GetSetting('UseJonthan') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseJonthan') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseJonthan") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "ArcaneSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('ArcaneSong') and Config:GetSetting('UseArcane') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseArcane') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseArcane") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "CrescendoSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('CrescendoSong') and Config:GetSetting('UseCrescendo') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseCrescendo') or (mq.TLO.Me.GemTimer(songSpell.RankName())() or -1) > 0 then return false end
+                    if (mq.TLO.Me.GemTimer(songSpell.RankName())() or -1) > 0 then return false end
                     local pct = Config:GetSetting('GroupManaPct')
                     return (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
                 end,
@@ -1186,8 +1162,8 @@ local _ClassConfig = {
             {
                 name = "GroupRegenSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('GroupRegenSong') and Config:GetSetting('RegenSong') == 2 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('RegenSong') ~= 2 then return false end
                     local pct = Config:GetSetting('GroupManaPct')
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell) and
                         ((Config:GetSetting('UseRegen') == 1 and (mq.TLO.Group.LowMana(pct)() or 999) >= Config:GetSetting('GroupManaCt'))
@@ -1197,8 +1173,8 @@ local _ClassConfig = {
             {
                 name = "AreaRegenSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('AreaRegenSong') and Config:GetSetting('RegenSong') == 3 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('RegenSong') ~= 3 then return false end
                     local pct = Config:GetSetting('GroupManaPct')
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell) and
                         not (mq.TLO.Me.Combat() and (mq.TLO.Group.LowMana(pct)() or 999) < Config:GetSetting('GroupManaCt'))
@@ -1207,109 +1183,100 @@ local _ClassConfig = {
             {
                 name = "AmpSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('AmpSong') and Config:GetSetting('UseAmp') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseAmp') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAmp") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "SufferingSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('SufferingSong') and Config:GetSetting('UseSuffering') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseSuffering') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseSuffering") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "SpitefulSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('SpitefulSong') and Config:GetSetting('UseSpiteful') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseSpiteful') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseSpiteful") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "SprySonataSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('SprySonataSong') and Config:GetSetting('UseSpry') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseSpry') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseSpry") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "ResistSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('ResistSong') and Config:GetSetting('UseResist') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseResist') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseResist") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "RecklessSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('RecklessSong') and Config:GetSetting('UseReckless') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseReckless') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseReckless") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "AccelerandoSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('AccelerandoSong') and Config:GetSetting('UseAccelerando') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseAccelerando') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAccelerando") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "FireBuffSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('FireBuffSong') and Config:GetSetting('UseFireBuff') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseFireBuff') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseFireBuff") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "ColdBuffSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('ColdBuffSong') and Config:GetSetting('UseColdBuff') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseColdBuff') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseColdBuff") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "DotBuffSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('DotBuffSong') and Config:GetSetting('UseDotBuff') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseDotBuff') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseDotBuff") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
         },
         ['Downtime'] = {
             {
-                name = "ShortRunBuff",
+                name = "RunBuffSong",
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                load_cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA('Selo\'s Sonata') end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseRunBuff') ~= 3 then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
-                end,
-            },
-            {
-                name = "LongRunBuff",
-                type = "Song",
-                targetId = function(self) return { mq.TLO.Me.ID(), } end,
-                cond = function(self, songSpell)
-                    if Config:GetSetting('UseRunBuff') ~= 2 then return false end
-                    return (mq.TLO.Me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0) <= 15
                 end,
             },
             {
                 name = "Selo's Sonata",
                 type = "AA",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                load_cond = function(self) return Config:GetSetting('UseRunBuff') end,
                 cond = function(self, aaName)
-                    if Config:GetSetting('UseRunBuff') ~= 1 then return false end
                     --refreshes slightly before expiry for better uptime
                     return (mq.TLO.Me.Buff(mq.TLO.AltAbility(aaName).Spell.Trigger(1)).Duration.TotalSeconds() or 0) < 30
                 end,
@@ -1317,6 +1284,7 @@ local _ClassConfig = {
             {
                 name = "Rallying Solo", --Rallying Call theoretically possible but problematic, needs own rotation akin to Focused Paragon, etc
                 type = "AA",
+                load_cond = function(self) return Casting.CanUseAA('Rallying Solo') end,
                 cond = function(self, aaName)
                     return (mq.TLO.Me.PctEndurance() < 30 or mq.TLO.Me.PctMana() < 30)
                 end,
@@ -1324,30 +1292,33 @@ local _ClassConfig = {
             {
                 name = "BardDPSAura",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('BardDSPAura') and Config:GetSetting('UseAura') == 1 end,
                 pre_activate = function(self, songSpell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
                     ---@diagnostic disable-next-line: undefined-field
                     if not Casting.AuraActiveByName(songSpell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
                 end,
                 cond = function(self, songSpell)
-                    return not Casting.AuraActiveByName(songSpell.BaseName()) and Config:GetSetting('UseAura') == 1
+                    return not Casting.AuraActiveByName(songSpell.BaseName())
                 end,
             },
             {
                 name = "BardRegenAura",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('BardRegenAura') and Config:GetSetting('UseAura') == 2 end,
                 pre_activate = function(self, songSpell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
                     ---@diagnostic disable-next-line: undefined-field
                     if not Casting.AuraActiveByName(songSpell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
                 end,
                 cond = function(self, songSpell)
-                    return not Casting.AuraActiveByName(songSpell.BaseName()) and Config:GetSetting('UseAura') == 2
+                    return not Casting.AuraActiveByName(songSpell.BaseName())
                 end,
             },
             {
                 name = "EndBreathSong",
                 type = "Song",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('EndBreathSong') and Config:GetSetting('UseEndBreath') end,
                 cond = function(self, songSpell)
-                    if not (Config:GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
+                    if not mq.TLO.Me.FeetWet() and not mq.TLO.Zone.ShortName() == 'thegrey' then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1356,16 +1327,16 @@ local _ClassConfig = {
             {
                 name = "Armor of Experience",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
                     return mq.TLO.Me.PctHPs() < 35
                 end,
             },
             {
                 name = "Fading Memories",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('UseFading') and Casting.CanUseAA('Fading Memories') end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('UseFading') then return false end
                     return self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self)
                     --I wanted to use XTAggroCount here but it doesn't include your current target in the number it returns and I don't see a good workaround. For Loop it is.
                 end,
@@ -1373,6 +1344,7 @@ local _ClassConfig = {
             {
                 name = "Hymn of the Last Stand",
                 type = "AA",
+                load_cond = function(self) return Casting.CanUseAA('Hymn of the Last Stand') end,
                 cond = function(self, aaName)
                     return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
@@ -1380,6 +1352,7 @@ local _ClassConfig = {
             {
                 name = "Shield of Notes",
                 type = "AA",
+                load_cond = function(self) return Casting.CanUseAA('Shield of Notes') end,
                 cond = function(self, aaName)
                     return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
@@ -1387,8 +1360,8 @@ local _ClassConfig = {
             {
                 name = "Coating",
                 type = "Item",
+                load_cond = function(self) return Config:GetSetting('DoCoating') end,
                 cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoCoating') then return false end
                     return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.SelfBuffItemCheck(itemName)
                 end,
             },
@@ -1425,13 +1398,9 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = 1,
             Min = 1,
-            Max = 4,
+            Max = 1,
             FAQ = "What do the different Modes do?",
-            Answer = "There are four modes: General, Tank Caster and Healer.\n" ..
-                "General will prioritize your gems for general use and is the default.\n" ..
-                "Tank will prioritize some gems to support a tank group.\n" ..
-                "Caster will prioritize some gems to support a caster group.\n" ..
-                "Healer will prioritize some gems to support healers.",
+            Answer = "Bard currently only has one mode.",
         },
         --Mana/Endurance Sustainment
         ['BardRespectMedState'] = {
@@ -1590,6 +1559,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
             FAQ = "Why is my Boastful Bellow being recast early? My BRD is using it again before the conclusion nuke!",
             Answer = "Unfortunately, MQ currently reports the buff falling off early; we are examining possible fixes at this time.",
         },
@@ -1608,10 +1578,18 @@ local _ClassConfig = {
             Answer = "Depending on how crowded your song selection is, you may not see this cast often.\n" ..
                 "You may need to adjust your selections to accomodate this one.",
         },
+        ['UseLLInsult']         = {
+            DisplayName = "Use Low-Level Insults",
+            Category = "DPS - Self",
+            Index = 3,
+            Tooltip = "Use the lowest level insults possible to trigger Troubador's Synergy. Reduces insult damage, but increases mana savings.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
         ['UseFireDots']         = {
             DisplayName = "Use Fire Dots",
             Category = "DPS - Self",
-            Index = 3,
+            Index = 4,
             Tooltip = Tooltips.FireDotSong,
             RequiresLoadoutChange = true,
             Default = false,
@@ -1621,7 +1599,7 @@ local _ClassConfig = {
         ['UseIceDots']          = {
             DisplayName = "Use Ice Dots",
             Category = "DPS - Self",
-            Index = 4,
+            Index = 5,
             Tooltip = Tooltips.IceDotSong,
             RequiresLoadoutChange = true,
             Default = false,
@@ -1631,7 +1609,7 @@ local _ClassConfig = {
         ['UsePoisonDots']       = {
             DisplayName = "Use Poison Dots",
             Category = "DPS - Self",
-            Index = 5,
+            Index = 6,
             Tooltip = Tooltips.PoisonDotSong,
             RequiresLoadoutChange = true,
             Default = false,
@@ -1641,7 +1619,7 @@ local _ClassConfig = {
         ['UseDiseaseDots']      = {
             DisplayName = "Use Disease Dots",
             Category = "DPS - Self",
-            Index = 6,
+            Index = 7,
             Tooltip = Tooltips.DiseaseDotSong,
             RequiresLoadoutChange = true,
             Default = false,
@@ -1652,7 +1630,7 @@ local _ClassConfig = {
         ['UseJonthan']          = {
             DisplayName = "Use Jonthan",
             Category = "DPS - Self",
-            Index = 7,
+            Index = 8,
             Tooltip = Tooltips.Jonthan,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1669,7 +1647,7 @@ local _ClassConfig = {
         ['UseFierceEye']        = {
             DisplayName = "Fierce Eye Use:",
             Category = "DPS - Group",
-            Index = 8,
+            Index = 10,
             Tooltip = "When to use the Fierce Eye AA.",
             Type = "Combo",
             ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
@@ -1677,6 +1655,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
             FAQ = "Why is Fierce Eye being being used on trash?",
             Answer = "By default, Fierce Eye will fire any time it is available in combat, as holding it for Burns tends to be an overall DPS loss.\n" ..
                 "Adjust to your personal taste.",
@@ -1684,7 +1663,7 @@ local _ClassConfig = {
         ['UseArcane']           = {
             DisplayName = "Use Arcane Line",
             Category = "DPS - Group",
-            Index = 2,
+            Index = 4,
             Tooltip = Tooltips.ArcaneSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1698,7 +1677,7 @@ local _ClassConfig = {
         ['UseDicho']            = {
             DisplayName = "Psalm (Dicho) Use:",
             Category = "DPS - Group",
-            Index = 4,
+            Index = 6,
             Tooltip = Tooltips.DichoSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'During QuickTime', 'All Combat', },
@@ -1715,7 +1694,7 @@ local _ClassConfig = {
         ['UseSuffering']        = {
             DisplayName = "Use Suffering Line",
             Category = "DPS - Group",
-            Index = 3,
+            Index = 5,
             Tooltip = Tooltips.SufferingSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1726,22 +1705,52 @@ local _ClassConfig = {
             FAQ = "Why am I singing Suffering line? It isn't great!",
             Answer = "By default we will sing this line during downtime in hopes that the proc can provide a slight aDPS boost when we next engage.",
         },
-        ['AriaBeforeOverhaste'] = {
-            DisplayName = "Aria Before Overhaste",
+        ['UseAria']             = {
+            DisplayName = "Use Aria",
             Category = "DPS - Group",
             Index = 1,
-            Tooltip = "Choose whether to use the Aria line solely to boost spell damage before the song adds overhaste at level 64.",
-            Default = true,
+            Tooltip = Tooltips.AriaSong,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
+            Default = 3,
+            Min = 1,
+            Max = 4,
             RequiresLoadoutChange = true,
-            ConfigType = "Advanced",
-            FAQ = "Why is my bard using a spell damage boost? I use a melee party.",
-            Answer = "The Aria line of spells provides both spell damage and overhaste, but overhaste only kicks in at level 64.\n" ..
-                "You can change its setting in the DPS - Group Tab if you would prefer not to use it until then.",
+            FAQ = "Why am I not using my Vah Shir overhaste song?",
+            Answer = "Choose which you will prioritize before they are combined in the Aria line on the DPS - Group options tab in your class settings.",
+        },
+        ['LLAria']              = {
+            DisplayName = "Pre-Aria Choice:",
+            Category = "DPS - Group",
+            Index = 2,
+            Tooltip = "Choose your preference of overhaste or spell damage before these songs are combined into the Aria line. After, we will simply use your Aria settings.",
+            Type = "Combo",
+            ComboOptions = { 'None', 'Overhaste', 'Spell Damage', },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+            RequiresLoadoutChange = true,
+            FAQ = "Why am I not using my Rizlona's spell damage song?",
+            Answer = "Choose which you will prioritize before they are combined in the Aria line on the DPS - Group options tab in your class settings.",
+        },
+        ['UseMarch']            = {
+            DisplayName = "Use War March",
+            Category = "DPS - Group",
+            Index = 3,
+            Tooltip = Tooltips.WarMarchSong,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
+            Default = 3,
+            Min = 1,
+            Max = 4,
+            RequiresLoadoutChange = true,
+            FAQ = "Why am I using the War March line? I have enchanter haste.",
+            Answer = "The War March line of songs can be enabled or disabled on the Offesive tab in the class options.",
         },
         ['UseFireBuff']         = {
             DisplayName = "Use Fire Spell Buff",
             Category = "DPS - Group",
-            Index = 5,
+            Index = 7,
             Tooltip = Tooltips.FireBuffSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1757,7 +1766,7 @@ local _ClassConfig = {
         ['UseColdBuff']         = {
             DisplayName = "Use Cold Spell Buff",
             Category = "DPS - Group",
-            Index = 6,
+            Index = 8,
             Tooltip = Tooltips.ColdBuffSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1773,7 +1782,7 @@ local _ClassConfig = {
         ['UseDotBuff']          = {
             DisplayName = "Use Fire/Magic DoT Buff",
             Category = "DPS - Group",
-            Index = 7,
+            Index = 9,
             Tooltip = Tooltips.DotBuffSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1789,7 +1798,7 @@ local _ClassConfig = {
         ['UseAlliance']         = {
             DisplayName = "Use Alliance",
             Category = "DPS - Group",
-            Index = 9,
+            Index = 11,
             Tooltip = Tooltips.AllianceSong,
             RequiresLoadoutChange = true,
             Default = false,
@@ -1798,8 +1807,7 @@ local _ClassConfig = {
             Answer = "You can enable Use Alliance to use your Alliance song when you are in combat.",
 
         },
-        --Why is this optional? I can't think of a situation that it should be false, keeping it here until I find out.Maybe a stacking thing?
-        --['UseFuneralDirge']		= { DisplayName = "Funeral Dirge (Burn)", Category = "DPS - Group", Index = 2, Tooltip = "Use Funeral Dirge during Burns", Default = true, },
+
         --Buffs and Defenses
         ['UseAura']             = {
             DisplayName = "Use Bard Aura",
@@ -1919,6 +1927,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
             FAQ = "Why is my BRD using Epic on these trash mobs?",
             Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
                 "This can be adjusted in the Utility/Items/Misc tab.",
@@ -1940,19 +1949,16 @@ local _ClassConfig = {
             Index = 5,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
+            RequiresLoadoutChange = true,
             FAQ = "What is a Coating?",
             Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
         ['UseRunBuff']          = {
-            DisplayName = "Runspeed Buff:",
+            DisplayName = "Use RunSpeed Buff",
             Category = "Utility/Misc",
             Index = 1,
-            Tooltip = "Select Runspeed Buff to use. NOTE: This setting may need user adjustment during the early level range!",
-            Type = "Combo",
-            ComboOptions = { 'AA', 'Song (Long Duration Only)', 'Song (Fastest Available)', 'Off', },
-            Default = 1,
-            Min = 1,
-            Max = 4,
+            Tooltip = "Use the best runspeed buff you have available. Short Duration > Long Duration > Selo's Sonata AA",
+            Default = true,
             RequiresLoadoutChange = true,
             FAQ = "Why am I not using [x] run speed (Selo) buff?",
             Answer = "You can configure your run speed buff selection in the Utility tab, this may need to be adjusted as you level.",
@@ -1964,6 +1970,7 @@ local _ClassConfig = {
             Tooltip = Tooltips.EndBreathSong,
             Default = false,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
             FAQ = "How do I use my Enduring Breath song?",
             Answer = "You can enable Use Enduring Breath to use your Enduring Breath song when you are in water.",
         },
@@ -1974,6 +1981,7 @@ local _ClassConfig = {
             Tooltip = "Use Veteran AA's in emergencies or during Burn",
             Default = true,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
             FAQ = "What Vet AA's does BRD use?",
             Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
@@ -1997,6 +2005,7 @@ local _ClassConfig = {
             Tooltip = "Use Fading Memories when you have aggro and you aren't the Main Assist.",
             Default = true,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
             FAQ = "Why is my BRD regularly using Fading Memories",
             Answer = "When Use Combat Escape is enabled, Fading Memories will be used when the Bard has any unwanted aggro.\n" ..
                 "This helps the common issue of bards gaining aggro from singing before a tank has the chance to secure it.",
@@ -2096,6 +2105,5 @@ local _ClassConfig = {
                 "Also, make sure you have Auto Swap Instrument enabled.",
         },
     },
-    ['Spells']          = { getSpellCallback = generateSongList, },
 }
 return _ClassConfig
