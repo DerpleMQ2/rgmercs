@@ -19,7 +19,7 @@ local _ClassConfig = {
         'Heal',
     },
     ['Cures']             = {
-        GetCureSpells = function(self)
+        GetCureSpells = function(self) --To do at some point: Consider options or features for group vs single target curing
             --(re)initialize the table for loadout changes
             self.TempSettings.CureSpells = {}
 
@@ -582,7 +582,13 @@ local _ClassConfig = {
             -- "Pure Blood", --Much better single cures occur after this one
         },
         ['CureCorrupt'] = {
-            "Dissolve Corruption",
+            "Purge Corruption",
+            "Extricate Corruption",
+            "Nullify Corruption",
+            "Abrogate Corruption",
+            "Eradicate Corruption",
+            "Dissolve Corruption", -- group from here up
+            "Pristine Blood",      -- single target from here down
             "Abolish Corruption",
             "Vitiate Corruption",
             "Expunge Corruption",

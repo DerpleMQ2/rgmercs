@@ -20,7 +20,7 @@ local _ClassConfig = {
         'Mana',
     },
     ['Cures']             = {
-        -- this code is slightly ineffecient since we only have SingleTgtCure here, but adding corruption or more options would have us change it back to this
+        -- this code is slightly ineffecient since we only have SingleTgtCure here, but adding more options would have us change it back to this
         -- -- since it is only run at startup, i'm fine with it. - Algar 8/29/25
         GetCureSpells = function(self)
             --(re)initialize the table for loadout changes
@@ -28,10 +28,10 @@ local _ClassConfig = {
 
             -- Find the map for each cure spell we need
             local neededCures = {
-                ['Poison'] = 'SingleTgtCure',
-                ['Disease'] = 'SingleTgtCure',
-                ['Curse'] = 'SingleTgtCure',
-                -- ['Corruption'] = -- todo, homework
+                ['Poison'] = Casting.GetFirstMapItem({ "GroupCure", "SingleTgtCure", }),
+                ['Disease'] = Casting.GetFirstMapItem({ "GroupCure", "SingleTgtCure", }),
+                ['Curse'] = Casting.GetFirstMapItem({ "GroupCure", "SingleTgtCure", }),
+                ['Corruption'] = Casting.GetFirstMapItem({ "CureCorrupt", "SingleTgtCure", }),
             }
 
             -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
@@ -119,6 +119,18 @@ local _ClassConfig = {
             "Perfected Blood",
             "Purged Blood",
             "Purified Blood",
+        },
+        ['CureCorrupt'] = {
+            "Chant of the Zelniak",
+            "Chant of the Wulthan",
+            "Chant of the Kromtus",
+            "Chant of Jaerol",
+            "Chant of the Izon",
+            "Chant of the Tae Ew",
+            "Chant of the Burynai",
+            "Chant of the Darkvine",
+            "Chant of the Napaea",
+            "Cure Corruption",
         },
         ['GroupCure'] = {
             -- Group Multi-Cure >=91

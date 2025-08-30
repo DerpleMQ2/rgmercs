@@ -30,7 +30,7 @@ local _ClassConfig = {
                 ['Poison'] = Casting.GetFirstMapItem({ "CureSpell", "CurePoison", }),
                 ['Disease'] = Casting.GetFirstMapItem({ "CureSpell", "CureDisease", }),
                 ['Curse'] = Casting.GetFirstMapItem({ "CureSpell", "CureCurse", }),
-                -- ['Corruption'] = -- todo
+                ['Corruption'] = 'CureCorrupt',
             }
 
             -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
@@ -456,6 +456,18 @@ local _ClassConfig = {
             "Blood of Corbeth",
             "Blood of Avoling",
             "Blood of Nadox",
+        },
+        ['CureCorrupt'] = {
+            "Chant of the Zelniak",
+            "Chant of the Wulthan",
+            "Chant of the Kromtus",
+            "Chant of Jaerol",
+            "Chant of the Izon",
+            "Chant of the Tae Ew",
+            "Chant of the Burynai",
+            "Chant of the Darkvine",
+            "Chant of the Napaea",
+            "Cure Corruption",
         },
         ["TwinHealNuke"] = {
             -- Nuke the MA Not the assist target - Levels 85+
