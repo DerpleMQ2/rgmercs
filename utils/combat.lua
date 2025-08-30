@@ -827,7 +827,7 @@ end
 --- @return number The group member with the lowest health percentage, or nil if no member meets the criteria.
 function Combat.FindWorstHurtGroupMember(minHPs)
     local groupSize = mq.TLO.Group.Members()
-    local worstId = mq.TLO.Me.ID()
+    local worstId = mq.TLO.Me.PctHPs() < minHPs and mq.TLO.Me.ID() or 0
     local worstPct = mq.TLO.Me.PctHPs() < minHPs and mq.TLO.Me.PctHPs() or minHPs
 
     Logger.log_verbose("\ayChecking for worst Hurt Group Members. Group Count: %d", groupSize)
@@ -860,7 +860,7 @@ function Combat.FindWorstHurtGroupMember(minHPs)
         Logger.log_verbose("\agNo one is hurt!")
     end
 
-    return (worstPct < 100 and worstId or 0)
+    return (worstPct < minHPs and worstId or 0)
 end
 
 --- Finds the entity with the worst hurt mana exceeding a minimum threshold.
