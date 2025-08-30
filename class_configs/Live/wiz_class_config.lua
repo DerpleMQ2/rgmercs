@@ -133,7 +133,6 @@ return {
             "Ethereal Blitz",
         },
         ['ChaosNuke'] = {
-            "Chaos Flame",
             "Chaos Inferno",
             "Chaos Burn",
             "Chaos Scintillation",
@@ -688,7 +687,10 @@ return {
             name = 'DPS(71-99)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 100 and mq.TLO.Me.Level() > 70 end,
+            load_cond = function()
+                return mq.TLO.Me.Level() < 100 and mq.TLO.Me.Level() > 70 and
+                    (Core.GetResolvedActionMapItem('ChaosNuke') or Core.GetResolvedActionMapItem('WildNuke'))
+            end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -699,7 +701,10 @@ return {
             name = 'FireDPS(1-70)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 1 end,
+            load_cond = function()
+                return Config:GetSetting('ElementChoice') == 1 and
+                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMap('WildNuke')))
+            end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -711,7 +716,10 @@ return {
             name = 'IceDPS(1-70)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 2 end,
+            load_cond = function()
+                return Config:GetSetting('ElementChoice') == 2 and
+                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMap('WildNuke')))
+            end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -723,7 +731,10 @@ return {
             name = 'MagicDPS(1-70)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 3 end,
+            load_cond = function()
+                return Config:GetSetting('ElementChoice') == 3 and
+                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMap('WildNuke')))
+            end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -735,7 +746,7 @@ return {
             name = 'DPS(PBAELowLevel)',
             state = 1,
             steps = 1,
-            load_cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end,
+            load_cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 76 end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
