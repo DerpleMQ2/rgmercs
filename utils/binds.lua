@@ -151,6 +151,10 @@ Binds.Handlers    = {
             end
             Core.DoCmd("/squelch /dggaexecute /mqtarget id %d", Targeting.GetTargetID())
             mq.delay(5)
+            if Config:GetSetting('BreakInvisForSay') then
+                Core.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,60]} /makemevisible")
+                mq.delay(100) -- we can't callback for someone else's invis. Give time for everyone to be visible.
+            end
             Core.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,60]} /say %s", text)
         end,
     },
@@ -165,6 +169,10 @@ Binds.Handlers    = {
             end
             Core.DoCmd("/squelch /dggaexecute /mqtarget id %d", Targeting.GetTargetID())
             mq.delay(5)
+            if Config:GetSetting('BreakInvisForSay') then
+                Core.DoCmd("/squelch /dggaexecute /makemevisible")
+                mq.delay(50) -- we can't callback for someone else's invis. Slight delay for execution.
+            end
             Core.DoCmd("/squelch /dggaexecute /docommand /timed 5 /say %s", text)
         end,
     },
@@ -179,6 +187,10 @@ Binds.Handlers    = {
             end
             Core.DoCmd("/squelch /dgraexecute /mqtarget id %d", Targeting.GetTargetID())
             mq.delay(5)
+            if Config:GetSetting('BreakInvisForSay') then
+                Core.DoCmd("/squelch /dgraexecute /makemevisible")
+                mq.delay(50) -- we can't callback for someone else's invis. Slight delay for execution.
+            end
             Core.DoCmd("/squelch /dgraexecute /docommand /timed 5 /say %s", text)
         end,
     },
