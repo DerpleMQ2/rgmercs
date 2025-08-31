@@ -1372,14 +1372,14 @@ function Module:GiveTime(combat_state)
 
     -- Healing happens first and anytime we aren't in downtime while invis and set not to break it.
     if self:IsHealing() then
-        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvis')) then
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvisForHealing')) then
             self:RunHealRotation()
         end
     end
 
     if self:IsRezing() and Config:GetSetting('DoRez') then
         -- Check Rezes
-        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvis')) then
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvisForHealing')) then
             self:IGCheckAndRez()
 
             self:SelfCheckAndRez()
@@ -1400,7 +1400,7 @@ function Module:GiveTime(combat_state)
     end
 
     if self:IsCuring() then
-        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvis')) then
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvisForHealing')) then
             self:RunCureRotation(combat_state)
 
             if Module.TempSettings.NeedCuresListMutex then

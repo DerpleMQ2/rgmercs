@@ -79,6 +79,13 @@ return {
             end,
         },
         {
+            name = 'Hide & Sneak',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and Casting.AmIBuffable()
+            end,
+        },
+        {
             name = 'Aggro Management',
             state = 1,
             steps = 1,
@@ -198,11 +205,13 @@ return {
                 name = "Hide",
                 type = "Ability",
                 pre_activate = function(self, abilityName)
-                    Core.DoCmd("/attack off")
-                    mq.delay(100, function() return not mq.TLO.Me.Combat() end)
+                    if Core.OnEMU() then
+                        Core.DoCmd("/attack off")
+                        mq.delay(100, function() return not mq.TLO.Me.Combat() end)
+                    end
                 end,
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > Config:GetSetting('HideAggro')
+                    return not mq.TLO.Me.Moving() or (mq.TLO.Me.AltAbility("Nimble Evasion").Rank() or 0) == 5
                 end,
                 post_activate = function(self, abilityName, success)
                     if not mq.TLO.Me.Combat() then
@@ -327,25 +336,44 @@ return {
                     return Casting.SelfBuffAACheck(aaName)
                 end,
             },
+        },
+        ['Hide & Sneak'] = {
             {
                 name = "Hide & Sneak",
                 type = "CustomFunc",
                 active_cond = function(self)
                     return mq.TLO.Me.Invis() and mq.TLO.Me.Sneaking()
                 end,
-                cond = function(self)
-                    return Config:GetSetting('DoHideSneak')
-                end,
-                custom_func = function(_)
-                    if Config:GetSetting('ChaseOn') then
-                        if not mq.TLO.Me.Sneaking() then
-                            Core.DoCmd("/doability sneak")
-                        end
-                    else
-                        if mq.TLO.Me.AbilityReady("hide")() then Core.DoCmd("/doability hide") end
-                        if mq.TLO.Me.AbilityReady("sneak")() then Core.DoCmd("/doability sneak") end
+                pre_activate = function(self, abilityName)
+                    if Core.OnEMU() and mq.TLO.Me.Combat() then
+                        Core.DoCmd("/attack off")
+                        mq.delay(100, function() return not mq.TLO.Me.Combat() end)
                     end
-                    return true
+                end,
+                cond = function(self)
+                    return Config:GetSetting('DoHideSneak') and (not mq.TLO.Me.Sneaking() or not mq.TLO.Me.Invis())
+                end,
+                custom_func = function(self)
+                    if not mq.TLO.Me.Sneaking() and mq.TLO.Me.AbilityReady("Sneak")() then
+                        Core.DoCmd("/doability sneak")
+                        mq.delay(200, function() return mq.TLO.Me.Sneaking() end)
+                    end
+                    if not mq.TLO.Me.Invis() and mq.TLO.Me.AbilityReady("Hide")() then
+                        if not mq.TLO.Me.Moving() or (mq.TLO.Me.AltAbility("Nimble Evasion").Rank() or 0) == 5 then
+                            Core.DoCmd("/doability hide")
+                            mq.delay(100, function() return (mq.TLO.Me.AbilityTimer("Hide")() or 0) > 0 end)
+                            ---@diagnostic disable-next-line: undefined-field
+                        elseif mq.TLO.Me.Moving() and mq.TLO.Nav.Active() and not mq.TLO.Nav.Paused() then
+                            -- let's get crazy: if we are naving, quickly pause and "sneak" a hide in
+                            Core.DoCmd("/nav pause")
+                            mq.delay(200, function() return not mq.TLO.Me.Moving() end)
+                            mq.delay((2 * mq.TLO.EverQuest.Ping()) or 200) --addl delay to avoid "must be perfectly still..." server desync
+                            Core.DoCmd("/doability hide")
+                            mq.delay(100, function() return (mq.TLO.Me.AbilityTimer("Hide")() or 0) > 0 end)
+                            ---@diagnostic disable-next-line: undefined-field
+                            if mq.TLO.Nav.Paused() then Core.DoCmd("/nav pause") end
+                        end
+                    end
                 end,
             },
         },
