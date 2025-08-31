@@ -514,7 +514,7 @@ return {
                 name = "HateDebuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.TargetOfTarget.ID() == (mq.TLO.Group.MainTank.ID() or Core.GetMainAssistId())
+                    return Targeting.TargetIsATank(mq.TLO.Me.TargetOfTarget)
                 end,
             },
             {
