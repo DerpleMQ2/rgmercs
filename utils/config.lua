@@ -913,6 +913,16 @@ Config.DefaultConfig = {
         FAQ = "Why are my songs not landing before casting a new one?",
         Answer = "You can set the [SongClipDelayFact] option to the number of milliseconds to wait before casting a new song.",
     },
+    ['UseExactSpellNames']   = {
+        DisplayName = "Use Exact Spell Names",
+        Category = "Spells/Abils",
+        Index = 18,
+        Tooltip = "This will cause RGMercs to use '/cast =<Spell>' which , must be supported by your MQ version but will avoid things like 'Bane' casting 'Bane of Nife' instead.",
+        Default = false,
+        ConfigType = "Advanced",
+        FAQ = "Why is the wrong spell being cast/a spell not being cast when it says it is?",
+        Answer = "If the spell name is not unique, you can set the [UseExactSpellNames] option to true to use the exact spell name when casting.",
+    },
 
     -- [ Tank/MA ] --
     ['MovebackWhenTank']     = {

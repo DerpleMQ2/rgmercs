@@ -1057,7 +1057,8 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
         --    return false
         --end
 
-        local cmd = string.format("/cast \"%s\"", spellName)
+        local cmd = string.format("/cast \"%s%s\"", Config:GetSetting('UseExactSpellNames') and "=" or "", spellName)
+
         Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESULT_NONE)
 
         local spellRange = spell.MyRange() > 0 and spell.MyRange() or (spell.AERange() > 0 and spell.AERange() or 250)
@@ -1173,7 +1174,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
                 -- EMU doesn't seem to tell us we begin singing.
                 Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)
             end
-            Core.DoCmd("/cast \"%s\"", songName)
+            Core.DoCmd("/cast \"%s%s\"", Config:GetSetting('UseExactSpellNames') and "=" or "", songName)
 
             mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
 
