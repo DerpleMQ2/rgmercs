@@ -124,11 +124,11 @@ local _ClassConfig = {
             "Echo of the Trusik",
             "Rizlona's Call of Flame",   -- overhaste/spell damage, level 64
         },
-        ['OverhasteSong'] = {            -- before effecst are combined in aria
+        ['OverhasteSong'] = {            -- before effects are combined in aria
             "Warsong of the Vah Shir",   -- overhaste only, level 60
             "Battlecry of the Vah Shir", -- overhaste only, level 52
         },
-        ['SpellDmgSong'] = {             -- before effecst are combined in aria
+        ['SpellDmgSong'] = {             -- before effects are combined in aria
             "Rizlona's Fire",            -- spell damage only, level 53
             "Rizlona's Embers",          -- spell damage only, level 45
         },
@@ -283,7 +283,6 @@ local _ClassConfig = {
             "Cassindra's Chorus of Clarity", -- 32, mana only
             "Cassindra's Chant of Clarity",  -- 20, mana only
             "Hymn of Restoration",           -- 7, hp only
-
         },
         ['AreaRegenSong'] = {
             -- ChorusRegenSong - Level Range 58 - 113
@@ -398,7 +397,6 @@ local _ClassConfig = {
             "Garadell's Fatesong",
             "Weshlu's Chillsong Aria",
         },
-
         ['DotBuffSong'] = {
             -- Fire & Magic Dots song
             "Tatalros' Psalm of Potency", -- 125
@@ -426,7 +424,6 @@ local _ClassConfig = {
             "Vulka's Chant of Flame",
             "Tuyen's Chant of Fire",
             "Tuyen's Chant of Flame",
-
             -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
             "Ancient: Chaos Chant",
             "Angstlich's Assonance",
@@ -434,7 +431,6 @@ local _ClassConfig = {
             "Fufil's Curtailing Chant",
         },
         ['IceDotSong'] = {
-
             -- Ice Dot
             "Swarn's Chant of Frost",
             "Sylra Fris' Chant of Frost",
@@ -449,9 +445,6 @@ local _ClassConfig = {
             "Vulka's Chant of Frost",
             "Tuyen's Chant of Ice",
             "Tuyen's Chant of Frost",
-
-
-
             -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
             "Ancient: Chaos Chant",
             "Angstlich's Assonance",
@@ -460,8 +453,6 @@ local _ClassConfig = {
         },
         ['PoisonDotSong'] = {
             -- DotSongs - Level Range 30 - 115
-
-
             "Marsin's Chant of Poison",
             "Cruor's Chant of Poison",
             "Malvus's Chant of Poison",
@@ -475,9 +466,6 @@ local _ClassConfig = {
             "Vulka's Chant of Poison",
             "Tuyen's Chant of Venom",
             "Tuyen's Chant of Poison",
-
-
-
             -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
             "Ancient: Chaos Chant",
             "Angstlich's Assonance",
@@ -486,7 +474,6 @@ local _ClassConfig = {
         },
         ['DiseaseDotSong'] = {
             -- DotSongs - Level Range 30 - 115
-
             "Goremand's Chant of Disease", -- 125
             "Coagulus' Chant of Disease",
             "Zlexak's Chant of Disease",
@@ -500,7 +487,6 @@ local _ClassConfig = {
             "Vulka's Chant of Disease",
             "Tuyen's Chant of the Plague",
             "Tuyen's Chant of Disease",
-
             -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
             "Ancient: Chaos Chant",
             "Angstlich's Assonance",
@@ -513,7 +499,6 @@ local _ClassConfig = {
             "Aria of Amelioration",
             --"Aria of Innocence", --curse only
             "Aria of Asceticism", --poison/disease Only
-
         },
         ['AllianceSong'] = {
             "Covariance of Sticks and Stones",
@@ -551,11 +536,6 @@ local _ClassConfig = {
         },
         ['ChordsAE'] = {
             "Chords of Dissonance",
-        },
-        ['LowAriaSong'] = {
-            -- Low Level Aria Song - before Combination of Effects Under Level 68
-            "Battlecry of the Vah Shir",
-            "Warsong of the Vah Shir",
         },
         ['AmpSong'] = {
             "Amplification",
