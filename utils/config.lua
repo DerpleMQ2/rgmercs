@@ -707,6 +707,14 @@ Config.DefaultConfig = {
         FAQ = "Why am I not following the Marked target?",
         Answer = "You can set the [FollowMarkTarget] option to true to automatically target the MA's Marked target.",
     },
+    ['SelfAssistFallback']   = {
+        DisplayName = "Self-Assist Fallback",
+        Category = "Engage",
+        Index = 16,
+        Tooltip = "If no other valid MA is found, fallback to ourselves.",
+        Default = true,
+        ConfigType = "Advanced",
+    },
 
     -- [SPELLS/ABILS] --
     ['ManaToNuke']           = {

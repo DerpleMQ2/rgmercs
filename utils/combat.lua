@@ -56,11 +56,13 @@ function Combat.SetMainAssist()
         end
     end
 
-    -- If there are no other valid assists, and we are still checking, fall back to ourselves!
-    if not Core.IAmMA() then -- only give the log message if we weren't already the MA
-        Logger.log_info("SetMainAssist: No other valid assists! Falling back to ourselves.")
+    if Config:GetSetting('SelfAssistFallback') then
+        -- If there are no other valid assists, and we are still checking, fall back to ourselves!
+        if not Core.IAmMA() then -- only give the log message if we weren't already the MA
+            Logger.log_info("SetMainAssist: No other valid assists! Falling back to ourselves.")
+        end
+        Config.Globals.MainAssist = mq.TLO.Me.CleanName()
     end
-    Config.Globals.MainAssist = mq.TLO.Me.CleanName()
 end
 
 --- Engages the target specified by the given autoTargetId.
