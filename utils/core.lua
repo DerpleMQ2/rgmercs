@@ -269,7 +269,7 @@ end
 
 function Core.GetAssistWarningString()
     local warningString
-    if not Config:GetSetting('AssistOutside') then
+    if not Config:GetSetting('UseAssistList') then
         if mq.TLO.Raid.Members() == 0 and mq.TLO.Group() then
             if not mq.TLO.Group.MainAssist() then
                 warningString = "Warning: NO GROUP MA ASSIGNED - PLEASE SET ONE!"
@@ -283,8 +283,8 @@ function Core.GetAssistWarningString()
                 warningString = "Warning: SELECTED RAID MA NOT IN ZONE!"
             end
         end
-    elseif #Config:GetSetting('OutsideAssistList') == 0 then
-        warningString = "Warning: THE OUTSIDE ASSIST LIST IS EMPTY WITH OUTSIDE ASSIST ENABLED!"
+    elseif #Config:GetSetting('AssistList') == 0 then
+        warningString = "Warning: THE ASSIST LIST IS ENABLED, BUT THE LIST IS EMPTY!"
     end
     return warningString
 end

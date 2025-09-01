@@ -17,14 +17,14 @@ Ui.ConfigFilter     = ""
 Ui.ShowDownNamed    = false
 
 
---- Renders the OA (Outside Assist) list.
---- This function is responsible for displaying the list of Outside Assist names
+--- Renders the assist list.
+--- This function is responsible for displaying the list of assist names
 --- It does not take any parameters and does not return any values.
 function Ui.RenderOAList()
     if mq.TLO.Target.ID() > 0 then
         ImGui.PushID("##_small_btn_create_oa")
         if ImGui.SmallButton("Add Target as OA") then
-            Config:AddOA(mq.TLO.Target.DisplayName())
+            Config:AssistAdd(mq.TLO.Target.DisplayName())
         end
         ImGui.PopID()
     end
@@ -39,7 +39,7 @@ function Ui.RenderOAList()
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for idx, name in ipairs(Config:GetSetting('OutsideAssistList') or {}) do
+        for idx, name in ipairs(Config:GetSetting('AssistList') or {}) do
             local spawn = mq.TLO.Spawn(string.format("PC =%s", name))
             ImGui.TableNextColumn()
             ImGui.Text(tostring(idx))
@@ -67,7 +67,7 @@ function Ui.RenderOAList()
             ImGui.TableNextColumn()
             ImGui.PushID("##_small_btn_delete_oa_" .. tostring(idx))
             if ImGui.SmallButton(Icons.FA_TRASH) then
-                Config:DeleteOA(idx)
+                Config:AssistDelete(idx)
             end
             ImGui.PopID()
             ImGui.SameLine()
@@ -76,17 +76,17 @@ function Ui.RenderOAList()
                 ImGui.InvisibleButton(Icons.FA_CHEVRON_UP, ImVec2(22, 1))
             else
                 if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
-                    Config:MoveOAUp(idx)
+                    Config:AssistMoveUp(idx)
                 end
             end
             ImGui.PopID()
             ImGui.SameLine()
             ImGui.PushID("##_small_btn_dn_oa_" .. tostring(idx))
-            if idx == #Config:GetSetting('OutsideAssistList') then
+            if idx == #Config:GetSetting('AssistList') then
                 ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
             else
                 if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
-                    Config:MoveOADown(idx)
+                    Config:AssistMoveDown(idx)
                 end
             end
             ImGui.PopID()

@@ -410,7 +410,7 @@ function Targeting.IsSafeName(spawnType, name)
         return true
     end
 
-    for _, n in ipairs(Config:GetSetting('OutsideAssistList')) do
+    for _, n in ipairs(Config:GetSetting('AssistList')) do
         if name == n then
             Logger.log_verbose("IsSafeName(%s): OA Safe", name)
             return true

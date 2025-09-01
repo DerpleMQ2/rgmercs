@@ -590,7 +590,7 @@ function Casting.GetBuffableGroupIDs()
         end
 
         -- check OA list
-        for _, n in ipairs(Config:GetSetting('OutsideAssistList')) do
+        for _, n in ipairs(Config:GetSetting('AssistList')) do
             -- dont double up OAs who are in our group
             if not mq.TLO.Group.Member(n)() then
                 local oaSpawn = mq.TLO.Spawn(("pc =%s"):format(n))

@@ -174,17 +174,17 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                     -- end
                     ImGui.Text("Stuck To: " ..
                         (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
-                    if ImGui.CollapsingHeader("Outside Assist List") then
+                    if ImGui.CollapsingHeader("Assist List") then
                         ImGui.Indent()
-                        if Config:GetSetting('AssistOutside') then
+                        if Config:GetSetting('UseAssistList') then
                             ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, .75)
                         else
                             ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, .75)
                         end
                         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(20, 3))
 
-                        if ImGui.SmallButton(Config:GetSetting('AssistOutside') and "Outside Assist: Enabled" or "Outside Assist: Disabled") then
-                            Config:SetSetting('AssistOutside', not Config:GetSetting('AssistOutside'))
+                        if ImGui.SmallButton(Config:GetSetting('UseAssistList') and "Use Assist List: Enabled" or "Use Assist List: Disabled") then
+                            Config:SetSetting('UseAssistList', not Config:GetSetting('UseAssistList'))
                         end
                         ImGui.PopStyleVar()
                         ImGui.PopStyleColor()

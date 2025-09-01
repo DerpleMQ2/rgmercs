@@ -16,10 +16,10 @@ Combat.__index  = Combat
 --- This function is responsible for designating the main assist.
 ---
 function Combat.SetMainAssist()
-    if Config:GetSetting('AssistOutside') then
-        if #Config:GetSetting('OutsideAssistList') > 0 then
+    if Config:GetSetting('UseAssistList') then
+        if #Config:GetSetting('AssistList') > 0 then
             Logger.log_verbose("SetMainAssist: Checking Assist List.")
-            for _, name in ipairs(Config:GetSetting('OutsideAssistList')) do
+            for _, name in ipairs(Config:GetSetting('AssistList')) do
                 Logger.log_verbose("SetMainAssist: Checking Assist List: %s", name)
                 local listAssistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
                 if listAssistSpawn() and not listAssistSpawn.Dead() then
@@ -439,7 +439,7 @@ function Combat.FindBestAutoTarget(validateFn)
         -- We're not the main assist so we need to choose our target based on our main assist.
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
-        if Config:GetSetting('AssistOutside') then
+        if Config:GetSetting('UseAssistList') then
             --- @diagnostic disable-next-line: redundant-parameter
             local peer = mq.TLO.DanNet.Peers(Config.Globals.MainAssist)()
             local assistTarget = nil
@@ -483,7 +483,7 @@ function Combat.FindBestAutoTarget(validateFn)
         mq.TLO.Target.ID())
 
     if Config.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then
-        if (Config:GetSetting('AssistOutside') or not Config:GetSetting('OnlyScanXT')) and not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
+        if (Config:GetSetting('UseAssistList') or not Config:GetSetting('OnlyScanXT')) and not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
             Targeting.AddXTByID(1, Config.Globals.AutoTargetID)
         end
 
@@ -508,7 +508,7 @@ function Combat.FindBestAutoTargetCheck()
     local OATarget = false
 
     -- our MA out of group has a valid target for us.
-    if Config:GetSetting('AssistOutside') and not Core.IAmMA() then
+    if Config:GetSetting('UseAssistList') and not Core.IAmMA() then
         local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
 
         if queryResult then
