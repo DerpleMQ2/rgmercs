@@ -186,7 +186,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                         end
                         ImGui.PopStyleVar()
                         ImGui.PopStyleColor()
-                        Ui.RenderOAList()
+                        Ui.RenderAssistList()
                         ImGui.Unindent()
                     end
 

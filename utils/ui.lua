@@ -20,15 +20,15 @@ Ui.ShowDownNamed    = false
 --- Renders the assist list.
 --- This function is responsible for displaying the list of assist names
 --- It does not take any parameters and does not return any values.
-function Ui.RenderOAList()
+function Ui.RenderAssistList()
     if mq.TLO.Target.ID() > 0 then
         ImGui.PushID("##_small_btn_create_oa")
-        if ImGui.SmallButton("Add Target as OA") then
+        if ImGui.SmallButton("Add Target to Assist List") then
             Config:AssistAdd(mq.TLO.Target.DisplayName())
         end
         ImGui.PopID()
     end
-    if ImGui.BeginTable("OAList Names", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("AssistList Names", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 
         ImGui.TableSetupColumn('ID', (ImGuiTableColumnFlags.WidthFixed), 20.0)

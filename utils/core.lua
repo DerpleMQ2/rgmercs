@@ -267,26 +267,4 @@ function Core.ProcessCureChecks()
     Modules:ExecModule("Class", "ManageCureCoroutines")
 end
 
-function Core.GetAssistWarningString()
-    local warningString
-    if not Config:GetSetting('UseAssistList') then
-        if mq.TLO.Raid.Members() == 0 and mq.TLO.Group() then
-            if not mq.TLO.Group.MainAssist() then
-                warningString = "Warning: NO GROUP MA ASSIGNED - PLEASE SET ONE!"
-            elseif mq.TLO.Group.MainAssist.ID() == 0 then
-                warningString = "Warning: GROUP MA NOT IN ZONE!"
-            end
-        elseif mq.TLO.Raid.Members() > 0 then
-            if not mq.TLO.Raid.MainAssist(Config:GetSetting('RaidAssistTarget'))() then
-                warningString = "Warning: NO RAID MA ASSIGNED - PLEASE SET ONE!"
-            elseif mq.TLO.Raid.MainAssist(Config:GetSetting('RaidAssistTarget')).ID() == 0 then
-                warningString = "Warning: SELECTED RAID MA NOT IN ZONE!"
-            end
-        end
-    elseif #Config:GetSetting('AssistList') == 0 then
-        warningString = "Warning: THE ASSIST LIST IS ENABLED, BUT THE LIST IS EMPTY!"
-    end
-    return warningString
-end
-
 return Core
