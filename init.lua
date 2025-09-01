@@ -202,10 +202,10 @@ local function RGInit(...)
 
     Combat.SetMainAssist()
 
-    local warningString = Core.GetAssistWarningString()
+    Ui.GetAssistWarningString()
 
-    if warningString then
-        Comms.PopUp("RGMercs " .. warningString .. "\nYour assist is currently set to %s.", Config.Globals.MainAssist)
+    if Config.TempSettings.AssistWarning then
+        Comms.PopUp("RGMercs " .. Config.TempSettings.AssistWarning .. "\nYour assist is currently set to %s.", Config.Globals.MainAssist)
     else
         Comms.PopUp("Welcome to RGMercs! Your assist is currently set to %s.", Config.Globals.MainAssist)
     end
@@ -348,6 +348,7 @@ local function Main()
     if mq.TLO.Me.Hovering() then Events.HandleDeath() end
 
     Combat.SetMainAssist()
+    Ui.GetAssistWarningString()
 
     if Combat.FindBestAutoTargetCheck() then
         -- This will find a valid target and set it to : Config.Globals.AutoTargetID

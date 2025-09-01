@@ -2067,30 +2067,6 @@ function Config:AssistClear()
     self:SaveSettings()
 end
 
--- --- Deletes the OA with the given ID
--- --- @param name string The name of the OA to delete
--- function Config:DeleteOAByName(name)
---     for idx, cur_name in ipairs(Config:GetSetting('AssistList') or {}) do
---         if cur_name:lower() == name:lower() then
---             self:DeleteOA(idx)
---             return
---         end
---     end
--- end
-
--- --- Deletes the OA with the given ID
--- --- @param idx number The ID of the OA to delete
--- function Config:DeleteOA(idx)
---     if idx <= #self:GetSetting('AssistList') then
---         Logger.log_info("\axOutside Assist \at%d\ax \ag%s\ax - \arDeleted!\ax", idx,
---             self:GetSetting('AssistList')[idx])
---         table.remove(self:GetSetting('AssistList'), idx)
---         self:SaveSettings()
---     else
---         Logger.log_error("\ar%d is not a valid OA ID!", idx)
---     end
--- end
-
 --- Moves the OA with the given ID up.
 --- @param id number The ID of the OA to move up.
 function Config:AssistMoveUp(id)
@@ -2105,8 +2081,7 @@ function Config:AssistMoveUp(id)
 
     self:GetSetting('AssistList')[newId], self:GetSetting('AssistList')[id] =
         self:GetSetting('AssistList')[id], self:GetSetting('AssistList')[newId]
-    Logger.log_info("\axAssist List: \ag%s\ax has been\ag moved up\ax to position \at%d\ax ",
-        self:GetSetting('AssistList')[newId], newId)
+    Logger.log_info("\axAssist List: \ag%s\ax has been\ag moved up\ax to position \at%d", self:GetSetting('AssistList')[newId], newId)
     self:SaveSettings()
 end
 
@@ -2127,8 +2102,7 @@ function Config:AssistMoveDown(id)
     self:GetSetting('AssistList')[newId], self:GetSetting('AssistList')[id] =
         self:GetSetting('AssistList')[id], self:GetSetting('AssistList')[newId]
 
-    Logger.log_info("\axAssist List: \ag%s\ax has been\ar moved down\ax to position \at%d\ax ",
-        self:GetSetting('AssistList')[newId], newId)
+    Logger.log_info("\axAssist List: \ag%s\ax has been\ar moved down\ax to position \at%d", self:GetSetting('AssistList')[newId], newId)
 
     self:SaveSettings()
 end

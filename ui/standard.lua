@@ -28,10 +28,8 @@ function StandardUI:renderModulesTabs()
 end
 
 function StandardUI:RenderTarget()
-    local warningString = Core.GetAssistWarningString()
-
-    if warningString then
-        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255), warningString)
+    if Config.TempSettings.AssistWarning then
+        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255), Config.TempSettings.AssistWarning)
     end
 
     local assistSpawn = Targeting.GetAutoTarget()

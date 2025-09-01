@@ -402,7 +402,7 @@ function Combat.FindBestAutoTarget(validateFn)
             else
                 -- If we don't have an AutoTarget and we are using the AutoTarget System:
                 -- If we already have a target, we should check to see if we automatically pulled it, or if it is likely that we manually pulled it.)
-                --If not, we need to scan our nearby area and choose a target based on our built in algorithm. We
+                -- If not, we need to scan our nearby area and choose a target based on our built in algorithm. We
                 -- only need to do this if we don't already have a target. Assume if any mob runs into camp, we shouldn't reprioritize
                 -- unless specifically told.
 
