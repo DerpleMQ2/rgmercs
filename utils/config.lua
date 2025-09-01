@@ -22,7 +22,7 @@ Config.TempSettings.SettingToModuleCache = {}
 
 -- Global State
 Config.Globals                           = {}
-Config.Globals.MainAssist                = ""
+Config.Globals.MainAssist                = mq.TLO.Me.CleanName()
 Config.Globals.ScriptDir                 = ""
 Config.Globals.AutoTargetID              = 0
 Config.Globals.ForceTargetID             = 0

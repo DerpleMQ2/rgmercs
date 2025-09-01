@@ -40,7 +40,7 @@ function Comms.PopUp(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
 
-    Core.DoCmd("/popup %s", output)
+    Core.DoCmd("/popupecho 15 5 %s", output)
 end
 
 --- Handles the announcement message.

@@ -199,43 +199,19 @@ local function RGInit(...)
 
     initPctComplete = 40
     initMsg = "Setting Assist..."
-    local mainAssist = mq.TLO.Me.CleanName()
 
-    if mq.TLO.Group() and mq.TLO.Group.MainAssist() then
-        mainAssist = mq.TLO.Group.MainAssist() or ""
+    Combat.SetMainAssist()
+
+    local warningString = Core.GetAssistWarningString()
+
+    if warningString then
+        Comms.PopUp("RGMercs " .. warningString .. "\nYour assist is currently set to %s.", Config.Globals.MainAssist)
+    else
+        Comms.PopUp("Welcome to RGMercs! Your assist is currently set to %s.", Config.Globals.MainAssist)
     end
 
-    for k, v in ipairs(Config.Constants.ExpansionIDToName) do
-        Logger.log_debug("\ayExpansion \at%-22s\ao[\am%02d\ao]: %s", v, k,
-            Core.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
-    end
-
-    -- TODO: Can turn this into an options parser later.
-    if args and #args > 0 then
-        for _, v in ipairs(args) do
-            if v ~= "mini" then
-                mainAssist = v
-                break
-            end
-        end
-    end
-
-    if (not mainAssist or mainAssist == "") and mq.TLO.Group.Members() > 0 then
-        mainAssist = mq.TLO.Group.MainAssist.DisplayName()
-    end
-
-    if mainAssist:len() > 0 then
-        Config.Globals.MainAssist = mainAssist
-        Comms.PopUp("Targeting %s for Main Assist", Config.Globals.MainAssist)
-        Targeting.SetTarget(Core.GetMainAssistId(), true)
-        Logger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", Config.Globals.MainAssist,
-            Config:GetSetting('AutoAssistAt'))
-    end
-
-    if Core.GetGroupMainAssistName() ~= mainAssist then
-        Comms.PopUp(string.format(
-            "Assisting: %s NOTICE: Group MainAssist [%s] != Your Assist Target [%s]. Is This On Purpose?", mainAssist,
-            Core.GetGroupMainAssistName(), mainAssist))
+    if Core.IAmMA() then
+        Logger.log_warn("This PC has assigned itself as the MA! If this is not intentional, please check your assist setup.")
     end
 
     initPctComplete = 50
@@ -249,15 +225,12 @@ local function RGInit(...)
 
     Core.DoCmd("/stick set breakontarget on")
 
-    -- TODO: Chat Begs
     initPctComplete = 70
     initMsg = "Closing down Macro..."
     if (mq.TLO.Macro.Name() or ""):find("RGMERC") then
         Core.DoCmd("/macro end")
     end
 
-    -- Comms.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
-    --     mq.TLO.Me.Class.ShortName())
     initMsg = "Pausing the CWTN Plugin..."
     Core.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
 
@@ -275,8 +248,7 @@ local function RGInit(...)
     printf("\aw\awBy \ag%s", Config._author)
     printf("\aw****************************")
     -- keep these for easy editing/additon later
-    -- printf("\agSPECIAL NOTE FOR EMU USERS:")
-    -- printf("\agLNS Users: The (RGMercs) Loot Corpses setting has been removed. Please use /lns (un)pause as needed.")
+    printf("\agOur Assist System has been revamped! See our recent forum post or commit messages.")
     printf("\awPlease visit us on the RG forums for the most recent news and updates.")
     printf("\aw use \ag /rg \aw for a list of commands")
 
@@ -375,7 +347,7 @@ local function Main()
 
     if mq.TLO.Me.Hovering() then Events.HandleDeath() end
 
-    Combat.SetControlToon()
+    Combat.SetMainAssist()
 
     if Combat.FindBestAutoTargetCheck() then
         -- This will find a valid target and set it to : Config.Globals.AutoTargetID

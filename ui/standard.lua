@@ -28,11 +28,10 @@ function StandardUI:renderModulesTabs()
 end
 
 function StandardUI:RenderTarget()
-    if (mq.TLO.Raid.Members() > 0 and mq.TLO.Raid.MainAssist(1)() == nil) or (mq.TLO.Raid.Members() == 0 and mq.TLO.Group() and not mq.TLO.Group.MainAssist()) then
-        if ((Core.OnEMU() and (mq.TLO.Raid.Members() >= 18 or mq.TLO.Raid.Members() == 0)) or not Core.OnEMU()) then
-            ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
-                string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
-        end
+    local warningString = Core.GetAssistWarningString()
+
+    if warningString then
+        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255), warningString)
     end
 
     local assistSpawn = Targeting.GetAutoTarget()
@@ -166,12 +165,13 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
 
                     -- .. tostring(Config.Globals.AutoTargetID))
                     ImGui.Text("MA: %-25s", (Core.GetMainAssistSpawn().CleanName() or "None"))
-                    if mq.TLO.Target.ID() > 0 and Targeting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
-                        ImGui.SameLine()
-                        if ImGui.SmallButton(string.format("Set MA to %s", Targeting.GetTargetCleanName())) then
-                            Config.Globals.MainAssist = mq.TLO.Target.CleanName()
-                        end
-                    end
+                    -- commented the below code out because with refactor it now does nothing. if we want another MA, add them to the assist list.
+                    -- if mq.TLO.Target.ID() > 0 and Targeting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
+                    --     ImGui.SameLine()
+                    --     if ImGui.SmallButton(string.format("Set MA to %s", Targeting.GetTargetCleanName())) then
+                    --         Config.Globals.MainAssist = mq.TLO.Target.CleanName()
+                    --     end
+                    -- end
                     ImGui.Text("Stuck To: " ..
                         (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Outside Assist List") then

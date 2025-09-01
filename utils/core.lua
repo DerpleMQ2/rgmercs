@@ -128,6 +128,18 @@ function Core.GetGroupMainAssistName()
     return (mq.TLO.Group.MainAssist.CleanName() or "")
 end
 
+--- Retrieves the ID of the selected number assist in the raid.
+--- @return number The ID of the chosen assist in the raid.
+function Core.GetRaidMainAssistID(assistNumber)
+    return (mq.TLO.Raid.MainAssist(assistNumber).ID() or 0)
+end
+
+--- Retrieves the name of the selected number assist in the raid.
+--- @return string The name of the chosesn assist in the raid.
+function Core.GetRaidMainAssistName(assistNumber)
+    return (mq.TLO.Raid.MainAssist(assistNumber).CleanName() or "")
+end
+
 --- Checks if the specified expansion is available.
 --- @param name string The name of the expansion to check.
 --- @return boolean True if the expansion is available, false otherwise.
@@ -253,6 +265,20 @@ end
 
 function Core.ProcessCureChecks()
     Modules:ExecModule("Class", "ManageCureCoroutines")
+end
+
+function Core.GetAssistWarningString()
+    local warningString
+    if not Config:GetSetting('AssistOutside') then
+        if mq.TLO.Raid.Members() == 0 and mq.TLO.Group() and not mq.TLO.Group.MainAssist() then
+            warningString = "Warning: NO GROUP MA ASSIGNED - PLEASE SET ONE!"
+        elseif mq.TLO.Raid.Members() > 0 and mq.TLO.Raid.MainAssist(1)() == nil then
+            warningString = "Warning: NO RAID MA ASSIGNED - PLEASE SET ONE!"
+        end
+    elseif #Config:GetSetting('OutsideAssistList') == 0 then
+        warningString = "Warning: THE OUTSIDE ASSIST LIST IS EMPTY WITH OUTSIDE ASSIST ENABLED!"
+    end
+    return warningString
 end
 
 return Core
