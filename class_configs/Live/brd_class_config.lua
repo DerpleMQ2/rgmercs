@@ -1272,7 +1272,7 @@ local _ClassConfig = {
             {
                 name = "BardDPSAura",
                 type = "Song",
-                load_cond = function(self) return Core.GetResolvedActionMapItem('BardDSPAura') and Config:GetSetting('UseAura') == 1 end,
+                load_cond = function(self) return Core.GetResolvedActionMapItem('BardDPSAura') and Config:GetSetting('UseAura') == 1 end,
                 pre_activate = function(self, songSpell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
                     ---@diagnostic disable-next-line: undefined-field
                     if not Casting.AuraActiveByName(songSpell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
