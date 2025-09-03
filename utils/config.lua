@@ -1537,6 +1537,12 @@ Config.DefaultConfig = {
         Tooltip = "Enable displaying the timing of each rotation step.",
         Default = false,
     },
+    ['ExtendedFTInfo']       = {
+        DisplayName = "Ext. ForceTarget Info",
+        Category = "UI",
+        Tooltip = "Show extended information in the Force Target window.",
+        Default = false,
+    },
 
     -- [ Debug ] --
     ['LogLevel']             = {

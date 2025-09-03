@@ -148,13 +148,19 @@ function Ui.RenderForceTargetList(showPopout)
         Config.Globals.ForceTargetID = 0
     end
 
-    if ImGui.BeginTable("XTargs", 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable)) then
+    if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 7 or 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
+        if Config:GetSetting("ExtendedFTInfo") then
+            ImGui.TableSetupColumn('XT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
+        end
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 300)
         ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.TableSetupColumn('Aggro %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        if Config:GetSetting("ExtendedFTInfo") then
+            ImGui.TableSetupColumn('SpawnID', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        end
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
@@ -170,6 +176,10 @@ function Ui.RenderForceTargetList(showPopout)
                     ImGui.PopStyleColor(1)
                 else
                     ImGui.Text("")
+                end
+                if Config:GetSetting("ExtendedFTInfo") then
+                    ImGui.TableNextColumn()
+                    ImGui.Text(tostring(i))
                 end
                 ImGui.TableNextColumn()
                 ImGui.PushStyleColor(ImGuiCol.Text, Ui.GetConColorBySpawn(xtarg))
@@ -187,6 +197,10 @@ function Ui.RenderForceTargetList(showPopout)
                 ImGui.Text(tostring(math.ceil(xtarg.PctAggro() or 0)))
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(math.ceil(xtarg.Distance() or 0)))
+                if Config:GetSetting("ExtendedFTInfo") then
+                    ImGui.TableNextColumn()
+                    ImGui.Text(tostring(math.ceil(xtarg.ID() or 0)))
+                end
             end
         end
 
@@ -975,6 +989,7 @@ function Ui.GetAssistWarningString()
     elseif #Config:GetSetting('AssistList') == 0 then
         warningString = "Warning: THE ASSIST LIST IS ENABLED, BUT THE LIST IS EMPTY!"
     end
+
     Config.TempSettings.AssistWarning = warningString
 end
 

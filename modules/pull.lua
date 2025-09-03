@@ -55,6 +55,7 @@ local PullStates                          = {
     ['PULL_RETURN_TO_CAMP']     = 8,
     ['PULL_WAITING_ON_MOB']     = 9,
     ['PULL_WAITING_SHOULDPULL'] = 10,
+    ['PULL_RESCAN_TARGET']      = 11,
 }
 
 local PullStateDisplayStrings             = {
@@ -1644,36 +1645,36 @@ function Module:GetPullableSpawns()
         end
 
         if spawn.Master.Type() == 'PC' then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
+            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
             return false
         elseif self:IsPullMode("Chain") then
             if Targeting.IsSpawnXTHater(spawn.ID()) then
-                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
                 return false
             end
         end
 
         if self:HaveList("PullAllowList") then
             if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
-                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
                 return false
             end
         elseif self:HaveList("PullDenyList") then
             if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
-                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
                 return false
             end
         end
 
         for _, ignoredMob in ipairs(self.TempSettings.PullIgnoreTargets) do
             if spawn.ID() == ignoredMob.ID() then
-                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Ignore List!", spawn.CleanName(), spawn.ID())
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Ignore List!", spawn.CleanName(), spawn.ID())
                 return false
             end
         end
 
         if spawn.FeetWet() and not Config:GetSetting('PullMobsInWater') then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water", spawn.CleanName(), spawn.ID())
+            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water", spawn.CleanName(), spawn.ID())
             return false
         end
 
@@ -1746,13 +1747,13 @@ function Module:GetPullableSpawns()
         end
 
         if not canPath or navDist > maxPathRange then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
+            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
                 spawn.ID(), navDist, Strings.BoolToColorString(canPath))
             return false
         end
 
         if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
+            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
                 spawn.CleanName(), spawn.ID())
             return false
         end
@@ -1870,10 +1871,13 @@ function Module:NavToWaypoint(loc, ignoreAggro)
     mq.TLO.Me.Stand()
 
     Core.DoCmd("/nav locyxz %s, log=off", loc)
-    mq.delay("2s")
+    mq.delay(1000, function() return mq.TLO.Navigation.Active() end)
 
     while mq.TLO.Navigation.Active() do
         Logger.log_verbose("NavToWaypoint Aggro Count: %d", Targeting.GetXTHaterCount())
+
+
+
 
         if Targeting.GetXTHaterCount() > 0 and not ignoreAggro then
             if mq.TLO.Navigation.Active() then
@@ -1889,7 +1893,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
             end
         end
 
-        mq.delay(10)
+        mq.delay(100)
     end
 
     return true
@@ -1981,6 +1985,12 @@ function Module:GiveTime(combat_state)
     Logger.log_verbose("PULL:GiveTime() - ShouldPull: %s", Strings.BoolToColorString(shouldPull))
 
     if not shouldPull then
+        --if we were navigating during a rescan, cancel it.
+        if self.TempSettings.PullState == PullStates.PULL_RESCAN_TARGET and mq.TLO.Navigation.Active() then
+            Logger.log_debug("\arNOTICE:\ax Rescan Aborted for ShouldPull!")
+            Core.DoCmd("/nav stop log=off")
+            mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
+        end
         if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
             -- go back to camp.
             self:SetPullState(PullStates.PULL_WAITING_SHOULDPULL, reason)
@@ -2136,11 +2146,12 @@ function Module:GiveTime(combat_state)
 
     Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
 
-    mq.delay(1000)
+    mq.delay(1000, function() return mq.TLO.Navigation.Active() end)
 
     local abortPull = false
+    local maxMove = self.settings.MaxMoveTime * 1000
 
-    while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
+    while mq.TLO.Navigation.Active() do
         Logger.log_super_verbose("Pathing to pull id...")
         if self:IsPullMode("Chain") then
             if Targeting.GetXTHaterCount() >= self.settings.ChainCount then
@@ -2168,6 +2179,16 @@ function Module:GiveTime(combat_state)
 
         mq.delay(100)
         mq.doevents()
+
+        maxMove = maxMove - 100
+
+        if maxMove <= 0 then
+            Logger.log_debug("\arNOTICE:\ax Pull Time Exceeded! Rescan for targets.")
+            self:SetPullState(PullStates.PULL_WAITING_SHOULDPULL, "")
+            -- simply return, if nav needs to be stopped, whatever needs to do it will stop it.
+            -- in this way, nav will continue towards the original target
+            return
+        end
     end
 
     mq.delay("2s", function() return not mq.TLO.Me.Moving() end)
@@ -2188,7 +2209,7 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    if abortPull == false then
+    if not abortPull then
         local target = mq.TLO.Target
         self:SetPullState(PullStates.PULL_PULLING, self:GetPullStateTargetInfo())
 
@@ -2196,7 +2217,6 @@ function Module:GiveTime(combat_state)
             Logger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
 
             local successFn = function() return Targeting.GetXTHaterCount() > 0 end
-            local maxMove = self.settings.MaxMoveTime * 1000
 
             if self:IsPullMode("Chain") then
                 successFn = function() return Targeting.GetXTHaterCount() >= self.settings.ChainCount end
@@ -2219,9 +2239,7 @@ function Module:GiveTime(combat_state)
                     mq.delay(10)
                 end
 
-                if Casting.CanUseAA("Companion's Discipline") or Casting.CanUseAA("Pet Discipline") then
-                    Core.DoCmd("/squelch /pet ghold on")
-                end
+                Core.SetPetHold()
                 Core.DoCmd("/squelch /pet back off")
                 mq.delay("1s", function() return (mq.TLO.Pet.PlayerState() or 0) == 0 end)
                 Core.DoCmd("/squelch /pet follow")
@@ -2288,7 +2306,7 @@ function Module:GiveTime(combat_state)
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
-                    Logger.log_super_verbose("Waiting on ranged pull to finish... %s", Strings.BoolToColorString(successFn()))
+                    Logger.log_super_verbose("Waiting on autoattack pull to finish... %s", Strings.BoolToColorString(successFn()))
                     Core.DoCmd("/attack")
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then

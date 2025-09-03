@@ -496,16 +496,20 @@ function Combat.FindBestAutoTarget(validateFn)
     Logger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", Config.Globals.AutoTargetID or 0,
         mq.TLO.Target.ID())
 
-    if Config.Globals.AutoTargetID > 0 and (not validateFn or validateFn(Config.Globals.AutoTargetID)) then
-        if mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then
-            Targeting.SetTarget(Config.Globals.AutoTargetID)
+    local autoTargetId = Config.Globals.AutoTargetID
+    if autoTargetId > 0 and (validateFn and validateFn(autoTargetId)) then
+        if mq.TLO.Target.ID() ~= autoTargetId then
+            Targeting.SetTarget(autoTargetId)
         end
 
-        -- this ensures we correctly and quickly receive health percent to assist in a timely manner
-        -- testing on emu to help alleviate xtarg issues algar 9/1/25
-        --if Config:GetSetting('UseAssistList') and not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
-        if (Config:GetSetting('UseAssistList') or Core.OnEMU()) and not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
-            Targeting.AddXTByID(1, Config.Globals.AutoTargetID)
+        -- For Assist Lists, this ensures we correctly and quickly receive health percent to assist in a timely manner
+        -- For Emu, this helps correct for emu xtarget bugs
+        -- Second dead check because targets were ocasionally dying between the validateFn and this check
+        if Config:GetSetting('UseAssistList') or Core.OnEMU() then
+            if mq.TLO.Spawn(autoTargetId)() and not mq.TLO.Spawn(autoTargetId).Dead() and not Targeting.IsSpawnXTHater(autoTargetId) then
+                Targeting.AddXTByID(1, Config.Globals.AutoTargetID)
+                Logger.log_verbose("FindTarget(): FoundTargetID(%d) not on xt list, adding.", autoTargetId or 0)
+            end
         end
     end
 end
@@ -522,22 +526,22 @@ function Combat.FindBestAutoTargetCheck()
         Strings.BoolToColorString(Core.IAmMA()), Strings.BoolToColorString(config.FollowMarkTarget),
         Strings.BoolToColorString(Config.Globals.BackOffFlag))
 
-    local OATarget = false
+    local assistTarg = false
 
-    -- our MA out of group has a valid target for us.
-    if Config:GetSetting('UseAssistList') and not Core.IAmMA() and Core.GetMainAssistId() > 0 then
+    -- check if our MA has a valid target for us. Check Assist List if on, or check everyone on emu to get around emu xtarget bugs
+    if (Config:GetSetting('UseAssistList') or Core.OnEMU()) and not Core.IAmMA() and Core.GetMainAssistId() > 0 then
         local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
         if queryResult then
             local assistTarget = mq.TLO.Spawn(queryResult)
             Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
                 assistTarget.CleanName() or "None")
             if assistTarget and assistTarget() then
-                OATarget = true
+                assistTarg = true
             end
         end
     end
 
-    return (Targeting.GetXTHaterCount() > 0 or Core.IAmMA() or config.FollowMarkTarget or OATarget) and
+    return (Targeting.GetXTHaterCount() > 0 or Core.IAmMA() or config.FollowMarkTarget or assistTarg) and
         not Config.Globals.BackOffFlag
 end
 
