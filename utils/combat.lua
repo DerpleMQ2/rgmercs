@@ -13,51 +13,69 @@ local Movement  = require("utils.movement")
 local Combat    = { _version = '1.0', _name = "Combat", _author = 'Derple', }
 Combat.__index  = Combat
 
---- Sets the control (Assist) toon for RGMercs
---- This function is responsible for designating a specific toon as the control toon.
+--- This function is responsible for designating the main assist.
 ---
-function Combat.SetControlToon()
-    Logger.log_verbose("Checking for best Control Toon")
-    if Config:GetSetting('AssistOutside') then
-        if #Config:GetSetting('OutsideAssistList') > 0 then
-            local maSpawn = Core.GetMainAssistSpawn()
+function Combat.SetMainAssist()
+    local inRaid = mq.TLO.Raid.Members() > 0
+    local inGroup = mq.TLO.Raid.Members() == 0 and mq.TLO.Group()
 
-            --temp disable, needs refactor, OA is broken when this returns prior to iterating over the OAL.
-
-            -- if maSpawn.ID() > 0 and not maSpawn.Dead() then
-            --     -- make sure they are still in our XT.
-            --     Targeting.AddXTByName(2, maSpawn.DisplayName())
-            --     return
-            -- end
-
-            for _, name in ipairs(Config:GetSetting('OutsideAssistList')) do
-                Logger.log_verbose("Testing %s for control", name)
-                local assistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
-
-                if assistSpawn() and assistSpawn.ID() ~= Core.GetMainAssistId() and not assistSpawn.Dead() then
-                    Logger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
-                    Config.Globals.MainAssist = assistSpawn.CleanName()
-
-                    Targeting.AddXTByName(2, assistSpawn.DisplayName())
-
-                    return
-                elseif assistSpawn() and assistSpawn.ID() == Core.GetMainAssistId() and not assistSpawn.Dead() then
-                    Targeting.AddXTByName(2, assistSpawn.DisplayName())
+    if Config:GetSetting('UseAssistList') then
+        if #Config:GetSetting('AssistList') > 0 then
+            Logger.log_verbose("SetMainAssist: Checking Assist List.")
+            for _, name in ipairs(Config:GetSetting('AssistList')) do
+                Logger.log_verbose("SetMainAssist: Checking Assist List: %s", name)
+                local listAssistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
+                if listAssistSpawn() and not listAssistSpawn.Dead() then
+                    if listAssistSpawn.ID() ~= Core.GetMainAssistId() then
+                        Logger.log_info("SetMainAssist: Setting new assist to %s [%d]", listAssistSpawn.CleanName(), listAssistSpawn.ID())
+                        Config.Globals.MainAssist = listAssistSpawn.CleanName()
+                    end
+                    if listAssistSpawn.CleanName() ~= mq.TLO.Me.CleanName() then
+                        Targeting.AddXTByName(2, listAssistSpawn.DisplayName())
+                    end
                     return
                 end
             end
-        else
-            if not Config.Globals.MainAssist or Config.Globals.MainAssist:len() == 0 then
-                -- Use our Target hope for the best!
-                --TODO: NOT A VALID BASE CMD Core.DoCmd("/squelch /xtarget assist %d", mq.TLO.Target.ID())
-                Config.Globals.MainAssist = mq.TLO.Target.CleanName()
+        end
+    elseif inRaid then
+        local raidAssistSpawn = mq.TLO.Raid.MainAssist(Config:GetSetting('RaidAssistTarget'))
+        if raidAssistSpawn() and raidAssistSpawn.ID() > 0 and not raidAssistSpawn.Dead() then
+            if raidAssistSpawn.ID() ~= Core.GetMainAssistId() then
+                Logger.log_info("SetMainAssist: Setting new assist to %s [%d]", raidAssistSpawn.CleanName(), raidAssistSpawn.ID())
+                Config.Globals.MainAssist = raidAssistSpawn.CleanName()
             end
+            return
+        end
+    elseif inGroup then
+        local groupAssistSpawn = mq.TLO.Group.MainAssist
+        if groupAssistSpawn() and groupAssistSpawn.ID() > 0 and not groupAssistSpawn.Dead() then
+            if groupAssistSpawn.ID() ~= Core.GetMainAssistId() then
+                Logger.log_info("SetMainAssist: Setting new assist to %s [%d]", groupAssistSpawn.CleanName(), groupAssistSpawn.ID())
+                Config.Globals.MainAssist = groupAssistSpawn.CleanName()
+            end
+            return
         end
     else
-        if Core.GetMainAssistId() ~= Core.GetGroupMainAssistID() and Core.GetGroupMainAssistID() > 0 then
-            Config.Globals.MainAssist = Core.GetGroupMainAssistName()
-        end
+        Combat.SetMAToSelf()
+        return
     end
+
+    -- Check to see if we should fall back to ourselves based on our current group/raid/fallback settings.
+    -- If we shouldn't, clear the MA so we don't go rogue on our group/raid and mess something up.
+    local fallBackCheck = { false, inGroup, inRaid, true, } -- see SelfAssistFallback setting entry
+    local fallBack = Config:GetSetting('SelfAssistFallback')
+    if fallBackCheck[fallBack] then
+        Combat.SetMAToSelf()
+    else
+        Config.Globals.MainAssist = ""
+    end
+end
+
+function Combat.SetMAToSelf()
+    if not Core.IAmMA() then -- only give the log message if we weren't already the MA
+        Logger.log_info("SetMainAssist: No valid assists! Falling back to ourselves.")
+    end
+    Config.Globals.MainAssist = mq.TLO.Me.CleanName()
 end
 
 --- Engages the target specified by the given autoTargetId.
@@ -397,7 +415,7 @@ function Combat.FindBestAutoTarget(validateFn)
             else
                 -- If we don't have an AutoTarget and we are using the AutoTarget System:
                 -- If we already have a target, we should check to see if we automatically pulled it, or if it is likely that we manually pulled it.)
-                --If not, we need to scan our nearby area and choose a target based on our built in algorithm. We
+                -- If not, we need to scan our nearby area and choose a target based on our built in algorithm. We
                 -- only need to do this if we don't already have a target. Assume if any mob runs into camp, we shouldn't reprioritize
                 -- unless specifically told.
 
@@ -434,7 +452,7 @@ function Combat.FindBestAutoTarget(validateFn)
         -- We're not the main assist so we need to choose our target based on our main assist.
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
-        if Config:GetSetting('AssistOutside') then
+        if Config:GetSetting('UseAssistList') then
             --- @diagnostic disable-next-line: redundant-parameter
             local peer = mq.TLO.DanNet.Peers(Config.Globals.MainAssist)()
             local assistTarget = nil
@@ -464,10 +482,11 @@ function Combat.FindBestAutoTarget(validateFn)
                     assistTarget.ID())
                 Config.Globals.AutoTargetID = assistTarget.ID()
 
-                -- if not already an XTHater then add it.
-                if not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
-                    Targeting.AddXTByName(1, assistTarget.Name())
-                end
+                -- looks like we already do this below... testing.
+                -- -- if not already an XTHater then add it.
+                -- if not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
+                --     Targeting.AddXTByName(1, assistTarget.Name())
+                -- end
             end
         else
             Combat.SetAutoTargetToGroupOrRaidTarget()
@@ -477,13 +496,20 @@ function Combat.FindBestAutoTarget(validateFn)
     Logger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", Config.Globals.AutoTargetID or 0,
         mq.TLO.Target.ID())
 
-    if Config.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then
-        if Config:GetSetting('AssistOutside') and not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
-            Targeting.AddXTByID(1, Config.Globals.AutoTargetID)
+    local autoTargetId = Config.Globals.AutoTargetID
+    if autoTargetId > 0 and (validateFn and validateFn(autoTargetId)) then
+        if mq.TLO.Target.ID() ~= autoTargetId then
+            Targeting.SetTarget(autoTargetId)
         end
 
-        if not validateFn or validateFn(Config.Globals.AutoTargetID) then
-            Targeting.SetTarget(Config.Globals.AutoTargetID)
+        -- For Assist Lists, this ensures we correctly and quickly receive health percent to assist in a timely manner
+        -- For Emu, this helps correct for emu xtarget bugs
+        -- Second dead check because targets were ocasionally dying between the validateFn and this check
+        if Config:GetSetting('UseAssistList') or Core.OnEMU() then
+            if mq.TLO.Spawn(autoTargetId)() and not mq.TLO.Spawn(autoTargetId).Dead() and not Targeting.IsSpawnXTHater(autoTargetId) then
+                Targeting.AddXTByID(1, Config.Globals.AutoTargetID)
+                Logger.log_verbose("FindTarget(): FoundTargetID(%d) not on xt list, adding.", autoTargetId or 0)
+            end
         end
     end
 end
@@ -500,23 +526,22 @@ function Combat.FindBestAutoTargetCheck()
         Strings.BoolToColorString(Core.IAmMA()), Strings.BoolToColorString(config.FollowMarkTarget),
         Strings.BoolToColorString(Config.Globals.BackOffFlag))
 
-    local OATarget = false
+    local assistTarg = false
 
-    -- our MA out of group has a valid target for us.
-    if Config:GetSetting('AssistOutside') then
+    -- check if our MA has a valid target for us. Check Assist List if on, or check everyone on emu to get around emu xtarget bugs
+    if (Config:GetSetting('UseAssistList') or Core.OnEMU()) and not Core.IAmMA() and Core.GetMainAssistId() > 0 then
         local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
-
         if queryResult then
             local assistTarget = mq.TLO.Spawn(queryResult)
             Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
                 assistTarget.CleanName() or "None")
             if assistTarget and assistTarget() then
-                OATarget = true
+                assistTarg = true
             end
         end
     end
 
-    return (Targeting.GetXTHaterCount() > 0 or Core.IAmMA() or config.FollowMarkTarget or OATarget) and
+    return (Targeting.GetXTHaterCount() > 0 or Core.IAmMA() or config.FollowMarkTarget or assistTarg) and
         not Config.Globals.BackOffFlag
 end
 

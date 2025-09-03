@@ -128,6 +128,18 @@ function Core.GetGroupMainAssistName()
     return (mq.TLO.Group.MainAssist.CleanName() or "")
 end
 
+--- Retrieves the ID of the selected number assist in the raid.
+--- @return number The ID of the chosen assist in the raid.
+function Core.GetRaidMainAssistID(assistNumber)
+    return (mq.TLO.Raid.MainAssist(assistNumber).ID() or 0)
+end
+
+--- Retrieves the name of the selected number assist in the raid.
+--- @return string The name of the chosesn assist in the raid.
+function Core.GetRaidMainAssistName(assistNumber)
+    return (mq.TLO.Raid.MainAssist(assistNumber).CleanName() or "")
+end
+
 --- Checks if the specified expansion is available.
 --- @param name string The name of the expansion to check.
 --- @return boolean True if the expansion is available, false otherwise.
@@ -152,13 +164,13 @@ end
 ---
 --- @return number The ID of the main assist.
 function Core.GetMainAssistId()
-    return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).ID() or 0
+    return Config.Globals.MainAssist:len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).ID() or 0
 end
 
 --- Retrieves the main assist spawn.
 --- @return MQSpawn The main assist spawn data.
 function Core.GetMainAssistSpawn()
-    return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist))
+    return Config.Globals.MainAssist:len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)) or mq.TLO.Spawn("")
 end
 
 --- Retrieves the percentage of hit points (HP) of the main assist.
@@ -253,6 +265,10 @@ end
 
 function Core.ProcessCureChecks()
     Modules:ExecModule("Class", "ManageCureCoroutines")
+end
+
+function Core.SetPetHold()
+    Modules:ExecModule("Class", "SetPetHold")
 end
 
 return Core

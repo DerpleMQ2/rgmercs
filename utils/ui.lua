@@ -17,18 +17,18 @@ Ui.ConfigFilter     = ""
 Ui.ShowDownNamed    = false
 
 
---- Renders the OA (Outside Assist) list.
---- This function is responsible for displaying the list of Outside Assist names
+--- Renders the assist list.
+--- This function is responsible for displaying the list of assist names
 --- It does not take any parameters and does not return any values.
-function Ui.RenderOAList()
+function Ui.RenderAssistList()
     if mq.TLO.Target.ID() > 0 then
         ImGui.PushID("##_small_btn_create_oa")
-        if ImGui.SmallButton("Add Target as OA") then
-            Config:AddOA(mq.TLO.Target.DisplayName())
+        if ImGui.SmallButton("Add Target to Assist List") then
+            Config:AssistAdd(mq.TLO.Target.DisplayName())
         end
         ImGui.PopID()
     end
-    if ImGui.BeginTable("OAList Names", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("AssistList Names", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 
         ImGui.TableSetupColumn('ID', (ImGuiTableColumnFlags.WidthFixed), 20.0)
@@ -39,7 +39,7 @@ function Ui.RenderOAList()
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for idx, name in ipairs(Config:GetSetting('OutsideAssistList') or {}) do
+        for idx, name in ipairs(Config:GetSetting('AssistList') or {}) do
             local spawn = mq.TLO.Spawn(string.format("PC =%s", name))
             ImGui.TableNextColumn()
             ImGui.Text(tostring(idx))
@@ -67,7 +67,7 @@ function Ui.RenderOAList()
             ImGui.TableNextColumn()
             ImGui.PushID("##_small_btn_delete_oa_" .. tostring(idx))
             if ImGui.SmallButton(Icons.FA_TRASH) then
-                Config:DeleteOA(idx)
+                Config:AssistDelete(idx)
             end
             ImGui.PopID()
             ImGui.SameLine()
@@ -76,17 +76,17 @@ function Ui.RenderOAList()
                 ImGui.InvisibleButton(Icons.FA_CHEVRON_UP, ImVec2(22, 1))
             else
                 if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
-                    Config:MoveOAUp(idx)
+                    Config:AssistMoveUp(idx)
                 end
             end
             ImGui.PopID()
             ImGui.SameLine()
             ImGui.PushID("##_small_btn_dn_oa_" .. tostring(idx))
-            if idx == #Config:GetSetting('OutsideAssistList') then
+            if idx == #Config:GetSetting('AssistList') then
                 ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
             else
                 if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
-                    Config:MoveOADown(idx)
+                    Config:AssistMoveDown(idx)
                 end
             end
             ImGui.PopID()
@@ -148,13 +148,19 @@ function Ui.RenderForceTargetList(showPopout)
         Config.Globals.ForceTargetID = 0
     end
 
-    if ImGui.BeginTable("XTargs", 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable)) then
+    if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 7 or 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
+        if Config:GetSetting("ExtendedFTInfo") then
+            ImGui.TableSetupColumn('XT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
+        end
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 300)
         ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.TableSetupColumn('Aggro %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        if Config:GetSetting("ExtendedFTInfo") then
+            ImGui.TableSetupColumn('SpawnID', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        end
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
@@ -170,6 +176,10 @@ function Ui.RenderForceTargetList(showPopout)
                     ImGui.PopStyleColor(1)
                 else
                     ImGui.Text("")
+                end
+                if Config:GetSetting("ExtendedFTInfo") then
+                    ImGui.TableNextColumn()
+                    ImGui.Text(tostring(i))
                 end
                 ImGui.TableNextColumn()
                 ImGui.PushStyleColor(ImGuiCol.Text, Ui.GetConColorBySpawn(xtarg))
@@ -187,6 +197,10 @@ function Ui.RenderForceTargetList(showPopout)
                 ImGui.Text(tostring(math.ceil(xtarg.PctAggro() or 0)))
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(math.ceil(xtarg.Distance() or 0)))
+                if Config:GetSetting("ExtendedFTInfo") then
+                    ImGui.TableNextColumn()
+                    ImGui.Text(tostring(math.ceil(xtarg.ID() or 0)))
+                end
             end
         end
 
@@ -954,6 +968,29 @@ function Ui.StrikeThroughText(text)
     ImGui.GetWindowDrawList():AddLine(cursorScreenPos, ImVec2(cursorScreenPos.x + textSizeVec.x, cursorScreenPos.y), IM_COL32(255, 255, 255, 255), 1.0)
     ImGui.Text(text)
     ImGui.PopStyleColor()
+end
+
+function Ui.GetAssistWarningString()
+    local warningString
+    if not Config:GetSetting('UseAssistList') then
+        if mq.TLO.Raid.Members() == 0 and mq.TLO.Group() then
+            if not mq.TLO.Group.MainAssist() then
+                warningString = "Warning: NO GROUP MA ASSIGNED - PLEASE SET ONE!"
+            elseif mq.TLO.Group.MainAssist.ID() == 0 then
+                warningString = "Warning: GROUP MA NOT IN ZONE!"
+            end
+        elseif mq.TLO.Raid.Members() > 0 then
+            if not mq.TLO.Raid.MainAssist(Config:GetSetting('RaidAssistTarget'))() then
+                warningString = "Warning: NO RAID MA ASSIGNED - PLEASE SET ONE!"
+            elseif mq.TLO.Raid.MainAssist(Config:GetSetting('RaidAssistTarget')).ID() == 0 then
+                warningString = "Warning: SELECTED RAID MA NOT IN ZONE!"
+            end
+        end
+    elseif #Config:GetSetting('AssistList') == 0 then
+        warningString = "Warning: THE ASSIST LIST IS ENABLED, BUT THE LIST IS EMPTY!"
+    end
+
+    Config.TempSettings.AssistWarning = warningString
 end
 
 return Ui

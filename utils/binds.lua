@@ -99,30 +99,59 @@ Binds.Handlers    = {
             Targeting.SetForceBurn(targetId)
         end,
     },
-    ['addoa'] = {
-        usage = "/rgl addoa <Name>",
-        about = "Adds <Name> to your Outside Assist List. If no name is entered, your target's name is used.",
+    ['assistadd'] = {
+        usage = "/rgl assistadd <Name>",
+        about = "Adds <Name> to the Assist List. If no name is entered, your target's name is used.",
         handler = function(name)
             if not name then name = mq.TLO.Target.CleanName() end
             if not name then
-                Logger.log_error("/rgl addoa - no name given and no valid target exists!")
+                Logger.log_error("/rgl assistadd - no name given and no valid target exists!")
                 return
             end
-            Logger.log_info("Adding %s to your Outside Assist list!", name)
-            Config:AddOA(name)
+            Config:AssistAdd(name)
         end,
     },
-    ['deloa'] = {
-        usage = "/rgl deloa <Name>",
-        about = "Deletes <Name> from your Outside Assist List. If no name is entered, your target's name is used.",
+    ['assistdelete'] = {
+        usage = "/rgl assistdelete (<Name> or <List#>)",
+        about = "Deletes (<Name> or <List#>) from the Assist List. If no name is entered, your target's name is used.",
         handler = function(name)
             if not name then name = mq.TLO.Target.CleanName() end
             if not name then
-                Logger.log_error("/rgl deloa - no name given and no valid target exists!")
+                Logger.log_error("/rgl assistdelete - no name given and no valid target exists!")
                 return
             end
-            Logger.log_info("Removing %s from your Outside Assist list!", name)
-            Config:DeleteOAByName(name)
+            Config:AssistDelete(name)
+        end,
+    },
+    ['assistup'] = {
+        usage = "/rgl assistup (<Name> or <List#>)",
+        about = "Moves (<Name> or <List#>) one position up on the Assist List. If no name is entered, your target's name is used.",
+        handler = function(name)
+            if not name then name = mq.TLO.Target.CleanName() end
+            if not name then
+                Logger.log_error("/rgl assistup - no name given and no valid target exists!")
+                return
+            end
+            Config:AssistMoveUp(name)
+        end,
+    },
+    ['assistdown'] = {
+        usage = "/rgl assistdown (<Name> or <List#>)",
+        about = "Moves (<Name> or <List#>) one position down on the Assist List. If no name is entered, your target's name is used.",
+        handler = function(name)
+            if not name then name = mq.TLO.Target.CleanName() end
+            if not name then
+                Logger.log_error("/rgl assistdown - no name given and no valid target exists!")
+                return
+            end
+            Config:AssistMoveDown(name)
+        end,
+    },
+    ['assistclear'] = {
+        usage = "/rgl assistclear",
+        about = "Completely clears the Assist List.",
+        handler = function()
+            Config:AssistClear()
         end,
     },
     ['backoff'] = {

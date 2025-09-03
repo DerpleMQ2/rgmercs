@@ -28,11 +28,8 @@ function StandardUI:renderModulesTabs()
 end
 
 function StandardUI:RenderTarget()
-    if (mq.TLO.Raid.Members() > 0 and mq.TLO.Raid.MainAssist(1)() == nil) or (mq.TLO.Raid.Members() == 0 and mq.TLO.Group() and not mq.TLO.Group.MainAssist()) then
-        if ((Core.OnEMU() and (mq.TLO.Raid.Members() >= 18 or mq.TLO.Raid.Members() == 0)) or not Core.OnEMU()) then
-            ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
-                string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
-        end
+    if Config.TempSettings.AssistWarning then
+        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255), Config.TempSettings.AssistWarning)
     end
 
     local assistSpawn = Targeting.GetAutoTarget()
@@ -163,32 +160,28 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                 if ImGui.BeginTabItem("RGMercsMain") then
                     ImGui.Text("Current State: " .. curState)
                     ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
-
-                    -- .. tostring(Config.Globals.AutoTargetID))
-                    ImGui.Text("MA: %-25s", (Core.GetMainAssistSpawn().CleanName() or "None"))
-                    if mq.TLO.Target.ID() > 0 and Targeting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
-                        ImGui.SameLine()
-                        if ImGui.SmallButton(string.format("Set MA to %s", Targeting.GetTargetCleanName())) then
-                            Config.Globals.MainAssist = mq.TLO.Target.CleanName()
-                        end
+                    if Config.TempSettings.AssistWarning and Core.IAmMA() then
+                        ImGui.Text("MA: %s (Fallback Mode)", (Core.GetMainAssistSpawn().CleanName() or "None"))
+                    else
+                        ImGui.Text("MA: %s", (Core.GetMainAssistSpawn().CleanName() or "None"))
                     end
                     ImGui.Text("Stuck To: " ..
                         (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
-                    if ImGui.CollapsingHeader("Outside Assist List") then
+                    if ImGui.CollapsingHeader("Assist List") then
                         ImGui.Indent()
-                        if Config:GetSetting('AssistOutside') then
+                        if Config:GetSetting('UseAssistList') then
                             ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, .75)
                         else
                             ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, .75)
                         end
                         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(20, 3))
 
-                        if ImGui.SmallButton(Config:GetSetting('AssistOutside') and "Outside Assist: Enabled" or "Outside Assist: Disabled") then
-                            Config:SetSetting('AssistOutside', not Config:GetSetting('AssistOutside'))
+                        if ImGui.SmallButton(Config:GetSetting('UseAssistList') and "Use Assist List: Enabled" or "Use Assist List: Disabled") then
+                            Config:SetSetting('UseAssistList', not Config:GetSetting('UseAssistList'))
                         end
                         ImGui.PopStyleVar()
                         ImGui.PopStyleColor()
-                        Ui.RenderOAList()
+                        Ui.RenderAssistList()
                         ImGui.Unindent()
                     end
 

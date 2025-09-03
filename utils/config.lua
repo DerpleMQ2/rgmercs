@@ -159,21 +159,21 @@ Config.DefaultConfig = {
         FAQ = "How do I load configuration file for different servers types?",
         Answer = "You can change the config type by selecting a different Server Type from the main panel.",
     },
-    ['AssistOutside']        = {
+    ['UseAssistList']        = {
         DisplayName = "Assist Outside of Group",
         Tooltip = "Allow assisting characters outside of your group.",
         Type = "Custom",
         Default = false,
-        FAQ = "How do I use the Outside Assist List?",
-        Answer = "You can add characters to the list on the main tab, and enable the assist outside option to allow you to assist them.",
+        FAQ = "How do I use the Assist List?",
+        Answer = "You can add characters to the list on the main tab, and enable use assist list option to allow you to assist them.",
     },
-    ['OutsideAssistList']    = {
-        DisplayName = "List of Outsiders to Assist",
-        Tooltip = "List of Outsiders to Assist",
+    ['AssistList']           = {
+        DisplayName = "List of User-Defined Assists",
+        Tooltip = "List of User-Defined Assists",
         Type = "Custom",
         Default = {},
         FAQ = "How do I Setup who to assist from outside of my group?",
-        Answer = "You can add characters to the [OutsideAssistList] to allow you to assist them.",
+        Answer = "You can add characters to the [AssistList] to allow you to assist them.",
     },
 
     -- [ CLICKIES ] --
@@ -706,6 +706,18 @@ Config.DefaultConfig = {
         ConfigType = "Advanced",
         FAQ = "Why am I not following the Marked target?",
         Answer = "You can set the [FollowMarkTarget] option to true to automatically target the MA's Marked target.",
+    },
+    ['SelfAssistFallback']   = {
+        DisplayName = "Self-Assist Fallback",
+        Category = "Engage",
+        Index = 16,
+        Tooltip = "If no other valid MA is found, fallback to ourselves.\nPlease note that when solo (and not using the Assist List), we are always our own MA.",
+        Type = "Combo",
+        ComboOptions = { 'Never', 'Only in Groups', 'Only in Raids', 'Always', },
+        Default = 2,
+        Min = 1,
+        Max = 4,
+        ConfigType = "Normal",
     },
 
     -- [SPELLS/ABILS] --
@@ -1525,6 +1537,12 @@ Config.DefaultConfig = {
         Tooltip = "Enable displaying the timing of each rotation step.",
         Default = false,
     },
+    ['ExtendedFTInfo']       = {
+        DisplayName = "Ext. ForceTarget Info",
+        Category = "UI",
+        Tooltip = "Show extended information in the Force Target window.",
+        Default = false,
+    },
 
     -- [ Debug ] --
     ['LogLevel']             = {
@@ -2015,67 +2033,103 @@ function Config.ResolveDefaults(defaults, settings)
     return settings, changed
 end
 
---- Adds an OA (Outside Assist) with the given name.
---- @param name string: The name of the OA to be added.
-function Config:AddOA(name)
-    for _, cur_name in ipairs(self:GetSetting('OutsideAssistList') or {}) do
+--- Adds the given name to the Assist List.
+--- @param name string: The name of the assist to be added.
+function Config:AssistAdd(name)
+    for _, cur_name in ipairs(self:GetSetting('AssistList') or {}) do
         if cur_name == name then
             return
         end
     end
 
-    table.insert(self:GetSetting('OutsideAssistList'), name)
+    table.insert(self:GetSetting('AssistList'), name)
     self:SaveSettings()
+    Logger.log_info("\axAssist List: \ag%s\ax has been\ag added\ax to the list at position \at%d\ax!", name,
+        #self:GetSetting('AssistList'))
 end
 
---- Deletes the OA with the given ID
---- @param name string The name of the OA to delete
-function Config:DeleteOAByName(name)
-    for idx, cur_name in ipairs(Config:GetSetting('OutsideAssistList') or {}) do
-        if cur_name:lower() == name:lower() then
-            self:DeleteOA(idx)
-            return
+function Config:AssistDelete(arg1)
+    if not arg1 then
+        Logger.log_error("\arAssist Delete: this command requires a valid argument!")
+        return
+    end
+
+    if type(arg1) == 'string' then
+        arg1 = self:ConvertAssistNameToID(arg1)
+    end
+
+    if type(arg1) == 'number' and arg1 > 0 then
+        if arg1 <= #self:GetSetting('AssistList') then
+            Logger.log_info("\axAssist List: \ag%s\ax has been \ardeleted\ax from the list!", self:GetSetting('AssistList')[arg1])
+            table.remove(self:GetSetting('AssistList'), arg1)
+            self:SaveSettings()
+        else
+            Logger.log_error("\arAssist Delete: %d is not a valid assist list ID!", arg1)
         end
+        return
     end
+    Logger.log_error("\arAssist Delete: %s was not on the list or is not a valid argument!", arg1)
 end
 
---- Deletes the OA with the given ID
---- @param idx number The ID of the OA to delete
-function Config:DeleteOA(idx)
-    if idx <= #self:GetSetting('OutsideAssistList') then
-        Logger.log_info("\axOutside Assist \at%d\ax \ag%s\ax - \arDeleted!\ax", idx,
-            self:GetSetting('OutsideAssistList')[idx])
-        table.remove(self:GetSetting('OutsideAssistList'), idx)
-        self:SaveSettings()
-    else
-        Logger.log_error("\ar%d is not a valid OA ID!", idx)
-    end
+function Config:AssistClear()
+    Logger.log_info("Assist List: \ayThe Assist List has been cleared!")
+    self.settings['AssistList'] = {}
+    self:SaveSettings()
 end
 
 --- Moves the OA with the given ID up.
 --- @param id number The ID of the OA to move up.
-function Config:MoveOAUp(id)
+function Config:AssistMoveUp(id)
+    if type(id) == 'string' then
+        id = self:ConvertAssistNameToID(id)
+    end
+
     local newId = id - 1
 
     if newId < 1 then return end
-    if id > #self:GetSetting('OutsideAssistList') then return end
+    if id > #self:GetSetting('AssistList') then return end
 
-    self:GetSetting('OutsideAssistList')[newId], self:GetSetting('OutsideAssistList')[id] =
-        self:GetSetting('OutsideAssistList')[id], self:GetSetting('OutsideAssistList')[newId]
+    self:GetSetting('AssistList')[newId], self:GetSetting('AssistList')[id] =
+        self:GetSetting('AssistList')[id], self:GetSetting('AssistList')[newId]
+    Logger.log_info("\axAssist List: \ag%s\ax has been\ag moved up\ax to position \at%d", self:GetSetting('AssistList')[newId], newId)
+    self:SaveSettings()
+end
+
+function Config:AssistMoveDown(id)
+    if not id then
+        Logger.log_error("\arAssist Move Down: this command requires a valid argument!")
+        return
+    end
+
+    if type(id) == 'string' then
+        id = self:ConvertAssistNameToID(id)
+    end
+
+    if id < 1 then return end
+    local newId = id + 1
+    if newId > #self:GetSetting('AssistList') then return end
+
+    self:GetSetting('AssistList')[newId], self:GetSetting('AssistList')[id] =
+        self:GetSetting('AssistList')[id], self:GetSetting('AssistList')[newId]
+
+    Logger.log_info("\axAssist List: \ag%s\ax has been\ar moved down\ax to position \at%d", self:GetSetting('AssistList')[newId], newId)
 
     self:SaveSettings()
 end
 
-function Config:MoveOADown(id)
-    local newId = id + 1
-
-    if id < 1 then return end
-    if newId > #self:GetSetting('OutsideAssistList') then return end
-
-    self:GetSetting('OutsideAssistList')[newId], self:GetSetting('OutsideAssistList')[id] =
-        self:GetSetting('OutsideAssistList')[id], self:GetSetting('OutsideAssistList')[newId]
-
-    self:SaveSettings()
+function Config:ConvertAssistNameToID(arg1)
+    if arg1:match("^%d$") then
+        arg1 = tonumber(arg1)
+        return arg1
+    else
+        for idx, cur_name in ipairs(Config:GetSetting('AssistList') or {}) do
+            if cur_name:lower() == arg1:lower() then
+                arg1 = tonumber(idx)
+                return arg1
+            end
+        end
+    end
+    return 0
 end
 
 function Config:GetTimeSinceLastMove()
