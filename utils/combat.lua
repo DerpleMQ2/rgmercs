@@ -452,12 +452,12 @@ function Combat.FindBestAutoTarget(validateFn)
         -- We're not the main assist so we need to choose our target based on our main assist.
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
-        if Config:GetSetting('UseAssistList') then
+        if Config:GetSetting('UseAssistList') and Config.Globals.MainAssist:len() > 0 then
             --- @diagnostic disable-next-line: redundant-parameter
             local peer = mq.TLO.DanNet.Peers(Config.Globals.MainAssist)()
             local assistTarget = nil
 
-            if peer:len() then
+            if peer:len() > 0 then
                 local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
                 if queryResult then
                     assistTarget = mq.TLO.Spawn(queryResult)
@@ -529,14 +529,18 @@ function Combat.FindBestAutoTargetCheck()
     local assistTarg = false
 
     -- check if our MA has a valid target for us. Check Assist List if on, or check everyone on emu to get around emu xtarget bugs
-    if (Config:GetSetting('UseAssistList') or Core.OnEMU()) and not Core.IAmMA() and Core.GetMainAssistId() > 0 then
-        local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
-        if queryResult then
-            local assistTarget = mq.TLO.Spawn(queryResult)
-            Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
-                assistTarget.CleanName() or "None")
-            if assistTarget and assistTarget() then
-                assistTarg = true
+    if (Config:GetSetting('UseAssistList') or Core.OnEMU()) and not Core.IAmMA() and Config.Globals.MainAssist:len() > 0 then
+        --- @diagnostic disable-next-line: redundant-parameter
+        local peer = mq.TLO.DanNet.Peers(Config.Globals.MainAssist)()
+        if peer:len() > 0 then
+            local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
+            if queryResult then
+                local assistTarget = mq.TLO.Spawn(queryResult)
+                Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
+                    assistTarget.CleanName() or "None")
+                if assistTarget and assistTarget() then
+                    assistTarg = true
+                end
             end
         end
     end
