@@ -21,7 +21,20 @@ Ui.ShowDownNamed    = false
 --- This function is responsible for displaying the list of assist names
 --- It does not take any parameters and does not return any values.
 function Ui.RenderAssistList()
+    if Config:GetSetting('UseAssistList') then
+        ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, .75)
+    else
+        ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, .75)
+    end
+    ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(20, 3))
+
+    if ImGui.SmallButton(Config:GetSetting('UseAssistList') and "Use Assist List: Enabled" or "Use Assist List: Disabled") then
+        Config:SetSetting('UseAssistList', not Config:GetSetting('UseAssistList'))
+    end
+    ImGui.PopStyleVar()
+    ImGui.PopStyleColor()
     if mq.TLO.Target.ID() > 0 then
+        ImGui.SameLine()
         ImGui.PushID("##_small_btn_create_oa")
         if ImGui.SmallButton("Add Target to Assist List") then
             Config:AssistAdd(mq.TLO.Target.DisplayName())

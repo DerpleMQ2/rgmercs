@@ -169,18 +169,6 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                         (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Assist List") then
                         ImGui.Indent()
-                        if Config:GetSetting('UseAssistList') then
-                            ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, .75)
-                        else
-                            ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, .75)
-                        end
-                        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(20, 3))
-
-                        if ImGui.SmallButton(Config:GetSetting('UseAssistList') and "Use Assist List: Enabled" or "Use Assist List: Disabled") then
-                            Config:SetSetting('UseAssistList', not Config:GetSetting('UseAssistList'))
-                        end
-                        ImGui.PopStyleVar()
-                        ImGui.PopStyleColor()
                         Ui.RenderAssistList()
                         ImGui.Unindent()
                     end
