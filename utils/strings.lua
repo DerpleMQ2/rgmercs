@@ -71,6 +71,10 @@ end
 --- @param b boolean: The boolean value to convert.
 --- @return string: "true" if the boolean is true, "false" otherwise.
 function Strings.BoolToString(b)
+    if type(b) ~= "boolean" then
+        return "\ayNOT A BOOL\ax"
+    end
+
     return b and "true" or "false"
 end
 
@@ -79,6 +83,10 @@ end
 --- @param b boolean: The boolean value to convert.
 --- @return string: The color string corresponding to the boolean value.
 function Strings.BoolToColorString(b)
+    if type(b) ~= "boolean" then
+        return "\ayNOT A BOOL\ax"
+    end
+
     return b and "\agtrue\ax" or "\arfalse\ax"
 end
 
