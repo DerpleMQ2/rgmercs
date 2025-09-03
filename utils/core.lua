@@ -164,13 +164,13 @@ end
 ---
 --- @return number The ID of the main assist.
 function Core.GetMainAssistId()
-    return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).ID() or 0
+    return Config.Globals.MainAssist:len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).ID() or 0
 end
 
 --- Retrieves the main assist spawn.
 --- @return MQSpawn The main assist spawn data.
 function Core.GetMainAssistSpawn()
-    return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist))
+    return Config.Globals.MainAssist:len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)) or mq.TLO.Spawn("")
 end
 
 --- Retrieves the percentage of hit points (HP) of the main assist.
@@ -265,6 +265,10 @@ end
 
 function Core.ProcessCureChecks()
     Modules:ExecModule("Class", "ManageCureCoroutines")
+end
+
+function Core.SetPetHold()
+    Modules:ExecModule("Class", "SetPetHold")
 end
 
 return Core

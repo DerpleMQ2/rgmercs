@@ -22,7 +22,7 @@ Config.TempSettings.SettingToModuleCache = {}
 
 -- Global State
 Config.Globals                           = {}
-Config.Globals.MainAssist                = mq.TLO.Me.CleanName()
+Config.Globals.MainAssist                = ""
 Config.Globals.ScriptDir                 = ""
 Config.Globals.AutoTargetID              = 0
 Config.Globals.ForceTargetID             = 0
@@ -711,9 +711,13 @@ Config.DefaultConfig = {
         DisplayName = "Self-Assist Fallback",
         Category = "Engage",
         Index = 16,
-        Tooltip = "If no other valid MA is found, fallback to ourselves.",
-        Default = true,
-        ConfigType = "Advanced",
+        Tooltip = "If no other valid MA is found, fallback to ourselves.\nPlease note that when solo (and not using the Assist List), we are always our own MA.",
+        Type = "Combo",
+        ComboOptions = { 'Never', 'Only in Groups', 'Only in Raids', 'Always', },
+        Default = 2,
+        Min = 1,
+        Max = 4,
+        ConfigType = "Normal",
     },
 
     -- [SPELLS/ABILS] --

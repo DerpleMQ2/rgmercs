@@ -160,16 +160,11 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                 if ImGui.BeginTabItem("RGMercsMain") then
                     ImGui.Text("Current State: " .. curState)
                     ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
-
-                    -- .. tostring(Config.Globals.AutoTargetID))
-                    ImGui.Text("MA: %-25s", (Core.GetMainAssistSpawn().CleanName() or "None"))
-                    -- commented the below code out because with refactor it now does nothing. if we want another MA, add them to the assist list.
-                    -- if mq.TLO.Target.ID() > 0 and Targeting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
-                    --     ImGui.SameLine()
-                    --     if ImGui.SmallButton(string.format("Set MA to %s", Targeting.GetTargetCleanName())) then
-                    --         Config.Globals.MainAssist = mq.TLO.Target.CleanName()
-                    --     end
-                    -- end
+                    if Config.TempSettings.AssistWarning and Core.IAmMA() then
+                        ImGui.Text("MA: %s (Fallback Mode)", (Core.GetMainAssistSpawn().CleanName() or "None"))
+                    else
+                        ImGui.Text("MA: %s", (Core.GetMainAssistSpawn().CleanName() or "None"))
+                    end
                     ImGui.Text("Stuck To: " ..
                         (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Assist List") then

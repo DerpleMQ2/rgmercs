@@ -204,8 +204,10 @@ local function RGInit(...)
 
     Ui.GetAssistWarningString()
 
+    local assistString = Config.Globals.MainAssist:len() > 0 and string.format("set to %s.", Config.Globals.MainAssist) or string.format("unset!")
+
     if Config.TempSettings.AssistWarning then
-        Comms.PopUp("RGMercs " .. Config.TempSettings.AssistWarning .. "\nYour assist is currently set to %s.", Config.Globals.MainAssist)
+        Comms.PopUp("RGMercs " .. Config.TempSettings.AssistWarning .. "\nYour assist is currently " .. assistString)
     else
         Comms.PopUp("Welcome to RGMercs! Your assist is currently set to %s.", Config.Globals.MainAssist)
     end
