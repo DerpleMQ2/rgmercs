@@ -209,7 +209,7 @@ local function RGInit(...)
     if Config.TempSettings.AssistWarning then
         Comms.PopUp("RGMercs " .. Config.TempSettings.AssistWarning .. "\nYour assist is currently " .. assistString)
     else
-        Comms.PopUp("Welcome to RGMercs! Your assist is currently set to %s.", Config.Globals.MainAssist)
+        Comms.PopUp("Welcome to RGMercs!\nYour assist is currently set to %s.", Config.Globals.MainAssist)
     end
 
     if Core.IAmMA() then
