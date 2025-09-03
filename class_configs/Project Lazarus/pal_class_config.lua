@@ -857,7 +857,7 @@ return {
                 name = "AEStun",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Core.IsTanking() or Config:GetSetting('AEStunUse') == 3 or Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')
+                    return Core.IsTanking() or Config:GetSetting('AEStunUse') == 3 or Core.GetMainAssistPctHPs() < Config:GetSetting('EmergencyStart')
                 end,
 
             },
@@ -866,7 +866,7 @@ return {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Core.IsTanking() or Config:GetSetting('AEStunUse') == 3 or Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')
+                    return Core.IsTanking() or Config:GetSetting('AEStunUse') == 3 or Core.GetMainAssistPctHPs() < Config:GetSetting('EmergencyStart')
                 end,
             },
             {

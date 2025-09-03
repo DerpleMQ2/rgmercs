@@ -177,16 +177,18 @@ end
 ---
 --- @return number The percentage of HP of the main assist.
 function Core.GetMainAssistPctHPs()
+    if Config.Globals.MainAssist:len() == 0 then return 100 end
+
     local groupMember = mq.TLO.Group.Member(Config.Globals.MainAssist)
     if groupMember and groupMember() then
-        return groupMember.PctHPs() or 0
+        return groupMember.PctHPs() or 100
     end
 
     local ret = tonumber(DanNet.query(Config.Globals.MainAssist, "Me.PctHPs", 1000))
 
     if ret and type(ret) == 'number' then return ret end
 
-    return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).PctHPs() or 0
+    return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).PctHPs() or 100
 end
 
 --- Checks if a given mode is active.
