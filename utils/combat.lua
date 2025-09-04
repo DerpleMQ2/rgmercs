@@ -465,7 +465,7 @@ function Combat.FindBestAutoTarget(validateFn)
                         assistTarget.CleanName() or "None", queryResult)
                 end
             else
-                local assistSpawn = Config.Globals.GetMainAssistSpawn()
+                local assistSpawn = Core.GetMainAssistSpawn()
                 if assistSpawn and assistSpawn() then
                     Targeting.SetTarget(assistSpawn.ID(), true)
                     assistTarget = mq.TLO.Me.TargetOfTarget
