@@ -242,9 +242,10 @@ function Rotation.TestConditionForEntry(caller, resolvedActionMap, entry, target
             (type(condArg) == 'userdata' and condArg() or condArg) or "None", condTarg.CleanName() or "None")
         pass = Core.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg)
 
-        if type(pass) ~= "boolean" then
-            Logger.log_error("Entry(%s): %s is not a boolean value!", entry.name, pass)
-        end
+        --temp suppress of error messaging while we evaluate.
+        -- if type(pass) ~= "boolean" then
+        --     Logger.log_error("Entry(%s): %s is not a boolean value!", entry.name, pass)
+        -- end
 
         if entry.active_cond then
             active = Core.SafeCallFunc("Active " .. logInfo, entry.active_cond, caller, condArg)
