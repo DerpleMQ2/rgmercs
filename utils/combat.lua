@@ -454,10 +454,10 @@ function Combat.FindBestAutoTarget(validateFn)
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
         if Config:GetSetting('UseAssistList') and Config.Globals.MainAssist:len() > 0 then
             --- @diagnostic disable-next-line: redundant-parameter
-            local peer = mq.TLO.DanNet.Peers(Config.Globals.MainAssist)()
+            local peer = mq.TLO.DanNet(Config.Globals.MainAssist)()
             local assistTarget = nil
 
-            if peer:len() > 0 then
+            if peer then
                 local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
                 if queryResult then
                     assistTarget = mq.TLO.Spawn(queryResult)
@@ -531,8 +531,8 @@ function Combat.FindBestAutoTargetCheck()
     -- check if our MA has a valid target for us. Check Assist List if on, or check everyone on emu to get around emu xtarget bugs
     if (Config:GetSetting('UseAssistList') or Core.OnEMU()) and not Core.IAmMA() and Config.Globals.MainAssist:len() > 0 then
         --- @diagnostic disable-next-line: redundant-parameter
-        local peer = mq.TLO.DanNet.Peers(Config.Globals.MainAssist)()
-        if peer:len() > 0 then
+        local peer = mq.TLO.DanNet(Config.Globals.MainAssist)()
+        if peer then
             local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
             if queryResult then
                 local assistTarget = mq.TLO.Spawn(queryResult)
