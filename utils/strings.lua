@@ -1,5 +1,3 @@
-local Logger    = require("utils.logger")
-
 local Strings   = { _version = '1.0', _name = "Strings", _author = 'Derple', }
 Strings.__index = Strings
 
@@ -74,7 +72,6 @@ end
 --- @return string: "true" if the boolean is true, "false" otherwise.
 function Strings.BoolToString(b)
     if type(b) ~= "boolean" then
-        Logger.log_error("%s is not a boolean value!", b)
         return "\ayNOT A BOOL\ax"
     end
 
@@ -87,7 +84,6 @@ end
 --- @return string: The color string corresponding to the boolean value.
 function Strings.BoolToColorString(b)
     if type(b) ~= "boolean" then
-        Logger.log_error("%s is not a boolean value!", b)
         return "\ayNOT A BOOL\ax"
     end
 
