@@ -542,6 +542,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Forsaken Elder Spiritist's Gauntlets",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Elder Spiritist's Gauntlets")() end,
+                cond = function(self, itemName, target)
+                    return Casting.DotItemCheck(itemName, target)
+                end,
+            },
+            {
                 name = "SwarmDot",
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoSwarmDot') end,

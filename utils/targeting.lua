@@ -445,7 +445,7 @@ end
 --- Checks if the target is in the same group.
 function Targeting.GroupedWithTarget(target)
     local targetName = target.CleanName() or "None"
-    return mq.TLO.Group.Member(targetName)()
+    return mq.TLO.Group.Member(targetName)() and true or false
 end
 
 function Targeting.SetForceBurn(targetId)
