@@ -26,22 +26,25 @@ function ConsoleUI:DrawConsole(showPopout)
             ImGui.TableSetupColumn("Opt Name", bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoResize), 100)
             ImGui.TableSetupColumn("Opt Value", ImGuiTableColumnFlags.WidthStretch)
             ImGui.TableNextColumn()
-            Config:GetSettings().LogToFile, changed = Ui.RenderOptionToggle("##log_to_file",
-                "", Config:GetSettings().LogToFile)
+            local logToFile = Config:GetSetting('LogToFile')
+            logToFile, changed = Ui.RenderOptionToggle("##log_to_file",
+                "", logToFile)
             if changed then
-                Config:SaveSettings()
+                Config:SetSetting('LogToFile', logToFile)
             end
             ImGui.TableNextColumn()
             ImGui.Text("Log to File")
             ImGui.TableNextColumn()
             ImGui.Text("Debug Level")
             ImGui.TableNextColumn()
-            Config:GetSettings().LogLevel, changed = ImGui.Combo("##Debug Level",
-                Config:GetSettings().LogLevel, Config.Constants.LogLevels,
+            local logLevel = Config:GetSetting('LogLevel')
+
+            logLevel, changed = ImGui.Combo("##Debug Level",
+                logLevel, Config.Constants.LogLevels,
                 #Config.Constants.LogLevels)
 
             if changed then
-                Config:SaveSettings()
+                Config:SetSetting('LogLevel', logLevel)
             end
             ImGui.TableNextColumn()
             ImGui.Text("Log Filter")

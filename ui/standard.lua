@@ -92,9 +92,8 @@ function StandardUI:RenderWindowControls()
     local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 2), smallButtonSize)
     ImGui.SetCursorPos(windowControlPos)
 
-    if ImGui.SmallButton((Config.settings.MainWindowLocked or false) and Icons.FA_LOCK or Icons.FA_UNLOCK) then
-        Config.settings.MainWindowLocked = not Config.settings.MainWindowLocked
-        Config:SaveSettings()
+    if ImGui.SmallButton((Config:GetSetting('MainWindowLocked') or false) and Icons.FA_LOCK or Icons.FA_UNLOCK) then
+        Config:SetSetting('MainWindowLocked', not Config:GetSetting('MainWindowLocked'))
     end
 
     ImGui.SameLine()
@@ -112,7 +111,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
     if not Config.Globals.Minimized then
         local flags = ImGuiWindowFlags.None
 
-        if Config.settings.MainWindowLocked then
+        if Config:GetSetting('MainWindowLocked') then
             flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
         end
 
@@ -187,28 +186,20 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                         ImGui.Indent()
 
                         if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                            local settingsRef = Config:GetSettings()
-                            settingsRef, pressed, _ = Ui.RenderSettings(settingsRef, Config.DefaultConfig,
-                                Config.DefaultCategories, false, true)
-                            if pressed then
-                                Config:SaveSettings()
-                            end
+                            _, _ = Ui.RenderModuleSettings("Core", Config.DefaultConfig, Config.SettingCategories, false, true)
                         end
                         if Config:GetSetting('ShowAllOptionsMain') then
                             if Config.Globals.SubmodulesLoaded then
-                                local submoduleSettings = Modules:ExecAll("GetSettings")
-                                local submoduleDefaults = Modules:ExecAll("GetDefaultSettings")
-                                local submoduleCategories = Modules:ExecAll("GetSettingCategories")
+                                local submoduleSettings = Config:GetAllModuleSettings()
+                                local submoduleDefaults = Config:GetAllModuleDefaultSettings()
+                                local submoduleCategories = Config:GetAllModuleSettingCategories()
+
                                 for n, s in pairs(submoduleSettings) do
-                                    if n ~= "Debug" and Modules:ExecModule(n, "ShouldRender") then
+                                    if n ~= "Debug" and n ~= "Core" and Modules:ExecModule(n, "ShouldRender") then
                                         ImGui.PushID(n .. "_config_hdr")
                                         if s and submoduleDefaults[n] and submoduleCategories[n] then
                                             if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                                s, pressed, _ = Ui.RenderSettings(s, submoduleDefaults[n],
-                                                    submoduleCategories[n], true)
-                                                if pressed then
-                                                    Modules:ExecModule(n, "SaveSettings", true)
-                                                end
+                                                _, _ = Ui.RenderModuleSettings(n, submoduleDefaults[n], submoduleCategories[n], true)
                                             end
                                         end
                                         ImGui.PopID()

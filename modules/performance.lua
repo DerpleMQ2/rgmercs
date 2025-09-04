@@ -5,16 +5,15 @@ local Ui                  = require("utils.ui")
 local Comms               = require("utils.comms")
 local Modules             = require("utils.modules")
 local Logger              = require("utils.logger")
+local Strings             = require("utils.strings")
 local ImPlot              = require('ImPlot')
 local Set                 = require('mq.Set')
 local ScrollingPlotBuffer = require('utils.scrolling_plot_buffer')
-local Icons               = require('mq.ICONS')
 
 local Module              = { _version = '0.1a', _name = "Perf", _author = 'Derple', }
 Module.__index            = Module
-Module.settings           = {}
 Module.DefaultConfig      = {}
-Module.DefaultCategories  = {}
+Module.SettingCategories  = {}
 Module.MaxFrameStep       = 5.0
 Module.GoalMaxFrameTime   = 0
 Module.CurMaxMaxFrameTime = 0
@@ -25,6 +24,7 @@ Module.MaxFrameTime       = 0
 Module.LastExtentsCheck   = os.clock()
 Module.FAQ                = {}
 Module.ClassFAQ           = {}
+Module.SaveRequested      = nil
 
 Module.DefaultConfig      = {
     ['SecondsToStore']                         = {
@@ -67,10 +67,10 @@ Module.DefaultConfig      = {
     },
 }
 
-Module.DefaultCategories  = Set.new({})
+Module.SettingCategories  = Set.new({})
 for k, v in pairs(Module.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
-        Module.DefaultCategories:add(v.Category)
+        Module.SettingCategories:add(v.Category)
     end
     Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 end
@@ -83,52 +83,45 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    mq.pickle(getConfigFileName(), self.settings)
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
 
-    if doBroadcast == true then
+function Module:WriteSettings()
+    if not self.SaveRequested then return end
+
+    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+
+    if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
+
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
     Logger.log_debug("Performance Monitor Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
+    local settings = {}
+    local firstSaveRequired = false
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
         Logger.log_error("\ay[Performance Monitor]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
-        self:SaveSettings(false)
+        firstSaveRequired = true
     else
-        self.settings = config()
+        settings = config()
     end
 
-    local settingsChanged = false
-
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
-
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 
     self.SettingsLoaded = true
 end
 
-function Module:GetSettings()
-    return self.settings
-end
-
-function Module:GetDefaultSettings()
-    return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-    return self.DefaultCategories
-end
-
 function Module.New()
-    local newModule = setmetatable({ settings = {}, }, Module)
+    local newModule = setmetatable({}, Module)
     return newModule
 end
 
@@ -136,7 +129,7 @@ function Module:Init()
     Logger.log_debug("Performance Monitor Module Loaded.")
     self:LoadSettings()
 
-    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:ShouldRender()
@@ -144,14 +137,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if not self.settings[self._name .. "_Popped"] then
-        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-            self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-            self:SaveSettings(false)
-        end
-        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-        ImGui.NewLine()
-    end
+    Ui.RenderPopSetting(self._name)
 
     local pressed
     if not self.SettingsLoaded then return end
@@ -162,7 +148,7 @@ function Module:Render()
         for _, data in pairs(self.FrameTimingData) do
             for idx, time in ipairs(data.frameTimes.DataY) do
                 -- is this entry visible?
-                local visible = data.frameTimes.DataX[idx] > os.clock() - self.settings.SecondsToStore and
+                local visible = data.frameTimes.DataX[idx] > os.clock() - Config:GetSetting('SecondsToStore') and
                     data.frameTimes.DataX[idx] < os.clock()
                 if visible and time > self.GoalMaxFrameTime then
                     self.GoalMaxFrameTime = math.ceil(time / self.MaxFrameStep) * self.MaxFrameStep
@@ -177,7 +163,7 @@ function Module:Render()
 
     if ImPlot.BeginPlot("Frame Times for RGMercs Modules") then
         ImPlot.SetupAxes("Time (s)", "Frame Time (ms)")
-        ImPlot.SetupAxisLimits(ImAxis.X1, os.clock() - self.settings.SecondsToStore, os.clock(), ImGuiCond.Always)
+        ImPlot.SetupAxisLimits(ImAxis.X1, os.clock() - Config:GetSetting('SecondsToStore'), os.clock(), ImGuiCond.Always)
         ImPlot.SetupAxisLimits(ImAxis.Y1, 1, self.CurMaxMaxFrameTime, ImGuiCond.Always)
 
         for _, module in pairs(Modules:GetModuleOrderedNames()) do
@@ -187,7 +173,7 @@ function Module:Render()
                 if framData then
                     ImPlot.PlotLine(module, framData.frameTimes.DataX, framData.frameTimes.DataY,
                         #framData.frameTimes.DataX,
-                        self.settings.PlotFillLines and ImPlotLineFlags.Shaded or ImPlotLineFlags.None,
+                        Config:GetSetting('PlotFillLines') and ImPlotLineFlags.Shaded or ImPlotLineFlags.None,
                         framData.frameTimes.Offset - 1)
                 end
             end
@@ -199,32 +185,30 @@ function Module:Render()
     ImGui.Separator()
 
     if ImGui.CollapsingHeader("Config Options") then
-        self.settings.SecondsToStore, pressed = ImGui.SliderInt(self.DefaultConfig.SecondsToStore.DisplayName,
-            self.settings.SecondsToStore, self.DefaultConfig.SecondsToStore.Min,
+        local secondsToStore = Config:GetSetting('SecondsToStore')
+
+        secondsToStore, pressed = ImGui.SliderInt(self.DefaultConfig.SecondsToStore.DisplayName,
+            secondsToStore, self.DefaultConfig.SecondsToStore.Min,
             self.DefaultConfig.SecondsToStore
             .Max,
             "%d s")
         if pressed then
-            self:SaveSettings(false)
+            Config:SetSetting('SecondsToStore', secondsToStore)
         end
 
-        self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
-        if pressed then
-            self:SaveSettings(false)
-        end
+        _, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
     end
 end
 
 function Module:Pop()
-    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-    self:SaveSettings(false)
+    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:GiveTime(combat_state)
 end
 
 function Module:OnFrameExec(module, frameTime)
-    if not self.settings.EnablePerfMonitoring then return end
+    if not Config:GetSetting('EnablePerfMonitoring') then return end
 
     if not self.FrameTimingData[module] then
         self.FrameTimingData[module] = {
@@ -251,7 +235,7 @@ function Module:OnCombatModeChanged()
 end
 
 function Module:DoGetState()
-    if not self.settings.EnablePerfMonitoring then return "Disabled" end
+    if not Config:GetSetting('EnablePerfMonitoring') then return "Disabled" end
 
     return "Enabled"
 end

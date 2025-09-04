@@ -22,6 +22,7 @@ Module.__index                 = Module
 
 Module.ModuleLoaded            = false
 Module.CombatState             = "None"
+Module.SaveRequested           = nil
 
 Module.TempSettings            = {}
 Module.TempSettings.MezImmune  = {}
@@ -179,10 +180,10 @@ Module.DefaultConfig           = {
     },
 }
 
-Module.DefaultCategories       = Set.new({})
+Module.SettingCategories       = Set.new({})
 for k, v in pairs(Module.DefaultConfig) do
     if v.Type ~= "Custom" then
-        Module.DefaultCategories:add(v.Category)
+        Module.SettingCategories:add(v.Category)
     end
     Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 end
@@ -205,56 +206,51 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    mq.pickle(getConfigFileName(), self.settings)
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
 
-    if doBroadcast == true then
+function Module:WriteSettings()
+    if not self.SaveRequested then return end
+
+    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+
+    if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
+
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
     Logger.log_debug("\ar%s\ao Mez Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
         Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
+    local settings = {}
+    local firstSaveRequired = false
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
         Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
             Config.Globals.CurLoadedClass, settings_pickle_path)
-        self.settings = {}
-        self:SaveSettings(false)
+        firstSaveRequired = true
     else
-        self.settings = config()
+        settings = config()
     end
 
-    if not self.settings or not self.DefaultCategories or not self.DefaultConfig then
+    if not self.SettingCategories or not self.DefaultConfig then
         Logger.log_error("\arFailed to Load Mez Config for Classs: %s", Config.Globals.CurLoadedClass)
         return
     end
 
-    local settingsChanged = false
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
-end
-
-function Module:GetSettings()
-    return self.settings
-end
-
-function Module:GetDefaultSettings()
-    return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-    return self.DefaultCategories
+    self.SettingsLoaded = true
 end
 
 function Module.New()
-    local newModule = setmetatable({ settings = {}, }, Module)
+    local newModule = setmetatable({}, Module)
     return newModule
 end
 
@@ -264,7 +260,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:ShouldRender()
@@ -272,17 +268,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if not self.settings[self._name .. "_Popped"] then
-        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-            self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-            self:SaveSettings(false)
-        end
-        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-        ImGui.NewLine()
-    end
-
-    ---@type boolean|nil
-    local pressed = false
+    Ui.RenderPopSetting(self._name)
 
     if self.ModuleLoaded then
         -- CCEd targets
@@ -343,18 +329,13 @@ function Module:Render()
         ImGui.Separator()
 
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
-                self.DefaultCategories)
-            if pressed then
-                self:SaveSettings(false)
-            end
+            _, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
         end
     end
 end
 
 function Module:Pop()
-    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-    self:SaveSettings(false)
+    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:HandleMezBroke(mobName, breakerName)
@@ -414,7 +395,7 @@ function Module:MezNow(mezId, useAE, useAA)
         if not Casting.SpellReady(aeMezSpell) then
             -- previous code checked for the enchanter class, but AAready will simply return false on any other class
             -- lets only try to use beam of slumber if we are in global, since a beam may not catch everything.
-            if useAA and self.settings.DoAAMez and Casting.AAReady("Beam of Slumber") then
+            if useAA and Config:GetSetting('DoAAMez') and Casting.AAReady("Beam of Slumber") then
                 -- This is a beam AE so I need ot face the target and cast.
                 Core.DoCmd("/face fast")
                 -- Delay to wait till face finishes
@@ -452,7 +433,7 @@ function Module:MezNow(mezId, useAE, useAA)
                 if Core.MyClassIs("brd") then
                     Casting.UseSong(aeMezSpell.RankName(), mezId, false, 2)
                 else
-                    Casting.UseSpell(aeMezSpell.RankName(), mezId, false, true, true, 2)
+                    Casting.UseSpell(aeMezSpell.RankName(), mezId, false, true, 2)
                 end
                 Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE SPELL MEZ \ag %s", aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
                     Config:GetSetting('MezAnnounce'))
@@ -462,7 +443,7 @@ function Module:MezNow(mezId, useAE, useAA)
         mq.doevents()
     else
         Logger.log_debug("Performing Single Target MEZ --> %d", mezId)
-        if useAA and Core.MyClassIs("brd") and Casting.AAReady("Dirge of the Sleepwalker") and self.settings.DoAAMez then
+        if useAA and Core.MyClassIs("brd") and Casting.AAReady("Dirge of the Sleepwalker") and Config:GetSetting('DoAAMez') then
             -- Bard AA Mez is Dirge of the Sleepwalker
             -- Only bards have single target AA Mez
             -- Cast and Return
@@ -494,7 +475,7 @@ function Module:MezNow(mezId, useAE, useAA)
                 local maxWaitToMez = 1500 + (mq.TLO.Window("CastingWindow").Open() and (mq.TLO.Me.Casting.MyCastTime() or 3000) or 0)
                 while maxWaitToMez > 0 do
                     Logger.log_verbose("MEZ: Waiting for cast or movement to finish to use ST Mez.")
-                    if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
+                    if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= Config:GetSetting('MezAECount') and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (Config:GetSetting('DoAAMez') and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
                         Logger.log_debug("Mez: Waiting for single mez to be ready, but high number of targets, let's check if AE Mez is needed again before we start singles.")
                         self:AEMezCheck()
                         return
@@ -520,7 +501,7 @@ function Module:MezNow(mezId, useAE, useAA)
                 Casting.UseSong(mezSpell.RankName(), mezId, false, 2)
             else
                 -- This may not work for Bards but will work for NEC/ENCs
-                Casting.UseSpell(mezSpell.RankName(), mezId, false, false, true, 2)
+                Casting.UseSpell(mezSpell.RankName(), mezId, false, false, 2)
             end
 
             -- In case they're mez immune
@@ -545,8 +526,8 @@ end
 function Module:AEMezCheck()
     if not Config:GetSetting('DoAEMez') then return end
 
-    local mezNPCFilter = string.format("npc radius %d targetable los playerstate 4", self.settings.MezRadius)
-    local mezNPCPetFilter = string.format("npcpet radius %d targetable los playerstate 4", self.settings.MezRadius)
+    local mezNPCFilter = string.format("npc radius %d targetable los playerstate 4", Config:GetSetting('MezRadius'))
+    local mezNPCPetFilter = string.format("npcpet radius %d targetable los playerstate 4", Config:GetSetting('MezRadius'))
     local aeCount = mq.TLO.SpawnCount(mezNPCFilter)() + mq.TLO.SpawnCount(mezNPCPetFilter)()
 
     local aeMezSpell = self:GetAEMezSpell()
@@ -558,7 +539,7 @@ function Module:AEMezCheck()
     end
 
     -- Make sure the mobs of concern are within range
-    if aeCount < self.settings.MezAECount then return end
+    if aeCount < Config:GetSetting('MezAECount') then return end
 
     if Config:GetSetting('SafeAEMez') then --not Core.MyClassIs("brd") then
         -- Get the nearest spawn meeting our npc search criteria
@@ -609,7 +590,7 @@ end
 function Module:AddCCTarget(mobId)
     if mobId == 0 then return end
 
-    if #self.TempSettings.MezTracker >= self.settings.MaxMezCount and self.TempSettings.MezTracker[mobId] == nil then
+    if #self.TempSettings.MezTracker >= Config:GetSetting('MaxMezCount') and self.TempSettings.MezTracker[mobId] == nil then
         Logger.log_debug("\awNOTICE:\ax Unable to mez %d - mez list is full", mobId)
         return false
     end
@@ -658,13 +639,13 @@ function Module:IsValidMezTarget(mobId)
         return false
     end
 
-    if (spawn.PctHPs() or 0) < self.settings.MezStopHPs then
+    if (spawn.PctHPs() or 0) < Config:GetSetting('MezStopHPs') then
         Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID(),
             spawn.CleanName(), spawn.Level())
         return false
     end
 
-    if (spawn.Distance() or 999) > self.settings.MezRadius then
+    if (spawn.Distance() or 999) > Config:GetSetting('MezRadius') then
         Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - Out of Mez Radius",
             spawn.ID(), spawn.CleanName(), spawn.Level())
         return false
@@ -684,15 +665,15 @@ function Module:UpdateMezList()
     end
 
     for _, t in ipairs(searchTypes) do
-        local minLevel = self.settings.MezMinLevel
-        local maxLevel = self.settings.MezMaxLevel
+        local minLevel = Config:GetSetting('MezMinLevel')
+        local maxLevel = Config:GetSetting('MezMaxLevel')
 
-        if self.settings.AutoLevelRange and mezSpell and mezSpell() then
+        if Config:GetSetting('AutoLevelRange') and mezSpell and mezSpell() then
             minLevel = 0
             maxLevel = mezSpell.MaxLevel()
         end
         local searchString = string.format("%s radius %d zradius %d range %d %d targetable playerstate 4", t,
-            self.settings.MezRadius * 2, self.settings.MezZRadius * 2, minLevel, maxLevel)
+            Config:GetSetting('MezRadius') * 2, Config:GetSetting('MezZRadius') * 2, minLevel, maxLevel)
 
         local mobCount = mq.TLO.SpawnCount(searchString)()
         Logger.log_debug("\ayUpdateMezList: Search String: '\at%s\ay' -- Count :: \am%d", searchString, mobCount)
@@ -732,7 +713,7 @@ function Module:ProcessMezList()
         return
     end
 
-    if not self.settings.DoSTMez and Targeting.GetXTHaterCount() < self.settings.MezAECount then
+    if not Config:GetSetting('DoSTMez') and Targeting.GetXTHaterCount() < Config:GetSetting('MezAECount') then
         Logger.log_debug("\ayProcessMezList(%d) :: Single Target Mezzing is off and under the needed AE count threshold, returning.")
         return
     end
@@ -756,7 +737,7 @@ function Module:ProcessMezList()
                 -- the mez spell. MyCastTime is in ms, timer is in deciseconds.
                 -- We already fudge the mez timer when we set it.
                 local spell = mezSpell
-                if data.duration > (spell.MyCastTime() / 100) or spawn.Distance() > self.settings.MezRadius or not spawn.LineOfSight() then
+                if data.duration > (spell.MyCastTime() / 100) or spawn.Distance() > Config:GetSetting('MezRadius') or not spawn.LineOfSight() then
                     Logger.log_debug("\ayProcessMezList(%d) :: Timer(%s > %s) Distance(%d) LOS(%s)", id,
                         Strings.FormatTime(data.duration / 1000),
                         Strings.FormatTime(spell.MyCastTime() / 100), spawn.Distance(),
@@ -781,10 +762,10 @@ function Module:ProcessMezList()
                         --mez the thing, if it isn't (an AE mez or someone else's mez may have hit it before we got to it). If it is, we will update timer below.
                         Targeting.SetTarget(id)
                         ---@diagnostic disable-next-line: undefined-field -- [Doesn't like the .ID on group assist target, but it is valid]
-                        if self.settings.DoAEMez and not mq.TLO.Target.Mezzed() and mq.TLO.Me.GroupAssistTarget.ID() ~= id then
+                        if Config:GetSetting('DoAEMez') and not mq.TLO.Target.Mezzed() and mq.TLO.Me.GroupAssistTarget.ID() ~= id then
                             --lets make sure we didn't have more mobs dogpile on, making an AE mez more appropriate
                             local aeMezSpell = self:GetAEMezSpell()
-                            if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
+                            if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= Config:GetSetting('MezAECount') and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (Config:GetSetting('DoAAMez') and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
                                 Logger.log_debug("High number of targets, let's check if AE Mez is needed again before we start singles.")
                                 self:AEMezCheck()
                             end
@@ -792,7 +773,7 @@ function Module:ProcessMezList()
 
                         --lets check to see if it is mezzed now/again and use a single target mez if necessary:
                         Targeting.SetTarget(id)
-                        if id ~= Config.Globals.AutoTargetID and self.settings.DoSTMez and not mq.TLO.Target.Mezzed() then
+                        if id ~= Config.Globals.AutoTargetID and Config:GetSetting('DoSTMez') and not mq.TLO.Target.Mezzed() then
                             Logger.log_debug("Single target mez is (still) needed.")
                             self:MezNow(id, false, true)
                         end
@@ -817,13 +798,13 @@ end
 function Module:DoMez()
     local mezSpell = self:GetMezSpell()
     local aeMezSpell = self:GetAEMezSpell()
-    if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
+    if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= Config:GetSetting('MezAECount') and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 or (Config:GetSetting('DoAAMez') and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
         self:AEMezCheck()
     end
 
     self:UpdateTimings()
 
-    if Targeting.GetXTHaterCount() >= self.settings.MezStartCount then
+    if Targeting.GetXTHaterCount() >= Config:GetSetting('MezStartCount') then
         self:UpdateMezList()
     end
 

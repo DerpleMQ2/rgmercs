@@ -8,9 +8,9 @@ local Targeting                    = require("utils.targeting")
 local Casting                      = require("utils.casting")
 local Ui                           = require("utils.ui")
 local Comms                        = require("utils.comms")
-local Strings                      = require("utils.strings")
 local Files                        = require("utils.files")
 local Logger                       = require("utils.logger")
+local Strings                      = require("utils.strings")
 local Set                          = require("mq.Set")
 local Icons                        = require('mq.ICONS')
 
@@ -22,6 +22,7 @@ Module.TempSettings.CampZoneId     = 0
 Module.TempSettings.LastCmd        = ""
 Module.FAQ                         = {}
 Module.ClassFAQ                    = {}
+Module.SaveRequested               = nil
 
 Module.Constants                   = {}
 Module.Constants.GGHZones          = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
@@ -250,7 +251,13 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    mq.pickle(getConfigFileName(), self.settings)
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
+
+function Module:WriteSettings()
+    if not self.SaveRequested then return end
+
+    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
 
     if Config:GetSetting('ReturnToCamp') then
         Core.DoCmd("/squelch /mapfilter campradius %d", Config:GetSetting('AutoCampRadius'))
@@ -260,57 +267,43 @@ function Module:SaveSettings(doBroadcast)
         Core.DoCmd("/squelch /mapfilter pullradius off")
     end
 
-    if doBroadcast == true then
+    if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
+
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
     Logger.log_debug("Chase Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
+    local settings = {}
+    local firstSaveRequired = false
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
         Logger.log_error("\ay[Basic]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
-        self.settings = {}
-        self:SaveSettings(false)
+        firstSaveRequired = true
     else
-        self.settings = config()
+        settings = config()
     end
 
-    Module.DefaultCategories = Set.new({})
+    Module.SettingCategories = Set.new({})
     for k, v in pairs(Module.DefaultConfig or {}) do
         if v.Type ~= "Custom" then
-            Module.DefaultCategories:add(v.Category)
+            Module.SettingCategories:add(v.Category)
         end
         Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
     end
 
-    local settingsChanged = false
-
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
-
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
-end
-
-function Module:GetSettings()
-    return self.settings
-end
-
-function Module:GetDefaultSettings()
-    return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-    return self.DefaultCategories
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 end
 
 function Module.New()
-    local newModule = setmetatable({ settings = {}, }, Module)
+    local newModule = setmetatable({}, Module)
     return newModule
 end
 
@@ -318,7 +311,7 @@ function Module:Init()
     Logger.log_debug("Chase Module Loaded.")
     self:LoadSettings()
     self.ModuleLoaded = true
-    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:ChaseOn(target)
@@ -334,10 +327,8 @@ function Module:ChaseOn(target)
 
     if chaseTarget() and chaseTarget.ID() > 0 and Targeting.TargetIsType("PC", chaseTarget) then
         self:CampOff()
-        self.settings.ChaseOn = true
-        self.settings.ChaseTarget = chaseTarget.CleanName()
-        self:SaveSettings(false)
-
+        Config:SetSetting('ChaseOn', true)
+        Config:SetSetting('ChaseTarget', chaseTarget.CleanName())
         Logger.log_info("\aoNow Chasing \ag%s", chaseTarget.CleanName())
     else
         Logger.log_warn("\ayWarning:\ax Not a valid chase target!")
@@ -356,16 +347,16 @@ function Module:RunCmd(cmd, ...)
 end
 
 function Module:ChaseOff()
-    if self.settings.ChaseOn == false then return end
-    Logger.log_info("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
-    self.settings.ChaseOn = false
-    self.settings.ChaseTarget = ""
+    if Config:GetSetting('ChaseOn') == false then return end
+    Logger.log_info("\ayNo longer chasing \at%s\ay.", Config:GetSetting('ChaseTarget') or "None")
+    Config:SetSetting('ChaseOn', false)
+    Config:SetSetting('ChaseTarget', "")
     self:SaveSettings(false)
 end
 
 function Module:CampOn()
     self:ChaseOff()
-    self.settings.ReturnToCamp   = true
+    Config:SetSetting('ReturnToCamp', true)
     self.TempSettings.AutoCampX  = mq.TLO.Me.X()
     self.TempSettings.AutoCampY  = mq.TLO.Me.Y()
     self.TempSettings.AutoCampZ  = mq.TLO.Me.Z()
@@ -377,7 +368,7 @@ end
 
 ---@return table # camp settings table
 function Module:GetCampData()
-    return { returnToCamp = (self.settings.ReturnToCamp and self.TempSettings.CampZoneId == mq.TLO.Zone.ID()), campSettings = self.TempSettings, }
+    return { returnToCamp = (Config:GetSetting('ReturnToCamp') and self.TempSettings.CampZoneId == mq.TLO.Zone.ID()), campSettings = self.TempSettings, }
 end
 
 ---@return boolean
@@ -386,7 +377,7 @@ function Module:InCampZone()
 end
 
 function Module:CampOff()
-    self.settings.ReturnToCamp = false
+    Config:SetSetting('ReturnToCamp', false)
     self:SaveSettings(false)
     Core.DoCmd("/squelch /mapfilter campradius off")
     Core.DoCmd("/squelch /mapfilter pullradius off")
@@ -414,7 +405,7 @@ function Module:DestoryCampfire()
 end
 
 function Module:GetCampfireTypeName()
-    return self.DefaultConfig.MaintainCampfire.ComboOptions[self.settings.MaintainCampfire]
+    return self.DefaultConfig.MaintainCampfire.ComboOptions[Config:GetSetting('MaintainCampfire')]
 end
 
 function Module:GetCampfireTypeID()
@@ -434,9 +425,9 @@ function Module:Campfire(camptype)
         return
     end
 
-    if self.settings.MaintainCampfire > 2 then
+    if Config:GetSetting('MaintainCampfire') > 2 then
         if mq.TLO.FindItemCount("Fellowship Campfire Materials") == 0 then
-            self.settings.MaintainCampfire = 36 -- Regular Fellowship
+            Config:SetSetting('MaintainCampfire', 36) -- Regular Fellowship
             self:SaveSettings(false)
             Logger.log_info("Fellowship Campfire Materials Not Found. Setting to Regular Fellowship.")
         end
@@ -484,16 +475,16 @@ function Module:Campfire(camptype)
         Logger.log_info("\agCampfire Dropped")
     else
         Logger.log_info("\ayCan't create campfire. Only %d nearby. Setting MaintainCampfire to 0.", fellowCount)
-        self.settings.MaintainCampfire = 1 -- off
+        Config:SetSetting('MaintainCampfire', 1) -- off
     end
 end
 
 function Module:ValidChaseTarget()
-    return (self.settings.ChaseTarget and self.settings.ChaseTarget:len() > 0)
+    return (Config:GetSetting('ChaseTarget') and Config:GetSetting('ChaseTarget'):len() > 0)
 end
 
 function Module:GetChaseTarget()
-    return self.settings.ChaseTarget:len() > 0 and self.settings.ChaseTarget or "<None>"
+    return Config:GetSetting('ChaseTarget'):len() > 0 and Config:GetSetting('ChaseTarget') or "<None>"
 end
 
 function Module:ShouldRender()
@@ -501,22 +492,14 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if not self.settings[self._name .. "_Popped"] then
-        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-            self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-            self:SaveSettings(false)
-        end
-        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-        ImGui.NewLine()
-    end
+    Ui.RenderPopSetting(self._name)
 
-    if self.settings and self.ModuleLoaded and Config.Globals.SubmodulesLoaded then
-        ImGui.Text("Chase Distance: %d", self.settings.ChaseDistance)
-        ImGui.Text("Chase Stop Distance: %d", self.settings.ChaseStopDistance)
-        ImGui.Text("Chase LOS Required: %s", self.settings.RequireLoS == true and "On" or "Off")
+    if self.ModuleLoaded and Config.Globals.SubmodulesLoaded then
+        ImGui.Text("Chase Distance: %d", Config:GetSetting('ChaseDistance'))
+        ImGui.Text("Chase Stop Distance: %d", Config:GetSetting('ChaseStopDistance'))
+        ImGui.Text("Chase LOS Required: %s", Config:GetSetting('RequireLoS') == true and "On" or "Off")
         ImGui.Text("Last Movement Command: %s", self.TempSettings.LastCmd)
 
-        local pressed
         local chaseSpawn = mq.TLO.Spawn("pc =" .. self:GetChaseTarget())
 
         ImGui.Separator()
@@ -524,6 +507,8 @@ function Module:Render()
         if ImGui.Button(Config:GetSetting('ChaseOn') and "Chase Off" or "Chase On", ImGui.GetWindowWidth() * .3, 25) then
             self:RunCmd("/rgl chase%s", Config:GetSetting('ChaseOn') and "off" or "on")
         end
+
+        local haveChaseTarget = self:ValidChaseTarget() and chaseSpawn() and chaseSpawn.ID() > 0
 
         if ImGui.BeginTable("ChaseInfoTable", 2, bit32.bor(ImGuiTableFlags.Borders)) then
             ImGui.TableNextColumn()
@@ -533,11 +518,11 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text("Distance")
             ImGui.TableNextColumn()
-            ImGui.Text("%d", self.settings.ChaseTarget:len() > 0 and chaseSpawn.Distance() or 0)
+            ImGui.Text("%d", haveChaseTarget and chaseSpawn.Distance() or 0)
             ImGui.TableNextColumn()
             ImGui.Text("ID")
             ImGui.TableNextColumn()
-            ImGui.Text("%d", self.settings.ChaseTarget:len() > 0 and chaseSpawn.ID() or 0)
+            ImGui.Text("%d", haveChaseTarget and chaseSpawn.ID() or 0)
             ImGui.TableNextColumn()
             ImGui.Text("Line of Sight")
             ImGui.TableNextColumn()
@@ -546,12 +531,12 @@ function Module:Render()
             else
                 ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
             end
-            ImGui.Text(self.settings.ChaseTarget:len() > 0 and (chaseSpawn.LineOfSight() and Icons.FA_EYE or Icons.FA_EYE_SLASH) or "N/A")
+            ImGui.Text(haveChaseTarget and (chaseSpawn.LineOfSight() and Icons.FA_EYE or Icons.FA_EYE_SLASH) or "N/A")
             ImGui.PopStyleColor(1)
             ImGui.TableNextColumn()
             ImGui.Text("Loc")
             ImGui.TableNextColumn()
-            Ui.NavEnabledLoc(self.settings.ChaseTarget:len() > 0 and chaseSpawn.LocYXZ() or "0,0,0")
+            Ui.NavEnabledLoc(haveChaseTarget and chaseSpawn.LocYXZ() or "0,0,0")
             ImGui.EndTable()
         end
 
@@ -605,26 +590,22 @@ function Module:Render()
         ImGui.Separator()
 
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
-            if pressed then
-                self:SaveSettings(false)
-            end
+            _, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
         end
     end
 end
 
 function Module:Pop()
-    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-    self:SaveSettings(false)
+    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:OnDeath()
     if not Config:GetSetting('BreakOnDeath') then return end
-    if self.settings.ChaseTarget then
-        Logger.log_info("\awNOTICE:\ax You're dead. I'm not chasing %s anymore.", self.settings.ChaseTarget)
+    if Config:GetSetting('ChaseTarget') then
+        Logger.log_info("\awNOTICE:\ax You're dead. I'm not chasing %s anymore.", Config:GetSetting('ChaseTarget'))
     end
-    self.settings.ChaseOn = false
-    self.settings.ChaseTarget = ""
+    Config:SetSetting('ChaseOn', false)
+    Config:SetSetting('ChaseTarget', "")
 end
 
 function Module:ShouldFollow()
@@ -633,7 +614,7 @@ function Module:ShouldFollow()
 
     return not mq.TLO.MoveTo.Moving() and
         (not me.Casting() or Core.MyClassIs("brd")) and
-        (Targeting.GetXTHaterCount() == 0 or (assistSpawn() and (assistSpawn.Distance() or 0) > self.settings.ChaseDistance))
+        (Targeting.GetXTHaterCount() == 0 or (assistSpawn() and (assistSpawn.Distance() or 0) > Config:GetSetting('ChaseDistance')))
 end
 
 function Module:OnZone()
@@ -649,11 +630,11 @@ function Module:DoCombatCampCheck()
 end
 
 function Module:GiveTime(combat_state)
-    if mq.TLO.Me.Hovering() and self.settings.ChaseOn then
+    if mq.TLO.Me.Hovering() and Config:GetSetting('ChaseOn') then
         if Config:GetSetting('BreakOnDeath') then
             Logger.log_warn("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
-                self.settings.ChaseTarget)
-            self.settings.ChaseOn = false
+                Config:GetSetting('ChaseTarget'))
+            Config:SetSetting('ChaseOn', false)
             self:SaveSettings()
         end
         return
@@ -688,7 +669,7 @@ function Module:GiveTime(combat_state)
     end
 
     if Casting.OkayToBuff() and not Config:GetSetting('PriorityHealing') then
-        if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and self.settings.MaintainCampfire > 1 then
+        if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and Config:GetSetting('MaintainCampfire') > 1 then
             --Logger.log_debug("Doing campfire maintainance")
             self:Campfire()
         end
@@ -701,22 +682,22 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    if self.settings.ChaseOn and not self:ValidChaseTarget() then
-        self.settings.ChaseOn = false
+    if Config:GetSetting('ChaseOn') and not self:ValidChaseTarget() then
+        Config:SetSetting('ChaseOn', false)
         Logger.log_warn("\awNOTICE:\ax \ayChase Target is invalid. Turning Chase Off!")
     end
 
-    if self.settings.ChaseOn and self.settings.ChaseTarget then
-        local chaseSpawn = mq.TLO.Spawn("pc =" .. self.settings.ChaseTarget)
+    if Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') then
+        local chaseSpawn = mq.TLO.Spawn("pc =" .. Config:GetSetting('ChaseTarget'))
 
         if not chaseSpawn or chaseSpawn.Dead() or not chaseSpawn.ID() then
             Logger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...",
-                self.settings.ChaseTarget)
+                Config:GetSetting('ChaseTarget'))
             return
         end
 
         if mq.TLO.Me.Dead() then return end
-        if not chaseSpawn or not chaseSpawn() or (chaseSpawn.Distance() or 0) < self.settings.ChaseDistance then return end
+        if not chaseSpawn or not chaseSpawn() or (chaseSpawn.Distance() or 0) < Config:GetSetting('ChaseDistance') then return end
 
         local Nav = mq.TLO.Navigation
 
@@ -728,32 +709,32 @@ function Module:GiveTime(combat_state)
             if not Nav.Active() then
                 if Nav.PathExists("id " .. chaseSpawn.ID())() then
                     local navCmd = string.format("/squelch /nav id %d log=critical dist=%d lineofsight=%s", chaseSpawn.ID(),
-                        self.settings.ChaseStopDistance, self.settings.RequireLoS and "on" or "off")
-                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", self.settings.ChaseTarget, navCmd)
+                        Config:GetSetting('ChaseStopDistance'), Config:GetSetting('RequireLoS') and "on" or "off")
+                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", Config:GetSetting('ChaseTarget'), navCmd)
                     self:RunCmd(navCmd)
 
                     mq.delay("3s", function() return mq.TLO.Navigation.Active() end)
 
-                    if not Nav.Active() and (chaseSpawn.Distance() or 0) > self.settings.ChaseDistance then
+                    if not Nav.Active() and (chaseSpawn.Distance() or 0) > Config:GetSetting('ChaseDistance') then
                         Logger.log_verbose("\awNOTICE:\ax Nav might have failed.")
-                        --self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
+                        --self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), Config:GetSetting('ChaseDistance'))
                     end
                 else
                     -- Assuming no line of site problems.
                     -- Moveto underwater style until 20 units away
-                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s Has no nav path, trying /moveto", self.settings.ChaseTarget)
-                    self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
+                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s Has no nav path, trying /moveto", Config:GetSetting('ChaseTarget'))
+                    self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), Config:GetSetting('ChaseDistance'))
                 end
             end
-        elseif chaseSpawn.Distance() > self.settings.ChaseDistance and chaseSpawn.Distance() < 400 then
+        elseif chaseSpawn.Distance() > Config:GetSetting('ChaseDistance') and chaseSpawn.Distance() < 400 then
             -- If we don't have a mesh we're using afollow as legacy RG behavior.
-            Logger.log_debug("\awNOTICE:\ax Chase Target %s but no nav mesh - using afollow instead", self.settings.ChaseTarget)
+            Logger.log_debug("\awNOTICE:\ax Chase Target %s but no nav mesh - using afollow instead", Config:GetSetting('ChaseTarget'))
             self:RunCmd("/squelch /afollow spawn %d", chaseSpawn.ID())
-            self:RunCmd("/squelch /afollow %d", self.settings.ChaseDistance)
+            self:RunCmd("/squelch /afollow %d", Config:GetSetting('ChaseDistance'))
 
             mq.delay("2s")
 
-            if chaseSpawn.Distance() < self.settings.ChaseDistance then
+            if chaseSpawn.Distance() < Config:GetSetting('ChaseDistance') then
                 self:RunCmd("/squelch /afollow off")
             end
         end

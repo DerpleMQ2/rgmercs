@@ -437,10 +437,9 @@ end
 --- This function evaluates certain criteria to determine if the burn phase should be initiated.
 --- @return boolean True if the burn condition is met, false otherwise.
 function Casting.BurnCheck()
-    local settings = Config:GetSettings()
-    local autoBurn = settings.BurnAuto and
-        ((Targeting.GetXTHaterCount() >= settings.BurnMobCount) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and settings.BurnNamed))
-    local alwaysBurn = (settings.BurnAlways and settings.BurnAuto)
+    local autoBurn = Config:GetSetting('BurnAuto') and
+        ((Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('BurnNamed')))
+    local alwaysBurn = (Config:GetSetting('BurnAlways') and Config:GetSetting('BurnAuto'))
     local forcedBurn = Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()
 
     Casting.LastBurnCheck = autoBurn or alwaysBurn or forcedBurn
@@ -941,10 +940,9 @@ end
 --- @param targetId number The ID of the target on which the spell will be cast.
 --- @param bAllowMem boolean Whether to allow the spell to be memorized if not already.
 --- @param bAllowDead boolean? Whether to allow casting the spell on a dead target.
---- @param overrideWaitForGlobalCooldown boolean? Whether to override the wait for the global cooldown.
 --- @param retryCount number? The number of times to retry casting the spell if it fails.
 --- @return boolean Returns true if the spell was successfully cast, false otherwise.
-function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown, retryCount)
+function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount)
     local me = mq.TLO.Me
     -- Immediately send bards to the song handler.
     if me.Class.ShortName():lower() == "brd" then
@@ -1075,13 +1073,6 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
             Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
         until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
-
-        -- don't return control until we are done.
-        if Config:GetSetting('WaitOnGlobalCooldown') and not overrideWaitForGlobalCooldown then
-            Logger.log_verbose("\ayUseSpell(): Waiting on Global Cooldown After Casting: %s", spellName)
-            Casting.WaitGlobalCoolDown()
-            Logger.log_verbose("\agUseSpell(): Done Waiting on Global Cooldown After Casting: %s", spellName)
-        end
 
         Config.Globals.LastUsedSpell = spellName
         return true

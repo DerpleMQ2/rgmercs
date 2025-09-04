@@ -141,7 +141,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
         if Casting.SpellReady(spell, bAllowMem) then
             Rotation.RunPreActivate(caller, resolvedActionMap, entry)
-            ret = Casting.UseSpell(spell.RankName(), targetId, bAllowMem, entry.allowDead, entry.overrideWaitForGlobalCooldown, entry.retries)
+            ret = Casting.UseSpell(spell.RankName(), targetId, bAllowMem, entry.allowDead, entry.retries)
         end
         Logger.log_verbose("(Spell) Trying to use %s - %s :: %s", entry.name, spell.RankName(), ret and "\agSuccess" or "\arFailed!")
     end

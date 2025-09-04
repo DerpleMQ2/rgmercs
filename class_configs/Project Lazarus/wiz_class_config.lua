@@ -19,7 +19,6 @@ return {
     },
     ['OnModeChange']    = function(self, mode)
         -- if this is enabled weaves will break.
-        Config:GetSettings().WaitOnGlobalCooldown = false
     end,
     ['ItemSets']        = {
         ['Epic'] = {

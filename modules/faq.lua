@@ -7,17 +7,17 @@ local Logger             = require("utils.logger")
 local Binds              = require("utils.binds")
 local Modules            = require("utils.modules")
 local Set                = require("mq.Set")
-local Icons              = require('mq.ICONS')
+local Strings            = require("utils.strings")
 
 local Module             = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }
 Module.__index           = Module
-Module.settings          = {}
 Module.DefaultConfig     = {}
-Module.DefaultCategories = {}
+Module.SettingCategories = {}
 Module.FAQ               = {}
 Module.ClassFAQ          = {}
 Module.TempSettings      = {}
-Module.DefaultCategories = Set.new({})
+Module.SettingCategories = Set.new({})
+Module.SaveRequested     = nil
 
 Module.DefaultConfig     = {
 	[string.format("%s_Popped", Module._name)] = {
@@ -32,10 +32,10 @@ Module.DefaultConfig     = {
 	},
 }
 
-Module.DefaultCategories = Set.new({})
+Module.SettingCategories = Set.new({})
 for k, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
-		Module.DefaultCategories:add(v.Category)
+		Module.SettingCategories:add(v.Category)
 	end
 
 	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
@@ -59,57 +59,50 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-	mq.pickle(getConfigFileName(), self.settings)
+	self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
 
-	if doBroadcast == true then
+function Module:WriteSettings()
+	if not self.SaveRequested then return end
+
+	mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+
+	if self.SaveRequested.doBroadcast == true then
 		Comms.BroadcastUpdate(self._name, "LoadSettings")
 	end
+
+	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+	self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
 	Logger.log_debug("FAQ Combat Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
+	local settings = {}
+	local firstSaveRequired = false
 
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
 		Logger.log_error("\ay[FAQ]: Unable to load global settings file(%s), creating a new one!",
 			settings_pickle_path)
-		self.settings.MyCheckbox = false
-		self:SaveSettings(false)
+		firstSaveRequired = true
 	else
-		self.settings = config()
+		settings = config()
 	end
 
 	for k, v in pairs(Module.DefaultConfig or {}) do
 		if v.Type ~= "Custom" then
-			Module.DefaultCategories:add(v.Category)
+			Module.SettingCategories:add(v.Category)
 		end
 		Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 	end
 
-	local settingsChanged = false
-	-- Setup Defaults
-	self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
-
-	if settingsChanged then
-		self:SaveSettings(false)
-	end
-end
-
-function Module:GetSettings()
-	return self.settings
-end
-
-function Module:GetDefaultSettings()
-	return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-	return self.DefaultCategories
+	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 end
 
 function Module.New()
-	local newModule = setmetatable({ settings = {}, }, Module)
+	local newModule = setmetatable({}, Module)
 	return newModule
 end
 
@@ -117,7 +110,7 @@ function Module:Init()
 	Logger.log_debug("FAQ Combat Module Loaded.")
 	self:LoadSettings()
 
-	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+	return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:ShouldRender()
@@ -295,14 +288,8 @@ function Module:FaqFind(question)
 end
 
 function Module:Render()
-	if not self.settings[self._name .. "_Popped"] then
-		if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-			self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-			self:SaveSettings(false)
-		end
-		Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-		ImGui.NewLine()
-	end
+	Ui.RenderPopSetting(self._name)
+
 
 	ImGui.Spacing()
 	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1, 1, 0, 1))
@@ -476,8 +463,7 @@ function Module:GetCommandHandlers()
 end
 
 function Module:Pop()
-	self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-	self:SaveSettings(false)
+	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:GetFAQ()

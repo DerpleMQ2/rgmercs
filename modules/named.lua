@@ -6,18 +6,18 @@ local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
 local Files              = require("utils.files")
 local Logger             = require("utils.logger")
+local Strings            = require("utils.strings")
 local Set                = require("mq.Set")
-local Icons              = require('mq.ICONS')
 local Nameds             = require("utils.nameds")
 
 local Module             = { _version = '0.1a', _name = "Named", _author = 'Grimmier', }
 Module.__index           = Module
-Module.settings          = {}
 Module.DefaultConfig     = {}
-Module.DefaultCategories = {}
+Module.SettingCategories = {}
 Module.FAQ               = {}
 Module.ClassFAQ          = {}
 Module.CachedNamedList   = {}
+Module.SaveRequested     = nil
 
 Module.NamedList         = {}
 Module.NamedAM           = {}
@@ -60,10 +60,10 @@ Module.CommandHandlers   = {
 
 }
 
-Module.DefaultCategories = Set.new({})
+Module.SettingCategories = Set.new({})
 for k, v in pairs(Module.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
-        Module.DefaultCategories:add(v.Category)
+        Module.SettingCategories:add(v.Category)
     end
 
     Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
@@ -77,37 +77,42 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    mq.pickle(getConfigFileName(), self.settings)
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
 
-    if doBroadcast == true then
+function Module:WriteSettings()
+    if not self.SaveRequested then return end
+
+    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+
+    if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
+
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
     self.NamedList = {}
     Logger.log_debug("Named Combat Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
+    local settings = {}
+    local firstSaveRequired = false
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
         Logger.log_error("\ay[Named]: Unable to load Named settings file(%s), creating a new one!",
             settings_pickle_path)
-        self.settings.MyCheckbox = false
-        self:SaveSettings(false)
+        firstSaveRequired = true
     else
-        self.settings = config()
+        settings = config()
     end
 
-    local settingsChanged = false
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
-
-    self.CurSelection = self.settings['NamedTable']
+    self.CurSelection = Config:GetSetting('NamedTable')
 
     self.NamedAM = self:LoadNamed("AlertMaster.ini")
     self.NamedSM = self:LoadNamed("MQ2SpawnMaster.ini")
@@ -115,20 +120,8 @@ function Module:LoadSettings()
     self:RefreshNamedTable()
 end
 
-function Module:GetSettings()
-    return self.settings
-end
-
-function Module:GetDefaultSettings()
-    return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-    return self.DefaultCategories
-end
-
 function Module.New()
-    local newModule = setmetatable({ settings = {}, }, Module)
+    local newModule = setmetatable({}, Module)
     return newModule
 end
 
@@ -136,7 +129,7 @@ function Module:Init()
     Logger.log_debug("Named Combat Module Loaded.")
     self:LoadSettings()
 
-    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:ShouldRender()
@@ -144,13 +137,8 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if not self.settings[self._name .. "_Popped"] then
-        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-            self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-            self:SaveSettings(false)
-        end
-        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-    end
+    Ui.RenderPopSetting(self._name)
+
     ImGui.SameLine()
     ImGui.Text("Make any mob \"named\" for burns by adding it to your MQ2SpawnMaster list!")
     ImGui.NewLine()
@@ -160,12 +148,14 @@ function Module:Render()
     local pressed
 
     ImGui.SetNextItemWidth(150)
-    self.settings['NamedTable'], pressed = ImGui.Combo("Named Table", self.settings['NamedTable'], { 'RGMercs', 'Alert Master', 'MQ2SpawnMaster', })
+    local namedTable = Config:GetSetting('NamedTable')
+
+    namedTable, pressed = ImGui.Combo("Named Table", namedTable, { 'RGMercs', 'Alert Master', 'MQ2SpawnMaster', })
     if pressed then
-        if self.settings['NamedTable'] ~= self.CurSelection then
-            self:SaveSettings(false)
+        if namedTable ~= self.CurSelection then
+            Config:SetSetting('NamedTable', namedTable)
             self:RefreshNamedTable()
-            self.CurSelection = self.settings['NamedTable']
+            self.CurSelection = namedTable
         end
     end
     Ui.Tooltip(
@@ -173,9 +163,9 @@ function Module:Render()
         "Please note that regardless of which list you choose, we will use the MQ2SpawnMaster TLO (if loaded) to check that list for the purposes of when to burn or use certain abilities.")
     ImGui.SameLine()
     if ImGui.SmallButton("Reload from INI") then
-        if self.settings['NamedTable'] == 2 then
+        if Config:GetSetting('NamedTable') == 2 then
             self.NamedAM = self:LoadNamed("AlertMaster.ini", true)
-        elseif self.settings['NamedTable'] == 3 then
+        elseif Config:GetSetting('NamedTable') == 3 then
             self.NamedSM = self:LoadNamed("MQ2SpawnMaster.ini", true)
         end
         self:RefreshNamedTable()
@@ -235,10 +225,10 @@ end
 
 function Module:RefreshNamedTable()
     Nameds = {}
-    if self.settings['NamedTable'] > 1 then
-        if self.settings['NamedTable'] == 2 then
+    if Config:GetSetting('NamedTable') > 1 then
+        if Config:GetSetting('NamedTable') == 2 then
             self.NamedList = self.NamedAM
-        elseif self.settings['NamedTable'] == 3 then
+        elseif Config:GetSetting('NamedTable') == 3 then
             self.NamedList = self.NamedSM
         end
         local zoneName = mq.TLO.Zone.Name():lower()
@@ -329,8 +319,7 @@ function Module:DoGetState()
 end
 
 function Module:Pop()
-    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-    self:SaveSettings(false)
+    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:GetCommandHandlers()

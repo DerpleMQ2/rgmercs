@@ -32,9 +32,10 @@ Module.TempSettings                          = {}
 Module.CombatState                           = "None"
 Module.CurrentRotation                       = { name = "None", state = 0, }
 Module.ClassConfig                           = nil
-Module.DefaultCategories                     = nil
+Module.SettingCategories                     = nil
 Module.FAQ                                   = {}
 Module.ClassFAQ                              = {}
+Module.SaveRequested                         = nil
 
 Module.Constants                             = {}
 Module.Constants.RezSearchGroup              = "pccorpse group radius 100 zradius 50"
@@ -85,7 +86,7 @@ Module.CommandHandlers                       = {
                 end
 
                 if not self:IsModeActive(newMode) then
-                    self.settings.Mode = newModeIdx
+                    Config:SetSetting('Mode', newModeIdx)
                     self:SetCombatMode(newMode)
                     return true
                 end
@@ -110,9 +111,9 @@ Module.CommandHandlers                       = {
         usage = "/rgl enablerotationentry \"<Name>\"",
         about = "Enables <Name> Rotation Entry",
         handler = function(self, name)
-            self.settings.EnabledRotationEntries[name] = true
+            local enabledRotationEntries = Config:GetSetting('EnabledRotationEntries') or {}
+            enabledRotationEntries[name] = true
             self:SaveSettings(false)
-
             return true
         end,
     },
@@ -120,9 +121,9 @@ Module.CommandHandlers                       = {
         usage = "/rgl disablerotationentry \"<Name>\"",
         about = "Disables <Name> Rotation Entry",
         handler = function(self, name)
-            self.settings.EnabledRotationEntries[name] = false
+            local enabledRotationEntries = Config:GetSetting('EnabledRotationEntries') or {}
+            enabledRotationEntries[name] = false
             self:SaveSettings(false)
-
             return true
         end,
     },
@@ -130,9 +131,9 @@ Module.CommandHandlers                       = {
         usage = "/rgl enablerotation \"<Name>\"",
         about = "Enables <Name> Rotation",
         handler = function(self, name)
-            self.settings.EnabledRotations[name] = true
+            local enabledRotations = Config:GetSetting('EnabledRotations') or {}
+            enabledRotations[name] = true
             self:SaveSettings(false)
-
             return true
         end,
     },
@@ -140,9 +141,9 @@ Module.CommandHandlers                       = {
         usage = "/rgl disablerotation \"<Name>\"",
         about = "Disables <Name> Rotation",
         handler = function(self, name)
-            self.settings.EnabledRotations[name] = false
+            local enabledRotations = Config:GetSetting('EnabledRotations') or {}
+            enabledRotations[name] = false
             self:SaveSettings(false)
-
             return true
         end,
     },
@@ -287,24 +288,36 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    mq.pickle(getConfigFileName(), self.settings)
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
+
+function Module:WriteSettings()
+    if not self.SaveRequested then return end
+
+    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
 
     -- set dynamic names.
     self:SetDynamicNames()
 
-    if doBroadcast == true then
+    if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
+
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
     -- load base configurations
     self.ClassConfig = ClassLoader.load(Config.Globals.CurLoadedClass)
+    local settings = {}
+    local firstSaveRequired = false
 
-    self.DefaultCategories = Set.new({})
+    self.SettingCategories = Set.new({})
     for k, v in pairs(self.ClassConfig.DefaultConfig or {}) do
         if v.Type ~= "Custom" then
-            self.DefaultCategories:add(v.Category)
+            self.SettingCategories:add(v.Category)
         end
         self.ClassFAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
     end
@@ -319,19 +332,16 @@ function Module:LoadSettings()
     if err or not config then
         Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
             Config.Globals.CurLoadedClass, settings_pickle_path)
-        self.settings = {}
-        self:SaveSettings(false)
+        firstSaveRequired = true
     else
-        self.settings = config()
+        settings = config()
     end
 
-    if not self.settings or not self.DefaultCategories or not self.ClassConfig.DefaultConfig then
+    if not self.SettingCategories or not self.ClassConfig.DefaultConfig then
         Logger.log_error("\arFailed to Load Core Class Config for Classs: %s", Config.Globals
             .CurLoadedClass)
         return
     end
-
-    local settingsChanged = false
 
     -- Add this to all class configs
     self.ClassConfig.DefaultConfig['EnabledRotationEntries'] = {
@@ -350,12 +360,7 @@ function Module:LoadSettings()
         Default = {},
     }
 
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
-
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
+    Config:RegisterModuleSettings(self._name, settings, self.ClassConfig.DefaultConfig, self.SettingCategories, firstSaveRequired)
 
     self:RescanLoadout()
 end
@@ -364,20 +369,8 @@ function Module:WriteCustomConfig()
     ClassLoader.writeCustomConfig(Config.Globals.CurLoadedClass)
 end
 
-function Module:GetSettings()
-    return self.settings
-end
-
-function Module:GetDefaultSettings()
-    return self.ClassConfig.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-    return self.DefaultCategories
-end
-
 function Module.New()
-    local newModule = setmetatable({ settings = {}, }, Module)
+    local newModule = setmetatable({}, Module)
     return newModule
 end
 
@@ -395,10 +388,8 @@ function Module:Init()
 
     return {
         self = self,
-        settings = self.settings,
         defaults = self.ClassConfig.DefaultConfig,
-        categories = self
-            .DefaultCategories,
+        categories = self.SettingCategories,
     }
 end
 
@@ -425,6 +416,7 @@ function Module:GetResolvedActionMapItem(item)
 end
 
 function Module:RescanLoadout()
+    Config:ClearAllTempSettings()
     self.TempSettings.NewCombatMode = true
 end
 
@@ -506,7 +498,9 @@ end
 function Module:RenderRotationWithToggle(r, rotationTable)
     local enabledRotationEntriesChanged = false
     local rotationName = r.name
-    local rotationDisabled = self.settings.EnabledRotations[r.name] == false
+    local enabledRotations = Config:GetSetting('EnabledRotations') or {}
+    local enabledRotationEntries = Config:GetSetting('EnabledRotationEntries') or {}
+    local rotationDisabled = enabledRotations[r.name] == false
     local rotationIcon = rotationDisabled and Icons.MD_ERROR or (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE)
     local headerText = string.format("[%s] %s", rotationIcon, rotationName)
     local toggleOffset = 60  -- how far left to move from the far right of the window to render the toggle button
@@ -519,18 +513,20 @@ function Module:RenderRotationWithToggle(r, rotationTable)
     -- This has to come here because if it comes after the Header, the header will eat our mouse events.
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - toggleOffset, cursorScreenPos.y)
     if ImGui.InvisibleButton("##Enable" .. rotationName, ImVec2(20, 20)) then
-        self.settings.EnabledRotations[r.name] = not self.settings.EnabledRotations[r.name]
-        self:SaveSettings(false)
+        enabledRotations[r.name] = not enabledRotations[r.name]
+        Config:SaveModuleSettings(self._name, Config:GetModuleSettings(self._name))
     end
 
     -- Reset the cursor position to where we started
     ImGui.SetCursorPos(cursorScreenPos)
     if ImGui.CollapsingHeader(headerText) then
-        if self.settings.EnabledRotations[r.name] ~= false then
+        if enabledRotations[r.name] ~= false then
             ImGui.Indent()
-            self.TempSettings.ShowFailedSpells, self.settings.EnabledRotationEntries, enabledRotationEntriesChanged = Ui.RenderRotationTable(r.name,
+            self.TempSettings.ShowFailedSpells, enabledRotationEntries, enabledRotationEntriesChanged = Ui.RenderRotationTable(r.name,
                 rotationTable[r.name],
-                self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells, self.settings.EnabledRotationEntries or {})
+                self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells, enabledRotationEntries)
+
+            if enabledRotationEntriesChanged then Config:SaveModuleSettings(self._name, Config:GetModuleSettings(self._name)) end
             ImGui.Unindent()
         end
     end
@@ -550,8 +546,6 @@ function Module:RenderRotationWithToggle(r, rotationTable)
     end
     -- Now set the rendering cursor back to where we were after the Header / Tables were rendered
     ImGui.SetCursorPos(cursorScreenPosAfterRender)
-
-    if enabledRotationEntriesChanged then self:SaveSettings(false) end
 end
 
 function Module:Render()
@@ -567,10 +561,11 @@ function Module:Render()
         ImGui.SameLine()
         ImGui.SetNextItemWidth(150)
         Ui.Tooltip(self.ClassConfig.DefaultConfig.Mode.Tooltip)
-        self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes,
+        local newMode
+        newMode, pressed = ImGui.Combo("##_select_ai_mode", Config:GetSetting('Mode'), self.ClassConfig.Modes,
             #self.ClassConfig.Modes)
         if pressed then
-            self:SaveSettings(false)
+            Config:SetSetting('Mode', newMode)
             self:RescanLoadout()
         end
         ImGui.SameLine()
@@ -646,10 +641,9 @@ function Module:Render()
         ImGui.Separator()
 
         if ImGui.CollapsingHeader("Class Options") then
-            self.settings, pressed, loadoutChange = Ui.RenderSettings(self.settings,
-                self.ClassConfig.DefaultConfig, self.DefaultCategories)
+            pressed, loadoutChange = Ui.RenderModuleSettings(self._name,
+                self.ClassConfig.DefaultConfig, self.SettingCategories)
             if pressed then
-                self:SaveSettings(false)
                 self.TempSettings.NewCombatMode = self.TempSettings.NewCombatMode or loadoutChange
             end
         end
@@ -678,24 +672,20 @@ function Module:GetHealRotationTable(mode)
     return self.ClassConfig and self.TempSettings.HealRotationTable[mode] or {}
 end
 
-function Module:GetSetting(setting)
-    return self.ModuleLoaded and self.settings[setting] or ""
-end
-
 function Module:GetDefaultConfig(config)
     return self.ModuleLoaded and self.ClassConfig[config] or nil
 end
 
 ---@return number
 function Module:GetClassModeId()
-    if not self.settings then return 0 end
-    return self.settings.Mode
+    if not self.ModuleLoaded then return 0 end
+    return Config:GetSetting('Mode')
 end
 
 ---@return string
 function Module:GetClassModeName()
-    if not self.settings or not self.ClassConfig then return "None" end
-    return self.ClassConfig.Modes[self.settings.Mode] or "None"
+    if not self.ModuleLoaded or not self.ClassConfig then return "None" end
+    return self.ClassConfig.Modes[Config:GetSetting('Mode')] or "None"
 end
 
 ---@return table
@@ -963,6 +953,8 @@ end
 function Module:HealById(id)
     if id == 0 then return end
     if not self.TempSettings.HealRotationStates then return end
+    local enabledRotations = Config:GetSetting('EnabledRotations') or {}
+
 
     Logger.log_verbose("\awHealById(%d)", id)
 
@@ -986,7 +978,7 @@ function Module:HealById(id)
         self.TempSettings.CurrentRotationStateType = 2
         self.TempSettings.CurrentRotationStateId = idx
 
-        if self.settings.EnabledRotations and self.settings.EnabledRotations[rotation.name] == false then
+        if enabledRotations and enabledRotations[rotation.name] == false then
             Logger.log_verbose("\aw:::Heal Rotation::: \arSkipping Rotation: %s because it is disabled in the settings.", rotation.name)
         else
             Logger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id,
@@ -1005,7 +997,7 @@ function Module:HealById(id)
 
                 local newState, wasRun = Rotation.Run(self, self:GetHealRotationTable(selectedRotation.name), id,
                     self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0,
-                    self.CombatState == "Downtime", selectedRotation.doFullRotation or false, nil, self.settings.EnabledRotationEntries or {})
+                    self.CombatState == "Downtime", selectedRotation.doFullRotation or false, nil, Config:GetSetting('EnabledRotationEntries') or {})
                 if selectedRotation.state then selectedRotation.state = newState end
 
                 if wasRun and Casting.GetLastCastResultName() == "CAST_SUCCESS" then
@@ -1329,9 +1321,10 @@ function Module:ProcessQueuedEvents()
 end
 
 function Module:GiveTime(combat_state)
-    if not self.ClassConfig then return end
+    if not self.ClassConfig or not self.ModuleLoaded then return end
+    local enabledRotations = Config:GetSetting('EnabledRotations') or {}
 
-    local me = mq.TLO.Me
+    local me               = mq.TLO.Me
     ---@diagnostic disable-next-line: undefined-field
     if me.Hovering() or me.Stunned() or me.Charmed() or me.Mezzed() or me.Feared() then
         Logger.log_super_verbose("Class GiveTime aborted, we aren't in control of ourselves. Hovering(%s) Stunned(%s) Charmed(%s) Feared(%s) Mezzed(%s)",
@@ -1348,8 +1341,9 @@ function Module:GiveTime(combat_state)
 
     -- Main Module logic goes here.
     if self.TempSettings.NewCombatMode then
-        Logger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[self.settings.Mode])
-        self:SetCombatMode(self.ClassConfig.Modes[self.settings.Mode])
+        Logger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[Config:GetSetting('Mode')])
+
+        self:SetCombatMode(self.ClassConfig.Modes[Config:GetSetting('Mode')])
         self:GetRotations()
         if self:IsCuring() then
             if self.ClassConfig.Cures and self.ClassConfig.Cures.GetCureSpells then
@@ -1446,7 +1440,7 @@ function Module:GiveTime(combat_state)
         self.TempSettings.CurrentRotationStateId = idx
         local timeCheckPassed = true
 
-        if self.settings.EnabledRotations and self.settings.EnabledRotations[r.name] == false then
+        if enabledRotations[r.name] == false then
             Logger.log_verbose("\aw:::RUN ROTATION::: \arSkipping Rotation: %s because it is disabled in the settings.", r.name)
         else
             self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
@@ -1469,7 +1463,7 @@ function Module:GiveTime(combat_state)
                                 self.CurrentRotation = { name = r.name, state = r.state or 0, }
                                 local newState = Rotation.Run(self, self:GetRotationTable(r.name), targetId,
                                     self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime", r.doFullRotation or false, r.cond,
-                                    self.settings.EnabledRotationEntries or {})
+                                    Config:GetSetting('EnabledRotationEntries') or {})
 
                                 if r.state then r.state = newState end
                                 self.TempSettings.RotationTimers[r.name] = os.clock()

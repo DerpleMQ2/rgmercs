@@ -1,65 +1,70 @@
-local mq                                 = require('mq')
-local Modules                            = require("utils.modules")
-local Tables                             = require("utils.tables")
-local Strings                            = require("utils.strings")
-local Files                              = require("utils.files")
-local Logger                             = require("utils.logger")
-local Set                                = require("mq.Set")
+local mq                                              = require('mq')
+local Modules                                         = require("utils.modules")
+local Tables                                          = require("utils.tables")
+local Strings                                         = require("utils.strings")
+local Files                                           = require("utils.files")
+local Logger                                          = require("utils.logger")
+local Set                                             = require("mq.Set")
 
-local Config                             = {
+local Config                                          = {
     _version = '1.2',
     _subVersion = "The Outer Brood",
     _name =
     "RGMercs Lua Edition",
     _author = 'Lead Devs: Derple, Algar',
 }
-Config.__index                           = Config
-Config.settings                          = {}
-Config.FAQ                               = {}
+Config.__index                                        = Config
+Config.moduleSettings                                 = {}
+Config.moduleDefaultSettings                          = {}
+Config.moduleTempSettings                             = {}
+Config.moduleSettingCategories                        = {}
+Config.FAQ                                            = {}
+Config.SettingsLoadComplete                           = false
 
-Config.TempSettings                      = {}
-Config.TempSettings.SettingToModuleCache = {}
+Config.TempSettings                                   = {}
+Config.TempSettings.SettingToModuleCache              = {}
+Config.TempSettings.SettingsLowerToNameAndModuleCache = {}
 
 -- Global State
-Config.Globals                           = {}
-Config.Globals.MainAssist                = ""
-Config.Globals.ScriptDir                 = ""
-Config.Globals.AutoTargetID              = 0
-Config.Globals.ForceTargetID             = 0
-Config.Globals.LastPulledID              = 0
-Config.Globals.SubmodulesLoaded          = false
-Config.Globals.PauseMain                 = false
-Config.Globals.LastMove                  = nil
-Config.Globals.BackOffFlag               = false
-Config.Globals.InMedState                = false
-Config.Globals.LastPetCmd                = 0
-Config.Globals.LastFaceTime              = 0
-Config.Globals.CurZoneId                 = mq.TLO.Zone.ID()
-Config.Globals.CurInstance               = mq.TLO.Me.Instance()
-Config.Globals.CurLoadedChar             = mq.TLO.Me.DisplayName()
-Config.Globals.CurLoadedClass            = mq.TLO.Me.Class.ShortName()
-Config.Globals.CurServer                 = mq.TLO.EverQuest.Server():gsub(" ", "")
-Config.Globals.CastResult                = 0
-Config.Globals.BuildType                 = mq.TLO.MacroQuest.BuildName()
-Config.Globals.Minimized                 = false
-Config.Globals.LastUsedSpell             = "None"
-Config.Globals.CorpseConned              = false
-Config.Globals.RezzedCorpses             = {}
+Config.Globals                                        = {}
+Config.Globals.MainAssist                             = ""
+Config.Globals.ScriptDir                              = ""
+Config.Globals.AutoTargetID                           = 0
+Config.Globals.ForceTargetID                          = 0
+Config.Globals.LastPulledID                           = 0
+Config.Globals.SubmodulesLoaded                       = false
+Config.Globals.PauseMain                              = false
+Config.Globals.LastMove                               = nil
+Config.Globals.BackOffFlag                            = false
+Config.Globals.InMedState                             = false
+Config.Globals.LastPetCmd                             = 0
+Config.Globals.LastFaceTime                           = 0
+Config.Globals.CurZoneId                              = mq.TLO.Zone.ID()
+Config.Globals.CurInstance                            = mq.TLO.Me.Instance()
+Config.Globals.CurLoadedChar                          = mq.TLO.Me.DisplayName()
+Config.Globals.CurLoadedClass                         = mq.TLO.Me.Class.ShortName()
+Config.Globals.CurServer                              = mq.TLO.EverQuest.Server():gsub(" ", "")
+Config.Globals.CastResult                             = 0
+Config.Globals.BuildType                              = mq.TLO.MacroQuest.BuildName()
+Config.Globals.Minimized                              = false
+Config.Globals.LastUsedSpell                          = "None"
+Config.Globals.CorpseConned                           = false
+Config.Globals.RezzedCorpses                          = {}
 
 -- Constants
-Config.Constants                         = {}
-Config.Constants.RGCasters               = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
+Config.Constants                                      = {}
+Config.Constants.RGCasters                            = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
     "SHM", "WIZ", })
-Config.Constants.RGMelee                 = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
-Config.Constants.RGHybrid                = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
-Config.Constants.RGTank                  = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGPetClass              = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
-Config.Constants.RGMezAnims              = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
-Config.Constants.ModRods                 = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
-Config.Constants.SpellBookSlots          = 1120
-Config.Constants.CastCompleted           = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
+Config.Constants.RGMelee                              = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
+Config.Constants.RGHybrid                             = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
+Config.Constants.RGTank                               = Set.new({ "WAR", "PAL", "SHD", })
+Config.Constants.RGPetClass                           = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
+Config.Constants.RGMezAnims                           = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
+Config.Constants.ModRods                              = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
+Config.Constants.SpellBookSlots                       = 1120
+Config.Constants.CastCompleted                        = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
 
-Config.Constants.CastResults             = {
+Config.Constants.CastResults                          = {
     ['CAST_RESULT_NONE'] = 0,
     ['CAST_SUCCESS']     = 1,
     ['CAST_BLOCKED']     = 2,
@@ -85,7 +90,7 @@ Config.Constants.CastResults             = {
     ['CAST_OVERWRITTEN'] = 22,
 }
 
-Config.Constants.CastResultsIdToName     = {}
+Config.Constants.CastResultsIdToName                  = {}
 for k, v in pairs(Config.Constants.CastResults) do Config.Constants.CastResultsIdToName[v] = k end
 
 Config.Constants.ExpansionNameToID = {
@@ -891,16 +896,6 @@ Config.DefaultConfig = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['WaitOnGlobalCooldown'] = {
-        DisplayName = "Wait on Global Cooldown",
-        Category = "Spells/Abils",
-        Index = 15,
-        Tooltip = "Wait on Global Cooldown before trying to cast more spells (Should NOT be used by classes that have Weave rotations!)",
-        Default = false,
-        ConfigType = "Advanced",
-        FAQ = "Why am I not casting spells?",
-        Answer = "You can set the [WaitOnGlobalCooldown] option to true to wait on the Global Cooldown before trying to cast more spells.",
-    },
     ['CastReadyDelayFact']   = {
         DisplayName = "Cast Ready Delay Factor",
         Category = "Spells/Abils",
@@ -1699,15 +1694,31 @@ Config.DefaultConfig = {
     },
 }
 
-Config.DefaultCategories = Set.new({})
+Config.SettingCategories = Set.new({})
 for k, v in pairs(Config.DefaultConfig) do
     if v.Type ~= "Custom" then
-        Config.DefaultCategories:add(v.Category)
+        Config.SettingCategories:add(v.Category)
     end
     Config.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 end
 
 Config.CommandHandlers = {}
+
+local function deep_copy(orig, copies)
+    copies = copies or {} -- to handle cycles
+    if type(orig) ~= "table" then
+        return orig
+    elseif copies[orig] then
+        return copies[orig]
+    end
+
+    local copy = {}
+    copies[orig] = copy
+    for k, v in pairs(orig) do
+        copy[deep_copy(k, copies)] = deep_copy(v, copies)
+    end
+    return setmetatable(copy, getmetatable(orig))
+end
 
 function Config:GetConfigFileName()
     local oldFile = mq.configDir ..
@@ -1725,7 +1736,7 @@ function Config:GetConfigFileName()
 end
 
 function Config:SaveSettings()
-    mq.pickle(self:GetConfigFileName(), self.settings)
+    mq.pickle(self:GetConfigFileName(), self:GetModuleSettings("Core"))
     Logger.set_log_level(Config:GetSetting('LogLevel'))
     Logger.set_log_to_file(Config:GetSetting('LogToFile'))
 end
@@ -1738,26 +1749,19 @@ function Config:LoadSettings()
         "\ayLoading Main Settings for %s!",
         self.Globals.CurLoadedChar)
 
-    local needSave = false
+    local settings = {}
+    local firstSaveRequired = false
 
     local config, err = loadfile(self:GetConfigFileName())
     if err or not config then
         Logger.log_error("\ayUnable to load global settings file(%s), creating a new one!",
             self:GetConfigFileName())
-        self.settings = {}
-        needSave = true
+        firstSaveRequired = true
     else
-        self.settings = config()
+        settings = config()
     end
 
-    local settingsChanged = false
-
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(Config.DefaultConfig, self.settings)
-
-    if needSave or settingsChanged then
-        self:SaveSettings()
-    end
+    Config:RegisterModuleSettings("Core", settings, Config.DefaultConfig, Config.SettingCategories, firstSaveRequired)
 
     -- setup our script path for later usage since getting it kind of sucks, but only on the first run (personas)
     if Config.Globals.ScriptDir == "" then
@@ -1766,20 +1770,17 @@ function Config:LoadSettings()
         Config.Globals.ScriptDir = string.format("%s/%s", mq.TLO.Lua.Dir(), scriptDir)
     end
 
+    self.SettingsLoadComplete = true
+
     return true
 end
 
 function Config:UpdateCommandHandlers()
     self.CommandHandlers = {}
     local startTime = mq.gettime()
-    local submoduleSettings = Modules:ExecAll("GetSettings")
-    local submoduleDefaults = Modules:ExecAll("GetDefaultSettings")
+    local submoduleDefaults = self:GetAllModuleDefaultSettings()
 
-
-    submoduleSettings["Core"] = self.settings
-    submoduleDefaults["Core"] = Config.DefaultConfig
-
-    for moduleName, moduleSettings in pairs(submoduleSettings) do
+    for moduleName, moduleSettings in pairs(Config.moduleSettings) do
         local modstartTime = mq.gettime()
         for setting, _ in pairs(moduleSettings or {}) do
             local setstartTime = mq.gettime()
@@ -1798,12 +1799,12 @@ function Config:UpdateCommandHandlers()
             end
         end
         local modendTime = mq.gettime()
-        Logger.log_debug("\ag[Config] \ayGetSettings() took %.3f seconds to process module %s.", (modendTime - modstartTime) / 1000, moduleName)
+        Logger.log_debug("\ag[Config] \ayGeting all Settings took %.3f seconds to process module %s.", (modendTime - modstartTime) / 1000, moduleName)
     end
 
     local endTime = mq.gettime()
 
-    Logger.log_debug("\ag[Config] \ayUpdateCommandHandlers() took %.3f seconds to execute for %d modules.", (endTime - startTime) / 1000, #submoduleSettings)
+    Logger.log_debug("\ag[Config] \ayUpdateCommandHandlers() took %.3f seconds to execute for %d modules.", (endTime - startTime) / 1000, #Config.moduleSettings)
 end
 
 ---@param config string
@@ -1813,7 +1814,7 @@ end
 ---@return string
 function Config:GetUsageText(config, showUsageText, defaults, valueOnly)
     local handledType = false
-    local usageString = showUsageText and string.format("/rgl set %s ", Strings.PadString(config, 5, false)) or ""
+    local usageString = showUsageText and string.format("/rgl set %s | ", Strings.PadString(config, 30, false)) or ""
     local configData = defaults[config]
 
     local rangeText = ""
@@ -1821,20 +1822,25 @@ function Config:GetUsageText(config, showUsageText, defaults, valueOnly)
     local currentText = ""
 
     if type(configData.Default) == 'number' then
-        rangeText = string.format("\aw[\a-yRange:\a-y%d\aw-\a-y%d\ax]", configData.Min or 0, configData.Max or 999)
-        defaultText = string.format("[\a-tDefault: %d\ax]", configData.Default)
+        rangeText = string.format("\aw[%s\ax]", Strings.PadString(string.format("\a-yRange: \a-y%d\aw-\a-y%d", configData.Min or 0, configData.Max or 999), 15, false))
+        defaultText = string.format("[\a-tDefault: %s\ax]", Strings.PadString(tostring(configData.Default), 8, false))
         currentText = string.format("%d", Config:GetSetting(config))
         handledType = true
     elseif type(configData.Default) == 'boolean' then
-        rangeText = string.format("\aw[\a-yType:\a-yon\aw|\a-yoff\ax]")
+        rangeText = string.format("\aw[%s\ax]", Strings.PadString(string.format("\a-yType : \a-yon\aw|\a-yoff"), 15, false))
         ---@diagnostic disable-next-line: param-type-mismatch
-        defaultText = string.format("[\a-tDefault: %s\ax]", Strings.BoolToString(configData.Default))
+        defaultText = string.format("[\a-tDefault: %s\ax]", Strings.PadString(Strings.BoolToString(configData.Default), 8, false))
         currentText = (string.format("%s", Strings.BoolToString(Config:GetSetting(config))))
         handledType = true
     elseif type(configData.Default) == 'string' then
-        rangeText = string.format("\aw<\"str\">")
-        defaultText = string.format("[\a-tDefault: \"%s\"\ax]", configData.Default)
+        rangeText = string.format("\aw[%s\ax]", Strings.PadString(string.format("\a-y<\"str\">"), 15, false))
+        defaultText = string.format("[\a-tDefault: %s\ax]", Strings.PadString("\"" .. configData.Default .. "\"", 8, false))
         currentText = string.format("%s", Config:GetSetting(config))
+        handledType = true
+    elseif type(configData.Default) == 'table' then
+        rangeText = string.format("\aw[%s\ax]", Strings.PadString(string.format("\a-y<\"table\">"), 15, false))
+        defaultText = string.format("[\a-tDefault: %s\ax]", Strings.PadString(Strings.TableToString(configData.Default), 8, false))
+        currentText = string.format("%s", Strings.TableToString(Config:GetSetting(config)))
         handledType = true
     end
 
@@ -1845,19 +1851,39 @@ function Config:GetUsageText(config, showUsageText, defaults, valueOnly)
             )
     else
         usageString = usageString ..
-            string.format("  %s   %s %s", Strings.PadString(currentText, 5, false), Strings.PadString(rangeText, 5, false), Strings.PadString(defaultText, 5, false)
+            string.format("  %s | %s | %s", Strings.PadString(currentText, 25, false), Strings.PadString(rangeText, 15, false), Strings.PadString(defaultText, 5, false)
             )
     end
 
     return handledType, usageString
 end
 
-function Config:GetSettings()
-    return self.settings
+function Config:GetModuleSettings(module)
+    return self.moduleTempSettings[module] or {}
+end
+
+function Config:GetModuleDefaultSettings(module)
+    return self.moduleDefaultSettings[module] or {}
+end
+
+function Config:GetModuleSettingCategories(module)
+    return self.moduleSettingCategories[module] or {}
+end
+
+function Config:GetAllModuleSettings()
+    return self.moduleTempSettings or {}
+end
+
+function Config:GetAllModuleDefaultSettings()
+    return self.moduleDefaultSettings or {}
+end
+
+function Config:GetAllModuleSettingCategories()
+    return self.moduleSettingCategories or {}
 end
 
 function Config:SettingsLoaded()
-    return self.settings ~= nil
+    return self.SettingsLoadComplete
 end
 
 --- Retrieves a specified setting.
@@ -1865,49 +1891,13 @@ end
 --- @param failOk boolean? If true, the function will not raise an error if the setting is not found.
 --- @return any The value of the setting, or nil if the setting is not found and failOk is true.
 function Config:GetSetting(setting, failOk)
-    local ret = { module = "Base", value = self:GetSettings()[setting], }
-
-    -- Speed up lookups because they happen often and we do not need to spam about multiple keys every frame, just the one time.
-    if Config.TempSettings.SettingToModuleCache[setting] ~= nil then
-        if Config.TempSettings.SettingToModuleCache[setting] == "Base" then
-            return self:GetSettings()[setting]
-        end
-
-        local settings = Modules:ExecModule(Config.TempSettings.SettingToModuleCache[setting], "GetSettings")
-        return settings[setting]
-    end
-
-    if ret.value ~= nil then Config.TempSettings.SettingToModuleCache[setting] = "Base" end
-
-    -- if we found it in the Global table we should alert if it is duplicated anywhere
-    -- else as that could get confusing.
-    if Modules then -- this could be run before we are fully done loading.
-        local submoduleSettings = Modules:ExecAll("GetSettings")
-        for name, settings in pairs(submoduleSettings) do
-            if settings[setting] ~= nil then
-                if not ret.value then
-                    ret = { module = name, value = settings[setting], }
-                    Config.TempSettings.SettingToModuleCache[setting] = name
-                else
-                    Logger.log_error(
-                        "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Returning first but this should be fixed!",
-                        setting,
-                        ret.module, name)
-                end
-            end
-        end
-    end
-
-
-    if ret.value ~= nil then
-        Logger.log_super_verbose("\ag[Setting] \at'%s' \agfound in module \am%s", setting, ret.module)
-    else
+    if not Config.TempSettings.SettingToModuleCache[setting] then
         if not failOk then
-            Logger.log_error("\ag[Setting] \at'%s' \aywas requested but not found in any module!", setting)
+            Logger.log_error("Setting %s was not found in the module cache!", setting)
         end
+        return nil
     end
-
-    return ret.value
+    return self:GetModuleSettings(Config.TempSettings.SettingToModuleCache[setting])[setting]
 end
 
 --- Validates and sets a configuration setting for a specified module.
@@ -1915,12 +1905,8 @@ end
 --- @param setting string: The name of the setting to be validated and set.
 --- @param value any: The value to be assigned to the setting.
 --- @return boolean|string|number|nil: Returns a valid value for the setting.
-function Config.MakeValidSetting(module, setting, value)
-    local defaultConfig = Config.DefaultConfig
-
-    if module ~= "Core" then
-        defaultConfig = Modules:ExecModule(module, "GetDefaultSettings")
-    end
+function Config:MakeValidSetting(module, setting, value)
+    local defaultConfig = self:GetModuleDefaultSettings(module)
 
     if type(defaultConfig[setting].Default) == 'number' then
         value = tonumber(value)
@@ -1941,6 +1927,8 @@ function Config.MakeValidSetting(module, setting, value)
         return boolValue
     elseif type(defaultConfig[setting].Default) == 'string' then
         return value
+    elseif type(defaultConfig[setting].Default) == 'table' then
+        return value
     end
 
     return nil
@@ -1951,54 +1939,69 @@ end
 --- @param setting string The original setting name that needs to be validated and formatted.
 --- @return string, string The module of the setting and The validated and formatted setting name.
 function Config:MakeValidSettingName(setting)
-    for s, _ in pairs(self:GetSettings()) do
-        if s:lower() == setting:lower() then return "Core", s end
-    end
+    local validSetting = self.TempSettings.SettingsLowerToNameAndModuleCache[setting:lower()] or "None"
 
-    local submoduleSettings = Modules:ExecAll("GetSettings")
-    for moduleName, settings in pairs(submoduleSettings) do
-        for s, _ in pairs(settings) do
-            if s:lower() == setting:lower() then return moduleName, s end
-        end
-    end
-    return "None", "None"
+    return Config.TempSettings.SettingToModuleCache[validSetting] or "None", validSetting
 end
 
 ---Sets a setting from either in global or a module setting table.
 --- @param setting string: The name of the setting to be updated.
 --- @param value any: The new value to assign to the setting.
-function Config:SetSetting(setting, value)
-    local defaultConfig = Config.DefaultConfig
+--- @param tempOnly boolean?: The new value to assign to the setting.
+function Config:SetSetting(setting, value, tempOnly)
     local settingModuleName = "Core"
     local beforeUpdate = ""
 
     settingModuleName, setting = self:MakeValidSettingName(setting)
 
-    if settingModuleName == "Core" then
-        local cleanValue = Config.MakeValidSetting("Core", setting, value)
-        _, beforeUpdate = Config:GetUsageText(setting, false, defaultConfig, true)
-        if cleanValue ~= nil then
-            self:GetSettings()[setting] = cleanValue
-            self:SaveSettings()
-        end
-    elseif settingModuleName ~= "None" then
-        local settings = Modules:ExecModule(settingModuleName, "GetSettings")
-        if settings[setting] ~= nil then
-            defaultConfig = Modules:ExecModule(settingModuleName, "GetDefaultSettings")
-            _, beforeUpdate = Config:GetUsageText(setting, false, defaultConfig, true)
-            local cleanValue = Config.MakeValidSetting(settingModuleName, setting, value)
-            if cleanValue ~= nil then
-                settings[setting] = cleanValue
-                Modules:ExecModule(settingModuleName, "SaveSettings", false)
-            end
-        end
-    else
+    if settingModuleName == "None" then
         Logger.log_error("Setting %s was not found!", setting)
         return
     end
 
+    local defaultConfig = self:GetModuleDefaultSettings(settingModuleName)
+
+    local cleanValue = self:MakeValidSetting(settingModuleName, setting, value)
+    _, beforeUpdate = Config:GetUsageText(setting, false, defaultConfig, true)
+    if cleanValue ~= nil then
+        if tempOnly then
+            self.moduleTempSettings[settingModuleName][setting] = cleanValue
+        else
+            self.moduleSettings[settingModuleName][setting] = deep_copy(cleanValue)
+            self.moduleTempSettings[settingModuleName][setting] = cleanValue
+            self:SaveModuleSettings(settingModuleName, self.moduleSettings[settingModuleName])
+        end
+    end
+
     local _, afterUpdate = Config:GetUsageText(setting, false, defaultConfig)
     Logger.log_info("(%s) \ag%s\aw is now:\ax %-5s \ay[Previous:\ax %s\ay]", settingModuleName, setting, afterUpdate, beforeUpdate)
+end
+
+--- Temporarily sets a setting
+--- @param setting string: The name of the setting to be updated.
+--- @param value any: The new value to assign to the setting.
+function Config:SetTempSetting(setting, value)
+    self:SetSetting(setting, value, true)
+end
+
+--- Clears a Temporarily sets a setting
+--- @param setting string: The name of the setting to be updated.
+function Config:ClearTempSetting(setting)
+    local settingModuleName = "Core"
+
+    settingModuleName, setting = self:MakeValidSettingName(setting)
+
+    if settingModuleName == "None" then
+        Logger.log_error("Setting %s was not found!", setting)
+        return
+    end
+
+    self:SetSetting(setting, self.moduleSettings[settingModuleName][setting], true)
+end
+
+--- Clears Temporarily set settings
+function Config:ClearAllTempSettings()
+    self.moduleTempSettings = deep_copy(self.moduleSettings) -- make sure nothing is a reference.
 end
 
 --- Resolves the default values for a given settings table.
@@ -2011,6 +2014,12 @@ end
 function Config.ResolveDefaults(defaults, settings)
     -- Setup Defaults
     local changed = false
+    if settings == nil then
+        settings = {}
+        changed = true
+        Logger.log_error("\arSettings file was empty or corrupt -- creating a new one with default values.")
+    end
+
     for k, v in pairs(defaults) do
         if settings[k] == nil then settings[k] = v.Default end
 
@@ -2031,6 +2040,59 @@ function Config.ResolveDefaults(defaults, settings)
     end
 
     return settings, changed
+end
+
+function Config:RegisterModuleSettings(module, settings, defaultSettings, settingsCategories, firstSaveRequired)
+    if self.moduleSettings[module] then
+        Logger.log_error("\arModule %s has already registered settings!", module)
+        return
+    end
+
+    local settingsChanged = false
+    -- Setup Defaults
+    settings, settingsChanged = Config.ResolveDefaults(defaultSettings, settings)
+    self.moduleSettings[module] = deep_copy(settings) -- make sure nothing is a reference.
+    self.moduleTempSettings[module] = settings
+    self.moduleDefaultSettings[module] = defaultSettings
+    self.moduleSettingCategories[module] = settingsCategories
+
+    for setting, _ in pairs(settings) do
+        if Config.TempSettings.SettingToModuleCache[setting] ~= nil then
+            Logger.log_error(
+                "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Keeping first but this should be fixed!",
+                setting,
+                Config.TempSettings.SettingToModuleCache[setting], module)
+        else
+            Config.TempSettings.SettingToModuleCache[setting] = module
+            Config.TempSettings.SettingsLowerToNameAndModuleCache[setting:lower()] = setting
+        end
+    end
+
+    if firstSaveRequired or settingsChanged then
+        if module == "Core" then
+            self:SaveSettings()
+        else
+            Modules:ExecModule(module, "SaveSettings", false)
+        end
+    end
+
+    Logger.log_info("\agModule %s - registered settings!", module)
+end
+
+function Config:ReplaceModuleSettings(module, settings)
+    self.moduleSettings[module] = settings
+    self.moduleTempSettings[module] = settings
+    Logger.log_debug("\agModule %s - replaced settings!", module)
+end
+
+function Config:SaveModuleSettings(module, settings)
+    self.moduleSettings[module] = settings
+    if module == "Core" then
+        self:SaveSettings()
+    else
+        Modules:ExecModule(module, "SaveSettings", false)
+    end
+    Logger.log_debug("\agModule %s - save settings requested!", module)
 end
 
 --- Adds the given name to the Assist List.
@@ -2073,8 +2135,7 @@ end
 
 function Config:AssistClear()
     Logger.log_info("Assist List: \ayThe Assist List has been cleared!")
-    self.settings['AssistList'] = {}
-    self:SaveSettings()
+    Config:SetSetting('AssistList', {})
 end
 
 --- Moves the OA with the given ID up.
@@ -2087,10 +2148,11 @@ function Config:AssistMoveUp(id)
     local newId = id - 1
 
     if newId < 1 then return end
-    if id > #self:GetSetting('AssistList') then return end
+    local assistList = self:GetSetting('AssistList')
 
-    self:GetSetting('AssistList')[newId], self:GetSetting('AssistList')[id] =
-        self:GetSetting('AssistList')[id], self:GetSetting('AssistList')[newId]
+    if id > #assistList then return end
+
+    assistList[newId], assistList[id] = assistList[id], assistList[newId]
     Logger.log_info("\axAssist List: \ag%s\ax has been\ag moved up\ax to position \at%d", self:GetSetting('AssistList')[newId], newId)
     self:SaveSettings()
 end
@@ -2107,10 +2169,11 @@ function Config:AssistMoveDown(id)
 
     if id < 1 then return end
     local newId = id + 1
-    if newId > #self:GetSetting('AssistList') then return end
+    local assistList = self:GetSetting('AssistList')
 
-    self:GetSetting('AssistList')[newId], self:GetSetting('AssistList')[id] =
-        self:GetSetting('AssistList')[id], self:GetSetting('AssistList')[newId]
+    if newId > #assistList then return end
+
+    assistList[newId], assistList[id] = assistList[id], assistList[newId]
 
     Logger.log_info("\axAssist List: \ag%s\ax has been\ar moved down\ax to position \at%d", self:GetSetting('AssistList')[newId], newId)
 
@@ -2155,9 +2218,12 @@ function Config:HandleBind(config, value)
         self:UpdateCommandHandlers()
 
         local allModules = {}
-        local submoduleSettings = Modules:ExecAll("GetSettings")
+        local submoduleSettings = self.moduleSettings or {}
+
         for name, _ in pairs(submoduleSettings) do
-            table.insert(allModules, name)
+            if name ~= "Core" then
+                table.insert(allModules, name)
+            end
         end
         table.sort(allModules)
         table.insert(allModules, 1, "Core")
@@ -2213,6 +2279,27 @@ function Config:HandleBind(config, value)
     return handled
 end
 
+---@param config string
+---@param value any
+---@return boolean
+function Config:HandleTempSet(config, value)
+    local handled = false
+
+    if not config or config:lower() == "show" or config:len() == 0 then
+        self:HandleBind("show", value)
+        return true
+    end
+
+    if self.CommandHandlers[config:lower()] ~= nil then
+        Config:SetTempSetting(config, value)
+        handled = true
+    else
+        Logger.log_error("\at%s\aw - \arNot a valid config setting!\ax", config)
+    end
+
+    return handled
+end
+
 function Config:StoreLastMove()
     local me = mq.TLO.Me
 
@@ -2236,7 +2323,7 @@ end
 
 ---@return number
 function Config:GetMainOpacity()
-    return tonumber((self:GetSettings().BgOpacity or 100) / 100) or 1.0
+    return tonumber((self:GetSetting('BgOpacity') or 100) / 100) or 1.0
 end
 
 --- Determines if the character should mount.

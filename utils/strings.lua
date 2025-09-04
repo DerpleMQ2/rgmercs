@@ -90,6 +90,31 @@ function Strings.BoolToColorString(b)
     return b and "\agtrue\ax" or "\arfalse\ax"
 end
 
+local function dumpTable(o, depth)
+    if not depth then depth = 0 end
+    if type(o) == 'table' then
+        local s = '{'
+        for k, v in pairs(o) do
+            if type(k) ~= 'number' then k = '"' .. k .. '"' end
+            s = s .. string.rep(" ", depth) .. ' [' .. k .. '] = ' .. dumpTable(v, depth + 1) .. ', '
+        end
+        return s .. string.rep(" ", depth) .. '}'
+    else
+        return tostring(o)
+    end
+end
+
+--- Converts a table value to its string representation.
+--- @param t table: The boolean value to convert.
+--- @return string: "true" if the boolean is true, "false" otherwise.
+function Strings.TableToString(t)
+    if type(t) ~= "table" then
+        return "{}"
+    end
+
+    return dumpTable(t)
+end
+
 --- Pads a string to a specified length with a given character.
 ---
 --- @param string string The original string to be padded.

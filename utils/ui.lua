@@ -769,6 +769,39 @@ function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
     return settings, any_pressed, new_loadout
 end
 
+function Ui.RenderPopSetting(moduleName)
+    if not Config:GetSetting(moduleName .. "_Popped") then
+        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
+            Config:SetSetting(moduleName .. "_Popped", not Config:GetSetting(moduleName .. "_Popped"))
+        end
+        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", moduleName))
+        ImGui.NewLine()
+    end
+end
+
+--- Renders the settings UI for the Ui module and handles saving if required.
+---
+--- @param module string The name of the module for which we want to render settings.
+--- @param defaults table The default settings to be used as a reference.
+--- @param categories table The categories of settings to be displayed.
+--- @param hideControls? boolean Whether to hide certain controls in the UI.
+--- @param showMainOptions? boolean Whether to show the main options in the UI.
+---
+--- @return boolean: any_pressed was anythign pressed?
+--- @return boolean: requires_new_loadout do we require a new loadout?
+function Ui.RenderModuleSettings(module, defaults, categories, hideControls, showMainOptions)
+    local settings = Config:GetModuleSettings(module)
+    local any_pressed = false
+    local requires_new_loadout = false
+    settings, any_pressed, requires_new_loadout = Ui.RenderSettings(settings, defaults, categories, hideControls, showMainOptions)
+
+    if any_pressed then
+        Config:SaveModuleSettings(module, settings)
+    end
+
+    return any_pressed, requires_new_loadout
+end
+
 --- Renders the settings UI for the Ui module.
 ---
 --- @param settings table The current settings to be rendered.
@@ -794,19 +827,22 @@ function Ui.RenderSettings(settings, defaults, categories, hideControls, showMai
         local changed = false
 
         if showMainOptions then
-            Config:GetSettings().ShowAllOptionsMain, changed = Ui.RenderOptionToggle("show_main_all_tog",
-                "Show All Module Options", Config:GetSettings().ShowAllOptionsMain)
+            local showAllOptionsMain = Config:GetSetting('ShowAllOptionsMain')
+            showAllOptionsMain, changed = Ui.RenderOptionToggle("show_main_all_tog",
+                "Show All Module Options", showAllOptionsMain)
             if changed then
-                Config:SaveSettings()
+                Config:SetSetting('ShowAllOptionsMain', showAllOptionsMain)
             end
             ImGui.SameLine()
         end
 
         changed = false
-        Config:GetSettings().ShowAdvancedOpts, changed = Ui.RenderOptionToggle("show_adv_tog",
-            "Show Advanced Options", Config:GetSettings().ShowAdvancedOpts)
+        local ShowAdvancedOpts = Config:GetSetting('ShowAdvancedOpts')
+
+        ShowAdvancedOpts, changed = Ui.RenderOptionToggle("show_adv_tog",
+            "Show Advanced Options", ShowAdvancedOpts)
         if changed then
-            Config:SaveSettings()
+            Config:SetSetting('ShowAdvancedOpts', ShowAdvancedOpts)
         end
 
         Ui.ConfigFilter = ImGui.InputText("Search Configs", Ui.ConfigFilter)

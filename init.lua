@@ -10,8 +10,8 @@ local Config = require('utils.config')
 Config:LoadSettings()
 
 local Logger = require("utils.logger")
-Logger.set_log_level(Config:GetSettings().LogLevel)
-Logger.set_log_to_file(Config:GetSettings().LogToFile)
+Logger.set_log_level(Config:GetSetting('LogLevel'))
+Logger.set_log_to_file(Config:GetSetting('LogToFile'))
 
 local Binds = require('utils.binds')
 require('utils.event_handlers')
@@ -105,8 +105,8 @@ local function RGMercsGUI()
             local imGuiStyle = ImGui.GetStyle()
 
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Config:GetMainOpacity()) -- Main window opacity.
-            ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, Config:GetSettings().ScrollBarRounding)
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Config:GetSettings().FrameEdgeRounding)
+            ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, Config:GetSetting('ScrollBarRounding'))
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Config:GetSetting('FrameEdgeRounding'))
             if Config:GetSetting('PopOutForceTarget') then
                 local openFT, showFT = ImGui.Begin("Force Target", Config:GetSetting('PopOutForceTarget'))
                 if showFT then
@@ -292,6 +292,7 @@ local function Main()
         end
         Modules:ExecModule("Drag", "GiveTime", curState)
         Modules:ExecModule("Debug", "GiveTime", curState)
+        Modules:ExecAll("WriteSettings") -- this needs to happen even when paused.
         return
     end
 
@@ -445,6 +446,7 @@ local function Main()
     end
 
     Modules:ExecAll("GiveTime", curState)
+    Modules:ExecAll("WriteSettings")
 
     mq.doevents()
     mq.delay(10)

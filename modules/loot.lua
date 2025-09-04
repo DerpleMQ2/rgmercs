@@ -16,8 +16,8 @@ local warningMessageSent = false
 
 local Module             = { _version = '1.1 for LNS', _name = "Loot", _author = 'Derple, Grimmier, Algar', }
 Module.__index           = Module
-Module.settings          = {}
-Module.DefaultCategories = {}
+Module.SettingCategories = {}
+Module.SaveRequested     = nil
 
 Module.ModuleLoaded      = false
 Module.TempSettings      = {}
@@ -100,10 +100,10 @@ Module.CommandHandlers   = {
 
 }
 
-Module.DefaultCategories = Set.new({})
+Module.SettingCategories = Set.new({})
 for k, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
-		Module.DefaultCategories:add(v.Category)
+		Module.SettingCategories:add(v.Category)
 	end
 
 	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
@@ -118,9 +118,15 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-	mq.pickle(getConfigFileName(), self.settings)
+	self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
+
+function Module:WriteSettings()
+	if not self.SaveRequested then return end
+	mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+
 	if self.SettingsLoaded then
-		if self.settings.DoLoot == true then
+		if Config:GetSetting('DoLoot') == true then
 			if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
 				Core.DoCmd("/lua run lootnscoot directed rgmercs")
 				warningMessageSent = false
@@ -129,55 +135,43 @@ function Module:SaveSettings(doBroadcast)
 			if not self.Actor then Module:LootMessageHandler() end
 
 			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'combatlooting', CombatLooting = self.settings.CombatLooting, })
+				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'combatlooting', CombatLooting = Config:GetSetting('CombatLooting'), })
 		else
 			Core.DoCmd("/lua stop lootnscoot")
 		end
 	end
-	if doBroadcast == true then
+
+	if self.SaveRequested.doBroadcast == true then
 		Comms.BroadcastUpdate(self._name, "LoadSettings")
 	end
+
+	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+	self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
 	Logger.log_debug("\ay[LOOT]: \atLootnScoot EMU, Loot Module Loading Settings for: %s.",
 		Config.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
+	local settings = {}
+	local firstSaveRequired = false
+
 
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
 		Logger.log_error("\ay[LOOT]: \aoUnable to load global settings file(%s), creating a new one!",
 			settings_pickle_path)
-		self.settings.MyCheckbox = false
-		self:SaveSettings(false)
+		firstSaveRequired = true
 	else
-		self.settings = config()
+		settings = config()
 	end
 
-	local needsSave = false
-	self.settings, needsSave = Config.ResolveDefaults(Module.DefaultConfig, self.settings)
-
-	Logger.log_debug("Settings Changes = %s", Strings.BoolToColorString(needsSave))
-	if needsSave then
-		self:SaveSettings(false)
-	end
-	self.SettingsLoaded = true
-end
-
-function Module:GetSettings()
-	return self.settings
-end
-
-function Module:GetDefaultSettings()
-	return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-	return self.DefaultCategories
+	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 end
 
 function Module.New()
-	local newModule = setmetatable({ settings = {}, }, Module)
+	local newModule = setmetatable({}, Module)
 	return newModule
 end
 
@@ -188,7 +182,7 @@ function Module:Init()
 		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s",
 			mq.TLO.MacroQuest.BuildName())
 	else
-		if self.settings.DoLoot then
+		if Config:GetSetting('DoLoot') then
 			if mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' then
 				Core.DoCmd("/lua stop lootnscoot")
 				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
@@ -202,7 +196,7 @@ function Module:Init()
 		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	end
 
-	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+	return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:ShouldRender()
@@ -210,29 +204,15 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	if not self.settings[self._name .. "_Popped"] then
-		if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-			self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-			self:SaveSettings(false)
-		end
-		Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-		ImGui.NewLine()
-		ImGui.Text(
-			"PLEASE NOTE: The LootNScoot script is no longer bundled with RGMercs.\nThis module has been adjusted to work with the standalone version!\nPlease see the RG forums for details. ")
-	end
-	local pressed = false
+	Ui.RenderPopSetting(self._name)
+
 	if ImGui.CollapsingHeader("Config Options") then
-		self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
-			self.DefaultCategories)
-		if pressed then
-			self:SaveSettings(false)
-		end
+		_, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
 	end
 end
 
 function Module:Pop()
-	self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-	self:SaveSettings(false)
+	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module.DoLooting(combat_state)

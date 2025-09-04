@@ -33,11 +33,7 @@ Binds.Handlers    = {
         handler = function(module)
             local configTable = {}
 
-            if not module or module:len() == 0 then
-                configTable = Config:GetSettings()
-            else
-                configTable = Modules:ExecModule(module, "GetSettings")
-            end
+            configTable = Config:GetModuleSettings((not module or module:len() <= 0) and "Core" or module)
 
             local encodedConfig = ConfigShare.ExportConfig(configTable)
             Logger.log_info("[RGConfigShare] :: %s", encodedConfig)
@@ -48,6 +44,21 @@ Binds.Handlers    = {
         about = "Show all settings or set a specific RGMercs setting.",
         handler = function(config, value)
             Config:HandleBind(config, value)
+        end,
+    },
+    ['tempset'] = {
+        usage = "/rgl tempset <setting> <value>",
+        about = "Temporarily sets a specific RGMercs setting until you reload or restart.",
+        handler = function(config, value)
+            Config:HandleTempSet(config, value)
+        end,
+    },
+    ['cleartempset'] = {
+        usage = "/rgl tempset <setting>",
+        about = "Clears a specific Temporarily set RGMercs setting back to the saved value.",
+
+        handler = function(config)
+            Config:ClearTempSetting(config)
         end,
     },
     ['forcecombat'] = {

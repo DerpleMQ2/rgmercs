@@ -4,6 +4,7 @@ local Core                       = require("utils.core")
 local Ui                         = require("utils.ui")
 local Comms                      = require("utils.comms")
 local Logger                     = require("utils.logger")
+local Strings                    = require("utils.strings")
 local Set                        = require("mq.Set")
 local Icons                      = require('mq.ICONS')
 local Zep                        = require('Zep')
@@ -11,9 +12,9 @@ local CHANNEL_COLOR              = IM_COL32(215, 154, 66)
 
 local Module                     = { _version = '0.1a', _name = "Debug", _author = 'Derple', }
 Module.__index                   = Module
-Module.settings                  = {}
 Module.FAQ                       = {}
 Module.ClassFAQ                  = {}
+Module.SaveRequested             = nil
 
 Module.DefaultConfig             = {
     ['script'] = {
@@ -39,7 +40,7 @@ Module.DefaultConfig             = {
         "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
-Module.DefaultCategories         = {}
+Module.SettingCategories         = {}
 
 Module.luaConsole                = Zep.Console.new("##RGDebugConsole")
 Module.luaConsole.maxBufferLines = 1000
@@ -61,61 +62,54 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    self.settings.script = self.luaBuffer:GetText()
-    mq.pickle(getConfigFileName(), self.settings)
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
 
-    if doBroadcast == true then
+function Module:WriteSettings()
+    if not self.SaveRequested then return end
+
+    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+
+    if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
+
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
     Logger.log_debug("Debug Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
+    local settings = {}
+    local firstSaveRequired = false
+
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
         Logger.log_error("\ay[Debug]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
-        self:SaveSettings(false)
+        firstSaveRequired = true
     else
-        self.settings = config()
+        settings = config()
     end
 
-    Module.DefaultCategories = Set.new({})
+    Module.SettingCategories = Set.new({})
     for k, v in pairs(Module.DefaultConfig or {}) do
         if v.Type ~= "Custom" then
-            Module.DefaultCategories:add(v.Category)
+            Module.SettingCategories:add(v.Category)
         end
         Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
     end
 
-    local settingsChanged = false
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
-
-    self.luaBuffer:SetText(self.settings.script or "")
-
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
-end
-
-function Module:GetSettings()
-    return self.settings
-end
-
-function Module:GetDefaultSettings()
-    return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-    return self.DefaultCategories
+    self.luaBuffer:SetText(Config:GetSetting('script') or "")
 end
 
 function Module.New()
-    local newModule = setmetatable({ settings = {}, }, Module)
+    local newModule = setmetatable({}, Module)
     return newModule
 end
 
@@ -125,11 +119,11 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:LogTimestamp()
-    if self.settings.ShowTimestamps then
+    if Config:GetSetting('ShowTimestamps') then
         local now = os.date('%H:%M:%S')
         self.luaConsole:AppendTextUnformatted(string.format('\aw[\at%s\aw] ', now))
     end
@@ -298,7 +292,10 @@ function Module:RenderToolbar()
         RenderTooltip("Clear Console")
 
         ImGui.TableNextColumn()
-        self.settings.ShowTimestamps = ImGui.Checkbox("Print Time Stamps", self.settings.ShowTimestamps)
+        local showTimestamps, pressed = ImGui.Checkbox("Print Time Stamps", Config:GetSetting('ShowTimestamps'))
+        if pressed then
+            Config:SetSetting('ShowTimestamps', showTimestamps)
+        end
         ImGui.TableNextColumn()
         ImGui.Text("Status: " .. self.status)
         ImGui.EndTable()
@@ -310,14 +307,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if not self.settings[self._name .. "_Popped"] then
-        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-            self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-            self:SaveSettings(false)
-        end
-        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-        ImGui.NewLine()
-    end
+    Ui.RenderPopSetting(self._name)
 
     if self.ModuleLoaded then
         self:RenderEditor()
@@ -327,8 +317,7 @@ function Module:Render()
 end
 
 function Module:Pop()
-    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-    self:SaveSettings(false)
+    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:GiveTime(combat_state)
@@ -347,7 +336,7 @@ function Module:GiveTime(combat_state)
     end
 
     if self.luaBuffer:HasFlag(Zep.BufferFlags.Dirty) then
-        self:SaveSettings()
+        Config:SetSetting('script', self.luaBuffer:GetText())
         self.luaBuffer:ClearFlags(Zep.BufferFlags.Dirty)
     end
 end

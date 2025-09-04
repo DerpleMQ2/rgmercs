@@ -515,10 +515,8 @@ end
 ---
 --- @return boolean True if the target meets the criteria, false otherwise.
 function Combat.FindBestAutoTargetCheck()
-    local config = Config:GetSettings()
-
     Logger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Targeting.GetXTHaterCount(),
-        Strings.BoolToColorString(Core.IAmMA()), Strings.BoolToColorString(config.FollowMarkTarget),
+        Strings.BoolToColorString(Core.IAmMA()), Strings.BoolToColorString(Config:GetSetting('FollowMarkTarget')),
         Strings.BoolToColorString(Config.Globals.BackOffFlag))
 
     local assistTarg = false
@@ -540,7 +538,7 @@ function Combat.FindBestAutoTargetCheck()
         end
     end
 
-    return (Targeting.GetXTHaterCount() > 0 or Core.IAmMA() or config.FollowMarkTarget or assistTarg) and
+    return (Targeting.GetXTHaterCount() > 0 or Core.IAmMA() or Config:GetSetting('FollowMarkTarget') or assistTarg) and
         not Config.Globals.BackOffFlag
 end
 

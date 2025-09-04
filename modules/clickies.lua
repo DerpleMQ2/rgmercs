@@ -12,9 +12,9 @@ local Icons                             = require('mq.ICONS')
 
 local Module                            = { _version = '0.1a', _name = "Clickies", _author = 'Derple', }
 Module.__index                          = Module
-Module.settings                         = {}
 Module.FAQ                              = {}
 Module.ClassFAQ                         = {}
+Module.SaveRequested                    = nil
 
 Module.TempSettings                     = {}
 Module.TempSettings.ClickyState         = {}
@@ -92,7 +92,7 @@ Module.DefaultConfig                    = {
         "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
-Module.DefaultCategories                = {}
+Module.SettingCategories                = {}
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -102,42 +102,54 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    mq.pickle(getConfigFileName(), self.settings)
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
 
-    if doBroadcast == true then
+function Module:WriteSettings()
+    if not self.SaveRequested then return end
+
+    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+
+    if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
+
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
     Logger.log_debug("Clickies Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
+    local settings = {}
+    local firstSaveRequired = false
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
         Logger.log_error("\ay[Drag]: Unable to load clickie settings file(%s), creating a new one!",
             settings_pickle_path)
-        self:SaveSettings(false)
+        firstSaveRequired = true
     else
-        self.settings = config()
+        settings = config()
     end
 
-    Module.DefaultCategories = Set.new({})
-    for k, v in pairs(Module.DefaultConfig or {}) do
+    self.SettingCategories = Set.new({})
+    for k, v in pairs(self.DefaultConfig or {}) do
         if v.Type ~= "Custom" then
-            Module.DefaultCategories:add(v.Category)
+            self.SettingCategories:add(v.Category)
         end
-        Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
+        self.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
     end
 
     local settingsChanged = false
 
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 
-    Logger.log_info("\awClickie Module: \atLoaded \ag%d\at Downtime Clickies and \ag%d\at Combat Clickies", #self.settings.DowntimeClickies, #self.settings.CombatClickies)
+    -- re-grab them incase they changed after the setup.
+    settings = Config:GetModuleSettings(self._name)
 
-    if #self.settings.CombatClickies == 0 then
+    if #settings.CombatClickies == 0 then
         local legacyClickes = {
             'CombatClicky1',
             'CombatClicky2',
@@ -150,7 +162,7 @@ function Module:LoadSettings()
         for _, clicky in ipairs(legacyClickes) do
             local cur = Config:GetSetting(clicky)
             if cur:len() > 0 then
-                table.insert(self.settings.CombatClickies, cur)
+                table.insert(settings.CombatClickies, cur)
                 Config:SetSetting(clicky, '')
                 Logger.log_info("\awClickie Module: \atFound Legacy Combat Clicky \am\'\ag%s\am\'\aw, moving to new format.", cur)
                 settingsChanged = true
@@ -158,7 +170,7 @@ function Module:LoadSettings()
         end
     end
 
-    if #self.settings.DowntimeClickies == 0 then
+    if #settings.DowntimeClickies == 0 then
         local legacyClickes = {
             'ClickyItem1',
             'ClickyItem2',
@@ -177,7 +189,7 @@ function Module:LoadSettings()
         for _, clicky in ipairs(legacyClickes) do
             local cur = Config:GetSetting(clicky)
             if cur:len() > 0 then
-                table.insert(self.settings.DowntimeClickies, cur)
+                table.insert(settings.DowntimeClickies, cur)
                 Config:SetSetting(clicky, '')
                 Logger.log_info("\awClickie Module: \atFound Legacy Downtime Clicky \am\'\ag%s\am\'\aw, moving to new format.", cur)
 
@@ -189,22 +201,12 @@ function Module:LoadSettings()
     if settingsChanged then
         self:SaveSettings(false)
     end
-end
 
-function Module:GetSettings()
-    return self.settings
-end
-
-function Module:GetDefaultSettings()
-    return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-    return self.DefaultCategories
+    Logger.log_info("\awClickie Module: \atLoaded \ag%d\at Downtime Clickies and \ag%d\at Combat Clickies", #settings.DowntimeClickies or 0, #settings.CombatClickies or 0)
 end
 
 function Module.New()
-    local newModule = setmetatable({ settings = {}, }, Module)
+    local newModule = setmetatable({}, Module)
     return newModule
 end
 
@@ -214,7 +216,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:ShouldRender()
@@ -235,16 +237,18 @@ function Module:RenderClickies(type, clickies)
                 ImGui.TableHeadersRow()
 
                 for _, clicky in pairs(clickies) do
-                    local lastUsed = self.TempSettings.ClickyState[clicky] and (self.TempSettings.ClickyState[clicky].lastUsed or 0) or 0
-                    local item = self.TempSettings.ClickyState[clicky] and
-                        (self.TempSettings.ClickyState[clicky].item and self.TempSettings.ClickyState[clicky].item.Clicky.Spell.RankName.Name() or "None")
-                        or "None"
-                    ImGui.TableNextColumn()
-                    ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.clock() - lastUsed)) or "Never")
-                    ImGui.TableNextColumn()
-                    ImGui.Text(clicky)
-                    ImGui.TableNextColumn()
-                    ImGui.Text(item)
+                    if clicky:len() > 0 then
+                        local lastUsed = self.TempSettings.ClickyState[clicky] and (self.TempSettings.ClickyState[clicky].lastUsed or 0) or 0
+                        local item = self.TempSettings.ClickyState[clicky] and
+                            (self.TempSettings.ClickyState[clicky].item and self.TempSettings.ClickyState[clicky].item.Clicky.Spell.RankName.Name() or "None")
+                            or "None"
+                        ImGui.TableNextColumn()
+                        ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.clock() - lastUsed)) or "Never")
+                        ImGui.TableNextColumn()
+                        ImGui.Text(clicky)
+                        ImGui.TableNextColumn()
+                        ImGui.Text(item)
+                    end
                 end
 
                 ImGui.EndTable()
@@ -256,39 +260,27 @@ function Module:RenderClickies(type, clickies)
 end
 
 function Module:Render()
-    if not self.settings[self._name .. "_Popped"] then
-        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-            self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-            self:SaveSettings(false)
-        end
-        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-        ImGui.NewLine()
-    end
+    Ui.RenderPopSetting(self._name)
 
-    self:RenderClickies("Downtime Clickies", self.settings.DowntimeClickies)
+    self:RenderClickies("Downtime Clickies", Config:GetSetting('DowntimeClickies'))
 
-    self:RenderClickies("Combat Clickies", self.settings.CombatClickies)
-
-    local pressed
+    self:RenderClickies("Combat Clickies", Config:GetSetting('CombatClickies'))
 
     if ImGui.CollapsingHeader("Config Options") then
-        self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
-            self.DefaultCategories)
-        if pressed then
-            self:SaveSettings(false)
-        end
+        _, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
     end
 end
 
 function Module:Pop()
-    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-    self:SaveSettings(false)
+    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:ValidateClickies(type)
-    local numClickes = #self.settings[type]
-    if numClickes == 0 or self.settings[type][numClickes] ~= "" then
-        table.insert(self.settings[type], '')
+    local clickieTable = Config:GetSetting(type)
+    local numClickes = #clickieTable or 0
+    if numClickes == 0 or clickieTable[numClickes] ~= "" then
+        table.insert(clickieTable, '')
+        -- tables are returned by reference, so this updates the setting directly.
         self:SaveSettings(false)
     end
 end
@@ -302,7 +294,7 @@ function Module:GiveTime(combat_state)
     if combat_state == 'Downtime' and Config:GetSetting('UseClickies') and not (mq.TLO.Me.Sitting() or Casting.IAmFeigning() or mq.TLO.Me.Invis()) then
         -- don't use clickies when we are trying to med, feigning, or invisible.
 
-        for _, clicky in ipairs(self.settings.DowntimeClickies) do
+        for _, clicky in ipairs(Config:GetSetting('DowntimeClickies')) do
             if clicky:len() > 0 then
                 self.TempSettings.ClickyState[clicky] = self.TempSettings.ClickyState[clicky] or {}
 
@@ -353,7 +345,7 @@ function Module:GiveTime(combat_state)
                     Config:GetSetting('EmergencyStart') or 45)) then
             -- don't use clickies when we are trying to med, feigning, or invisible.
 
-            for _, clicky in ipairs(self.settings.CombatClickies) do
+            for _, clicky in ipairs(Config:GetSetting('CombatClickies')) do
                 if clicky:len() > 0 then
                     self.TempSettings.ClickyState[clicky] = self.TempSettings.ClickyState[clicky] or {}
 
@@ -396,16 +388,17 @@ end
 
 function Module:DoGetState()
     -- Reture a reasonable state if queried
-    local result = string.format("\awLoaded \ag%d\at Downtime Clickies and \ag%d\at Combat Clickies\n\n", #self.settings.DowntimeClickies, #self.settings.CombatClickies)
+    local result = string.format("\awLoaded \ag%d\at Downtime Clickies and \ag%d\at Combat Clickies\n\n", #Config:GetSetting('DowntimeClickies'),
+        #Config:GetSetting('CombatClickies'))
     result = result .. "-=-=-=-=-=\n"
 
-    for i, v in ipairs(self.settings.DowntimeClickies) do
+    for i, v in ipairs(Config:GetSetting('DowntimeClickies')) do
         result = result .. string.format("\atDowntime Clicky %d: \ay%s\at\n", i, v)
     end
 
     result = result .. "\n"
 
-    for i, v in ipairs(self.settings.CombatClickies) do
+    for i, v in ipairs(Config:GetSetting('CombatClickies')) do
         result = result .. string.format("\atCombat Clicky %d: \ay%s\at\n", i, v)
     end
 

@@ -1,47 +1,38 @@
 local Config             = require('utils.config')
 local Set                = require("mq.Set")
+local Logger             = require("utils.logger")
 
 local Module             = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
 Module.__index           = Module
-Module.settings          = {}
 Module.DefaultConfig     = {}
-Module.DefaultCategories = Set.new({})
+Module.SettingCategories = Set.new({})
 Module.Credits           = require("extras.credits")
 Module.ColorWheel        = {}
 Module.ColorWheelTimer   = {}
 Module.FAQ               = {}
 Module.ClassFAQ          = {}
+Module.SaveRequested     = nil
 
 function Module:SaveSettings(doBroadcast)
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
+
+function Module:WriteSettings()
+    if not self.SaveRequested then return end
+
+    Logger.log_error("\ar%s Module requested to save settings bug this module has no settings!", self._name)
+
+    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
-    self.settings = {}
+    local settings = {}
 
-    local settingsChanged = false
-
-    -- Setup Defaults
-    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
-
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
-end
-
-function Module:GetSettings()
-    return self.settings
-end
-
-function Module:GetDefaultSettings()
-    return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-    return self.DefaultCategories
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, false)
 end
 
 function Module.New()
-    local newModule = setmetatable({ settings = {}, }, Module)
+    local newModule = setmetatable({}, Module)
     return newModule
 end
 

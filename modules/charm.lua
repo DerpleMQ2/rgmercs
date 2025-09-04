@@ -18,9 +18,9 @@ require('utils.datatypes')
 
 local Module                     = { _version = '0.1a', _name = "Charm", _author = 'Grimmier', }
 Module.__index                   = Module
-
 Module.ModuleLoaded              = false
 Module.CombatState               = "None"
+Module.SaveRequested             = nil
 
 Module.TempSettings              = {}
 Module.TempSettings.CharmImmune  = {}
@@ -180,10 +180,10 @@ Module.FAQ                       = {
 	},
 }
 
-Module.DefaultCategories         = Set.new({})
+Module.SettingCategories         = Set.new({})
 for k, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
-		Module.DefaultCategories:add(v.Category)
+		Module.SettingCategories:add(v.Category)
 	end
 	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 end
@@ -212,39 +212,42 @@ local function getImmuneFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-	mq.pickle(getConfigFileName(), self.settings)
+	self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+end
 
-	if doBroadcast == true then
+function Module:WriteSettings()
+	if not self.SaveRequested then return end
+
+	mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+
+	if self.SaveRequested.doBroadcast == true then
 		Comms.BroadcastUpdate(self._name, "LoadSettings")
 	end
+
+	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+
+	self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
 	Logger.log_debug("\ar%s\ao Charm Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
 		Config.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
+	local settings = {}
+	local firstSaveRequired = false
 
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
 		Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
 			Config.Globals.CurLoadedClass, settings_pickle_path)
-		self.settings = {}
-		self:SaveSettings(false)
+		firstSaveRequired = true
 	else
-		self.settings = config()
+		settings = config()
 	end
 
-	if not self.settings or not self.DefaultCategories or not self.DefaultConfig then
+	if not settings or not self.SettingCategories or not self.DefaultConfig then
 		Logger.log_error("\arFailed to Load Charm Config for Classs: %s", Config.Globals.CurLoadedClass)
 		return
-	end
-
-	local settingsChanged = false
-	-- Setup Defaults
-	self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
-
-	if settingsChanged then
-		self:SaveSettings(false)
 	end
 
 	local immune_pickle_path = getImmuneFileName()
@@ -257,22 +260,12 @@ function Module:LoadSettings()
 	else
 		self.ImmuneTable = immuneConfig()
 	end
-end
 
-function Module:GetSettings()
-	return self.settings
-end
-
-function Module:GetDefaultSettings()
-	return self.DefaultConfig
-end
-
-function Module:GetSettingCategories()
-	return self.DefaultCategories
+	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 end
 
 function Module.New()
-	local newModule = setmetatable({ settings = {}, }, Module)
+	local newModule = setmetatable({}, Module)
 	return newModule
 end
 
@@ -287,7 +280,7 @@ function Module:Init()
 
 	self.ModuleLoaded = true
 
-	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+	return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
 end
 
 function Module:ShouldRender()
@@ -295,17 +288,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	if not self.settings[self._name .. "_Popped"] then
-		if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-			self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-			self:SaveSettings(false)
-		end
-		Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-		ImGui.NewLine()
-	end
-
-	---@type boolean|nil
-	local pressed = false
+	Ui.RenderPopSetting(self._name)
 
 	if self.ModuleLoaded then
 		-- CCEd targets
@@ -389,18 +372,13 @@ function Module:Render()
 		ImGui.Separator()
 
 		if ImGui.CollapsingHeader("Config Options") then
-			self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
-				self.DefaultCategories)
-			if pressed then
-				self:SaveSettings(false)
-			end
+			_, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
 		end
 	end
 end
 
 function Module:Pop()
-	self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-	self:SaveSettings(false)
+	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:HandleCharmBroke(mobName, breakerName)
@@ -439,8 +417,7 @@ end
 function Module:CharmLvlToHigh(mobLvl)
 	if Core.MyClassIs("BRD") then return false end
 	if Config:GetSetting("DireCharm", true) and Config:GetSetting("AutoLevelRangeCharm") then
-		self.settings.DireCharmMaxLvl = mobLvl - 1
-		self:SaveSettings(false)
+		Config:SetSetting('DireCharmMaxLvl', mobLvl - 1)
 		Logger.log_debug("\awNOTICE:\ax \aoTarget LVL to High,\ayLowering Max Level for Dire Charm!")
 		return true
 	end
@@ -595,13 +572,13 @@ function Module:IsValidCharmTarget(mobId)
 		return false
 	end
 
-	if (spawn.PctHPs() or 0) < self.settings.CharmStopHPs then
+	if (spawn.PctHPs() or 0) < Config:GetSetting('CharmStopHPs') then
 		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID(),
 			spawn.CleanName(), spawn.Level())
 		return false
 	end
 
-	if (spawn.Distance() or 999) > self.settings.CharmRadius then
+	if (spawn.Distance() or 999) > Config:GetSetting('CharmRadius') then
 		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - Out of Charm Radius",
 			spawn.ID(), spawn.CleanName(), spawn.Level())
 		return false
@@ -621,12 +598,12 @@ function Module:UpdateCharmList()
 	end
 
 	for _, t in ipairs(searchTypes) do
-		local minLevel = self.settings.CharmMinLevel
-		local maxLevel = self.settings.CharmMaxLevel
-		if self.settings.AutoLevelRangeCharm and charmSpell and charmSpell() then
+		local minLevel = Config:GetSetting('CharmMinLevel')
+		local maxLevel = Config:GetSetting('CharmMaxLevel')
+		if Config:GetSetting('AutoLevelRangeCharm') and charmSpell and charmSpell() then
 			minLevel = 0
 			maxLevel = charmSpell.MaxLevel()
-			self.settings.CharmMaxLevel = maxLevel
+			Config:SetSetting('CharmMaxLevel', maxLevel)
 		end
 		-- streamline search by body type for druids/necros this saves work when checking invalid.
 		local npcType = ''
@@ -636,7 +613,7 @@ function Module:UpdateCharmList()
 			npcType = ' body Undead'
 		end
 		local searchString = string.format("%s radius %d zradius %d range %d %d targetable playerstate 4%s", t,
-			self.settings.CharmRadius * 2, self.settings.CharmZRadius * 2, minLevel, maxLevel, npcType)
+			Config:GetSetting('CharmRadius') * 2, Config:GetSetting('CharmZRadius') * 2, minLevel, maxLevel, npcType)
 
 		local mobCount = mq.TLO.SpawnCount(searchString)()
 		Logger.log_debug("\ayUpdateCharmList: Search String: '\at%s\ay' -- Count :: \am%d", searchString, mobCount)
@@ -671,7 +648,7 @@ function Module:ProcessCharmList()
 
 	if not charmSpell or not charmSpell() then return end
 
-	if not self.settings.CharmOn then
+	if not Config:GetSetting('CharmOn') then
 		Logger.log_debug("\ayProcessCharmList(%d) :: Charming is off...")
 		return
 	end
@@ -691,7 +668,7 @@ function Module:ProcessCharmList()
 				Logger.log_debug("\ayProcessCharmList(%d) :: Mob id is in immune list - removing...", id)
 				table.insert(removeList, id)
 			else
-				if spawn.Distance() > self.settings.CharmRadius or not spawn.LineOfSight() then
+				if spawn.Distance() > Config:GetSetting('CharmRadius') or not spawn.LineOfSight() then
 					Logger.log_debug("\ayProcessCharmList(%d) :: Distance(%d) LOS(%s)", id,
 						spawn.Distance(), Strings.BoolToColorString(spawn.LineOfSight()))
 				else
@@ -736,7 +713,7 @@ function Module:DoCharm()
 	local charmSpell = self:GetCharmSpell()
 	self:UpdateTimings()
 
-	if Targeting.GetXTHaterCount() >= self.settings.CharmStartCount then
+	if Targeting.GetXTHaterCount() >= Config:GetSetting('CharmStartCount') then
 		self:UpdateCharmList()
 	end
 	if not Core.MyClassIs("BRD") then
@@ -785,8 +762,6 @@ function Module:GiveTime(combat_state)
 	end
 
 	self.CombatState = combat_state
-
-
 
 	self:DoCharm()
 end
