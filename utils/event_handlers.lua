@@ -215,6 +215,11 @@ end)
 
 -- [ END SCRIBE SPELL HANDLERS ] --
 
+mq.event('New Discipline', "You have learned a new discipline!", function()
+    Modules:ExecModule("Class", "RescanLoadout")
+    mq.flushevents("New Discipline")
+end)
+
 -- [ CAST RESULT HANDLERS ] --
 mq.event('Success1', "You begin casting#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)
