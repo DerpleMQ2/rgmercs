@@ -26,12 +26,13 @@ function Combat.SetMainAssist()
                 Logger.log_verbose("SetMainAssist: Checking Assist List: %s", name)
                 local listAssistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
                 if listAssistSpawn() and not listAssistSpawn.Dead() then
+                    local assistName = listAssistSpawn.CleanName()
                     if listAssistSpawn.ID() ~= Core.GetMainAssistId() then
-                        Logger.log_info("SetMainAssist: Setting new assist to %s [%d]", listAssistSpawn.CleanName(), listAssistSpawn.ID())
-                        Config.Globals.MainAssist = listAssistSpawn.CleanName()
+                        Logger.log_info("SetMainAssist: Setting new assist to %s [%d]", assistName, listAssistSpawn.ID())
+                        Config.Globals.MainAssist = assistName
                     end
-                    if listAssistSpawn.CleanName() ~= mq.TLO.Me.CleanName() then
-                        Targeting.AddXTByName(2, listAssistSpawn.DisplayName())
+                    if assistName ~= mq.TLO.Me.CleanName() then
+                        Targeting.AddXTByName(2, assistName)
                     end
                     return
                 end
@@ -481,12 +482,6 @@ function Combat.FindBestAutoTarget(validateFn)
                 Logger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
                     assistTarget.ID())
                 Config.Globals.AutoTargetID = assistTarget.ID()
-
-                -- looks like we already do this below... testing.
-                -- -- if not already an XTHater then add it.
-                -- if not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
-                --     Targeting.AddXTByName(1, assistTarget.Name())
-                -- end
             end
         else
             Combat.SetAutoTargetToGroupOrRaidTarget()
