@@ -2079,6 +2079,16 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, settin
     Logger.log_info("\agModule %s - registered settings!", module)
 end
 
+function Config:ClearAllModuleSettings()
+    self.moduleSettings = {}
+    self.moduleTempSettings = {}
+    self.moduleDefaultSettings = {}
+    self.moduleSettingCategories = {}
+    self.TempSettings.SettingToModuleCache = {}
+    self.TempSettings.SettingsLowerToNameAndModuleCache = {}
+    self.SettingsLoadComplete = false
+end
+
 function Config:ReplaceModuleSettings(module, settings)
     self.moduleSettings[module] = settings
     self.moduleTempSettings[module] = settings

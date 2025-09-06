@@ -127,6 +127,7 @@ function Ui.RenderConfigSelector()
         if changed then
             Config:SetSetting('ClassConfigDir', Config.Globals.ClassConfigDirs[newConfigDir])
             Config:SaveSettings()
+            Config:ClearAllModuleSettings()
             Config:LoadSettings()
             Modules:ExecAll("LoadSettings")
         end
