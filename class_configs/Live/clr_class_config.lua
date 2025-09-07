@@ -47,7 +47,7 @@ local _ClassConfig = {
 
         CureNow = function(self, type, targetId)
             local targetSpawn = mq.TLO.Spawn(targetId)
-            if not targetSpawn and targetSpawn() then return false end
+            if not targetSpawn and targetSpawn() then return false, false end
 
             if Config:GetSetting('DoCureAA') then
                 local cureAA = Casting.AAReady("Purify Soul") and "Purify Soul"
@@ -61,7 +61,7 @@ local _ClassConfig = {
                 end
                 if cureAA then
                     Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", mq.TLO.Spawn(targetId).CleanName() or "Unknown")
-                    return Casting.UseAA(cureAA, targetId)
+                    return true, Casting.UseAA(cureAA, targetId)
                 end
             end
 
@@ -71,16 +71,16 @@ local _ClassConfig = {
                         if cureSpell.TargetType():lower() == "group v1" and not Targeting.GroupedWithTarget(targetSpawn) then
                             Logger.log_debug("CureNow: We cannot use %s on %s, because it is a group-only spell and they are not in our group!", cureSpell.RankName(),
                                 targetSpawn.CleanName() or "Unknown")
-                            return false
+                        else
+                            Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
+                            return true, Casting.UseSpell(cureSpell.RankName(), targetId, true)
                         end
-                        Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
-                        return Casting.UseSpell(cureSpell.RankName(), targetId, true)
                     end
                 end
             end
 
             Logger.log_debug("CureNow: No valid cure at this time for %s on %s.", type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
-            return false
+            return false, false
         end,
     },
     ['ItemSets']          = {
