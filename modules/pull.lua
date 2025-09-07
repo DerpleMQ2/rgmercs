@@ -54,7 +54,7 @@ local PullStates                          = {
     ['PULL_RETURN_TO_CAMP']     = 8,
     ['PULL_WAITING_ON_MOB']     = 9,
     ['PULL_WAITING_SHOULDPULL'] = 10,
-    ['PULL_RESCAN_TARGET']      = 11,
+    ['PULL_MOVING_CHECKS']      = 11,
 }
 
 local PullStateDisplayStrings             = {
@@ -69,6 +69,7 @@ local PullStateDisplayStrings             = {
     ['PULL_RETURN_TO_CAMP']     = { Display = Icons.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_WAITING_ON_MOB']     = { Display = Icons.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_WAITING_SHOULDPULL'] = { Display = Icons.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
+    ['PULL_MOVING_CHECKS']      = { Display = Icons.FA_EYE, Text = "Rechecking Actions", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
 }
 
 local PullStatesIDToName                  = {}
@@ -1866,11 +1867,9 @@ function Module:NavToWaypoint(loc, ignoreAggro)
     Core.DoCmd("/nav locyxz %s, log=off", loc)
     mq.delay(1000, function() return mq.TLO.Navigation.Active() end)
 
+    local maxMove = self.settings.MaxMoveTime * 1000
     while mq.TLO.Navigation.Active() do
         Logger.log_verbose("NavToWaypoint Aggro Count: %d", Targeting.GetXTHaterCount())
-
-
-
 
         if Targeting.GetXTHaterCount() > 0 and not ignoreAggro then
             if mq.TLO.Navigation.Active() then
@@ -1887,6 +1886,16 @@ function Module:NavToWaypoint(loc, ignoreAggro)
         end
 
         mq.delay(100)
+        mq.doevents()
+        maxMove = maxMove - 100
+
+        if maxMove <= 0 then
+            Logger.log_debug("\arNOTICE:\ax Pull Time Exceeded! Rescan for targets.")
+            self:SetPullState(PullStates.PULL_MOVING_CHECKS, "")
+            -- simply return, if nav needs to be stopped, whatever needs to do it will stop it.
+            -- in this way, nav will continue towards the original target while we rescan
+            return false
+        end
     end
 
     return true
@@ -1979,12 +1988,7 @@ function Module:GiveTime(combat_state)
     Logger.log_verbose("PULL:GiveTime() - ShouldPull: %s", Strings.BoolToColorString(shouldPull))
 
     if not shouldPull then
-        --if we were navigating during a rescan, cancel it.
-        if self.TempSettings.PullState == PullStates.PULL_RESCAN_TARGET and mq.TLO.Navigation.Active() then
-            Logger.log_debug("\arNOTICE:\ax Rescan Aborted for ShouldPull!")
-            Core.DoCmd("/nav stop log=off")
-            mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
-        end
+        Module:StopNavAfterFailedMovingCheck()
         if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
             -- go back to camp.
             self:SetPullState(PullStates.PULL_WAITING_SHOULDPULL, reason)
@@ -1999,6 +2003,16 @@ function Module:GiveTime(combat_state)
         return
     end
 
+    if Config:GetSetting('GroupWatch') then
+        local groupReady, groupReason = self:CheckGroupForPull(Config:GetSetting('GroupWatchStartPct'), Config:GetSetting('GroupWatchStopPct'), campData)
+        if not groupReady then
+            Logger.log_verbose("PULL:GiveTime() - GroupWatch Failed")
+            Module:StopNavAfterFailedMovingCheck()
+            self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
+            return
+        end
+    end
+
     -- GROUPWATCH and NAVINTERRUPT are the two states we can't reset. In the future it may be best to
     -- limit this to only the states we know should be transitionable to the IDLE state.
     if self.TempSettings.PullState ~= PullStates.PULL_GROUPWATCH_WAIT and self.TempSettings.PullState ~= PullStates.PULL_NAV_INTERRUPT then
@@ -2006,17 +2020,6 @@ function Module:GiveTime(combat_state)
     end
 
     self:SetLastPullOrCombatEndedTimer()
-
-    if Config:GetSetting('GroupWatch') then
-        local groupReady, groupReason = self:CheckGroupForPull(Config:GetSetting('GroupWatchStartPct'), Config:GetSetting('GroupWatchStopPct'), campData)
-        if not groupReady then
-            Logger.log_verbose("PULL:GiveTime() - GroupWatch Failed")
-            self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
-            return
-        end
-    end
-
-    self:SetPullState(PullStates.PULL_IDLE, "")
 
     -- We're ready to pull, but first, check if we're in farm mode and if we were interrupted
     if self:IsPullMode("Farm") then
@@ -2178,32 +2181,32 @@ function Module:GiveTime(combat_state)
 
         if maxMove <= 0 then
             Logger.log_debug("\arNOTICE:\ax Pull Time Exceeded! Rescan for targets.")
-            self:SetPullState(PullStates.PULL_WAITING_SHOULDPULL, "")
+            self:SetPullState(PullStates.PULL_MOVING_CHECKS, "")
             -- simply return, if nav needs to be stopped, whatever needs to do it will stop it.
-            -- in this way, nav will continue towards the original target
+            -- in this way, nav will continue towards the original target while we rescan
             return
         end
     end
 
-    mq.delay("2s", function() return not mq.TLO.Me.Moving() end)
+    if not abortPull then
+        mq.delay("2s", function() return not mq.TLO.Me.Moving() end)
 
-    -- TODO: PrePullTarget()
+        -- TODO: PrePullTarget()
 
-    Targeting.SetTarget(self.TempSettings.PullID)
+        Targeting.SetTarget(self.TempSettings.PullID)
 
-    if mq.TLO.Target.Master.Type() == 'PC' then
-        Logger.log_debug("\atPULL::PullTarget \awPullTarget :: Spawn \am%s\aw (\at%d\aw) is Charmed Pet -- Skipping", mq.TLO.Target.CleanName(), mq.TLO.Target.ID())
-        abortPull = true
-    end
-
-    if Config:GetSetting('SafeTargeting') then
-        -- Hard coding 500 units as our radius as it's probably twice our effective spell range.
-        if Targeting.IsSpawnFightingStranger(mq.TLO.Spawn(self.TempSettings.PullID), 500) then
+        if mq.TLO.Target.Master.Type() == 'PC' then
+            Logger.log_debug("\atPULL::PullTarget \awPullTarget :: Spawn \am%s\aw (\at%d\aw) is Charmed Pet -- Skipping", mq.TLO.Target.CleanName(), mq.TLO.Target.ID())
             abortPull = true
         end
-    end
 
-    if not abortPull then
+        if Config:GetSetting('SafeTargeting') then
+            -- Hard coding 500 units as our radius as it's probably twice our effective spell range.
+            if Targeting.IsSpawnFightingStranger(mq.TLO.Spawn(self.TempSettings.PullID), 500) then
+                abortPull = true
+            end
+        end
+
         local target = mq.TLO.Target
         self:SetPullState(PullStates.PULL_PULLING, self:GetPullStateTargetInfo())
 
@@ -2508,6 +2511,15 @@ end
 function Module:SetLastPullOrCombatEndedTimer()
     self.TempSettings.LastPullOrCombatEnded = os.clock()
     Logger.log_verbose("Last Pull or Combat Ended: %s", os.clock())
+end
+
+function Module:StopNavAfterFailedMovingCheck()
+    --if we were navigating during a rescan, cancel it.
+    if self.TempSettings.PullState == PullStates.PULL_MOVING_CHECKS and mq.TLO.Navigation.Active() then
+        Logger.log_debug("\arNOTICE:\ax Moving Checks failed! Aborting nav.")
+        Core.DoCmd("/nav stop log=off")
+        mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
+    end
 end
 
 ---@param cmd string
