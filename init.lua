@@ -25,6 +25,7 @@ local Events      = require("utils.events")
 local Ui          = require("utils.ui")
 local Comms       = require("utils.comms")
 local Strings     = require("utils.strings")
+local Movement    = require("utils.movement")
 
 -- Initialize class-based moduldes
 local Modules     = require("utils.modules")
@@ -225,7 +226,7 @@ local function RGInit(...)
         Core.DoCmd("/squelch /dnet commandecho off")
     end
 
-    Core.DoCmd("/stick set breakontarget on")
+    Movement:DoStickCmd("set breakontarget on")
 
     initPctComplete = 70
     initMsg = "Closing down Macro..."

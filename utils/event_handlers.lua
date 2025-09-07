@@ -21,8 +21,8 @@ mq.event("CantSee", "You cannot see your target.", function()
     end
     local target = mq.TLO.Target
     if mq.TLO.Stick.Active() then
-        Core.DoCmd("/stick off")
-        Movement.ClearLastStickTimer()
+        Movement:DoStickCmd("off")
+        Movement:ClearLastStickTimer()
     end
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
@@ -43,12 +43,12 @@ mq.event("CantSee", "You cannot see your target.", function()
                     Core.DoCmd("/squelch /face fast")
                     if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then
                         Logger.log_debug("Can't See target (%s [%d]). Moving back 10.", target.CleanName() or "", target.ID() or 0)
-                        Core.DoCmd("/stick 10 moveback uw")
+                        Movement:DoStickCmd("10 moveback uw")
                         -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
                         mq.delay(100, function() return mq.TLO.Stick.Active() end)
                         mq.delay(500, function() return not mq.TLO.Me.Moving() end)
-                        Core.DoCmd("/stick off")
-                        Movement.ClearLastStickTimer()
+                        Movement:DoStickCmd("off")
+                        Movement:ClearLastStickTimer()
                     else
                         local desiredDistance = (target.MaxRangeTo() or 0) * 0.7
                         if not Config:GetSetting('DoMelee') then
@@ -56,7 +56,7 @@ mq.event("CantSee", "You cannot see your target.", function()
                         end
 
                         Logger.log_debug("Can't See target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID(), desiredDistance)
-                        Movement.NavInCombat(target.ID(), desiredDistance, false)
+                        Movement:NavInCombat(target.ID(), desiredDistance, false)
                     end
                 end
             end
@@ -126,8 +126,8 @@ local function tooFarHandler()
     if Config.Globals.BackOffFlag then return end
     if Config.Globals.PauseMain then return end
     if mq.TLO.Stick.Active() then
-        Core.DoCmd("/stick off")
-        Movement.ClearLastStickTimer()
+        Movement:DoStickCmd("off")
+        Movement:ClearLastStickTimer()
     end
     local target = mq.TLO.Target
 
@@ -151,16 +151,16 @@ local function tooFarHandler()
 
                     if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then --not sure if this is necessary or still happening since we changed distance to use 3D.
                         Logger.log_debug("Too Far from Target (%s [%d]). Possible flyer detected. Moving back 10.", target.CleanName() or "", target.ID() or 0)
-                        Core.DoCmd("/stick 10 moveback uw")
+                        Movement:DoStickCmd("10 moveback uw")
                         -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
                         mq.delay(100, function() return mq.TLO.Stick.Active() end)
                         mq.delay(500, function() return not mq.TLO.Me.Moving() end)
-                        Core.DoCmd("/stick off")
-                        Movement.ClearLastStickTimer()
+                        Movement:DoStickCmd("off")
+                        Movement:ClearLastStickTimer()
                     else
                         Logger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
                             (target.MaxRangeTo() or 0) * 0.7)
-                        Movement.NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.7, false)
+                        Movement:NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.7, false)
                     end
                 end
             end

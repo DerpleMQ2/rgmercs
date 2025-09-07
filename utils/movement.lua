@@ -1,49 +1,81 @@
-local mq             = require('mq')
-local Config         = require('utils.config')
-local Logger         = require("utils.logger")
-local Core           = require("utils.core")
+local mq                = require('mq')
+local Config            = require('utils.config')
+local Logger            = require("utils.logger")
+local Core              = require("utils.core")
+local Strings           = require("utils.strings")
 
-local Movement       = { _version = '1.0', _name = "Movement", _author = 'Derple', }
-Movement.__index     = Movement
-Movement.LastDoStick = 0
+local Movement          = { _version = '1.0', _name = "Movement", _author = 'Derple', }
+Movement.__index        = Movement
+Movement.LastDoStick    = 0
+Movement.LastDoStickCmd = ""
 
 --- Sticks the player to the specified target.
 --- @param targetId number The ID of the target to stick to.
-function Movement.DoStick(targetId)
-    if os.clock() - Movement.LastDoStick < 1 then
+function Movement:DoStick(targetId)
+    if os.clock() - self.LastDoStick < 1 then
         Logger.log_debug(
             "\ayIgnoring DoStick because we just stuck a second ago - let's give it some time.")
         return
     end
 
-    Movement.LastDoStick = os.clock()
-
     if Config:GetSetting('StickHow'):len() > 0 then
-        Core.DoCmd("/stick %s", Config:GetSetting('StickHow'))
+        self:DoStickCmd("%s", Config:GetSetting('StickHow'))
     else
         if Core.IAmMA() then
-            Core.DoCmd("/stick 10 id %d %s uw", targetId, Config:GetSetting('MovebackWhenTank') and "moveback" or "")
+            self:DoStickCmd("10 id %d %s uw", targetId, Config:GetSetting('MovebackWhenTank') and "moveback" or "")
         else
             local stickDist = (mq.TLO.Spawn(targetId).Height() or 5) > 15 and 20 or 10
-            Core.DoCmd("/stick %d id %d behindonce moveback uw", stickDist, targetId)
+            self:DoStickCmd("%d id %d behindonce moveback uw", stickDist, targetId)
         end
     end
 end
 
+function Movement:DoStickCmd(params, ...)
+    local formatted = params
+    if ... ~= nil then formatted = string.format(params, ...) end
+    Core.DoCmd("/stick %s", formatted)
+    self:SetLastStickTimer(os.clock())
+    self.LastDoStickCmd = formatted
+end
+
+-- Gets the last stick timer.
+--- @return string The last stick command.
+function Movement:GetLastStickCmd()
+    return self.LastDoStickCmd
+end
+
 -- Clears the last stick timer.
-function Movement.ClearLastStickTimer()
-    Movement.LastDoStick = 0
+function Movement:ClearLastStickTimer()
+    self.LastDoStick = 0
+end
+
+-- Gets the last stick timer.
+--- @return number The last stick timer.
+function Movement:GetLastStickTimer()
+    return self.LastDoStick
+end
+
+-- Sets the last stick timer.
+--- @param t number The time to set the last stick timer to.
+function Movement:SetLastStickTimer(t)
+    self.LastDoStick = t
+end
+
+-- Gets the time since last stick a stirng.
+--- @return string Formatted time since last stick.
+function Movement:GetTimeSinceLastStick()
+    return string.format("%ds", os.clock() - self.LastDoStick)
 end
 
 --- Navigates to a target during combat.
 --- @param targetId number The ID of the target to navigate to.
 --- @param distance number The distance to maintain from the target.
 --- @param bDontStick boolean Whether to avoid sticking to the target.
-function Movement.NavInCombat(targetId, distance, bDontStick)
+function Movement:NavInCombat(targetId, distance, bDontStick)
     if not Config:GetSetting('DoAutoEngage') then return end
 
     if mq.TLO.Stick.Active() then
-        Core.DoCmd("/stick off")
+        self:DoStickCmd("off")
     end
 
     if mq.TLO.Navigation.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
@@ -59,7 +91,7 @@ function Movement.NavInCombat(targetId, distance, bDontStick)
     end
 
     if not bDontStick then
-        Movement.DoStick(targetId)
+        self:DoStick(targetId)
     end
 end
 
@@ -67,7 +99,7 @@ end
 --- @param target MQTarget The central point around which to navigate.
 --- @param radius number The radius of the circle to navigate around.
 --- @return boolean True if we were able to successfully navigate around
-function Movement.NavAroundCircle(target, radius)
+function Movement:NavAroundCircle(target, radius)
     if not Config:GetSetting('DoAutoEngage') then return false end
     if not target or not target() and not target.Dead() then return false end
     if not mq.TLO.Navigation.MeshLoaded() then return false end

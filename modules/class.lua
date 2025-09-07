@@ -1423,11 +1423,11 @@ function Module:GiveTime(combat_state)
             if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and not xtSpawn.Fleeing() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and ((xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater") or Targeting.ForceCombat) and not Config.Constants.RGMezAnims:contains(xtSpawn.Animation()) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
                 Logger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(), (xtSpawn.Heading.Degrees() or 0))
-                if os.clock() - Movement.LastDoStick < 0.5 then
+                if os.clock() - Movement:GetLastStickTimer() < 0.5 then
                     Logger.log_debug("\ayIgnoring moveback because we just stuck a second ago - let's give it some time.")
                 else
-                    Core.DoCmd("/stick moveback %d", Config:GetSetting('MovebackDistance'))
-                    Movement.LastDoStick = os.clock()
+                    Movement:DoStickCmd("moveback %d", Config:GetSetting('MovebackDistance'))
+                    Movement:SetLastStickTimer(os.clock())
                 end
             end
         end
@@ -1504,7 +1504,7 @@ end
 
 function Module:OnDeath()
     Core.DoCmd("/nav stop")
-    Core.DoCmd("/stick off")
+    Movement:DoStickCmd("off")
 end
 
 function Module:OnZone()

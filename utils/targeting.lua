@@ -4,6 +4,7 @@ local Core                  = require('utils.core')
 local Modules               = require("utils.modules")
 local Logger                = require("utils.logger")
 local Strings               = require("utils.strings")
+local Movement              = require("utils.movement")
 local Set                   = require('mq.set')
 
 local Targeting             = { _version = '1.0', _name = "Targeting", _author = 'Derple', }
@@ -54,7 +55,7 @@ function Targeting.ClearTarget()
     if Config:GetSetting('DoAutoTarget') then
         Config.Globals.AutoTargetID = 0
         if Config.Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Config.Globals.ForceTargetID) then Config.Globals.ForceTargetID = 0 end
-        if mq.TLO.Stick.Status():lower() == "on" then Core.DoCmd("/stick off") end
+        if mq.TLO.Stick.Status():lower() == "on" then Movement:DoStickCmd("off") end
         Core.DoCmd("/target clear")
         if mq.TLO.Me.XTarget(1).TargetType() ~= "Auto Hater" then Core.DoCmd("/xtarget set 1 autohater") end
     end

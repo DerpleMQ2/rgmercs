@@ -345,7 +345,7 @@ return {
                     mq.TLO.Target.LineOfSight(), chaseDistance, Strings.BoolToColorString(forceMove), Strings.BoolToColorString(tooClose), Strings.BoolToColorString(tooFar))
                 if Config:GetSetting('NavCircle') then
                     if tooClose or tooFar or forceMove then
-                        Movement.NavAroundCircle(mq.TLO.Target, Config:GetSetting('BowNavDistance'))
+                        Movement:NavAroundCircle(mq.TLO.Target, Config:GetSetting('BowNavDistance'))
                     end
                 elseif tooClose then
                     if chaseDistance < 30 then
@@ -354,7 +354,7 @@ return {
                             chaseDistance)
                     end
                     Core.DoCmd('/squelch face fast')
-                    Core.DoCmd("/stick 10 moveback")
+                    Movement:DoStickCmd("10 moveback")
                 elseif tooFar or forceMove then
                     Core.DoCmd("/squelch /nav id %d distance=%d lineofsight=on", Config.Globals.AutoTargetID, Config:GetSetting('BowNavDistance'))
                     Core.DoCmd('/squelch face fast')

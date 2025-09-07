@@ -8,6 +8,7 @@ local Core         = require('utils.core')
 local Targeting    = require('utils.targeting')
 local Casting      = require('utils.casting')
 local Modules      = require('utils.modules')
+local Movement     = require('utils.movement')
 local ConsoleUI    = require('ui.console')
 local GitCommit    = require('extras.version')
 
@@ -164,8 +165,11 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                     else
                         ImGui.Text("MA: %s", (Core.GetMainAssistSpawn().CleanName() or "None"))
                     end
-                    ImGui.Text("Stuck To: " ..
-                        (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
+                    ImGui.Text(string.format("Stuck To: %s [%s] <%s ago>",
+                        (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"),
+                        (mq.TLO.Stick.Active() and Movement:GetLastStickCmd() or "N/A"),
+                        Movement:GetTimeSinceLastStick() or "0"))
+
                     if ImGui.CollapsingHeader("Assist List") then
                         ImGui.Indent()
                         Ui.RenderAssistList()

@@ -110,14 +110,14 @@ function Combat.EngageTarget(autoTargetId)
                     Logger.log_verbose("EngageTarget(): Target is too far! %d>%d attempting to nav to it.", target.Distance3D(),
                         target.MaxRangeTo())
 
-                    Movement.NavInCombat(autoTargetId, Targeting.GetTargetMaxRangeTo(target), false)
+                    Movement:NavInCombat(autoTargetId, Targeting.GetTargetMaxRangeTo(target), false)
                 else
                     Logger.log_verbose("EngageTarget(): Target is in range moving to combat")
                     if mq.TLO.Navigation.Active() then
                         Core.DoCmd("/nav stop log=off")
                     end
                     if mq.TLO.Stick.Status():lower() == "off" then
-                        Movement.DoStick(autoTargetId)
+                        Movement:DoStick(autoTargetId)
                     end
                 end
 
@@ -150,7 +150,7 @@ function Combat.EngageTarget(autoTargetId)
 
                 if not Config:GetSetting('DoMelee') and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Body.Name() == "Dragon" and Targeting.IsNamed(target) then
                     Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Dragon Named detected, sticking for belly cast.", Targeting.GetTargetCleanName())
-                    Core.DoCmd("/stick pin 40")
+                    Movement:DoStickCmd("pin 40")
                 end
 
                 if Core.MyClassIs("RNG") and not mq.TLO.Me.AutoFire() then
@@ -161,7 +161,7 @@ function Combat.EngageTarget(autoTargetId)
             end
 
             -- TODO: why are we doing this after turning stick on just now?
-            --if mq.TLO.Stick.Status():lower() == "on" then Core.DoCmd("/stick off") end
+            --if mq.TLO.Stick.Status():lower() == "on" then Movement:DoStickCmd("off") end
         end
     else
         Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.",

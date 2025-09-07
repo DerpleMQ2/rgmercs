@@ -43,17 +43,26 @@ function Strings.split(text, pattern, plain)
     return ret
 end
 
---- Formats a given time according to the specified format string.
+--- Formats a given time
 ---
 --- @param time number The time value to format.
---- @param formatString string? The format string to use for formatting the time.
 --- @return string The formatted time as a string.
-function Strings.FormatTime(time, formatString)
+function Strings.FormatTime(time)
+    local timeTable = Strings.GetTimeAsTable(time)
+
+    return string.format("%d:%02d:%02d:%02d", timeTable.Days, timeTable.Hours, timeTable.Mins, timeTable.Secs)
+end
+
+--- Returns the current time as a table.
+---
+--- @param time number The time value to format.
+--- @return table The time as a table with days, hours, minutes, and seconds.
+function Strings.GetTimeAsTable(time)
     local days = math.floor(time / 86400)
     local hours = math.floor((time % 86400) / 3600)
     local minutes = math.floor((time % 3600) / 60)
     local seconds = math.floor((time % 60))
-    return string.format(formatString and formatString or "%d:%02d:%02d:%02d", days, hours, minutes, seconds)
+    return { Days = days, Hours = hours, Mins = minutes, Secs = seconds, }
 end
 
 --- Formats a given time according to the specified format string.
