@@ -67,6 +67,15 @@ Module.DefaultConfig     = {
 			"While RGMercs doesn't necessary control what LNS is doing, exactly, we do have a timeout setting that dictates how long we will allow it to do it before re-checking for other actions. \n" ..
 			"You can adjust this advanced setting in the Loot options. Please note, if no other actions are required by mercs, we will simply allow LNS to continue.",
 	},
+	['MaxChaseTargetDistance']                 = {
+		DisplayName = "Max Chase Targ Dist",
+		Category = "Loot N Scoot",
+		Index = 4,
+		Tooltip = "If chase is on, we won't loot (and will abort looting) any corpses when the chase target is farther than this value away from us.",
+		Default = 300,
+		Min = 1,
+		Max = 20000,
+	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
 		Type = "Custom",
@@ -227,6 +236,12 @@ function Module.DoLooting(combat_state)
 			break
 		end
 
+		if not Module:CheckChaseTargetInRange() then
+			Logger.log_debug("\ay[LOOT]: Aborting Actions due to chase target distance!")
+			Module.TempSettings.Looting = false
+			break
+		end
+
 		mq.delay(20, function() return not Module.TempSettings.Looting end)
 
 		maxWait = maxWait - 20
@@ -263,6 +278,16 @@ function Module:LootMessageHandler()
 	end)
 end
 
+function Module:CheckChaseTargetInRange()
+	if Config:GetSetting('ChaseOn') then
+		local chaseSpawn = mq.TLO.Spawn("pc =" .. Core.GetChaseTarget())
+		if chaseSpawn() and (chaseSpawn.Distance3D() or 0) > Config:GetSetting('MaxChaseTargetDistance') then
+			return false
+		end
+	end
+	return true
+end
+
 function Module:GiveTime(combat_state)
 	if not Config:GetSetting('DoLoot') then return end
 	if Config.Globals.PauseMain then return end
@@ -276,6 +301,11 @@ function Module:GiveTime(combat_state)
 	end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
+
+	if not self:CheckChaseTargetInRange() then
+		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Chase Target too far away.")
+		return
+	end
 
 	if Config:GetSetting('LootRespectMedState') and Config.Globals.InMedState then
 		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Meditating.")
