@@ -273,4 +273,8 @@ function Core.SetPetHold()
     Modules:ExecModule("Class", "SetPetHold")
 end
 
+function Core.GetChaseTarget()
+    return Modules:ExecModule("Movement", "GetChaseTarget")
+end
+
 return Core
