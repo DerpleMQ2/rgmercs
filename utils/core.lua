@@ -89,11 +89,16 @@ end
 --- This function iterates over the provided table of plugins and performs a check on each one.
 ---
 --- @param t table A table containing plugin information to be checked.
-function Core.CheckPlugins(t)
+function Core.CheckPlugins(t, reloadingUnloaded)
     for _, p in pairs(t) do
         if not mq.TLO.Plugin(p)() then
-            Core.DoCmd("/squelch /plugin %s noauto", p)
-            Logger.log_info("\aw %s \ar not detected! \aw This script requires it! Loading ...", p)
+            Core.DoCmd("/squelch /plugin %s %s", p, reloadingUnloaded and "" or "noauto")
+
+            if reloadingUnloaded then
+                Logger.log_info("\aw %s \ar is being reloaded as RGMercs is shutting down...", p)
+            else
+                Logger.log_info("\aw %s \ar not detected! \aw This script requires it! Loading ...", p)
+            end
         end
     end
 end
