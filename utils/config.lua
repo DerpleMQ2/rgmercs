@@ -2108,14 +2108,16 @@ end
 --- Adds the given name to the Assist List.
 --- @param name string: The name of the assist to be added.
 function Config:AssistAdd(name)
-    for _, cur_name in ipairs(self:GetSetting('AssistList') or {}) do
+    local assistList = self:GetSetting('AssistList')
+
+    for _, cur_name in ipairs(assistList or {}) do
         if cur_name == name then
             return
         end
     end
 
-    table.insert(self:GetSetting('AssistList'), name)
-    self:SaveSettings()
+    table.insert(assistList, name)
+    self:SetSetting('AssistList', assistList)
     Logger.log_info("\axAssist List: \ag%s\ax has been\ag added\ax to the list at position \at%d\ax!", name,
         #self:GetSetting('AssistList'))
 end
@@ -2126,15 +2128,17 @@ function Config:AssistDelete(arg1)
         return
     end
 
+    local assistList = self:GetSetting('AssistList')
+
     if type(arg1) == 'string' then
         arg1 = self:ConvertAssistNameToID(arg1)
     end
 
     if type(arg1) == 'number' and arg1 > 0 then
-        if arg1 <= #self:GetSetting('AssistList') then
-            Logger.log_info("\axAssist List: \ag%s\ax has been \ardeleted\ax from the list!", self:GetSetting('AssistList')[arg1])
-            table.remove(self:GetSetting('AssistList'), arg1)
-            self:SaveSettings()
+        if arg1 <= #assistList then
+            Logger.log_info("\axAssist List: \ag%s\ax has been \ardeleted\ax from the list!", assistList[arg1])
+            table.remove(assistList, arg1)
+            self:SetSetting('AssistList', assistList)
         else
             Logger.log_error("\arAssist Delete: %d is not a valid assist list ID!", arg1)
         end
@@ -2164,7 +2168,7 @@ function Config:AssistMoveUp(id)
 
     assistList[newId], assistList[id] = assistList[id], assistList[newId]
     Logger.log_info("\axAssist List: \ag%s\ax has been\ag moved up\ax to position \at%d", self:GetSetting('AssistList')[newId], newId)
-    self:SaveSettings()
+    self:SetSetting('AssistList', assistList)
 end
 
 function Config:AssistMoveDown(id)
@@ -2187,7 +2191,7 @@ function Config:AssistMoveDown(id)
 
     Logger.log_info("\axAssist List: \ag%s\ax has been\ar moved down\ax to position \at%d", self:GetSetting('AssistList')[newId], newId)
 
-    self:SaveSettings()
+    self:SetSetting('AssistList', assistList)
 end
 
 function Config:ConvertAssistNameToID(arg1)
