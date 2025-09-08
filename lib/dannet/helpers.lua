@@ -10,7 +10,7 @@ function helpers.query(peer, query, timeout)
         mq.delay(timeout or 1000, function() return (mq.TLO.DanNet(peer).Q(query).Received() or 0) > 0 end)
     end
     local value = mq.TLO.DanNet(peer).Q(query)()
-    Logger.log_verbose('\ayQuerying - mq.TLO.DanNet(%s).Q(%s) = %s', peer, query, value)
+    Logger.log_verbose('\ayQuerying - mq.TLO.DanNet(%s).Q(%s) = %s [%d]', peer, query, value, mq.TLO.DanNet(peer).Q(query).Received() or 0)
     return value
 end
 
@@ -22,7 +22,7 @@ function helpers.observe(peer, query, timeout)
     ---@diagnostic disable-next-line: undefined-field
     mq.delay(timeout or 1000, function() return (mq.TLO.DanNet(peer).O(query).Received() or 0) > 0 end)
     local value = mq.TLO.DanNet(peer).O(query)()
-    Logger.log_verbose('\ayObserving - mq.TLO.DanNet(%s).O(%s) = %s', peer, query, value)
+    Logger.log_verbose('\ayObserving - mq.TLO.DanNet(%s).O(%s) = %s [%d]', peer, query, value, mq.TLO.DanNet(peer).Q(query).Received() or 0)
     return value
 end
 
