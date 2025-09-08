@@ -1737,6 +1737,7 @@ end
 
 function Config:SaveSettings()
     mq.pickle(self:GetConfigFileName(), self:GetModuleSettings("Core"))
+    Logger.log_debug("\ag%s Module settings saved to %s.", self._name, self:GetConfigFileName())
     Logger.set_log_level(Config:GetSetting('LogLevel'))
     Logger.set_log_to_file(Config:GetSetting('LogToFile'))
 end
