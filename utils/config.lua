@@ -7,7 +7,7 @@ local Logger                                          = require("utils.logger")
 local Set                                             = require("mq.Set")
 
 local Config                                          = {
-    _version = '1.2',
+    _version = '1.3',
     _subVersion = "The Outer Brood",
     _name =
     "RGMercs Lua Edition",
