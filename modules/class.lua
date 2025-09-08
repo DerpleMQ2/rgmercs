@@ -1111,7 +1111,7 @@ function Module:ProcessCuresList()
         else
             local typeList = types:toList()
             for _, type in ipairs(typeList) do
-                local haveValidOptions, successful = Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, id)
+                local successful, haveValidOptions = Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, type, id)
 
                 if not haveValidOptions or successful then
                     -- if succesful, clear the entire list so we don't chain group cures needlessly
@@ -1176,7 +1176,7 @@ function Module:CheckSelfForCures()
                 Config:GetSetting('CureAnnounceGroup'),
                 Config:GetSetting('CureAnnounce'))
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                local haveValidOptions, successful = Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, mq.TLO.Me.ID())
+                local successful, haveValidOptions = Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, mq.TLO.Me.ID())
 
                 if not haveValidOptions or successful then
                     -- if succesful, clear the entire list so we don't chain group cures needlessly

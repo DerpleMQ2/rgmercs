@@ -485,6 +485,6 @@ while openGUI do
     mq.delay(10)
 end
 
-Core.CheckPlugins(unloadedPlugins)
+Core.CheckPlugins(unloadedPlugins, true)
 
 Modules:ExecAll("Shutdown")

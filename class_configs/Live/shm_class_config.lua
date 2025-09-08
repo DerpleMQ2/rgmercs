@@ -60,7 +60,7 @@ local _ClassConfig = {
 
                 if cureAA then
                     Logger.log_debug("CureNow: Using %s for %s on %s.", cureAA, type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
-                    return true, Casting.UseAA(cureAA, targetId)
+                    return Casting.UseAA(cureAA, targetId), true
                 end
             end
 
@@ -72,7 +72,7 @@ local _ClassConfig = {
                                 targetSpawn.CleanName() or "Unknown")
                         else
                             Logger.log_debug("CureNow: Using %s for %s on %s.", cureSpell.RankName(), type:lower() or "unknown", targetSpawn.CleanName() or "Unknown")
-                            return true, Casting.UseSpell(cureSpell.RankName(), targetId, true)
+                            return Casting.UseSpell(cureSpell.RankName(), targetId, true), true
                         end
                     end
                 end
