@@ -753,6 +753,17 @@ local _ClassConfig = {
                 return combat_state == "Combat" and (Targeting.IHaveAggro(Config:GetSetting('StartFDPct')) or Casting.IAmFeigning())
             end,
         },
+        { --Keep things from running
+            name = 'Snare',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoSnare') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Targeting.IsNamed(Targeting.GetAutoTarget()) and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount') and
+                    not Casting.IAmFeigning()
+            end,
+        },
         {
             name = 'Burn',
             state = 1,
@@ -868,13 +879,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Encroaching Darkness",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and Targeting.GetTargetPctHPs() < 50
-                end,
-            },
-            {
                 name = "Dying Grasp",
                 type = "AA",
                 cond = function(self, aaName)
@@ -914,11 +918,6 @@ local _ClassConfig = {
             {
                 name = "SwarmPet",
                 type = "Spell",
-            },
-            {
-                name = "SnareDot",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) and Config:GetSetting('DoSnare') end,
             },
             {
                 name = "Disease3",
@@ -1029,6 +1028,23 @@ local _ClassConfig = {
                 name = "DurationTap",
                 type = "Spell",
                 cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+            },
+        },
+        ['Snare'] = {
+            {
+                name = "Encroaching Darkness",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target)
+                end,
+            },
+            {
+                name = "SnareDot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if Casting.CanUseAA("Encroaching Darkness") then return false end
+                    return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target)
+                end,
             },
         },
         ['Burn'] = {
@@ -1264,7 +1280,7 @@ local _ClassConfig = {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SnareDot",   cond = function(self) return Config:GetSetting('DoSnare') end, },
+                { name = "SnareDot",   cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Enchroaching Darkness") end, },
                 { name = "Magic1",     cond = function(self) return mq.TLO.Me.Level() > 70 and mq.TLO.Me.Level() < 87 end, },
                 { name = "Magic3", },
                 { name = "HealthTaps", },
@@ -1373,12 +1389,26 @@ local _ClassConfig = {
             Answer = "Set the [DeathBloomPercent] setting to the desired % of mana you want to cast Death Bloom at.",
         },
         ['DoSnare']           = {
-            DisplayName = "Cast Snares",
+            DisplayName = "Use Snares",
             Category = "Spells and Abilities",
-            Tooltip = "Enable casting Snare spells.",
-            Default = true,
-            FAQ = "I want to use my Snare spells, how do I do that?",
-            Answer = "Set the [DoSnare] setting to true and the Necro will use Snare spells.",
+            Index = 1,
+            Tooltip = "Use Snare(Snare Dot used until AA is available).",
+            Default = false,
+            RequiresLoadoutChange = true,
+            FAQ = "Why is my Necromancer not snaring?",
+            Answer = "Make sure Use Snares is enabled in your class settings.",
+        },
+        ['SnareCount']        = {
+            DisplayName = "Snare Max Mob Count",
+            Category = "Spells and Abilities",
+            Index = 2,
+            Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
+            Default = 3,
+            Min = 1,
+            Max = 99,
+            FAQ = "Why is my Shadow Knight Not snaring?",
+            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
+                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
         ['StartFDPct']        = {
             DisplayName = "FD Aggro Pct",
