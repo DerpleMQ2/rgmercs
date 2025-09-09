@@ -864,7 +864,7 @@ function Combat.FindWorstHurtGroupMember(minHPs)
                 worstId = healTarget.ID()
             end
 
-            if Config:GetSetting('DoPetHeals') and healTarget.Pet.ID() > 0 then
+            if Config:GetSetting('DoPetHeals') and (healTarget.Pet.ID() or 0) > 0 then
                 local petHP = healTarget.Pet.PctHPs() or 101
                 if petHP < worstPct and petHP < Config:GetSetting('PetHealPoint') then
                     Logger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
