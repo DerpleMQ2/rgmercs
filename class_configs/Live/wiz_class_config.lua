@@ -701,7 +701,7 @@ return {
             steps = 1,
             load_cond = function()
                 return Config:GetSetting('ElementChoice') == 1 and
-                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMap('WildNuke')))
+                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMapItem('WildNuke')))
             end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
@@ -716,7 +716,7 @@ return {
             steps = 1,
             load_cond = function()
                 return Config:GetSetting('ElementChoice') == 2 and
-                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMap('WildNuke')))
+                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMapItem('WildNuke')))
             end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
@@ -731,7 +731,7 @@ return {
             steps = 1,
             load_cond = function()
                 return Config:GetSetting('ElementChoice') == 3 and
-                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMap('WildNuke')))
+                    (mq.TLO.Me.Level() < 71 or (not Core.GetResolvedActionMapItem('ChaosNuke') and not Core.GetResolvedActionMapItem('WildNuke')))
             end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
