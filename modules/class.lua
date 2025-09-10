@@ -1216,7 +1216,6 @@ function Module:RunCureRotation(combat_state)
         self.TempSettings.CureCheckTimer = os.clock()
     end
 
-
     Logger.log_verbose("\ao[Cures] Checking for curables...")
 
     -- check ourselves locally every frame
