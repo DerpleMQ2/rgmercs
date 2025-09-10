@@ -1641,7 +1641,15 @@ function Module:GetPullableSpawns()
         if spawn.Master.Type() == 'PC' then
             Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
             return false
-        elseif self:IsPullMode("Chain") then
+        end
+
+        local surname = spawn.Surname()
+        if surname and (surname:find("'s Pet") or surname:find("'s Doppelganger")) then
+            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Temp or Swarm Pet -- Skipping", spawn.CleanName(), spawn.ID())
+            return false
+        end
+
+        if self:IsPullMode("Chain") then
             if Targeting.IsSpawnXTHater(spawn.ID()) then
                 Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
                 return false
