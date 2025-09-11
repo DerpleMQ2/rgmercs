@@ -99,6 +99,7 @@ function Strings.BoolToColorString(b)
     return b and "\agtrue\ax" or "\arfalse\ax"
 end
 
+local maxTableDumpLength = 60
 local function dumpTable(o, depth, accLen)
     accLen = accLen or 0
     if not depth then depth = 0 end
@@ -112,7 +113,7 @@ local function dumpTable(o, depth, accLen)
             entry = entry .. valueStr .. ', '
             s = s .. entry
             accLen = accLen + #entry
-            if accLen >= 40 then
+            if accLen >= maxTableDumpLength then
                 return s .. '...}'
             end
         end
@@ -120,8 +121,8 @@ local function dumpTable(o, depth, accLen)
     else
         local str = tostring(o)
         accLen = accLen + #str
-        if accLen >= 40 then
-            return str:sub(1, 40 - (accLen - #str)) .. '...'
+        if accLen >= maxTableDumpLength then
+            return str:sub(1, maxTableDumpLength - (accLen - #str)) .. '...'
         end
         return str
     end
