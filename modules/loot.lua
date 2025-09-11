@@ -1,4 +1,4 @@
--- Sample Basic Class Module
+-- SmartLoot Integration Module
 local mq                 = require('mq')
 local Config             = require('utils.config')
 local Core               = require("utils.core")
@@ -7,14 +7,11 @@ local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
 local Strings            = require("utils.strings")
 local Logger             = require("utils.logger")
-local Actors             = require("actors")
+local Targeting          = require("utils.targeting")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
--- Server name formatted for LNS to recognize
-local serverLNSFormat    = mq.TLO.EverQuest.Server():gsub(" ", "_")
-local warningMessageSent = false
 
-local Module             = { _version = '1.1 for LNS', _name = "Loot", _author = 'Derple, Grimmier, Algar', }
+local Module             = { _version = '2.0 SmartLoot', _name = "Loot", _author = 'andude2, Algar', }
 Module.__index           = Module
 Module.SettingCategories = {}
 Module.SaveRequested     = nil
@@ -26,55 +23,34 @@ Module.FAQ               = {}
 Module.ClassFAQ          = {}
 
 Module.DefaultConfig     = {
-	['DoLoot']                                 = {
-		DisplayName = "Load LootNScoot",
-		Category = "Loot N Scoot",
+	['UseSmartLoot']                           = {
+		DisplayName = "Enable SmartLoot",
+		Category = "SmartLoot",
 		Index = 1,
-		Tooltip = "Load the integrated LootNScoot in directed mode. Turning this off will unload the looting script.",
+		Tooltip = "Enable SmartLoot integration for automated looting. SmartLoot must be running separately.",
 		Default = false,
-		FAQ = "What is this silver coin thing? How do I turn it off?",
-		Answer = "The silver coin is our integration of LootNScoot, looting automation for Emu. It can be disabled as you choose.",
+		FAQ = "How do I enable looting with RGMercs?",
+		Answer = "Enable 'Enable SmartLoot' and ensure SmartLoot script is running. RGMercs will coordinate with SmartLoot for looting.",
 	},
-	['CombatLooting']                          = {
-		DisplayName = "Combat Looting",
-		Category = "Loot N Scoot",
-		Index = 2,
-		Tooltip = "Enables looting during RGMercs-defined combat.",
+	['SLMainLooter']                           = {
+		DisplayName = "Set RG Main",
+		Category = "SmartLoot",
+		Index = 1,
+		Tooltip = "Set this toon as the main looter for smartloot.",
 		Default = false,
-		FAQ = "How do i make sure my guys are looting during combat?, incase I die or something.",
-		Answer = "You can enable [CombatLooting] to loot during combat, I recommend only having one or 2 characters do this and NOT THE MA!!.",
-	},
-	['LootRespectMedState']                    = {
-		DisplayName = "Respect Med State",
-		Category = "Loot N Scoot",
-		Index = 3,
-		Tooltip = "Hold looting if you are currently meditating.",
-		Default = false,
-		FAQ = "Why is the PC sitting there and not medding?",
-		Answer =
-		"If you turn on Respect Med State in the Group Watch options, your looter will remain medding until those thresholds are reached.\nIf Stand When Done is not enabled, the looter may continue to sit after those thresholds are reached.",
+		FAQ = "How do I enable looting with RGMercs?",
+		Answer = "Enable 'Enable SmartLoot' and ensure SmartLoot script is running. RGMercs will coordinate with SmartLoot for looting.",
 	},
 	['LootingTimeout']                         = {
 		DisplayName = "Looting Timeout",
-		Category = "Loot N Scoot",
+		Category = "SmartLoot",
 		Index = 4,
-		Tooltip = "The length of time in seconds that RGMercs will allow LNS to process loot actions in a single check.",
-		Default = 5,
-		Min = 1,
-		Max = 30,
-		FAQ = "Why do my guys take too long to loot, or sometimes miss corpses?",
-		Answer =
-			"While RGMercs doesn't necessary control what LNS is doing, exactly, we do have a timeout setting that dictates how long we will allow it to do it before re-checking for other actions. \n" ..
-			"You can adjust this advanced setting in the Loot options. Please note, if no other actions are required by mercs, we will simply allow LNS to continue.",
-	},
-	['MaxChaseTargetDistance']                 = {
-		DisplayName = "Max Chase Targ Dist",
-		Category = "Loot N Scoot",
-		Index = 4,
-		Tooltip = "If chase is on, we won't loot (and will abort looting) any corpses when the chase target is farther than this value away from us.",
-		Default = 300,
-		Min = 1,
-		Max = 20000,
+		Tooltip = "Maximum time in seconds to wait for SmartLoot to complete before continuing.",
+		Default = 30,
+		Min = 10,
+		Max = 60,
+		FAQ = "Why do my characters wait too long for looting?",
+		Answer = "The Looting Timeout controls how long RGMercs waits for SmartLoot to finish. Increase if SmartLoot needs more time, decrease to be more responsive.",
 	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
@@ -88,25 +64,46 @@ Module.DefaultConfig     = {
 }
 
 Module.FAQ               = {
-	[1] = {
-		Questions = "How can I set the same settings on all of my characters?",
-		Answer = "You can copy your Loot_Server_Name_CharName_CLASS.lua and rename them for the other characters.\n\n" ..
-			"Example: Loot_Project_Lazarus_Grimmier_CLR.lua\n\n" ..
-			"We may add an option at a later date to copy settings from one character to another directly.",
-		Settings_Used = "DoLoot",
-	},
-	[2] = {
-		Question = "What is the difference between GlobalItem and NormalItem?",
-		Answer =
-			"GlobalItem is a setting that will always be used for that item.\nNormalItem is a setting that will be used for that item unless it is set as a GlobalItem.\n" ..
-			"NormalItem settings are evaluated each time if you have [AlwaysEval] turned on, which can change your setting if the item no longer meets the criteria.\n" ..
-			"Setting an items as a GlobalItem will prevent it from being re-evaluated and always use the GlobalItem setting.",
-		Settings_Used = "GlobalLootOn",
-	},
 }
 
 Module.CommandHandlers   = {
+	['slreset'] = {
+		handler = function(self, params)
+			Logger.log_info("\\ay[LOOT]: \\agManually resetting loot state")
+			self.TempSettings.Looting = false
+			self.TempSettings.LootStartTime = nil
+			Logger.log_info("\\ay[LOOT]: \\agLoot state reset - RGMercs should resume normal operations")
+		end,
+		help = "Reset loot state if stuck waiting",
+	},
+	['slstatus'] = {
+		handler = function(self, params)
+			Logger.log_info("\\ay[LOOT]: \\ag=== Loot Module Status ===")
+			Logger.log_info("\\ay[LOOT]: \\agLooting: %s", tostring(self.TempSettings.Looting))
+			Logger.log_info("\\ay[LOOT]: \\agSmartLoot Ready: %s", tostring(self:IsSmartLootReady()))
+			if self.TempSettings.LootStartTime then
+				local elapsed = (mq.gettime() - self.TempSettings.LootStartTime) / 1000
+				Logger.log_info("\\ay[LOOT]: \\agElapsed Time: %.1fs", elapsed)
+			end
 
+			-- Check SmartLoot status
+			local success, slState, slMode = pcall(function()
+				---@diagnostic disable-next-line: undefined-field
+				local smartLoot = mq.TLO.SmartLoot
+				if smartLoot then
+					return smartLoot.State() or "Unknown", smartLoot.Mode() or "Unknown"
+				end
+				return "Unknown", "Unknown"
+			end)
+
+			if success then
+				Logger.log_info("\\ay[LOOT]: \\agSmartLoot State: %s (%s)", slState, slMode)
+			else
+				Logger.log_info("\\ay[LOOT]: \\arError reading SmartLoot status")
+			end
+		end,
+		help = "Show current loot module status",
+	},
 }
 
 Module.SettingCategories = Set.new({})
@@ -135,18 +132,9 @@ function Module:WriteSettings()
 	mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
 
 	if self.SettingsLoaded then
-		if Config:GetSetting('DoLoot') == true then
-			if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
-				Core.DoCmd("/lua run lootnscoot directed rgmercs")
-				warningMessageSent = false
-			end
-
-			if not self.Actor then Module:LootMessageHandler() end
-
-			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'combatlooting', CombatLooting = Config:GetSetting('CombatLooting'), })
-		else
-			Core.DoCmd("/lua stop lootnscoot")
+		-- Initialize SmartLoot integration if enabled
+		if Config:GetSetting('UseSmartLoot') then
+			self:InitializeSmartLoot()
 		end
 	end
 
@@ -160,12 +148,11 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-	Logger.log_debug("\ay[LOOT]: \atLootnScoot EMU, Loot Module Loading Settings for: %s.",
+	Logger.log_debug("\ay[LOOT]: \atSmartLoot Integration Module Loading Settings for: %s.",
 		Config.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 	local settings = {}
 	local firstSaveRequired = false
-
 
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
@@ -180,29 +167,18 @@ function Module:LoadSettings()
 end
 
 function Module.New()
-	local newModule = setmetatable({}, Module)
+	local newModule = setmetatable({ settings = {}, }, Module)
 	return newModule
 end
 
 function Module:Init()
 	self:LoadSettings()
-	self:LootMessageHandler()
 	if not Core.OnEMU() then
 		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s",
 			mq.TLO.MacroQuest.BuildName())
 	else
-		if Config:GetSetting('DoLoot') then
-			if mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' then
-				Core.DoCmd("/lua stop lootnscoot")
-				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
-			end
-			Core.DoCmd("/lua run lootnscoot directed rgmercs")
-			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'getcombatsetting', })
-		end
-		self.TempSettings.Looting = false
-		--pass settings to lootnscoot lib
-		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
+		self:InitializeSmartLoot()
+		Logger.log_debug("\ay[LOOT]: \agSmartLoot integration module loaded.")
 	end
 
 	return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
@@ -215,6 +191,36 @@ end
 function Module:Render()
 	Ui.RenderPopSetting(self._name)
 
+	-- SmartLoot status display
+	local smartLootStatus = "Not Running"
+	local statusColor = { 1.0, 0.3, 0.3, 1.0, } -- Red
+
+	if self:IsSmartLootReady() then
+		local success, slState, slMode = pcall(function()
+			---@diagnostic disable-next-line: undefined-field
+			local smartLoot = mq.TLO.SmartLoot
+			if smartLoot then
+				return smartLoot.State() or "Unknown", smartLoot.Mode() or "Unknown"
+			end
+			return "Unknown", "Unknown"
+		end)
+
+		if success then
+			smartLootStatus = string.format("%s (%s)", slState, slMode)
+			statusColor = { 0.3, 1.0, 0.3, 1.0, } -- Green
+		else
+			smartLootStatus = "Error Reading Status"
+			statusColor = { 1.0, 1.0, 0.3, 1.0, } -- Yellow
+		end
+	end
+
+	ImGui.TextColored(statusColor[1], statusColor[2], statusColor[3], statusColor[4], "SmartLoot Status: " .. smartLootStatus)
+	ImGui.NewLine()
+
+	ImGui.Text("This module integrates with SmartLoot for automated looting.")
+	ImGui.Text("SmartLoot must be running separately: /lua run smartloot")
+
+
 	if ImGui.CollapsingHeader("Config Options") then
 		_, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
 	end
@@ -224,111 +230,144 @@ function Module:Pop()
 	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
-function Module.DoLooting(combat_state)
-	if not Module.TempSettings.Looting then return end
-
-	local maxWait = Config:GetSetting('LootingTimeout') * 1000
-	while Module.TempSettings.Looting do
-		if combat_state == "Combat" and not Config:GetSetting('CombatLooting') then
-			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")
-			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
-			Module.TempSettings.Looting = false
-			break
-		end
-
-		if not Module:CheckChaseTargetInRange() then
-			Logger.log_debug("\ay[LOOT]: Aborting Actions due to chase target distance!")
-			Module.TempSettings.Looting = false
-			break
-		end
-
-		mq.delay(20, function() return not Module.TempSettings.Looting end)
-
-		maxWait = maxWait - 20
-
-		if maxWait <= 0 then
-			Logger.log_debug("\ay[LOOT]: Aborting Actions due to timeout.")
-			Module.TempSettings.Looting = false
-			break
-		end
-		mq.doevents()
+-- Initialize SmartLoot integration
+function Module:InitializeSmartLoot()
+	if not Config:GetSetting('UseSmartLoot') then
+		self.useSmartLoot = false
+		return
 	end
-	Logger.log_verbose("\ay[LOOT]: \atFinished or Aborted Looting: \agResuming")
+
+	-- Check for SmartLoot availability
+	local smartLootStatus = mq.TLO.Lua.Script('smartloot')
+
+	if not smartLootStatus() then
+		Core.DoCmd('/lua run smartloot')
+	end
+	if smartLootStatus and smartLootStatus.Status() == 'RUNNING' then
+		---@diagnostic disable-next-line: undefined-field
+		self.useSmartLoot = true
+		Logger.log_info("\ay[LOOT]: \agSmartLoot integration enabled, please ensure you have a Main Looter set!")
+		if Config:GetSetting('SLMainLooter') then
+			mq.cmd('/sl_mode rgmain')
+			Logger.log_info("Loot: Setting this character as the main looter for SmartLoot.")
+		end
+		self.smartLootInitialized = true
+	else
+		self.useSmartLoot = false
+		self.smartLootInitialized = false
+		Logger.log_warn("\ay[LOOT]: \arSmartLoot not running - looting disabled")
+	end
 end
 
-function Module:LootMessageHandler()
-	self.Actor = Actors.register('loot_module', function(message)
-		local mail = message()
-		local subject = mail.Subject or ''
-		local who = mail.Who or ''
-		local CombatLooting = mail.CombatLooting or false
-		local currSetting = Config:GetSetting('CombatLooting')
-
-		if who ~= Config.Globals.CurLoadedChar then return end
-
-		if currSetting ~= CombatLooting then
-			Config:SetSetting('CombatLooting', CombatLooting)
+-- Check if SmartLoot is available and ready
+function Module:IsSmartLootReady()
+	if not self.useSmartLoot then
+		-- Try to re-initialize if settings allow it
+		if Config:GetSetting('UseSmartLoot') then
+			self:InitializeSmartLoot()
 		end
-
-		if subject == ('done_looting' or 'done_processing') then
-			Module.TempSettings.Looting = false
-		elseif subject == 'processing' then
-			Module.TempSettings.Looting = true
-		end
-	end)
-end
-
-function Module:CheckChaseTargetInRange()
-	if Config:GetSetting('ChaseOn') then
-		local chaseSpawn = mq.TLO.Spawn("pc =" .. Core.GetChaseTarget())
-		if chaseSpawn() and (chaseSpawn.Distance3D() or 0) > Config:GetSetting('MaxChaseTargetDistance') then
-			return false
-		end
+		return self.useSmartLoot
 	end
+
+	-- -- Verify SmartLoot is still running (commented cuz mercs gets closed if it isnt)
+	-- local smartLootStatus = mq.TLO.Lua.Script('smartloot')
+	-- if not smartLootStatus or smartLootStatus.Status() ~= 'RUNNING' then
+	-- 	self.useSmartLoot = false
+	-- 	self.smartLootInitialized = false
+	-- 	return false
+	-- end
+
+	-- Ensure SmartLoot mode is set correctly if not already done
+	if not self.smartLootInitialized then
+		self:InitializeSmartLoot()
+		self.smartLootInitialized = true
+	end
+
 	return true
 end
 
-function Module:GiveTime(combat_state)
-	if not Config:GetSetting('DoLoot') then return end
-	if Config.Globals.PauseMain then return end
-	if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
-		if not warningMessageSent then
-			Logger.log_error("\ar[LOOT]: Looting is enabled, but LNS does not appear to be running!")
-			Comms.PrintGroupMessage("%s has looting enabled, but LNS does not appear to be running!", mq.TLO.Me.CleanName())
-			warningMessageSent = true
-		end
+-- Trigger SmartLoot to process corpses
+function Module:DoLoot()
+	-- Trigger SmartLoot RGMain processing
+	if Config:GetSetting('SLMainLooter') then
+		Logger.log_debug("\ay[LOOT]: \agTriggering SmartLoot RGMain processing")
+		mq.cmd('/sl_rg_trigger')
+	end
+
+	-- Mark that we've initiated looting
+	self.TempSettings.LootStartTime = mq.gettime()
+	self.TempSettings.Looting = true
+
+	return true
+end
+
+-- Wait for SmartLoot to complete with proper focus holding
+function Module:ProcessLooting(combat_state)
+	---@diagnostic disable-next-line: undefined-field
+	local smartLoot = mq.TLO.SmartLoot
+	if not self.TempSettings.Looting then
 		return
 	end
+
+	local timeoutMs = Config:GetSetting('LootingTimeout') * 1000
+	local startTime = self.TempSettings.LootStartTime or mq.gettime()
+
+	-- Hold focus in loot module while SmartLoot is working
+	while self.TempSettings.Looting do
+		local elapsed = mq.gettime() - startTime
+
+		-- Check for timeout
+		if elapsed > timeoutMs then
+			Logger.log_warn("\ay[LOOT]: \arLooting timeout reached (%d seconds) - continuing", Config:GetSetting('LootingTimeout'))
+			self.TempSettings.Looting = false
+			break
+		end
+
+		-- Check for combat and abort if needed
+		if combat_state == 'Combat' or smartLoot.State() == "CombatDetected" then
+			Logger.log_debug("\ay[LOOT]: \arCombat detected - aborting looting")
+			if mq.TLO.Window("LootWnd").Open() then
+				mq.TLO.Window("LootWnd").DoClose()
+			end
+			self.TempSettings.Looting = false
+			break
+		end
+
+		if smartLoot.IsIdle() then -- we dont need to check for the TLO because it will close mercs if it isn't there
+			Logger.log_verbose("\ay[LOOT]: \agSmartLoot processing complete (%.1fs elapsed)", elapsed / 1000)
+			self.TempSettings.Looting = false
+			break
+		end
+
+		-- Small delay to not hammer the CPU
+		mq.delay(50)
+		mq.doevents()
+	end
+
+	Logger.log_verbose("\ay[LOOT]: \agFinished Processing Loot.")
+end
+
+function Module:GiveTime(combat_state)
+	if not Config:GetSetting('UseSmartLoot') then return end
+	---@diagnostic disable-next-line: undefined-field
+	local smartLoot = mq.TLO.SmartLoot
+	if not smartLoot or not smartLoot.IsEnabled() then return end
+	if Config.Globals.PauseMain then return end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 
-	if not self:CheckChaseTargetInRange() then
-		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Chase Target too far away.")
+	-- Check if we should initiate looting
+	if not self:IsSmartLootReady() then
 		return
 	end
 
-	if Config:GetSetting('LootRespectMedState') and Config.Globals.InMedState then
-		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Meditating.")
-		return
-	end
-
-	local deadCount = mq.TLO.SpawnCount("npccorpse radius 100 zradius 50")()
-	local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Me.CleanName()))()
-	if myCorpseCount > 0 then deadCount = deadCount + 1 end
-
-	if self.Actor == nil then self:LootMessageHandler() end
-	-- send actors message to loot
-	if (combat_state ~= "Combat" or Config:GetSetting('CombatLooting')) and deadCount > 0 then
-		if not self.TempSettings.Looting then
-			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'doloot', })
-			self.TempSettings.Looting = true
+	-- Check for corpses using SmartLoot
+	if self.TempSettings.Looting or (smartLoot.HasNewCorpses() and smartLoot.SafeToLoot()) then
+		if self:DoLoot() then
+			Logger.log_verbose("\ay[LOOT]: \agInitiated SmartLoot processing")
+			-- Process looting immediately
+			self:ProcessLooting(combat_state)
 		end
-	end
-
-	if self.TempSettings.Looting then
-		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
-		Module.DoLooting(combat_state)
 	end
 end
 
@@ -382,8 +421,29 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-	Logger.log_debug("\ay[LOOT]: \axEMU Loot Module Unloaded.")
-	Core.DoCmd("/lua stop lootnscoot")
+	Logger.log_debug("\ay[LOOT]: \axSmartLoot Integration Module Unloaded.")
+	-- Clear any pending loot state
+	self.TempSettings.Looting = false
+	self.TempSettings.LootStartTime = nil
 end
+
+-- for algar reference, ignore for now
+
+-- Module.SmartLootEngineLootState = {
+-- 	Idle = 1,
+-- 	FindingCorpse = 2,
+-- 	NavigatingToCorpse = 3,
+-- 	OpeningLootWindow = 4,
+-- 	ProcessingItems = 5,
+-- 	WaitingForPendingDecision = 6,
+-- 	ExecutingLootAction = 7,
+-- 	CleaningUpCorpse = 8,
+-- 	ProcessingPeers = 9,
+-- 	OnceModeCompletion = 10,
+-- 	CombatDetected = 11,
+-- 	EmergencyStop = 12,
+-- 	WaitingForWaterfallCompletion = 13,
+-- 	WaitingForInventorySpace = 14,
+-- }
 
 return Module
