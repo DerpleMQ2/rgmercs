@@ -1842,8 +1842,8 @@ function Config:GetUsageText(config, showUsageText, defaults, valueOnly)
         rangeText = string.format("\aw[%s\ax]", Strings.PadString(string.format("\a-y<\"table\">"), 15, false))
         defaultText = string.format("[\a-tDefault: %s\ax]", Strings.PadString(Strings.TableToString(configData.Default), 8, false))
         currentText = string.format("%s", Strings.TableToString(Config:GetSetting(config)))
-        if #currentText > 40 then
-            currentText = currentText:sub(1, 40) .. "..."
+        if #currentText > 120 then
+            currentText = currentText:sub(1, 120) .. "..."
         end
 
         handledType = true
