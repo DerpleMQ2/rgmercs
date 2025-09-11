@@ -99,17 +99,31 @@ function Strings.BoolToColorString(b)
     return b and "\agtrue\ax" or "\arfalse\ax"
 end
 
-local function dumpTable(o, depth)
+local function dumpTable(o, depth, accLen)
+    accLen = accLen or 0
     if not depth then depth = 0 end
     if type(o) == 'table' then
         local s = '{'
+        accLen = accLen + #s
         for k, v in pairs(o) do
             if type(k) ~= 'number' then k = '"' .. k .. '"' end
-            s = s .. string.rep(" ", depth) .. ' [' .. k .. '] = ' .. dumpTable(v, depth + 1) .. ', '
+            local entry = string.rep(" ", depth) .. ' [' .. k .. '] = '
+            local valueStr = dumpTable(v, depth + 1, accLen + #entry)
+            entry = entry .. valueStr .. ', '
+            s = s .. entry
+            accLen = accLen + #entry
+            if accLen >= 40 then
+                return s .. '...}'
+            end
         end
         return s .. string.rep(" ", depth) .. '}'
     else
-        return tostring(o)
+        local str = tostring(o)
+        accLen = accLen + #str
+        if accLen >= 40 then
+            return str:sub(1, 40 - (accLen - #str)) .. '...'
+        end
+        return str
     end
 end
 
