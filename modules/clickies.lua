@@ -1,4 +1,4 @@
--- Clickie Module
+-- Clicky Module
 local mq                                = require('mq')
 local Config                            = require('utils.config')
 local Core                              = require('utils.core')
@@ -10,6 +10,7 @@ local Logger                            = require("utils.logger")
 local Targeting                         = require("utils.targeting")
 local Set                               = require("mq.Set")
 local Icons                             = require('mq.ICONS')
+local animItems                         = mq.FindTextureAnimation("A_DragItem")
 
 local Module                            = { _version = '0.1a', _name = "Clickies", _author = 'Derple', }
 Module.__index                          = Module
@@ -30,8 +31,8 @@ Module.DefaultConfig                    = {
         Tooltip     = "Use items during Downtime.",
         Default     = false,
         ConfigType  = "Normal",
-        FAQ         = "I have some clickie items that I want to use during downtime. How do I set them up?",
-        Answer      = "You can set up to 12 clickie items in the Clickies section of the config.\n" ..
+        FAQ         = "I have some clicky items that I want to use during downtime. How do I set them up?",
+        Answer      = "You can set up to any number of clicky items in the Clickies section of the config.\n" ..
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['UseCombatClickies']                      = {
@@ -252,7 +253,7 @@ function Module:LoadSettings()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        Logger.log_error("\ay[Drag]: Unable to load clickie settings file(%s), creating a new one!",
+        Logger.log_error("\ay[Drag]: Unable to load clicky settings file(%s), creating a new one!",
             settings_pickle_path)
         firstSaveRequired = true
     else
@@ -316,7 +317,7 @@ function Module:LoadSettings()
 
     Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
 
-    Logger.log_info("\awClickie Module: \atLoaded \ag%d\at Clickies", #settings.Clickies or 0)
+    Logger.log_info("\awClicky Module: \atLoaded \ag%d\at Clickies", #settings.Clickies or 0)
 end
 
 function Module.New()
@@ -325,7 +326,7 @@ function Module.New()
 end
 
 function Module:Init()
-    Logger.log_debug("Clickie Module Loaded.")
+    Logger.log_debug("Clicky Module Loaded.")
     self:LoadSettings()
 
     self.ModuleLoaded = true
@@ -376,13 +377,13 @@ function Module:RenderControls(clickyIdx, idx, conditionsTable, headerPos)
 end
 
 function Module:RenderConditionTypesCombo(cond, condIdx)
-    if ImGui.BeginTable("##clickie_cond_type_table_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+    if ImGui.BeginTable("##clicky_cond_type_table_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
         ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 50)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         ImGui.TableNextColumn()
         ImGui.Text("Type")
         ImGui.TableNextColumn()
-        local selectedNum, changed = ImGui.Combo("##clickie_cond_type_" .. "_" .. condIdx, self.LogicBlocks[cond.type].id, self.LogicBlockTypes,
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_type_" .. "_" .. condIdx, self.LogicBlocks[cond.type].id, self.LogicBlockTypes,
             #self.LogicBlockTypes)
         if changed then
             cond.type = self.LogicBlockTypes[selectedNum] or "None"
@@ -400,13 +401,13 @@ function Module:RenderConditionTargetCombo(cond, condIdx)
     if not self:GetLogicBlockByType(cond.type).has_target then
         return
     end
-    if ImGui.BeginTable("##clickie_cond_target_table_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+    if ImGui.BeginTable("##clicky_cond_target_table_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
         ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 50)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         ImGui.TableNextColumn()
         ImGui.Text("Target")
         ImGui.TableNextColumn()
-        local selectedNum, changed = ImGui.Combo("##clickie_cond_target_" .. "_" .. condIdx, tonumber(self.TargetTypeIDs[cond.target or "Self"]) or 1,
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_target_" .. "_" .. condIdx, tonumber(self.TargetTypeIDs[cond.target or "Self"]) or 1,
             self.TargetTypes,
             #self.TargetTypes)
         if changed then
@@ -417,18 +418,18 @@ function Module:RenderConditionTargetCombo(cond, condIdx)
     end
 end
 
-function Module:RenderClickieTargetCombo(clickie, clickieIdx)
-    if ImGui.BeginTable("##clickie_target_table_" .. clickieIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+function Module:RenderClickyTargetCombo(clicky, clickyIdx)
+    if ImGui.BeginTable("##clicky_target_table_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
         ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 50)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         ImGui.TableNextColumn()
         ImGui.Text("Target")
         ImGui.TableNextColumn()
-        local selectedNum, changed = ImGui.Combo("##clickie_cond_target_" .. "_" .. clickieIdx, tonumber(self.TargetTypeIDs[clickie.target or "Self"]) or 1,
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_target_" .. "_" .. clickyIdx, tonumber(self.TargetTypeIDs[clicky.target or "Self"]) or 1,
             self.TargetTypes,
             #self.TargetTypes)
         if changed then
-            clickie.target = self.TargetTypes[selectedNum] or "Self"
+            clicky.target = self.TargetTypes[selectedNum] or "Self"
             self:SaveSettings(false)
         end
         ImGui.EndTable()
@@ -436,7 +437,7 @@ function Module:RenderClickieTargetCombo(clickie, clickieIdx)
 end
 
 function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
-    if ImGui.BeginTable("##clickie_cond_args_table_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+    if ImGui.BeginTable("##clicky_cond_args_table_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
         ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 80)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         for argIdx = 1, #cond.args do
@@ -445,7 +446,7 @@ function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
             ImGui.TableNextColumn()
             if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "number" then
                 local changed = false
-                cond.args[argIdx], changed = Ui.RenderOptionNumber("##clickie_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
+                cond.args[argIdx], changed = Ui.RenderOptionNumber("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
                     "", cond.args[argIdx], self.LogicBlocks[cond.type].args[argIdx].min, self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).max)
 
                 if changed then
@@ -454,7 +455,7 @@ function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
             end
             if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "boolean" then
                 local changed = false
-                cond.args[argIdx], changed = Ui.RenderOptionToggle("##clickie_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
+                cond.args[argIdx], changed = Ui.RenderOptionToggle("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
                     "",
                     cond.args[argIdx])
 
@@ -483,10 +484,20 @@ function Module:GetLogicBlockArgCountByType(type)
     return #self.LogicBlocks[type].args or 0
 end
 
+function Module:RenderClickyHeaderIcon(clicky, headerPos)
+    local offset = 30
+
+    if clicky.iconId == nil then
+        local item = mq.TLO.FindItem(clicky.itemName)
+        clicky.iconId = item() and tonumber((item.Icon() or 500) - 500) or 0
+    end
+
+    local draw_list = ImGui.GetWindowDrawList()
+    animItems:SetTextureCell(tonumber(clicky.iconId) or 0)
+    draw_list:AddTextureAnimation(animItems, ImVec2(headerPos.x + offset, headerPos.y), ImVec2(20, 20))
+end
+
 function Module:RenderClickiesWithConditions(type, clickies)
-    local requiresLoadoutChange = false
-    local any_pressed = false
-    local pressed = false
     if ImGui.CollapsingHeader(type) then
         ImGui.Indent()
         if not mq.TLO.Cursor() then
@@ -508,13 +519,14 @@ function Module:RenderClickiesWithConditions(type, clickies)
         if #clickies > 0 then
             for clickyIdx, clicky in ipairs(clickies) do
                 if clicky.itemName:len() > 0 then
-                    if ImGui.CollapsingHeader(clicky.itemName) then
+                    local headerPos = ImGui.GetCursorScreenPosVec()
+                    if ImGui.CollapsingHeader("             " .. clicky.itemName) then
                         ImGui.Indent()
-                        self:RenderClickieTargetCombo(clicky, clickyIdx)
+                        self:RenderClickyTargetCombo(clicky, clickyIdx)
                         ImGui.SeparatorText("Usage Info")
-                        self:RenderClickieData(clicky, clickyIdx)
+                        self:RenderClickyData(clicky, clickyIdx)
                         ImGui.SeparatorText("Conditions");
-                        ImGui.PushID("##clickie_conditions_btn_" .. clickyIdx)
+                        ImGui.PushID("##clicky_conditions_btn_" .. clickyIdx)
                         if ImGui.SmallButton(Icons.FA_PLUS .. " Add Condition") then
                             table.insert(clicky.conditions, { type = 'None', args = {}, target = 'Self', })
                             self:SaveSettings(false)
@@ -523,7 +535,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                         for condIdx, cond in ipairs(clicky.conditions or {}) do
                             if self:GetLogicBlockByType(cond.type) then
                                 local headerPos = ImGui.GetCursorPosVec()
-                                if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clickie_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
+                                if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
                                     Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
                                     ImGui.NewLine()
 
@@ -539,9 +551,9 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 self:RenderControls(clickyIdx, condIdx, clicky.conditions, headerPos)
                             end
                         end
-
                         ImGui.Unindent()
                     end
+                    self:RenderClickyHeaderIcon(clicky, headerPos)
                 end
             end
         end
@@ -587,7 +599,7 @@ function Module:RenderClickies(type, clickies)
     end
 end
 
-function Module:RenderClickieData(clicky, clickyIdx)
+function Module:RenderClickyData(clicky, clickyIdx)
     if ImGui.BeginTable("##clickies_table_" .. clicky.itemName .. tostring(clickyIdx), 3, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('Last Used', (ImGuiTableColumnFlags.WidthFixed), 100.0)
@@ -629,10 +641,10 @@ function Module:Pop()
 end
 
 function Module:ValidateClickies(type)
-    local clickieTable = Config:GetSetting(type)
-    local numClickes = #clickieTable or 0
-    if numClickes == 0 or clickieTable[numClickes].itemName ~= "" then
-        table.insert(clickieTable, { itemName = '', conditions = {}, })
+    local clickyTable = Config:GetSetting(type)
+    local numClickes = #clickyTable or 0
+    if numClickes == 0 or clickyTable[numClickes].itemName ~= "" then
+        table.insert(clickyTable, { itemName = '', conditions = {}, })
         -- tables are returned by reference, so this updates the setting directly.
         self:SaveSettings(false)
     end
@@ -661,7 +673,7 @@ function Module:GiveTime(combat_state)
 
     for _, clicky in ipairs(Config:GetSetting('Clickies')) do
         if clicky.itemName:len() > 0 then
-            Logger.log_super_verbose("Clickies: \a-yChecking clickie entry: \ay%s", clicky.itemName)
+            Logger.log_super_verbose("Clickies: \a-yChecking clicky entry: \ay%s", clicky.itemName)
 
             local target = nil
             local allConditionsMet = true
@@ -674,7 +686,7 @@ function Module:GiveTime(combat_state)
                         target = Targeting.GetAutoTarget()
                     end
                 end
-                if not Core.SafeCallFunc("Test Clickie Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
+                if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
                     allConditionsMet = false
                     break
                 end
@@ -766,7 +778,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    Logger.log_debug("Clickie Module Unloaded.")
+    Logger.log_debug("clicky Module Unloaded.")
 end
 
 return Module
