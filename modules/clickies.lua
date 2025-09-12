@@ -700,15 +700,21 @@ function Module:GiveTime(combat_state)
 
                 if item then
                     target = mq.TLO.Me
-                    if clicky.target == "Main Assist" then
+                    local buffCheckPassed = true
+                    if clicky.target == "Self" then
+                        target = mq.TLO.Me
+                        buffCheckPassed = Casting.SelfBuffItemCheck(clicky.itemName)
+                    elseif clicky.target == "Main Assist" then
                         target = Core.GetMainAssistSpawn()
+                        buffCheckPassed = Casting.PeerBuffCheck(item.Clicky.Spell.ID(), target, false)
                     elseif clicky.target == "Auto Target" then
                         target = Targeting.GetAutoTarget()
+                        buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
                     end
 
                     self.TempSettings.ClickyState[clicky.itemName].item = item
                     if Casting.ItemReady(item()) then
-                        if Casting.DetItemCheck(item.Name(), target) then
+                        if buffCheckPassed then
                             Logger.log_verbose("\aaClicky: Item \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
                             Casting.UseItem(item.Name(), Config.Globals.AutoTargetID)
                             self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
