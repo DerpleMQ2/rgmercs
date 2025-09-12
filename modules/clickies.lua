@@ -338,7 +338,26 @@ function Module:ShouldRender()
     return true
 end
 
-function Module:RenderControls(clickyIdx, idx, conditionsTable, headerPos)
+function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, preRender)
+    local startingPosVec = ImGui.GetCursorPosVec()
+    local offset = 40
+
+    self:RenderClickyHeaderIcon(clickies[clickyIdx], headerScreenPos)
+
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset, headerCursorPos.y + 5)
+
+    ImGui.PushID("##_small_btn_delete_clicky_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
+
+    if ImGui.SmallButton(Icons.FA_TRASH) then
+        table.remove(clickies, clickyIdx)
+        self:SaveSettings(false)
+    end
+    ImGui.PopID()
+
+    ImGui.SetCursorPos(startingPosVec)
+end
+
+function Module:RenderConditionControls(clickyIdx, idx, conditionsTable, headerPos)
     local startingPosVec = ImGui.GetCursorPosVec()
     local offset = 110
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset, headerPos.y)
@@ -487,6 +506,8 @@ end
 function Module:RenderClickyHeaderIcon(clicky, headerPos)
     local offset = 30
 
+    if not clicky then return end
+
     if clicky.iconId == nil then
         local item = mq.TLO.FindItem(clicky.itemName)
         clicky.iconId = item() and tonumber((item.Icon() or 500) - 500) or 0
@@ -519,7 +540,9 @@ function Module:RenderClickiesWithConditions(type, clickies)
         if #clickies > 0 then
             for clickyIdx, clicky in ipairs(clickies) do
                 if clicky.itemName:len() > 0 then
-                    local headerPos = ImGui.GetCursorScreenPosVec()
+                    local headerScreenPos = ImGui.GetCursorScreenPosVec()
+                    local headerCursorPos = ImGui.GetCursorPosVec()
+                    self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, true)
                     if ImGui.CollapsingHeader("             " .. clicky.itemName) then
                         ImGui.Indent()
                         self:RenderClickyTargetCombo(clicky, clickyIdx)
@@ -548,12 +571,12 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                     ImGui.NewLine()
                                 end
 
-                                self:RenderControls(clickyIdx, condIdx, clicky.conditions, headerPos)
+                                self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions, headerPos)
                             end
                         end
                         ImGui.Unindent()
                     end
-                    self:RenderClickyHeaderIcon(clicky, headerPos)
+                    self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, false)
                 end
             end
         end
