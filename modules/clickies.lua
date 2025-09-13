@@ -312,7 +312,7 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
 
     self:RenderClickyHeaderIcon(clickies[clickyIdx], headerScreenPos)
 
-    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset, headerCursorPos.y + 5)
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset, headerCursorPos.y + 3)
 
     ImGui.PushID("##_small_btn_delete_clicky_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
 
