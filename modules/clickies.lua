@@ -436,7 +436,7 @@ end
 
 function Module:RenderClickyTargetCombo(clicky, clickyIdx)
     if ImGui.BeginTable("##clicky_target_table_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
-        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150)
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 100)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         ImGui.TableNextColumn()
         ImGui.Text("Target")
@@ -462,7 +462,7 @@ end
 
 function Module:RenderClickyCombatStateCombo(clicky, clickyIdx)
     if ImGui.BeginTable("##clicky_combat_state_table_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
-        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150)
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 100)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         ImGui.TableNextColumn()
         ImGui.Text("Combat State")
