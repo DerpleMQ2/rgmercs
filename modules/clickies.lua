@@ -121,13 +121,27 @@ Module.LogicBlocks                      = {
 
     ['In Zone'] = {
         cond = function(self, target, zoneName)
-            Logger.log_super_verbose("\ayClickies: Checking if we are in Zone: %s CurZone: %s/%s", zoneName, mq.TLO.Zone.Name() or "None", mq.TLO.Zone.ShortName() or "None")
-            return (zoneName == (mq.TLO.Zone.Name() or "") or zoneName == (mq.TLO.Zone.ShortName() or ""))
+            Logger.log_super_verbose("\ayClickies: Checking if we are in Zone(s): %s CurZone: %s/%s", zoneName, mq.TLO.Zone.Name() or "None", mq.TLO.Zone.ShortName() or "None")
+            local zoneChecks = Strings.split(zoneName or "", ",")
+            for i, v in ipairs(zoneChecks) do
+                v = v:gsub("^%s*(.-)%s*$", "%1") -- trim spaces
+                if v == (mq.TLO.Zone.Name() or "") or v == (mq.TLO.Zone.ShortName() or "") then
+                    return true
+                end
+            end
+
+            return false
         end,
         has_target = false,
-        tooltip = "Check if you are in this zone (full or short name)",
+        tooltip = "Check if you are in any of these zones (full or short name, comma separated).",
+
         render_header_text = function(self, cond)
-            return string.format("In Zone %s", cond.args[1] or "None")
+            local zoneList = ""
+            local zoneChecks = Strings.split(cond.args[1] or "", ",")
+            for _, v in pairs(zoneChecks) do
+                zoneList = zoneList .. (zoneList == "" and "" or " or ") .. v
+            end
+            return string.format("In Zone(s) %s", zoneList == "" and "None" or zoneList)
         end,
         args = {
             { name = "Zone Name", type = "string", default = "ggh", },
