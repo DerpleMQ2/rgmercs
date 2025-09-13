@@ -120,43 +120,10 @@ Module.LogicBlocks                      = {
         },
     },
 
-    ['Combat State'] = {
-        cond = function(self, target, inCombat)
-            Logger.log_super_verbose("\ayClickies: Combat State condition check, inCombat: %s Current State: %s", Strings.BoolToColorString(inCombat), self.CombatState)
-
-            if inCombat then
-                if os.clock() - self.TempSettings.CombatClickiesTimer < Config:GetSetting('CombatClickiesDelay') then
-                    Logger.log_super_verbose("\ayClickies: \arToo soon since last Combat Clickies check, aborting.")
-                    return false
-                end
-
-                if Config:GetSetting('UseCombatClickies') and
-                    not (mq.TLO.Me.Sitting() or Casting.IAmFeigning() or
-                        not Core.OkayToNotHeal() or mq.TLO.Me.PctHPs() < (Config:GetSetting('EmergencyStart', true) and
-                            Config:GetSetting('EmergencyStart') or 45)) then
-                    self.TempSettings.CombatClickiesTimer = os.clock()
-                    return true
-                else
-                    return false
-                end
-            else
-                if (mq.TLO.Me.Sitting() or Casting.IAmFeigning() or mq.TLO.Me.Invis()) then return false end
-                return self.CombatState == "Downtime" and Config:GetSetting('UseClickies')
-            end
-        end,
-        has_target = false,
-        tooltip = "Only use if in/out of combat.",
-        render_header_text = function(self, cond)
-            return string.format("Combat State == %s", (cond.args[1] and "Combat" or "Downtime"))
-        end,
-        args = {
-            { name = "In Combat", type = "boolean", default = true, },
-        },
-    },
-
     ['HP Theshold'] = {
         cond = function(self, target, aboveHP, belowHP)
-            Logger.log_super_verbose("\ayClickies: HP Theshold condition check on %s, aboveHP: %d belowHp: %d", target.CleanName() or "None", aboveHP, belowHP)
+            Logger.log_super_verbose("\ayClickies: HP Theshold condition check on %s, aboveHP: %d belowHP: %d pctHPs: %d", target.CleanName() or "None", aboveHP, belowHP,
+                target.PctHPs())
 
             if not target or not target() then
                 return false
@@ -184,7 +151,8 @@ Module.LogicBlocks                      = {
 
     ['Mana Threshold'] = {
         cond = function(self, target, aboveMana, belowMana)
-            Logger.log_super_verbose("\ayClickies: Mana Theshold condition check on %s, aboveHP: %d belowHp: %d", target.CleanName() or "None", aboveMana, belowMana)
+            Logger.log_super_verbose("\ayClickies: Mana Theshold condition check on %s, aboveMana: %d belowMana: %d pctMana: %d", target.CleanName() or "None", aboveMana, belowMana,
+                target.PctMana())
 
             local pctMana = target.PctMana() or 0
             if aboveMana and pctMana < aboveMana then
@@ -207,18 +175,27 @@ Module.LogicBlocks                      = {
     },
 }
 
-Module.LogicBlockTypes                  = { 'None', 'Server Type', 'Combat State', 'HP Theshold', 'Mana Threshold', }
+Module.LogicBlockTypes                  = { 'None', 'Server Type', 'HP Theshold', 'Mana Threshold', }
 for k, v in pairs(Module.LogicBlockTypes) do
     Module.LogicBlocks[v].id = k
 end
 
-Module.TargetTypes = { 'Self', 'Main Assist', 'Auto Target', }
+Module.CombatTargetTypes = { 'Self', 'Main Assist', 'Auto Target', }
+Module.NonCombatTargetTypes = { 'Self', 'Main Assist', }
+Module.CombatStates = { 'Downtime', 'Combat', 'Any', }
 
-Module.TargetTypeIDs = {}
-for k, v in pairs(Module.TargetTypes) do
-    Module.TargetTypeIDs[v] = k
+Module.CombatTargetTypeIDs = {}
+for k, v in pairs(Module.CombatTargetTypes) do
+    Module.CombatTargetTypeIDs[v] = k
 end
-
+Module.NonCombatTargetTypeIDs = {}
+for k, v in pairs(Module.NonCombatTargetTypes) do
+    Module.NonCombatTargetTypeIDs[v] = k
+end
+Module.CombatStateIDs = {}
+for k, v in pairs(Module.CombatStates) do
+    Module.CombatStateIDs[v] = k
+end
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -279,12 +256,8 @@ function Module:LoadSettings()
                 {
                     itemName = clicky,
                     target = 'Self',
-                    conditions = {
-                        [1] = {
-                            ['type'] = 'Combat State',
-                            ['args'] = { [1] = false, },
-                        },
-                    },
+                    combat_state = 'Downtime',
+                    conditions = {},
                 })
             settingsChanged = true
         end
@@ -297,12 +270,8 @@ function Module:LoadSettings()
                 {
                     itemName = clicky,
                     target = 'Self',
-                    conditions = {
-                        [1] = {
-                            ['type'] = 'Combat State',
-                            ['args'] = { [1] = true, },
-                        },
-                    },
+                    combat_state = 'Combat',
+                    conditions = {},
                 })
             settingsChanged = true
         end
@@ -439,16 +408,42 @@ end
 
 function Module:RenderClickyTargetCombo(clicky, clickyIdx)
     if ImGui.BeginTable("##clicky_target_table_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
-        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 50)
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         ImGui.TableNextColumn()
         ImGui.Text("Target")
         ImGui.TableNextColumn()
-        local selectedNum, changed = ImGui.Combo("##clicky_cond_target_" .. "_" .. clickyIdx, tonumber(self.TargetTypeIDs[clicky.target or "Self"]) or 1,
-            self.TargetTypes,
-            #self.TargetTypes)
+        local targetTypeIDs = self.CombatTargetTypeIDs
+        local targetTypes = self.CombatTargetTypes
+
+        if clicky.combat_state == "Downtime" then
+            targetTypeIDs = self.NonCombatTargetTypeIDs
+            targetTypes = self.NonCombatTargetTypes
+        end
+
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_target_" .. "_" .. clickyIdx, tonumber(targetTypeIDs[clicky.target or "Self"]) or 1,
+            targetTypes,
+            #targetTypes)
         if changed then
-            clicky.target = self.TargetTypes[selectedNum] or "Self"
+            clicky.target = targetTypes[selectedNum] or "Self"
+            self:SaveSettings(false)
+        end
+        ImGui.EndTable()
+    end
+end
+
+function Module:RenderClickyCombatStateCombo(clicky, clickyIdx)
+    if ImGui.BeginTable("##clicky_combat_state_table_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150)
+        ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
+        ImGui.TableNextColumn()
+        ImGui.Text("Combat State")
+        ImGui.TableNextColumn()
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_combat_state_" .. "_" .. clickyIdx, tonumber(self.CombatStateIDs[clicky.combat_state or "Any"]) or 1,
+            self.CombatStates,
+            #self.CombatStates)
+        if changed then
+            clicky.combat_state = self.CombatStates[selectedNum] or "Any"
             self:SaveSettings(false)
         end
         ImGui.EndTable()
@@ -529,6 +524,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                 table.insert(clickies, {
                     itemName = mq.TLO.Cursor.Name(),
                     target = 'Self',
+                    combat_state = 'Any',
                     conditions = {},
                 })
                 self:SaveSettings(false)
@@ -545,6 +541,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                     self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, true)
                     if ImGui.CollapsingHeader("             " .. clicky.itemName) then
                         ImGui.Indent()
+                        self:RenderClickyCombatStateCombo(clicky, clickyIdx)
                         self:RenderClickyTargetCombo(clicky, clickyIdx)
                         ImGui.SeparatorText("Usage Info")
                         self:RenderClickyData(clicky, clickyIdx)
@@ -663,20 +660,8 @@ function Module:Pop()
     Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
-function Module:ValidateClickies(type)
-    local clickyTable = Config:GetSetting(type)
-    local numClickes = #clickyTable or 0
-    if numClickes == 0 or clickyTable[numClickes].itemName ~= "" then
-        table.insert(clickyTable, { itemName = '', conditions = {}, })
-        -- tables are returned by reference, so this updates the setting directly.
-        self:SaveSettings(false)
-    end
-end
-
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
-    --self:ValidateClickies('CombatClickies')
-    --self:ValidateClickies('DowntimeClickies')
     self.CombatState = combat_state
 
     if combat_state == 'Combat' then
@@ -698,57 +683,67 @@ function Module:GiveTime(combat_state)
         if clicky.itemName:len() > 0 then
             Logger.log_super_verbose("Clickies: \a-yChecking clicky entry: \ay%s", clicky.itemName)
 
-            local target = nil
-            local allConditionsMet = true
-            for _, cond in ipairs(clicky.conditions or {}) do
-                if self:GetLogicBlockByType(cond.type).has_target then
-                    target = mq.TLO.Me
-                    if cond.target == "Main Assist" then
-                        target = Core.GetMainAssistSpawn()
-                    elseif cond.target == "Auto Target" then
-                        target = Targeting.GetAutoTarget()
-                    end
-                end
-                if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
-                    allConditionsMet = false
-                    break
-                end
-            end
-
-            if allConditionsMet then
-                self.TempSettings.ClickyState[clicky.itemName] = self.TempSettings.ClickyState[clicky.itemName] or {}
-
-                local item = mq.TLO.FindItem(clicky.itemName)
-                Logger.log_verbose("Looking for clicky item: %s found: %s", clicky, Strings.BoolToColorString(item() ~= nil))
-
-                if item then
-                    target = mq.TLO.Me
-                    local buffCheckPassed = true
-                    if clicky.target == "Self" then
-                        target = mq.TLO.Me
-                        buffCheckPassed = Casting.SelfBuffItemCheck(clicky.itemName)
-                    elseif clicky.target == "Main Assist" then
-                        target = Core.GetMainAssistSpawn()
-                        buffCheckPassed = Casting.PeerBuffCheck(item.Clicky.Spell.ID(), target, false)
-                    elseif clicky.target == "Auto Target" then
-                        target = Targeting.GetAutoTarget()
-                        buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
-                    end
-
-                    self.TempSettings.ClickyState[clicky.itemName].item = item
-                    if Casting.ItemReady(item()) then
-                        if buffCheckPassed then
-                            Logger.log_verbose("\aaClicky: Item \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                            Casting.UseItem(item.Name(), Config.Globals.AutoTargetID)
-                            self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
-                            break --ensure we stop after we process a single clicky to allow rotations to continue
-                        else
-                            Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay already active or would not stack!", item.Name(), item.Clicky.Spell.RankName.Name())
+            if clicky.combat_state == "Any" or clicky.combat_state == combat_state then
+                local target = mq.TLO.Me
+                local allConditionsMet = true
+                for _, cond in ipairs(clicky.conditions or {}) do
+                    if self:GetLogicBlockByType(cond.type).has_target then
+                        if cond.target == "Main Assist" then
+                            ---@diagnostic disable-next-line: cast-local-type
+                            target = Core.GetMainAssistSpawn()
+                        elseif cond.target == "Auto Target" then
+                            ---@diagnostic disable-next-line: cast-local-type
+                            target = Targeting.GetAutoTarget()
                         end
-                    else
-                        Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
+                    end
+                    Logger.log_super_verbose("Clickies: \ayTesting Condition: \at%s\ay on target: \at%s", cond.type, target and (target.CleanName() or "None") or "None")
+
+                    if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
+                        allConditionsMet = false
+                        break
                     end
                 end
+
+                if allConditionsMet then
+                    self.TempSettings.ClickyState[clicky.itemName] = self.TempSettings.ClickyState[clicky.itemName] or {}
+
+                    local item = mq.TLO.FindItem(clicky.itemName)
+                    Logger.log_verbose("Looking for clicky item: %s found: %s", clicky, Strings.BoolToColorString(item() ~= nil))
+
+                    if item then
+                        target = mq.TLO.Me
+                        local buffCheckPassed = true
+                        if clicky.target == "Self" then
+                            target = mq.TLO.Me
+                            buffCheckPassed = Casting.SelfBuffItemCheck(clicky.itemName)
+                        elseif clicky.target == "Main Assist" then
+                            ---@diagnostic disable-next-line: cast-local-type
+                            target = Core.GetMainAssistSpawn()
+                            buffCheckPassed = Casting.PeerBuffCheck(item.Clicky.Spell.ID(), target, false)
+                        elseif clicky.target == "Auto Target" then
+                            ---@diagnostic disable-next-line: cast-local-type
+                            target = Targeting.GetAutoTarget()
+                            buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
+                        end
+
+                        self.TempSettings.ClickyState[clicky.itemName].item = item
+                        if Casting.ItemReady(item()) then
+                            if buffCheckPassed then
+                                Logger.log_verbose("\aaClicky: Item \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
+                                Casting.UseItem(item.Name(), target.ID())
+                                self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
+                                break --ensure we stop after we process a single clicky to allow rotations to continue
+                            else
+                                Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay already active or would not stack!", item.Name(), item.Clicky.Spell.RankName.Name())
+                            end
+                        else
+                            Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
+                        end
+                    end
+                end
+            else
+                Logger.log_super_verbose("Clickies: \arSkipping clicky entry: \ay%s due to Combat State mismatch (Clicky State: %s Current State: %s)", clicky.itemName,
+                    clicky.combat_state, combat_state)
             end
         end
     end
