@@ -1912,6 +1912,17 @@ function Config:GetSetting(setting, failOk)
     return self:GetModuleSettings(Config.TempSettings.SettingToModuleCache[setting])[setting]
 end
 
+--- Retrieves a specified setting default info.
+--- @param setting string The name of the setting to retrieve.
+--- @return any The value of the setting, or nil if the setting is not found and failOk is true.
+function Config:GetSettingDefaults(setting)
+    if not Config.TempSettings.SettingToModuleCache[setting] then
+        Logger.log_error("Setting %s was not found in the module cache!", setting)
+        return nil
+    end
+    return self:GetModuleDefaultSettings(Config.TempSettings.SettingToModuleCache[setting])[setting]
+end
+
 --- Validates and sets a configuration setting for a specified module.
 --- @param module string: The name of the module for which the setting is being configured.
 --- @param setting string: The name of the setting to be validated and set.

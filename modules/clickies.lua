@@ -221,9 +221,43 @@ Module.LogicBlocks                      = {
             { name = "<= Mana %", type = "number", default = 100, min = 0, max = 100, },
         },
     },
+
+    ['Config Setting'] = {
+        cond = function(self, target, setting, value)
+            Logger.log_super_verbose("\ayClicky: \a-yChecking if GetSetting(%s) == %s", setting, tostring(value))
+
+            return Config:HaveSetting(setting) and (Config:GetSetting(setting) == value) or false
+        end,
+        has_target = false,
+        tooltip = "Only use if the value of GetSetting(setting) == value",
+        render_header_text = function(self, cond)
+            return Config:HaveSetting(cond.args[1]) and string.format("GetSetting('%s') == %s", cond.args[1], tostring(cond.args[2])) or
+                "Please set a valid setting name..."
+        end,
+        args = {
+            {
+                name = "Setting",
+                type = "string",
+                default = "",
+                on_changed =
+                    function(self, newValue, cond)
+                        if Config:HaveSetting(newValue) then
+                            local settingInfo = Config:GetSettingDefaults(newValue)
+                            if settingInfo then
+                                self.LogicBlocks[cond.type].args[2].min = settingInfo.Min
+                                self.LogicBlocks[cond.type].args[2].max = settingInfo.Max
+                                self.LogicBlocks[cond.type].args[2].default = settingInfo.Default
+                                cond.args[2] = settingInfo.Default
+                            end
+                        end
+                    end,
+            },
+            { name = "Value", type = "setting_value", default = "", },
+        },
+    },
 }
 
-Module.LogicBlockTypes                  = { 'None', 'Server Type', 'HP Theshold', 'Mana Threshold', 'In Zone', }
+Module.LogicBlockTypes                  = { 'None', 'Server Type', 'HP Theshold', 'Mana Threshold', 'In Zone', 'Config Setting', }
 for k, v in pairs(Module.LogicBlockTypes) do
     Module.LogicBlocks[v].id = k
 end
@@ -498,6 +532,32 @@ function Module:RenderClickyCombatStateCombo(clicky, clickyIdx)
     end
 end
 
+function Module:RenderClickyOption(type, cond, condIdx, argIdx, clickyIdx)
+    local changed = false
+
+    if type == "number" then
+        cond.args[argIdx], changed = Ui.RenderOptionNumber("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
+            "", cond.args[argIdx], self.LogicBlocks[cond.type].args[argIdx].min, self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).max)
+    elseif type == "boolean" then
+        cond.args[argIdx], changed = Ui.RenderOptionToggle("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
+            "",
+            cond.args[argIdx])
+    elseif type == "string" then
+        cond.args[argIdx], changed = ImGui.InputText("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
+            cond.args[argIdx])
+    else
+        ImGui.TextDisabled("Invalid Option Type: %s", type)
+    end
+
+    if changed then
+        if self.LogicBlocks[cond.type].args[argIdx].on_changed then
+            Core.SafeCallFunc("On Changed Callback", self.LogicBlocks[cond.type].args[argIdx].on_changed, self, cond.args[argIdx], cond)
+        end
+
+        self:SaveSettings(false)
+    end
+end
+
 function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
     if ImGui.BeginTable("##clicky_cond_args_table_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
         ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 80)
@@ -506,33 +566,25 @@ function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
             ImGui.TableNextColumn()
             ImGui.Text(self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).name or ("Arg " .. tostring(argIdx)))
             ImGui.TableNextColumn()
-            if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "number" then
-                local changed = false
-                cond.args[argIdx], changed = Ui.RenderOptionNumber("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
-                    "", cond.args[argIdx], self.LogicBlocks[cond.type].args[argIdx].min, self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).max)
 
-                if changed then
-                    self:SaveSettings(false)
-                end
-            end
-            if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "boolean" then
+            if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "setting_value" then
                 local changed = false
-                cond.args[argIdx], changed = Ui.RenderOptionToggle("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
-                    "",
-                    cond.args[argIdx])
 
-                if changed then
-                    self:SaveSettings(false)
-                end
-            end
-            if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "string" then
-                local changed = false
-                cond.args[argIdx], changed = ImGui.InputText("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
-                    cond.args[argIdx])
+                -- the arg before this must be a valid setting for this to work.
+                if argIdx == 1 or not Config:HaveSetting(cond.args[argIdx - 1]) then
+                    ImGui.TextDisabled("Please select a valid setting in the previous argument.")
+                else
+                    local settingName = cond.args[argIdx - 1] or ""
+                    local settingInfo = Config:GetSettingDefaults(settingName)
 
-                if changed then
-                    self:SaveSettings(false)
+                    self:RenderClickyOption(type(settingInfo.Default), cond, condIdx, argIdx, clickyIdx)
+
+                    if changed then
+                        self:SaveSettings(false)
+                    end
                 end
+            else
+                self:RenderClickyOption(self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type, cond, condIdx, argIdx, clickyIdx)
             end
         end
         ImGui.EndTable()
