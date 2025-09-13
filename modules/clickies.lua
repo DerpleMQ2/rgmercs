@@ -802,14 +802,8 @@ function Module:DoGetState()
         #Config:GetSetting('CombatClickies'))
     result = result .. "-=-=-=-=-=\n"
 
-    for i, v in ipairs(Config:GetSetting('DowntimeClickies')) do
-        result = result .. string.format("\atDowntime Clicky %d: \ay%s\at\n", i, v.itemName)
-    end
-
-    result = result .. "\n"
-
-    for i, v in ipairs(Config:GetSetting('CombatClickies')) do
-        result = result .. string.format("\atCombat Clicky %d: \ay%s\at\n", i, v.itemName)
+    for i, v in ipairs(Config:GetSetting('Clickies')) do
+        result = result .. string.format("\atClicky %d: \ay%s\at\n", i, v.itemName)
     end
 
     return result
