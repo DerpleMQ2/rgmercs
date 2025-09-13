@@ -119,6 +119,21 @@ Module.LogicBlocks                      = {
         },
     },
 
+    ['In Zone'] = {
+        cond = function(self, target, zoneName)
+            Logger.log_super_verbose("\ayClickies: Checking if we are in Zone: %s CurZone: %s/%s", zoneName, mq.TLO.Zone.Name() or "None", mq.TLO.Zone.ShortName() or "None")
+            return (zoneName == (mq.TLO.Zone.Name() or "") or zoneName == (mq.TLO.Zone.ShortName() or ""))
+        end,
+        has_target = false,
+        tooltip = "Check if you are in this zone (full or short name)",
+        render_header_text = function(self, cond)
+            return string.format("In Zone %s", cond.args[1] or "None")
+        end,
+        args = {
+            { name = "Zone Name", type = "string", default = "ggh", },
+        },
+    },
+
     ['HP Theshold'] = {
         cond = function(self, target, aboveHP, belowHP)
             Logger.log_super_verbose("\ayClickies: HP Theshold condition check on %s, aboveHP: %d belowHP: %d pctHPs: %d", target.CleanName() or "None", aboveHP, belowHP,
@@ -174,7 +189,7 @@ Module.LogicBlocks                      = {
     },
 }
 
-Module.LogicBlockTypes                  = { 'None', 'Server Type', 'HP Theshold', 'Mana Threshold', }
+Module.LogicBlockTypes                  = { 'None', 'Server Type', 'HP Theshold', 'Mana Threshold', 'In Zone', }
 for k, v in pairs(Module.LogicBlockTypes) do
     Module.LogicBlocks[v].id = k
 end
@@ -470,6 +485,15 @@ function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
                 local changed = false
                 cond.args[argIdx], changed = Ui.RenderOptionToggle("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
                     "",
+                    cond.args[argIdx])
+
+                if changed then
+                    self:SaveSettings(false)
+                end
+            end
+            if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "string" then
+                local changed = false
+                cond.args[argIdx], changed = ImGui.InputText("##clicky_arg_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
                     cond.args[argIdx])
 
                 if changed then
