@@ -17,6 +17,7 @@ Module.__index                          = Module
 Module.FAQ                              = {}
 Module.ClassFAQ                         = {}
 Module.SaveRequested                    = nil
+Module.ClickyRotationIndex              = 1
 
 Module.TempSettings                     = {}
 Module.TempSettings.ClickyState         = {}
@@ -59,6 +60,20 @@ Module.DefaultConfig                    = {
         Answer = "By default, Combat Clickies are only checked every 10 seconds to ensure we aren't interfering with other (more important) actions.\n" ..
             "You can adjust this with the C.Click Check Delay setting. ",
     },
+    ['MaxClickiesPerFrame']                    = {
+        DisplayName = "Max Clickies Per Frame",
+        Category = "Clickies",
+        Index = 4,
+        Tooltip = "The max number of clickies to allow to successfully be used per frame, 0 for no limit.",
+        Default = 0,
+        Min = 0,
+        Max = 99,
+        ConfigType = "Advanced",
+        FAQ = "My clickies are preventing other actions, what can I do?",
+        Answer = "By default, there is no limit to the number of clickies that can be used per frame.\n" ..
+            "If you are finding that your clickies are interfering with other actions, you can set a limit here.\n" ..
+            "This will limit the number of clickies that can be used per frame, allowing other actions to occur.",
+    },
     ['Clickies']                               = {
         DisplayName = "Item %d",
         Category    = "Clickies",
@@ -95,7 +110,7 @@ Module.LogicBlocks                      = {
 
     ['Server Type'] = {
         cond = function(self, target, onLive, onEmu, onLaz)
-            Logger.log_super_verbose("\ayClickies: Checking Server Type is onLive(%s) onEmu(%s), onLaz(%s)", Strings.BoolToColorString(onLive),
+            Logger.log_super_verbose("\ayClicky: \a-yChecking Server Type is onLive(%s) onEmu(%s), onLaz(%s)", Strings.BoolToColorString(onLive),
                 Strings.BoolToColorString(onEmu), Strings.BoolToColorString(onLaz))
 
             return (onLive and not Core.OnEMU()) or (onEmu and Core.OnEMU()) or (onLaz and Core.OnLaz())
@@ -121,7 +136,8 @@ Module.LogicBlocks                      = {
 
     ['In Zone'] = {
         cond = function(self, target, zoneName)
-            Logger.log_super_verbose("\ayClickies: Checking if we are in Zone(s): %s CurZone: %s/%s", zoneName, mq.TLO.Zone.Name() or "None", mq.TLO.Zone.ShortName() or "None")
+            Logger.log_super_verbose("\ayClicky: \a-yChecking if we are in Zone(s): \at%s\aw CurZone: \at%s\aw/\at%s", zoneName, mq.TLO.Zone.Name() or "None",
+                mq.TLO.Zone.ShortName() or "None")
             local zoneChecks = Strings.split(zoneName or "", ",")
             for i, v in ipairs(zoneChecks) do
                 v = v:gsub("^%s*(.-)%s*$", "%1") -- trim spaces
@@ -150,20 +166,23 @@ Module.LogicBlocks                      = {
 
     ['HP Theshold'] = {
         cond = function(self, target, aboveHP, belowHP)
-            Logger.log_super_verbose("\ayClickies: HP Theshold condition check on %s, aboveHP: %d belowHP: %d pctHPs: %d", target.CleanName() or "None", aboveHP, belowHP,
-                target.PctHPs())
-
             if not target or not target() then
                 return false
             end
 
             local pctHPs = target.PctHPs() or 0
-            if aboveHP and pctHPs < aboveHP then
+
+            Logger.log_super_verbose("\ayClicky: \ayClicky: \awHP Theshold condition check on \at%s\aw, aboveHP(\a-t%d\aw/%s) belowHP(\a-t%d\aw/%s) pctHPs(\a-t%d\aw)",
+                target.CleanName() or "None", aboveHP, Strings.BoolToColorString((pctHPs >= aboveHP)), belowHP, Strings.BoolToColorString((pctHPs <= belowHP)),
+                pctHPs)
+
+            if not (pctHPs >= aboveHP) then
                 return false
             end
-            if belowHP and pctHPs > belowHP then
+            if not (pctHPs <= belowHP) then
                 return false
             end
+
             return true
         end,
         has_target = true,
@@ -172,21 +191,22 @@ Module.LogicBlocks                      = {
             return string.format("HP of %s is between %d%% and %d%%", cond.target or "Self", cond.args[1] or 0, cond.args[2] or 100)
         end,
         args = {
-            { name = "> HP %", type = "number", default = 0,   min = 0, max = 100, },
-            { name = "< HP %", type = "number", default = 100, min = 0, max = 100, },
+            { name = ">= HP %", type = "number", default = 0,   min = 0, max = 100, },
+            { name = "<= HP %", type = "number", default = 100, min = 0, max = 100, },
         },
     },
 
     ['Mana Threshold'] = {
         cond = function(self, target, aboveMana, belowMana)
-            Logger.log_super_verbose("\ayClickies: Mana Theshold condition check on %s, aboveMana: %d belowMana: %d pctMana: %d", target.CleanName() or "None", aboveMana, belowMana,
-                target.PctMana())
-
             local pctMana = target.PctMana() or 0
-            if aboveMana and pctMana < aboveMana then
+            Logger.log_super_verbose("\ayClicky: \ayClicky: \awMana Theshold condition check on \at%s\aw, aboveMana(\a-t%d\aw/%s) belowMana(\a-t%d\aw/%s) pctMana(\a-t%d\aw)",
+                target.CleanName() or "None", aboveMana, Strings.BoolToColorString((pctMana >= aboveMana)), belowMana, Strings.BoolToColorString((pctMana <= belowMana)),
+                pctMana)
+
+            if not (pctMana >= aboveMana) then
                 return false
             end
-            if belowMana and pctMana > belowMana then
+            if not (pctMana <= belowMana) then
                 return false
             end
             return true
@@ -197,8 +217,8 @@ Module.LogicBlocks                      = {
             return string.format("Your Mana is between %d%% and %d%%", cond.args[1] or 0, cond.args[2] or 100)
         end,
         args = {
-            { name = "> Mana %", type = "number", default = 0,   min = 0, max = 100, },
-            { name = "< Mana %", type = "number", default = 100, min = 0, max = 100, },
+            { name = ">= Mana %", type = "number", default = 0,   min = 0, max = 100, },
+            { name = "<= Mana %", type = "number", default = 100, min = 0, max = 100, },
         },
     },
 }
@@ -702,7 +722,7 @@ function Module:GiveTime(combat_state)
     if combat_state == 'Combat' then
         -- TODO: Should these just be rmemoved now?
         -- I plan on breaking clickies out further to allow things like horn, other healing clickies to be used, that the user will select... this is "interim" implementation.
-        if Core.OnLaz() and mq.TLO.Me.PctHPs() <= (Config:GetSetting('EmergencyStart', true) and Config:GetSetting('EmergencyStart') or 45) then
+        if Core.OnLaz() and mq.TLO.Me.PctHPs() <= (Config:HaveSetting('EmergencyStart') and Config:GetSetting('EmergencyStart') or 45) then
             local healingItems = { "Sanguine Mind Crystal", "Orb of Shadows", } -- "Draught of Opulent Healing", keeping this one manual for now
             for _, itemName in ipairs(healingItems) do
                 local item = mq.TLO.FindItem(itemName)
@@ -715,9 +735,16 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    for _, clicky in ipairs(Config:GetSetting('Clickies')) do
+    local maxClickiesPerFrame = Config:GetSetting('MaxClickiesPerFrame') or 0
+    local clickiesUsedThisFrame = 0
+    local startingClickyIdx = maxClickiesPerFrame > 0 and self.ClickyRotationIndex or 1
+    local clickies = Config:GetSetting('Clickies') or {}
+    local numClickies = #clickies
+    for clickyIdx = startingClickyIdx, numClickies do
+        local clicky = clickies[clickyIdx]
         if clicky.itemName:len() > 0 then
-            Logger.log_super_verbose("Clickies: \a-yChecking clicky entry: \ay%s", clicky.itemName)
+            self.ClickyRotationIndex = (clickyIdx % numClickies) + 1
+            Logger.log_super_verbose("\ayClicky: \awChecking clicky entry: \ay%s\aw[\at%d\aw]", clicky.itemName, clickyIdx)
 
             if clicky.combat_state == "Any" or clicky.combat_state == combat_state then
                 local target = mq.TLO.Me
@@ -732,11 +759,14 @@ function Module:GiveTime(combat_state)
                             target = Targeting.GetAutoTarget()
                         end
                     end
-                    Logger.log_super_verbose("Clickies: \ayTesting Condition: \at%s\ay on target: \at%s", cond.type, target and (target.CleanName() or "None") or "None")
+                    Logger.log_super_verbose("\ayClicky: \awTesting Condition: \at%s\aw on target: \at%s", cond.type, target and (target.CleanName() or "None") or "None")
 
                     if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
+                        Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \arFailed!")
                         allConditionsMet = false
                         break
+                    else
+                        Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \agSuccess!")
                     end
                 end
 
@@ -744,7 +774,7 @@ function Module:GiveTime(combat_state)
                     self.TempSettings.ClickyState[clicky.itemName] = self.TempSettings.ClickyState[clicky.itemName] or {}
 
                     local item = mq.TLO.FindItem(clicky.itemName)
-                    Logger.log_verbose("Looking for clicky item: %s found: %s", clicky, Strings.BoolToColorString(item() ~= nil))
+                    Logger.log_verbose("\ayClicky: \awLooking for clicky item: \am%s \awfound: %s", clicky.itemName, Strings.BoolToColorString(item() ~= nil))
 
                     if item then
                         target = mq.TLO.Me
@@ -765,20 +795,28 @@ function Module:GiveTime(combat_state)
                         self.TempSettings.ClickyState[clicky.itemName].item = item
                         if Casting.ItemReady(item()) then
                             if buffCheckPassed then
-                                Logger.log_verbose("\aaClicky: Item \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
+                                Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
                                 Casting.UseItem(item.Name(), target.ID())
+                                clickiesUsedThisFrame = clickiesUsedThisFrame + 1
+                                if maxClickiesPerFrame > 0 and clickiesUsedThisFrame >= maxClickiesPerFrame then
+                                    Logger.log_debug("\ayClicky: \a-tMax Clickies Per Frame of \am%d\a-t reached, stopping for this frame and picking up with %d next frame.",
+                                        maxClickiesPerFrame, self.ClickyRotationIndex)
+                                    break
+                                end
                                 self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
                                 break --ensure we stop after we process a single clicky to allow rotations to continue
                             else
-                                Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay already active or would not stack!", item.Name(), item.Clicky.Spell.RankName.Name())
+                                Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ar already active or would not stack!", item.Name(),
+                                    item.Clicky.Spell.RankName.Name())
                             end
                         else
-                            Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
+                            Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky: \at%s\ar Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
                         end
                     end
                 end
             else
-                Logger.log_super_verbose("Clickies: \arSkipping clicky entry: \ay%s due to Combat State mismatch (Clicky State: %s Current State: %s)", clicky.itemName,
+                Logger.log_super_verbose("\ayClicky: \arSkipping clicky entry: \am%s\ar due to Combat State mismatch (Clicky State: \at%s \arCurrent State: \at%s\ar)",
+                    clicky.itemName,
                     clicky.combat_state, combat_state)
             end
         end

@@ -1891,6 +1891,13 @@ function Config:SettingsLoaded()
     return self.SettingsLoadComplete
 end
 
+--- Retrieves if a specified setting exists.
+--- @param setting string The name of the setting to retrieve.
+--- @return boolean true if this setting exists.
+function Config:HaveSetting(setting)
+    return Config.TempSettings.SettingToModuleCache[setting] ~= nil
+end
+
 --- Retrieves a specified setting.
 --- @param setting string The name of the setting to retrieve.
 --- @param failOk boolean? If true, the function will not raise an error if the setting is not found.
