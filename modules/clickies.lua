@@ -17,7 +17,6 @@ Module.__index                          = Module
 Module.FAQ                              = {}
 Module.ClassFAQ                         = {}
 Module.SaveRequested                    = nil
-Module.CombatState                      = "Downtime"
 
 Module.TempSettings                     = {}
 Module.TempSettings.ClickyState         = {}
@@ -662,9 +661,8 @@ end
 
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
-    self.CombatState = combat_state
-
     if combat_state == 'Combat' then
+        -- TODO: Should these just be rmemoved now?
         -- I plan on breaking clickies out further to allow things like horn, other healing clickies to be used, that the user will select... this is "interim" implementation.
         if Core.OnLaz() and mq.TLO.Me.PctHPs() <= (Config:GetSetting('EmergencyStart', true) and Config:GetSetting('EmergencyStart') or 45) then
             local healingItems = { "Sanguine Mind Crystal", "Orb of Shadows", } -- "Draught of Opulent Healing", keeping this one manual for now
