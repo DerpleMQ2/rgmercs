@@ -624,7 +624,7 @@ function Module:IsValidMezTarget(mobId)
     end
     -- Here's where we can add a necro check to see if the spawn is undead or not. If it's not
     -- undead it gets added to the mez immune list.
-    if spawn and spawn.Body.Name():lower() == "giant" then
+    if Targeting.TargetBodyIs(spawn, "giant") then
         Logger.log_debug(
             "\ayUpdateMezList: Adding ID: %d Name: %s Level: %d to our immune list as it is a giant.", spawn.ID(),
             spawn.CleanName(),
