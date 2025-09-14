@@ -401,7 +401,7 @@ Module.LogicBlocks                      = {
         end,
         tooltip = "Only use if the value of GetSetting(setting) == value",
         render_header_text = function(self, cond)
-            return Config:HaveSetting(cond.args[1]) and string.format("GetSetting('%s') == %s", cond.args[1], tostring(cond.args[2])) or
+            return Config:HaveSetting(cond.args[1]) and string.format("The '%s' setting is %s", cond.args[1], tostring(cond.args[2])) or
                 "Please set a valid setting name..."
         end,
         args = {
@@ -932,6 +932,12 @@ function Module:RenderClickiesWithConditions(type, clickies)
                         self:SaveSettings(false)
                     end
                     ImGui.PopID()
+                    ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
+
+                    ImGui.BeginChild("##clicky_conditions_child_" .. clickyIdx, ImVec2(0, 0),
+                        bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
+                        bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
+
                     for condIdx, cond in ipairs(clicky.conditions or {}) do
                         if self:GetLogicBlockByType(cond.type) then
                             local headerPos = ImGui.GetCursorPosVec()
@@ -966,6 +972,9 @@ function Module:RenderClickiesWithConditions(type, clickies)
                     if clicky.enabled == false then
                         ImGui.EndDisabled()
                     end
+
+                    ImGui.EndChild()
+                    ImGui.PopStyleVar(1)
                 end
 
                 self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, false)
@@ -1115,7 +1124,7 @@ function Module:GiveTime(combat_state)
                                 break
                             end
                             self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
-                            break     --ensure we stop after we process a single clicky to allow rotations to continue
+                            break --ensure we stop after we process a single clicky to allow rotations to continue
                         else
                             if not buffCheckPassed then
                                 Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ar already active or would not stack!", item.Name(),
