@@ -664,7 +664,7 @@ local _ClassConfig = {
                 name = "Spear of Fate",
                 type = "Item",
                 cond = function(self, itemName, target)
-                    return Targeting.IsNamed(target)
+                    return Targeting.IsNamed(target) and Casting.DotItemCheck(itemName, target)
                 end,
             },
             {
