@@ -177,6 +177,22 @@ Module.LogicBlocks                      = {
     },
 
     {
+        name = "Group Injured Count",
+        cond = function(self, target, hp, cnt)
+            return (mq.TLO.Group.Injured(hp)() or 0) >= cnt
+        end,
+        cond_targets = { 'Self', },
+        tooltip = "Only use if [Count] group members are below [X] HP.",
+        render_header_text = function(self, cond)
+            return string.format("%d group members are <= %d%% HP", cond.args[1] or 0, cond.args[2] or 100)
+        end,
+        args = {
+            { name = "Grp Count", type = "number", default = 0,   min = 0, max = 6, },
+            { name = "<= HP %",   type = "number", default = 100, min = 0, max = 100, },
+        },
+    },
+
+    {
         name = "Target Aggro Percent",
         cond = function(self, target, aboveAggro, belowAggro)
             if not target or not target() then
