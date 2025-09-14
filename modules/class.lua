@@ -62,6 +62,7 @@ Module.TempSettings.CureCoroutines           = {}
 Module.TempSettings.NeedCuresList            = {}
 Module.TempSettings.NeedCuresListMutex       = false
 Module.TempSettings.CureChecksStale          = false
+Module.TempSettings.ImmuneTargets            = {}
 
 Module.CommandHandlers                       = {
     setmode = {
@@ -1518,6 +1519,7 @@ function Module:OnZone()
         mq.delay(addDelay)
         self:SetPetHold()
     end
+    Module.TempSettings.ImmuneTargets = {} -- clear list of slow/snare/stun immune mobs
 end
 
 function Module:DoGetState()
@@ -1632,6 +1634,25 @@ function Module:SetPetHold()
             Core.DoCmd("/pet hold on")
         end
     end
+end
+
+function Module:AddImmuneTarget(effect, targetId)
+    if not effect or not targetId or targetId == 0 then return false end
+
+    if not Module.TempSettings.ImmuneTargets[effect] then
+        Module.TempSettings.ImmuneTargets[effect] = Set.new({})
+    end
+    Module.TempSettings.ImmuneTargets[effect]:add(targetId)
+end
+
+function Module:TargetIsImmune(effect, targetId)
+    if not effect or not targetId or targetId == 0 then return false end
+
+    local effectSet = Module.TempSettings.ImmuneTargets[effect]
+    if effectSet then
+        return effectSet:contains(targetId)
+    end
+    return false
 end
 
 function Module:Shutdown()

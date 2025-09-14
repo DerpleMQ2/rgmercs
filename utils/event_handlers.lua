@@ -383,18 +383,22 @@ end)
 
 mq.event('Immune2', "Your target is immune to changes in its attack speed#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Modules:ExecModule("Class", "AddImmuneTarget", "Slow", Config.Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune3', "Your target is immune to changes in its run speed#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Modules:ExecModule("Class", "AddImmuneTarget", "Snare", Config.Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune4', "Your target is immune to snare spells#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Modules:ExecModule("Class", "AddImmuneTarget", "Snare", Config.Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune5', "Your target is immune to the stun portion of this effect#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Modules:ExecModule("Class", "AddImmuneTarget", "Stun", Config.Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune6', "Your target looks unaffected#*#", function()
