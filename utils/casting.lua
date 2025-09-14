@@ -1776,4 +1776,22 @@ function Casting.GroupLowManaCount(percent)
     return count
 end
 
+function Casting.SlowImmuneTarget(target)
+    if not target then target = mq.TLO.Target end
+    local targetId = target.ID() or 0
+    return Modules:ExecModule("Class", "TargetIsImmune", "Slow", targetId)
+end
+
+function Casting.SnareImmuneTarget(target)
+    if not target then target = mq.TLO.Target end
+    local targetId = target.ID() or 0
+    return Modules:ExecModule("Class", "TargetIsImmune", "Snare", targetId)
+end
+
+function Casting.StunImmuneTarget(target)
+    if not target then target = mq.TLO.Target end
+    local targetId = target.ID() or 0
+    return Modules:ExecModule("Class", "TargetIsImmune", "Stun", targetId)
+end
+
 return Casting
