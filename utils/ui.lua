@@ -608,18 +608,24 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         ImGui.PopID()
         new_loadout = ((pressed or false) and (requiresLoadoutChange))
         any_pressed = any_pressed or (pressed or false)
-    elseif type == "ClickyItem" then
+    elseif type == "ClickyItem" or type == "ClickyItemWithConditions" then
         -- make a drag and drop target
         ImGui.PushFont(ImGui.ConsoleFont)
         local displayCharCount = 11
-        local nameLen = setting:len()
+        local itemName = type == "ClickyItemWithConditions" and setting.itemName or setting
+        local nameLen = itemName:len()
         local maxStart = (nameLen - displayCharCount) + 1
         local startDisp = maxStart > 0 and (os.clock() % maxStart) + 1 or 0
 
         ImGui.PushID(id .. "__btn")
-        if ImGui.SmallButton(nameLen > 0 and setting:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
+        if ImGui.SmallButton(nameLen > 0 and itemName:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
             if mq.TLO.Cursor() then
-                setting = mq.TLO.Cursor.Name()
+                if type == "ClickyItemWithConditions" then
+                    setting.itemName = mq.TLO.Cursor.Name()
+                else
+                    setting = mq.TLO.Cursor.Name()
+                end
+
                 pressed = true
             end
         end
@@ -627,17 +633,22 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
 
         ImGui.PopFont()
         if nameLen > 0 then
-            Ui.Tooltip(setting)
+            Ui.Tooltip(itemName)
         end
 
         ImGui.SameLine()
         ImGui.PushID(id .. "__clear_btn")
         if ImGui.SmallButton(Icons.MD_CLEAR) then
-            setting = ""
+            if type == "ClickyItemWithConditions" then
+                setting.itemName = ""
+            else
+                setting = ""
+            end
             pressed = true
         end
         ImGui.PopID()
-        Ui.Tooltip(string.format("Drop a new item here to replace\n%s", setting))
+        Ui.Tooltip(string.format("Drop a new item here to replace\n%s", itemName))
+
         new_loadout = new_loadout or
             ((pressed or false) and (requiresLoadoutChange))
         any_pressed = any_pressed or (pressed or false)

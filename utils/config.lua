@@ -1547,7 +1547,7 @@ Config.DefaultConfig = {
         Type = "Custom",
         Default = 3,
         Min = 1,
-        Max = 5,
+        Max = 6,
         ConfigType = "Advanced",
         FAQ = "Why am I not seeing any logs?",
         Answer = "You can set the [LogLevel] option to the level of logs you would like to see.\n" ..
@@ -1891,6 +1891,13 @@ function Config:SettingsLoaded()
     return self.SettingsLoadComplete
 end
 
+--- Retrieves if a specified setting exists.
+--- @param setting string The name of the setting to retrieve.
+--- @return boolean true if this setting exists.
+function Config:HaveSetting(setting)
+    return Config.TempSettings.SettingToModuleCache[setting] ~= nil
+end
+
 --- Retrieves a specified setting.
 --- @param setting string The name of the setting to retrieve.
 --- @param failOk boolean? If true, the function will not raise an error if the setting is not found.
@@ -1903,6 +1910,17 @@ function Config:GetSetting(setting, failOk)
         return nil
     end
     return self:GetModuleSettings(Config.TempSettings.SettingToModuleCache[setting])[setting]
+end
+
+--- Retrieves a specified setting default info.
+--- @param setting string The name of the setting to retrieve.
+--- @return any The value of the setting, or nil if the setting is not found and failOk is true.
+function Config:GetSettingDefaults(setting)
+    if not Config.TempSettings.SettingToModuleCache[setting] then
+        Logger.log_error("Setting %s was not found in the module cache!", setting)
+        return nil
+    end
+    return self:GetModuleDefaultSettings(Config.TempSettings.SettingToModuleCache[setting])[setting]
 end
 
 --- Validates and sets a configuration setting for a specified module.
