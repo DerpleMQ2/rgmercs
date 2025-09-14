@@ -150,7 +150,7 @@ end
 function Casting.PetBuffCheck(spell)
     if not (spell and spell()) then return false end
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell.ID() or spell.RankName.ID() -- this checks the book first but allows us to still pass spells we don't know as variables to check
+    local spellId = mq.TLO.Me.Spell(spell()).ID() or spell.RankName.ID() -- this checks the book first but allows us to still pass spells we don't know as variables to check
     return Casting.LocalBuffCheck(spellId, true)
 end
 
