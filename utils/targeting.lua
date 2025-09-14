@@ -69,7 +69,7 @@ function Targeting.GetTargetID(target)
 end
 
 --- Checks if the target's body type matches the specified type.
---- @param target MQTarget The target whose body type is to be checked.
+--- @param target MQTarget|MQSpawn The target whose body type is to be checked.
 --- @param type string The body type to check against.
 --- @return boolean True if the target's body type matches the specified type, false otherwise.
 function Targeting.TargetBodyIs(target, type)
