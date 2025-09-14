@@ -25,28 +25,6 @@ Module.TempSettings.ClickyState         = {}
 Module.TempSettings.CombatClickiesTimer = 0
 
 Module.DefaultConfig                    = {
-    ['UseClickies']                            = {
-        DisplayName = "Use Downtime Clickies",
-        Category    = "Clickies",
-        Index       = 0,
-        Tooltip     = "Use items during Downtime.",
-        Default     = false,
-        ConfigType  = "Normal",
-        FAQ         = "I have some clicky items that I want to use during downtime. How do I set them up?",
-        Answer      = "You can set up to any number of clicky items in the Clickies section of the config.\n" ..
-            "You can drag and drop them onto the ClickyItem# tags to add them.",
-    },
-    ['UseCombatClickies']                      = {
-        DisplayName = "Use Combat Clickies",
-        Category    = "Clickies",
-        Index       = 2,
-        Tooltip     = "Use detrimental clickies on your target during Combat.",
-        Default     = false,
-        ConfigType  = "Normal",
-        FAQ         = "Why isn't my combat clicky being used?",
-        Answer      = "Combat clickies only support detrimental items.\n" ..
-            "Beneficial items should be used in Downtime or have a specific entry added to control proper use conditions.",
-    },
     ['MaxClickiesPerFrame']                    = {
         DisplayName = "Max Clickies Per Frame",
         Category = "Clickies",
@@ -84,7 +62,7 @@ Module.DefaultConfig                    = {
 Module.SettingCategories                = {}
 
 Module.CombatTargetTypes                = { 'Self', 'Pet', 'Main Assist', 'Auto Target', }
-Module.NonCombatTargetTypes             = { 'Self', 'Main Assist', }
+Module.NonCombatTargetTypes             = { 'Self', 'Pet', 'Main Assist', }
 Module.CombatStates                     = { 'Downtime', 'Combat', 'Any', }
 
 -- each of these becomes a condition you can set per clickie
@@ -350,6 +328,27 @@ Module.LogicBlocks                      = {
             return string.format("You %s Effect '%s'", cond.args[2] and "don't have" or "have", cond.args[1] or "None")
         end,
         cond_targets = { "Self", },
+        args = {
+            { name = "Effect", type = "string",  default = "", },
+            { name = "Negate", type = "boolean", default = false, },
+        },
+    },
+
+    {
+        name = "My Pet Has Effect",
+        cond = function(self, target, effect, negate)
+            local hasEffect = not Casting.PetBuffCheck(mq.TLO.Spell(effect)) -- this will return false if the pet has it
+            if negate then
+                return not hasEffect
+            else
+                return hasEffect
+            end
+        end,
+        tooltip = "Only use when you have this effect on your pet",
+        render_header_text = function(self, cond)
+            return string.format("Your Pet %s Effect '%s'", cond.args[2] and "doesn't have" or "has", cond.args[1] or "None")
+        end,
+        cond_targets = { "Pet", },
         args = {
             { name = "Effect", type = "string",  default = "", },
             { name = "Negate", type = "boolean", default = false, },
