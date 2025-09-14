@@ -484,6 +484,13 @@ local _ClassConfig = {
     ['Rotations']       = {
         ['Downtime'] = {
             {
+                name = "Touch of the Cursed",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
                 name = "Horror",
                 type = "Spell",
                 tooltip = Tooltips.Horror,

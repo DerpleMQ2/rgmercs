@@ -659,6 +659,13 @@ return {
                 end,
             },
             {
+                name = "Blessing of Life",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
                 name = "ArmorSelfBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
