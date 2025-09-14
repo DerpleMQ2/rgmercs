@@ -83,7 +83,7 @@ Module.DefaultConfig                    = {
 }
 Module.SettingCategories                = {}
 
-Module.CombatTargetTypes                = { 'Self', 'Main Assist', 'Auto Target', }
+Module.CombatTargetTypes                = { 'Self', 'Pet', 'Main Assist', 'Auto Target', }
 Module.NonCombatTargetTypes             = { 'Self', 'Main Assist', }
 Module.CombatStates                     = { 'Downtime', 'Combat', 'Any', }
 
@@ -1075,6 +1075,9 @@ function Module:GiveTime(combat_state)
                             if cond.target == "Main Assist" then
                                 ---@diagnostic disable-next-line: cast-local-type
                                 target = Core.GetMainAssistSpawn()
+                            elseif cond.target == "Pet" then
+                                ---@diagnostic disable-next-line: cast-local-type
+                                target = mq.TLO.Me.Pet
                             elseif cond.target == "Auto Target" then
                                 ---@diagnostic disable-next-line: cast-local-type
                                 target = Targeting.GetAutoTarget()
@@ -1104,19 +1107,22 @@ function Module:GiveTime(combat_state)
                         if clicky.target == "Self" then
                             target = mq.TLO.Me
                             buffCheckPassed = Casting.SelfBuffItemCheck(clicky.itemName)
-                        elseif clicky.target == "Main Assist" then
-                            ---@diagnostic disable-next-line: cast-local-type
-                            target = Core.GetMainAssistSpawn()
-                            buffCheckPassed = Casting.PeerBuffCheck(item.Clicky.Spell.ID(), target, false)
-                        elseif clicky.target == "Auto Target" then
-                            ---@diagnostic disable-next-line: cast-local-type
-                            target = Targeting.GetAutoTarget()
-                            buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
-                        end
+                            if clicky.target == "Pet" then
+                                ---@diagnostic disable-next-line: cast-local-type
+                                target = mq.TLO.Me.Pet
+                                buffCheckPassed = mq.TLO.Me.Pet.ID() > 0 and Casting.PetBuffItemCheck(clicky.itemName)
+                            elseif clicky.target == "Main Assist" then
+                                ---@diagnostic disable-next-line: cast-local-type
+                                target = Core.GetMainAssistSpawn()
+                                buffCheckPassed = Casting.PeerBuffCheck(item.Clicky.Spell.ID(), target, false)
+                            elseif clicky.target == "Auto Target" then
+                                ---@diagnostic disable-next-line: cast-local-type
+                                target = Targeting.GetAutoTarget()
+                                buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
+                            end
 
-                        self.TempSettings.ClickyState[clicky.itemName].item = item
-                        if Casting.ItemReady(item()) then
-                            if buffCheckPassed then
+                            self.TempSettings.ClickyState[clicky.itemName].item = item
+                            if buffCheckPassed and Casting.ItemReady(item()) then
                                 Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
                                 Casting.UseItem(item.Name(), target.ID())
                                 clickiesUsedThisFrame = clickiesUsedThisFrame + 1
@@ -1127,12 +1133,14 @@ function Module:GiveTime(combat_state)
                                 end
                                 self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
                                 break --ensure we stop after we process a single clicky to allow rotations to continue
-                            else
-                                Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ar already active or would not stack!", item.Name(),
-                                    item.Clicky.Spell.RankName.Name())
                             end
                         else
-                            Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky: \at%s\ar Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
+                            if not buffCheckPassed then
+                                Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ar already active or would not stack!", item.Name(),
+                                    item.Clicky.Spell.RankName.Name())
+                            else
+                                Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky: \at%s\ar Buff check failed, not using!", item.Name(), item.Clicky.Spell.RankName.Name())
+                            end
                         end
                     end
                 end
