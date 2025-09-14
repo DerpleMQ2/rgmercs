@@ -624,11 +624,15 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
 
     ImGui.PushID("##_small_btn_ctrl_clicky_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
 
-    local changed = false
-    clickies[clickyIdx].enabled, changed = Ui.RenderOptionToggle("##EnableDrawn" .. tostring(clickyIdx), "",
-        clickies[clickyIdx].enabled == nil and true or clickies[clickyIdx].enabled)
-    if changed then
-        self:SaveSettings(false)
+    if clickies[clickyIdx] then
+        local changed = false
+        local enabled = clickies[clickyIdx].enabled == nil or clickies[clickyIdx].enabled
+
+        enabled, changed = Ui.RenderOptionToggle("##EnableDrawn" .. tostring(clickyIdx), "", enabled)
+        if changed then
+            clickies[clickyIdx].enabled = enabled
+            self:SaveSettings(false)
+        end
     end
 
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_trash, headerCursorPos.y + 3)
@@ -870,128 +874,92 @@ function Module:RenderClickyHeaderIcon(clicky, headerPos)
 end
 
 function Module:RenderClickiesWithConditions(type, clickies)
-    if ImGui.CollapsingHeader(type) then
-        ImGui.Indent()
-        if not mq.TLO.Cursor() then
-            ImGui.BeginDisabled(true)
+    --if ImGui.CollapsingHeader(type) then
+    --    ImGui.Indent()
+    if not mq.TLO.Cursor() then
+        ImGui.BeginDisabled(true)
+    end
+    if ImGui.SmallButton(mq.TLO.Cursor.Name() and string.format("%s Add %s to %s", Icons.FA_PLUS, mq.TLO.Cursor.Name() or "N/A", type) or "Pickup an Item To Add") then
+        if mq.TLO.Cursor() then
+            table.insert(clickies, {
+                itemName = mq.TLO.Cursor.Name(),
+                target = 'Self',
+                combat_state = 'Any',
+                conditions = {},
+            })
+            self:SaveSettings(false)
         end
-        if ImGui.SmallButton(mq.TLO.Cursor.Name() and string.format("%s Add %s to %s", Icons.FA_PLUS, mq.TLO.Cursor.Name() or "N/A", type) or "Pickup an Item To Add") then
-            if mq.TLO.Cursor() then
-                table.insert(clickies, {
-                    itemName = mq.TLO.Cursor.Name(),
-                    target = 'Self',
-                    combat_state = 'Any',
-                    conditions = {},
-                })
-                self:SaveSettings(false)
-            end
-        end
-        if not mq.TLO.Cursor() then
-            ImGui.EndDisabled()
-        end
-        if #clickies > 0 then
-            for clickyIdx, clicky in ipairs(clickies) do
-                if clicky.itemName:len() > 0 then
-                    local headerScreenPos = ImGui.GetCursorScreenPosVec()
-                    local headerCursorPos = ImGui.GetCursorPosVec()
-                    self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, true)
+    end
+    if not mq.TLO.Cursor() then
+        ImGui.EndDisabled()
+    end
+    if #clickies > 0 then
+        for clickyIdx, clicky in ipairs(clickies) do
+            if clicky.itemName:len() > 0 then
+                local headerScreenPos = ImGui.GetCursorScreenPosVec()
+                local headerCursorPos = ImGui.GetCursorPosVec()
+                self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, true)
 
-                    if ImGui.CollapsingHeader("             " .. clicky.itemName) then
-                        if clicky.enabled == false then
-                            ImGui.BeginDisabled(true)
-                        end
-                        ImGui.Indent()
-                        self:RenderClickyCombatStateCombo(clicky, clickyIdx)
-                        self:RenderClickyTargetCombo(clicky, clickyIdx)
-                        ImGui.SeparatorText("Usage Info")
-                        self:RenderClickyData(clicky, clickyIdx)
-                        ImGui.SeparatorText("Conditions");
-                        ImGui.PushID("##clicky_conditions_btn_" .. clickyIdx)
-                        if ImGui.SmallButton(Icons.FA_PLUS .. " Add Condition") then
-                            table.insert(clicky.conditions, { type = 'None', args = {}, target = 'Self', })
-                            self:SaveSettings(false)
-                        end
-                        ImGui.PopID()
-                        for condIdx, cond in ipairs(clicky.conditions or {}) do
-                            if self:GetLogicBlockByType(cond.type) then
-                                local headerPos = ImGui.GetCursorPosVec()
-                                if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
-                                    Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
-                                    ImGui.NewLine()
+                if ImGui.CollapsingHeader("             " .. clicky.itemName) then
+                    if clicky.enabled == false then
+                        ImGui.BeginDisabled(true)
+                    end
+                    ImGui.Indent()
+                    self:RenderClickyCombatStateCombo(clicky, clickyIdx)
+                    self:RenderClickyTargetCombo(clicky, clickyIdx)
+                    ImGui.SeparatorText("Usage Info")
+                    self:RenderClickyData(clicky, clickyIdx)
+                    ImGui.SeparatorText("Conditions");
+                    ImGui.PushID("##clicky_conditions_btn_" .. clickyIdx)
+                    if ImGui.SmallButton(Icons.FA_PLUS .. " Add Condition") then
+                        table.insert(clicky.conditions, { type = 'None', args = {}, target = 'Self', })
+                        self:SaveSettings(false)
+                    end
+                    ImGui.PopID()
+                    for condIdx, cond in ipairs(clicky.conditions or {}) do
+                        if self:GetLogicBlockByType(cond.type) then
+                            local headerPos = ImGui.GetCursorPosVec()
+                            if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
+                                Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
+                                ImGui.NewLine()
 
-                                    self:RenderConditionTypesCombo(cond, condIdx)
-                                    --if #cond.args > 0 or #self:GetLogicBlockTargetsByType(cond.type) > 0 then
-                                    ImGui.Indent()
-                                    ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
-                                    ImGui.BeginChild("##clicky_cond_child_" .. clickyIdx .. "_" .. condIdx, ImVec2(0, 0),
-                                        bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
-                                        bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
-                                    self:RenderConditionTargetCombo(cond, condIdx)
-                                    self:RenderConditionArgs(cond, condIdx, clickyIdx)
-                                    ImGui.EndChild()
-                                    ImGui.PopStyleVar(1)
+                                self:RenderConditionTypesCombo(cond, condIdx)
+                                --if #cond.args > 0 or #self:GetLogicBlockTargetsByType(cond.type) > 0 then
+                                ImGui.Indent()
+                                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
+                                ImGui.BeginChild("##clicky_cond_child_" .. clickyIdx .. "_" .. condIdx, ImVec2(0, 0),
+                                    bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
+                                    bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
+                                self:RenderConditionTargetCombo(cond, condIdx)
+                                self:RenderConditionArgs(cond, condIdx, clickyIdx)
+                                ImGui.EndChild()
+                                ImGui.PopStyleVar(1)
 
-                                    ImGui.Unindent()
-                                    --end
-                                    ImGui.TreePop()
-                                else
-                                    Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
-                                    ImGui.NewLine()
-                                end
-
-                                self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions, headerPos)
+                                ImGui.Unindent()
+                                --end
+                                ImGui.TreePop()
+                            else
+                                Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
+                                ImGui.NewLine()
                             end
-                        end
-                        ImGui.Unindent()
-                        if clicky.enabled == false then
-                            ImGui.EndDisabled()
+
+                            self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions, headerPos)
                         end
                     end
-
-                    self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, false)
-                end
-            end
-        end
-
-        ImGui.Unindent()
-        ImGui.Separator()
-    end
-end
-
-function Module:RenderClickies(type, clickies)
-    if ImGui.CollapsingHeader(type) then
-        ImGui.Indent()
-
-        if #clickies > 0 then
-            if ImGui.BeginTable("##clickies_table_" .. type, 3, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
-                ImGui.TableSetupColumn('Last Used', (ImGuiTableColumnFlags.WidthFixed), 100.0)
-                ImGui.TableSetupColumn('Item', (ImGuiTableColumnFlags.WidthFixed), 150.0)
-                ImGui.TableSetupColumn('Effect', (ImGuiTableColumnFlags.WidthStretch), 200.0)
-                ImGui.PopStyleColor()
-                ImGui.TableHeadersRow()
-
-                for _, clicky in pairs(clickies) do
-                    if clicky.itemName:len() > 0 then
-                        local lastUsed = self.TempSettings.ClickyState[clicky.itemName] and (self.TempSettings.ClickyState[clicky.itemName].lastUsed or 0) or 0
-                        local item = self.TempSettings.ClickyState[clicky.itemName] and
-                            (self.TempSettings.ClickyState[clicky.itemName].item and self.TempSettings.ClickyState[clicky.itemName].item.Clicky.Spell.RankName.Name() or "None")
-                            or "None"
-                        ImGui.TableNextColumn()
-                        ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.clock() - lastUsed)) or "Never")
-                        ImGui.TableNextColumn()
-                        ImGui.Text(clicky.itemName)
-                        ImGui.TableNextColumn()
-                        ImGui.Text(item)
+                    ImGui.Unindent()
+                    if clicky.enabled == false then
+                        ImGui.EndDisabled()
                     end
                 end
 
-                ImGui.EndTable()
+                self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, false)
             end
         end
-        ImGui.Unindent()
-        ImGui.Separator()
     end
+
+    --    ImGui.Unindent()
+    ImGui.Separator()
+    -- end
 end
 
 function Module:RenderClickyData(clicky, clickyIdx)
