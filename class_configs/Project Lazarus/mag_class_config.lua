@@ -2039,11 +2039,11 @@ _ClassConfig      = {
             FAQ = "I want to use AE Malo in my rotation, how do I do that?",
             Answer = "You can use the [DoAEMalo] feature to use AE Malo in your rotation.",
         },
-        ['AESlowCount']    = {
-            DisplayName = "AE Slow Count",
+        ['AEMaloCount']    = {
+            DisplayName = "AE Malo Count",
             Category = "Debuffs",
             Index = 3,
-            Tooltip = "Number of XT Haters before we use AE Slow.",
+            Tooltip = "Number of XT Haters before we use AE Malo.",
             Min = 1,
             Default = 2,
             Max = 30,
