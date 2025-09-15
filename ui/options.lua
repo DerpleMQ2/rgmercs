@@ -16,14 +16,25 @@ local Set       = require("mq.Set")
 -- Header: Which collapsing header on the right panel the option should be listed under
 -- Category: Will use dividers under each header to further organize options.
 
-local OptionsUI             = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
-OptionsUI.__index           = OptionsUI
-OptionsUI.selectedGroup     = "General"
-OptionsUI.Groups            = { --- Add a default of the same name for any key that has nothing in its table once these are finished
+local OptionsUI           = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
+OptionsUI.__index         = OptionsUI
+OptionsUI.selectedGroup   = "General"
+OptionsUI.Groups          = { --- Add a default of the same name for any key that has nothing in its table once these are finished
+    {
+        Name = "General",
+        Desciption = "General Settings",
+        Icon = Icons.FA_COGS,
+        Headers = {
+            ['Following'] = { "Chase", "Camp", },
+            ['Meditation'] = { "Behavior", "Thresholds", },
+            ['Drag'] = {},
+            ['Pulling'] = { "Behavior", "Puller", "Group", "Distance", "Targets", },
+        },
+    },
     {
         Name = "Movement",
         Desciption = "Following, Medding, Pulling",
-        Icon = Icons.FA_,
+        Icon = Icons.MD_DIRECTIONS_RUN,
         Headers = {
             ['Following'] = { "Chase", "Camp", },
             ['Meditation'] = { "Behavior", "Thresholds", },
@@ -81,6 +92,13 @@ OptionsUI.Groups            = { --- Add a default of the same name for any key t
         },
     },
 }
+
+OptionsUI.GroupsNameToIDs = {}
+
+for id, group in ipairs(OptionsUI.Groups) do
+    OptionsUI.GroupsNameToIDs[group.Name] = id
+end
+
 OptionsUI.settings          = {}
 OptionsUI.SettingNames      = {}
 OptionsUI.SettingCategories = Set.new({})
@@ -110,28 +128,17 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
 end
 
 function OptionsUI:RenderOptionsPanel(groupName)
-    for _, c in ipairs(self.SettingCategories) do
-        local shouldShow = false
-        for _, k in ipairs(self.SettingNames) do
-            -- stolen from elsewhere, examine/adapt once tables are properly set up
-            -- if defaults[k].Category == c then
-            --     if Config:GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
-            --         shouldShow = true
-            --         break
-            --     end
-            -- end
+    for header, options in pairs(self.Groups[self.GroupsNameToIDs[groupName]].Headers) do
+        if ImGui.CollapsingHeader(header) then
+            for _, category in ipairs(options) do
+                ImGui.SeparatorText(category)
+                ImGui.Separator()
+                -- Render options for this category
+            end
+            -- Render options for this header
         end
-
-        -- if shouldShow then
-        --     if ImGui.BeginTabItem(c) then
-        --         local cat_pressed = false
-
-        --         settings, cat_pressed, new_loadout = Ui.RenderSettingsTable(settings, settingNames, defaults, c)
-        --         any_pressed = any_pressed or cat_pressed
-        --         ImGui.EndTabItem()
-        --     end
-        -- end
     end
+
 
 
 
@@ -237,12 +244,7 @@ function OptionsUI:GetCombinedDefaultSettings()
 end
 
 function OptionsUI:RenderCurrentTab()
-    for _, group in ipairs(self.Groups) do
-        if self.selectedGroup == group.Name then
-            self:RenderOptionsPanel(group.Name)
-            break
-        end
-    end
+    self:RenderOptionsPanel(self.selectedGroup)
 end
 
 function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
@@ -251,11 +253,11 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     if not Config.Globals.Minimized then
         local flags = ImGuiWindowFlags.None
 
-        if Config.settings.MainWindowLocked then
+        if Config:GetSetting('MainWindowLocked') then
             flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
         end
 
-        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsOptionsUI'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
 
         ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
 
@@ -280,7 +282,6 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                 local flags = bit32.bor(ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersInner)
                 if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
-
                     self:RenderCurrentTab()
                     ImGui.EndTable()
                 end
