@@ -25,10 +25,9 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Desciption = "General Settings",
         Icon = Icons.FA_COGS,
         Headers = {
-            ['Following'] = { "Chase", "Camp", },
-            ['Meditation'] = { "Behavior", "Thresholds", },
-            ['Drag'] = {},
-            ['Pulling'] = { "Behavior", "Puller", "Group", "Distance", "Targets", },
+            ['General'] = { "General", },
+            ['General2'] = { "General2", },
+            ['General3'] = { "General3", },
         },
     },
     {
@@ -47,11 +46,11 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Desciption = "Assisting, Positioning",
         Icon = Icons.FA_HEART,
         Headers = {
-            ['Targeting'] = {},   -- Auto engage, med break, stay on target, etc
-            ['Assisting'] = {},   -- this will include pet and merc percentages/commands
-            ['Positioning'] = {}, -- stick, face, etc
-            ['Burning'] = {},
-            ['Tanking'] = {},
+            ['Targeting'] = { "General", },                        -- Auto engage, med break, stay on target, etc
+            ['Assisting'] = { "General", },                        -- this will include pet and merc percentages/commands
+            ['Positioning'] = { "General", "Tanking", "Events", }, -- stick, face, etc
+            ['Burning'] = { "General", },
+            ['Tanking'] = { "General", },
         },
     },
     {
@@ -59,10 +58,11 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Desciption = "Spells, Songs, Discs, AA",
         Icon = Icons.FA_HEART,
         Headers = {
-            ['Buffs'] = { "Self", "Pet", "Group", },
-            ['Debuffs'] = { "Slow", "Resist", "Snare", "Dispel", }, -- Resist i.e, Malo, Tash, druid
+            ['General'] = { "Behavior", "Under the Hood", },
+            ['Buffs'] = { "General", "Self", "Pet", "Group", },
+            ['Debuffs'] = { "General", "Slow", "Resist", "Snare", "Dispel", }, -- Resist i.e, Malo, Tash, druid
             ['Healing'] = { "General", "Thresholds", "Curing", "Rezzing", },
-            ['Damage'] = { "Direct", "AE", "Over Time", "Taps", },
+            ['Damage'] = { "General", "Direct", "AE", "Over Time", "Taps", },
             ['Tanking'] = { "Hate Tools", "Defenses", },
             ['Utility'] = { "Hate Reduction", "Emergency", "Unique", }, -- Unique Example: Canni, Paragon, etc.
             ['Mez'] = { "General", "Range", "Target", },
@@ -74,9 +74,8 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Desciption = "Clickies, Bandolier Swaps",
         Icon = Icons.MD_RESTAURANT_MENU,
         Headers = {
-            ['Clickies(Pre-Defined)'] = { "Downtime", "Combat", "Recovery", }, -- should we combine pre/user-defined?
-            ['Clickies(User-Defined)'] = { "Downtime", "Combat", "Recovery", },
-            ['Bandolier'] = {},
+            ['Clickies(Pre-Configured)'] = { "Clickies", },
+            ['Bandolier'] = { "Swaps", },
             ['Instruments'] = {},
         },
     },
@@ -86,9 +85,10 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Icon = Icons.FA_COGS,
         Headers = {
             ['Loot(Emu)'] = {},
-            ['Announcing'] = {}, -- group announce stuff
-            ['Interface'] = {},  -- ui stuff
-            ['Other'] = {},      -- ??? profit
+            ['Announcing'] = { "General", },          -- group announce stuff
+            ['Interface'] = { "General", },           -- ui stuff
+            ['Other'] = { "Other", },                 -- ??? profit
+            ['Uncategorized'] = { "Uncategorized", }, -- settings from custom configs that don't have proper group/header
         },
     },
 }
