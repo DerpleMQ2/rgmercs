@@ -483,7 +483,7 @@ return {
                 type = "AA",
                 load_cond = function() return Casting.CanUseAA("Entrap") end,
                 cond = function(self, aaName, target)
-                    return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target)
+                    return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
             {
@@ -491,7 +491,7 @@ return {
                 type = "Spell",
                 load_cond = function() return not Casting.CanUseAA("Entrap") end,
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target)
+                    return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
         },
