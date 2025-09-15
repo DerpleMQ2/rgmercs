@@ -1133,7 +1133,7 @@ local _ClassConfig = {
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoAESlow') and Casting.CanUseAA("Turgur's Virulent Swarm") end,
                 cond = function(self, aaName, target)
-                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.DetAACheck(aaName)
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.DetAACheck(aaName) and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
@@ -1141,7 +1141,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoAESlow') and not Casting.CanUseAA("Turgur's Virulent Swarm") end,
                 cond = function(self, spell, target)
-                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.DetSpellCheck(spell)
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.DetSpellCheck(spell) and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
@@ -1149,7 +1149,7 @@ local _ClassConfig = {
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoSTSlow') and Casting.CanUseAA("Turgur's Swarm") end,
                 cond = function(self, aaName, target)
-                    return Casting.DetAACheck(aaName)
+                    return Casting.DetAACheck(aaName) and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
@@ -1158,7 +1158,7 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('DoSTSlow') and not Casting.CanUseAA("Turgur's Swarm") end,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoSTSlow') or Casting.CanUseAA("Turgur's Swarm") then return false end
-                    return Casting.DetSpellCheck(spell)
+                    return Casting.DetSpellCheck(spell) and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
@@ -1166,7 +1166,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoDiseaseSlow') end,
                 cond = function(self, spell, target)
-                    return not mq.TLO.Target.Slowed() and Casting.DetSpellCheck(spell)
+                    return not mq.TLO.Target.Slowed() and Casting.DetSpellCheck(spell) and not Casting.SlowImmuneTarget(target)
                 end,
             },
         },

@@ -1301,9 +1301,9 @@ local _ClassConfig = {
             {
                 name = "LowLevelStun",
                 type = "Spell",
-                cond = function(self, spell)
+                cond = function(self, spell, target)
                     if not Config:GetSetting('DoLLStun') then return false end
-                    return Targeting.TargetNotStunned() and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff()
+                    return Targeting.TargetNotStunned() and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff() and not Casting.StunImmuneTarget(target)
                 end,
             },
             {

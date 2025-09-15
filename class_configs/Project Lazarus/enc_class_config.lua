@@ -971,26 +971,26 @@ local _ClassConfig = {
             {
                 name = "Enveloping Helix",
                 type = "AA",
-                cond = function(self, aaName)
+                cond = function(self, aaName, target)
                     if Targeting.GetXTHaterCount() < Config:GetSetting('AECount') then return false end
-                    return Casting.DetAACheck(aaName)
+                    return Casting.DetAACheck(aaName) and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
                 name = "Dreary Deeds",
                 type = "AA",
                 load_cond = function() return Casting.CanUseAA("Dreary Deeds") end,
-                cond = function(self, aaName)
+                cond = function(self, aaName, target)
                     local aaSpell = Casting.GetAASpell(aaName)
-                    return Casting.DetAACheck(aaName) and (aaSpell.SlowPct() or 0) > Targeting.GetTargetSlowedPct()
+                    return Casting.DetAACheck(aaName) and (aaSpell.SlowPct() or 0) > Targeting.GetTargetSlowedPct() and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
                 name = "SlowSpell",
                 type = "Spell",
                 load_cond = function() return not Casting.CanUseAA("Dreary Deeds") end,
-                cond = function(self, spell)
-                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct())
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and not Casting.SlowImmuneTarget(target)
                 end,
             },
         },
