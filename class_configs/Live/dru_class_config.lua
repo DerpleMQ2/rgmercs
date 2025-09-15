@@ -1265,16 +1265,16 @@ local _ClassConfig = {
             {
                 name = "Entrap",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoSnare') and Casting.DetAACheck(aaName) and Targeting.GetAutoTargetPctHPs() < 50
+                cond = function(self, aaName, target)
+                    return Config:GetSetting('DoSnare') and Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
             {
                 name = "SnareSpell",
                 type = "Spell",
-                cond = function(self, spell)
+                cond = function(self, spell, target)
                     if Casting.CanUseAA("Entrap") then return false end
-                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(spell) and Targeting.GetAutoTargetPctHPs() < 50
+                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
             {

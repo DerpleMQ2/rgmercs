@@ -1035,7 +1035,7 @@ local _ClassConfig = {
                 name = "Encroaching Darkness",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target)
+                    return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
             {
@@ -1043,7 +1043,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Casting.CanUseAA("Encroaching Darkness") then return false end
-                    return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target)
+                    return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
         },

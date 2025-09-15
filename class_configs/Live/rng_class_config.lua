@@ -1334,7 +1334,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Entrap,
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Config:GetSetting('DoSnare') and Casting.DetAACheck(aaName)
+                    return Config:GetSetting('DoSnare') and Casting.DetAACheck(aaName) and not Casting.SnareImmuneTarget(target)
                 end,
             },
             {
@@ -1342,7 +1342,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.SnareSpells,
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(spell)
+                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(spell) and not Casting.SnareImmuneTarget(target)
                 end,
             },
             {

@@ -438,15 +438,16 @@ local _ClassConfig = {
             {
                 name = "AESlowSong",
                 type = "Song",
-                cond = function(self, songSpell)
-                    return Config:GetSetting("DoAESlow") and Casting.DetSpellCheck(songSpell) and Targeting.GetXTHaterCount() > 2 and not mq.TLO.Target.Slowed()
+                cond = function(self, songSpell, target)
+                    return Config:GetSetting("DoAESlow") and Casting.DetSpellCheck(songSpell) and Targeting.GetXTHaterCount() > 2 and not mq.TLO.Target.Slowed() and
+                        not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
                 name = "SlowSong",
                 type = "Song",
-                cond = function(self, songSpell)
-                    return Config:GetSetting("DoSTSlow") and Casting.DetSpellCheck(songSpell) and not mq.TLO.Target.Slowed()
+                cond = function(self, songSpell, target)
+                    return Config:GetSetting("DoSTSlow") and Casting.DetSpellCheck(songSpell) and not mq.TLO.Target.Slowed() and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {

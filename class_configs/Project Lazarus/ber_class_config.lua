@@ -201,7 +201,7 @@ return {
                 name = "SnareStrike",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Casting.DetSpellCheck(discSpell) and Targeting.MobHasLowHP(target)
+                    return Casting.DetSpellCheck(discSpell) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
         },

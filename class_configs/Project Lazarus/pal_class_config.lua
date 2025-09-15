@@ -982,7 +982,7 @@ return {
                 name = "StunTimer4",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Targeting.TargetNotStunned()
+                    return Targeting.TargetNotStunned() and (Core.IsTanking() or not Casting.StunImmuneTarget(target))
                 end,
             },
             {
@@ -1001,7 +1001,7 @@ return {
                 name = "StunTimer5",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Targeting.TargetNotStunned()
+                    return Targeting.TargetNotStunned() and (Core.IsTanking() or not Casting.StunImmuneTarget(target))
                 end,
             },
             {

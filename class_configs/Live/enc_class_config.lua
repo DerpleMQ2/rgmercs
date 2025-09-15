@@ -1412,7 +1412,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSlow') then return false end
                     local aaSpell = Casting.GetAASpell(aaName)
-                    return Casting.DetAACheck(aaName) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct())
+                    return Casting.DetAACheck(aaName) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
@@ -1428,7 +1428,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoSlow') or Casting.CanUseAA("Slowing Helix") or Core.GetResolvedActionMapItem('CripSlowSpell') then return false end
-                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct())
+                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
