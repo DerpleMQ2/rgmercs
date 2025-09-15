@@ -1525,6 +1525,12 @@ Config.DefaultConfig = {
         FAQ = "The UI is overwhelming how can I make it simpler?",
         Answer = "You can click off the Use Full UI option under UI settings for a simpler version of the UI.",
     },
+    ['EnableOptionsUI']      = {
+        DisplayName = "Enable Options UI",
+        Category = "UI",
+        Tooltip = "Show the experimental Options UI window",
+        Default = false,
+    },
     ['ShowDebugTiming']      = {
         DisplayName = "Show Roation Debug Timing",
         Category = "UI",

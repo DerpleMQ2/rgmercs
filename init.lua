@@ -44,6 +44,7 @@ local initMsg         = "Initializing RGMercs..."
 -- UI --
 local SimpleUI        = require("ui.simple")
 local StandardUI      = require("ui.standard")
+local OptionsUI       = require("ui.options")
 local ConsoleUI       = require("ui.console")
 local LoaderUI        = require("ui.loader")
 local HudUI           = require("ui.hud")
@@ -142,6 +143,11 @@ local function RGMercsGUI()
             else
                 openGUI = SimpleUI:RenderMainWindow(imGuiStyle, curState, openGUI)
             end
+
+            if Config:GetSetting('EnableOptionsUI') then
+                OptionsUI:RenderMainWindow(imGuiStyle, curState, openGUI)
+            end
+
 
             ImGui.PopStyleVar(3)
 
