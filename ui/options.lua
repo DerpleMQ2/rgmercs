@@ -1,12 +1,11 @@
-local mq        = require('mq')
-local ImGui     = require('ImGui')
-local Config    = require('utils.config')
-local Ui        = require('utils.ui')
-local Icons     = require('mq.ICONS')
-local GitCommit = require('extras.version')
-local Modules   = require('utils.modules')
-local Set       = require("mq.Set")
-
+local mq      = require('mq')
+local ImGui   = require('ImGui')
+local Config  = require('utils.config')
+local Ui      = require('utils.ui')
+local Icons   = require('mq.ICONS')
+local Modules = require('utils.modules')
+local Set     = require("mq.Set")
+local Strings = require('utils.strings')
 
 
 
@@ -134,6 +133,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
                 ImGui.SeparatorText(category)
                 ImGui.Separator()
                 -- Render options for this category
+                self:RenderCategorySettings(category)
             end
             -- Render options for this header
         end
@@ -150,13 +150,75 @@ function OptionsUI:RenderOptionsPanel(groupName)
     -- render categories
 end
 
-function OptionsUI:RenderCategories()
+function OptionsUI:RenderCategorySettings(category)
     -- We have our header rendered, we clicked on it to expand it, this is the next step in iterating through the groups
     -- check group table above to see if the header keys have entries in the category table
     -- if there is a category in the table, check if a setting of that category exists in the combinedsettingstable
     -- if there is, draw the name with a divider
     -- render an option table with all options from that (category if present, header without category if not)
     -- entries should already be indexed in the combined settings table
+    local any_pressed         = false
+    local new_loadout         = false
+    local pressed             = false
+    local loadout_change      = false
+    local renderWidth         = 300
+    local windowWidth         = ImGui.GetWindowWidth()
+    local numCols             = math.max(1, math.floor(windowWidth / renderWidth))
+    local settingsForCategory = Config:GetAllSettingsForCategory(category)
+
+    if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        for _ = 1, numCols do
+            ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 150.0)
+            ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
+        end
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+        ImGui.TableNextRow()
+
+        for idx, settingName in ipairs(settingsForCategory or {}) do
+            local settingDefaults = Config:GetSettingDefaults(settingName)
+            local setting         = Config:GetSetting(settingName)
+            local id              = "##" .. settingName
+            if settingDefaults.Type ~= "Custom" then
+                ImGui.TableNextColumn()
+                ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
+                Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
+                    type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip,
+                    setting,
+                    tostring(settingDefaults.Default)))
+                ImGui.TableNextColumn()
+                local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
+                if (settingDefaults.Type or ""):find("Array") then
+                    typeOfSetting = settingDefaults.Type:sub(7)
+                end
+
+                if settingDefaults ~= nil then
+                    setting, loadout_change, pressed = Ui.RenderOption(
+                        typeOfSetting,
+                        setting,
+                        id,
+                        settingDefaults.RequiresLoadoutChange or false,
+                        settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
+                    new_loadout = new_loadout or loadout_change
+                    any_pressed = any_pressed or pressed
+
+                    --  need to update setting here and notify module
+                    if pressed then
+                        Config:SetSetting(settingName, setting)
+
+                        if new_loadout then
+                            Modules:ExecModule("Class", "RescanLoadout")
+                            new_loadout = false
+                        end
+                    end
+                else
+                    ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
+                end
+            end
+        end
+        ImGui.EndTable()
+    end
 end
 
 -- TODO: Figure this out. We can load these at the start, but we will also need to update the self.Settings table when we change a setting
@@ -168,7 +230,6 @@ function OptionsUI:GetCombinedCurrentSettings()
     for name, setting in pairs(Config.settings) do
         self.settings[name] = setting
     end
-
     -- get the current setting value from each module's config file
     for _, module in pairs(OptionsUI.CustomModuleOrder) do
         local moduleSettings = Modules:ExecModule(module, "GetSettings") --These are the actual setting values from the character specific files
