@@ -1178,7 +1178,7 @@ function Module:Render()
 
     if ImGui.CollapsingHeader("Config Options") then
         if self.ModuleLoaded then
-            _, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
+            Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
         end
     end
 end

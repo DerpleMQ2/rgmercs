@@ -190,7 +190,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                         ImGui.Indent()
 
                         if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                            _, _ = Ui.RenderModuleSettings("Core", Config.DefaultConfig, Config.SettingCategories, false, true)
+                            Ui.RenderModuleSettings("Core", Config.DefaultConfig, Config.SettingCategories, false, true)
                         end
                         if Config:GetSetting('ShowAllOptionsMain') then
                             if Config.Globals.SubmodulesLoaded then
@@ -203,7 +203,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                                         ImGui.PushID(n .. "_config_hdr")
                                         if s and submoduleDefaults[n] and submoduleCategories[n] then
                                             if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                                _, _ = Ui.RenderModuleSettings(n, submoduleDefaults[n], submoduleCategories[n], true)
+                                                Ui.RenderModuleSettings(n, submoduleDefaults[n], submoduleCategories[n], true)
                                             end
                                         end
                                         ImGui.PopID()
