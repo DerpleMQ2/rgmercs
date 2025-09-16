@@ -799,8 +799,6 @@ end
 --- @param hideControls? boolean Whether to hide certain controls in the UI.
 --- @param showMainOptions? boolean Whether to show the main options in the UI.
 ---
---- @return boolean: any_pressed was anythign pressed?
---- @return boolean: requires_new_loadout do we require a new loadout?
 function Ui.RenderModuleSettings(module, defaults, categories, hideControls, showMainOptions)
     local settings = Config:GetModuleSettings(module)
     local any_pressed = false
@@ -809,9 +807,12 @@ function Ui.RenderModuleSettings(module, defaults, categories, hideControls, sho
 
     if any_pressed then
         Config:SaveModuleSettings(module, settings)
-    end
 
-    return any_pressed, requires_new_loadout
+        if requires_new_loadout then
+            Logger.log_info("Settings change requires a new loadout to be applied.")
+            Modules:ExecModule("Class", "RescanLoadout")
+        end
+    end
 end
 
 --- Renders the settings UI for the Ui module.

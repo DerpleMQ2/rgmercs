@@ -149,8 +149,7 @@ function Module:Render()
         ImGui.Separator()
 
         if ImGui.CollapsingHeader("Config Options") then
-            _, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig,
-                self.SettingCategories)
+            Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
         end
     end
 end

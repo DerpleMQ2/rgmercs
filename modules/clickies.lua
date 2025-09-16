@@ -1017,7 +1017,7 @@ function Module:Render()
     self:RenderClickiesWithConditions("Clickies", Config:GetSetting('Clickies'))
 
     if ImGui.CollapsingHeader("Config Options") then
-        _, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
+        Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
     end
 end
 

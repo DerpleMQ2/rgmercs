@@ -642,11 +642,7 @@ function Module:Render()
         ImGui.Separator()
 
         if ImGui.CollapsingHeader("Class Options") then
-            pressed, loadoutChange = Ui.RenderModuleSettings(self._name,
-                self.ClassConfig.DefaultConfig, self.SettingCategories)
-            if pressed then
-                self.TempSettings.NewCombatMode = self.TempSettings.NewCombatMode or loadoutChange
-            end
+            Ui.RenderModuleSettings(self._name, self.ClassConfig.DefaultConfig, self.SettingCategories)
         end
     end
 end

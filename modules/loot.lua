@@ -216,7 +216,7 @@ function Module:Render()
 	Ui.RenderPopSetting(self._name)
 
 	if ImGui.CollapsingHeader("Config Options") then
-		_, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
+		Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
 	end
 end
 
