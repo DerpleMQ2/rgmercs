@@ -4,6 +4,7 @@ local Config              = require('utils.config')
 local Ui                  = require('utils.ui')
 local Icons               = require('mq.ICONS')
 local Modules             = require('utils.modules')
+local Strings             = require('utils.strings')
 local Set                 = require("mq.Set")
 
 -- Using the following terms:
@@ -14,6 +15,7 @@ local Set                 = require("mq.Set")
 local OptionsUI           = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
 OptionsUI.__index         = OptionsUI
 OptionsUI.selectedGroup   = "General"
+OptionsUI.configFilter    = ""
 OptionsUI.Groups          = { --- Add a default of the same name for any key that has nothing in its table once these are finished
     {
         Name = "General",
@@ -88,6 +90,8 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
     },
 }
 
+OptionsUI.FilteredGroups  = OptionsUI.Groups
+
 OptionsUI.GroupsNameToIDs = {}
 
 for id, group in ipairs(OptionsUI.Groups) do
@@ -115,6 +119,77 @@ OptionsUI.CustomModuleOrder = { "Movement", "Pull", "Drag", "Mez", "Charm", "Cli
 
 -- Note... plan on moving functions to proper libraries as necessary later
 
+function OptionsUI:ApplySearchFilter()
+    self.FilteredGroups = self.Groups
+
+    if self.configFilter:len() > 0 then
+        local filter = self.configFilter:lower()
+        local filtered = {}
+
+        for _, group in ipairs(self.Groups) do
+            local groupNameLower = group.Name:lower()
+            local groupMatches = groupNameLower:find(filter, 1, true) ~= nil or (group.Desciption or ""):lower():find(filter, 1, true) ~= nil
+
+            local newGroup = {
+                Name = group.Name,
+                Desciption = group.Desciption,
+                Icon = group.Icon,
+                Headers = {},
+            }
+
+            for header, categories in pairs(group.Headers) do
+                local headerLower = header:lower()
+                local headerMatches = headerLower:find(filter, 1, true) ~= nil
+
+                local newCategories = {}
+
+                for _, category in ipairs(categories) do
+                    local categoryLower = category:lower()
+                    local categoryMatches = categoryLower:find(filter, 1, true) ~= nil
+
+                    local settingsForCategory = Config:GetAllSettingsForCategory(category)
+                    local matchingSettings = {}
+
+                    for _, settingName in ipairs(settingsForCategory or {}) do
+                        local settingDefaults = Config:GetSettingDefaults(settingName)
+                        local settingDisplayNameLower = (settingDefaults.DisplayName or ""):lower()
+                        local settingTooltipLower = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or (settingDefaults.Tooltip or "")):lower()
+
+                        if settingDisplayNameLower:find(filter, 1, true) ~= nil or
+                            settingTooltipLower:find(filter, 1, true) ~= nil then
+                            table.insert(matchingSettings, settingName)
+                        end
+                    end
+
+                    if categoryMatches or #matchingSettings > 0 then
+                        table.insert(newCategories, category)
+                    end
+                end
+
+                if headerMatches or #newCategories > 0 then
+                    newGroup.Headers[header] = newCategories
+                end
+            end
+
+            if groupMatches or next(newGroup.Headers) ~= nil then
+                print("Adding group:", newGroup.Name, groupMatches, next(newGroup.Headers) ~= nil)
+
+                print(Strings.TableToString(newGroup.Headers))
+
+
+                table.insert(filtered, newGroup)
+            end
+        end
+
+        self.FilteredGroups = filtered
+
+        OptionsUI.GroupsNameToIDs = {}
+
+        for id, group in ipairs(OptionsUI.FilteredGroups) do
+            OptionsUI.GroupsNameToIDs[group.Name] = id
+        end
+    end
+end
 
 function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     if ImGui.Selectable(groupLabel, self.selectedGroup == groupName) then
@@ -130,7 +205,7 @@ function OptionsUI:RenderCategorySeperator(category)
 end
 
 function OptionsUI:RenderOptionsPanel(groupName)
-    for header, options in pairs(self.Groups[self.GroupsNameToIDs[groupName]].Headers) do
+    for header, options in pairs(self.FilteredGroups[self.GroupsNameToIDs[groupName]] and (self.FilteredGroups[self.GroupsNameToIDs[groupName]].Headers or {}) or {}) do
         local any_options_in_header = false
         for _, category in ipairs(options) do
             if #Config:GetAllSettingsForCategory(category) > 0 then
@@ -198,40 +273,50 @@ function OptionsUI:RenderCategorySettings(category)
             local settingDefaults = Config:GetSettingDefaults(settingName)
             local setting         = Config:GetSetting(settingName)
             local id              = "##" .. settingName
-            if settingDefaults.Type ~= "Custom" then
-                ImGui.TableNextColumn()
-                ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
-                Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
-                    type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip,
-                    setting,
-                    tostring(settingDefaults.Default)))
-                ImGui.TableNextColumn()
-                local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
-                if (settingDefaults.Type or ""):find("Array") then
-                    typeOfSetting = settingDefaults.Type:sub(7)
-                end
+            local matchedFilter   = self.configFilter == ""
+            local settingTooltip  = type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip
 
-                if settingDefaults ~= nil then
-                    setting, loadout_change, pressed = Ui.RenderOption(
-                        typeOfSetting,
+            if settingDefaults.DisplayName:lower():find(self.configFilter, 1, true) ~= nil or
+                settingTooltip:lower():find(self.configFilter, 1, true) ~= nil then
+                matchedFilter = true
+            end
+
+            if matchedFilter then
+                if settingDefaults.Type ~= "Custom" then
+                    ImGui.TableNextColumn()
+                    ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
+                    Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
+                        settingTooltip,
                         setting,
-                        id,
-                        settingDefaults.RequiresLoadoutChange or false,
-                        settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
-                    new_loadout = new_loadout or loadout_change
-                    any_pressed = any_pressed or pressed
-
-                    --  need to update setting here and notify module
-                    if pressed then
-                        Config:SetSetting(settingName, setting)
-
-                        if new_loadout then
-                            Modules:ExecModule("Class", "RescanLoadout")
-                            new_loadout = false
-                        end
+                        tostring(settingDefaults.Default)))
+                    ImGui.TableNextColumn()
+                    local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
+                    if (settingDefaults.Type or ""):find("Array") then
+                        typeOfSetting = settingDefaults.Type:sub(7)
                     end
-                else
-                    ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
+
+                    if settingDefaults ~= nil then
+                        setting, loadout_change, pressed = Ui.RenderOption(
+                            typeOfSetting,
+                            setting,
+                            id,
+                            settingDefaults.RequiresLoadoutChange or false,
+                            settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
+                        new_loadout = new_loadout or loadout_change
+                        any_pressed = any_pressed or pressed
+
+                        --  need to update setting here and notify module
+                        if pressed then
+                            Config:SetSetting(settingName, setting)
+
+                            if new_loadout then
+                                Modules:ExecModule("Class", "RescanLoadout")
+                                new_loadout = false
+                            end
+                        end
+                    else
+                        ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
+                    end
                 end
             end
         end
@@ -239,89 +324,6 @@ function OptionsUI:RenderCategorySettings(category)
     end
 
     ImGui.EndChild()
-end
-
--- TODO: Figure this out. We can load these at the start, but we will also need to update the self.Settings table when we change a setting
--- -- At start, we will be doing double work when we update settings (like we are doing double on everything else).
--- -- Even after that, to write to the file *and* update this table will require some fuckery.
--- -- This is just going to be one of those integration issues and a trade-off for bucking modularity for settings.
-function OptionsUI:GetCombinedCurrentSettings()
-    -- get the current setting value from the RGMercs config file
-    for name, setting in pairs(Config.settings) do
-        self.settings[name] = setting
-    end
-    -- get the current setting value from each module's config file
-    for _, module in pairs(OptionsUI.CustomModuleOrder) do
-        local moduleSettings = Modules:ExecModule(module, "GetSettings") --These are the actual setting values from the character specific files
-
-        for name, setting in pairs(moduleSettings) do
-            self.settings[name] = setting
-        end
-    end
-end
-
-function OptionsUI:GetCombinedDefaultSettings()
-    -- Get the Default Configs from all modules + config lumped together.
-
-    -- Get Config settings copied into the new table, pull the keys and sort first so we don't have index number conflicts with modules
-    local sortedConfigKeys = {}
-    for name, setting in pairs(Config.DefaultConfig) do
-        self.DefaultConfigs[name] = setting
-        table.insert(sortedConfigKeys, name)
-    end
-
-    table.sort(sortedConfigKeys, function(k1, k2)
-        local s1, s2 = Config.DefaultConfig[k1], Config.DefaultConfig[k2]
-        if (s1.Index ~= nil or s2.Index ~= nil) and (s1.Index ~= s2.Index) then
-            return (s1.Index or 999) < (s2.Index or 999)
-        elseif s1.Category == s2.Category then
-            return (s1.DisplayName or "") < (s2.DisplayName or "")
-        else
-            return (s1.Category or "") < (s2.Category or "")
-        end
-    end)
-
-    for _, key in ipairs(sortedConfigKeys) do
-        local setting = self.DefaultConfigs[key]
-        table.insert(self.SettingNames, key)
-        if setting.Type ~= "Custom" then
-            self.SettingCategories:add(setting.Category)
-        end
-    end
-
-    -- now iterate over the module List, and do the same thing on a per-module basis
-
-    for _, module in pairs(OptionsUI.CustomModuleOrder) do
-        local moduleDefaults = Modules:ExecModule(module, "GetDefaultSettings") --This is a list of all settings, including their default value
-
-        for name, setting in pairs(moduleDefaults) do
-            self.DefaultConfigs[name] = setting
-        end
-
-        local sortedModuleKeys = {}
-        for name, _ in pairs(moduleDefaults) do
-            table.insert(sortedModuleKeys, name)
-        end
-
-        table.sort(sortedModuleKeys, function(k1, k2)
-            local s1, s2 = moduleDefaults[k1], moduleDefaults[k2]
-            if (s1.Index ~= nil or s2.Index ~= nil) and (s1.Index ~= s2.Index) then
-                return (s1.Index or 999) < (s2.Index or 999)
-            elseif s1.Category == s2.Category then
-                return (s1.DisplayName or "") < (s2.DisplayName or "")
-            else
-                return (s1.Category or "") < (s2.Category or "")
-            end
-        end)
-
-        for _, key in ipairs(sortedModuleKeys) do
-            local setting = moduleDefaults[key]
-            table.insert(self.SettingNames, key)
-            if setting.Type ~= "Custom" then
-                self.SettingCategories:add(setting.Category)
-            end
-        end
-    end
 end
 
 function OptionsUI:RenderCurrentTab()
@@ -347,9 +349,15 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             if ImGui.BeginChild("left##RGmercsOptions", ImGui.GetWindowContentRegionWidth() * .3, y - 1, ImGuiChildFlags.Border) then
                 local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersV, ImGuiTableFlags.ScrollY)
                 -- figure out icons once headings are finalized
+                local textChanged = false
+                self.configFilter, textChanged = ImGui.InputText("Search Configs###OptionsUISearchText", self.configFilter)
+                if textChanged then
+                    self:ApplySearchFilter()
+                end
+
                 if ImGui.BeginTable('configmenu##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
-                    for _, group in ipairs(self.Groups) do
+                    for _, group in ipairs(self.FilteredGroups) do
                         self:RenderGroupPanel(string.format("%s %s", group.Icon, group.Name), group.Name)
                         ImGui.TableNextColumn()
                     end
