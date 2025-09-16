@@ -890,8 +890,6 @@ function Module:RenderClickyHeaderIcon(clicky, headerPos)
 end
 
 function Module:RenderClickiesWithConditions(type, clickies)
-    --if ImGui.CollapsingHeader(type) then
-    --    ImGui.Indent()
     if not mq.TLO.Cursor() then
         ImGui.BeginDisabled(true)
     end
@@ -946,7 +944,6 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 ImGui.NewLine()
 
                                 self:RenderConditionTypesCombo(cond, condIdx)
-                                --if #cond.args > 0 or #self:GetLogicBlockTargetsByType(cond.type) > 0 then
                                 ImGui.Indent()
                                 ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
                                 ImGui.BeginChild("##clicky_cond_child_" .. clickyIdx .. "_" .. condIdx, ImVec2(0, 0),
@@ -956,9 +953,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 self:RenderConditionArgs(cond, condIdx, clickyIdx)
                                 ImGui.EndChild()
                                 ImGui.PopStyleVar(1)
-
                                 ImGui.Unindent()
-                                --end
                                 ImGui.TreePop()
                             else
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
@@ -968,13 +963,15 @@ function Module:RenderClickiesWithConditions(type, clickies)
                             self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions, headerPos)
                         end
                     end
-                    ImGui.Unindent()
+
                     if clicky.enabled == false then
                         ImGui.EndDisabled()
                     end
 
                     ImGui.EndChild()
                     ImGui.PopStyleVar(1)
+
+                    ImGui.Unindent()
                 end
 
                 self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, false)
