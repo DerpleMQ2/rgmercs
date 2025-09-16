@@ -604,6 +604,7 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         ImGui.PushID("##combo_setting_" .. id)
         ---@type string[]
         local comboOptions = args[1]
+        ImGui.SetNextItemWidth(-1)
         setting, pressed = ImGui.Combo("", setting, comboOptions)
         ImGui.PopID()
         new_loadout = ((pressed or false) and (requiresLoadoutChange))
