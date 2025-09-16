@@ -1,14 +1,10 @@
-local mq      = require('mq')
-local ImGui   = require('ImGui')
-local Config  = require('utils.config')
-local Ui      = require('utils.ui')
-local Icons   = require('mq.ICONS')
-local Modules = require('utils.modules')
-local Set     = require("mq.Set")
-local Strings = require('utils.strings')
-
-
-
+local mq                  = require('mq')
+local ImGui               = require('ImGui')
+local Config              = require('utils.config')
+local Ui                  = require('utils.ui')
+local Icons               = require('mq.ICONS')
+local Modules             = require('utils.modules')
+local Set                 = require("mq.Set")
 
 -- Using the following terms:
 -- Group: Broad category of options, found on the left panel
@@ -130,10 +126,25 @@ function OptionsUI:RenderOptionsPanel(groupName)
     for header, options in pairs(self.Groups[self.GroupsNameToIDs[groupName]].Headers) do
         if ImGui.CollapsingHeader(header) then
             for _, category in ipairs(options) do
+                ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextPadding, ImVec2(15, 15))
+                ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextAlign, ImVec2(0.5, 0.5))
+
                 ImGui.SeparatorText(category)
-                ImGui.Separator()
+                ImGui.PopStyleVar(2)
+
+                --ImGui.Separator()
                 -- Render options for this category
+                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
+                ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 1.0)
+                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(15, 15))
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(25, 25))
+                ImGui.BeginChild("OptionsChild_" .. category, ImVec2(0, 0), bit32.bor(ImGuiChildFlags.Border, ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY),
+                    bit32.bor(ImGuiWindowFlags.None))
+                ImGui.PopStyleVar(4)
+
                 self:RenderCategorySettings(category)
+
+                ImGui.EndChild()
             end
             -- Render options for this header
         end
