@@ -172,11 +172,6 @@ function OptionsUI:ApplySearchFilter()
             end
 
             if groupMatches or next(newGroup.Headers) ~= nil then
-                print("Adding group:", newGroup.Name, groupMatches, next(newGroup.Headers) ~= nil)
-
-                print(Strings.TableToString(newGroup.Headers))
-
-
                 table.insert(filtered, newGroup)
             end
         end
