@@ -122,36 +122,34 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     end
 end
 
+function OptionsUI:RenderCategorySeperator(category)
+    ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextPadding, ImVec2(15, 15))
+    ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextAlign, ImVec2(0.5, 0.5))
+    ImGui.SeparatorText(category)
+    ImGui.PopStyleVar(2)
+end
+
 function OptionsUI:RenderOptionsPanel(groupName)
     for header, options in pairs(self.Groups[self.GroupsNameToIDs[groupName]].Headers) do
-        if ImGui.CollapsingHeader(header) then
+        local any_options_in_header = false
+        for _, category in ipairs(options) do
+            if #Config:GetAllSettingsForCategory(category) > 0 then
+                any_options_in_header = true
+                break
+            end
+        end
+
+        if any_options_in_header and ImGui.CollapsingHeader(header) then
             for _, category in ipairs(options) do
-                ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextPadding, ImVec2(15, 15))
-                ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextAlign, ImVec2(0.5, 0.5))
-
-                ImGui.SeparatorText(category)
-                ImGui.PopStyleVar(2)
-
-                --ImGui.Separator()
-                -- Render options for this category
-                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
-                ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 1.0)
-                ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(15, 15))
-                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(25, 25))
-                ImGui.BeginChild("OptionsChild_" .. category, ImVec2(0, 0), bit32.bor(ImGuiChildFlags.Border, ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY),
-                    bit32.bor(ImGuiWindowFlags.None))
-                ImGui.PopStyleVar(4)
-
-                self:RenderCategorySettings(category)
-
-                ImGui.EndChild()
+                if #Config:GetAllSettingsForCategory(category) > 0 then
+                    self:RenderCategorySeperator(category)
+                    -- Render options for this category
+                    self:RenderCategorySettings(category)
+                end
             end
             -- Render options for this header
         end
     end
-
-
-
 
     -- original plan:
     -- check headers in groups table against combined settings table
@@ -176,6 +174,15 @@ function OptionsUI:RenderCategorySettings(category)
     local windowWidth         = ImGui.GetWindowWidth()
     local numCols             = math.max(1, math.floor(windowWidth / renderWidth))
     local settingsForCategory = Config:GetAllSettingsForCategory(category)
+
+    ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
+    ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 1.0)
+    ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(15, 15))
+    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(25, 25))
+    ImGui.BeginChild("OptionsChild_" .. category, ImVec2(0, 0),
+        bit32.bor(ImGuiChildFlags.Border, ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY),
+        bit32.bor(ImGuiWindowFlags.None))
+    ImGui.PopStyleVar(4)
 
     if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
@@ -230,6 +237,8 @@ function OptionsUI:RenderCategorySettings(category)
         end
         ImGui.EndTable()
     end
+
+    ImGui.EndChild()
 end
 
 -- TODO: Figure this out. We can load these at the start, but we will also need to update the self.Settings table when we change a setting
