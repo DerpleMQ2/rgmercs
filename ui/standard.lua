@@ -90,17 +90,23 @@ function StandardUI:RenderWindowControls()
     local position = ImGui.GetCursorPosVec()
     local smallButtonSize = 32
 
-    local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 2), smallButtonSize)
+    local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 3), smallButtonSize)
     ImGui.SetCursorPos(windowControlPos)
+
+    if ImGui.SmallButton(Icons.MD_SETTINGS) then
+        Config:SetSetting('EnableOptionsUI', not Config:GetSetting('EnableOptionsUI'))
+    end
+    ImGui.SameLine()
 
     if ImGui.SmallButton((Config:GetSetting('MainWindowLocked') or false) and Icons.FA_LOCK or Icons.FA_UNLOCK) then
         Config:SetSetting('MainWindowLocked', not Config:GetSetting('MainWindowLocked'))
     end
-
     ImGui.SameLine()
+
     if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
         Config.Globals.Minimized = true
     end
+
     Ui.Tooltip("Minimize Main Window")
 
     ImGui.SetCursorPos(position)
