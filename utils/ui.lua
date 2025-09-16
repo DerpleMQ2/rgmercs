@@ -723,7 +723,7 @@ function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
                                 local arrayType = defaults[k].Type:sub(7)
 
                                 for idx, _ in ipairs(settings[k] or {}) do
-                                    ImGui.Text(string.format(defaults[k].DisplayName or "None %d", idx))
+                                    ImGui.Text(string.format("%s", defaults[k].DisplayName or (string.format("None %d", idx))))
                                     Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
                                         type(defaults[k].Tooltip) == 'function' and defaults[k].Tooltip() or defaults[k].Tooltip,
                                         k,

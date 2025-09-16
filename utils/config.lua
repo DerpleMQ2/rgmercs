@@ -24,47 +24,49 @@ Config.SettingsLoadComplete                           = false
 Config.TempSettings                                   = {}
 Config.TempSettings.SettingToModuleCache              = {}
 Config.TempSettings.SettingsLowerToNameAndModuleCache = {}
+Config.TempSettings.SettingsCategoryToSettingMapping  = {}
+
 
 -- Global State
-Config.Globals                                        = {}
-Config.Globals.MainAssist                             = ""
-Config.Globals.ScriptDir                              = ""
-Config.Globals.AutoTargetID                           = 0
-Config.Globals.ForceTargetID                          = 0
-Config.Globals.LastPulledID                           = 0
-Config.Globals.SubmodulesLoaded                       = false
-Config.Globals.PauseMain                              = false
-Config.Globals.LastMove                               = nil
-Config.Globals.BackOffFlag                            = false
-Config.Globals.InMedState                             = false
-Config.Globals.LastPetCmd                             = 0
-Config.Globals.LastFaceTime                           = 0
-Config.Globals.CurZoneId                              = mq.TLO.Zone.ID()
-Config.Globals.CurInstance                            = mq.TLO.Me.Instance()
-Config.Globals.CurLoadedChar                          = mq.TLO.Me.DisplayName()
-Config.Globals.CurLoadedClass                         = mq.TLO.Me.Class.ShortName()
-Config.Globals.CurServer                              = mq.TLO.EverQuest.Server():gsub(" ", "")
-Config.Globals.CastResult                             = 0
-Config.Globals.BuildType                              = mq.TLO.MacroQuest.BuildName()
-Config.Globals.Minimized                              = false
-Config.Globals.LastUsedSpell                          = "None"
-Config.Globals.CorpseConned                           = false
-Config.Globals.RezzedCorpses                          = {}
+Config.Globals                       = {}
+Config.Globals.MainAssist            = ""
+Config.Globals.ScriptDir             = ""
+Config.Globals.AutoTargetID          = 0
+Config.Globals.ForceTargetID         = 0
+Config.Globals.LastPulledID          = 0
+Config.Globals.SubmodulesLoaded      = false
+Config.Globals.PauseMain             = false
+Config.Globals.LastMove              = nil
+Config.Globals.BackOffFlag           = false
+Config.Globals.InMedState            = false
+Config.Globals.LastPetCmd            = 0
+Config.Globals.LastFaceTime          = 0
+Config.Globals.CurZoneId             = mq.TLO.Zone.ID()
+Config.Globals.CurInstance           = mq.TLO.Me.Instance()
+Config.Globals.CurLoadedChar         = mq.TLO.Me.DisplayName()
+Config.Globals.CurLoadedClass        = mq.TLO.Me.Class.ShortName()
+Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
+Config.Globals.CastResult            = 0
+Config.Globals.BuildType             = mq.TLO.MacroQuest.BuildName()
+Config.Globals.Minimized             = false
+Config.Globals.LastUsedSpell         = "None"
+Config.Globals.CorpseConned          = false
+Config.Globals.RezzedCorpses         = {}
 
 -- Constants
-Config.Constants                                      = {}
-Config.Constants.RGCasters                            = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
+Config.Constants                     = {}
+Config.Constants.RGCasters           = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
     "SHM", "WIZ", })
-Config.Constants.RGMelee                              = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
-Config.Constants.RGHybrid                             = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
-Config.Constants.RGTank                               = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGPetClass                           = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
-Config.Constants.RGMezAnims                           = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
-Config.Constants.ModRods                              = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
-Config.Constants.SpellBookSlots                       = 1120
-Config.Constants.CastCompleted                        = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
+Config.Constants.RGMelee             = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
+Config.Constants.RGHybrid            = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
+Config.Constants.RGTank              = Set.new({ "WAR", "PAL", "SHD", })
+Config.Constants.RGPetClass          = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
+Config.Constants.RGMezAnims          = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
+Config.Constants.ModRods             = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
+Config.Constants.SpellBookSlots      = 1120
+Config.Constants.CastCompleted       = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
 
-Config.Constants.CastResults                          = {
+Config.Constants.CastResults         = {
     ['CAST_RESULT_NONE'] = 0,
     ['CAST_SUCCESS']     = 1,
     ['CAST_BLOCKED']     = 2,
@@ -90,7 +92,7 @@ Config.Constants.CastResults                          = {
     ['CAST_OVERWRITTEN'] = 22,
 }
 
-Config.Constants.CastResultsIdToName                  = {}
+Config.Constants.CastResultsIdToName = {}
 for k, v in pairs(Config.Constants.CastResults) do Config.Constants.CastResultsIdToName[v] = k end
 
 Config.Constants.ExpansionNameToID = {
@@ -2133,6 +2135,10 @@ function Config:GetAllModuleSettingCategories()
     return self.moduleSettingCategories or {}
 end
 
+function Config:GetAllSettingsForCategory(category)
+    return Config.TempSettings.SettingsCategoryToSettingMapping[category] or {}
+end
+
 function Config:SettingsLoaded()
     return self.SettingsLoadComplete
 end
@@ -2311,6 +2317,12 @@ function Config.ResolveDefaults(defaults, settings)
     return settings, changed
 end
 
+function Config:RegisterCategoryToSettingMapping(setting)
+    local category = Config:GetSettingDefaults(setting).Category or "General"
+    Config.TempSettings.SettingsCategoryToSettingMapping[category] = Config.TempSettings.SettingsCategoryToSettingMapping[category] or {}
+    table.insert(Config.TempSettings.SettingsCategoryToSettingMapping[category], setting)
+end
+
 function Config:RegisterModuleSettings(module, settings, defaultSettings, settingsCategories, firstSaveRequired)
     if self.moduleSettings[module] then
         Logger.log_error("\arModule %s has already registered settings!", module)
@@ -2331,9 +2343,11 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, settin
                 "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Keeping first but this should be fixed!",
                 setting,
                 Config.TempSettings.SettingToModuleCache[setting], module)
+            self:RegisterCategoryToSettingMapping(setting)
         else
             Config.TempSettings.SettingToModuleCache[setting] = module
             Config.TempSettings.SettingsLowerToNameAndModuleCache[setting:lower()] = setting
+            self:RegisterCategoryToSettingMapping(setting)
         end
     end
 
