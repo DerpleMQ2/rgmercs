@@ -1875,7 +1875,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
     Core.DoCmd("/nav locyxz %s, log=off", loc)
     mq.delay(1000, function() return mq.TLO.Navigation.Active() end)
 
-    local maxMove = self.settings.MaxMoveTime * 1000
+    local maxMove = Config:GetSetting('MaxMoveTime') * 1000
     while mq.TLO.Navigation.Active() do
         Logger.log_verbose("NavToWaypoint Aggro Count: %d", Targeting.GetXTHaterCount())
 
