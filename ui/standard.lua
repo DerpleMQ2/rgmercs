@@ -1,4 +1,5 @@
 local mq           = require('mq')
+local GitCommit    = require('extras.version')
 local ImGui        = require('ImGui')
 local Config       = require('utils.config')
 local Ui           = require('utils.ui')
