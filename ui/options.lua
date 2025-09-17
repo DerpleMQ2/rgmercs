@@ -21,6 +21,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "General",
         Desciption = "General and Misc Settings",
         Icon = Icons.FA_COGS,
+        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/settingsicon.png"),
         Headers = {
             ['General'] = { "General Settings", },
             ['Announcements'] = { "Announcements", }, -- group announce stuff
@@ -34,6 +35,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Movement",
         Desciption = "Following, Medding, Pulling",
         Icon = Icons.MD_DIRECTIONS_RUN,
+        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/movementicon.png"),
         Headers = {
             ['Following'] = { "Chase", "Camp", },
             ['Meditation'] = { "Med Rules", "Med Thresholds", },
@@ -58,6 +60,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Abilities",
         Desciption = "Spells, Songs, Discs, AA",
         Icon = Icons.FA_HEART,
+        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/stafficon.png"),
         Headers = {
             ['Common'] = { "Common Rules", "Under the Hood", },
             ['Buffs'] = { "Buff Rules", "Self", "Pet", "Group", },
@@ -74,6 +77,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Items",
         Desciption = "Clickies, Bandolier Swaps",
         Icon = Icons.MD_RESTAURANT_MENU,
+        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/itemicon.png"),
         Headers = {
             ['Clickies(Pre-Configured)'] = { "Clickies", },
             ['Bandolier'] = { "Swaps", },
@@ -189,13 +193,14 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
 end
 
 function OptionsUI:RenderGroupPanelWithImage(groupLabel, groupName, groupImage)
-    local _, pressed = ImGui.Selectable("##" .. groupLabel, self.selectedGroup == groupName)
+    local _, pressed = ImGui.Selectable("##" .. groupLabel, self.selectedGroup == groupName, ImGuiSelectableFlags.None, ImVec2(0, 20))
+
     if pressed then
         self.selectedGroup = groupName
     end
 
     ImGui.SameLine()
-    ImGui.Image(groupImage:GetTextureID(), ImVec2(15, 15), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 0))
+    ImGui.Image(groupImage:GetTextureID(), ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 0))
     ImGui.SameLine()
     ImGui.Text(groupLabel)
 end
