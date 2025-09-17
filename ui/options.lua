@@ -104,6 +104,8 @@ OptionsUI.settings          = {}
 OptionsUI.SettingNames      = {}
 OptionsUI.SettingCategories = Set.new({})
 OptionsUI.DefaultConfigs    = {}
+OptionsUI.FirstRender       = true
+
 --Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
 OptionsUI.CustomModuleOrder = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
@@ -131,65 +133,63 @@ end
 function OptionsUI:ApplySearchFilter()
     self.FilteredGroups = self.Groups
 
-    if self.configFilter:len() > 0 then
-        local filter = self.configFilter:lower()
-        local filtered = {}
+    local filter = self.configFilter:lower()
+    local filtered = {}
 
-        for _, group in ipairs(self.Groups) do
-            local groupNameLower = group.Name:lower()
-            local groupMatches = groupNameLower:find(filter, 1, true) ~= nil or (group.Description or ""):lower():find(filter, 1, true) ~= nil
+    for _, group in ipairs(self.Groups) do
+        local groupNameLower = group.Name:lower()
+        local groupMatches = groupNameLower:find(filter, 1, true) ~= nil or (group.Description or ""):lower():find(filter, 1, true) ~= nil
 
-            local newGroup = shallow_copy(group)
-            newGroup.Headers = {} -- clear headers for rebuilding
+        local newGroup = shallow_copy(group)
+        newGroup.Headers = {} -- clear headers for rebuilding
 
-            for header, categories in pairs(group.Headers) do
-                local headerLower = header:lower()
-                local headerMatches = headerLower:find(filter, 1, true) ~= nil
+        for header, categories in pairs(group.Headers) do
+            local headerLower = header:lower()
+            local headerMatches = headerLower:find(filter, 1, true) ~= nil
 
-                local newCategories = {}
+            local newCategories = {}
 
-                for _, category in ipairs(categories) do
-                    local categoryLower = category:lower()
-                    local categoryMatches = categoryLower:find(filter, 1, true) ~= nil
+            for _, category in ipairs(categories) do
+                local categoryLower = category:lower()
+                local categoryMatches = categoryLower:find(filter, 1, true) ~= nil
 
-                    local settingsForCategory = Config:GetAllSettingsForCategory(category)
-                    local matchingSettings = {}
+                local settingsForCategory = Config:GetAllSettingsForCategory(category)
+                local matchingSettings = {}
 
-                    for _, settingName in ipairs(settingsForCategory or {}) do
-                        local settingDefaults         = Config:GetSettingDefaults(settingName)
-                        local settingDisplayNameLower = (settingDefaults.DisplayName or ""):lower()
-                        local settingTooltipLower     = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or (settingDefaults.Tooltip or "")):lower()
-                        local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or
-                            (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
+                for _, settingName in ipairs(settingsForCategory or {}) do
+                    local settingDefaults         = Config:GetSettingDefaults(settingName)
+                    local settingDisplayNameLower = (settingDefaults.DisplayName or ""):lower()
+                    local settingTooltipLower     = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or (settingDefaults.Tooltip or "")):lower()
+                    local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or
+                        (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
 
-                        if showAdv and (settingDisplayNameLower:find(filter, 1, true) ~= nil or
-                                settingTooltipLower:find(filter, 1, true) ~= nil) then
-                            table.insert(matchingSettings, settingName)
-                        end
-                    end
-
-                    if categoryMatches or #matchingSettings > 0 then
-                        table.insert(newCategories, category)
+                    if showAdv and (settingDisplayNameLower:find(filter, 1, true) ~= nil or
+                            settingTooltipLower:find(filter, 1, true) ~= nil) then
+                        table.insert(matchingSettings, settingName)
                     end
                 end
 
-                if headerMatches or #newCategories > 0 then
-                    newGroup.Headers[header] = newCategories
+                if (self.configFilter:len() > 0 and categoryMatches) or #matchingSettings > 0 then
+                    table.insert(newCategories, category)
                 end
             end
 
-            if groupMatches or next(newGroup.Headers) ~= nil then
-                table.insert(filtered, newGroup)
+            if (self.configFilter:len() > 0 and headerMatches) or #newCategories > 0 then
+                newGroup.Headers[header] = newCategories
             end
         end
 
-        self.FilteredGroups = filtered
-
-        OptionsUI.GroupsNameToIDs = {}
-
-        for id, group in ipairs(OptionsUI.FilteredGroups) do
-            OptionsUI.GroupsNameToIDs[group.Name] = id
+        if groupMatches or next(newGroup.Headers) ~= nil then
+            table.insert(filtered, newGroup)
         end
+    end
+
+    self.FilteredGroups = filtered
+
+    OptionsUI.GroupsNameToIDs = {}
+
+    for id, group in ipairs(OptionsUI.FilteredGroups) do
+        OptionsUI.GroupsNameToIDs[group.Name] = id
     end
 end
 
@@ -382,6 +382,11 @@ end
 
 function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     local shouldDrawGUI = true
+
+    if self.FirstRender then
+        self:ApplySearchFilter()
+        self.FirstRender = false
+    end
 
     if not Config.Globals.Minimized then
         local flags = ImGuiWindowFlags.None
