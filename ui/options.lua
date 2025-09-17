@@ -35,7 +35,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Movement",
         Desciption = "Following, Medding, Pulling",
         Icon = Icons.MD_DIRECTIONS_RUN,
-        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/movementicon.png"),
+        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/followicon.png"),
         Headers = {
             ['Following'] = { "Chase", "Camp", },
             ['Meditation'] = { "Med Rules", "Med Thresholds", },
@@ -194,16 +194,40 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
 end
 
 function OptionsUI:RenderGroupPanelWithImage(groupLabel, groupName, groupImage)
-    local _, pressed = ImGui.Selectable("##" .. groupLabel, self.selectedGroup == groupName, ImGuiSelectableFlags.None, ImVec2(0, 20))
+    local selectableHeight = 40
+    local iconSize         = 20
+    local cursorScreenPos  = ImGui.GetCursorScreenPosVec()
+    local textColStyle     = ImGui.GetStyleColorVec4(ImGuiCol.Text)
+    local currentStyle     = ImGui.GetStyle()
+
+    local _, pressed       = ImGui.Selectable("##" .. groupLabel, self.selectedGroup == groupName, ImGuiSelectableFlags.None, ImVec2(0, selectableHeight))
 
     if pressed then
         self.selectedGroup = groupName
     end
 
-    ImGui.SameLine()
-    ImGui.Image(groupImage:GetTextureID(), ImVec2(20, 20), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 0))
-    ImGui.SameLine()
-    ImGui.Text(groupLabel)
+    local draw_list = ImGui.GetWindowDrawList()
+
+    local _, label_y = ImGui.CalcTextSize(groupLabel)
+    local midLabelY = math.floor((selectableHeight - label_y) / 2) or 0
+    local midIconY = math.floor((selectableHeight - iconSize) / 2) or 0
+
+    -- set the text color from the theme
+    local labelCol = IM_COL32(math.floor(textColStyle.x * 255), math.floor(textColStyle.y * 255), math.floor(textColStyle.z * 255), math.floor(textColStyle.w * 255))
+
+    local currentXPos = cursorScreenPos.x + currentStyle.ItemSpacing.x
+    -- draw the icon png
+    draw_list:AddImage(groupImage:GetTextureID(),
+        ImVec2(currentXPos, cursorScreenPos.y + midIconY),
+        ImVec2(currentXPos + iconSize, cursorScreenPos.y + midIconY + iconSize),
+        ImVec2(0, 0), ImVec2(1, 1),
+        IM_COL32(255, 255, 255, 255))
+
+    -- move the cursor to the right of the icon
+    currentXPos = currentXPos + iconSize + currentStyle.ItemSpacing.x
+
+    -- render the label text
+    draw_list:AddText(ImVec2(currentXPos, cursorScreenPos.y + midLabelY), labelCol, groupLabel)
 end
 
 function OptionsUI:RenderCategorySeperator(category)
