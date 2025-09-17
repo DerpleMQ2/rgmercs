@@ -1,27 +1,32 @@
-local mq                  = require('mq')
-local ImGui               = require('ImGui')
-local Config              = require('utils.config')
-local Ui                  = require('utils.ui')
-local Icons               = require('mq.ICONS')
-local Modules             = require('utils.modules')
-local Strings             = require('utils.strings')
-local Set                 = require("mq.Set")
+local mq                = require('mq')
+local ImGui             = require('ImGui')
+local Config            = require('utils.config')
+local Ui                = require('utils.ui')
+local Icons             = require('mq.ICONS')
+local Modules           = require('utils.modules')
+local Strings           = require('utils.strings')
+local Set               = require("mq.Set")
 
 -- Using the following terms:
 -- Group: Broad category of options, found on the left panel
 -- Header: Which collapsing header on the right panel the option should be listed under
 -- Category: Will use dividers under each header to further organize options.
 
-local OptionsUI           = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
-OptionsUI.__index         = OptionsUI
-OptionsUI.selectedGroup   = "General"
-OptionsUI.configFilter    = ""
+local OptionsUI         = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
+OptionsUI.__index       = OptionsUI
+OptionsUI.selectedGroup = "General"
+OptionsUI.configFilter  = ""
+
+function OptionsUI.LoadIcon(icon)
+    return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
+end
+
 OptionsUI.Groups          = { --- Add a default of the same name for any key that has nothing in its table once these are finished
     {
         Name = "General",
         Desciption = "General and Misc Settings",
         Icon = Icons.FA_COGS,
-        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/settingsicon.png"),
+        IconImage = OptionsUI.LoadIcon("settingsicon"),
         Headers = {
             ['General'] = { "General Settings", },
             ['Announcements'] = { "Announcements", }, -- group announce stuff
@@ -35,7 +40,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Movement",
         Desciption = "Following, Medding, Pulling",
         Icon = Icons.MD_DIRECTIONS_RUN,
-        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/followicon.png"),
+        IconImage = OptionsUI.LoadIcon("followicon"),
         Headers = {
             ['Following'] = { "Chase", "Camp", },
             ['Meditation'] = { "Med Rules", "Med Thresholds", },
@@ -47,7 +52,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Combat",
         Desciption = "Assisting, Positioning",
         Icon = Icons.FA_HEART,
-        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/swordicon.png"),
+        IconImage = OptionsUI.LoadIcon("swordicon"),
         Headers = {
             ['Targeting'] = { "Targeting", },     -- Auto engage, med break, stay on target, etc
             ['Assisting'] = { "Assisting", },     -- this will include pet and merc percentages/commands
@@ -60,7 +65,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Abilities",
         Desciption = "Spells, Songs, Discs, AA",
         Icon = Icons.FA_HEART,
-        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/stafficon.png"),
+        IconImage = OptionsUI.LoadIcon("stafficon"),
         Headers = {
             ['Common'] = { "Common Rules", "Under the Hood", },
             ['Pet'] = { "Summoning", "Buffs", "Swarm", },
@@ -78,7 +83,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Items",
         Desciption = "Clickies, Bandolier Swaps",
         Icon = Icons.MD_RESTAURANT_MENU,
-        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/itemicon.png"),
+        IconImage = OptionsUI.LoadIcon("itemicon"),
         Headers = {
             ['Clickies(Pre-Configured)'] = { "Clickies", },
             ['Bandolier'] = { "Swaps", },
@@ -195,7 +200,7 @@ end
 
 function OptionsUI:RenderGroupPanelWithImage(groupLabel, groupName, groupImage)
     local selectableHeight = 40
-    local iconSize         = 20
+    local iconSize         = 30
     local cursorScreenPos  = ImGui.GetCursorScreenPosVec()
     local textColStyle     = ImGui.GetStyleColorVec4(ImGuiCol.Text)
     local currentStyle     = ImGui.GetStyle()
