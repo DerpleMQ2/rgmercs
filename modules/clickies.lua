@@ -943,7 +943,6 @@ function Module:RenderClickiesWithConditions(type, clickies)
                             local headerPos = ImGui.GetCursorPosVec()
                             if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
-                                ImGui.NewLine()
 
                                 self:RenderConditionTypesCombo(cond, condIdx)
                                 ImGui.Indent()
@@ -959,7 +958,6 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 ImGui.TreePop()
                             else
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
-                                ImGui.NewLine()
                             end
 
                             self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions, headerPos)

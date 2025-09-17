@@ -1019,6 +1019,7 @@ function Ui.Tooltip(desc)
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
     end
+    ImGui.NewLine()
 end
 
 --- Renders text as strikethrough
