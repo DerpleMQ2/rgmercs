@@ -19,6 +19,8 @@ Module.SaveRequested     = nil
 Module.DefaultConfig     = {
     ['DoDrag']                                 = {
         DisplayName = "Drag Corpses",
+        Group = "Movement",
+        Header = "Drag",
         Category = "Drag",
         Tooltip = "Enable Dragging Corpses with you",
         Index = 1,
@@ -28,6 +30,8 @@ Module.DefaultConfig     = {
     },
     ['DoSearchDrag']                           = {
         DisplayName = "Use Spawn Search Dragging",
+        Group = "Movement",
+        Header = "Drag",
         Category = "Drag",
         Tooltip = "Use Search to find drag targets",
         Index = 3,
@@ -37,6 +41,8 @@ Module.DefaultConfig     = {
     },
     ['SearchDrag']                             = {
         DisplayName = "Spawn Search",
+        Group = "Movement",
+        Header = "Drag",
         Category = "Drag",
         Tooltip = "Enable Dragging Corpses with you",
         Index = 4,
@@ -47,6 +53,8 @@ Module.DefaultConfig     = {
     },
     ['DoDanNetDrag']                           = {
         DisplayName = "Use DanNet Dragging",
+        Group = "Movement",
+        Header = "Drag",
         Category = "Drag",
         Tooltip = "Use DanNet to find drag targets",
         Index = 2,

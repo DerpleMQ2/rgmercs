@@ -19,12 +19,15 @@ OptionsUI.configFilter    = ""
 OptionsUI.Groups          = { --- Add a default of the same name for any key that has nothing in its table once these are finished
     {
         Name = "General",
-        Desciption = "General Settings",
+        Desciption = "General and Misc Settings",
         Icon = Icons.FA_COGS,
         Headers = {
-            ['General'] = { "General", },
-            ['General2'] = { "General2", },
-            ['General3'] = { "General3", },
+            ['General'] = { "General Settings", },
+            ['Announcing'] = { "Announce", },         -- group announce stuff
+            ['Interface'] = { "Interface", },         -- ui stuff
+            ['Loot(Emu)'] = { "Loot", },
+            ['Misc'] = { "Other", },                  -- ??? profit
+            ['Uncategorized'] = { "Uncategorized", }, -- settings from custom configs that don't have proper group/header
         },
     },
     {
@@ -33,9 +36,9 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Icon = Icons.MD_DIRECTIONS_RUN,
         Headers = {
             ['Following'] = { "Chase", "Camp", },
-            ['Meditation'] = { "Behavior", "Thresholds", },
-            ['Drag'] = {},
-            ['Pulling'] = { "Behavior", "Puller", "Group", "Distance", "Targets", },
+            ['Meditation'] = { "Med Rules", "Med Thresholds", },
+            ['Drag'] = { "Drag", },
+            ['Pulling'] = { "Pull Rules", "Puller Vitals", "Group Vitals", "Distance", "Targets", },
         },
     },
     {
@@ -43,11 +46,11 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Desciption = "Assisting, Positioning",
         Icon = Icons.FA_HEART,
         Headers = {
-            ['Targeting'] = { "General", },                        -- Auto engage, med break, stay on target, etc
-            ['Assisting'] = { "General", },                        -- this will include pet and merc percentages/commands
-            ['Positioning'] = { "General", "Tanking", "Events", }, -- stick, face, etc
-            ['Burning'] = { "General", },
-            ['Tanking'] = { "General", },
+            ['Targeting'] = { "Targeting", },     -- Auto engage, med break, stay on target, etc
+            ['Assisting'] = { "Assisting", },     -- this will include pet and merc percentages/commands
+            ['Positioning'] = { "Positioning", }, -- stick, face, etc
+            ['Burning'] = { "Burning", },
+            ['Tanking'] = { "Tanking", },
         },
     },
     {
@@ -55,15 +58,15 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Desciption = "Spells, Songs, Discs, AA",
         Icon = Icons.FA_HEART,
         Headers = {
-            ['General'] = { "Behavior", "Under the Hood", },
-            ['Buffs'] = { "General", "Self", "Pet", "Group", },
-            ['Debuffs'] = { "General", "Slow", "Resist", "Snare", "Dispel", }, -- Resist i.e, Malo, Tash, druid
-            ['Healing'] = { "General", "Thresholds", "Curing", "Rezzing", },
-            ['Damage'] = { "General", "Direct", "AE", "Over Time", "Taps", },
+            ['Common'] = { "Common Rules", "Under the Hood", },
+            ['Buffs'] = { "Buff Rules", "Self", "Pet", "Group", },
+            ['Debuffs'] = { "Debuff Rules", "Slow", "Resist", "Snare", "Dispel", }, -- Resist i.e, Malo, Tash, druid
+            ['Healing'] = { "Healing Rules", "Healing Thresholds", "Curing", "Rezzing", },
+            ['Damage'] = { "Direct", "AE", "Over Time", "Taps", },
             ['Tanking'] = { "Hate Tools", "Defenses", },
             ['Utility'] = { "Hate Reduction", "Emergency", "Unique", }, -- Unique Example: Canni, Paragon, etc.
-            ['Mez'] = { "General", "Range", "Target", },
-            ['Charm'] = { "General", "Range", "Target", },
+            ['Mez'] = { "Mez General", "Mez Targets", },
+            ['Charm'] = { "Charm General", "Charm Targets", },
         },
     },
     {
@@ -73,19 +76,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Headers = {
             ['Clickies(Pre-Configured)'] = { "Clickies", },
             ['Bandolier'] = { "Swaps", },
-            ['Instruments'] = {},
-        },
-    },
-    {
-        Name = "Miscellaneous",
-        Desciption = "Loot, UI, Communication",
-        Icon = Icons.FA_COGS,
-        Headers = {
-            ['Loot(Emu)'] = {},
-            ['Announcing'] = { "General", },          -- group announce stuff
-            ['Interface'] = { "General", },           -- ui stuff
-            ['Other'] = { "Other", },                 -- ??? profit
-            ['Uncategorized'] = { "Uncategorized", }, -- settings from custom configs that don't have proper group/header
+            ['Instruments'] = { "Instruments", },
         },
     },
 }
