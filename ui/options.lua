@@ -24,7 +24,7 @@ end
 OptionsUI.Groups          = { --- Add a default of the same name for any key that has nothing in its table once these are finished
     {
         Name = "General",
-        Desciption = "General and Misc Settings",
+        Description = "General and Misc Settings",
         Icon = Icons.FA_COGS,
         IconImage = OptionsUI.LoadIcon("settingsicon"),
         Headers = {
@@ -38,7 +38,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
     },
     {
         Name = "Movement",
-        Desciption = "Following, Medding, Pulling",
+        Description = "Following, Medding, Pulling",
         Icon = Icons.MD_DIRECTIONS_RUN,
         IconImage = OptionsUI.LoadIcon("followicon"),
         Headers = {
@@ -50,7 +50,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
     },
     {
         Name = "Combat",
-        Desciption = "Assisting, Positioning",
+        Description = "Assisting, Positioning",
         Icon = Icons.FA_HEART,
         IconImage = OptionsUI.LoadIcon("swordicon"),
         Headers = {
@@ -63,7 +63,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
     },
     {
         Name = "Abilities",
-        Desciption = "Spells, Songs, Discs, AA",
+        Description = "Spells, Songs, Discs, AA",
         Icon = Icons.FA_HEART,
         IconImage = OptionsUI.LoadIcon("stafficon"),
         Headers = {
@@ -81,7 +81,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
     },
     {
         Name = "Items",
-        Desciption = "Clickies, Bandolier Swaps",
+        Description = "Clickies, Bandolier Swaps",
         Icon = Icons.MD_RESTAURANT_MENU,
         IconImage = OptionsUI.LoadIcon("itemicon"),
         Headers = {
@@ -137,7 +137,7 @@ function OptionsUI:ApplySearchFilter()
 
         for _, group in ipairs(self.Groups) do
             local groupNameLower = group.Name:lower()
-            local groupMatches = groupNameLower:find(filter, 1, true) ~= nil or (group.Desciption or ""):lower():find(filter, 1, true) ~= nil
+            local groupMatches = groupNameLower:find(filter, 1, true) ~= nil or (group.Description or ""):lower():find(filter, 1, true) ~= nil
 
             local newGroup = shallow_copy(group)
             newGroup.Headers = {} -- clear headers for rebuilding
@@ -156,12 +156,14 @@ function OptionsUI:ApplySearchFilter()
                     local matchingSettings = {}
 
                     for _, settingName in ipairs(settingsForCategory or {}) do
-                        local settingDefaults = Config:GetSettingDefaults(settingName)
+                        local settingDefaults         = Config:GetSettingDefaults(settingName)
                         local settingDisplayNameLower = (settingDefaults.DisplayName or ""):lower()
-                        local settingTooltipLower = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or (settingDefaults.Tooltip or "")):lower()
+                        local settingTooltipLower     = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or (settingDefaults.Tooltip or "")):lower()
+                        local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or
+                            (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
 
-                        if settingDisplayNameLower:find(filter, 1, true) ~= nil or
-                            settingTooltipLower:find(filter, 1, true) ~= nil then
+                        if showAdv and (settingDisplayNameLower:find(filter, 1, true) ~= nil or
+                                settingTooltipLower:find(filter, 1, true) ~= nil) then
                             table.insert(matchingSettings, settingName)
                         end
                     end
@@ -199,22 +201,26 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     ImGui.Text(groupLabel)
 end
 
-function OptionsUI:RenderGroupPanelWithImage(groupLabel, groupName, groupImage)
+function OptionsUI:RenderGroupPanelWithImage(group)
     local selectableHeight = 40
     local iconSize         = 30
     local cursorScreenPos  = ImGui.GetCursorScreenPosVec()
     local textColStyle     = ImGui.GetStyleColorVec4(ImGuiCol.Text)
     local currentStyle     = ImGui.GetStyle()
 
-    local _, pressed       = ImGui.Selectable("##" .. groupLabel, self.selectedGroup == groupName, ImGuiSelectableFlags.None, ImVec2(0, selectableHeight))
+    local _, pressed       = ImGui.Selectable("##" .. group.Name, self.selectedGroup == group.Name, ImGuiSelectableFlags.None, ImVec2(0, selectableHeight))
+
+    if group.Description and group.Description:len() > 0 then
+        Ui.Tooltip(group.Description or "")
+    end
 
     if pressed then
-        self.selectedGroup = groupName
+        self.selectedGroup = group.Name
     end
 
     local draw_list = ImGui.GetWindowDrawList()
 
-    local _, label_y = ImGui.CalcTextSize(groupLabel)
+    local _, label_y = ImGui.CalcTextSize(group.Name)
     local midLabelY = math.floor((selectableHeight - label_y) / 2) or 0
     local midIconY = math.floor((selectableHeight - iconSize) / 2) or 0
 
@@ -223,7 +229,7 @@ function OptionsUI:RenderGroupPanelWithImage(groupLabel, groupName, groupImage)
 
     local currentXPos = cursorScreenPos.x + currentStyle.ItemSpacing.x
     -- draw the icon png
-    draw_list:AddImage(groupImage:GetTextureID(),
+    draw_list:AddImage(group.IconImage:GetTextureID(),
         ImVec2(currentXPos, cursorScreenPos.y + midIconY),
         ImVec2(currentXPos + iconSize, cursorScreenPos.y + midIconY + iconSize),
         ImVec2(0, 0), ImVec2(1, 1),
@@ -233,7 +239,7 @@ function OptionsUI:RenderGroupPanelWithImage(groupLabel, groupName, groupImage)
     currentXPos = currentXPos + iconSize + currentStyle.ItemSpacing.x
 
     -- render the label text
-    draw_list:AddText(ImVec2(currentXPos, cursorScreenPos.y + midLabelY), labelCol, groupLabel)
+    draw_list:AddText(ImVec2(currentXPos, cursorScreenPos.y + midLabelY), labelCol, group.Name)
 end
 
 function OptionsUI:RenderCategorySeperator(category)
@@ -315,11 +321,13 @@ function OptionsUI:RenderCategorySettings(category)
             local settingDefaults = Config:GetSettingDefaults(settingName)
             local setting         = Config:GetSetting(settingName)
             local id              = "##" .. settingName
-            local matchedFilter   = self.configFilter == ""
             local settingTooltip  = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
+            local showAdv         = Config:GetSetting('ShowAdvancedOpts') or
+                (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
+            local matchedFilter   = (self.configFilter == "") and showAdv
 
-            if settingDefaults.DisplayName:lower():find(self.configFilter, 1, true) ~= nil or
-                settingTooltip:lower():find(self.configFilter, 1, true) ~= nil then
+            if showAdv and (settingDefaults.DisplayName:lower():find(self.configFilter, 1, true) ~= nil or
+                    settingTooltip:lower():find(self.configFilter, 1, true) ~= nil) then
                 matchedFilter = true
             end
 
@@ -389,19 +397,45 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
         if shouldDrawGUI then
             local _, y = ImGui.GetContentRegionAvail()
             if ImGui.BeginChild("left##RGmercsOptions", ImGui.GetWindowContentRegionWidth() * .3, y - 1, ImGuiChildFlags.Border) then
-                local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersV, ImGuiTableFlags.ScrollY)
+                local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.ScrollY)
                 -- figure out icons once headings are finalized
                 local textChanged = false
+                local inputBoxPosX = ImGui.GetCursorPosX()
                 self.configFilter, textChanged = ImGui.InputText("Search Configs###OptionsUISearchText", self.configFilter)
                 if textChanged then
                     self:ApplySearchFilter()
                 end
 
+                if not ImGui.IsItemActive() and self.configFilter:len() == 0 then
+                    ImGui.SameLine()
+                    local curPosX = ImGui.GetCursorPosX()
+                    ImGui.SetCursorPosX(inputBoxPosX)
+                    ImGui.TextColored(0.8, 0.8, 0.8, 0.75, "Search Configs...")
+                    ImGui.SameLine()
+                    ImGui.SetCursorPosX(curPosX)
+                else
+                    ImGui.SameLine()
+                end
+
+                if ImGui.SmallButton(Icons.MD_CLEAR) then
+                    self.configFilter = ""
+                    self:ApplySearchFilter()
+                end
+                Ui.Tooltip("Clear Search Text")
+                local ShowAdvancedOpts = Config:GetSetting('ShowAdvancedOpts')
+                local changed = false
+                ShowAdvancedOpts, changed = Ui.RenderOptionToggle("show_adv_tog###OptionsUI", "Show Advanced Options", ShowAdvancedOpts)
+                if changed then
+                    Config:SetSetting('ShowAdvancedOpts', ShowAdvancedOpts)
+                    self:ApplySearchFilter()
+                end
+                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5)
+
                 if ImGui.BeginTable('configmenu##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
                     for _, group in ipairs(self.FilteredGroups) do
                         if group.IconImage then
-                            self:RenderGroupPanelWithImage(group.Name, group.Name, group.IconImage)
+                            self:RenderGroupPanelWithImage(group)
                         else
                             self:RenderGroupPanel(string.format("%s %s", group.Icon, group.Name), group.Name)
                         end
@@ -409,6 +443,8 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                     end
                     ImGui.EndTable()
                 end
+
+                ImGui.PopStyleVar()
             end
             ImGui.EndChild()
             ImGui.SameLine()
