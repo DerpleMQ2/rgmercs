@@ -662,6 +662,7 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
         any_pressed = any_pressed or pressed
     elseif type == 'string' then -- display only
+        ImGui.SetNextItemWidth(-1)
         setting, pressed = ImGui.InputText("##" .. id, setting)
         any_pressed = any_pressed or pressed
         Ui.Tooltip(setting)
