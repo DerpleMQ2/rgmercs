@@ -45,6 +45,7 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Name = "Combat",
         Desciption = "Assisting, Positioning",
         Icon = Icons.FA_HEART,
+        IconImage = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/swordicon.png"),
         Headers = {
             ['Targeting'] = { "Targeting", },     -- Auto engage, med break, stay on target, etc
             ['Assisting'] = { "Assisting", },     -- this will include pet and merc percentages/commands
@@ -109,6 +110,13 @@ OptionsUI.CustomModuleOrder = { "Movement", "Pull", "Drag", "Mez", "Charm", "Cli
 -- Icons can be done later, etc. Going to have to pull up the list so I can see them visually. If we use image buttons, we don't need them.
 
 -- Note... plan on moving functions to proper libraries as necessary later
+local function shallow_copy(orig)
+    local copy = {}
+    for k, v in pairs(orig) do
+        copy[k] = v
+    end
+    return copy
+end
 
 function OptionsUI:ApplySearchFilter()
     self.FilteredGroups = self.Groups
@@ -121,12 +129,7 @@ function OptionsUI:ApplySearchFilter()
             local groupNameLower = group.Name:lower()
             local groupMatches = groupNameLower:find(filter, 1, true) ~= nil or (group.Desciption or ""):lower():find(filter, 1, true) ~= nil
 
-            local newGroup = {
-                Name = group.Name,
-                Desciption = group.Desciption,
-                Icon = group.Icon,
-                Headers = {},
-            }
+            local newGroup = shallow_copy(group)
 
             for header, categories in pairs(group.Headers) do
                 local headerLower = header:lower()
@@ -178,9 +181,23 @@ function OptionsUI:ApplySearchFilter()
 end
 
 function OptionsUI:RenderGroupPanel(groupLabel, groupName)
-    if ImGui.Selectable(groupLabel, self.selectedGroup == groupName) then
+    if ImGui.Selectable(" ##" .. groupLabel, self.selectedGroup == groupName) then
         self.selectedGroup = groupName
     end
+    ImGui.SameLine()
+    ImGui.Text(groupLabel)
+end
+
+function OptionsUI:RenderGroupPanelWithImage(groupLabel, groupName, groupImage)
+    local _, pressed = ImGui.Selectable("##" .. groupLabel, self.selectedGroup == groupName)
+    if pressed then
+        self.selectedGroup = groupName
+    end
+
+    ImGui.SameLine()
+    ImGui.Image(groupImage:GetTextureID(), ImVec2(15, 15), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 0))
+    ImGui.SameLine()
+    ImGui.Text(groupLabel)
 end
 
 function OptionsUI:RenderCategorySeperator(category)
@@ -347,7 +364,11 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                 if ImGui.BeginTable('configmenu##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
                     for _, group in ipairs(self.FilteredGroups) do
-                        self:RenderGroupPanel(string.format("%s %s", group.Icon, group.Name), group.Name)
+                        if group.IconImage then
+                            self:RenderGroupPanelWithImage(group.Name, group.Name, group.IconImage)
+                        else
+                            self:RenderGroupPanel(string.format("%s %s", group.Icon, group.Name), group.Name)
+                        end
                         ImGui.TableNextColumn()
                     end
                     ImGui.EndTable()
