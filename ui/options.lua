@@ -406,7 +406,10 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                 -- figure out icons once headings are finalized
                 local textChanged = false
                 local inputBoxPosX = ImGui.GetCursorPosX()
-                ImGui.SetNextItemWidth(157)
+                local style = ImGui.GetStyle()
+                local searchBarUsableWidth = ImGui.GetWindowContentRegionWidth() - (ImGui.GetFontSize() + style.FramePadding.y + style.WindowPadding.x * 2)
+                ImGui.SetNextItemWidth(searchBarUsableWidth)
+
                 self.configFilter, textChanged = ImGui.InputText("###OptionsUISearchText", self.configFilter)
                 if textChanged then
                     self:ApplySearchFilter()
@@ -415,7 +418,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                 if not ImGui.IsItemActive() and self.configFilter:len() == 0 then
                     ImGui.SameLine()
                     local curPosX = ImGui.GetCursorPosX()
-                    ImGui.SetCursorPosX(inputBoxPosX)
+                    ImGui.SetCursorPosX(inputBoxPosX + (style.WindowPadding.x / 2))
                     ImGui.TextColored(0.8, 0.8, 0.8, 0.75, "Search Configs...")
                     ImGui.SameLine()
                     ImGui.SetCursorPosX(curPosX)
