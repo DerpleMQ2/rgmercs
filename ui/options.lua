@@ -401,11 +401,12 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
 
         if shouldDrawGUI then
             local _, y = ImGui.GetContentRegionAvail()
-            if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 200), y - 1, ImGuiChildFlags.Border) then
+            if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
                 local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.ScrollY)
                 -- figure out icons once headings are finalized
                 local textChanged = false
                 local inputBoxPosX = ImGui.GetCursorPosX()
+                ImGui.SetNextItemWidth(157)
                 self.configFilter, textChanged = ImGui.InputText("###OptionsUISearchText", self.configFilter)
                 if textChanged then
                     self:ApplySearchFilter()
