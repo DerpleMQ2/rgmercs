@@ -140,6 +140,7 @@ function OptionsUI:ApplySearchFilter()
             local groupMatches = groupNameLower:find(filter, 1, true) ~= nil or (group.Desciption or ""):lower():find(filter, 1, true) ~= nil
 
             local newGroup = shallow_copy(group)
+            newGroup.Headers = {} -- clear headers for rebuilding
 
             for header, categories in pairs(group.Headers) do
                 local headerLower = header:lower()
