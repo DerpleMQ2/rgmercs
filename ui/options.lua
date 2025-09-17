@@ -260,7 +260,7 @@ function OptionsUI:RenderCategorySettings(category)
             local setting         = Config:GetSetting(settingName)
             local id              = "##" .. settingName
             local matchedFilter   = self.configFilter == ""
-            local settingTooltip  = type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip
+            local settingTooltip  = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
 
             if settingDefaults.DisplayName:lower():find(self.configFilter, 1, true) ~= nil or
                 settingTooltip:lower():find(self.configFilter, 1, true) ~= nil then
