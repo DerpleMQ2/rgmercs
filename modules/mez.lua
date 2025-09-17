@@ -34,7 +34,9 @@ Module.DefaultConfig           = {
     -- [ MEZ ] --
     ['MezAECount']                             = {
         DisplayName = "Mez AE Count",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Tooltip = "Mez if you have at least [X] on xtarget",
         FAQ = "How do I set my AE mes limits?",
         Answer = "Set your [MezAECount] Setting to the minimum number of Mobs on Xtarget before using AE Mez.",
@@ -44,7 +46,9 @@ Module.DefaultConfig           = {
     },
     ['MezOn']                                  = {
         DisplayName = "Enable Mezzing",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Default = true,
         Tooltip = "Enables mezzing all forms of mezzing as a quick toggle, select particular actions to use below.",
         FAQ = "How do I turn on Mez?",
@@ -52,7 +56,9 @@ Module.DefaultConfig           = {
     },
     ['DoSTMez']                                = {
         DisplayName = "ST Mez Song/Spells",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Default = true,
         Tooltip = "Set to enable use of ST mez spells/songs.",
         RequiresLoadoutChange = true,
@@ -61,7 +67,9 @@ Module.DefaultConfig           = {
     },
     ['DoAEMez']                                = {
         DisplayName = "AE Mez Song/Spells",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Default = true,
         Tooltip = "Set to enable use of AE mez spells/songs.",
         RequiresLoadoutChange = true,
@@ -70,7 +78,9 @@ Module.DefaultConfig           = {
     },
     ['DoAAMez']                                = {
         DisplayName = "Use Mez AA",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Default = true,
         Tooltip = "Use Beam of Slumber(ENC) or Dirge of the Sleepwalker(BRD) when able.",
         FAQ = "Why am I not using XXX AA to mez?",
@@ -78,7 +88,9 @@ Module.DefaultConfig           = {
     },
     ['MezStartCount']                          = {
         DisplayName = "Mez Start Count",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Default = 2,
         Min = 1,
         Max = 20,
@@ -88,7 +100,9 @@ Module.DefaultConfig           = {
     },
     ['MaxMezCount']                            = {
         DisplayName = "Max Mez Count",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Default = 13,
         Min = 1,
         Max = 20,
@@ -98,7 +112,9 @@ Module.DefaultConfig           = {
     },
     ['MezRadius']                              = {
         DisplayName = "Mez Radius",
-        Category = "Mez Range",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Default = 100,
         Min = 1,
         Max = 200,
@@ -108,7 +124,9 @@ Module.DefaultConfig           = {
     },
     ['MezZRadius']                             = {
         DisplayName = "Mez ZRadius",
-        Category = "Mez Range",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Default = 15,
         Min = 1,
         Max = 200,
@@ -119,7 +137,9 @@ Module.DefaultConfig           = {
     },
     ['AutoLevelRange']                         = {
         DisplayName = "Auto Level Range",
-        Category = "Mez Target",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez Targets",
         Default = true,
         Tooltip = "Set to enable automatic mez level detection based on spells.",
         FAQ = "I'm Lazy and hate updating my thresholds. How do I make my character do it for me?",
@@ -127,7 +147,9 @@ Module.DefaultConfig           = {
     },
     ['MezMinLevel']                            = {
         DisplayName = "Mez Min Level",
-        Category = "Mez Target",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez Targets",
         Default = 0,
         Min = 1,
         Max = 200,
@@ -138,7 +160,9 @@ Module.DefaultConfig           = {
     },
     ['MezMaxLevel']                            = {
         DisplayName = "Mez Max Level",
-        Category = "Mez Target",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez Targets",
         Default = 0,
         Min = 1,
         Max = 200,
@@ -149,7 +173,9 @@ Module.DefaultConfig           = {
     },
     ['MezStopHPs']                             = {
         DisplayName = "Mez Stop HPs",
-        Category = "Mez Target",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez Targets",
         Default = 80,
         Min = 1,
         Max = 100,
@@ -159,7 +185,9 @@ Module.DefaultConfig           = {
     },
     ['SafeAEMez']                              = {
         DisplayName = "AE Mez Safety Check",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
         Index = 3,
         Tooltip =
         "Check to ensure there aren't neutral mobs in range we could aggro if AE mez is used. May result in non-use due to false positives.",

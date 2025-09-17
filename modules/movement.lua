@@ -73,6 +73,8 @@ table.sort(Module.Constants.CampfireTypes)
 Module.DefaultConfig   = {
     ['AutoCampRadius']                         = {
         DisplayName = "Auto Camp Radius",
+        Group = "Movement",
+        Header = "Following",
         Category = "Camp",
         Tooltip = "Return to camp after you get this far away",
         Default = (Config.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60),
@@ -83,6 +85,8 @@ Module.DefaultConfig   = {
     },
     ['ChaseOn']                                = {
         DisplayName = "Chase On",
+        Group = "Movement",
+        Header = "Following",
         Category = "Chase",
         Tooltip = "Chase your Chase Target.",
         Default = false,
@@ -91,6 +95,8 @@ Module.DefaultConfig   = {
     },
     ['BreakOnDeath']                           = {
         DisplayName = "Break On Death",
+        Group = "Movement",
+        Header = "Following",
         Category = "Chase",
         Tooltip = "Stop chasing when you die.",
         Default = false,
@@ -99,6 +105,8 @@ Module.DefaultConfig   = {
     },
     ['ChaseDistance']                          = {
         DisplayName = "Chase Distance",
+        Group = "Movement",
+        Header = "Following",
         Category = "Chase",
         Tooltip = "How Far your Chase Target can get before you Chase.",
         Default = 25,
@@ -109,6 +117,8 @@ Module.DefaultConfig   = {
     },
     ['ChaseStopDistance']                      = {
         DisplayName = "Chase Stop Distance",
+        Group = "Movement",
+        Header = "Following",
         Category = "Chase",
         Tooltip = "How close to get to your chase target before you stop.",
         Default = 25,
@@ -119,6 +129,8 @@ Module.DefaultConfig   = {
     },
     ['ChaseTarget']                            = {
         DisplayName = "Chase Target",
+        Group = "Movement",
+        Header = "Following",
         Category = "Chase",
         Tooltip = "Character you are Chasing",
         Type = "Custom",
@@ -128,6 +140,8 @@ Module.DefaultConfig   = {
     },
     ['ReturnToCamp']                           = {
         DisplayName = "Return To Camp",
+        Group = "Movement",
+        Header = "Following",
         Category = "Camp",
         Tooltip = "Return to Camp After Combat (requires you to /rgl campon)",
         Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
@@ -136,6 +150,8 @@ Module.DefaultConfig   = {
     },
     ['CampHard']                               = {
         DisplayName = "Camp Hard",
+        Group = "Movement",
+        Header = "Following",
         Category = "Camp",
         Tooltip = "Return to Camp Loc Everytime",
         Default = false,
@@ -144,6 +160,8 @@ Module.DefaultConfig   = {
     },
     ['MaintainCampfire']                       = {
         DisplayName = "Maintain Campfire",
+        Group = "Movement",
+        Header = "Following",
         Category = "Camp",
         Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;",
         Type = "Combo",
@@ -157,6 +175,8 @@ Module.DefaultConfig   = {
     },
     ['RequireLoS']                             = {
         DisplayName = "Require LOS",
+        Group = "Movement",
+        Header = "Following",
         Category = "Chase",
         Tooltip = "Require LOS when using /nav",
         Default = Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()),
@@ -165,6 +185,8 @@ Module.DefaultConfig   = {
     },
     ['PriorityFollow']                         = {
         DisplayName = "Prioritize Follow",
+        Group = "Movement",
+        Header = "Following",
         Category = "Chase",
         Tooltip = "If enabled (and you are not the Chase Target), you will prioritize staying in range of the Chase Target over any other actions.",
         Default = false,
@@ -174,6 +196,8 @@ Module.DefaultConfig   = {
     },
     ['DoFellow']                               = {
         DisplayName = "Enable Fellowship Insignia",
+        Group = "Movement",
+        Header = "Following",
         Category = "Camp",
         Tooltip = "Use fellowship insignia automatically.",
         Default = false,
@@ -183,6 +207,8 @@ Module.DefaultConfig   = {
     },
     ['RunMovePaused']                          = {
         DisplayName = "Run Movement on Pause",
+        Group = "Movement",
+        Header = "Following",
         Category = "Chase",
         Tooltip = "Runs the Movement/Chase module even if the Main loop is paused",
         Default = true,
