@@ -1247,14 +1247,6 @@ function Module:Render()
             end
         end
     end
-
-    ImGui.Separator()
-
-    if ImGui.CollapsingHeader("Config Options") then
-        if self.ModuleLoaded then
-            Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
-        end
-    end
 end
 
 ---@return integer

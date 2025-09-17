@@ -612,12 +612,6 @@ function Module:Render()
             ImGui.Text("%d", self.TempSettings.CampZoneId == mq.TLO.Zone.ID() and Config:GetSetting("AutoCampRadius") or 0)
             ImGui.EndTable()
         end
-
-        ImGui.Separator()
-
-        if ImGui.CollapsingHeader("Config Options") then
-            Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
-        end
     end
 end
 

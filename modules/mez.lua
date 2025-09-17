@@ -353,12 +353,6 @@ function Module:Render()
             end
             ImGui.Unindent()
         end
-
-        ImGui.Separator()
-
-        if ImGui.CollapsingHeader("Config Options") then
-            Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
-        end
     end
 end
 

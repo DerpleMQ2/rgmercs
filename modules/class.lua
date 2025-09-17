@@ -638,12 +638,6 @@ function Module:Render()
                 ImGui.Unindent()
             end
         end
-
-        ImGui.Separator()
-
-        if ImGui.CollapsingHeader("Class Options") then
-            Ui.RenderModuleSettings(self._name, self.ClassConfig.DefaultConfig, self.SettingCategories)
-        end
     end
 end
 

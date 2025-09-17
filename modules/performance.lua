@@ -31,7 +31,6 @@ Module.DefaultConfig      = {
         DisplayName = "Seconds to Store",
         Category = "Monitoring",
         Tooltip = "The number of Seconds to keep in history.",
-        Type = "Custom",
         Default = 30,
         Min = 10,
         Max = 120,
@@ -180,23 +179,6 @@ function Module:Render()
         end
 
         ImPlot.EndPlot()
-    end
-
-    ImGui.Separator()
-
-    if ImGui.CollapsingHeader("Config Options") then
-        local secondsToStore = Config:GetSetting('SecondsToStore')
-
-        secondsToStore, pressed = ImGui.SliderInt(self.DefaultConfig.SecondsToStore.DisplayName,
-            secondsToStore, self.DefaultConfig.SecondsToStore.Min,
-            self.DefaultConfig.SecondsToStore
-            .Max,
-            "%d s")
-        if pressed then
-            Config:SetSetting('SecondsToStore', secondsToStore)
-        end
-
-        Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
     end
 end
 
