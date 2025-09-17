@@ -23,9 +23,9 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Icon = Icons.FA_COGS,
         Headers = {
             ['General'] = { "General Settings", },
-            ['Announcing'] = { "Announce", },         -- group announce stuff
+            ['Announcements'] = { "Announcements", }, -- group announce stuff
             ['Interface'] = { "Interface", },         -- ui stuff
-            ['Loot(Emu)'] = { "Loot", },
+            ['Loot(Emu)'] = { "LNS", },
             ['Misc'] = { "Other", },                  -- ??? profit
             ['Uncategorized'] = { "Uncategorized", }, -- settings from custom configs that don't have proper group/header
         },
@@ -185,7 +185,7 @@ end
 
 function OptionsUI:RenderCategorySeperator(category)
     ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextPadding, ImVec2(15, 15))
-    ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextAlign, ImVec2(0.5, 0.5))
+    ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextAlign, ImVec2(0.05, 0.5))
     ImGui.SeparatorText(category)
     ImGui.PopStyleVar(2)
 end
@@ -203,7 +203,10 @@ function OptionsUI:RenderOptionsPanel(groupName)
         if any_options_in_header and ImGui.CollapsingHeader(header) then
             for _, category in ipairs(options) do
                 if #Config:GetAllSettingsForCategory(category) > 0 then
-                    self:RenderCategorySeperator(category)
+                    -- only draw the seperator if the category name is different from the heading
+                    if header ~= category then
+                        self:RenderCategorySeperator(category)
+                    end
                     -- Render options for this category
                     self:RenderCategorySettings(category)
                 end
@@ -236,24 +239,24 @@ function OptionsUI:RenderCategorySettings(category)
     local numCols             = math.max(1, math.floor(windowWidth / renderWidth))
     local settingsForCategory = Config:GetAllSettingsForCategory(category)
 
-    ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
-    ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 1.0)
-    ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(15, 15))
-    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(25, 25))
-    ImGui.BeginChild("OptionsChild_" .. category, ImVec2(0, 0),
-        bit32.bor(ImGuiChildFlags.Border, ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY),
-        bit32.bor(ImGuiWindowFlags.None))
-    ImGui.PopStyleVar(4)
+    -- ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
+    -- ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 1.0)
+    -- ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(15, 15))
+    -- ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(25, 25))
+    -- ImGui.BeginChild("OptionsChild_" .. category, ImVec2(0, 0),
+    --     bit32.bor(ImGuiChildFlags.Border, ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY),
+    --     bit32.bor(ImGuiWindowFlags.None))
+    -- ImGui.PopStyleVar(4)
 
     if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        -- ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         for _ = 1, numCols do
-            ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 150.0)
+            ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 180.0)
             ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
         end
-        ImGui.PopStyleColor()
-        ImGui.TableHeadersRow()
-        ImGui.TableNextRow()
+        -- ImGui.PopStyleColor()
+        -- ImGui.TableHeadersRow()
+        -- ImGui.TableNextRow()
 
         for idx, settingName in ipairs(settingsForCategory or {}) do
             local settingDefaults = Config:GetSettingDefaults(settingName)
@@ -309,7 +312,7 @@ function OptionsUI:RenderCategorySettings(category)
         ImGui.EndTable()
     end
 
-    ImGui.EndChild()
+    --ImGui.EndChild()
 end
 
 function OptionsUI:RenderCurrentTab()
