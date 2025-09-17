@@ -148,16 +148,9 @@ end
 function Module:Render()
     Ui.RenderPopSetting(self._name)
 
-    local pressed
     if self.ModuleLoaded then
         if ImGui.Button(Config:GetSetting('DoDrag') and "Stop Dragging" or "Start Dragging", ImGui.GetWindowWidth() * .3, 25) then
             Config:SetSetting('DoDrag', not Config:GetSetting('DoDrag'))
-        end
-
-        ImGui.Separator()
-
-        if ImGui.CollapsingHeader("Config Options") then
-            Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
         end
     end
 end

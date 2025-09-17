@@ -1015,10 +1015,6 @@ function Module:Render()
     Ui.RenderPopSetting(self._name)
 
     self:RenderClickiesWithConditions("Clickies", Config:GetSetting('Clickies'))
-
-    if ImGui.CollapsingHeader("Config Options") then
-        Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
-    end
 end
 
 function Module:Pop()
