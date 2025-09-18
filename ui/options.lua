@@ -159,6 +159,8 @@ function OptionsUI:ApplySearchFilter()
                     end
                 end
 
+                table.sort(self.FilteredSettingsByCat[category] or {})
+
                 if #(self.FilteredSettingsByCat[category] or {}) > 0 then
                     table.insert(newCategories, category)
                 end
