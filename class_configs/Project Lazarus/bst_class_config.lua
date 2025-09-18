@@ -802,7 +802,9 @@ return {
         --Mana Management
         ['DoParagon']      = {
             DisplayName = "Use Paragon",
-            Category = "Mana Mgmt.",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 1,
             Tooltip = "Use Group or Focused Paragon AAs.",
             RequiresLoadoutChange = true,
@@ -816,7 +818,9 @@ return {
         },
         ['ParaPct']        = {
             DisplayName = "Paragon %",
-            Category = "Mana Mgmt.",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 2,
             Tooltip = "Minimum mana % before we use Paragon of Spirit.",
             Default = 50,
@@ -831,7 +835,9 @@ return {
         },
         ['FParaPct']       = {
             DisplayName = "F.Paragon %",
-            Category = "Mana Mgmt.",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 3,
             Tooltip = "Minimum mana % before we use Focused Paragon.",
             Default = 90,
@@ -846,7 +852,9 @@ return {
         },
         ['DowntimeFP']     = {
             DisplayName = "Downtime F.Paragon",
-            Category = "Mana Mgmt.",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 4,
             Tooltip = "Use Focused Paragon outside of Combat.",
             Default = false,
@@ -860,7 +868,9 @@ return {
         --Pets
         ['DoPetHealSpell'] = {
             DisplayName = "Do Pet Heals",
-            Category = "Pet Mgmt.",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 1,
             Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.",
             Default = true,
@@ -871,7 +881,9 @@ return {
         },
         ['PetHealPct']     = {
             DisplayName = "Pet Heal %",
-            Category = "Pet Mgmt.",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Healing Thresholds",
             Index = 2,
             Tooltip = "Heal pet at [X]% HPs",
             Default = 60,
@@ -883,7 +895,9 @@ return {
         },
         ['DoPetSlow']      = {
             DisplayName = "Pet Slow Proc",
-            Category = "Pet Mgmt.",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Buffs",
             Index = 3,
             Tooltip = "Use your Pet Slow Proc Buff (does not stack with Pet Damage or Snare Proc Buff).",
             Default = false,
@@ -894,7 +908,9 @@ return {
         },
         ['DoPetSnare']     = {
             DisplayName = "Pet Snare Proc",
-            Category = "Pet Mgmt.",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Buffs",
             Index = 4,
             Tooltip = "Use your Pet Snare Proc Buff (does not stack with Pet Damage or Slow Proc Buff).",
             Default = false,
@@ -904,7 +920,9 @@ return {
         },
         ['DoEpic']         = {
             DisplayName = "Do Epic",
-            Category = "Pet Mgmt.",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 8,
             Tooltip = "Click your Epic Weapon.",
             Default = false,
@@ -913,7 +931,9 @@ return {
         },
         ['KeepPetMemmed']  = {
             DisplayName = "Always Mem Pet",
-            Category = "Pet Mgmt.",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Pet Summoning",
             Index = 9,
             Tooltip = "Keep your pet spell memorized (allows combat resummoning).",
             Default = false,
@@ -923,7 +943,9 @@ return {
         --Spells/Abilities
         ['DoHeals']        = {
             DisplayName = "Do Heals",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 1,
             Tooltip = "Mem and cast your Mending spell.",
             Default = true,
@@ -934,7 +956,9 @@ return {
         },
         ['DoSlow']         = {
             DisplayName = "Do Slow",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Slow",
             Index = 2,
             Tooltip = "Use your slow spell or AA.",
             Default = true,
@@ -944,7 +968,9 @@ return {
         },
         ['DoDot']          = {
             DisplayName = "Cast DOTs",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 3,
             Tooltip = "Enable casting Damage Over Time spells.",
             Default = true,
@@ -955,7 +981,9 @@ return {
         },
         ['DotNamedOnly']   = {
             DisplayName = "Only Dot Named",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 4,
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
@@ -965,7 +993,9 @@ return {
         },
         ['DoRunSpeed']     = {
             DisplayName = "Do Run Speed",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 5,
             Tooltip = "Do Run Speed Spells/AAs",
             Default = false,
@@ -974,7 +1004,9 @@ return {
         },
         ['DoAvatar']       = {
             DisplayName = "Do Avatar",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 6,
             Tooltip = "Buff Group/Pet with Infusion of Spirit",
             Default = false,
@@ -984,7 +1016,9 @@ return {
         },
         ['DoVetAA']        = {
             DisplayName = "Use Vet AA",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 7,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
@@ -994,7 +1028,9 @@ return {
         --Combat
         ['DoAEDamage']     = {
             DisplayName = "Do AE Damage",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
@@ -1004,7 +1040,9 @@ return {
         },
         ['AETargetCnt']    = {
             DisplayName = "AE Target Count",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
@@ -1016,7 +1054,9 @@ return {
         },
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 4,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -1029,7 +1069,9 @@ return {
         },
         ['SafeAEDamage']   = {
             DisplayName = "AE Proximity Check",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -1040,7 +1082,9 @@ return {
         },
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
             Index = 6,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
@@ -1052,7 +1096,9 @@ return {
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
-            Category = "Combat",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 8,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,

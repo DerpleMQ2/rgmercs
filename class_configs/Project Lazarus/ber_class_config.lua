@@ -392,7 +392,9 @@ return {
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 2,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
@@ -403,7 +405,9 @@ return {
         -- Combat
         ['DoBattleLeap']   = {
             DisplayName = "Do Battle Leap",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 1,
             Tooltip = "Enable using Battle Leap",
             Default = true,
@@ -412,7 +416,9 @@ return {
         },
         ['DoSnare']        = {
             DisplayName = "Do Snare",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 2,
             Tooltip = "Snare opponents with low health.",
             Default = false,
@@ -421,7 +427,9 @@ return {
         },
         ['SnareCount']     = {
             DisplayName = "Snare Max Mob Count",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 3,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
@@ -433,7 +441,9 @@ return {
         },
         ['DoStun']         = {
             DisplayName = "Do Stun",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Stun",
             Index = 4,
             Tooltip = "Attempt to stun your opponents.",
             Default = false,
@@ -442,7 +452,9 @@ return {
         },
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
             Index = 4,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
@@ -454,7 +466,9 @@ return {
         },
         ['DoVetAA']        = {
             DisplayName = "Use Vet AA",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 5,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
@@ -465,7 +479,9 @@ return {
         --AE Damage
         ['DoAEDamage']     = {
             DisplayName = "Do AE Damage",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
             Default = false,
@@ -474,7 +490,9 @@ return {
         },
         ['AETargetCnt']    = {
             DisplayName = "AE Target Count",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 2,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
@@ -486,7 +504,9 @@ return {
         },
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -499,7 +519,9 @@ return {
         },
         ['SafeAEDamage']   = {
             DisplayName = "AE Proximity Check",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 4,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -510,7 +532,9 @@ return {
         },
         ['UseRampage']     = {
             DisplayName = "Rampage Use:",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Use Rampage 1-Never 2-Burns 3-Always",
             Type = "Combo",

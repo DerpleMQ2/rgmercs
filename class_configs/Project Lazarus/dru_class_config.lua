@@ -1014,7 +1014,9 @@ local _ClassConfig = {
         -- Buffs
         ['DoMoveBuffs']       = {
             DisplayName = "Do Movement Buffs",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 1,
             Tooltip = "Cast Movement Spells/AA.",
             RequiresLoadoutChange = true,
@@ -1025,7 +1027,9 @@ local _ClassConfig = {
         },
         ['DoHPBuff']          = {
             DisplayName = "Group HP Buff",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 2,
             Tooltip = "Use your group HP Buff. Disable as desired to prevent conflicts with CLR or PAL buffs.",
             RequiresLoadoutChange = true,
@@ -1035,7 +1039,9 @@ local _ClassConfig = {
         },
         ['DoGroupRegen']      = {
             DisplayName = "Group Regen Buff",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 3,
             Tooltip = "Use your Group Regen buff.",
             RequiresLoadoutChange = true,
@@ -1045,7 +1051,9 @@ local _ClassConfig = {
         },
         ['DoGroupDmgShield']  = {
             DisplayName = "Group Dmg Shield",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 4,
             Tooltip = "Use your group damage shield buff.",
             RequiresLoadoutChange = true,
@@ -1072,7 +1080,9 @@ local _ClassConfig = {
         },
         ['SpireChoice']       = {
             DisplayName = "Spire Choice:",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 6,
             Tooltip = "Choose which Fundament you would like to use during burns:\n" ..
                 "First Spire: Spell Crit Buff to Self.\n" ..
@@ -1088,7 +1098,9 @@ local _ClassConfig = {
         },
         ['WolfSpiritChoice']  = {
             DisplayName = "Self Wolfbuff Choice:",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 7,
             Tooltip = "Choose which wolf spirit buff you would like to maintain on yourself:\n" ..
                 "White: Increased healing and reduced mana cost for healing spells. Mana Regeneration and Cold Resist.\n" ..
@@ -1101,20 +1113,13 @@ local _ClassConfig = {
             FAQ = "Why am I using the wrong wolf form?",
             Answer = "You can choose which wolf form you prefer in the Class Options.",
         },
-        -- ['DoBurstDS']         = {
-        --     DisplayName = "Do Burst DS",
-        --     Category = "Buffs",
-        --     Index = 5,
-        --     Tooltip = "Use your Barkspur buff.",
-        --     Default = false,
-        --     FAQ = "Why am I spamming my Group Regen buff?",
-        --     Answer = "Certain Shaman and Druid group regen buffs report cross-stacking. You should deselect the option on one of the PCs if they are grouped together.",
-        -- },
 
         --Debuffs
         ['DoSnare']           = {
             DisplayName = "Use Snares",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 1,
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
@@ -1124,7 +1129,9 @@ local _ClassConfig = {
         },
         ['SnareCount']        = {
             DisplayName = "Snare Max Mob Count",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 2,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
@@ -1136,7 +1143,9 @@ local _ClassConfig = {
         },
         ['DoFireDebuff']      = {
             DisplayName = "Fire Debuff",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Resist",
             Index = 3,
             Tooltip = "Use your fire resist debuff (to include the (Hand > Blessing) of Ro AA).",
             Default = false,
@@ -1146,7 +1155,9 @@ local _ClassConfig = {
         },
         ['DoColdDebuff']      = {
             DisplayName = "Cold Debuff",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Resist",
             Index = 4,
             Tooltip = "Use your cold resist debuff.",
             Default = false,
@@ -1156,7 +1167,9 @@ local _ClassConfig = {
         },
         ['DoATKDebuff']       = {
             DisplayName = "ATK Debuff",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Misc Debuffs",
             Index = 5,
             Tooltip = "Use your attack resist debuff.",
             Default = false,
@@ -1168,7 +1181,9 @@ local _ClassConfig = {
         --Damage
         ['DoFireNuke']        = {
             DisplayName = "Fire Nuke",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 1,
             Tooltip = "Use your single-target fire nukes.",
             RequiresLoadoutChange = true,
@@ -1178,7 +1193,9 @@ local _ClassConfig = {
         },
         ['DoIceNuke']         = {
             DisplayName = "Cold Nuke",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 2,
             Tooltip = "Use your single-target cold nukes.",
             RequiresLoadoutChange = true,
@@ -1188,7 +1205,9 @@ local _ClassConfig = {
         },
         ['DoStunNuke']        = {
             DisplayName = "Stun Nuke",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 3,
             Tooltip = "Use your stun nukes (magic damage with stun component).",
             RequiresLoadoutChange = true,
@@ -1198,7 +1217,9 @@ local _ClassConfig = {
         },
         ['DoTwinHealNuke']    = {
             DisplayName = "Twinheal Nuke",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 4,
             Tooltip = "Use your twinheal nuke (fire damage with a twinheal buff effect).",
             RequiresLoadoutChange = true,
@@ -1208,7 +1229,9 @@ local _ClassConfig = {
         },
         ['DoFlameLickDot']    = {
             DisplayName = "Fire Debuff Dot",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 5,
             Tooltip = "Use your Flame Lick line of dots (fire damage, fire resist debuff, 60s duration).",
             Default = false,
@@ -1218,7 +1241,9 @@ local _ClassConfig = {
         },
         ['DoVengeanceDot']    = {
             DisplayName = "Fire Dot",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 6,
             Tooltip = "Use your Vengeance line of dots (fire damage, 30s duration).",
             Default = false,
@@ -1228,7 +1253,9 @@ local _ClassConfig = {
         },
         ['DoSwarmDot']        = {
             DisplayName = "Magic Dot",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 7,
             Tooltip = "Use your Swarm line of dots (magic damage, 54s duration).",
             Default = false,
@@ -1238,7 +1265,9 @@ local _ClassConfig = {
         },
         ['DotNamedOnly']      = {
             DisplayName = "Only Dot Named",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 8,
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
@@ -1250,7 +1279,9 @@ local _ClassConfig = {
         --Damage(AE)
         ['DoAEDamage']        = {
             DisplayName = "Do AE Damage",
-            Category = "Damage(AE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
@@ -1260,7 +1291,9 @@ local _ClassConfig = {
         },
         ['DoPBAE']            = {
             DisplayName = "Use PBAE Spells",
-            Category = "Damage(AE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 2,
             RequiresLoadoutChange = true,
             Tooltip =
@@ -1271,7 +1304,9 @@ local _ClassConfig = {
         },
         ['DoRain']            = {
             DisplayName = "Use Ice Rain",
-            Category = "Damage(AE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
@@ -1282,7 +1317,9 @@ local _ClassConfig = {
         },
         ['RainDistance']      = {
             DisplayName = "Min Rain Distance",
-            Category = "Damage(AE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 4,
             ConfigType = "Advanced",
             Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25').",
@@ -1294,7 +1331,9 @@ local _ClassConfig = {
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Tgt Cnt",
-            Category = "Damage(AE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Minimum number of valid targets before using PB Spells like the of Flame line.",
             Default = 4,
@@ -1306,7 +1345,9 @@ local _ClassConfig = {
         },
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
-            Category = "Damage(AE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 6,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -1319,7 +1360,9 @@ local _ClassConfig = {
         },
         ['SafeAEDamage']      = {
             DisplayName = "AE Proximity Check",
-            Category = "Damage(AE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 7,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -1332,7 +1375,9 @@ local _ClassConfig = {
         -- Utility
         ['DoElixir']          = {
             DisplayName = "Use Elixir",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 1,
             Tooltip = "Use the Elixir Line (Yes, druids get Elixirs on Laz).",
             RequiresLoadoutChange = true,
@@ -1343,7 +1388,9 @@ local _ClassConfig = {
         },
         ['KeepPoisonMemmed']  = {
             DisplayName = "Mem Cure Poison",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
             Index = 2,
             Tooltip = "Memorize cure poison spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
@@ -1356,7 +1403,9 @@ local _ClassConfig = {
         },
         ['KeepDiseaseMemmed'] = {
             DisplayName = "Mem Cure Disease",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
             Index = 3,
             Tooltip = "Memorize cure disease spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
@@ -1369,7 +1418,9 @@ local _ClassConfig = {
         },
         ['KeepCurseMemmed']   = {
             DisplayName = "Mem Remove Curse",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
             Index = 4,
             Tooltip = "Memorize remove curese spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
@@ -1382,7 +1433,9 @@ local _ClassConfig = {
         },
         ['GroupHealAsCure']   = {
             DisplayName = "Use Group Heal to Cure",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
             Index = 4,
             Tooltip = "If Word of Reconstitution is available, use this to cure instead of individual cure spells. \n" ..
                 "Please note that we will prioritize Remove Greater Curse if you have selected to keep it memmed as above (due to the counter disparity).",
@@ -1395,7 +1448,9 @@ local _ClassConfig = {
         },
         ['DoArcanumWeave']    = {
             DisplayName = "Weave Arcanums",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 6,
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
@@ -1406,7 +1461,9 @@ local _ClassConfig = {
         },
         ['KeepEvacMemmed']    = {
             DisplayName = "Memorize Evac",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
             Index = 7,
             Tooltip = "Keep (Lesser) Succor memorized.",
             Default = false,

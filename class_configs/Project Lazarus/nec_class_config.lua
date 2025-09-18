@@ -985,7 +985,9 @@ local _ClassConfig = {
         --Pet
         ['PetType']           = {
             DisplayName = "Pet Class",
-            Category = "Pet",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Pet Summoning",
             Index = 1,
             Tooltip = "Choose which pet you wish to summon. Please note that rogue pets have uneven spacing at lower levels.",
             Type = "Combo",
@@ -998,7 +1000,9 @@ local _ClassConfig = {
         },
         ['DoPetHealSpell']    = {
             DisplayName = "Pet Heal Spell",
-            Category = "Pet",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 2,
             Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.",
             Default = false,
@@ -1009,7 +1013,9 @@ local _ClassConfig = {
         },
         ['PetHealPct']        = {
             DisplayName = "Pet Heal %",
-            Category = "Pet",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Healing Thresholds",
             Index = 3,
             Tooltip = "Heal pet at [X]% HPs",
             Default = 60,
@@ -1023,7 +1029,9 @@ local _ClassConfig = {
         --Debuffs
         ['ScentDebuffUse']    = {
             DisplayName = "Scent Debuff:",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Resist",
             Index = 1,
             Tooltip =
                 "Choose which scent resist debuff to use, if any.\n" ..
@@ -1041,7 +1049,9 @@ local _ClassConfig = {
         },
         ['DoSnare']           = {
             DisplayName = "Use Snares",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 2,
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
@@ -1051,7 +1061,9 @@ local _ClassConfig = {
         },
         ['SnareCount']        = {
             DisplayName = "Snare Max Mob Count",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 3,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
@@ -1065,7 +1077,9 @@ local _ClassConfig = {
         --Combat
         ['DoLifetap']         = {
             DisplayName = "Do Lifetap",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Taps",
             Index = 1,
             Tooltip = "Use the your ST Lifetap nuke line.",
             RequiresLoadoutChange = true,
@@ -1075,7 +1089,9 @@ local _ClassConfig = {
         },
         ['DoUndeadNuke']      = {
             DisplayName = "Do Undead Nuke",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 2,
             Tooltip = "Use the Undead nuke line.",
             RequiresLoadoutChange = true,
@@ -1085,7 +1101,9 @@ local _ClassConfig = {
         },
         ['WakeDeadCorpseCnt'] = {
             DisplayName = "WtD Corpse Count",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Swarm Pets",
             Index = 3,
             Tooltip = "Number of Corpses before we cast Wake the Dead",
             Default = 5,
@@ -1097,7 +1115,9 @@ local _ClassConfig = {
         },
         ['DoLifeBurn']        = {
             DisplayName = "Use Life Burn",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 4,
             Tooltip = "Use Life Burn AA if your aggro is below 25%.",
             RequiresLoadoutChange = true,
@@ -1125,7 +1145,9 @@ local _ClassConfig = {
         },
         ['SpireChoice']       = {
             DisplayName = "Spire Choice:",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 6,
             Tooltip = "Choose which Fundament you would like to use during burns:\n" ..
                 "First Spire: DoT Crit Chance Buff.\n" ..
@@ -1141,7 +1163,9 @@ local _ClassConfig = {
         },
         ['EmergencyStart']    = {
             DisplayName = "Emergency HP%",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
             Index = 7,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities. Also, the minimum HP we need to use the Flesh Buff.",
             Default = 50,
@@ -1153,7 +1177,9 @@ local _ClassConfig = {
         },
         ['AggroFeign']        = {
             DisplayName = "Emergency Feign",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
             Index = 8,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
@@ -1165,7 +1191,9 @@ local _ClassConfig = {
         --Utility
         ['DoLich']            = {
             DisplayName = "Cast Lich",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 1,
             Tooltip = "Enable casting Lich spells.",
             RequiresLoadoutChange = true,
@@ -1176,7 +1204,9 @@ local _ClassConfig = {
         },
         ['StopLichHP']        = {
             DisplayName = "Stop Lich HP",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 2,
             Tooltip = "Cancel Lich at HP Pct [x]",
             RequiresLoadoutChange = false,
@@ -1188,7 +1218,9 @@ local _ClassConfig = {
         },
         ['StartLichMana']     = {
             DisplayName = "Start Lich Mana",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 3,
             Tooltip = "Start Lich at Mana Pct [x]",
             RequiresLoadoutChange = false,
@@ -1198,7 +1230,9 @@ local _ClassConfig = {
         },
         ['StopLichMana']      = {
             DisplayName = "Stop Lich Mana",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 4,
             Tooltip = "Cancel Lich at Mana Pct [x]",
             RequiresLoadoutChange = false,
@@ -1210,7 +1244,9 @@ local _ClassConfig = {
         },
         ['DeathBloomPercent'] = {
             DisplayName = "Death Bloom %",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 5,
             Tooltip = "Mana % at which to cast Death Bloom",
             Default = 40,
@@ -1222,7 +1258,9 @@ local _ClassConfig = {
         },
         ['DoPustules']        = {
             DisplayName = "Use Pustules",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 6,
             Tooltip = "Use your Necrotic Pustules spell on the (non-SHD) MA.",
             RequiresLoadoutChange = true,
@@ -1233,7 +1271,9 @@ local _ClassConfig = {
         },
         ['DoArcanumWeave']    = {
             DisplayName = "Weave Arcanums",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 7,
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
@@ -1245,7 +1285,9 @@ local _ClassConfig = {
         },
         ['DoOrbNuke']         = {
             DisplayName = "Summon Orbs",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 8,
             Tooltip = "Use your Orb nuke to summon more Soul/Shadow orbs when needed.",
             RequiresLoadoutChange = true,
@@ -1255,7 +1297,9 @@ local _ClassConfig = {
         },
         ['DoMAOrbHeal']       = {
             DisplayName = "Heal MA with Orbs",
-            Category = "Combat",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 9,
             Tooltip = "Use the your Orb of Shadows on the MA when their health is low.",
             RequiresLoadoutChange = true,

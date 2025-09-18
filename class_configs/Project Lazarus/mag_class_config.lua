@@ -1886,7 +1886,9 @@ _ClassConfig      = {
         },
         ['DoPocketPet']    = {
             DisplayName = "Do Pocket Pet",
-            Category = "Pet",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Pet Summoning",
             Tooltip = "Pocket your pet during downtime",
             Default = false,
             RequiresLoadoutChange = true,
@@ -1895,7 +1897,9 @@ _ClassConfig      = {
         },
         ['DoPetArmor']     = {
             DisplayName = "Do Pet Armor",
-            Category = "Pet",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Tooltip = "Summon Armor for Pets",
             Default = false,
             FAQ = "I want to make sure my pet is always armored, how do I do that?",
@@ -1903,7 +1907,9 @@ _ClassConfig      = {
         },
         ['DoPetWeapons']   = {
             DisplayName = "Do Pet Weapons",
-            Category = "Pet",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Tooltip = "Summon Weapons for Pets",
             Default = false,
             FAQ = "I want to make sure my pet is always armed, how do I do that?",
@@ -1911,7 +1917,9 @@ _ClassConfig      = {
         },
         ['PetType']        = {
             DisplayName = "Pet Type",
-            Category = "Pet",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Pet Summoning",
             Tooltip = "1 = Fire, 2 = Water, 3 = Earth, 4 = Air",
             Type = "Combo",
             ComboOptions = { 'Fire', 'Water', 'Earth', 'Air', },
@@ -1923,7 +1931,9 @@ _ClassConfig      = {
         },
         ['DoPetHeirlooms'] = {
             DisplayName = "Do Pet Heirlooms",
-            Category = "Pet",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Tooltip = "Summon Heirlooms for Pets",
             Default = false,
             FAQ = "I want to make sure my pet is always Heirloomed, how do I do that?",
@@ -1931,7 +1941,9 @@ _ClassConfig      = {
         },
         ['DoPetHealSpell'] = {
             DisplayName = "Pet Heal Spell",
-            Category = "Pet",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 2,
             Tooltip = "Mem and cast your Pet Heal spell. AA Pet Heals are always used in emergencies.",
             Default = true,
@@ -1942,7 +1954,9 @@ _ClassConfig      = {
         },
         ['PetHealPct']     = {
             DisplayName = "Pet Heal %",
-            Category = "Pet",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Healing Thresholds",
             Tooltip = "Heal pet at [X]% HPs",
             Default = 60,
             Min = 1,
@@ -1953,7 +1967,9 @@ _ClassConfig      = {
         },
         ['SummonModRods']  = {
             DisplayName = "Summon Mod Rods",
-            Category = "Mana",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Index = 1,
             Tooltip = "Summon Mod Rods",
             RequiresLoadoutChange = true,
@@ -1963,7 +1979,9 @@ _ClassConfig      = {
         },
         ['ElementChoice']  = {
             DisplayName = "Element Choice:",
-            Category = "DPS Low Level",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 1,
             Tooltip = "Choose an element to focus on under level 71.",
             Type = "Combo",
@@ -1977,7 +1995,9 @@ _ClassConfig      = {
         },
         ['DoSwarmPet']     = {
             DisplayName = "Swarm Pet Spell:",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Swarm Pets",
             Tooltip = "Choose the conditions to cast your Swarm Pet Spell.",
             Type = "Combo",
             ComboOptions = { 'Never', 'Named Only', 'Always', },
@@ -1990,7 +2010,9 @@ _ClassConfig      = {
         },
         ['DoFranticDS']    = {
             DisplayName = "Frantic Flames",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Tooltip = "Use Frantic Flames during burns.",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
@@ -1999,7 +2021,9 @@ _ClassConfig      = {
         },
         ['AISelfDelay']    = {
             DisplayName = "Autoinv Delay (Self)",
-            Category = "Utilities",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.",
             Default = 50,
             Min = 1,
@@ -2010,7 +2034,9 @@ _ClassConfig      = {
         },
         ['AIGroupDelay']   = {
             DisplayName = "Autoinv Delay (Group)",
-            Category = "Utilities",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.",
             Default = 150,
             Min = 1,
@@ -2021,7 +2047,9 @@ _ClassConfig      = {
         },
         ['DoMalo']         = {
             DisplayName = "Cast Malo",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Resist",
             Index = 1,
             Tooltip = "Do Malo Spells/AAs",
             RequiresLoadoutChange = true, --this setting is used as a load condition
@@ -2031,7 +2059,9 @@ _ClassConfig      = {
         },
         ['DoAEMalo']       = {
             DisplayName = "Cast AE Malo",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Resist",
             Index = 2,
             Tooltip = "Do AE Malo Spells/AAs",
             RequiresLoadoutChange = true, --this setting is used as a load condition
@@ -2041,7 +2071,9 @@ _ClassConfig      = {
         },
         ['AEMaloCount']    = {
             DisplayName = "AE Malo Count",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Resist",
             Index = 3,
             Tooltip = "Number of XT Haters before we use AE Malo.",
             Min = 1,
@@ -2053,7 +2085,9 @@ _ClassConfig      = {
         },
         ['CombatModRod']   = {
             DisplayName = "Combat Mod Rods",
-            Category = "Mana",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Index = 2,
             Tooltip = "Summon Mod Rods in combat if the criteria below are met.",
             Default = true,
@@ -2064,7 +2098,9 @@ _ClassConfig      = {
         },
         ['GroupManaPct']   = {
             DisplayName = "Combat ModRod %",
-            Category = "Mana",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Index = 3,
             Tooltip = "Mana% to begin summoning Mod Rods in combat.",
             Default = 50,
@@ -2078,7 +2114,9 @@ _ClassConfig      = {
         },
         ['GroupManaCt']    = {
             DisplayName = "Combat ModRod Count",
-            Category = "Mana",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
             Index = 4,
             Tooltip = "The number of party members (including yourself) that need to be under the above mana percentage.",
             Default = 3,
@@ -2093,7 +2131,9 @@ _ClassConfig      = {
         },
         ['DoArcanumWeave'] = {
             DisplayName = "Weave Arcanums",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
@@ -2105,7 +2145,9 @@ _ClassConfig      = {
         --Damage (AE)
         ['DoAEDamage']     = {
             DisplayName = "Do AE Damage",
-            Category = "Damage (PBAE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
@@ -2115,7 +2157,9 @@ _ClassConfig      = {
         },
         ['PBAETargetCnt']  = {
             DisplayName = "PBAE Tgt Cnt",
-            Category = "Damage (PBAE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Minimum number of valid targets before using PBAE Spells.",
             Default = 4,
@@ -2127,7 +2171,9 @@ _ClassConfig      = {
         },
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
-            Category = "Damage (PBAE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 6,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -2140,7 +2186,9 @@ _ClassConfig      = {
         },
         ['SafeAEDamage']   = {
             DisplayName = "AE Proximity Check",
-            Category = "Damage (PBAE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 7,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,

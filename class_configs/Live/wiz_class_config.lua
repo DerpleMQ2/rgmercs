@@ -350,7 +350,7 @@ return {
             "Ether Skin",
             "Force Shield",
         },
-        ['StripBuffSpell'] = {
+        ['Dispel'] = {
             "Annul Magic",
             "Nullify Magic",
             "Cancel Magic",
@@ -1371,7 +1371,7 @@ return {
             DisplayName = "Do Rain",
             Group = "Abilities",
             Header = "Damage",
-            Category = "AE",
+            Category = "Direct",
             Index = 2,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
@@ -1385,7 +1385,7 @@ return {
             DisplayName = "Min Rain Distance",
             Group = "Abilities",
             Header = "Damage",
-            Category = "AE",
+            Category = "Direct",
             Index = 3,
             ConfigType = "Advanced",
             Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25').",

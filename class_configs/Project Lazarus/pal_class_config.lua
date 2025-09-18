@@ -1135,7 +1135,9 @@ return {
         --AE(All Modes)
         ['DoAEDamage']        = {
             DisplayName = "Do AE Damage",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE stuns that cause damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
@@ -1145,7 +1147,9 @@ return {
         },
         ['DoAEStun']          = {
             DisplayName = "Do AE Stun",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 2,
             Tooltip = "Use your Targeted AE Stun (Stun Command or Sacred Word) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
             Default = true,
@@ -1154,7 +1158,9 @@ return {
         },
         ['DoPBAEStun']        = {
             DisplayName = "Do PBAE Stun",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             Tooltip = "Use your PBAE Stun (The Silent Command) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
             Default = true,
@@ -1163,7 +1169,9 @@ return {
         },
         ['AEStunUse']         = {
             DisplayName = "AEStun Use(DPS Mode):",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 4,
             Tooltip = "When to use your AE Stun Lines in DPS Mode.",
             RequiresLoadoutChange = true,
@@ -1177,7 +1185,9 @@ return {
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Target Count",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
             Default = 2,
@@ -1189,7 +1199,9 @@ return {
         },
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 6,
             Tooltip =
             "Maximum number of valid targets to use AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -1202,7 +1214,9 @@ return {
         },
         ['SafeAEDamage']      = {
             DisplayName = "AE Proximity Check",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 7,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
