@@ -7,11 +7,6 @@ local Modules           = require('utils.modules')
 local Strings           = require('utils.strings')
 local Set               = require("mq.Set")
 
--- Using the following terms:
--- Group: Broad category of options, found on the left panel
--- Header: Which collapsing header on the right panel the option should be listed under
--- Category: Will use dividers under each header to further organize options.
-
 local OptionsUI         = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
 OptionsUI.__index       = OptionsUI
 OptionsUI.selectedGroup = "General"
@@ -28,10 +23,9 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.FA_COGS,
         IconImage = OptionsUI.LoadIcon("settingsicon"),
         Headers = {
-            { Name = 'General',       Categories = { "General Settings", }, },
+            { Name = 'Announcements', Categories = { "Announcements", }, }, -- group announce stuff
             { Name = 'Interface',     Categories = { "Interface", }, },     -- ui stuff
             { Name = 'Loot(Emu)',     Categories = { "LNS", }, },
-            { Name = 'Announcements', Categories = { "Announcements", }, }, -- group announce stuff
             { Name = 'Misc',          Categories = { "Other", }, },         -- ??? profit
             { Name = 'Uncategorized', Categories = { "Uncategorized", }, }, -- settings from custom configs that don't have proper group/header
         },
@@ -74,7 +68,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
             { Name = 'Recovery', Categories = { "General Healing", "Healing Thresholds", "Other Recovery", "Curing", "Rezzing", }, },
             { Name = 'Damage',   Categories = { "Direct", "AE", "Over Time", "Taps", }, },
             { Name = 'Tanking',  Categories = { "Hate Tools", "Defenses", }, },
-            { Name = 'Utility',  Categories = { "Hate Reduction", "Emergency", "Item Summoning", "Unique", }, },
+            { Name = 'Utility',  Categories = { "Hate Reduction", "Emergency", }, },
             { Name = 'Mez',      Categories = { "Mez General", "Mez Targets", }, },
             { Name = 'Charm',    Categories = { "Charm General", "Charm Targets", }, },
         },
@@ -85,10 +79,10 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.MD_RESTAURANT_MENU,
         IconImage = OptionsUI.LoadIcon("itemicon"),
         Headers = {
-            { Name = 'Clickies(Pre-Configured)', Categories = { "Clickies(Pre-Configured)", }, },
+            { Name = 'Item Summoning',           Categories = { "Item Summoning", }, },
             { Name = 'Bandolier',                Categories = { "Bandolier", }, },
             { Name = 'Instruments',              Categories = { "Instruments", }, },
-            { Name = 'Item Summoning',           Categories = { "Item Summoning", }, },
+            { Name = 'Clickies(Pre-Configured)', Categories = { "Clickies(Pre-Configured)", }, },
         },
     },
 }
@@ -107,9 +101,6 @@ OptionsUI.SettingNames      = {}
 OptionsUI.SettingCategories = Set.new({})
 OptionsUI.DefaultConfigs    = {}
 OptionsUI.FirstRender       = true
-
---Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
-OptionsUI.CustomModuleOrder = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
 local function shallow_copy(orig)
     local copy = {}
@@ -260,7 +251,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
             for _, category in ipairs(header.Categories) do
                 if #Config:GetAllSettingsForCategory(category) > 0 then
                     -- only draw the seperator if the category name is different from the heading
-                    if header ~= category then
+                    if header.Name ~= category then
                         self:RenderCategorySeperator(category)
                     end
                     -- Render options for this category
