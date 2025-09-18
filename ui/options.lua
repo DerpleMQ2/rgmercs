@@ -26,7 +26,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
             { Name = 'Announcements', Categories = { "Announcements", }, }, -- group announce stuff
             { Name = 'Interface',     Categories = { "Interface", }, },     -- ui stuff
             { Name = 'Loot(Emu)',     Categories = { "LNS", }, },
-            { Name = 'Misc',          Categories = { "Other", }, },         -- ??? profit
+            { Name = 'Misc',          Categories = { "Misc", }, },          -- ??? profit
             { Name = 'Uncategorized', Categories = { "Uncategorized", }, }, -- settings from custom configs that don't have proper group/header
         },
     },
@@ -48,9 +48,9 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.FA_HEART,
         IconImage = OptionsUI.LoadIcon("swordicon"),
         Headers = {
-            { Name = 'Targeting',   Categories = { "Targeting", }, },   -- Auto engage, med break, stay on target, etc
-            { Name = 'Assisting',   Categories = { "Assisting", }, },   -- this will include pet and merc percentages/commands
-            { Name = 'Positioning', Categories = { "Positioning", }, }, -- stick, face, etc
+            { Name = 'Targeting',   Categories = { "Targeting", }, },                                          -- Auto engage, med break, stay on target, etc
+            { Name = 'Assisting',   Categories = { "Assisting", }, },                                          -- this will include pet and merc percentages/commands
+            { Name = 'Positioning', Categories = { "General Positioning", "Tank Positioning", "Archery", }, }, -- stick, face, etc
             { Name = 'Burning',     Categories = { "Burning", }, },
             { Name = 'Tanking',     Categories = { "Tanking", }, },
         },

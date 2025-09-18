@@ -826,7 +826,7 @@ return {
             DisplayName = "Bow Nav Distance",
             Group = "Combat",
             Header = "Positioning",
-            Category = "Positioning",
+            Category = "Archery",
             Index = 1,
             Tooltip = "The distance from your target you should nav to for ranged attacks when necessary.\n" ..
                 "If Nav Circle is enabled, the distance to circle at.",
@@ -841,7 +841,7 @@ return {
             DisplayName = "Nav Circle",
             Group = "Combat",
             Header = "Positioning",
-            Category = "Positioning",
+            Category = "Archery",
             Index = 2,
             Tooltip = "Use Nav to Circle your target while autofiring.",
             Default = false,
