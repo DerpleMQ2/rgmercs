@@ -1230,6 +1230,8 @@ return {
         --Hate Tools
         ['AETauntAA']         = {
             DisplayName = "Use Beacon",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 1,
             Tooltip = "Use Beacon of the Righteous to regain AE aggro in Tank Mode.",
@@ -1238,6 +1240,8 @@ return {
         },
         ['AETauntCnt']        = {
             DisplayName = "AE Taunt Count",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 2,
             Tooltip = "Minimum number of haters before using AE Taunt AA or Stuns(when used as taunts).",
@@ -1250,6 +1254,8 @@ return {
         },
         ['SafeAETaunt']       = {
             DisplayName = "AE Taunt Safety Check",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 3,
             Tooltip = "Limit unintended pulls with AE Taunts or Stuns(when used as taunts). May result in non-use due to false positives.",
@@ -1263,6 +1269,8 @@ return {
         --Defenses
         ['DiscCount']         = {
             DisplayName = "Def. Disc. Count",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Defenses",
             Index = 1,
             Tooltip = "Number of mobs around you before you use preemptively use Defensive Discs.",
@@ -1275,6 +1283,8 @@ return {
         },
         ['DefenseStart']      = {
             DisplayName = "Defense HP",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Defenses",
             Index = 2,
             Tooltip = "The HP % where we will use defensive actions like discs, epics, etc.\nNote that fighting a named will also trigger these actions.",
@@ -1287,6 +1297,8 @@ return {
         },
         ['EmergencyStart']    = {
             DisplayName = "Emergency Start",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Defenses",
             Index = 3,
             Tooltip = "The HP % before all but essential rotations are cut in favor of emergency or defensive abilities.",
@@ -1299,6 +1311,8 @@ return {
         },
         ['HPCritical']        = {
             DisplayName = "HP Critical",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Defenses",
             Index = 4,
             Tooltip =
@@ -1332,7 +1346,9 @@ return {
         },
         ['DoCoating']         = {
             DisplayName = "Use Coating",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 2,
             Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
             Default = false,
@@ -1341,7 +1357,9 @@ return {
         },
         ['UseBandolier']      = {
             DisplayName = "Dynamic Weapon Swap",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 3,
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"2Hand\" TO USE THIS FUNCTION.***",
             Default = false,
@@ -1352,7 +1370,9 @@ return {
         },
         ['EquipShield']       = {
             DisplayName = "Equip Shield",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 4,
             Tooltip = "Under this HP%, you will swap to your \"Shield\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 50,
@@ -1365,7 +1385,9 @@ return {
         },
         ['Equip2Hand']        = {
             DisplayName = "Equip 2Hand",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 5,
             Tooltip = "Over this HP%, you will swap to your \"2Hand\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 75,
@@ -1378,7 +1400,9 @@ return {
         },
         ['NamedShieldLock']   = {
             DisplayName = "Shield on Named",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 6,
             Tooltip = "Keep Shield equipped for Named mobs(must be in SpawnMaster or named.lua)",
             Default = true,
@@ -1389,7 +1413,9 @@ return {
         --Heals/Cures
         ['DoTouchHeal']       = {
             DisplayName = "Touch Heal Use:",
-            Category = "Heals/Cures",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 1,
             Tooltip = "Choose when the Paladin will use the single-target Touch-line healing spell.",
             RequiresLoadoutChange = true,
@@ -1404,7 +1430,9 @@ return {
         },
         ['DoLightHeal']       = {
             DisplayName = "Light Heal Use:",
-            Category = "Heals/Cures",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 2,
             Tooltip = "Choose how many ToT heals (\"Light of\" line) to keep memorized, if any.",
             RequiresLoadoutChange = true,
@@ -1419,7 +1447,9 @@ return {
         },
         ['DoWaveHeal']        = {
             DisplayName = "Wave Heal Use:",
-            Category = "Heals/Cures",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 3,
             Tooltip = "Choose how many group heals to keep memorized, if any.",
             RequiresLoadoutChange = true,
@@ -1434,7 +1464,9 @@ return {
         },
         ['WaveHealUse']       = {
             DisplayName = "Use Waves for ST:",
-            Category = "Heals/Cures",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 4,
             Tooltip = "Use your Wave Heals as single-target heals as needed.",
             RequiresLoadoutChange = true,
@@ -1449,7 +1481,9 @@ return {
         },
         ['DoCleansing']       = {
             DisplayName = "Cleansing HoT:",
-            Category = "Heals/Cures",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 5,
             Tooltip = "Select your preference for Cleansing HoT use:",
             RequiresLoadoutChange = true,
@@ -1464,7 +1498,9 @@ return {
         },
         ['KeepPurityMemmed']  = {
             DisplayName = "Mem Crusader's Cure",
-            Category = "Heals/Cures",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
             Index = 6,
             Tooltip = "Memorize your Crusader's xxx line (Cure poi/dis/curse) when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
@@ -1476,7 +1512,9 @@ return {
         },
         ['KeepCurseMemmed']   = {
             DisplayName = "Mem Remove Curse",
-            Category = "Heals/Cures",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
             Index = 7,
             Tooltip = "Memorize remove curse spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
@@ -1490,7 +1528,9 @@ return {
         --Combat
         ['DoTwinHealNuke']    = {
             DisplayName = "Twin Heal Nuke",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 1,
             Tooltip = "Use Twin Heal Nuke Spells",
             RequiresLoadoutChange = true,
@@ -1501,7 +1541,9 @@ return {
         },
         ['DoSereneStun']      = {
             DisplayName = "Do Serene Stun",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Stun",
             Index = 3,
             Tooltip = "Use the Quellious/Serene stun line (long duration stun with DD component).",
             RequiresLoadoutChange = true,
@@ -1511,7 +1553,9 @@ return {
         },
         ['DoUndeadNuke']      = {
             DisplayName = "Do Undead Nuke",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 3,
             Tooltip = "Use the standard Undead nuke line.",
             RequiresLoadoutChange = true,
@@ -1521,7 +1565,9 @@ return {
         },
         ['DoQuickUndeadNuke'] = {
             DisplayName = "Do Undead Quick Nuke",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 4,
             Tooltip = "Use the quick undead nuke line (which includes a potential snare and ac debuff trigger).",
             RequiresLoadoutChange = true,
@@ -1531,7 +1577,9 @@ return {
         },
         ['DoValorousRage']    = {
             DisplayName = "Valorous Rage",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 5,
             Tooltip = "Use the Valorous Rage AA during burns.",
             Default = false,
@@ -1540,7 +1588,9 @@ return {
         },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
-            Category = "Combat",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 6,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
@@ -1551,7 +1601,9 @@ return {
         --Buffs
         ['AegoSymbol']        = {
             DisplayName = "Aego/Symbol Choice:",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 1,
             Tooltip =
             "Choose whether to use the Aegolism or Symbol Line of HP Buffs.\nPlease note using both is supported for party members who block buffs, but these buffs do not stack once we transition from using a HP Type-One buff in place of Aegolism.",
@@ -1565,7 +1617,9 @@ return {
         },
         ['DoACBuff']          = {
             DisplayName = "Use AC Buff",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 2,
             Tooltip =
                 "Use your single-slot AC Buff on the Main Assist. USE CASES:\n" ..
@@ -1579,7 +1633,9 @@ return {
         },
         ['DoBrells']          = {
             DisplayName = "Do Brells",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 3,
             Tooltip = "Enable Casting Brells",
             Default = true,
@@ -1588,7 +1644,9 @@ return {
         },
         ['DoWardProc']        = {
             DisplayName = "Do Ward Proc",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 4,
             Tooltip = "Use your Ward of Tunare defensive proc buff.",
             Default = true,
@@ -1597,7 +1655,9 @@ return {
         },
         ['DoSalvation']       = {
             DisplayName = "Marr's Salvation",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 5,
             Tooltip = "Use your group hatred reduction buff AA.",
             Default = true,
@@ -1606,7 +1666,9 @@ return {
         },
         ['ProcChoice']        = {
             DisplayName = "Proc Buff Choice:",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 6,
             Tooltip =
                 "Choose which DD proc buff you prefer. The Undead proc does higher damage but is restricted to that target type.\n" ..
