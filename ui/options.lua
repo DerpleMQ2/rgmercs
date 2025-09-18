@@ -159,7 +159,17 @@ function OptionsUI:ApplySearchFilter()
                     end
                 end
 
-                table.sort(self.FilteredSettingsByCat[category] or {})
+                table.sort(self.FilteredSettingsByCat[category] or {}, function(k1, k2)
+                    local k1Defaults = Config:GetSettingDefaults(k1)
+                    local k2Defaults = Config:GetSettingDefaults(k2)
+                    if (k1Defaults.Index ~= nil or k2Defaults.Index ~= nil) and (k1Defaults.Index ~= k2Defaults.Index) then
+                        return (k1Defaults.Index or 999) < (k2Defaults.Index or 999)
+                    elseif k1Defaults.Category == k2Defaults.Category then
+                        return (k1Defaults.DisplayName or "") < (k2Defaults.DisplayName or "")
+                    else
+                        return (k1Defaults.Category or "") < (k2Defaults.Category or "")
+                    end
+                end)
 
                 if #(self.FilteredSettingsByCat[category] or {}) > 0 then
                     table.insert(newCategories, category)
