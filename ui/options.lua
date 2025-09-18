@@ -302,7 +302,7 @@ function OptionsUI:RenderCategorySettings(category)
                 ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
                 Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
                     settingTooltip,
-                    setting,
+                    settingName,
                     tostring(settingDefaults.Default)))
                 ImGui.TableNextColumn()
                 local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
