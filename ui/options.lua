@@ -21,19 +21,19 @@ function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
 end
 
-OptionsUI.Groups          = { --- Add a default of the same name for any key that has nothing in its table once these are finished
+OptionsUI.Groups                = { --- Add a default of the same name for any key that has nothing in its table once these are finished
     {
         Name = "General",
         Description = "General and Misc Settings",
         Icon = Icons.FA_COGS,
         IconImage = OptionsUI.LoadIcon("settingsicon"),
         Headers = {
-            ['General'] = { "General Settings", },
-            ['Announcements'] = { "Announcements", }, -- group announce stuff
-            ['Interface'] = { "Interface", },         -- ui stuff
-            ['Loot(Emu)'] = { "LNS", },
-            ['Misc'] = { "Other", },                  -- ??? profit
-            ['Uncategorized'] = { "Uncategorized", }, -- settings from custom configs that don't have proper group/header
+            { Name = 'General',       Categories = { "General Settings", }, },
+            { Name = 'Interface',     Categories = { "Interface", }, },     -- ui stuff
+            { Name = 'Loot(Emu)',     Categories = { "LNS", }, },
+            { Name = 'Announcements', Categories = { "Announcements", }, }, -- group announce stuff
+            { Name = 'Misc',          Categories = { "Other", }, },         -- ??? profit
+            { Name = 'Uncategorized', Categories = { "Uncategorized", }, }, -- settings from custom configs that don't have proper group/header
         },
     },
     {
@@ -42,10 +42,10 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Icon = Icons.MD_DIRECTIONS_RUN,
         IconImage = OptionsUI.LoadIcon("followicon"),
         Headers = {
-            ['Following'] = { "Chase", "Camp", },
-            ['Meditation'] = { "Med Rules", "Med Thresholds", },
-            ['Drag'] = { "Drag", },
-            ['Pulling'] = { "Pull Rules", "Puller Vitals", "Group Vitals", "Distance", "Targets", },
+            { Name = 'Following',  Categories = { "Chase", "Camp", }, },
+            { Name = 'Meditation', Categories = { "Med Rules", "Med Thresholds", }, },
+            { Name = 'Drag',       Categories = { "Drag", }, },
+            { Name = 'Pulling',    Categories = { "Pull Rules", "Puller Vitals", "Group Vitals", "Distance", "Targets", }, },
         },
     },
     {
@@ -54,11 +54,11 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Icon = Icons.FA_HEART,
         IconImage = OptionsUI.LoadIcon("swordicon"),
         Headers = {
-            ['Targeting'] = { "Targeting", },     -- Auto engage, med break, stay on target, etc
-            ['Assisting'] = { "Assisting", },     -- this will include pet and merc percentages/commands
-            ['Positioning'] = { "Positioning", }, -- stick, face, etc
-            ['Burning'] = { "Burning", },
-            ['Tanking'] = { "Tanking", },
+            { Name = 'Targeting',   Categories = { "Targeting", }, },   -- Auto engage, med break, stay on target, etc
+            { Name = 'Assisting',   Categories = { "Assisting", }, },   -- this will include pet and merc percentages/commands
+            { Name = 'Positioning', Categories = { "Positioning", }, }, -- stick, face, etc
+            { Name = 'Burning',     Categories = { "Burning", }, },
+            { Name = 'Tanking',     Categories = { "Tanking", }, },
         },
     },
     {
@@ -67,16 +67,16 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Icon = Icons.FA_HEART,
         IconImage = OptionsUI.LoadIcon("stafficon"),
         Headers = {
-            ['Common'] = { "Common Rules", "Under the Hood", },
-            ['Pet'] = { "Pet Summoning", "Pet Buffs", "Swarm Pets", },
-            ['Buffs'] = { "Buff Rules", "Self", "Group", },
-            ['Debuffs'] = { "Debuff Rules", "Slow", "Stun", "Resist", "Snare", "Dispel", "Misc Debuffs", }, -- Resist i.e, Malo, Tash, druid
-            ['Recovery'] = { "General Healing", "Healing Thresholds", "Other Recovery", "Curing", "Rezzing", },
-            ['Damage'] = { "Direct", "AE", "Over Time", "Taps", },
-            ['Tanking'] = { "Hate Tools", "Defenses", },
-            ['Utility'] = { "Hate Reduction", "Emergency", "Item Summoning", "Unique", },
-            ['Mez'] = { "Mez General", "Mez Targets", },
-            ['Charm'] = { "Charm General", "Charm Targets", },
+            { Name = 'Common',   Categories = { "Common Rules", "Under the Hood", }, },
+            { Name = 'Pet',      Categories = { "Pet Summoning", "Pet Buffs", "Swarm Pets", }, },
+            { Name = 'Buffs',    Categories = { "Buff Rules", "Self", "Group", }, },
+            { Name = 'Debuffs',  Categories = { "Debuff Rules", "Slow", "Stun", "Resist", "Snare", "Dispel", "Misc Debuffs", }, }, -- Resist i.e, Malo, Tash, druid
+            { Name = 'Recovery', Categories = { "General Healing", "Healing Thresholds", "Other Recovery", "Curing", "Rezzing", }, },
+            { Name = 'Damage',   Categories = { "Direct", "AE", "Over Time", "Taps", }, },
+            { Name = 'Tanking',  Categories = { "Hate Tools", "Defenses", }, },
+            { Name = 'Utility',  Categories = { "Hate Reduction", "Emergency", "Item Summoning", "Unique", }, },
+            { Name = 'Mez',      Categories = { "Mez General", "Mez Targets", }, },
+            { Name = 'Charm',    Categories = { "Charm General", "Charm Targets", }, },
         },
     },
     {
@@ -85,17 +85,18 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Icon = Icons.MD_RESTAURANT_MENU,
         IconImage = OptionsUI.LoadIcon("itemicon"),
         Headers = {
-            ['Clickies(Pre-Configured)'] = { "Clickies(Pre-Configured)", },
-            ['Bandolier'] = { "Bandolier", },
-            ['Instruments'] = { "Instruments", },
-            ['Item Summoning'] = { "Item Summoning", },
+            { Name = 'Clickies(Pre-Configured)', Categories = { "Clickies(Pre-Configured)", }, },
+            { Name = 'Bandolier',                Categories = { "Bandolier", }, },
+            { Name = 'Instruments',              Categories = { "Instruments", }, },
+            { Name = 'Item Summoning',           Categories = { "Item Summoning", }, },
         },
     },
 }
 
-OptionsUI.FilteredGroups  = OptionsUI.Groups
+OptionsUI.FilteredGroups        = OptionsUI.Groups
+OptionsUI.FilteredSettingsByCat = {}
 
-OptionsUI.GroupsNameToIDs = {}
+OptionsUI.GroupsNameToIDs       = {}
 
 for id, group in ipairs(OptionsUI.Groups) do
     OptionsUI.GroupsNameToIDs[group.Name] = id
@@ -119,10 +120,11 @@ local function shallow_copy(orig)
 end
 
 function OptionsUI:ApplySearchFilter()
-    self.FilteredGroups = self.Groups
+    self.FilteredGroups        = self.Groups
+    self.FilteredSettingsByCat = {}
 
-    local filter = self.configFilter:lower()
-    local filtered = {}
+    local filter               = self.configFilter:lower()
+    local filtered             = {}
 
     for _, group in ipairs(self.Groups) do
         local groupNameLower = group.Name:lower()
@@ -131,18 +133,17 @@ function OptionsUI:ApplySearchFilter()
         local newGroup = shallow_copy(group)
         newGroup.Headers = {} -- clear headers for rebuilding
 
-        for header, categories in pairs(group.Headers) do
-            local headerLower = header:lower()
+        for _, header in ipairs(group.Headers) do
+            local headerLower = header.Name:lower()
             local headerMatches = headerLower:find(filter, 1, true) ~= nil
 
             local newCategories = {}
 
-            for _, category in ipairs(categories) do
+            for _, category in ipairs(header.Categories) do
                 local categoryLower = category:lower()
                 local categoryMatches = categoryLower:find(filter, 1, true) ~= nil
 
                 local settingsForCategory = Config:GetAllSettingsForCategory(category)
-                local matchingSettings = {}
 
                 for _, settingName in ipairs(settingsForCategory or {}) do
                     local settingDefaults         = Config:GetSettingDefaults(settingName)
@@ -151,23 +152,27 @@ function OptionsUI:ApplySearchFilter()
                     local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or
                         (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
 
-                    if showAdv and (settingDisplayNameLower:find(filter, 1, true) ~= nil or
+                    if showAdv and (headerMatches or categoryMatches or settingDisplayNameLower:find(filter, 1, true) ~= nil or
                             settingTooltipLower:find(filter, 1, true) ~= nil) then
-                        table.insert(matchingSettings, settingName)
+                        self.FilteredSettingsByCat[category] = self.FilteredSettingsByCat[category] or {}
+                        table.insert(self.FilteredSettingsByCat[category], settingName)
                     end
                 end
 
-                if (self.configFilter:len() > 0 and categoryMatches) or #matchingSettings > 0 then
+                if #(self.FilteredSettingsByCat[category] or {}) > 0 then
                     table.insert(newCategories, category)
                 end
             end
 
-            if (self.configFilter:len() > 0 and headerMatches) or #newCategories > 0 then
-                newGroup.Headers[header] = newCategories
+            if #newCategories > 0 then
+                table.insert(newGroup.Headers, { Name = header.Name, Categories = newCategories, })
             end
         end
 
-        if groupMatches or next(newGroup.Headers) ~= nil then
+        -- sort headers by alpha
+        table.sort(newGroup.Headers, function(a, b) return a.Name < b.Name end)
+
+        if groupMatches or #(newGroup.Headers or {}) > 0 then
             table.insert(filtered, newGroup)
         end
     end
@@ -238,17 +243,9 @@ function OptionsUI:RenderCategorySeperator(category)
 end
 
 function OptionsUI:RenderOptionsPanel(groupName)
-    for header, options in pairs(self.FilteredGroups[self.GroupsNameToIDs[groupName]] and (self.FilteredGroups[self.GroupsNameToIDs[groupName]].Headers or {}) or {}) do
-        local any_options_in_header = false
-        for _, category in ipairs(options) do
-            if #Config:GetAllSettingsForCategory(category) > 0 then
-                any_options_in_header = true
-                break
-            end
-        end
-
-        if any_options_in_header and ImGui.CollapsingHeader(header) then
-            for _, category in ipairs(options) do
+    for _, header in ipairs(self.FilteredGroups[self.GroupsNameToIDs[groupName]] and (self.FilteredGroups[self.GroupsNameToIDs[groupName]].Headers or {}) or {}) do
+        if ImGui.CollapsingHeader(header.Name) then
+            for _, category in ipairs(header.Categories) do
                 if #Config:GetAllSettingsForCategory(category) > 0 then
                     -- only draw the seperator if the category name is different from the heading
                     if header ~= category then
@@ -271,7 +268,7 @@ function OptionsUI:RenderCategorySettings(category)
     local renderWidth         = 300
     local windowWidth         = ImGui.GetWindowWidth()
     local numCols             = math.max(1, math.floor(windowWidth / renderWidth))
-    local settingsForCategory = Config:GetAllSettingsForCategory(category)
+    local settingsForCategory = self.FilteredSettingsByCat[category] or {}
 
     -- ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
     -- ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 1.0)
@@ -297,51 +294,40 @@ function OptionsUI:RenderCategorySettings(category)
             local setting         = Config:GetSetting(settingName)
             local id              = "##" .. settingName
             local settingTooltip  = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
-            local showAdv         = Config:GetSetting('ShowAdvancedOpts') or
-                (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
-            local matchedFilter   = (self.configFilter == "") and showAdv
+            if settingDefaults.Type ~= "Custom" then
+                ImGui.TableNextColumn()
+                ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
+                Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
+                    settingTooltip,
+                    setting,
+                    tostring(settingDefaults.Default)))
+                ImGui.TableNextColumn()
+                local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
+                if (settingDefaults.Type or ""):find("Array") then
+                    typeOfSetting = settingDefaults.Type:sub(7)
+                end
 
-            if showAdv and (settingDefaults.DisplayName:lower():find(self.configFilter, 1, true) ~= nil or
-                    settingTooltip:lower():find(self.configFilter, 1, true) ~= nil) then
-                matchedFilter = true
-            end
-
-            if matchedFilter then
-                if settingDefaults.Type ~= "Custom" then
-                    ImGui.TableNextColumn()
-                    ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
-                    Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
-                        settingTooltip,
+                if settingDefaults ~= nil then
+                    setting, loadout_change, pressed = Ui.RenderOption(
+                        typeOfSetting,
                         setting,
-                        tostring(settingDefaults.Default)))
-                    ImGui.TableNextColumn()
-                    local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
-                    if (settingDefaults.Type or ""):find("Array") then
-                        typeOfSetting = settingDefaults.Type:sub(7)
-                    end
+                        id,
+                        settingDefaults.RequiresLoadoutChange or false,
+                        settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
+                    new_loadout = new_loadout or loadout_change
+                    any_pressed = any_pressed or pressed
 
-                    if settingDefaults ~= nil then
-                        setting, loadout_change, pressed = Ui.RenderOption(
-                            typeOfSetting,
-                            setting,
-                            id,
-                            settingDefaults.RequiresLoadoutChange or false,
-                            settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
-                        new_loadout = new_loadout or loadout_change
-                        any_pressed = any_pressed or pressed
+                    --  need to update setting here and notify module
+                    if pressed then
+                        Config:SetSetting(settingName, setting)
 
-                        --  need to update setting here and notify module
-                        if pressed then
-                            Config:SetSetting(settingName, setting)
-
-                            if new_loadout then
-                                Modules:ExecModule("Class", "RescanLoadout")
-                                new_loadout = false
-                            end
+                        if new_loadout then
+                            Modules:ExecModule("Class", "RescanLoadout")
+                            new_loadout = false
                         end
-                    else
-                        ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
                     end
+                else
+                    ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
                 end
             end
         end
