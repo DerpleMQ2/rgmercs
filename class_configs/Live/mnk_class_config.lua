@@ -659,7 +659,9 @@ local _ClassConfig = {
         },
         ['DoVetAA']        = {
             DisplayName = "Use Vet AA",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 8,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
@@ -668,7 +670,9 @@ local _ClassConfig = {
         },
         ['DoAEDamage']     = {
             DisplayName = "Do AE Damage",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
             Default = false,
@@ -677,7 +681,9 @@ local _ClassConfig = {
         },
         ['AETargetCnt']    = {
             DisplayName = "AE Target Count",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 2,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
@@ -689,7 +695,9 @@ local _ClassConfig = {
         },
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -702,7 +710,9 @@ local _ClassConfig = {
         },
         ['SafeAEDamage']   = {
             DisplayName = "AE Proximity Check",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -713,7 +723,9 @@ local _ClassConfig = {
         },
         ['AggroFeign']     = {
             DisplayName = "Emergency Feign",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
             Index = 9,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
@@ -723,7 +735,9 @@ local _ClassConfig = {
         },
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
             Index = 10,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
@@ -735,7 +749,9 @@ local _ClassConfig = {
         },
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
-            Category = "Abilities",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 8,
             Tooltip = "Click your chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
@@ -746,7 +762,9 @@ local _ClassConfig = {
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 6,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,

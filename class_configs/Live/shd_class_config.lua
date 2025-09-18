@@ -2195,7 +2195,9 @@ local _ClassConfig = {
         --Buffs and Debuffs
         ['DoSnare']           = {
             DisplayName = "Use Snares",
-            Category = "Buffs/Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 1,
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
@@ -2205,7 +2207,9 @@ local _ClassConfig = {
         },
         ['SnareCount']        = {
             DisplayName = "Snare Max Mob Count",
-            Category = "Buffs/Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 2,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
@@ -2217,7 +2221,9 @@ local _ClassConfig = {
         },
         ['DoTempHP']          = {
             DisplayName = "Use HP Buff",
-            Category = "Buffs/Debuffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 3,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("TempHP") end,
             Default = true,
@@ -2227,7 +2233,9 @@ local _ClassConfig = {
         },
         ['ProcChoice']        = {
             DisplayName = "HP/Mana Proc:",
-            Category = "Buffs/Debuffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 4,
             Tooltip = "Prefer HP Proc and DLU(Azia) or Mana Proc and DLU(Beza)",
             Type = "Combo",
@@ -2241,7 +2249,9 @@ local _ClassConfig = {
         },
         ['OverwriteDLUBuffs'] = {
             DisplayName = "Overwrite DLU Buffs",
-            Category = "Buffs/Debuffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 5,
             Tooltip = "Overwrite DLU with single buffs when they are better than the DLU effect.",
             Default = false,
@@ -2251,7 +2261,9 @@ local _ClassConfig = {
         },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
-            Category = "Buffs/Debuffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 8,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
@@ -2262,6 +2274,8 @@ local _ClassConfig = {
         --Taps
         ['StartLifeTap']      = {
             DisplayName = "HP % for LifeTaps",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 1,
             Tooltip = "Your HP % before we use Life Taps.",
@@ -2274,6 +2288,8 @@ local _ClassConfig = {
         },
         ['DoDireTap']         = {
             DisplayName = "Cast Dire Taps",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 2,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("DireTap") end,
@@ -2285,6 +2301,8 @@ local _ClassConfig = {
         },
         ['StartDireTap']      = {
             DisplayName = "HP % for Dire",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 3,
             Tooltip = "Your HP % before we use Dire taps.",
@@ -2297,6 +2315,8 @@ local _ClassConfig = {
         },
         ['DoDicho']           = {
             DisplayName = "Cast Dicho Taps",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 4,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("Dicho") end,
@@ -2308,6 +2328,8 @@ local _ClassConfig = {
         },
         ['StartDicho']        = {
             DisplayName = "HP % for Dicho",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 5,
             Tooltip = "Your HP % before we use Dicho taps.",
@@ -2320,6 +2342,8 @@ local _ClassConfig = {
         },
         ['DoACTap']           = {
             DisplayName = "Use AC Tap",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 6,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("PowerTapAC") end,
@@ -2331,6 +2355,8 @@ local _ClassConfig = {
         },
         ['DoAtkTap']          = {
             DisplayName = "Use Attack Tap",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 7,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("PowerTapAtk") end,
@@ -2342,6 +2368,8 @@ local _ClassConfig = {
         },
         ['DoMaxHPTap']        = {
             DisplayName = "Use Max HP Tap",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 8,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("MaxHPTap") end,
@@ -2354,6 +2382,8 @@ local _ClassConfig = {
         },
         ['DoLeechTouch']      = {
             DisplayName = "Leech Touch Use:",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 9,
             Tooltip = "When to use Leech Touch",
@@ -2368,6 +2398,8 @@ local _ClassConfig = {
         },
         ['DoThoughtLeech']    = {
             DisplayName = "Thought Leech Use:",
+            Group = "Abilities",
+            Header = "Damage",
             Category = "Taps",
             Index = 10,
             Tooltip = "When to use Thought Leech",
@@ -2384,7 +2416,9 @@ local _ClassConfig = {
         --DoT Spells
         ['DoBondTap']         = {
             DisplayName = "Use Bond Dot",
-            Category = "DoT Spells",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 1,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("BondTap") end,
             RequiresLoadoutChange = true,
@@ -2394,7 +2428,9 @@ local _ClassConfig = {
         },
         ['DoPoisonDot']       = {
             DisplayName = "Use Poison Dot",
-            Category = "DoT Spells",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 2,
             ToolTip = function() return Ui.GetDynamicTooltipForSpell("PoisonDot") end,
             RequiresLoadoutChange = true,
@@ -2404,7 +2440,9 @@ local _ClassConfig = {
         },
         ['DoCorruptionDot']   = {
             DisplayName = "Use Corrupt Dot",
-            Category = "DoT Spells",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 3,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("CorruptDot") end,
             RequiresLoadoutChange = true,
@@ -2414,7 +2452,9 @@ local _ClassConfig = {
         },
         ['DoDireDot']         = {
             DisplayName = "Use Dire Dot",
-            Category = "DoT Spells",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 4,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("DireDot") end,
             RequiresLoadoutChange = true,
@@ -2426,7 +2466,9 @@ local _ClassConfig = {
         -- AE Damage
         ['DoAEDamage']        = {
             DisplayName = "Do AE Damage",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
@@ -2436,7 +2478,9 @@ local _ClassConfig = {
         },
         ['DoAELifeTap']       = {
             DisplayName = "Use AE Hate/LifeTap",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 2,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("AELifeTap") end,
             RequiresLoadoutChange = true,
@@ -2446,7 +2490,9 @@ local _ClassConfig = {
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Target Count",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
             Default = 2,
@@ -2458,7 +2504,9 @@ local _ClassConfig = {
         },
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 4,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -2471,7 +2519,9 @@ local _ClassConfig = {
         },
         ['SafeAEDamage']      = {
             DisplayName = "AE Proximity Check",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -2484,6 +2534,8 @@ local _ClassConfig = {
         --Hate Tools
         ['DoHateBuff']        = {
             DisplayName = "Use Hate Buff",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 1,
             Tooltip = "Use your Visage buff (Voice of ... line). If the AA is not available, we will use/memorize the spell if we have enough open slots.",
@@ -2496,6 +2548,8 @@ local _ClassConfig = {
         },
         ['DoTerror']          = {
             DisplayName = "Terror Taunts:",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 2,
             Tooltip = "Choose the level range (if any) to memorize Terror Spells.",
@@ -2510,6 +2564,8 @@ local _ClassConfig = {
         },
         ['DoForPower']        = {
             DisplayName = "Use \"For Power\"",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 3,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("ForPower") end,
@@ -2521,6 +2577,8 @@ local _ClassConfig = {
         },
         ['AETauntAA']         = {
             DisplayName = "Use AE Taunt AA",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 4,
             Tooltip = "Use Explosions of Hatred and Spite.",
@@ -2531,6 +2589,8 @@ local _ClassConfig = {
         },
         ['AETauntSpell']      = {
             DisplayName = "AE Taunt Spell Choice:",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 5,
             Tooltip = "Choose the level range (if any) to memorize AE Taunt Spells.",
@@ -2548,6 +2608,8 @@ local _ClassConfig = {
         },
         ['AETauntCnt']        = {
             DisplayName = "AE Taunt Count",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 6,
             Tooltip = "Minimum number of haters before using AE Taunt Spells or AA.",
@@ -2560,6 +2622,8 @@ local _ClassConfig = {
         },
         ['SafeAETaunt']       = {
             DisplayName = "AE Taunt Safety Check",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Hate Tools",
             Index = 7,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE taunts are used. May result in non-use due to false positives.",
@@ -2572,6 +2636,8 @@ local _ClassConfig = {
         --Defenses
         ['DiscCount']         = {
             DisplayName = "Def. Disc. Count",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Defenses",
             Index = 1,
             Tooltip = "Number of mobs around you before you use preemptively use Defensive Discs.",
@@ -2584,6 +2650,8 @@ local _ClassConfig = {
         },
         ['DefenseStart']      = {
             DisplayName = "Defense Start",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Defenses",
             Index = 2,
             Tooltip = "The HP % where we will use defensive discs and the like.\nNote that fighting a named will also trigger these actions.",
@@ -2596,6 +2664,8 @@ local _ClassConfig = {
         },
         ['EmergencyStart']    = {
             DisplayName = "Emergency Start",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Defenses",
             Index = 3,
             Tooltip = "The HP % before heavy defensive abilities like Shield Flash are triggered.\n Some non-essential rotations are skipped to help us focus on survival (See FAQ).",
@@ -2608,6 +2678,8 @@ local _ClassConfig = {
         },
         ['HPCritical']        = {
             DisplayName = "HP Critical",
+            Group = "Abilities",
+            Header = "Tanking",
             Category = "Defenses",
             Index = 4,
             Tooltip =
@@ -2624,7 +2696,9 @@ local _ClassConfig = {
         --Equipment
         ['DoChestClick']      = {
             DisplayName = "Do Chest Click",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 1,
             Tooltip = "Click your equipped chest.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
@@ -2633,7 +2707,9 @@ local _ClassConfig = {
         },
         ['DoCharmClick']      = {
             DisplayName = "Do Charm Click",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 2,
             Tooltip = "Click your charm for Geomantra.",
             Default = false,
@@ -2642,7 +2718,9 @@ local _ClassConfig = {
         },
         ['DoCoating']         = {
             DisplayName = "Use Coating",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 3,
             Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
             Default = false,
@@ -2651,7 +2729,9 @@ local _ClassConfig = {
         },
         ['UseBandolier']      = {
             DisplayName = "Dynamic Weapon Swap",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 4,
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"2Hand\" TO USE THIS FUNCTION.***",
             Default = false,
@@ -2662,7 +2742,9 @@ local _ClassConfig = {
         },
         ['EquipShield']       = {
             DisplayName = "Equip Shield",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 5,
             Tooltip = "Under this HP%, you will swap to your \"Shield\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 50,
@@ -2675,7 +2757,9 @@ local _ClassConfig = {
         },
         ['Equip2Hand']        = {
             DisplayName = "Equip 2Hand",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 6,
             Tooltip = "Over this HP%, you will swap to your \"2Hand\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 75,
@@ -2688,7 +2772,9 @@ local _ClassConfig = {
         },
         ['NamedShieldLock']   = {
             DisplayName = "Shield on Named",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 7,
             Tooltip = "Keep Shield equipped for Named mobs(must be in SpawnMaster or named.lua)",
             Default = true,
@@ -2697,7 +2783,9 @@ local _ClassConfig = {
         },
         ['SummonArrows']      = {
             DisplayName = "Use Huntsman's Quiver",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Bandolier",
+            Category = "Bandolier",
             Index = 8,
             Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
             Default = false,

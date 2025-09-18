@@ -722,7 +722,9 @@ return {
         -- Poison
         ['PoisonName']      = {
             DisplayName = "Poison Item",
-            Category = "Poison",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Tooltip = "Click the poison you want to use here",
             Type = "ClickyItem",
             Default = "",
@@ -732,7 +734,9 @@ return {
         },
         ['PoisonClicky']    = {
             DisplayName = "Poison Clicky",
-            Category = "Poison",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Tooltip = "Click the poison summoner you want to use here",
             Type = "ClickyItem",
             Default = "",
@@ -742,7 +746,9 @@ return {
         },
         ['PoisonItemCount'] = {
             DisplayName = "Poison Item Count",
-            Category = "Poison",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Tooltip = "Min number of poison before we start summoning more",
             Default = 3,
             Min = 1,
@@ -753,7 +759,9 @@ return {
         -- Abilities
         ['DoHideSneak']     = {
             DisplayName = "Do Hide/Sneak Click",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 1,
             Tooltip = "Use Hide/Sneak during Downtime",
             Default = true,
@@ -763,7 +771,9 @@ return {
         },
         ['DoOpener']        = {
             DisplayName = "Use Openers",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 2,
             Tooltip = "Use Sneak Attack line to start combat (e.g, Daggerslash).",
             Default = true,
@@ -772,7 +782,9 @@ return {
         },
         ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
             Default = false,
@@ -781,7 +793,9 @@ return {
         },
         ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 4,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
@@ -793,7 +807,9 @@ return {
         },
         ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -806,7 +822,9 @@ return {
         },
         ['SafeAEDamage']    = {
             DisplayName = "AE Proximity Check",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 6,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -817,7 +835,9 @@ return {
         },
         ['EmergencyStart']  = {
             DisplayName = "Emergency HP%",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
             Index = 7,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
@@ -829,7 +849,9 @@ return {
         },
         ['HideAggro']       = {
             DisplayName = "Hide Aggro%",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Hate Reduction",
             Index = 8,
             Tooltip = "Your Aggro % before we will attempt to Hide from our current target.",
             Default = 90,
@@ -840,7 +862,9 @@ return {
         },
         ['DoVetAA']         = {
             DisplayName = "Use Vet AA",
-            Category = "Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 9,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
@@ -850,7 +874,9 @@ return {
         --Equipment
         ['UseEpic']         = {
             DisplayName = "Epic Use:",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 1,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",
@@ -865,7 +891,9 @@ return {
         },
         ['DoChestClick']    = {
             DisplayName = "Do Chest Click",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 2,
             Tooltip = "Click your chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
@@ -876,23 +904,14 @@ return {
         },
         ['DoCoating']       = {
             DisplayName = "Use Coating",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 3,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
             FAQ = "What is a Coating?",
             Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
-        },
-        --Orphaned (remove when config goes default)
-        ['DoEpic']          = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
     },
 }
