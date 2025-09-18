@@ -1111,9 +1111,9 @@ Config.DefaultConfig = {
     },
     ['ForceKillPet']         = {
         DisplayName = "Force Kill Pet",
-        Group = "General",
-        Header = "Misc",
-        Category = "Other",
+        Group = "Combat",
+        Header = "Tanking",
+        Category = "Tanking",
         Index = 4,
         Tooltip = "Force kill pcpet if on xtarget.",
         Default = false,
@@ -2312,7 +2312,7 @@ function Config.ResolveDefaults(defaults, settings)
 end
 
 function Config:RegisterCategoryToSettingMapping(setting)
-    local category = Config:GetSettingDefaults(setting).Category or "General"
+    local category = Config:GetSettingDefaults(setting).Category or "Uncategorized"
     Config.TempSettings.SettingsCategoryToSettingMapping[category] = Config.TempSettings.SettingsCategoryToSettingMapping[category] or {}
     table.insert(Config.TempSettings.SettingsCategoryToSettingMapping[category], setting)
 end
