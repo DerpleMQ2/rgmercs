@@ -128,7 +128,7 @@ return {
             "Ether Skin",
             "Force Shield",
         },
-        ['StripBuffSpell'] = {
+        ['Dispel'] = {
             "Annul Magic",
             "Nullify Magic",
             "Cancel Magic",
@@ -934,7 +934,9 @@ return {
         -- Damage (ST)
         ['ElementChoice']        = {
             DisplayName = "Element Choice:",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 1,
             Tooltip = "Choose an element to focus on.",
             Type = "Combo",
@@ -948,7 +950,9 @@ return {
         },
         ['DoManaBurn']           = {
             DisplayName = "Use Mana Burn AA",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 2,
             Tooltip = "Enable usage of the Mana Burn series of AA.",
             RequiresLoadoutChange = true,
@@ -958,7 +962,9 @@ return {
         },
         ['DoRain']               = {
             DisplayName = "Do Rain",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 3,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
@@ -970,7 +976,9 @@ return {
         },
         ['RainDistance']         = {
             DisplayName = "Min Rain Distance",
-            Category = "Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 4,
             ConfigType = "Advanced",
             Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25').",
@@ -984,7 +992,9 @@ return {
         --Damage (AE)
         ['DoAEDamage']           = {
             DisplayName = "Do AE Damage",
-            Category = "Damage (PBAE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
@@ -994,7 +1004,9 @@ return {
         },
         ['PBAETargetCnt']        = {
             DisplayName = "PBAE Tgt Cnt",
-            Category = "Damage (PBAE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Minimum number of valid targets before using PB Spells like the of Flame line.",
             Default = 4,
@@ -1006,7 +1018,9 @@ return {
         },
         ['MaxAETargetCnt']       = {
             DisplayName = "Max AE Targets",
-            Category = "Damage (PBAE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 6,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -1019,7 +1033,9 @@ return {
         },
         ['SafeAEDamage']         = {
             DisplayName = "AE Proximity Check",
-            Category = "Damage (PBAE)",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 7,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -1032,7 +1048,9 @@ return {
         -- Utility
         ['JoltAggro']            = {
             DisplayName = "Jolt Aggro %",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Hate Reduction",
             Index = 1,
             Tooltip = "Aggro at which to use Jolt",
             Default = 90,
@@ -1043,7 +1061,9 @@ return {
         },
         ['DoSnare']              = {
             DisplayName = "Use Snares",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 3,
             Tooltip = "Use Snare Spells.",
             Default = false,
@@ -1053,7 +1073,9 @@ return {
         },
         ['SnareCount']           = {
             DisplayName = "Snare Max Mob Count",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 4,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
@@ -1065,7 +1087,9 @@ return {
         },
         ['DoStun']               = {
             DisplayName = "Do Stun",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Stun",
             Index = 5,
             Tooltip = "Use your Stun Nukes (Stun with DD, not mana efficient).",
             RequiresLoadoutChange = true,
@@ -1076,7 +1100,9 @@ return {
         },
         ['HarvestManaPct']       = {
             DisplayName = "Harvest Mana %",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 7,
             ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using a harvest spell or aa.",
@@ -1088,7 +1114,9 @@ return {
         },
         ['CombatHarvestManaPct'] = {
             DisplayName = "Combat Harvest %",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 8,
             ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using a harvest spell or aa in Combat.",
@@ -1100,7 +1128,9 @@ return {
         },
         ['DoArcanumWeave']       = {
             DisplayName = "Weave Arcanums",
-            Category = "Utility",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 9,
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition

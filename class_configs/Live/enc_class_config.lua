@@ -444,7 +444,7 @@ local _ClassConfig = {
             "Tepid Deeds",
             "Languid Pace",
         },
-        ['StripBuffSpell'] = {
+        ['Dispel'] = {
             "Eradicate Magic",
             "Recant Magic",
             "Pillage Enchantment",
@@ -840,10 +840,10 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'StripBuff',
+            name = 'Dispel',
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('DoStripBuff') end,
+            load_cond = function() return Config:GetSetting('DoDispel') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.OkayToDebuff()
@@ -1135,7 +1135,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['StripBuff'] = {
+        ['Dispel'] = {
             {
                 name = "Eradicate Magic",
                 type = "AA",
@@ -1144,7 +1144,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "StripBuffSpell",
+                name = "Dispel",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Casting.CanUseAA("Eradicate Magic") then return false end
@@ -1457,7 +1457,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') and not Casting.CanUseAA("Eradicate Magic") end, },
+                { name = "Dispel",           cond = function(self) return Config:GetSetting('DoDispel') and not Casting.CanUseAA("Eradicate Magic") end, },
                 { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
@@ -1487,13 +1487,13 @@ local _ClassConfig = {
             end,
         },
         {
-            id = 'StripBuffSpell',
+            id = 'Dispel',
             Type = "Spell",
-            DisplayName = function() return Core.GetResolvedActionMapItem('StripBuffSpell').RankName.Name() or "" end,
-            AbilityName = function() return Core.GetResolvedActionMapItem('StripBuffSpell').RankName.Name() or "" end,
+            DisplayName = function() return Core.GetResolvedActionMapItem('Dispel').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('Dispel').RankName.Name() or "" end,
             AbilityRange = 200,
             cond = function(self)
-                local resolvedSpell = Core.GetResolvedActionMapItem('StripBuffSpell')
+                local resolvedSpell = Core.GetResolvedActionMapItem('Dispel')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
@@ -1661,7 +1661,7 @@ local _ClassConfig = {
                 "If you are not Crippling, you may need to Enable the [DoCripple] setting.\n" ..
                 "Please note that eventually, Cripple and Slow lines are merged together in the Helix line.",
         },
-        ['DoStripBuff']        = {
+        ['DoDispel']           = {
             DisplayName = "Do Dispel",
             Group = "Abilities",
             Header = "Debuffs",
@@ -1669,9 +1669,9 @@ local _ClassConfig = {
             Tooltip = "Enable removing beneficial enemy effects.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not stripping buffs?",
-            Answer = "The [DoStripBuff] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
-                "If you are not stripping buffs, you may need to Enable the [DoStripBuff] setting.",
+            FAQ = "Why am I not dispelling?",
+            Answer = "The [DoDispel] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
+                "If you are not dispelling, you may need to Enable the [DoDispel] setting.",
         },
 
         --Combat

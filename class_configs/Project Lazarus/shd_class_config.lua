@@ -1255,20 +1255,6 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not using Leech Touch?",
             Answer = "You can choose the conditions under which you will use Leech Touch on the Taps tab.",
         },
-        -- ['DoThoughtLeech']   = { --commented because on aa list but inactive
-        --     DisplayName = "Thought Leech Use:",
-        --     Category = "Taps",
-        --     Index = 5,
-        --     Tooltip = "When to use Thought Leech",
-        --     Type = "Combo",
-        --     ComboOptions = { 'On critically low mana', 'As DD during burns', 'For Mana or DD', },
-        --     Default = 3,
-        --     Min = 1,
-        --     Max = 3,
-        --     ConfigType = "Advanced",
-        --     FAQ = "Why is my Shadow Knight not using Thought Leech?",
-        --     Answer = "You can choose the conditions under which you will use Thought Leech on the Taps tab.",
-        -- },
 
         --DoT Spells
         ['DoBondTap']       = {
