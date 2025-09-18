@@ -1226,7 +1226,9 @@ local _ClassConfig = {
         --Combat
         ['UseEpic']            = {
             DisplayName = "Epic Use:",
-            Category = "Buffs",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 1,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",
@@ -1294,7 +1296,9 @@ local _ClassConfig = {
         },
         ['DoChestClick']       = {
             DisplayName = "Do Chest Click",
-            Category = "Combat",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 5,
             Tooltip = "Click your equipped chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",

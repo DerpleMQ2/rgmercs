@@ -375,7 +375,9 @@ return {
         --Equipment
         ['UseEpic']        = {
             DisplayName = "Epic Use:",
-            Category = "Equipment",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 1,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",

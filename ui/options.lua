@@ -68,13 +68,13 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         IconImage = OptionsUI.LoadIcon("stafficon"),
         Headers = {
             ['Common'] = { "Common Rules", "Under the Hood", },
-            ['Pet'] = { "Summoning", "Buffs", "Swarm", },
+            ['Pet'] = { "Pet Summoning", "Pet Buffs", "Swarm Pets", },
             ['Buffs'] = { "Buff Rules", "Self", "Group", },
-            ['Debuffs'] = { "Debuff Rules", "Slow", "Resist/Stat", "Snare", "Dispel", }, -- Resist i.e, Malo, Tash, druid
-            ['Healing'] = { "Healing Rules", "Healing Thresholds", "Curing", "Rezzing", },
+            ['Debuffs'] = { "Debuff Rules", "Slow", "Stun", "Resist", "Snare", "Dispel", "Misc Debuffs", }, -- Resist i.e, Malo, Tash, druid
+            ['Recovery'] = { "General Healing", "Healing Thresholds", "Other Recovery", "Curing", "Rezzing", },
             ['Damage'] = { "Direct", "AE", "Over Time", "Taps", },
             ['Tanking'] = { "Hate Tools", "Defenses", },
-            ['Utility'] = { "Hate Reduction", "Emergency", "Unique", }, -- Unique Example: Canni, Paragon, etc.
+            ['Utility'] = { "Hate Reduction", "Emergency", "Item Summoning", "Unique", },
             ['Mez'] = { "Mez General", "Mez Targets", },
             ['Charm'] = { "Charm General", "Charm Targets", },
         },
@@ -85,9 +85,10 @@ OptionsUI.Groups          = { --- Add a default of the same name for any key tha
         Icon = Icons.MD_RESTAURANT_MENU,
         IconImage = OptionsUI.LoadIcon("itemicon"),
         Headers = {
-            ['Clickies(Pre-Configured)'] = { "Clickies", },
-            ['Bandolier'] = { "Swaps", },
+            ['Clickies(Pre-Configured)'] = { "Clickies(Pre-Configured)", },
+            ['Bandolier'] = { "Bandolier", },
             ['Instruments'] = { "Instruments", },
+            ['Item Summoning'] = { "Item Summoning", },
         },
     },
 }
@@ -109,19 +110,6 @@ OptionsUI.FirstRender       = true
 --Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
 OptionsUI.CustomModuleOrder = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
--- Premise:
-
--- Render groups and descriptions on the left panel.
--- -- Descriptions can be a tooltip, but it would be great to actually make them images at some point
--- -- That way, we could have larger lettering on the group Names with smaller description text underneath
-
-
--- Misc Thoughts
--- Abils seems to have a lot of headers, but I guess most won't be shown for most classes.
--- -- It still makes the most logical sense to me, breaking them up just to hit a target # of headers doesn't seem great.
--- Icons can be done later, etc. Going to have to pull up the list so I can see them visually. If we use image buttons, we don't need them.
-
--- Note... plan on moving functions to proper libraries as necessary later
 local function shallow_copy(orig)
     local copy = {}
     for k, v in pairs(orig) do
@@ -273,22 +261,9 @@ function OptionsUI:RenderOptionsPanel(groupName)
             -- Render options for this header
         end
     end
-
-    -- original plan:
-    -- check headers in groups table against combined settings table
-    -- if there is a setting with that header, draw a collapsing header
-    -- if not, draw the alternate (non-collapsing) gray header (as soon as I figure out how the heck to do that)
-    -- -- I think it would be nice, but it is much easier to only draw the headers that have entries
-    -- render categories
 end
 
 function OptionsUI:RenderCategorySettings(category)
-    -- We have our header rendered, we clicked on it to expand it, this is the next step in iterating through the groups
-    -- check group table above to see if the header keys have entries in the category table
-    -- if there is a category in the table, check if a setting of that category exists in the combinedsettingstable
-    -- if there is, draw the name with a divider
-    -- render an option table with all options from that (category if present, header without category if not)
-    -- entries should already be indexed in the combined settings table
     local any_pressed         = false
     local new_loadout         = false
     local pressed             = false

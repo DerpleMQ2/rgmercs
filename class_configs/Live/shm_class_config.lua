@@ -1699,7 +1699,9 @@ local _ClassConfig = {
         --DPS
         ['DoHealDPS']         = {
             DisplayName = "Heal Mode DPS",
-            Category = "DPS",
+            Group = "Abilities",
+            Header = "Common",
+            Category = "Common Rules",
             Index = 1,
             Tooltip = "This is a top-level setting that governs any DPS spells in heal mode, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
             RequiresLoadoutChange = true,
@@ -1709,7 +1711,9 @@ local _ClassConfig = {
         },
         ['DoNuke']            = {
             DisplayName = "Use Nukes",
-            Category = "DPS",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 2,
             Tooltip = "Use a level-appropriate single-target nuke.\n" ..
                 "Heal Mode: We will choose one avaiable nuke: Fast Poison (Bite) > Poison (Venom) > Ice.\n" ..
@@ -1719,7 +1723,9 @@ local _ClassConfig = {
         },
         ['DoTwinHealNuke']    = {
             DisplayName = "Twin Heal Nuke",
-            Category = "DPS",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 3,
             Tooltip = "Use Twin Heal Nuke Spells",
             RequiresLoadoutChange = true,
@@ -1731,7 +1737,9 @@ local _ClassConfig = {
         },
         ['DoPoisonDot']       = {
             DisplayName = "Use Poison DoTs",
-            Category = "DPS",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 4,
             Tooltip = "Use one or more mode- and level-appropriate poison dots.\n" ..
                 "Heal Mode: Saryrn line is used until Chaotic line is available.\n" ..
@@ -1741,7 +1749,9 @@ local _ClassConfig = {
         },
         ['DoDiseaseDot']      = {
             DisplayName = "Use Disease DoTs",
-            Category = "DPS",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 5,
             Tooltip = "Use one or more mode- and level-appropriate poison dots.\n" ..
                 "Heal Mode: Uses the best of Pandemic > Afflicition > Ultor on named.\n" ..
@@ -1751,7 +1761,9 @@ local _ClassConfig = {
         },
         ['DoCurseDot']        = {
             DisplayName = "Use Curse DoTs",
-            Category = "DPS",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Index = 6,
             Tooltip = "Use one or more mode- and level-appropriate curse dots.\n" ..
                 "Heal Mode: Curse line is used until X's Curse line is available.\n" ..
@@ -1763,7 +1775,9 @@ local _ClassConfig = {
         -- Healing
         ['DoHealOverTime']    = {
             DisplayName = "Use HoTs",
-            Category = "Healing",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Index = 1,
             Tooltip = "Heal Mode: Use Heal Over Time Spells",
             RequiresLoadoutChange = true,
@@ -1774,7 +1788,9 @@ local _ClassConfig = {
         },
         ['MemCureSpell']      = {
             DisplayName = "Mem Cure Spell",
-            Category = "Healing",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
             Index = 2,
             Tooltip = "Mem your cure spells:\n" ..
                 "Heal Mode: Prioritizes the combined cure spell. Memorizes others if able, if the combined spell isn't available.\n" ..
@@ -1785,7 +1801,9 @@ local _ClassConfig = {
         },
         ['DoChestClick']      = {
             DisplayName = "Do Chest Click",
-            Category = "Healing",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 3,
             Tooltip = "Click your equipped chest.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
@@ -1795,7 +1813,9 @@ local _ClassConfig = {
         --Canni
         ['DoAACanni']         = {
             DisplayName = "Use AA Canni",
-            Category = "Canni",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 4,
             Tooltip = "Use Canni AA",
             Default = true,
@@ -1805,7 +1825,9 @@ local _ClassConfig = {
         },
         ['AACanniManaPct']    = {
             DisplayName = "AA Canni Mana %",
-            Category = "Canni",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 5,
             Tooltip = "Use Canni AA Under [X]% mana",
             Default = 70,
@@ -1817,7 +1839,9 @@ local _ClassConfig = {
         },
         ['AACanniMinHP']      = {
             DisplayName = "AA Canni HP %",
-            Category = "Canni",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 6,
             Tooltip = "Dont Use Canni AA Under [X]% HP",
             Default = 90,
@@ -1829,7 +1853,9 @@ local _ClassConfig = {
         },
         ['DoSpellCanni']      = {
             DisplayName = "Use Spell Canni",
-            Category = "Canni",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 1,
             Tooltip = "Mem and use Canni Spells",
             RequiresLoadoutChange = true,
@@ -1841,7 +1867,9 @@ local _ClassConfig = {
         },
         ['SpellCanniManaPct'] = {
             DisplayName = "Spell Canni Mana %",
-            Category = "Canni",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 2,
             Tooltip = "Use Canni Spell Under [X]% mana",
             Default = 70,
@@ -1853,7 +1881,9 @@ local _ClassConfig = {
         },
         ['SpellCanniMinHP']   = {
             DisplayName = "Spell Canni HP %",
-            Category = "Canni",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 3,
             Tooltip = "Dont Use Canni Spell Under [X]% HP",
             Default = 85,
@@ -1865,7 +1895,9 @@ local _ClassConfig = {
         },
         ['DoCombatCanni']     = {
             DisplayName = "Canni in Combat",
-            Category = "Canni",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 7,
             Tooltip = "Use Canni AA and Spells in combat",
             Default = true,
@@ -1877,7 +1909,9 @@ local _ClassConfig = {
         --Buffs
         ['UseEpic']           = {
             DisplayName = "Epic Use:",
-            Category = "Buffs",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 1,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",
@@ -1892,7 +1926,9 @@ local _ClassConfig = {
         },
         ['DoRunSpeed']        = {
             DisplayName = "Do Run Speed",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 2,
             Tooltip = "Do Run Speed Spells/AAs",
             Default = true,
@@ -1901,7 +1937,9 @@ local _ClassConfig = {
         },
         ['DoGroupShrink']     = {
             DisplayName = "Group Shrink",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 3,
             Tooltip = "Use Group Shrink Buff",
             Default = true,
@@ -1911,7 +1949,9 @@ local _ClassConfig = {
         },
         ['DoTempHP']          = {
             DisplayName = "Temp HP Buff",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 4,
             Tooltip = "Use Temp HP Buff on Warriors in the group.",
             RequiresLoadoutChange = true,
@@ -1921,7 +1961,9 @@ local _ClassConfig = {
         },
         ['DoAura']            = {
             DisplayName = "Use Aura",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 5,
             Tooltip = "Use Aura (Pact of Wolf)",
             Default = true,
@@ -1931,7 +1973,9 @@ local _ClassConfig = {
         },
         ['DoGroupRegen']      = {
             DisplayName = "Group Regen Buff",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 6,
             Tooltip = "Use your Group Regen buff.",
             Default = true,
@@ -1940,7 +1984,9 @@ local _ClassConfig = {
         },
         ['DoHaste']           = {
             DisplayName = "Use Haste",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 7,
             Tooltip = "Do Haste Spells/AAs",
             Default = true,
@@ -1950,7 +1996,9 @@ local _ClassConfig = {
         },
         ['DoSelfWard']        = {
             DisplayName = "Do Self Ward",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 8,
             Tooltip = "Use your Ward of... self-heal ward buff line.",
             Default = true,
@@ -1959,7 +2007,9 @@ local _ClassConfig = {
         },
         ['DoVetAA']           = {
             DisplayName = "Do Vet AA",
-            Category = "Buffs",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Index = 9,
             Tooltip = "Use Veteran AA during burns (See FAQ).",
             Default = true,
@@ -1970,7 +2020,9 @@ local _ClassConfig = {
         --Debuffs
         ['DoSTMalo']          = {
             DisplayName = "Do ST Malo",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuff",
+            Category = "Resist",
             Index = 1,
             Tooltip = "Do ST Malo Spells/AAs",
             RequiresLoadoutChange = true,
@@ -1980,7 +2032,9 @@ local _ClassConfig = {
         },
         ['DoAEMalo']          = {
             DisplayName = "Do AE Malo",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuff",
+            Category = "Resist",
             Index = 2,
             Tooltip = "Do AE Malo Spells/AAs",
             RequiresLoadoutChange = true,
@@ -1990,7 +2044,9 @@ local _ClassConfig = {
         },
         ['DoSTSlow']          = {
             DisplayName = "Do ST Slow",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuff",
+            Category = "Slow",
             Index = 4,
             Tooltip = "Do ST Slow Spells/AAs",
             RequiresLoadoutChange = true,
@@ -2001,7 +2057,9 @@ local _ClassConfig = {
         },
         ['DoAESlow']          = {
             DisplayName = "Do AE Slow",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuff",
+            Category = "Slow",
             Index = 5,
             Tooltip = "Do AE Slow Spells/AAs",
             RequiresLoadoutChange = true,
@@ -2011,7 +2069,9 @@ local _ClassConfig = {
         },
         ['AESlowCount']       = {
             DisplayName = "AE Slow Count",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuff",
+            Category = "Slow",
             Index = 6,
             Tooltip = "Number of XT Haters before we use AE Slow.",
             Min = 1,
@@ -2023,7 +2083,9 @@ local _ClassConfig = {
         },
         ['AEMaloCount']       = {
             DisplayName = "AE Malo Count",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuff",
+            Category = "Resist",
             Index = 3,
             Tooltip = "Number of XT Haters before we use AE Malo.",
             Min = 1,
@@ -2035,7 +2097,9 @@ local _ClassConfig = {
         },
         ['DoDiseaseSlow']     = {
             DisplayName = "Disease Slow",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuff",
+            Category = "Slow",
             Index = 7,
             Tooltip = "Use Disease Slow instead of normal ST Slow",
             RequiresLoadoutChange = true,
@@ -2047,7 +2111,9 @@ local _ClassConfig = {
         },
         ['DoLLHPBuff']        = {
             DisplayName = "HP Buff (LowLvl)",
-            Category = "Buffs (Low Level)",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 1,
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
@@ -2059,7 +2125,9 @@ local _ClassConfig = {
         },
         ['DoLLAgiBuff']       = {
             DisplayName = "Agility Buff (LowLvl)",
-            Category = "Buffs (Low Level)",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 2,
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
@@ -2071,7 +2139,9 @@ local _ClassConfig = {
         },
         ['DoLLStaBuff']       = {
             DisplayName = "Stamina Buff (LowLvl)",
-            Category = "Buffs (Low Level)",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 3,
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
@@ -2083,7 +2153,9 @@ local _ClassConfig = {
         },
         ['DoLLStrBuff']       = {
             DisplayName = "Strength Buff (LowLvl)",
-            Category = "Buffs (Low Level)",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Index = 4,
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,

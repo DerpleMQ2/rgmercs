@@ -1108,7 +1108,9 @@ local _ClassConfig = {
         },
         ['UseEpic']           = {
             DisplayName = "Epic Use:",
-            Category = "Combat",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 5,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",

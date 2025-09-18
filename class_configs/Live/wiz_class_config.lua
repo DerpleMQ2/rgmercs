@@ -1353,7 +1353,9 @@ return {
         -- Low Level
         ['ElementChoice']        = {
             DisplayName = "Element Choice:",
-            Category = "DPS Low Level",
+            Group = "Abilities",
+            Header = "Common",
+            Category = "Common Rules",
             Index = 1,
             Tooltip = "Choose an element to focus on under level 71.",
             Type = "Combo",
@@ -1367,7 +1369,9 @@ return {
         },
         ['DoRain']               = {
             DisplayName = "Do Rain",
-            Category = "DPS Low Level",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 2,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
@@ -1379,7 +1383,9 @@ return {
         },
         ['RainDistance']         = {
             DisplayName = "Min Rain Distance",
-            Category = "DPS Low Level",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             ConfigType = "Advanced",
             Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25').",
@@ -1391,7 +1397,9 @@ return {
         },
         ['DoStun']               = {
             DisplayName = "Do Stun",
-            Category = "DPS Low Level",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Stun",
             Index = 4,
             Tooltip = "Use your Stun Nukes (Stun with DD, not mana efficient).",
             RequiresLoadoutChange = true,
@@ -1404,7 +1412,9 @@ return {
         --AE Damage
         ['DoAEDamage']           = {
             DisplayName = "Do AE Damage",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
@@ -1414,7 +1424,9 @@ return {
         },
         ['DoAEBeam']             = {
             DisplayName = "Use Beam Spells",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 2,
             RequiresLoadoutChange = true,
             Tooltip = "**WILL BREAK MEZ** Use your Frontal AE Spells (Beam Line). **WILL BREAK MEZ**",
@@ -1424,7 +1436,9 @@ return {
         },
         ['BeamTargetCnt']        = {
             DisplayName = "Beam Tgt Cnt",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 3,
             Tooltip = "Minimum number of valid targets before using AE Spells like Beams.",
             Default = 2,
@@ -1436,7 +1450,9 @@ return {
         },
         ['DoPBAE']               = {
             DisplayName = "Use PBAE Spells",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 4,
             RequiresLoadoutChange = true,
             Tooltip =
@@ -1447,7 +1463,9 @@ return {
         },
         ['PBAETargetCnt']        = {
             DisplayName = "PBAE Tgt Cnt",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 5,
             Tooltip = "Minimum number of valid targets before using PB Spells like the of Flame line.",
             Default = 4,
@@ -1459,7 +1477,9 @@ return {
         },
         ['MaxAETargetCnt']       = {
             DisplayName = "Max AE Targets",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 6,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
@@ -1472,7 +1492,9 @@ return {
         },
         ['SafeAEDamage']         = {
             DisplayName = "AE Proximity Check",
-            Category = "AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Index = 7,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
@@ -1485,7 +1507,9 @@ return {
         -- Spells and Abilities
         ['JoltAggro']            = {
             DisplayName = "Jolt Aggro %",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Hate Reduction",
             Index = 1,
             Tooltip = "Aggro at which to use Jolt",
             Default = 90,
@@ -1496,7 +1520,9 @@ return {
         },
         ['DoManaBurn']           = {
             DisplayName = "Use Mana Burn AA",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Index = 2,
             Tooltip = "Enable usage of Mana Burn",
             Default = true,
@@ -1505,7 +1531,9 @@ return {
         },
         ['DoSnare']              = {
             DisplayName = "Use Snares",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 3,
             Tooltip = "Use Snare Spells.",
             Default = false,
@@ -1515,7 +1543,9 @@ return {
         },
         ['SnareCount']           = {
             DisplayName = "Snare Max Mob Count",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Index = 4,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
@@ -1527,7 +1557,9 @@ return {
         },
         ['DoChestClick']         = {
             DisplayName = "Do Chest Click",
-            Category = "Spells and Abilities",
+            Group = "Items",
+            Header = "Clickies(Pre-Configured)",
+            Category = "Clickies(Pre-Configured)",
             Index = 5,
             Tooltip = "Click your chest item",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
@@ -1536,7 +1568,9 @@ return {
         },
         ['GambitManaPct']        = {
             DisplayName = "Gambit Mana %",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 6,
             ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using your Gambit line.",
@@ -1548,7 +1582,9 @@ return {
         },
         ['HarvestManaPct']       = {
             DisplayName = "Harvest Mana %",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 7,
             ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using a harvest spell or aa.",
@@ -1560,7 +1596,9 @@ return {
         },
         ['CombatHarvestManaPct'] = {
             DisplayName = "Combat Harvest %",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Other Recovery",
             Index = 8,
             ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using a harvest spell or aa in Combat.",
@@ -1569,47 +1607,6 @@ return {
             Max = 99,
             FAQ = "How do I use Harvest Spells?",
             Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
-        },
-        --Orphaned
-        ['WeaveAANukes']         = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['RainMinHaters']        = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['RainMinTargetHP']      = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['DoGOMCheck']           = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
     },
 }
