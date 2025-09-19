@@ -1,6 +1,7 @@
 local mq                = require('mq')
 local ImGui             = require('ImGui')
 local Config            = require('utils.config')
+local Logger            = require('utils.logger')
 local Ui                = require('utils.ui')
 local Icons             = require('mq.ICONS')
 local Modules           = require('utils.modules')
@@ -11,6 +12,7 @@ local OptionsUI         = { _version = '1.0', _name = "OptionsUI", _author = 'De
 OptionsUI.__index       = OptionsUI
 OptionsUI.selectedGroup = "General"
 OptionsUI.configFilter  = ""
+OptionsUI.lastSortTime  = 0
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -140,10 +142,11 @@ function OptionsUI:ApplySearchFilter()
                     local settingDefaults         = Config:GetSettingDefaults(settingName)
                     local settingDisplayNameLower = (settingDefaults.DisplayName or ""):lower()
                     local settingTooltipLower     = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or (settingDefaults.Tooltip or "")):lower()
+                    local customSetting           = (settingDefaults.Type == "Custom")
                     local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or
                         (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
 
-                    if showAdv and (headerMatches or categoryMatches or settingDisplayNameLower:find(filter, 1, true) ~= nil or
+                    if showAdv and not customSetting and (headerMatches or categoryMatches or settingDisplayNameLower:find(filter, 1, true) ~= nil or
                             settingTooltipLower:find(filter, 1, true) ~= nil) then
                         self.FilteredSettingsByCat[category] = self.FilteredSettingsByCat[category] or {}
                         table.insert(self.FilteredSettingsByCat[category], settingName)
@@ -187,6 +190,8 @@ function OptionsUI:ApplySearchFilter()
     for id, group in ipairs(OptionsUI.FilteredGroups) do
         OptionsUI.GroupsNameToIDs[group.Name] = id
     end
+
+    self.lastSortTime = os.time()
 end
 
 function OptionsUI:RenderGroupPanel(groupLabel, groupName)
@@ -294,44 +299,53 @@ function OptionsUI:RenderCategorySettings(category)
 
         for idx, settingName in ipairs(settingsForCategory or {}) do
             local settingDefaults = Config:GetSettingDefaults(settingName)
-            local setting         = Config:GetSetting(settingName)
-            local id              = "##" .. settingName
-            local settingTooltip  = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
-            if settingDefaults.Type ~= "Custom" then
-                ImGui.TableNextColumn()
-                ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
-                Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
-                    settingTooltip,
-                    settingName,
-                    tostring(settingDefaults.Default)))
-                ImGui.TableNextColumn()
-                local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
-                if (settingDefaults.Type or ""):find("Array") then
-                    typeOfSetting = settingDefaults.Type:sub(7)
-                end
 
-                if settingDefaults ~= nil then
-                    setting, loadout_change, pressed = Ui.RenderOption(
-                        typeOfSetting,
-                        setting,
-                        id,
-                        settingDefaults.RequiresLoadoutChange or false,
-                        settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
-                    new_loadout = new_loadout or loadout_change
-                    any_pressed = any_pressed or pressed
-
-                    --  need to update setting here and notify module
-                    if pressed then
-                        Config:SetSetting(settingName, setting)
-
-                        if new_loadout then
-                            Modules:ExecModule("Class", "RescanLoadout")
-                            new_loadout = false
-                        end
+            -- defaults can go away when a different class config is loaded in.
+            if settingDefaults then
+                local setting        = Config:GetSetting(settingName)
+                local id             = "##" .. settingName
+                local settingTooltip = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
+                if settingDefaults.Type ~= "Custom" then
+                    ImGui.TableNextColumn()
+                    ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
+                    Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
+                        settingTooltip,
+                        settingName,
+                        tostring(settingDefaults.Default)))
+                    ImGui.TableNextColumn()
+                    local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
+                    if (settingDefaults.Type or ""):find("Array") then
+                        typeOfSetting = settingDefaults.Type:sub(7)
                     end
-                else
-                    ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
+
+                    if settingDefaults ~= nil then
+                        setting, loadout_change, pressed = Ui.RenderOption(
+                            typeOfSetting,
+                            setting,
+                            id,
+                            settingDefaults.RequiresLoadoutChange or false,
+                            settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
+                        new_loadout = new_loadout or loadout_change
+                        any_pressed = any_pressed or pressed
+
+                        --  need to update setting here and notify module
+                        if pressed then
+                            Config:SetSetting(settingName, setting)
+
+                            if new_loadout then
+                                Modules:ExecModule("Class", "RescanLoadout")
+                                new_loadout = false
+                            end
+                        end
+                    else
+                        ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
+                    end
                 end
+            else
+                ImGui.TableNextColumn()
+                ImGui.Text(string.format("\arError: Setting not found - %s\ax", settingName))
+                ImGui.TableNextColumn()
+                ImGui.Text(string.format("\arError: Setting not found - %s\ax", settingName))
             end
         end
         ImGui.EndTable()
@@ -347,8 +361,9 @@ end
 function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     local shouldDrawGUI = true
 
-    if self.FirstRender then
+    if self.FirstRender or self.lastSortTime < Config:GetLastModuleRegisteredTime() then
         self:ApplySearchFilter()
+        Logger.log_debug("\ayOptionsUI: \awSettings re-sorted due to new module settings being registered.")
         self.FirstRender = false
     end
 
@@ -423,7 +438,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             ImGui.SameLine()
             local x, _ = ImGui.GetContentRegionAvail()
             if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
-                local flags = bit32.bor(ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersInner)
+                local flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
                 if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
                     self:RenderCurrentTab()

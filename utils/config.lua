@@ -22,6 +22,7 @@ Config.FAQ                                            = {}
 Config.SettingsLoadComplete                           = false
 
 Config.TempSettings                                   = {}
+Config.TempSettings.lastModuleRegisteredTime          = 0
 Config.TempSettings.SettingToModuleCache              = {}
 Config.TempSettings.SettingsLowerToNameAndModuleCache = {}
 Config.TempSettings.SettingsCategoryToSettingMapping  = {}
@@ -2312,7 +2313,7 @@ function Config.ResolveDefaults(defaults, settings)
 end
 
 function Config:RegisterCategoryToSettingMapping(setting)
-    local category = Config:GetSettingDefaults(setting).Category or "Uncategorized"
+    local category = Config:GetSettingDefaults(setting).Category
     Config.TempSettings.SettingsCategoryToSettingMapping[category] = Config.TempSettings.SettingsCategoryToSettingMapping[category] or {}
     table.insert(Config.TempSettings.SettingsCategoryToSettingMapping[category], setting)
 end
@@ -2324,6 +2325,7 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, settin
     end
 
     local settingsChanged = false
+
     -- Setup Defaults
     settings, settingsChanged = Config.ResolveDefaults(defaultSettings, settings)
     self.moduleSettings[module] = deep_copy(settings) -- make sure nothing is a reference.
@@ -2332,6 +2334,11 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, settin
     self.moduleSettingCategories[module] = settingsCategories
 
     for setting, _ in pairs(settings) do
+        if not self.moduleDefaultSettings[module][setting].Category or self.moduleDefaultSettings[module][setting].Category:len() == 0 then
+            self.moduleDefaultSettings[module][setting].Category = "Uncategorized"
+            self.moduleSettingCategories[module]:add("Uncategorized")
+        end
+
         if Config.TempSettings.SettingToModuleCache[setting] ~= nil then
             Logger.log_error(
                 "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Keeping first but this should be fixed!",
@@ -2353,7 +2360,13 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, settin
         end
     end
 
+    self.TempSettings.lastModuleRegisteredTime = os.time()
+
     Logger.log_info("\agModule %s - registered settings!", module)
+end
+
+function Config:GetLastModuleRegisteredTime()
+    return self.TempSettings.lastModuleRegisteredTime
 end
 
 function Config:ClearAllModuleSettings()
@@ -2363,13 +2376,8 @@ function Config:ClearAllModuleSettings()
     self.moduleSettingCategories = {}
     self.TempSettings.SettingToModuleCache = {}
     self.TempSettings.SettingsLowerToNameAndModuleCache = {}
+    self.TempSettings.SettingsCategoryToSettingMapping = {}
     self.SettingsLoadComplete = false
-end
-
-function Config:ReplaceModuleSettings(module, settings)
-    self.moduleSettings[module] = settings
-    self.moduleTempSettings[module] = settings
-    Logger.log_debug("\agModule %s - replaced settings!", module)
 end
 
 function Config:SaveModuleSettings(module, settings)
