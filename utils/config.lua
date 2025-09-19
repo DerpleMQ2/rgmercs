@@ -1937,14 +1937,6 @@ Config.DefaultConfig = {
     },
 }
 
-Config.SettingCategories = Set.new({})
-for k, v in pairs(Config.DefaultConfig) do
-    if v.Type ~= "Custom" then
-        Config.SettingCategories:add(v.Category)
-    end
-    Config.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
-
 Config.CommandHandlers = {}
 
 local function deep_copy(orig, copies)
@@ -2005,7 +1997,7 @@ function Config:LoadSettings()
         settings = config()
     end
 
-    Config:RegisterModuleSettings("Core", settings, Config.DefaultConfig, Config.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings("Core", settings, Config.DefaultConfig, Config.FAQ, firstSaveRequired)
 
     -- setup our script path for later usage since getting it kind of sucks, but only on the first run (personas)
     if Config.Globals.ScriptDir == "" then
@@ -2318,7 +2310,7 @@ function Config:RegisterCategoryToSettingMapping(setting)
     table.insert(Config.TempSettings.SettingsCategoryToSettingMapping[category], setting)
 end
 
-function Config:RegisterModuleSettings(module, settings, defaultSettings, settingsCategories, firstSaveRequired)
+function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, firstSaveRequired)
     if self.moduleSettings[module] then
         Logger.log_error("\arModule %s has already registered settings!", module)
         return
@@ -2326,12 +2318,21 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, settin
 
     local settingsChanged = false
 
+    --Centralize category creation and setup the FAQs
+    local settingCategories = Set.new({})
+    for k, v in pairs(defaultSettings or {}) do
+        if v.Type ~= "Custom" then
+            settingCategories:add(v.Category)
+        end
+        faq[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
+    end
+
     -- Setup Defaults
     settings, settingsChanged = Config.ResolveDefaults(defaultSettings, settings)
     self.moduleSettings[module] = deep_copy(settings) -- make sure nothing is a reference.
     self.moduleTempSettings[module] = settings
     self.moduleDefaultSettings[module] = defaultSettings
-    self.moduleSettingCategories[module] = settingsCategories
+    self.moduleSettingCategories[module] = settingCategories
 
     for setting, _ in pairs(settings) do
         if not self.moduleDefaultSettings[module][setting].Category or self.moduleDefaultSettings[module][setting].Category:len() == 0 then

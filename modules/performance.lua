@@ -13,7 +13,6 @@ local ScrollingPlotBuffer = require('utils.scrolling_plot_buffer')
 local Module              = { _version = '0.1a', _name = "Perf", _author = 'Derple', }
 Module.__index            = Module
 Module.DefaultConfig      = {}
-Module.SettingCategories  = {}
 Module.MaxFrameStep       = 5.0
 Module.GoalMaxFrameTime   = 0
 Module.CurMaxMaxFrameTime = 0
@@ -23,7 +22,6 @@ Module.FrameTimingData    = {}
 Module.MaxFrameTime       = 0
 Module.LastExtentsCheck   = os.clock()
 Module.FAQ                = {}
-Module.ClassFAQ           = {}
 Module.SaveRequested      = nil
 
 Module.DefaultConfig      = {
@@ -66,14 +64,6 @@ Module.DefaultConfig      = {
     },
 }
 
-Module.SettingCategories  = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-    if v.Type ~= "Custom" then
-        Module.SettingCategories:add(v.Category)
-    end
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
-
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
@@ -114,7 +104,7 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     self.SettingsLoaded = true
 end
@@ -128,7 +118,7 @@ function Module:Init()
     Logger.log_debug("Performance Monitor Module Loaded.")
     self:LoadSettings()
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -228,10 +218,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

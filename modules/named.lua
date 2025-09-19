@@ -1,34 +1,32 @@
 -- Sample Named Class Module
-local mq                 = require('mq')
-local Config             = require('utils.config')
-local Targeting          = require("utils.targeting")
-local Ui                 = require("utils.ui")
-local Comms              = require("utils.comms")
-local Files              = require("utils.files")
-local Logger             = require("utils.logger")
-local Strings            = require("utils.strings")
-local Set                = require("mq.Set")
-local Nameds             = require("utils.nameds")
+local mq               = require('mq')
+local Config           = require('utils.config')
+local Targeting        = require("utils.targeting")
+local Ui               = require("utils.ui")
+local Comms            = require("utils.comms")
+local Files            = require("utils.files")
+local Logger           = require("utils.logger")
+local Strings          = require("utils.strings")
+local Set              = require("mq.Set")
+local Nameds           = require("utils.nameds")
 
-local Module             = { _version = '0.1a', _name = "Named", _author = 'Grimmier', }
-Module.__index           = Module
-Module.DefaultConfig     = {}
-Module.SettingCategories = {}
-Module.FAQ               = {}
-Module.ClassFAQ          = {}
-Module.CachedNamedList   = {}
-Module.SaveRequested     = nil
+local Module           = { _version = '0.1a', _name = "Named", _author = 'Grimmier', }
+Module.__index         = Module
+Module.DefaultConfig   = {}
+Module.FAQ             = {}
+Module.CachedNamedList = {}
+Module.SaveRequested   = nil
 
-Module.NamedList         = {}
-Module.NamedAM           = {}
-Module.NamedSM           = {}
-Module.CurSelection      = 1
-Module.namesLoaded       = false
-Module.LastNamedCheck    = 0
+Module.NamedList       = {}
+Module.NamedAM         = {}
+Module.NamedSM         = {}
+Module.CurSelection    = 1
+Module.namesLoaded     = false
+Module.LastNamedCheck  = 0
 
-Module.DefNamed          = Nameds or {}
+Module.DefNamed        = Nameds or {}
 
-Module.DefaultConfig     = {
+Module.DefaultConfig   = {
     ['NamedTable'] = {
         DisplayName = "Named Table",
         Category = "Named Spawns",
@@ -56,18 +54,9 @@ Module.DefaultConfig     = {
     },
 }
 
-Module.CommandHandlers   = {
+Module.CommandHandlers = {
 
 }
-
-Module.SettingCategories = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-    if v.Type ~= "Custom" then
-        Module.SettingCategories:add(v.Category)
-    end
-
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -110,7 +99,7 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     self.CurSelection = Config:GetSetting('NamedTable')
 
@@ -129,7 +118,7 @@ function Module:Init()
     Logger.log_debug("Named Combat Module Loaded.")
     self:LoadSettings()
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -328,10 +317,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

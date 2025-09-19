@@ -28,7 +28,6 @@ Module.TempSettings            = {}
 Module.TempSettings.MezImmune  = {}
 Module.TempSettings.MezTracker = {}
 Module.FAQ                     = {}
-Module.ClassFAQ                = {}
 
 Module.DefaultConfig           = {
     -- [ MEZ ] --
@@ -208,14 +207,6 @@ Module.DefaultConfig           = {
     },
 }
 
-Module.SettingCategories       = Set.new({})
-for k, v in pairs(Module.DefaultConfig) do
-    if v.Type ~= "Custom" then
-        Module.SettingCategories:add(v.Category)
-    end
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
-
 local function getConfigFileName()
     local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
@@ -267,12 +258,12 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    if not self.SettingCategories or not self.DefaultConfig then
+    if not self.DefaultConfig then
         Logger.log_error("\arFailed to Load Mez Config for Classs: %s", Config.Globals.CurLoadedClass)
         return
     end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     self.SettingsLoaded = true
 end
@@ -288,7 +279,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -887,10 +878,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

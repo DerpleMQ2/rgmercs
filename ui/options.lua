@@ -98,11 +98,10 @@ for id, group in ipairs(OptionsUI.Groups) do
     OptionsUI.GroupsNameToIDs[group.Name] = id
 end
 
-OptionsUI.settings          = {}
-OptionsUI.SettingNames      = {}
-OptionsUI.SettingCategories = Set.new({})
-OptionsUI.DefaultConfigs    = {}
-OptionsUI.FirstRender       = true
+OptionsUI.settings       = {}
+OptionsUI.SettingNames   = {}
+OptionsUI.DefaultConfigs = {}
+OptionsUI.FirstRender    = true
 
 local function shallow_copy(orig)
     local copy = {}
