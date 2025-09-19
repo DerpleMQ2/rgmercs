@@ -21,7 +21,6 @@ Module.TempSettings                = {}
 Module.TempSettings.CampZoneId     = 0
 Module.TempSettings.LastCmd        = ""
 Module.FAQ                         = {}
-Module.ClassFAQ                    = {}
 Module.SaveRequested               = nil
 
 Module.Constants                   = {}
@@ -317,15 +316,7 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    Module.SettingCategories = Set.new({})
-    for k, v in pairs(Module.DefaultConfig or {}) do
-        if v.Type ~= "Custom" then
-            Module.SettingCategories:add(v.Category)
-        end
-        Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-    end
-
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 end
 
 function Module.New()
@@ -337,7 +328,7 @@ function Module:Init()
     Logger.log_debug("Chase Module Loaded.")
     self:LoadSettings()
     self.ModuleLoaded = true
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ChaseOn(target)
@@ -775,10 +766,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

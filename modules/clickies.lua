@@ -16,7 +16,6 @@ local animItems                         = mq.FindTextureAnimation("A_DragItem")
 local Module                            = { _version = '0.1a', _name = "Clickies", _author = 'Derple', }
 Module.__index                          = Module
 Module.FAQ                              = {}
-Module.ClassFAQ                         = {}
 Module.SaveRequested                    = nil
 Module.ClickyRotationIndex              = 1
 
@@ -61,7 +60,6 @@ Module.DefaultConfig                    = {
         "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
-Module.SettingCategories                = {}
 
 Module.CombatTargetTypes                = { 'Self', 'Pet', 'Main Assist', 'Auto Target', }
 Module.NonCombatTargetTypes             = { 'Self', 'Pet', 'Main Assist', }
@@ -561,14 +559,6 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    self.SettingCategories = Set.new({})
-    for k, v in pairs(self.DefaultConfig or {}) do
-        if v.Type ~= "Custom" then
-            self.SettingCategories:add(v.Category)
-        end
-        self.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-    end
-
     local settingsChanged = false
 
     settings.Clickies = settings.Clickies or {}
@@ -608,7 +598,7 @@ function Module:LoadSettings()
         self:SaveSettings(false)
     end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     Logger.log_info("\awClicky Module: \atLoaded \ag%d\at Clickies", #settings.Clickies or 0)
 end
@@ -624,7 +614,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -1167,10 +1157,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

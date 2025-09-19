@@ -1,17 +1,15 @@
-local Config             = require('utils.config')
-local Set                = require("mq.Set")
-local Logger             = require("utils.logger")
+local Config           = require('utils.config')
+local Set              = require("mq.Set")
+local Logger           = require("utils.logger")
 
-local Module             = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
-Module.__index           = Module
-Module.DefaultConfig     = {}
-Module.SettingCategories = Set.new({})
-Module.Credits           = require("extras.credits")
-Module.ColorWheel        = {}
-Module.ColorWheelTimer   = {}
-Module.FAQ               = {}
-Module.ClassFAQ          = {}
-Module.SaveRequested     = nil
+local Module           = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
+Module.__index         = Module
+Module.DefaultConfig   = {}
+Module.Credits         = require("extras.credits")
+Module.ColorWheel      = {}
+Module.ColorWheelTimer = {}
+Module.FAQ             = {}
+Module.SaveRequested   = nil
 
 function Module:SaveSettings(doBroadcast)
     self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
@@ -28,7 +26,7 @@ end
 function Module:LoadSettings()
     local settings = {}
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, false)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, false)
 end
 
 function Module.New()
@@ -113,10 +111,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

@@ -26,7 +26,6 @@ Module.TempSettings              = {}
 Module.TempSettings.CharmImmune  = {}
 Module.TempSettings.CharmTracker = {}
 Module.FAQ                       = {}
-Module.ClassFAQ                  = {}
 Module.ImmuneTable               = {}
 
 Module.DefaultConfig             = {
@@ -200,14 +199,6 @@ Module.FAQ                       = {
 	},
 }
 
-Module.SettingCategories         = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-	if v.Type ~= "Custom" then
-		Module.SettingCategories:add(v.Category)
-	end
-	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
-
 local function getConfigFileName()
 	local oldFile = mq.configDir ..
 		'/rgmercs/PCConfigs/' ..
@@ -265,7 +256,7 @@ function Module:LoadSettings()
 		settings = config()
 	end
 
-	if not settings or not self.SettingCategories or not self.DefaultConfig then
+	if not settings or not self.DefaultConfig then
 		Logger.log_error("\arFailed to Load Charm Config for Classs: %s", Config.Globals.CurLoadedClass)
 		return
 	end
@@ -281,7 +272,7 @@ function Module:LoadSettings()
 		self.ImmuneTable = immuneConfig()
 	end
 
-	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 end
 
 function Module.New()
@@ -300,7 +291,7 @@ function Module:Init()
 
 	self.ModuleLoaded = true
 
-	return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+	return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -802,10 +793,6 @@ end
 
 function Module:GetFAQ()
 	return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-	return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

@@ -40,7 +40,6 @@ Module.TempSettings.SelectedPath          = "None"
 Module.TempSettings.PullAttemptStarted    = 0
 Module.TempSettings.PullRadius            = 0
 Module.FAQ                                = {}
-Module.ClassFAQ                           = {}
 Module.SaveRequested                      = nil
 
 local PullStates                          = {
@@ -702,15 +701,7 @@ Module.DefaultConfig                   = {
     },
 }
 
-Module.SettingCategories               = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-    if v.Type ~= "Custom" then
-        Module.SettingCategories:add(v.Category)
-    end
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
-
-Module.CommandHandlers = {
+Module.CommandHandlers                 = {
     pulltarget = {
         usage = "/rgl pulltarget",
         about = "Pulls your current target using your rgmercs pull ability",
@@ -833,7 +824,7 @@ function Module:LoadSettings()
         Module.TempSettings.MyPaths = pathsConfig()
     end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     -- turn off at startup for safety
     Config:SetSetting('DoPull', false)
@@ -890,7 +881,7 @@ function Module:Init()
     Logger.log_debug("Pull Module Loaded.")
     self:LoadSettings()
     self.ModuleLoaded = true
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:RenderMobList(displayName, settingName)
@@ -2576,10 +2567,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 function Module:SetLastPullOrCombatEndedTimer()
