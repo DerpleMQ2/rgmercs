@@ -32,7 +32,9 @@ Module.DefaultConfig             = {
 	-- [ CHARM ] --
 	['CharmOn']                                = {
 		DisplayName           = "Charm On",
-		Category              = "Charm Pet",
+		Group                 = "Abilities",
+		Header                = "Charm",
+		Category              = "Charm General",
 		Default               = false,
 		Tooltip               = "Set to use charm spells.",
 		RequiresLoadoutChange = true,

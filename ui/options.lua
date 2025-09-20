@@ -176,9 +176,6 @@ function OptionsUI:ApplySearchFilter()
             end
         end
 
-        -- sort headers by alpha
-        table.sort(newGroup.Headers, function(a, b) return a.Name < b.Name end)
-
         if groupMatches or #(newGroup.Headers or {}) > 0 then
             table.insert(filtered, newGroup)
         end
