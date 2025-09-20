@@ -191,7 +191,7 @@ function OptionsUI:ApplySearchFilter()
             end
         end
 
-        if groupMatches or #(newGroup.Headers or {}) > 0 then
+        if #(newGroup.Headers or {}) > 0 then
             table.insert(filtered, newGroup)
         end
     end
