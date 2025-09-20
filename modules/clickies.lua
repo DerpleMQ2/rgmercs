@@ -1030,7 +1030,7 @@ function Module:RenderClickyData(clicky, clickyIdx)
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
     self:RenderClickiesWithConditions("Clickies", Config:GetSetting('Clickies'))
 end

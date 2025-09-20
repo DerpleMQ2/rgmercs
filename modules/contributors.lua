@@ -70,6 +70,8 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
+    Ui.RenderPopAndSettings(self._name)
+
     if ImGui.CollapsingHeader("Developers", ImGuiTreeNodeFlags.DefaultOpen) then
         for _, c in ipairs(self.Credits.Devs) do
             self:RenderName(c)

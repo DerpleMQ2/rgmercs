@@ -95,6 +95,7 @@ function StandardUI:RenderWindowControls()
     ImGui.SetCursorPos(windowControlPos)
 
     if ImGui.SmallButton(Icons.MD_SETTINGS) then
+        Config:ClearAllHighlightedModules()
         Config:SetSetting('EnableOptionsUI', not Config:GetSetting('EnableOptionsUI'))
     end
     ImGui.SameLine()

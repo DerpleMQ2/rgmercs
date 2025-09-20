@@ -212,7 +212,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	Ui.RenderPopSetting(self._name)
+	Ui.RenderPopAndSettings(self._name)
 end
 
 function Module:Pop()

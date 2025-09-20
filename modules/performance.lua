@@ -132,7 +132,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
     local pressed
     if not self.SettingsLoaded then return end

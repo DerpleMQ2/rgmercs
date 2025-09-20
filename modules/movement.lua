@@ -509,7 +509,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
     if self.ModuleLoaded and Config.Globals.SubmodulesLoaded then
         ImGui.Text("Chase Distance: %d", Config:GetSetting('ChaseDistance'))

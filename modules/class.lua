@@ -539,6 +539,8 @@ function Module:RenderRotationWithToggle(r, rotationTable)
 end
 
 function Module:Render()
+    Ui.RenderPopAndSettings(self._name)
+
     ImGui.Text("Combat State: %s", self.CombatState)
     ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
 

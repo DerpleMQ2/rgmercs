@@ -270,7 +270,7 @@ function Module:FaqFind(question)
 end
 
 function Module:Render()
-	Ui.RenderPopSetting(self._name)
+	Ui.RenderPopAndSettings(self._name)
 
 
 	ImGui.Spacing()

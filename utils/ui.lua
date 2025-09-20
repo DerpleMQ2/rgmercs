@@ -783,13 +783,23 @@ function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
     return settings, any_pressed, new_loadout
 end
 
-function Ui.RenderPopSetting(moduleName)
-    if not Config:GetSetting(moduleName .. "_Popped") then
-        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-            Config:SetSetting(moduleName .. "_Popped", not Config:GetSetting(moduleName .. "_Popped"))
+function Ui.RenderPopAndSettings(moduleName)
+    if ImGui.SmallButton(Icons.MD_SETTINGS) then
+        Config:HighlightModule(moduleName)
+        Config:SetSetting('EnableOptionsUI', not Config:GetSetting('EnableOptionsUI'))
+    end
+
+    if Config:HaveSetting(moduleName .. "_Popped") then
+        ImGui.SameLine()
+
+        if not Config:GetSetting(moduleName .. "_Popped") then
+            if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
+                Config:SetSetting(moduleName .. "_Popped", not Config:GetSetting(moduleName .. "_Popped"))
+                Config:GetSetting('EnableOptionsUI')
+            end
+            Ui.Tooltip(string.format("Pop the %s tab out into its own window.", moduleName))
+            ImGui.NewLine()
         end
-        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", moduleName))
-        ImGui.NewLine()
     end
 end
 

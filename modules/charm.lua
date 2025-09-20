@@ -301,7 +301,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	Ui.RenderPopSetting(self._name)
+	Ui.RenderPopAndSettings(self._name)
 
 	if self.ModuleLoaded then
 		-- CCEd targets

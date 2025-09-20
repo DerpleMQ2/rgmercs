@@ -1,18 +1,21 @@
-local mq                = require('mq')
-local ImGui             = require('ImGui')
-local Config            = require('utils.config')
-local Logger            = require('utils.logger')
-local Ui                = require('utils.ui')
-local Icons             = require('mq.ICONS')
-local Modules           = require('utils.modules')
-local Strings           = require('utils.strings')
-local Set               = require("mq.Set")
+local mq                        = require('mq')
+local ImGui                     = require('ImGui')
+local Config                    = require('utils.config')
+local Logger                    = require('utils.logger')
+local Ui                        = require('utils.ui')
+local Icons                     = require('mq.ICONS')
+local Modules                   = require('utils.modules')
+local Strings                   = require('utils.strings')
+local Set                       = require("mq.Set")
 
-local OptionsUI         = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
-OptionsUI.__index       = OptionsUI
-OptionsUI.selectedGroup = "General"
-OptionsUI.configFilter  = ""
-OptionsUI.lastSortTime  = 0
+local OptionsUI                 = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
+OptionsUI.__index               = OptionsUI
+OptionsUI.selectedGroup         = "General"
+OptionsUI.HighlightedCategories = Set.new({})
+OptionsUI.HighlightedSettings   = Set.new({})
+OptionsUI.configFilter          = ""
+OptionsUI.lastSortTime          = 0
+OptionsUI.lastHighlightTime     = 0
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -115,6 +118,9 @@ function OptionsUI:ApplySearchFilter()
     self.FilteredGroups        = self.Groups
     self.FilteredSettingsByCat = {}
 
+    self.HighlightedSettings   = Set.new({})
+    self.HighlightedCategories = Set.new({})
+
     local filter               = self.configFilter:lower()
     local filtered             = {}
 
@@ -124,11 +130,12 @@ function OptionsUI:ApplySearchFilter()
 
         local newGroup = shallow_copy(group)
         newGroup.Headers = {} -- clear headers for rebuilding
+        newGroup.Highlighted = false
 
         for _, header in ipairs(group.Headers) do
             local headerLower = header.Name:lower()
             local headerMatches = headerLower:find(filter, 1, true) ~= nil
-
+            local highlightHeader = false
             local newCategories = {}
 
             for _, category in ipairs(header.Categories) do
@@ -149,6 +156,14 @@ function OptionsUI:ApplySearchFilter()
                             settingTooltipLower:find(filter, 1, true) ~= nil) then
                         self.FilteredSettingsByCat[category] = self.FilteredSettingsByCat[category] or {}
                         table.insert(self.FilteredSettingsByCat[category], settingName)
+
+                        -- set highlighting
+                        if Config:IsModuleHighlighted(Config:GetModuleForSetting(settingName)) then
+                            newGroup.Highlighted = true
+                            self.HighlightedSettings:add(settingName)
+                            self.HighlightedCategories:add(category)
+                            highlightHeader = true
+                        end
                     end
                 end
 
@@ -172,7 +187,7 @@ function OptionsUI:ApplySearchFilter()
             end
 
             if #newCategories > 0 then
-                table.insert(newGroup.Headers, { Name = header.Name, Categories = newCategories, })
+                table.insert(newGroup.Headers, { Name = header.Name, Categories = newCategories, highlighted = highlightHeader, })
             end
         end
 
@@ -190,6 +205,7 @@ function OptionsUI:ApplySearchFilter()
     end
 
     self.lastSortTime = os.time()
+    self.lastHighlightTime = os.time()
 end
 
 function OptionsUI:RenderGroupPanel(groupLabel, groupName)
@@ -224,7 +240,10 @@ function OptionsUI:RenderGroupPanelWithImage(group)
     local midIconY = math.floor((selectableHeight - iconSize) / 2) or 0
 
     -- set the text color from the theme
-    local labelCol = IM_COL32(math.floor(textColStyle.x * 255), math.floor(textColStyle.y * 255), math.floor(textColStyle.z * 255), math.floor(textColStyle.w * 255))
+    local labelCol = group.Highlighted
+        and IM_COL32(255, 128, 0, 255)
+
+        or IM_COL32(math.floor(textColStyle.x * 255), math.floor(textColStyle.y * 255), math.floor(textColStyle.z * 255), math.floor(textColStyle.w * 255))
 
     local currentXPos = cursorScreenPos.x + currentStyle.ItemSpacing.x
     -- draw the icon png
@@ -244,13 +263,30 @@ end
 function OptionsUI:RenderCategorySeperator(category)
     ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextPadding, ImVec2(15, 15))
     ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextAlign, ImVec2(0.05, 0.5))
+
+    if self.HighlightedCategories:contains(category) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
+    end
+
     ImGui.SeparatorText(category)
+
+    if self.HighlightedCategories:contains(category) then
+        ImGui.PopStyleColor(1)
+    end
+
     ImGui.PopStyleVar(2)
 end
 
 function OptionsUI:RenderOptionsPanel(groupName)
     for _, header in ipairs(self.FilteredGroups[self.GroupsNameToIDs[groupName]] and (self.FilteredGroups[self.GroupsNameToIDs[groupName]].Headers or {}) or {}) do
+        if header.highlighted then
+            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
+        end
+
         if ImGui.CollapsingHeader(header.Name) then
+            if header.highlighted then
+                ImGui.PopStyleColor(1)
+            end
             for _, category in ipairs(header.Categories) do
                 if #Config:GetAllSettingsForCategory(category) > 0 then
                     -- only draw the seperator if the category name is different from the heading
@@ -262,6 +298,10 @@ function OptionsUI:RenderOptionsPanel(groupName)
                 end
             end
             -- Render options for this header
+        else
+            if header.highlighted then
+                ImGui.PopStyleColor(1)
+            end
         end
     end
 end
@@ -305,7 +345,13 @@ function OptionsUI:RenderCategorySettings(category)
                 local settingTooltip = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
                 if settingDefaults.Type ~= "Custom" then
                     ImGui.TableNextColumn()
+                    if self.HighlightedSettings:contains(settingName) then
+                        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
+                    end
                     ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
+                    if self.HighlightedSettings:contains(settingName) then
+                        ImGui.PopStyleColor(1)
+                    end
                     Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
                         settingTooltip,
                         settingName,
@@ -354,12 +400,13 @@ end
 
 function OptionsUI:RenderCurrentTab()
     self:RenderOptionsPanel(self.selectedGroup)
+    self:ApplySearchFilter()
 end
 
 function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     local shouldDrawGUI = true
 
-    if self.FirstRender or self.lastSortTime < Config:GetLastModuleRegisteredTime() then
+    if self.FirstRender or self.lastSortTime < Config:GetLastModuleRegisteredTime() or self.lastHighlightTime < Config:GetLastHighlightChangeTime() then
         self:ApplySearchFilter()
         Logger.log_debug("\ayOptionsUI: \awSettings re-sorted due to new module settings being registered.")
         self.FirstRender = false
@@ -415,7 +462,6 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                     Config:SetSetting('ShowAdvancedOpts', ShowAdvancedOpts)
                     self:ApplySearchFilter()
                 end
-                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5)
 
                 if ImGui.BeginTable('configmenu##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
@@ -429,8 +475,6 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                     end
                     ImGui.EndTable()
                 end
-
-                ImGui.PopStyleVar()
             end
             ImGui.EndChild()
             ImGui.SameLine()

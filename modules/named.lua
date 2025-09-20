@@ -124,7 +124,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
     ImGui.SameLine()
     ImGui.Text("Make any mob \"named\" for burns by adding it to your MQ2SpawnMaster list!")
