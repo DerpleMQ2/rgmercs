@@ -1652,7 +1652,7 @@ local _ClassConfig = {
                     mq.TLO.Target.LineOfSight(), chaseDistance, Strings.BoolToColorString(forceMove), Strings.BoolToColorString(tooClose), Strings.BoolToColorString(tooFar))
 
                 if forceMove and mq.TLO.Target.LineOfSight() then
-                    Logger.log_warning(
+                    Logger.log_warn(
                         "Custom Ranger combatNav: \arWarning! \aw Mercs has detected a \"Can't See\" condition, but MQ is reporting line of sight. \ayManual intervention may be required.")
                 end
                 if Config:GetSetting('NavCircle') then
@@ -1661,7 +1661,7 @@ local _ClassConfig = {
                     end
                 elseif tooClose then
                     if chaseDistance < 30 then
-                        Logger.log_warning(
+                        Logger.log_warn(
                             "Custom Ranger combatNav: \arWarning! \awChase distance is %d. \ayThis may interfere with ranged combat, depending on chase target movement!",
                             chaseDistance)
                     end

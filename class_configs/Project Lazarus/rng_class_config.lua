@@ -349,7 +349,7 @@ return {
                     end
                 elseif tooClose then
                     if chaseDistance < 30 then
-                        Logger.log_warning(
+                        Logger.log_warn(
                             "Custom Ranger combatNav: \arWarning! \awChase distance is %d. \ayThis may interfere with ranged combat, depending on chase target movement!",
                             chaseDistance)
                     end

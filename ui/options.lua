@@ -28,11 +28,11 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.FA_COGS,
         IconImage = OptionsUI.LoadIcon("settingsicon"),
         Headers = {
-            { Name = 'Announcements', Categories = { "Announcements", }, }, -- group announce stuff
-            { Name = 'Interface',     Categories = { "Interface", }, },     -- ui stuff
+            { Name = 'Announcements', Categories = { "Announcements", }, },                  -- group announce stuff
+            { Name = 'Interface',     Categories = { "Interface", }, },                      -- ui stuff
             { Name = 'Loot(Emu)',     Categories = { "LNS", }, },
-            { Name = 'Misc',          Categories = { "Misc", }, },          -- ??? profit
-            { Name = 'Uncategorized', Categories = { "Uncategorized", }, }, -- settings from custom configs that don't have proper group/header
+            { Name = 'Misc',          Categories = { "Misc", }, },                           -- ??? profit
+            { Name = 'Uncategorized', Categories = { "Uncategorized", }, CatchAll = true, }, -- settings from custom configs that don't have proper group/header
         },
     },
     {
@@ -120,14 +120,37 @@ function OptionsUI:ApplySearchFilter()
 
     self.HighlightedSettings   = Set.new({})
     self.HighlightedCategories = Set.new({})
+    local knownCategories      = Set.new({})
 
     local filter               = self.configFilter:lower()
     local filtered             = {}
+    local catchAllHeader       = nil
+
+    -- precalc all known categories so we can add ones that as missing.
+    for _, group in ipairs(self.Groups) do
+        for _, header in ipairs(group.Headers) do
+            for _, category in ipairs(header.Categories) do
+                local categoryLower = category:lower()
+                knownCategories:add(categoryLower)
+                if header.CatchAll then
+                    catchAllHeader = header
+                end
+            end
+        end
+    end
+
+    local allCategories = Config:GetAllModuleSettingCategories()
+    for _, category in ipairs(allCategories or {}) do
+        if not knownCategories:contains(category:lower()) then
+            knownCategories:add(category:lower())
+            if catchAllHeader then
+                table.insert(catchAllHeader.Categories, category)
+                Logger.log_warn("OptionsUI:ApplySearchFilter: Adding missing category '%s' to catch-all header '%s'", category, catchAllHeader.Name)
+            end
+        end
+    end
 
     for _, group in ipairs(self.Groups) do
-        local groupNameLower = group.Name:lower()
-        local groupMatches = groupNameLower:find(filter, 1, true) ~= nil or (group.Description or ""):lower():find(filter, 1, true) ~= nil
-
         local newGroup = shallow_copy(group)
         newGroup.Headers = {} -- clear headers for rebuilding
         newGroup.Highlighted = false
@@ -140,6 +163,7 @@ function OptionsUI:ApplySearchFilter()
 
             for _, category in ipairs(header.Categories) do
                 local categoryLower = category:lower()
+
                 local categoryMatches = categoryLower:find(filter, 1, true) ~= nil
 
                 local settingsForCategory = Config:GetAllSettingsForCategory(category)
