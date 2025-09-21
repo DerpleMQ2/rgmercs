@@ -1728,7 +1728,7 @@ local _ClassConfig = {
             Group = "Combat",
             Header = "Positioning",
             Category = "Archery",
-            Index = 1,
+            Index = 101,
             Tooltip = "The distance from your target you should nav to for ranged attacks when necessary.\n" ..
                 "If Nav Circle is enabled, the distance to circle at.",
             Default = 45,
@@ -1743,7 +1743,7 @@ local _ClassConfig = {
             Group = "Combat",
             Header = "Positioning",
             Category = "Archery",
-            Index = 2,
+            Index = 102,
             Tooltip = "Use Nav to Circle your target while autofiring.",
             Default = false,
             RequiresLoadoutChange = true, -- this is a load condition

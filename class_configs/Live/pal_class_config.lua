@@ -1641,7 +1641,6 @@ return {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 1,
             Tooltip = "Choose whether to use the Aegolism or Symbol Line of HP Buffs.",
             Type = "Combo",
             ComboOptions = { 'Aegolism Line (Keeper)', 'Symbol Line', 'None', },
