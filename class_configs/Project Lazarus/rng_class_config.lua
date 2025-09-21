@@ -959,8 +959,8 @@ return {
         ['UseEpic']        = {
             DisplayName = "Epic Use:",
             Group = "Items",
-            Header = "Clickies(Pre-Configured)",
-            Category = "Clickies(Pre-Configured)",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
             Index = 3,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",
@@ -989,8 +989,8 @@ return {
         ['DoCoating']      = {
             DisplayName = "Use Coating",
             Group = "Items",
-            Header = "Clickies(Pre-Configured)",
-            Category = "Clickies(Pre-Configured)",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
             Index = 5,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,

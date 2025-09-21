@@ -821,8 +821,8 @@ return {
         ['DoEpic']          = {
             DisplayName = "Do Epic",
             Group = "Items",
-            Header = "Clickies(Pre-Configured)",
-            Category = "Clickies(Pre-Configured)",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
             Tooltip = "Enable using your epic clicky",
             Default = true,
             FAQ = "Why am I not using my Epic clicky?",

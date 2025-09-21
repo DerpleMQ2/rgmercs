@@ -1686,8 +1686,8 @@ return {
         ['DoEpic']         = {
             DisplayName = "Do Epic",
             Group = "Items",
-            Header = "Clickies(Pre-Configured)",
-            Category = "Clickies(Pre-Configured)",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
             Index = 9,
             Tooltip = "Click your Epic Weapon.",
             Default = false,
@@ -1862,8 +1862,8 @@ return {
         ['DoCoating']      = {
             DisplayName = "Use Coating",
             Group = "Items",
-            Header = "Clickies(Pre-Configured)",
-            Category = "Clickies(Pre-Configured)",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
             Index = 8,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
@@ -1873,8 +1873,8 @@ return {
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
             Group = "Items",
-            Header = "Clickies(Pre-Configured)",
-            Category = "Clickies(Pre-Configured)",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
             Index = 9,
             Tooltip = "Click your chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",

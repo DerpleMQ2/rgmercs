@@ -1599,8 +1599,8 @@ return {
         ['DoChestClick'] = {
             DisplayName = "Do Chest Click",
             Group = "Items",
-            Header = "Clickies(Pre-Configured)",
-            Category = "Clickies(Pre-Configured)",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
             Tooltip = "Click your chest item",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "Why am I not clicking my chest item?",
@@ -1619,8 +1619,8 @@ return {
         ['SummonArrows'] = {
             DisplayName = "Use Huntsman's Quiver",
             Group = "Items",
-            Header = "Clickies(Pre-Configured)",
-            Category = "Clickies(Pre-Configured)",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
             Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
             Default = false,
             FAQ = "How do I summon arrows?",

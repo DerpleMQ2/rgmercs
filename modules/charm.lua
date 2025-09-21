@@ -29,24 +29,48 @@ Module.FAQ                       = {}
 Module.ImmuneTable               = {}
 
 Module.DefaultConfig             = {
-	-- [ CHARM ] --
+	-- General
 	['CharmOn']                                = {
 		DisplayName           = "Charm On",
 		Group                 = "Abilities",
 		Header                = "Charm",
 		Category              = "Charm General",
+		Index                 = 1,
 		Default               = false,
 		Tooltip               = "Set to use charm spells.",
 		RequiresLoadoutChange = true,
 		FAQ                   = "How do I make my [Bard, Enchanter, Druid, Necro] Charm pets?",
-		Answer                =
-		"Bards, Enchanters, Druids, and Necros all have the option to Enable [CharmOn] so they can Charm a pet.",
+		Answer                = "Bards, Enchanters, Druids, and Necros all have the option to Enable [CharmOn] so they can Charm a pet.",
+	},
+	['DireCharm']                              = {
+		DisplayName = "Dire Charm",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm General",
+		Index       = 2,
+		Default     = false,
+		Tooltip     = "Use DireCharm AA",
+		FAQ         = "How do I use Dire Charm AA?",
+		Answer      = "Enable [DireCharm] setting and we will attempt to use [DireCharm] based upon the other settings.",
+	},
+	['PreferCharm']                            = {
+		DisplayName = "Prefer Charmed Pet",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm General",
+		Index       = 3,
+		Default     = false,
+		Tooltip     = "Prefer to use a charmed pet over a summoned pet.",
+		FAQ         = "I want to only use Charm Pets and ignore summoning my own, can I do that?",
+		Answer      =
+		"The setting is currently there but not implimented yet [PreferCharm].\n\nIf you have [DoCharm] enabled you shouldn't try to summon a pet.",
 	},
 	['CharmStartCount']                        = {
 		DisplayName = "Charm Start Count",
 		Group       = "Abilities",
 		Header      = "Charm",
 		Category    = "Charm General",
+		Index       = 4,
 		Default     = 2,
 		Min         = 1,
 		Max         = 20,
@@ -60,6 +84,7 @@ Module.DefaultConfig             = {
 		Group       = "Abilities",
 		Header      = "Charm",
 		Category    = "Charm General",
+		Index       = 5,
 		Default     = 100,
 		Min         = 1,
 		Max         = 200,
@@ -72,6 +97,7 @@ Module.DefaultConfig             = {
 		Group       = "Abilities",
 		Header      = "Charm",
 		Category    = "Charm General",
+		Index       = 6,
 		Default     = 15,
 		Min         = 1,
 		Max         = 200,
@@ -80,22 +106,13 @@ Module.DefaultConfig             = {
 		FAQ         = "Why won't I Charm pets?",
 		Answer      = "Your [CharmZRadius] may be set to low.\n\nIncrease this to charm mobs farther above / below you.",
 	},
-	['AutoLevelRangeCharm']                    = {
-		DisplayName = "Auto Level Range",
-		Group       = "Abilities",
-		Header      = "Charm",
-		Category    = "Charm Targets",
-		Default     = true,
-		Tooltip     = "Set to enable automatic charm level detection based on spells.",
-		FAQ         = "I don't know what lvl my charm spell maxes at?",
-		Answer      =
-		"Enable [AutoLevelRangeCharm] to have the max level set for you based on the currently selected spell.",
-	},
+	-- Targets
 	['CharmStopHPs']                           = {
 		DisplayName = "Charm Stop HPs",
 		Group       = "Abilities",
 		Header      = "Charm",
 		Category    = "Charm Targets",
+		Index       = 1,
 		Default     = 80,
 		Min         = 1,
 		Max         = 100,
@@ -103,11 +120,24 @@ Module.DefaultConfig             = {
 		FAQ         = "Why are all of my Charm Pets nearly Dead?",
 		Answer      = "Raise the [CharmStopHPs] setting so you won't try to charm a mob below that health Percentage.",
 	},
+	['AutoLevelRangeCharm']                    = {
+		DisplayName = "Auto Level Range",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm Targets",
+		Index       = 2,
+		Default     = true,
+		Tooltip     = "Set to enable automatic charm level detection based on spells.",
+		FAQ         = "I don't know what lvl my charm spell maxes at?",
+		Answer      =
+		"Enable [AutoLevelRangeCharm] to have the max level set for you based on the currently selected spell.",
+	},
 	['CharmMinLevel']                          = {
 		DisplayName = "Charm Min Level",
 		Group       = "Abilities",
 		Header      = "Charm",
 		Category    = "Charm Targets",
+		Index       = 3,
 		Default     = 0,
 		Min         = 1,
 		Max         = 200,
@@ -122,6 +152,7 @@ Module.DefaultConfig             = {
 		Group       = "Abilities",
 		Header      = "Charm",
 		Category    = "Charm Targets",
+		Index       = 4,
 		Default     = 0,
 		Min         = 1,
 		Max         = 200,
@@ -136,6 +167,7 @@ Module.DefaultConfig             = {
 		Group       = "Abilities",
 		Header      = "Charm",
 		Category    = "Charm Targets",
+		Index       = 5,
 		Default     = 0,
 		Min         = 1,
 		Max         = 200,
@@ -145,27 +177,6 @@ Module.DefaultConfig             = {
 		Answer      =
 			"Your [DireCharmMaxLvl] may be set to High.\n\nAdjust approptiatly or Enable [AutoLevelRangeCharm] and set the value really High, " ..
 			"to have this automatically adjust down to find the appropriate level for you.",
-	},
-	['DireCharm']                              = {
-		DisplayName = "Dire Charm",
-		Group       = "Abilities",
-		Header      = "Charm",
-		Category    = "Charm General",
-		Default     = false,
-		Tooltip     = "Use DireCharm AA",
-		FAQ         = "How do I use Dire Charm AA?",
-		Answer      = "Enable [DireCharm] setting and we will attempt to use [DireCharm] based upon the other settings.",
-	},
-	['PreferCharm']                            = {
-		DisplayName = "Prefer Charmed Pet",
-		Group       = "Abilities",
-		Header      = "Charm",
-		Category    = "Charm General",
-		Default     = false,
-		Tooltip     = "Prefer to use a charmed pet over a summoned pet.",
-		FAQ         = "I want to only use Charm Pets and ignore summoning my own, can I do that?",
-		Answer      =
-		"The setting is currently there but not implimented yet [PreferCharm].\n\nIf you have [DoCharm] enabled you shouldn't try to summon a pet.",
 	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",

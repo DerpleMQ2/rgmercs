@@ -84,10 +84,10 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.MD_RESTAURANT_MENU,
         IconImage = OptionsUI.LoadIcon("itemicon"),
         Headers = {
-            { Name = 'Item Summoning',           Categories = { "Item Summoning", }, },
-            { Name = 'Bandolier',                Categories = { "Bandolier", }, },
-            { Name = 'Instruments',              Categories = { "Instruments", }, },
-            { Name = 'Clickies(Pre-Configured)', Categories = { "Clickies(Pre-Configured)", }, },
+            { Name = 'Item Summoning', Categories = { "Item Summoning", }, },
+            { Name = 'Bandolier',      Categories = { "Bandolier", }, },
+            { Name = 'Instruments',    Categories = { "Instruments", }, },
+            { Name = 'Clickies',       Categories = { "General Clickies", "Class Config Clickies", "User Clickies", }, },
         },
     },
 }
