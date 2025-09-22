@@ -130,8 +130,7 @@ function OptionsUI:ApplySearchFilter()
     for _, group in ipairs(self.Groups) do
         for _, header in ipairs(group.Headers) do
             for _, category in ipairs(header.Categories) do
-                local categoryLower = category:lower()
-                knownCategories:add(categoryLower)
+                knownCategories:add(category)
                 if header.CatchAll then
                     catchAllHeader = header
                 end
@@ -139,14 +138,21 @@ function OptionsUI:ApplySearchFilter()
         end
     end
 
+    local allModuleCategories = Set.new({})
     local allCategories = Config:GetAllModuleSettingCategories()
-    for _, category in ipairs(allCategories or {}) do
-        if not knownCategories:contains(category:lower()) then
-            knownCategories:add(category:lower())
-            if catchAllHeader then
-                table.insert(catchAllHeader.Categories, category)
-                Logger.log_warn("OptionsUI:ApplySearchFilter: Adding missing category '%s' to catch-all header '%s'", category, catchAllHeader.Name)
-            end
+    for _, categories in pairs(allCategories or {}) do -- module to categories
+        local categoryList = categories:toList() or {}
+        for _, category in ipairs(categoryList) do     -- all categories in module
+            allModuleCategories:add(category)
+        end
+    end
+
+    local allModuleCategoriesTable = allModuleCategories:toList()
+    for _, categoryLower in ipairs(allModuleCategoriesTable) do
+        if not knownCategories:contains(categoryLower) and catchAllHeader ~= nil then
+            Logger.log_warn("\ayOptionsUI: \awAdding missing category '\at%s\aw' to catch-all header.", categoryLower)
+            table.insert(catchAllHeader.Categories, categoryLower)
+            knownCategories:add(categoryLower)
         end
     end
 
@@ -424,7 +430,6 @@ end
 
 function OptionsUI:RenderCurrentTab()
     self:RenderOptionsPanel(self.selectedGroup)
-    self:ApplySearchFilter()
 end
 
 function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
