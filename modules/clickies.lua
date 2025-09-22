@@ -632,7 +632,9 @@ end
 function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, preRender)
     local startingPosVec = ImGui.GetCursorPosVec()
     local offset_trash = 40
-    local offset_enable = 80
+    local offset_enable = 160
+    local offset_up = 80
+    local offset_down = 120
 
     self:RenderClickyHeaderIcon(clickies[clickyIdx], headerScreenPos)
 
@@ -649,6 +651,32 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
             clickies[clickyIdx].enabled = enabled
             self:SaveSettings(false)
         end
+    end
+
+    if clickyIdx > 1 then
+        ImGui.SameLine()
+        ImGui.PushID("##_small_btn_up_clicky_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
+        if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
+            clickies[clickyIdx], clickies[clickyIdx - 1] = clickies[clickyIdx - 1], clickies[clickyIdx]
+            self:SaveSettings(false)
+        end
+        ImGui.PopID()
+    else
+        ImGui.SameLine()
+        ImGui.InvisibleButton(Icons.FA_CHEVRON_UP, ImVec2(22, 1))
+    end
+
+    if clickyIdx < #clickies then
+        ImGui.SameLine()
+        ImGui.PushID("##_small_btn_dn_clicky_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
+        if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
+            clickies[clickyIdx], clickies[clickyIdx + 1] = clickies[clickyIdx + 1], clickies[clickyIdx]
+            self:SaveSettings(false)
+        end
+        ImGui.PopID()
+    else
+        ImGui.SameLine()
+        ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
     end
 
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_trash, headerCursorPos.y + 3)
@@ -1025,8 +1053,26 @@ function Module:Pop()
     Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
+function Module:ValidateClickies()
+    local clickies = Config:GetSetting('Clickies') or {}
+    local clickiesChanged = false
+    for idx = #clickies, 1, -1 do
+        local clicky = clickies[idx]
+        if clicky.itemName:len() == 0 then
+            table.remove(clickies, idx)
+            clickiesChanged = true
+        end
+    end
+
+    if clickiesChanged then
+        self:SaveSettings(false)
+    end
+end
+
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
+    self:ValidateClickies()
+
     if combat_state == 'Combat' then
         -- TODO: Should these just be rmemoved now?
         -- I plan on breaking clickies out further to allow things like horn, other healing clickies to be used, that the user will select... this is "interim" implementation.
