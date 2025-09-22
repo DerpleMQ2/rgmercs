@@ -148,11 +148,11 @@ function OptionsUI:ApplySearchFilter()
     end
 
     local allModuleCategoriesTable = allModuleCategories:toList()
-    for _, categoryLower in ipairs(allModuleCategoriesTable) do
-        if not knownCategories:contains(categoryLower) and catchAllHeader ~= nil then
-            Logger.log_warn("\ayOptionsUI: \awAdding missing category '\at%s\aw' to catch-all header.", categoryLower)
-            table.insert(catchAllHeader.Categories, categoryLower)
-            knownCategories:add(categoryLower)
+    for _, category in ipairs(allModuleCategoriesTable) do
+        if not knownCategories:contains(category) and catchAllHeader ~= nil then
+            Logger.log_warn("\ayOptionsUI: \awAdding missing category '\at%s\aw' to catch-all header.", category)
+            table.insert(catchAllHeader.Categories, category)
+            knownCategories:add(category)
         end
     end
 
