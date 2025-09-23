@@ -177,6 +177,49 @@ Module.LogicBlocks                      = {
     },
 
     {
+        name = "Any Threshold",
+        cond = function(self, target, aboveHP, belowHP, aboveMana, belowMana, aboveEndurance, belowEndurance)
+            if not target or not target() then
+                return false
+            end
+
+            local pctEndurance = target.PctEndurance() or 0
+            local pctMana = target.PctMana() or 0
+            local pctHPs = target.PctHPs() or 0
+
+            if pctHPs >= aboveHP and pctHPs <= belowHP then
+                return true
+            end
+
+            if pctMana >= aboveMana and pctMana <= belowMana then
+                return true
+            end
+
+            if pctEndurance >= aboveEndurance and pctMana <= belowEndurance then
+                return true
+            end
+
+            return false
+        end,
+        cond_targets = Module.NonCombatTargetTypes,
+        tooltip = "Only use if [target] Health or Mana or Endurance is above/below this percent.",
+        render_header_text = function(self, cond)
+            return string.format("%s is between [%d%% >= HP <= %d%%] or [%d%% >= Mana <= %d%%] or [%d%% >= End <= %d%%]", cond.target or "Self",
+                cond.args[1] or 0, cond.args[2] or 100,
+                cond.args[3] or 0, cond.args[4] or 100,
+                cond.args[5] or 0, cond.args[6] or 100)
+        end,
+        args = {
+            { name = ">= HP %",        type = "number", default = 0,   min = 0, max = 100, },
+            { name = "<= HP %",        type = "number", default = 100, min = 0, max = 100, },
+            { name = ">= Mana %",      type = "number", default = 0,   min = 0, max = 100, },
+            { name = "<= Mana %",      type = "number", default = 100, min = 0, max = 100, },
+            { name = ">= Endurance %", type = "number", default = 0,   min = 0, max = 100, },
+            { name = "<= Endurance %", type = "number", default = 100, min = 0, max = 100, },
+        },
+    },
+
+    {
         name = "Group Injured Count",
         cond = function(self, target, hp, cnt)
             return (mq.TLO.Group.Injured(hp)() or 0) >= cnt
@@ -942,6 +985,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                 local headerCursorPos = ImGui.GetCursorPosVec()
                 self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, true)
 
+                ImGui.PushID("##clicky_header_" .. clickyIdx)
                 if ImGui.CollapsingHeader("             " .. clicky.itemName) then
                     if clicky.enabled == false then
                         ImGui.BeginDisabled(true)
@@ -1003,6 +1047,8 @@ function Module:RenderClickiesWithConditions(type, clickies)
                 end
 
                 self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, false)
+
+                ImGui.PopID()
             end
         end
     end
