@@ -1895,7 +1895,7 @@ function Module:CheckForAbort(pullID, bNavigating)
 
     -- ignore distance and time if this is a manually requested pull
     if pullID ~= self.TempSettings.TargetSpawnID then
-        if spawn.Distance() > self.TempSettings.PullRadius then
+        if spawn.Distance() > Config:GetSetting("MaxPathRange") then
             Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
             return true
         end
