@@ -786,7 +786,7 @@ end
 function Ui.RenderPopAndSettings(moduleName)
     if ImGui.SmallButton(Icons.MD_SETTINGS) then
         Config:HighlightModule(moduleName)
-        Config:SetSetting('EnableOptionsUI', not Config:GetSetting('EnableOptionsUI'))
+        Config:SetSetting('EnableOptionsUI', true)
     end
 
     if Config:HaveSetting(moduleName .. "_Popped") then
