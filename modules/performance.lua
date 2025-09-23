@@ -128,7 +128,7 @@ function Module:Init()
 end
 
 function Module:ShouldRender()
-    return true
+    return Config:GetSetting('EnablePerfMonitoring')
 end
 
 function Module:Render()

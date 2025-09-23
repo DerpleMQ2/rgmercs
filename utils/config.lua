@@ -245,6 +245,13 @@ Config.DefaultConfig = {
         FAQ = "How do I log to a file?",
         Answer = "You can set the [LogToFile] option to true to write all logs to the mqlog file.",
     },
+    ['EnableDebugging']      = {
+        DisplayName = "Enable Debugging",
+        Category = "Debug",
+        Tooltip = "Enable the Debug Panel",
+        Default = false,
+        ConfigType = "Advanced",
+    },
 
     -- Announcements
     ['AnnounceTarget']       = {

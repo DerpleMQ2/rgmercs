@@ -66,13 +66,7 @@ function Module:RenderName(name)
     end
 end
 
-function Module:ShouldRender()
-    return true
-end
-
-function Module:Render()
-    Ui.RenderPopAndSettings(self._name)
-
+function Module:RenderConfig()
     if ImGui.CollapsingHeader("Developers", ImGuiTreeNodeFlags.DefaultOpen) then
         for _, c in ipairs(self.Credits.Devs) do
             self:RenderName(c)
@@ -86,6 +80,14 @@ function Module:Render()
             self:RenderName(c)
         end
     end
+end
+
+function Module:ShouldRender()
+    return false
+end
+
+function Module:Render()
+
 end
 
 function Module:GiveTime(combat_state)

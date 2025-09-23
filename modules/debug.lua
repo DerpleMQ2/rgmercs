@@ -292,7 +292,7 @@ function Module:RenderToolbar()
 end
 
 function Module:ShouldRender()
-    return true
+    return Config:GetSetting('EnableDebugging')
 end
 
 function Module:Render()

@@ -96,7 +96,7 @@ function Module:Init()
 end
 
 function Module:ShouldRender()
-	return true
+	return false
 end
 
 function Module:MatchSearch(...)
@@ -269,10 +269,7 @@ function Module:FaqFind(question)
 	self.TempSettings.Search = ''
 end
 
-function Module:Render()
-	Ui.RenderPopAndSettings(self._name)
-
-
+function Module:RenderConfig()
 	ImGui.Spacing()
 	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1, 1, 0, 1))
 	ImGui.Text("Local FAQ Browser Link")
@@ -418,6 +415,9 @@ function Module:Render()
 		end
 	end
 	ImGui.EndChild()
+end
+
+function Module:Render()
 end
 
 function Module:GiveTime(combat_state)

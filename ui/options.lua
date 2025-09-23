@@ -90,6 +90,30 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
             { Name = 'Clickies',       Categories = { "General Clickies", "Class Config Clickies", "User Clickies", }, },
         },
     },
+    {
+        Name = "FAQ",
+        Description = "Frequently Asked Questions",
+        Icon = Icons.MD_RESTAURANT_MENU,
+        IconImage = OptionsUI.LoadIcon("faqicon"),
+        Headers = {
+        },
+        HiddenOnSearch = true,
+        HeaderRender = function(self)
+            return Modules:ExecModule("FAQ", "RenderConfig")
+        end,
+    },
+    {
+        Name = "Contributors",
+        Description = "Credits to those who helped",
+        Icon = Icons.MD_RESTAURANT_MENU,
+        IconImage = OptionsUI.LoadIcon("contribicon"),
+        HiddenOnSearch = false,
+        Headers = {
+        },
+        HeaderRender = function(self)
+            return Modules:ExecModule("Contributors", "RenderConfig")
+        end,
+    },
 }
 
 OptionsUI.FilteredGroups        = OptionsUI.Groups
@@ -221,7 +245,7 @@ function OptionsUI:ApplySearchFilter()
             end
         end
 
-        if #(newGroup.Headers or {}) > 0 then
+        if #(newGroup.Headers or {}) > 0 or (newGroup.HeaderRender and (filter:len() == 0 or not newGroup.HiddenOnSearch)) then
             table.insert(filtered, newGroup)
         end
     end
@@ -308,30 +332,35 @@ function OptionsUI:RenderCategorySeperator(category)
 end
 
 function OptionsUI:RenderOptionsPanel(groupName)
-    for _, header in ipairs(self.FilteredGroups[self.GroupsNameToIDs[groupName]] and (self.FilteredGroups[self.GroupsNameToIDs[groupName]].Headers or {}) or {}) do
-        if header.highlighted then
-            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
-        end
-
-        if ImGui.CollapsingHeader(header.Name) then
+    if self.FilteredGroups[self.GroupsNameToIDs[groupName]] then
+        for _, header in ipairs(self.FilteredGroups[self.GroupsNameToIDs[groupName]].Headers or {}) do
             if header.highlighted then
-                ImGui.PopStyleColor(1)
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
             end
-            for _, category in ipairs(header.Categories) do
-                if #Config:GetAllSettingsForCategory(category) > 0 then
-                    -- only draw the seperator if the category name is different from the heading
-                    if header.Name ~= category then
-                        self:RenderCategorySeperator(category)
+
+            if ImGui.CollapsingHeader(header.Name) then
+                if header.highlighted then
+                    ImGui.PopStyleColor(1)
+                end
+                for _, category in ipairs(header.Categories) do
+                    if #Config:GetAllSettingsForCategory(category) > 0 then
+                        -- only draw the seperator if the category name is different from the heading
+                        if header.Name ~= category then
+                            self:RenderCategorySeperator(category)
+                        end
+                        -- Render options for this category
+                        self:RenderCategorySettings(category)
                     end
-                    -- Render options for this category
-                    self:RenderCategorySettings(category)
+                end
+            else
+                if header.highlighted then
+                    ImGui.PopStyleColor(1)
                 end
             end
-            -- Render options for this header
-        else
-            if header.highlighted then
-                ImGui.PopStyleColor(1)
-            end
+        end
+
+        if self.FilteredGroups[self.GroupsNameToIDs[groupName]].HeaderRender then
+            self.FilteredGroups[self.GroupsNameToIDs[groupName]].HeaderRender(self)
         end
     end
 end
