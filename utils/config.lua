@@ -1791,16 +1791,6 @@ Config.DefaultConfig = {
     },
 
     --Deprecated/Need Adjusted to Custom/Etc
-    ['ShowAllOptionsMain']   = {
-        DisplayName = "Show All Options on Main",
-        Group = "General",
-        Header = "Interface",
-        Category = "Interface",
-        Tooltip = "Show all options on the main panel",
-        Default = true,
-        FAQ = "There are a lot of options on the main panel, how do I hide some of them?",
-        Answer = "You can set the [ShowAllOptionsMain] option to false to hide some of the options on the main panel.",
-    },
     ['FullUI']               = {
         DisplayName = "Use Full UI",
         Group = "General",
@@ -1813,6 +1803,7 @@ Config.DefaultConfig = {
     },
     ['EnableOptionsUI']      = {
         DisplayName = "Enable Options UI",
+        Type = "Custom",
         Group = "General",
         Header = "Interface",
         Category = "Interface",
