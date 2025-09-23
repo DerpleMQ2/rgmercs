@@ -349,7 +349,7 @@ return {
                     end
                 elseif tooClose then
                     if chaseDistance < 30 then
-                        Logger.log_warning(
+                        Logger.log_warn(
                             "Custom Ranger combatNav: \arWarning! \awChase distance is %d. \ayThis may interfere with ranged combat, depending on chase target movement!",
                             chaseDistance)
                     end
@@ -768,8 +768,10 @@ return {
         --AEDamage
         ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
-            Category = "AEDamage",
-            Index = 1,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 101,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
             Default = false,
@@ -778,8 +780,10 @@ return {
         },
         ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
-            Category = "AEDamage",
-            Index = 3,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 102,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
             Min = 1,
@@ -790,8 +794,10 @@ return {
         },
         ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
-            Category = "AEDamage",
-            Index = 4,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 103,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
             Default = 5,
@@ -803,8 +809,10 @@ return {
         },
         ['SafeAEDamage']    = {
             DisplayName = "AE Proximity Check",
-            Category = "AEDamage",
-            Index = 5,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 104,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Proximity Check?",
@@ -816,8 +824,10 @@ return {
         --Archery
         ['BowNavDistance']  = {
             DisplayName = "Bow Nav Distance",
+            Group = "Combat",
+            Header = "Positioning",
             Category = "Archery",
-            Index = 1,
+            Index = 101,
             Tooltip = "The distance from your target you should nav to for ranged attacks when necessary.\n" ..
                 "If Nav Circle is enabled, the distance to circle at.",
             Default = 45,
@@ -829,8 +839,10 @@ return {
         },
         ['NavCircle']       = {
             DisplayName = "Nav Circle",
+            Group = "Combat",
+            Header = "Positioning",
             Category = "Archery",
-            Index = 2,
+            Index = 102,
             Tooltip = "Use Nav to Circle your target while autofiring.",
             Default = false,
             RequiresLoadoutChange = true, -- this is a load condition
@@ -841,8 +853,10 @@ return {
         --Buffs
         ['ArrowBuffChoice'] = {
             DisplayName = "Arrow Element:",
-            Category = "Buffs",
-            Index = 1,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
+            Index = 101,
             Tooltip = "Choose which element you would like to focus on with Arrow buffs and Scout's Mastery\n" ..
                 "We will use Poison Arrows during burns and switch back to this element (as able) afterwards.",
             Type = "Combo",
@@ -855,8 +869,10 @@ return {
         },
         ['DoMoveBuffs']     = {
             DisplayName = "Do Spirit of Eagle",
-            Category = "Buffs",
-            Index = 2,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 101,
             Tooltip = "Cast Movement Spells/AA.",
             Default = false,
             RequiresLoadoutChange = true,
@@ -866,29 +882,37 @@ return {
         },
         ['DoRegenBuff']     = {
             DisplayName = "Do Regen Buff",
-            Category = "Buffs",
-            Index = 3,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 102,
             Tooltip = "Use your ST Regen Buff Line.",
             Default = false,
         },
         ['DoStrengthBuff']  = {
             DisplayName = " Do Strength HP Buff",
-            Category = "Buffs",
-            Index = 4,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 103,
             Tooltip = "Use your Strength of ... HP buff line.",
             Default = true,
         },
         ['DoShieldDS']      = {
             DisplayName = "Do Shield DS",
-            Category = "Buffs",
-            Index = 5,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 104,
             Tooltip = "Use your Shield DS line of spells.",
             Default = true,
         },
         ['DoColdResist']    = {
             DisplayName = "Do Cold Resist",
-            Category = "Buffs",
-            Index = 6,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 105,
             Tooltip = "Use your group cold resist buff.",
             Default = false,
             FAQ = "Why am I not using my single-target resist buff?",
@@ -896,8 +920,10 @@ return {
         },
         ['DoFireResist']    = {
             DisplayName = "Do Fire Resist",
-            Category = "Buffs",
-            Index = 7,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 106,
             Tooltip = "Use your group cold resist buff.",
             Default = false,
             FAQ = "Why am I not using my single-target resist buff?",
@@ -908,8 +934,10 @@ return {
         --Combat
         ['DoSwarmDot']     = {
             DisplayName = "Swarm Dot",
-            Category = "Combat",
-            Index = 1,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 101,
             Tooltip = "Use your Swarm line of dots (magic damage, 54s duration).",
             Default = true,
             RequiresLoadoutChange = true,
@@ -918,8 +946,10 @@ return {
         },
         ['DotNamedOnly']   = {
             DisplayName = "Only Dot Named",
-            Category = "Combat",
-            Index = 2,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 102,
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
             FAQ = "Why am I not using my dots?",
@@ -928,8 +958,10 @@ return {
         },
         ['UseEpic']        = {
             DisplayName = "Epic Use:",
-            Category = "Combat",
-            Index = 3,
+            Group = "Items",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
+            Index = 101,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",
             ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
@@ -942,8 +974,10 @@ return {
         },
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
-            Category = "Combat",
-            Index = 4,
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 101,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
             Min = 1,
@@ -954,8 +988,10 @@ return {
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
-            Category = "Combat",
-            Index = 5,
+            Group = "Items",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
+            Index = 102,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
             FAQ = "What is a Coating?",
@@ -963,8 +999,10 @@ return {
         },
         ['DoVetAA']        = {
             DisplayName = "Use Vet AA",
-            Category = "Combat",
-            Index = 6,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
+            Index = 102,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
             FAQ = "What Vet AA's does RNG use?",
@@ -974,8 +1012,10 @@ return {
         --Utility
         ['DoHeals']        = {
             DisplayName = "Do Heals",
-            Category = "Utility",
-            Index = 1,
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 101,
             Tooltip = "Mem and cast your Salve spell.",
             Default = true,
             RequiresLoadoutChange = true,
@@ -984,24 +1024,30 @@ return {
         },
         ['DoJoltSpell']    = {
             DisplayName = "Do Jolt Spell",
-            Category = "Utility",
-            Index = 2,
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Hate Reduction",
+            Index = 101,
             Tooltip = "Use your Jolt spell when your aggro is high.",
             Default = true,
             RequiresLoadoutChange = true,
         },
         ['DoSnare']        = {
             DisplayName = "Use Snares",
-            Category = "Utility",
-            Index = 3,
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
+            Index = 101,
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
             RequiresLoadoutChange = true,
         },
         ['SnareCount']     = {
             DisplayName = "Snare Max Mob Count",
-            Category = "Utility",
-            Index = 4,
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
+            Index = 102,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
             Min = 1,

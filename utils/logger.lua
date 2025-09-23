@@ -43,6 +43,7 @@ local logLevels = {
 	['debug']         = { level = 4, header = "\amDEBUG  \ax", },
 	['info']          = { level = 3, header = "\aoINFO   \ax", },
 	['warn']          = { level = 2, header = "\ayWARN   \ax", },
+	['warning']       = { level = 2, header = "\ayWARN   \ax", },
 	['error']         = { level = 1, header = "\arERROR  \ax", },
 }
 

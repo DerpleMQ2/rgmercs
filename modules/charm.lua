@@ -26,24 +26,51 @@ Module.TempSettings              = {}
 Module.TempSettings.CharmImmune  = {}
 Module.TempSettings.CharmTracker = {}
 Module.FAQ                       = {}
-Module.ClassFAQ                  = {}
 Module.ImmuneTable               = {}
 
 Module.DefaultConfig             = {
-	-- [ CHARM ] --
+	-- General
 	['CharmOn']                                = {
 		DisplayName           = "Charm On",
-		Category              = "Charm Pet",
+		Group                 = "Abilities",
+		Header                = "Charm",
+		Category              = "Charm General",
+		Index                 = 1,
 		Default               = false,
 		Tooltip               = "Set to use charm spells.",
 		RequiresLoadoutChange = true,
 		FAQ                   = "How do I make my [Bard, Enchanter, Druid, Necro] Charm pets?",
-		Answer                =
-		"Bards, Enchanters, Druids, and Necros all have the option to Enable [CharmOn] so they can Charm a pet.",
+		Answer                = "Bards, Enchanters, Druids, and Necros all have the option to Enable [CharmOn] so they can Charm a pet.",
+	},
+	['DireCharm']                              = {
+		DisplayName = "Dire Charm",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm General",
+		Index       = 2,
+		Default     = false,
+		Tooltip     = "Use DireCharm AA",
+		FAQ         = "How do I use Dire Charm AA?",
+		Answer      = "Enable [DireCharm] setting and we will attempt to use [DireCharm] based upon the other settings.",
+	},
+	['PreferCharm']                            = {
+		DisplayName = "Prefer Charmed Pet",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm General",
+		Index       = 3,
+		Default     = false,
+		Tooltip     = "Prefer to use a charmed pet over a summoned pet.",
+		FAQ         = "I want to only use Charm Pets and ignore summoning my own, can I do that?",
+		Answer      =
+		"The setting is currently there but not implimented yet [PreferCharm].\n\nIf you have [DoCharm] enabled you shouldn't try to summon a pet.",
 	},
 	['CharmStartCount']                        = {
 		DisplayName = "Charm Start Count",
-		Category    = "Charm Pet",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm General",
+		Index       = 4,
 		Default     = 2,
 		Min         = 1,
 		Max         = 20,
@@ -54,7 +81,10 @@ Module.DefaultConfig             = {
 	},
 	['CharmRadius']                            = {
 		DisplayName = "Charm Radius",
-		Category    = "Charm Range",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm General",
+		Index       = 5,
 		Default     = 100,
 		Min         = 1,
 		Max         = 200,
@@ -64,7 +94,10 @@ Module.DefaultConfig             = {
 	},
 	['CharmZRadius']                           = {
 		DisplayName = "Charm ZRadius",
-		Category    = "Charm Range",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm General",
+		Index       = 6,
 		Default     = 15,
 		Min         = 1,
 		Max         = 200,
@@ -73,18 +106,13 @@ Module.DefaultConfig             = {
 		FAQ         = "Why won't I Charm pets?",
 		Answer      = "Your [CharmZRadius] may be set to low.\n\nIncrease this to charm mobs farther above / below you.",
 	},
-	['AutoLevelRangeCharm']                    = {
-		DisplayName = "Auto Level Range",
-		Category    = "Charm Target",
-		Default     = true,
-		Tooltip     = "Set to enable automatic charm level detection based on spells.",
-		FAQ         = "I don't know what lvl my charm spell maxes at?",
-		Answer      =
-		"Enable [AutoLevelRangeCharm] to have the max level set for you based on the currently selected spell.",
-	},
+	-- Targets
 	['CharmStopHPs']                           = {
 		DisplayName = "Charm Stop HPs",
-		Category    = "Charm Target",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm Targets",
+		Index       = 1,
 		Default     = 80,
 		Min         = 1,
 		Max         = 100,
@@ -92,9 +120,24 @@ Module.DefaultConfig             = {
 		FAQ         = "Why are all of my Charm Pets nearly Dead?",
 		Answer      = "Raise the [CharmStopHPs] setting so you won't try to charm a mob below that health Percentage.",
 	},
+	['AutoLevelRangeCharm']                    = {
+		DisplayName = "Auto Level Range",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm Targets",
+		Index       = 2,
+		Default     = true,
+		Tooltip     = "Set to enable automatic charm level detection based on spells.",
+		FAQ         = "I don't know what lvl my charm spell maxes at?",
+		Answer      =
+		"Enable [AutoLevelRangeCharm] to have the max level set for you based on the currently selected spell.",
+	},
 	['CharmMinLevel']                          = {
 		DisplayName = "Charm Min Level",
-		Category    = "Charm Target",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm Targets",
+		Index       = 3,
 		Default     = 0,
 		Min         = 1,
 		Max         = 200,
@@ -106,7 +149,10 @@ Module.DefaultConfig             = {
 	},
 	['CharmMaxLevel']                          = {
 		DisplayName = "Charm Max Level",
-		Category    = "Charm Target",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm Targets",
+		Index       = 4,
 		Default     = 0,
 		Min         = 1,
 		Max         = 200,
@@ -118,7 +164,10 @@ Module.DefaultConfig             = {
 	},
 	['DireCharmMaxLvl']                        = {
 		DisplayName = "DireCharm Max Level",
-		Category    = "Charm Target",
+		Group       = "Abilities",
+		Header      = "Charm",
+		Category    = "Charm Targets",
+		Index       = 5,
 		Default     = 0,
 		Min         = 1,
 		Max         = 200,
@@ -128,23 +177,6 @@ Module.DefaultConfig             = {
 		Answer      =
 			"Your [DireCharmMaxLvl] may be set to High.\n\nAdjust approptiatly or Enable [AutoLevelRangeCharm] and set the value really High, " ..
 			"to have this automatically adjust down to find the appropriate level for you.",
-	},
-	['DireCharm']                              = {
-		DisplayName = "Dire Charm",
-		Category    = "Charm Pet",
-		Default     = false,
-		Tooltip     = "Use DireCharm AA",
-		FAQ         = "How do I use Dire Charm AA?",
-		Answer      = "Enable [DireCharm] setting and we will attempt to use [DireCharm] based upon the other settings.",
-	},
-	['PreferCharm']                            = {
-		DisplayName = "Prefer Charmed Pet",
-		Category    = "Charm Pet",
-		Default     = false,
-		Tooltip     = "Prefer to use a charmed pet over a summoned pet.",
-		FAQ         = "I want to only use Charm Pets and ignore summoning my own, can I do that?",
-		Answer      =
-		"The setting is currently there but not implimented yet [PreferCharm].\n\nIf you have [DoCharm] enabled you shouldn't try to summon a pet.",
 	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
@@ -179,14 +211,6 @@ Module.FAQ                       = {
 		Settings_Used = "DoPet",
 	},
 }
-
-Module.SettingCategories         = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-	if v.Type ~= "Custom" then
-		Module.SettingCategories:add(v.Category)
-	end
-	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
 
 local function getConfigFileName()
 	local oldFile = mq.configDir ..
@@ -245,7 +269,7 @@ function Module:LoadSettings()
 		settings = config()
 	end
 
-	if not settings or not self.SettingCategories or not self.DefaultConfig then
+	if not settings or not self.DefaultConfig then
 		Logger.log_error("\arFailed to Load Charm Config for Classs: %s", Config.Globals.CurLoadedClass)
 		return
 	end
@@ -261,7 +285,7 @@ function Module:LoadSettings()
 		self.ImmuneTable = immuneConfig()
 	end
 
-	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 end
 
 function Module.New()
@@ -280,7 +304,7 @@ function Module:Init()
 
 	self.ModuleLoaded = true
 
-	return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+	return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -288,7 +312,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	Ui.RenderPopSetting(self._name)
+	Ui.RenderPopAndSettings(self._name)
 
 	if self.ModuleLoaded then
 		-- CCEd targets
@@ -367,12 +391,6 @@ function Module:Render()
 				ImGui.EndTable()
 			end
 			ImGui.Unindent()
-		end
-
-		ImGui.Separator()
-
-		if ImGui.CollapsingHeader("Config Options") then
-			Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
 		end
 	end
 end
@@ -788,10 +806,6 @@ end
 
 function Module:GetFAQ()
 	return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-	return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

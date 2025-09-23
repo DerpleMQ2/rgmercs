@@ -1,25 +1,23 @@
 -- Sample FAQ Class Module
-local mq                 = require('mq')
-local Config             = require('utils.config')
-local Ui                 = require("utils.ui")
-local Comms              = require("utils.comms")
-local Logger             = require("utils.logger")
-local Binds              = require("utils.binds")
-local Modules            = require("utils.modules")
-local Set                = require("mq.Set")
-local Strings            = require("utils.strings")
+local mq               = require('mq')
+local Config           = require('utils.config')
+local Ui               = require("utils.ui")
+local Comms            = require("utils.comms")
+local Logger           = require("utils.logger")
+local Binds            = require("utils.binds")
+local Modules          = require("utils.modules")
+local Set              = require("mq.Set")
+local Strings          = require("utils.strings")
 
-local Module             = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }
-Module.__index           = Module
-Module.DefaultConfig     = {}
-Module.SettingCategories = {}
-Module.FAQ               = {}
-Module.ClassFAQ          = {}
-Module.TempSettings      = {}
-Module.SettingCategories = Set.new({})
-Module.SaveRequested     = nil
+local Module           = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }
+Module.__index         = Module
+Module.DefaultConfig   = {}
+Module.FAQ             = {}
+Module.ClassFAQ        = {}
+Module.TempSettings    = {}
+Module.SaveRequested   = nil
 
-Module.DefaultConfig     = {
+Module.DefaultConfig   = {
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
 		Type = "Custom",
@@ -31,15 +29,6 @@ Module.DefaultConfig     = {
 		"You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
 	},
 }
-
-Module.SettingCategories = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-	if v.Type ~= "Custom" then
-		Module.SettingCategories:add(v.Category)
-	end
-
-	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
 
 Module.CommandHandlers = {
 	exportwiki = {
@@ -91,14 +80,7 @@ function Module:LoadSettings()
 		settings = config()
 	end
 
-	for k, v in pairs(Module.DefaultConfig or {}) do
-		if v.Type ~= "Custom" then
-			Module.SettingCategories:add(v.Category)
-		end
-		Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-	end
-
-	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 end
 
 function Module.New()
@@ -110,11 +92,11 @@ function Module:Init()
 	Logger.log_debug("FAQ Combat Module Loaded.")
 	self:LoadSettings()
 
-	return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+	return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
-	return true
+	return false
 end
 
 function Module:MatchSearch(...)
@@ -131,11 +113,11 @@ function Module:ExportFAQToWiki()
 	-- Fetch the FAQs for modules, commands, and class configurations
 	local questions = Modules:ExecAll("GetFAQ")
 	local commandFaq = Modules:ExecAll("GetCommandHandlers")
-	local classFaq = Modules:ExecAll("GetClassFAQ")
+	local classFaq = Modules:ExecModule("Class", "GetClassFAQ")
 	local configFaq = {}
 	configFaq.Config = Config:GetFAQ()
 
-	if not questions and not commandFaq and not classFaq then
+	if not questions and not commandFaq then
 		print("No FAQ data found.")
 		return
 	end
@@ -271,7 +253,7 @@ function Module:FaqFind(question)
 		end
 	end
 
-	local classFaq = Modules:ExecAll("GetClassFAQ")
+	local classFaq = Modules:ExecMOdule("Class", "GetClassFAQ")
 	if classFaq ~= nil then
 		for module, info in pairs(classFaq or {}) do
 			if info.FAQ then
@@ -287,10 +269,7 @@ function Module:FaqFind(question)
 	self.TempSettings.Search = ''
 end
 
-function Module:Render()
-	Ui.RenderPopSetting(self._name)
-
-
+function Module:RenderConfig()
 	ImGui.Spacing()
 	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1, 1, 0, 1))
 	ImGui.Text("Local FAQ Browser Link")
@@ -406,7 +385,7 @@ function Module:Render()
 		end
 
 		if ImGui.CollapsingHeader("FAQ Class Config") then
-			local classFaq = Modules:ExecAll("GetClassFAQ")
+			local classFaq = Modules:ExecModule("Class", "GetClassFAQ")
 			if ImGui.BeginTable("FAQClass", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
 				ImGui.TableSetupColumn("SettingName", ImGuiTableColumnFlags.WidthFixed, 100)
 				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 200)
@@ -436,6 +415,9 @@ function Module:Render()
 		end
 	end
 	ImGui.EndChild()
+end
+
+function Module:Render()
 end
 
 function Module:GiveTime(combat_state)

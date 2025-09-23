@@ -16,19 +16,19 @@ local warningMessageSent = false
 
 local Module             = { _version = '1.1 for LNS', _name = "Loot", _author = 'Derple, Grimmier, Algar', }
 Module.__index           = Module
-Module.SettingCategories = {}
 Module.SaveRequested     = nil
 
 Module.ModuleLoaded      = false
 Module.TempSettings      = {}
 
 Module.FAQ               = {}
-Module.ClassFAQ          = {}
 
 Module.DefaultConfig     = {
 	['DoLoot']                                 = {
 		DisplayName = "Load LootNScoot",
-		Category = "Loot N Scoot",
+		Group = "General",
+		Header = "Loot",
+		Category = "LNS",
 		Index = 1,
 		Tooltip = "Load the integrated LootNScoot in directed mode. Turning this off will unload the looting script.",
 		Default = false,
@@ -37,7 +37,9 @@ Module.DefaultConfig     = {
 	},
 	['CombatLooting']                          = {
 		DisplayName = "Combat Looting",
-		Category = "Loot N Scoot",
+		Group = "General",
+		Header = "Loot",
+		Category = "LNS",
 		Index = 2,
 		Tooltip = "Enables looting during RGMercs-defined combat.",
 		Default = false,
@@ -46,7 +48,9 @@ Module.DefaultConfig     = {
 	},
 	['LootRespectMedState']                    = {
 		DisplayName = "Respect Med State",
-		Category = "Loot N Scoot",
+		Group = "General",
+		Header = "Loot",
+		Category = "LNS",
 		Index = 3,
 		Tooltip = "Hold looting if you are currently meditating.",
 		Default = false,
@@ -56,7 +60,9 @@ Module.DefaultConfig     = {
 	},
 	['LootingTimeout']                         = {
 		DisplayName = "Looting Timeout",
-		Category = "Loot N Scoot",
+		Group = "General",
+		Header = "Loot",
+		Category = "LNS",
 		Index = 4,
 		Tooltip = "The length of time in seconds that RGMercs will allow LNS to process loot actions in a single check.",
 		Default = 5,
@@ -69,8 +75,10 @@ Module.DefaultConfig     = {
 	},
 	['MaxChaseTargetDistance']                 = {
 		DisplayName = "Max Chase Targ Dist",
-		Category = "Loot N Scoot",
-		Index = 4,
+		Group = "General",
+		Header = "Loot",
+		Category = "LNS",
+		Index = 5,
 		Tooltip = "If chase is on, we won't loot (and will abort looting) any corpses when the chase target is farther than this value away from us.",
 		Default = 300,
 		Min = 1,
@@ -108,15 +116,6 @@ Module.FAQ               = {
 Module.CommandHandlers   = {
 
 }
-
-Module.SettingCategories = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-	if v.Type ~= "Custom" then
-		Module.SettingCategories:add(v.Category)
-	end
-
-	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
 
 local function getConfigFileName()
 	local server = mq.TLO.EverQuest.Server()
@@ -176,7 +175,7 @@ function Module:LoadSettings()
 		settings = config()
 	end
 
-	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 end
 
 function Module.New()
@@ -205,7 +204,7 @@ function Module:Init()
 		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	end
 
-	return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+	return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -213,11 +212,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	Ui.RenderPopSetting(self._name)
-
-	if ImGui.CollapsingHeader("Config Options") then
-		Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
-	end
+	Ui.RenderPopAndSettings(self._name)
 end
 
 function Module:Pop()
@@ -356,13 +351,6 @@ function Module:GetFAQ()
 	return {
 		module = self._name,
 		FAQ = self.FAQ or {},
-	}
-end
-
-function Module:GetClassFAQ()
-	return {
-		module = self._name,
-		FAQ = self.ClassFAQ or {},
 	}
 end
 

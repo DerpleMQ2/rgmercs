@@ -23,7 +23,6 @@ Module.TempSettings.PorterList     = {}
 Module.TempSettings.FilteredList   = {}
 Module.TempSettings.FilterText     = ""
 Module.FAQ                         = {}
-Module.ClassFAQ                    = {}
 
 local travelColors                 = {}
 travelColors["Group v2"]           = {}
@@ -64,14 +63,6 @@ Module.DefaultConfig               = {
     },
 }
 
-Module.SettingCategories           = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-    if v.Type ~= "Custom" then
-        Module.SettingCategories:add(v.Category)
-    end
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
-
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
@@ -111,14 +102,8 @@ function Module:LoadSettings()
     else
         settings = config()
     end
-    for k, v in pairs(Module.DefaultConfig or {}) do
-        if v.Type ~= "Custom" then
-            Module.SettingCategories:add(v.Category)
-        end
-        self.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-    end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 end
 
 function Module:TravelerUpdate(newData)
@@ -196,7 +181,7 @@ function Module:Init()
     self:CreatePorterList()
     self:GenerateFilteredPortsList()
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:GetColorForType(type)
@@ -243,8 +228,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
-
+    Ui.RenderPopAndSettings(self._name)
 
     local width = ImGui.GetWindowWidth()
     local buttonsPerRow = math.max(1, math.floor(width / self.ButtonWidth))
@@ -348,10 +332,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

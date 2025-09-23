@@ -10,15 +10,16 @@ local Strings   = require("utils.strings")
 local Set       = require("mq.Set")
 
 
-local Module             = { _version = '0.1a', _name = "Drag", _author = 'Derple', }
-Module.__index           = Module
-Module.FAQ               = {}
-Module.ClassFAQ          = {}
-Module.SaveRequested     = nil
+local Module         = { _version = '0.1a', _name = "Drag", _author = 'Derple', }
+Module.__index       = Module
+Module.FAQ           = {}
+Module.SaveRequested = nil
 
-Module.DefaultConfig     = {
+Module.DefaultConfig = {
     ['DoDrag']                                 = {
         DisplayName = "Drag Corpses",
+        Group = "Movement",
+        Header = "Drag",
         Category = "Drag",
         Tooltip = "Enable Dragging Corpses with you",
         Index = 1,
@@ -28,6 +29,8 @@ Module.DefaultConfig     = {
     },
     ['DoSearchDrag']                           = {
         DisplayName = "Use Spawn Search Dragging",
+        Group = "Movement",
+        Header = "Drag",
         Category = "Drag",
         Tooltip = "Use Search to find drag targets",
         Index = 3,
@@ -37,6 +40,8 @@ Module.DefaultConfig     = {
     },
     ['SearchDrag']                             = {
         DisplayName = "Spawn Search",
+        Group = "Movement",
+        Header = "Drag",
         Category = "Drag",
         Tooltip = "Enable Dragging Corpses with you",
         Index = 4,
@@ -47,6 +52,8 @@ Module.DefaultConfig     = {
     },
     ['DoDanNetDrag']                           = {
         DisplayName = "Use DanNet Dragging",
+        Group = "Movement",
+        Header = "Drag",
         Category = "Drag",
         Tooltip = "Use DanNet to find drag targets",
         Index = 2,
@@ -65,7 +72,6 @@ Module.DefaultConfig     = {
         "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
-Module.SettingCategories = {}
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -108,15 +114,7 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    Module.SettingCategories = Set.new({})
-    for k, v in pairs(Module.DefaultConfig or {}) do
-        if v.Type ~= "Custom" then
-            Module.SettingCategories:add(v.Category)
-        end
-        Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-    end
-
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 end
 
 function Module.New()
@@ -130,7 +128,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -138,18 +136,11 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
-    local pressed
     if self.ModuleLoaded then
         if ImGui.Button(Config:GetSetting('DoDrag') and "Stop Dragging" or "Start Dragging", ImGui.GetWindowWidth() * .3, 25) then
             Config:SetSetting('DoDrag', not Config:GetSetting('DoDrag'))
-        end
-
-        ImGui.Separator()
-
-        if ImGui.CollapsingHeader("Config Options") then
-            Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
         end
     end
 end
@@ -226,10 +217,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

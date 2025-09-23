@@ -1652,7 +1652,7 @@ local _ClassConfig = {
                     mq.TLO.Target.LineOfSight(), chaseDistance, Strings.BoolToColorString(forceMove), Strings.BoolToColorString(tooClose), Strings.BoolToColorString(tooFar))
 
                 if forceMove and mq.TLO.Target.LineOfSight() then
-                    Logger.log_warning(
+                    Logger.log_warn(
                         "Custom Ranger combatNav: \arWarning! \aw Mercs has detected a \"Can't See\" condition, but MQ is reporting line of sight. \ayManual intervention may be required.")
                 end
                 if Config:GetSetting('NavCircle') then
@@ -1661,7 +1661,7 @@ local _ClassConfig = {
                     end
                 elseif tooClose then
                     if chaseDistance < 30 then
-                        Logger.log_warning(
+                        Logger.log_warn(
                             "Custom Ranger combatNav: \arWarning! \awChase distance is %d. \ayThis may interfere with ranged combat, depending on chase target movement!",
                             chaseDistance)
                     end
@@ -1725,8 +1725,10 @@ local _ClassConfig = {
         --Archery
         ['BowNavDistance']    = {
             DisplayName = "Bow Nav Distance",
+            Group = "Combat",
+            Header = "Positioning",
             Category = "Archery",
-            Index = 1,
+            Index = 101,
             Tooltip = "The distance from your target you should nav to for ranged attacks when necessary.\n" ..
                 "If Nav Circle is enabled, the distance to circle at.",
             Default = 45,
@@ -1738,8 +1740,10 @@ local _ClassConfig = {
         },
         ['NavCircle']         = {
             DisplayName = "Nav Circle",
+            Group = "Combat",
+            Header = "Positioning",
             Category = "Archery",
-            Index = 2,
+            Index = 102,
             Tooltip = "Use Nav to Circle your target while autofiring.",
             Default = false,
             RequiresLoadoutChange = true, -- this is a load condition
@@ -1748,7 +1752,9 @@ local _ClassConfig = {
         },
         ['DoSnare']           = {
             DisplayName = "Cast Snares",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
             Tooltip = "Enable casting Snare spells.",
             Default = true,
             FAQ = "Why am I not casting my snare spells?",
@@ -1756,7 +1762,9 @@ local _ClassConfig = {
         },
         ['DoDot']             = {
             DisplayName = "Cast DOTs",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
             Tooltip = "Enable casting Damage Over Time spells.",
             Default = true,
             FAQ = "Why am I not casting my DOT spells?",
@@ -1764,7 +1772,9 @@ local _ClassConfig = {
         },
         ['DoHeals']           = {
             DisplayName = "Cast Heals",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
             Tooltip = "Enable casting of Healing spells.",
             Default = true,
             FAQ = "Why am I not casting my Heal spells?",
@@ -1772,7 +1782,9 @@ local _ClassConfig = {
         },
         ['DoRegen']           = {
             DisplayName = "Cast Regen Spells",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Tooltip = "Enable casting of Regen spells.",
             Default = true,
             FAQ = "Why am I not casting my Regen spells?",
@@ -1780,7 +1792,9 @@ local _ClassConfig = {
         },
         ['DoRunSpeed']        = {
             DisplayName = "Cast Run Speed Buffs",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Tooltip = "Use Ranger Run Speed Buffs.",
             Default = true,
             FAQ = "Why am I not casting my Run Speed Buffs?",
@@ -1788,7 +1802,9 @@ local _ClassConfig = {
         },
         ['DoMask']            = {
             DisplayName = "Cast Mask Spell",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Tooltip = "Use Ranger Mask Spell",
             Default = false,
             FAQ = "Why am I not casting my Mask Spell?",
@@ -1796,7 +1812,9 @@ local _ClassConfig = {
         },
         ['DoFireFist']        = {
             DisplayName = "Cast FireFist",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Tooltip = "Use Ranger FireFist Line of Spells",
             Default = true,
             FAQ = "Why am I not casting my FireFist Spells?",
@@ -1804,7 +1822,9 @@ local _ClassConfig = {
         },
         ['DoAoE']             = {
             DisplayName = "Use AoEs",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
             Tooltip = "Enable AoE abilities and spells.",
             Default = false,
             FAQ = "Why am I not casting my AoE spells?",
@@ -1812,7 +1832,9 @@ local _ClassConfig = {
         },
         ['DoOpener']          = {
             DisplayName = "Use Openers",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Tooltip = "Use Opening Arrow Shot Silent Shot Line.",
             Default = true,
             FAQ = "Why am I not casting my Opener spells?",
@@ -1820,7 +1842,9 @@ local _ClassConfig = {
         },
         ['DoPoisonArrow']     = {
             DisplayName = "Use Poison Arrow",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
             Tooltip = "Enable use of Poison Arrow.",
             Default = true,
             FAQ = "Why am I not casting my Poison Arrow spells?",
@@ -1828,7 +1852,9 @@ local _ClassConfig = {
         },
         ['DoReagentArrow']    = {
             DisplayName = "Use Reagent Arrow",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
             Tooltip = "Toggle usage of Spells and Openers that require Reagent arrows.",
             Default = false,
             FAQ = "Why am I not casting my Reagent Arrow spells?",
@@ -1836,7 +1862,9 @@ local _ClassConfig = {
         },
         ['DoAgroReducerBuff'] = {
             DisplayName = "Cast Agro Reducer Buff",
-            Category = "Spells and Abilities",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
             Tooltip = "Use Agro Reduction Buffs.",
             Default = true,
             FAQ = "How do I manage aggro as a Ranger?",

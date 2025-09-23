@@ -604,6 +604,7 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         ImGui.PushID("##combo_setting_" .. id)
         ---@type string[]
         local comboOptions = args[1]
+        ImGui.SetNextItemWidth(-1)
         setting, pressed = ImGui.Combo("", setting, comboOptions)
         ImGui.PopID()
         new_loadout = ((pressed or false) and (requiresLoadoutChange))
@@ -661,6 +662,7 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
         any_pressed = any_pressed or pressed
     elseif type == 'string' then -- display only
+        ImGui.SetNextItemWidth(-1)
         setting, pressed = ImGui.InputText("##" .. id, setting)
         any_pressed = any_pressed or pressed
         Ui.Tooltip(setting)
@@ -723,7 +725,7 @@ function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
                                 local arrayType = defaults[k].Type:sub(7)
 
                                 for idx, _ in ipairs(settings[k] or {}) do
-                                    ImGui.Text(string.format(defaults[k].DisplayName or "None %d", idx))
+                                    ImGui.Text(string.format("%s", defaults[k].DisplayName or (string.format("None %d", idx))))
                                     Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
                                         type(defaults[k].Tooltip) == 'function' and defaults[k].Tooltip() or defaults[k].Tooltip,
                                         k,
@@ -781,13 +783,23 @@ function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
     return settings, any_pressed, new_loadout
 end
 
-function Ui.RenderPopSetting(moduleName)
-    if not Config:GetSetting(moduleName .. "_Popped") then
-        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-            Config:SetSetting(moduleName .. "_Popped", not Config:GetSetting(moduleName .. "_Popped"))
+function Ui.RenderPopAndSettings(moduleName)
+    if ImGui.SmallButton(Icons.MD_SETTINGS) then
+        Config:HighlightModule(moduleName)
+        Config:SetSetting('EnableOptionsUI', true)
+    end
+
+    if Config:HaveSetting(moduleName .. "_Popped") then
+        ImGui.SameLine()
+
+        if not Config:GetSetting(moduleName .. "_Popped") then
+            if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
+                Config:SetSetting(moduleName .. "_Popped", not Config:GetSetting(moduleName .. "_Popped"))
+                Config:GetSetting('EnableOptionsUI')
+            end
+            Ui.Tooltip(string.format("Pop the %s tab out into its own window.", moduleName))
+            ImGui.NewLine()
         end
-        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", moduleName))
-        ImGui.NewLine()
     end
 end
 
@@ -1018,6 +1030,7 @@ function Ui.Tooltip(desc)
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
     end
+    ImGui.NewLine()
 end
 
 --- Renders text as strikethrough
