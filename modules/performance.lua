@@ -13,7 +13,6 @@ local ScrollingPlotBuffer = require('utils.scrolling_plot_buffer')
 local Module              = { _version = '0.1a', _name = "Perf", _author = 'Derple', }
 Module.__index            = Module
 Module.DefaultConfig      = {}
-Module.SettingCategories  = {}
 Module.MaxFrameStep       = 5.0
 Module.GoalMaxFrameTime   = 0
 Module.CurMaxMaxFrameTime = 0
@@ -23,15 +22,15 @@ Module.FrameTimingData    = {}
 Module.MaxFrameTime       = 0
 Module.LastExtentsCheck   = os.clock()
 Module.FAQ                = {}
-Module.ClassFAQ           = {}
 Module.SaveRequested      = nil
 
 Module.DefaultConfig      = {
     ['SecondsToStore']                         = {
         DisplayName = "Seconds to Store",
-        Category = "Monitoring",
+        Group = "General",
+        Header = "Misc",
+        Category = "Misc",
         Tooltip = "The number of Seconds to keep in history.",
-        Type = "Custom",
         Default = 30,
         Min = 10,
         Max = 120,
@@ -41,7 +40,9 @@ Module.DefaultConfig      = {
     },
     ['EnablePerfMonitoring']                   = {
         DisplayName = "Enable Performance Monitoring",
-        Category    = "Monitoring",
+        Group       = "General",
+        Header      = "Misc",
+        Category    = "Misc",
         Tooltip     = "Might cause some lag so only use if you want it",
         Default     = false,
         FAQ         = "I want to see how long my modules are taking to run, how do I do that?",
@@ -49,7 +50,9 @@ Module.DefaultConfig      = {
     },
     ['PlotFillLines']                          = {
         DisplayName = "Enable Fill Lines",
-        Category = "Graph",
+        Group = "General",
+        Header = "Misc",
+        Category = "Misc",
         Tooltip = "Fill in the Plot Lines",
         Default = true,
         FAQ = "Can I toggle between Lines and Bars?",
@@ -66,14 +69,6 @@ Module.DefaultConfig      = {
         "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
-
-Module.SettingCategories  = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-    if v.Type ~= "Custom" then
-        Module.SettingCategories:add(v.Category)
-    end
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -115,7 +110,7 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     self.SettingsLoaded = true
 end
@@ -129,15 +124,15 @@ function Module:Init()
     Logger.log_debug("Performance Monitor Module Loaded.")
     self:LoadSettings()
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
-    return true
+    return Config:GetSetting('EnablePerfMonitoring')
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
     local pressed
     if not self.SettingsLoaded then return end
@@ -180,23 +175,6 @@ function Module:Render()
         end
 
         ImPlot.EndPlot()
-    end
-
-    ImGui.Separator()
-
-    if ImGui.CollapsingHeader("Config Options") then
-        local secondsToStore = Config:GetSetting('SecondsToStore')
-
-        secondsToStore, pressed = ImGui.SliderInt(self.DefaultConfig.SecondsToStore.DisplayName,
-            secondsToStore, self.DefaultConfig.SecondsToStore.Min,
-            self.DefaultConfig.SecondsToStore
-            .Max,
-            "%d s")
-        if pressed then
-            Config:SetSetting('SecondsToStore', secondsToStore)
-        end
-
-        Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
     end
 end
 
@@ -246,10 +224,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

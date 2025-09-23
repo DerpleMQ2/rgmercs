@@ -28,23 +28,15 @@ Module.TempSettings            = {}
 Module.TempSettings.MezImmune  = {}
 Module.TempSettings.MezTracker = {}
 Module.FAQ                     = {}
-Module.ClassFAQ                = {}
 
 Module.DefaultConfig           = {
-    -- [ MEZ ] --
-    ['MezAECount']                             = {
-        DisplayName = "Mez AE Count",
-        Category = "Mez",
-        Tooltip = "Mez if you have at least [X] on xtarget",
-        FAQ = "How do I set my AE mes limits?",
-        Answer = "Set your [MezAECount] Setting to the minimum number of Mobs on Xtarget before using AE Mez.",
-        Default = 3,
-        Min = 1,
-        Max = 20,
-    },
+    --General
     ['MezOn']                                  = {
         DisplayName = "Enable Mezzing",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 1,
         Default = true,
         Tooltip = "Enables mezzing all forms of mezzing as a quick toggle, select particular actions to use below.",
         FAQ = "How do I turn on Mez?",
@@ -52,7 +44,10 @@ Module.DefaultConfig           = {
     },
     ['DoSTMez']                                = {
         DisplayName = "ST Mez Song/Spells",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 2,
         Default = true,
         Tooltip = "Set to enable use of ST mez spells/songs.",
         RequiresLoadoutChange = true,
@@ -61,7 +56,10 @@ Module.DefaultConfig           = {
     },
     ['DoAEMez']                                = {
         DisplayName = "AE Mez Song/Spells",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 3,
         Default = true,
         Tooltip = "Set to enable use of AE mez spells/songs.",
         RequiresLoadoutChange = true,
@@ -70,7 +68,10 @@ Module.DefaultConfig           = {
     },
     ['DoAAMez']                                = {
         DisplayName = "Use Mez AA",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 4,
         Default = true,
         Tooltip = "Use Beam of Slumber(ENC) or Dirge of the Sleepwalker(BRD) when able.",
         FAQ = "Why am I not using XXX AA to mez?",
@@ -78,7 +79,10 @@ Module.DefaultConfig           = {
     },
     ['MezStartCount']                          = {
         DisplayName = "Mez Start Count",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 5,
         Default = 2,
         Min = 1,
         Max = 20,
@@ -86,9 +90,25 @@ Module.DefaultConfig           = {
         FAQ = "How do I control when to cast Mez?",
         Answer = "You can adjust your [MezStartCount] to set how many mobs are on XTarget before casting Mez spells",
     },
+    ['MezAECount']                             = {
+        DisplayName = "Mez AE Count",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 6,
+        Tooltip = "Mez if you have at least [X] on xtarget",
+        FAQ = "How do I set my AE mes limits?",
+        Answer = "Set your [MezAECount] Setting to the minimum number of Mobs on Xtarget before using AE Mez.",
+        Default = 3,
+        Min = 1,
+        Max = 20,
+    },
     ['MaxMezCount']                            = {
         DisplayName = "Max Mez Count",
-        Category = "Mez",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 7,
         Default = 13,
         Min = 1,
         Max = 20,
@@ -98,7 +118,10 @@ Module.DefaultConfig           = {
     },
     ['MezRadius']                              = {
         DisplayName = "Mez Radius",
-        Category = "Mez Range",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 8,
         Default = 100,
         Min = 1,
         Max = 200,
@@ -108,7 +131,10 @@ Module.DefaultConfig           = {
     },
     ['MezZRadius']                             = {
         DisplayName = "Mez ZRadius",
-        Category = "Mez Range",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 9,
         Default = 15,
         Min = 1,
         Max = 200,
@@ -117,9 +143,39 @@ Module.DefaultConfig           = {
         FAQ = "I can't get my enchanter to mez mobs on hills, how do I fix this?",
         Answer = "Adjust your [MezZRadius] to the height above/below you want to start mezzing mobs.",
     },
+    ['SafeAEMez']                              = {
+        DisplayName = "AE Mez Safety Check",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez General",
+        Index = 10,
+        Tooltip =
+        "Check to ensure there aren't neutral mobs in range we could aggro if AE mez is used. May result in non-use due to false positives.",
+        Default = false,
+        FAQ = "Can you better explain the AE Mez Safety Check?",
+        Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the mez.\n" ..
+            "Unfortunately, the script currently cannot always discern whether an NPC is (un)attackable, so at times this may lead to the mez not being used when it is safe to do so.",
+    },
+    -- Targets
+    ['MezStopHPs']                             = {
+        DisplayName = "Mez Stop HPs",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez Targets",
+        Index = 1,
+        Default = 80,
+        Min = 1,
+        Max = 100,
+        Tooltip = "Mob HP% to stop trying to mez",
+        FAQ = "I keep trying to mez mobs that are about to die -- how do I fix this?",
+        Answer = "Adjust your [MezStopHPs] to the HP% you want to stop trying to mez mobs.",
+    },
     ['AutoLevelRange']                         = {
         DisplayName = "Auto Level Range",
-        Category = "Mez Target",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez Targets",
+        Index = 2,
         Default = true,
         Tooltip = "Set to enable automatic mez level detection based on spells.",
         FAQ = "I'm Lazy and hate updating my thresholds. How do I make my character do it for me?",
@@ -127,7 +183,10 @@ Module.DefaultConfig           = {
     },
     ['MezMinLevel']                            = {
         DisplayName = "Mez Min Level",
-        Category = "Mez Target",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez Targets",
+        Index = 3,
         Default = 0,
         Min = 1,
         Max = 200,
@@ -138,7 +197,10 @@ Module.DefaultConfig           = {
     },
     ['MezMaxLevel']                            = {
         DisplayName = "Mez Max Level",
-        Category = "Mez Target",
+        Group = "Abilities",
+        Header = "Mez",
+        Category = "Mez Targets",
+        Index = 4,
         Default = 0,
         Min = 1,
         Max = 200,
@@ -147,27 +209,7 @@ Module.DefaultConfig           = {
         FAQ = "Why won't my enchanter mez this mob? His new spell should work on it.",
         Answer = "You most likely have [AutoLevelRange] turned off and forgot to increase the [MezMaxLevel] to the max for this spell.",
     },
-    ['MezStopHPs']                             = {
-        DisplayName = "Mez Stop HPs",
-        Category = "Mez Target",
-        Default = 80,
-        Min = 1,
-        Max = 100,
-        Tooltip = "Mob HP% to stop trying to mez",
-        FAQ = "I keep trying to mez mobs that are about to die -- how do I fix this?",
-        Answer = "Adjust your [MezStopHPs] to the HP% you want to stop trying to mez mobs.",
-    },
-    ['SafeAEMez']                              = {
-        DisplayName = "AE Mez Safety Check",
-        Category = "Mez",
-        Index = 3,
-        Tooltip =
-        "Check to ensure there aren't neutral mobs in range we could aggro if AE mez is used. May result in non-use due to false positives.",
-        Default = false,
-        FAQ = "Can you better explain the AE Mez Safety Check?",
-        Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the mez.\n" ..
-            "Unfortunately, the script currently cannot always discern whether an NPC is (un)attackable, so at times this may lead to the mez not being used when it is safe to do so.",
-    },
+
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Type = "Custom",
@@ -179,14 +221,6 @@ Module.DefaultConfig           = {
         "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
-
-Module.SettingCategories       = Set.new({})
-for k, v in pairs(Module.DefaultConfig) do
-    if v.Type ~= "Custom" then
-        Module.SettingCategories:add(v.Category)
-    end
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
 
 local function getConfigFileName()
     local oldFile = mq.configDir ..
@@ -239,12 +273,12 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    if not self.SettingCategories or not self.DefaultConfig then
+    if not self.DefaultConfig then
         Logger.log_error("\arFailed to Load Mez Config for Classs: %s", Config.Globals.CurLoadedClass)
         return
     end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     self.SettingsLoaded = true
 end
@@ -260,7 +294,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -268,7 +302,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
     if self.ModuleLoaded then
         -- CCEd targets
@@ -324,12 +358,6 @@ function Module:Render()
                 ImGui.EndTable()
             end
             ImGui.Unindent()
-        end
-
-        ImGui.Separator()
-
-        if ImGui.CollapsingHeader("Config Options") then
-            Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
         end
     end
 end
@@ -865,10 +893,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

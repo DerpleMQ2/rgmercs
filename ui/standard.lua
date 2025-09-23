@@ -1,4 +1,5 @@
 local mq           = require('mq')
+local GitCommit    = require('extras.version')
 local ImGui        = require('ImGui')
 local Config       = require('utils.config')
 local Ui           = require('utils.ui')
@@ -90,17 +91,24 @@ function StandardUI:RenderWindowControls()
     local position = ImGui.GetCursorPosVec()
     local smallButtonSize = 32
 
-    local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 2), smallButtonSize)
+    local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 3), smallButtonSize)
     ImGui.SetCursorPos(windowControlPos)
+
+    if ImGui.SmallButton(Icons.MD_SETTINGS) then
+        Config:ClearAllHighlightedModules()
+        Config:SetSetting('EnableOptionsUI', not Config:GetSetting('EnableOptionsUI'))
+    end
+    ImGui.SameLine()
 
     if ImGui.SmallButton((Config:GetSetting('MainWindowLocked') or false) and Icons.FA_LOCK or Icons.FA_UNLOCK) then
         Config:SetSetting('MainWindowLocked', not Config:GetSetting('MainWindowLocked'))
     end
-
     ImGui.SameLine()
+
     if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
         Config.Globals.Minimized = true
     end
+
     Ui.Tooltip("Minimize Main Window")
 
     ImGui.SetCursorPos(position)
@@ -182,36 +190,6 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                             Ui.RenderForceTargetList(true)
                             ImGui.Unindent()
                         end
-                    end
-
-                    ImGui.Separator()
-
-                    if ImGui.CollapsingHeader("Config Options") then
-                        ImGui.Indent()
-
-                        if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                            Ui.RenderModuleSettings("Core", Config.DefaultConfig, Config.SettingCategories, false, true)
-                        end
-                        if Config:GetSetting('ShowAllOptionsMain') then
-                            if Config.Globals.SubmodulesLoaded then
-                                local submoduleSettings = Config:GetAllModuleSettings()
-                                local submoduleDefaults = Config:GetAllModuleDefaultSettings()
-                                local submoduleCategories = Config:GetAllModuleSettingCategories()
-
-                                for n, s in pairs(submoduleSettings) do
-                                    if n ~= "Debug" and n ~= "Core" and Modules:ExecModule(n, "ShouldRender") then
-                                        ImGui.PushID(n .. "_config_hdr")
-                                        if s and submoduleDefaults[n] and submoduleCategories[n] then
-                                            if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                                Ui.RenderModuleSettings(n, submoduleDefaults[n], submoduleCategories[n], true)
-                                            end
-                                        end
-                                        ImGui.PopID()
-                                    end
-                                end
-                            end
-                        end
-                        ImGui.Unindent()
                     end
                     ImGui.EndTabItem()
                 end

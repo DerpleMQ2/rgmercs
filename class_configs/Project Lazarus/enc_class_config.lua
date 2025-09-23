@@ -163,7 +163,7 @@ local _ClassConfig = {
             "Tepid Deeds",
             "Languid Pace",
         },
-        ['StripBuffSpell'] = {
+        ['Dispel'] = {
             "Abashi's Disempowerment",
             "Recant Magic",
             "Pillage Enchantment",
@@ -361,10 +361,10 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'StripBuff',
+            name = 'Dispel',
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('DoStripBuff') end,
+            load_cond = function() return Config:GetSetting('DoDispel') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.OkayToDebuff()
@@ -815,9 +815,9 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['StripBuff'] = {
+        ['Dispel'] = {
             {
-                name = "StripBuffSpell",
+                name = "Dispel",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if mq.TLO.Target.ID() == 0 then return false end
@@ -902,14 +902,6 @@ local _ClassConfig = {
             {
                 name = "Chromatic Haze",
                 type = "AA",
-            },
-            { --Chest Click, name function stops errors in rotation window when slot is empty
-                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
-                end,
             },
             {
                 name = "Fundament: Third Spire of Enchantment",
@@ -1033,7 +1025,7 @@ local _ClassConfig = {
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
-                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "Dispel",           cond = function(self) return Config:GetSetting('DoDispel') end, },
                 { name = "ColoredNuke",      cond = function(self) return Config:GetSetting('DoColored') end, },
                 { name = "Chromaburst",      cond = function(self) return Config:GetSetting('DoChroma') end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') end, },
@@ -1060,13 +1052,13 @@ local _ClassConfig = {
             end,
         },
         {
-            id = 'StripBuffSpell',
+            id = 'Dispel',
             Type = "Spell",
-            DisplayName = function() return Core.GetResolvedActionMapItem('StripBuffSpell').RankName.Name() or "" end,
-            AbilityName = function() return Core.GetResolvedActionMapItem('StripBuffSpell').RankName.Name() or "" end,
+            DisplayName = function() return Core.GetResolvedActionMapItem('Dispel').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('Dispel').RankName.Name() or "" end,
             AbilityRange = 200,
             cond = function(self)
-                local resolvedSpell = Core.GetResolvedActionMapItem('StripBuffSpell')
+                local resolvedSpell = Core.GetResolvedActionMapItem('Dispel')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
@@ -1089,8 +1081,10 @@ local _ClassConfig = {
         --Buffs
         ['UseAura']            = {
             DisplayName = "Aura Selection:",
-            Category = "Buffs",
-            Index = 1,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 101,
             Tooltip = "Select the Aura to be used, if any.",
             Type = "Combo",
             ComboOptions = { 'Spell Proc', 'Twincast', 'Visage', 'Auroria', 'None', },
@@ -1104,8 +1098,10 @@ local _ClassConfig = {
         },
         ['RuneChoice']         = {
             DisplayName = "Rune Selection:",
-            Category = "Buffs",
-            Index = 2,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 102,
             Tooltip = "Select which line of Rune spells you prefer to use.\nPlease note that after level 73, the group rune has a built-in hate reduction when struck.",
             Type = "Combo",
             ComboOptions = { 'Single Target', 'Group', 'Off', },
@@ -1119,8 +1115,10 @@ local _ClassConfig = {
         },
         ['DoGroupSpellShield'] = {
             DisplayName = "Do Group Spellshield",
-            Category = "Buffs",
-            Index = 3,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 103,
             Tooltip = "Enable casting the Group Spell Shield Line.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1130,8 +1128,10 @@ local _ClassConfig = {
         },
         ['DoProcBuff']         = {
             DisplayName = "Do Spellproc Buff",
-            Category = "Buffs",
-            Index = 4,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 104,
             Tooltip = "Enable casting the spell proc (Mana ... ) line.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1140,8 +1140,10 @@ local _ClassConfig = {
         },
         ['DoNDTBuff']          = {
             DisplayName = "Cast NDT",
-            Category = "Buffs",
-            Index = 5,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 105,
             Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1151,8 +1153,10 @@ local _ClassConfig = {
         },
         ['DoHateBuff']         = {
             DisplayName = "Do Hate Visage",
-            Category = "Buffs",
-            Index = 6,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 106,
             Tooltip = "Use your hatred visage buff on your tank.",
             RequiresLoadoutChange = true,
             Default = false,
@@ -1161,8 +1165,10 @@ local _ClassConfig = {
         },
         ['DoArcanumWeave']     = {
             DisplayName = "Weave Arcanums",
-            Category = "Buffs",
-            Index = 7,
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
+            Index = 107,
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
@@ -1174,7 +1180,10 @@ local _ClassConfig = {
         --Debuffs
         ['DoTash']             = {
             DisplayName = "Do Tash",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Resist",
+            Index = 101,
             Tooltip = "Cast Tash Spells",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1184,7 +1193,10 @@ local _ClassConfig = {
         },
         ['DoSlow']             = {
             DisplayName = "Cast Slow",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Slow",
+            Index = 101,
             Tooltip = "Enable casting Slow spells.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1194,7 +1206,10 @@ local _ClassConfig = {
         },
         ['DoCrippleSpell']     = {
             DisplayName = "Cast Cripple Spell",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Misc Debuffs",
+            Index = 101,
             Tooltip = "Enable casting Cripple spells.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1204,7 +1219,10 @@ local _ClassConfig = {
         },
         ['DoCrippleAA']        = {
             DisplayName = "Use AE Cripple AA",
-            Category = "Debuffs",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Index = 102,
+            Category = "Misc Debuffs",
             Tooltip = "Enable casting Crippling Aurora when we meet the AE threshold, or on a named if we don't have the spell above selected.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1212,22 +1230,27 @@ local _ClassConfig = {
             Answer = "The [DoCrippleAA] setting determines whether or not your PC will cast AE Cripple spells.\n" ..
                 "If you are not Crippling, you may need to Enable the settings in the Debuffs tab.",
         },
-        ['DoStripBuff']        = {
-            DisplayName = "Do Strip Buffs",
-            Category = "Debuffs",
+        ['DoDispel']           = {
+            DisplayName = "Do Dispel",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Dispel",
+            Index = 101,
             Tooltip = "Enable removing beneficial enemy effects.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not stripping buffs?",
-            Answer = "The [DoStripBuff] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
-                "If you are not stripping buffs, you may need to Enable the [DoStripBuff] setting.",
+            FAQ = "Why am I not dispelling buffs?",
+            Answer = "The [DoDispel] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
+                "If you are not dispelling, you may need to Enable the [DoDispel] setting.",
         },
 
         --Combat
         ['UseEpic']            = {
             DisplayName = "Epic Use:",
-            Category = "Buffs",
-            Index = 1,
+            Group = "Items",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
+            Index = 101,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",
             ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
@@ -1241,8 +1264,10 @@ local _ClassConfig = {
         },
         ['AECount']            = {
             DisplayName = "AE Count",
-            Category = "Combat",
-            Index = 2,
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Debuff Rules",
+            Index = 101,
             Tooltip = "Number of XT Haters before we will use AE Slow, Tash, or Stun.",
             Min = 1,
             Default = 3,
@@ -1252,8 +1277,10 @@ local _ClassConfig = {
         },
         ['DoSpinStun']         = {
             DisplayName = "Spin Stun use:",
-            Category = "Combat",
-            Index = 3,
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Stun",
+            Index = 101,
             Tooltip = "When to use your Spin Stun Line.",
             RequiresLoadoutChange = true,
             Type = "Combo",
@@ -1267,8 +1294,10 @@ local _ClassConfig = {
         },
         ['DoAEStun']           = {
             DisplayName = "PBAE Stun use:",
-            Category = "Combat",
-            Index = 4,
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Stun",
+            Index = 102,
             Tooltip = "When to use your PBAE Stun Line.",
             RequiresLoadoutChange = true,
             Type = "Combo",
@@ -1282,8 +1311,10 @@ local _ClassConfig = {
         },
         ['EmergencyStart']     = {
             DisplayName = "Emergency Start",
-            Category = "Combat",
-            Index = 5,
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 101,
             Tooltip = "The HP % emergency abilities will be used (Abilities used depend on whose health is low, the ENC or the MA).",
             Default = 50,
             Min = 1,
@@ -1292,20 +1323,12 @@ local _ClassConfig = {
             FAQ = "Why am I not using my emergency abilities?",
             Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
-        ['DoChestClick']       = {
-            DisplayName = "Do Chest Click",
-            Category = "Combat",
-            Index = 5,
-            Tooltip = "Click your equipped chest item during burns.",
-            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "Why am I not clicking my chest item?",
-            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
-                "ENC is set to use theirs during burns, so long as the item equipped has a clicky effect.",
-        },
         ['DoSoothing']         = {
             DisplayName = "Do Soothing Words",
-            Category = "Combat",
-            Index = 6,
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Hate Reduction",
+            Index = 101,
             RequiresLoadoutChange = true,
             Tooltip = "Use the Soothing Words AA (large aggro reduction) on a named whose target is not our MA.",
             Default = false,
@@ -1314,8 +1337,10 @@ local _ClassConfig = {
         },
         ['DoBeguilers']        = {
             DisplayName = "Do Beguiler's",
-            Category = "Combat",
-            Index = 7,
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 102,
             RequiresLoadoutChange = true,
             Tooltip = "Use Beguiler's (Directed) Banishment AA when you have aggro.",
             Default = false,
@@ -1326,8 +1351,10 @@ local _ClassConfig = {
         --DPS
         ['DoNuke']             = {
             DisplayName = "Magic Nuke",
-            Category = "DPS",
-            Index = 1,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 101,
             Tooltip = "Use your primary magic nuke line.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1336,8 +1363,10 @@ local _ClassConfig = {
         },
         ['DoColored']          = {
             DisplayName = "Colored Chaos",
-            Category = "DPS",
-            Index = 2,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 102,
             Tooltip = "Use the Colored Chaos magic nuke.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1346,8 +1375,10 @@ local _ClassConfig = {
         },
         ['DoChroma']           = {
             DisplayName = "Chromaburst",
-            Category = "DPS",
-            Index = 3,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 103,
             Tooltip = "Use the Chromaburst magic nuke.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1356,8 +1387,10 @@ local _ClassConfig = {
         },
         ['DoStrangleDot']      = {
             DisplayName = "Strangle Dot",
-            Category = "DPS",
-            Index = 4,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 101,
             Tooltip = "Use your magic damage (Strangle Line) Dot.",
             RequiresLoadoutChange = true,
             Default = false,
@@ -1366,8 +1399,10 @@ local _ClassConfig = {
         },
         ['DoMindDot']          = {
             DisplayName = "Mind Dot",
-            Category = "DPS",
-            Index = 5,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 102,
             Tooltip = "Use your mana drain/magic damage (Mind Line) Dot on Named.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1376,8 +1411,10 @@ local _ClassConfig = {
         },
         ['DotNamedOnly']       = {
             DisplayName = "Only Dot Named",
-            Category = "DPS",
-            Index = 6,
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 103,
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
             FAQ = "Why am I not using my dots?",
@@ -1388,8 +1425,10 @@ local _ClassConfig = {
         -- Crystal Summoning
         ['SummonAzure']        = {
             DisplayName = "Azure Mind Crystal",
-            Category = "Crystals",
-            Index = 1,
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
+            Index = 101,
             Tooltip = "Summon Azure Mind Crystals (Mana Restore) for the group.",
             RequiresLoadoutChange = true, -- this is a load condition
             Default = true,
@@ -1398,8 +1437,10 @@ local _ClassConfig = {
         },
         ['SummonSanguine']     = {
             DisplayName = "Sanguine Mind Crystal",
-            Category = "Crystals",
-            Index = 2,
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
+            Index = 102,
             Tooltip = "Summon Sanguine Mind Crystals (Health Restore) for the group.",
             RequiresLoadoutChange = true, -- this is a load condition
             Default = true,
@@ -1408,7 +1449,10 @@ local _ClassConfig = {
         },
         ['AICrystalDelay']     = {
             DisplayName = "Crystal Autoinv Delay",
-            Category = "Crystals",
+            Group = "Items",
+            Header = "Item Summoning",
+            Category = "Item Summoning",
+            Index = 103,
             Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.",
             Default = 150,
             Min = 1,

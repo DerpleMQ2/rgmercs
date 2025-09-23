@@ -16,7 +16,6 @@ local animItems                         = mq.FindTextureAnimation("A_DragItem")
 local Module                            = { _version = '0.1a', _name = "Clickies", _author = 'Derple', }
 Module.__index                          = Module
 Module.FAQ                              = {}
-Module.ClassFAQ                         = {}
 Module.SaveRequested                    = nil
 Module.ClickyRotationIndex              = 1
 
@@ -27,8 +26,10 @@ Module.TempSettings.CombatClickiesTimer = 0
 Module.DefaultConfig                    = {
     ['MaxClickiesPerFrame']                    = {
         DisplayName = "Max Clickies Per Frame",
-        Category = "Clickies",
-        Index = 3,
+        Group = "Items",
+        Header = "Clickies",
+        Category = "User Clickies",
+        Index = 1,
         Tooltip = "The max number of clickies to allow to successfully be used per frame, 0 for no limit.",
         Default = 0,
         Min = 0,
@@ -46,7 +47,6 @@ Module.DefaultConfig                    = {
         Type        = "Custom",
         Default     = {},
         ConfigType  = "Normal",
-        Index       = 4,
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
@@ -59,7 +59,6 @@ Module.DefaultConfig                    = {
         "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
-Module.SettingCategories                = {}
 
 Module.CombatTargetTypes                = { 'Self', 'Pet', 'Main Assist', 'Auto Target', }
 Module.NonCombatTargetTypes             = { 'Self', 'Pet', 'Main Assist', }
@@ -602,14 +601,6 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    self.SettingCategories = Set.new({})
-    for k, v in pairs(self.DefaultConfig or {}) do
-        if v.Type ~= "Custom" then
-            self.SettingCategories:add(v.Category)
-        end
-        self.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-    end
-
     local settingsChanged = false
 
     settings.Clickies = settings.Clickies or {}
@@ -649,7 +640,7 @@ function Module:LoadSettings()
         self:SaveSettings(false)
     end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     Logger.log_info("\awClicky Module: \atLoaded \ag%d\at Clickies", #settings.Clickies or 0)
 end
@@ -665,7 +656,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -1013,7 +1004,6 @@ function Module:RenderClickiesWithConditions(type, clickies)
                             local headerPos = ImGui.GetCursorPosVec()
                             if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
-                                ImGui.NewLine()
 
                                 self:RenderConditionTypesCombo(cond, condIdx)
                                 ImGui.Indent()
@@ -1029,7 +1019,6 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 ImGui.TreePop()
                             else
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
-                                ImGui.NewLine()
                             end
 
                             self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions, headerPos)
@@ -1086,13 +1075,9 @@ function Module:RenderClickyData(clicky, clickyIdx)
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
     self:RenderClickiesWithConditions("Clickies", Config:GetSetting('Clickies'))
-
-    if ImGui.CollapsingHeader("Config Options") then
-        Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
-    end
 end
 
 function Module:Pop()
@@ -1263,10 +1248,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

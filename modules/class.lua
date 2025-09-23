@@ -32,8 +32,6 @@ Module.TempSettings                          = {}
 Module.CombatState                           = "None"
 Module.CurrentRotation                       = { name = "None", state = 0, }
 Module.ClassConfig                           = nil
-Module.SettingCategories                     = nil
-Module.FAQ                                   = {}
 Module.ClassFAQ                              = {}
 Module.SaveRequested                         = nil
 
@@ -315,14 +313,6 @@ function Module:LoadSettings()
     local settings = {}
     local firstSaveRequired = false
 
-    self.SettingCategories = Set.new({})
-    for k, v in pairs(self.ClassConfig.DefaultConfig or {}) do
-        if v.Type ~= "Custom" then
-            self.SettingCategories:add(v.Category)
-        end
-        self.ClassFAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-    end
-
     Logger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
         Config.Globals.CurLoadedChar)
     Logger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author,
@@ -338,7 +328,7 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    if not self.SettingCategories or not self.ClassConfig.DefaultConfig then
+    if not self.ClassConfig.DefaultConfig then
         Logger.log_error("\arFailed to Load Core Class Config for Classs: %s", Config.Globals
             .CurLoadedClass)
         return
@@ -361,7 +351,7 @@ function Module:LoadSettings()
         Default = {},
     }
 
-    Config:RegisterModuleSettings(self._name, settings, self.ClassConfig.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.ClassConfig.DefaultConfig, self.ClassFAQ, firstSaveRequired)
 
     self:RescanLoadout()
 end
@@ -390,7 +380,6 @@ function Module:Init()
     return {
         self = self,
         defaults = self.ClassConfig.DefaultConfig,
-        categories = self.SettingCategories,
     }
 end
 
@@ -550,6 +539,8 @@ function Module:RenderRotationWithToggle(r, rotationTable)
 end
 
 function Module:Render()
+    Ui.RenderPopAndSettings(self._name)
+
     ImGui.Text("Combat State: %s", self.CombatState)
     ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
 
@@ -637,12 +628,6 @@ function Module:Render()
                 end
                 ImGui.Unindent()
             end
-        end
-
-        ImGui.Separator()
-
-        if ImGui.CollapsingHeader("Class Options") then
-            Ui.RenderModuleSettings(self._name, self.ClassConfig.DefaultConfig, self.SettingCategories)
         end
     end
 end

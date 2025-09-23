@@ -13,7 +13,6 @@ local CHANNEL_COLOR              = IM_COL32(215, 154, 66)
 local Module                     = { _version = '0.1a', _name = "Debug", _author = 'Derple', }
 Module.__index                   = Module
 Module.FAQ                       = {}
-Module.ClassFAQ                  = {}
 Module.SaveRequested             = nil
 
 Module.DefaultConfig             = {
@@ -40,8 +39,6 @@ Module.DefaultConfig             = {
         "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
-Module.SettingCategories         = {}
-
 Module.luaConsole                = Zep.Console.new("##RGDebugConsole")
 Module.luaConsole.maxBufferLines = 1000
 Module.luaConsole.autoScroll     = true
@@ -95,15 +92,7 @@ function Module:LoadSettings()
         settings = config()
     end
 
-    Module.SettingCategories = Set.new({})
-    for k, v in pairs(Module.DefaultConfig or {}) do
-        if v.Type ~= "Custom" then
-            Module.SettingCategories:add(v.Category)
-        end
-        Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-    end
-
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.SettingCategories, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     self.luaBuffer:SetText(Config:GetSetting('script') or "")
 end
@@ -119,7 +108,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    return { self = self, defaults = self.DefaultConfig, categories = self.SettingCategories, }
+    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:LogTimestamp()
@@ -303,11 +292,11 @@ function Module:RenderToolbar()
 end
 
 function Module:ShouldRender()
-    return true
+    return Config:GetSetting('EnableDebugging')
 end
 
 function Module:Render()
-    Ui.RenderPopSetting(self._name)
+    Ui.RenderPopAndSettings(self._name)
 
     if self.ModuleLoaded then
         self:RenderEditor()
@@ -363,10 +352,6 @@ end
 
 function Module:GetFAQ()
     return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string
