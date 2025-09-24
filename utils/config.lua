@@ -247,7 +247,7 @@ Config.DefaultConfig = {
     },
     ['EnableDebugging']      = {
         DisplayName = "Enable Debugging",
-        Category = "Debug",
+        Category = "Misc",
         Tooltip = "Enable the Debug Panel",
         Default = false,
         ConfigType = "Advanced",
