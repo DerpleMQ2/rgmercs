@@ -93,7 +93,7 @@ function Casting.LocalBuffCheck(spellId, checkPet)
                 local triggerID = triggerSpell.ID()
                 if not (checkPet and me.Pet.Buff(triggerName)() or me.FindBuff("id " .. triggerID)()) then
                     Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, checking stacking.", triggerName, triggerID)
-                    if triggerSpell.Stacks() then
+                    if (checkPet and triggerSpell.StacksPet() or triggerSpell.Stacks()) then
                         Logger.log_verbose("LocalBuffCheck: %s(ID:%d) seems to stack, let's do it!", triggerName, triggerID)
                         return true
                     else

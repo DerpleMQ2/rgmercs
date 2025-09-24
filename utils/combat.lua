@@ -148,7 +148,7 @@ function Combat.EngageTarget(autoTargetId)
             else
                 Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Targeting.GetTargetCleanName())
 
-                if not Config:GetSetting('DoMelee') and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Body.Name() == "Dragon" and Targeting.IsNamed(target) then
+                if not Config:GetSetting('DoMelee') and Config:GetSetting("BellyCastStick") and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Body.Name() == "Dragon" and Targeting.IsNamed(target) then
                     Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Dragon Named detected, sticking for belly cast.", Targeting.GetTargetCleanName())
                     Movement:DoStickCmd("pin 40")
                 end
