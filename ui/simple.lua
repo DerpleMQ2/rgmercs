@@ -21,7 +21,7 @@ function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
     if not Config.Globals.Minimized then
         local flags = ImGuiWindowFlags.None
 
-        if Config.settings.MainWindowLocked then
+        if Config:GetSetting('MainWindowLocked') then
             flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
         end
 
