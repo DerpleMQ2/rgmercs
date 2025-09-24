@@ -477,6 +477,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
         end
 
+        ImGui.SetNextWindowSize(ImVec2(700, 500), ImGuiCond.FirstUseEver)
         openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
 
         ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
