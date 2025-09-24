@@ -435,6 +435,23 @@ Module.LogicBlocks                      = {
     },
 
     {
+        name = "Item Count",
+        cond = function(self, target, item, belowCount, aboveCount)
+            local itemCount = mq.TLO.FindItemCount(string.format("=%s", item))()
+            return itemCount <= aboveCount and itemCount >= belowCount
+        end,
+        tooltip = "Only use we have a certain quantity range of an item.",
+        render_header_text = function(self, cond)
+            return string.format("We have between %d and %d of %s", cond.args[2], cond.args[3], cond.args[1])
+        end,
+        args = {
+            { name = "Item",     type = "string", default = "", },
+            { name = ">= Count", type = "number", default = 0,    min = 0, max = 1000, },
+            { name = "<= Count", type = "number", default = 1000, min = 0, max = 1000, },
+        },
+    },
+
+    {
         name = "Config Setting",
         cond = function(self, target, setting, value)
             Logger.log_super_verbose("\ayClicky: \a-yChecking if GetSetting(%s) == %s", setting, tostring(value))

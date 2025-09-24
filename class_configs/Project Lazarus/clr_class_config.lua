@@ -1122,7 +1122,7 @@ local _ClassConfig = {
             DisplayName = "Mem Cure Poison",
             Group = "Abilities",
             Header = "Recovery",
-            Category = "Cures",
+            Category = "Curing",
             Index = 101,
             Tooltip = "Memorize cure poison spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
@@ -1137,7 +1137,7 @@ local _ClassConfig = {
             DisplayName = "Mem Cure Disease",
             Group = "Abilities",
             Header = "Recovery",
-            Category = "Cures",
+            Category = "Curing",
             Index = 102,
             Tooltip = "Memorize cure disease spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
@@ -1152,7 +1152,7 @@ local _ClassConfig = {
             DisplayName = "Mem Remove Curse",
             Group = "Abilities",
             Header = "Recovery",
-            Category = "Cures",
+            Category = "Curing",
             Index = 103,
             Tooltip = "Memorize remove curese spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
@@ -1167,7 +1167,7 @@ local _ClassConfig = {
             DisplayName = "Use Group Heal to Cure",
             Group = "Abilities",
             Header = "Recovery",
-            Category = "Cures",
+            Category = "Curing",
             Index = 104,
             Tooltip = "If Word of Replenishment or Vivification are available, use these to cure instead of individual cure spells. \n" ..
                 "Please note that we will prioritize single target cures if you have selected to keep them memmed above (due to the counter disparity).",
