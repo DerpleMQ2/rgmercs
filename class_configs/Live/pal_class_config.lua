@@ -1327,15 +1327,6 @@ return {
                     return Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
                 end,
             },
-            {
-                name = "Huntsman's Ethereal Quiver",
-                type = "Item",
-                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
-                cond = function(self)
-                    if not Config:GetSetting('SummonArrows') then return false end
-                    return mq.TLO.FindItemCount("Ethereal Arrow")() < 101
-                end,
-            },
         },
         ['GroupBuff'] = {
             {
@@ -1615,16 +1606,6 @@ return {
             Default = true,
             FAQ = "Why am I not casting Reverse DS?",
             Answer = "Make sure you have the [DoReverseDS] setting enabled.",
-        },
-        ['SummonArrows'] = {
-            DisplayName = "Use Huntsman's Quiver",
-            Group = "Items",
-            Header = "Clickies",
-            Category = "Class Config Clickies",
-            Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
-            Default = false,
-            FAQ = "How do I summon arrows?",
-            Answer = "If you are at least level 90, keep a Huntsman's Ethereal Quiver in your inventory and enable its use in the options.",
         },
         ['DoBrells']     = {
             DisplayName = "Do Brells",

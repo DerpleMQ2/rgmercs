@@ -476,15 +476,6 @@ local _ClassConfig = {
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
-            {
-                name = "Huntsman's Ethereal Quiver",
-                type = "Item",
-                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
-                cond = function(self)
-                    if not Config:GetSetting('SummonArrows') then return false end
-                    return mq.TLO.FindItemCount("Ethereal Arrow")() < 101
-                end,
-            },
         },
         ['HateTools'] = {
             --used when we've lost hatred after it is initially established
@@ -1192,17 +1183,6 @@ local _ClassConfig = {
             Default = false,
             FAQ = "How do I use my Epic Weapon?",
             Answer = "Enable Do Epic to click your Epic Weapon.",
-        },
-        ['SummonArrows']     = {
-            DisplayName = "Use Huntsman's Quiver",
-            Group = "Items",
-            Header = "Clickies",
-            Category = "Class Config Clickies",
-            Index = 105,
-            Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
-            Default = false,
-            FAQ = "How do I summon arrows?",
-            Answer = "If you are at least level 90, keep a Huntsman's Ethereal Quiver in your inventory and enable its use in the options.",
         },
     },
 }

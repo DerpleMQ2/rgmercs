@@ -1557,14 +1557,6 @@ _ClassConfig      = {
                     return false
                 end,
             },
-            {
-                name = "Forsaken Fungus Covered Scale Tunic",
-                type = "Item",
-                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Fungus Covered Scale Tunic")() end,
-                cond = function(self, itemName, target)
-                    return mq.TLO.Me.PctMana() < 40 or mq.TLO.Me.PctHPs() < 40
-                end,
-            },
         },
         ['DPS(PBAE)'] = {
             {
