@@ -767,7 +767,7 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() > 76 end,
             cond = function(self, target)
-                return Targeting.BigHealsNeeded(target)
+                return Targeting.BigHealsNeeded(target) and not Targeting.TargetIsType("pet", target)
             end,
         },
         { -- Level 59-76
@@ -776,7 +776,7 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() > 58 and mq.TLO.Me.Level() < 77 end,
             cond = function(self, target)
-                return Targeting.BigHealsNeeded(target)
+                return Targeting.BigHealsNeeded(target) and not Targeting.TargetIsType("pet", target)
             end,
         },
         { -- Level 101+

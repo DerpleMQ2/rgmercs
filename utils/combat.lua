@@ -932,7 +932,7 @@ function Combat.FindWorstHurtXT(minHPs)
         local healTarget = mq.TLO.Me.XTarget(i)
 
         if healTarget and healTarget() and Targeting.TargetIsType("pc", healTarget) then
-            if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
+            if not healTarget.Dead() and (healTarget.PctHPs() or 101) < worstPct then
                 Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
                 worstPct = healTarget.PctHPs()
                 worstId = healTarget.ID()
