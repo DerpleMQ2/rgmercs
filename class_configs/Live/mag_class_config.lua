@@ -2006,6 +2006,19 @@ _ClassConfig      = {
             FAQ = "I want to make sure my pet is always Heirloomed, how do I do that?",
             Answer = "You can use the [DoPetHeirlooms] feature to summon pet Heirlooms.",
         },
+        ['DoPetHealSpell'] = {
+            DisplayName = "Pet Heal Spell",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 101,
+            Tooltip = "Mem and cast your Pet Heal spell. AA Pet Heals are always used in emergencies.",
+            Default = true,
+            RequiresLoadoutChange = true,
+            FAQ = "My Pet Keeps Dying, What Can I Do?",
+            Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
+                "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
+        },
         ['PetHealPct']     = {
             DisplayName = "Pet Heal %",
             Group = "Abilities",

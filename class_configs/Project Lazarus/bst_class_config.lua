@@ -867,7 +867,7 @@ return {
         },
         --Pets
         ['DoPetHealSpell'] = {
-            DisplayName = "Do Pet Heals",
+            DisplayName = "Pet Heal Spell",
             Group = "Abilities",
             Header = "Recovery",
             Category = "General Healing",

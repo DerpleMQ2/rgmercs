@@ -395,7 +395,7 @@ return {
             state = 1,
             steps = 1,
             cond = function(self, target)
-                return Targeting.BigHealsNeeded(target)
+                return Targeting.BigHealsNeeded(target) and not Targeting.TargetIsType("pet", target)
             end,
         },
         {
