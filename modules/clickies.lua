@@ -23,6 +23,94 @@ Module.TempSettings                     = {}
 Module.TempSettings.ClickyState         = {}
 Module.TempSettings.CombatClickiesTimer = 0
 
+Module.ServerClickies                   = {}
+Module.ServerClickies.ProjectLazarus    = {
+    [1] = {
+        ['conditions'] = {
+            [1] = {
+                target = 'Self',
+                args = {
+                    [1] = 0,
+                    [2] = 30,
+                },
+                type = 'HP Threshold',
+            },
+        },
+        ['iconId'] = 2484,
+        ['itemName'] = 'Draught of Opulent Healing I',
+        ['target'] = 'Self',
+        ['combat_state'] = 'Combat',
+    },
+    [2] = {
+        ['conditions'] = {
+            [1] = {
+                ['target'] = 'Main Assist',
+                ['args'] = {
+                    [1] = 0,
+                    [2] = 40,
+                },
+                ['type'] = 'HP Threshold',
+            },
+        },
+        ['iconId'] = 1002,
+        ['itemName'] = 'Orb of Shadows',
+        ['target'] = 'Main Assist',
+        ['combat_state'] = 'Combat',
+    },
+    [3] = {
+        ['conditions'] = {
+            [1] = {
+                ['target'] = 'Self',
+                ['args'] = {
+                    [1] = 0,
+                    [2] = 40,
+                },
+                ['type'] = 'HP Threshold',
+            },
+        },
+        ['iconId'] = 936,
+        ['itemName'] = 'Sanguine Mind Crystal III',
+        ['target'] = 'Self',
+        ['combat_state'] = 'Combat',
+    },
+    [4] = {
+        ['conditions'] = {
+            [1] = {
+                ['target'] = 'Self',
+                ['args'] = {
+                    [1] = 0,
+                    [2] = 40,
+                    [3] = 0,
+                    [4] = 40,
+                    [5] = 0,
+                    [6] = 40,
+                },
+                ['type'] = 'Any Threshold',
+            },
+        },
+        ['iconId'] = 178,
+        ['itemName'] = 'Forsaken Fungus Covered Scale Tunic',
+        ['target'] = 'Self',
+        ['combat_state'] = 'Combat',
+    },
+    [5] = {
+        ['conditions'] = {
+            [1] = {
+                ['target'] = 'Self',
+                ['args'] = {
+                    [1] = 0,
+                    [2] = 50,
+                },
+                ['type'] = 'HP Threshold',
+            },
+        },
+        ['iconId'] = 1002,
+        ['itemName'] = 'Orb of Shadows',
+        ['target'] = 'Self',
+        ['combat_state'] = 'Combat',
+    },
+}
+
 Module.DefaultConfig                    = {
     ['MaxClickiesPerFrame']                    = {
         DisplayName = "Max Clickies Per Frame",
@@ -620,7 +708,16 @@ function Module:LoadSettings()
 
     local settingsChanged = false
 
-    settings.Clickies = settings.Clickies or {}
+    local defaultServerClickies = self.ServerClickies
+    -- this can be refactored as needed when other servers/environments are added
+    if (mq.TLO.EverQuest.Server() or ""):lower() == "project lazarus" then
+        defaultServerClickies = self.ServerClickies.ProjectLazarus
+    end
+
+    if not settings.Clickies then
+        settings.Clickies = defaultServerClickies
+        settingsChanged = true
+    end
 
     for _, clicky in ipairs(settings.DowntimeClickies or {}) do
         if type(clicky) == 'string' then
@@ -986,6 +1083,11 @@ function Module:RenderClickiesWithConditions(type, clickies)
     if not mq.TLO.Cursor() then
         ImGui.EndDisabled()
     end
+    ImGui.SameLine()
+    if ImGui.SmallButton("Add Server Defaults") then
+        self:InsertDefaultClickies()
+    end
+    Ui.Tooltip("Add server-specific default clickies to the end of the list.")
     if #clickies > 0 then
         for clickyIdx, clicky in ipairs(clickies) do
             if clicky.itemName:len() > 0 then
@@ -1117,25 +1219,18 @@ function Module:ValidateClickies()
     end
 end
 
+function Module:InsertDefaultClickies()
+    if Core.OnLaz() then
+        for _, defaultClicky in ipairs(self.ServerClickies.ProjectLazarus) do
+            table.insert(Config:GetSetting('Clickies'), defaultClicky)
+            self:SaveSettings(false)
+        end
+    end
+end
+
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
     self:ValidateClickies()
-
-    if combat_state == 'Combat' then
-        -- TODO: Should these just be rmemoved now?
-        -- I plan on breaking clickies out further to allow things like horn, other healing clickies to be used, that the user will select... this is "interim" implementation.
-        if Core.OnLaz() and mq.TLO.Me.PctHPs() <= (Config:HaveSetting('EmergencyStart') and Config:GetSetting('EmergencyStart') or 45) then
-            local healingItems = { "Sanguine Mind Crystal", "Orb of Shadows", } -- "Draught of Opulent Healing", keeping this one manual for now
-            for _, itemName in ipairs(healingItems) do
-                local item = mq.TLO.FindItem(itemName)
-                if item() and item.TimerReady() == 0 then
-                    Logger.log_verbose("Low Health Detected, using a heal clicky!")
-                    Casting.UseItem(item.Name(), mq.TLO.Me.ID())
-                    return
-                end
-            end
-        end
-    end
 
     local maxClickiesPerFrame = Config:GetSetting('MaxClickiesPerFrame') or 0
     local clickiesUsedThisFrame = 0
