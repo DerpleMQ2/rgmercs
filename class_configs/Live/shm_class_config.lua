@@ -778,7 +778,7 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() > 64 end,
-            cond = function(self, target) return Targeting.BigHealsNeeded(target) end,
+            cond = function(self, target) return Targeting.BigHealsNeeded(target) and not Targeting.TargetIsType("pet", target) end,
         },
         {
             name = 'MainHealPoint',

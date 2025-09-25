@@ -1391,11 +1391,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "General Healing",
         Index = 1,
-        Tooltip = "Treat pets as valid targets for PC healing rotations. Please note that many pet classes may use their pet heal abilities even with this off.",
-        Default = false,
+        Tooltip = "Allow pets to be targeted in PC healing rotations.\n" ..
+            "Note that CLR/DRU/PAL/SHM will reserve \"Big Heal\" rotations for PCs.\n" ..
+            "Further note that many abilities that heal the PC's own pet do not check this setting and are handled seperately.",
+        Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I not healing pets?",
-        Answer = "You can set the [DoPetHeals] option to true to heal pets in your group.",
     },
     ['BreakInvisForHealing'] = {
         DisplayName = "Break Invis",
