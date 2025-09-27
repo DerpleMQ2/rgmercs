@@ -1363,7 +1363,7 @@ function Module:GiveTime(combat_state)
 
             self:SelfCheckAndRez()
 
-            if Config:GetSetting('HealOutside') then
+            if Config:GetSetting('RezOutside') then
                 self:OOGCheckAndRez()
             end
 
