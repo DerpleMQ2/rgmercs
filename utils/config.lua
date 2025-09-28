@@ -63,7 +63,7 @@ Config.Constants.RGMelee                              = Set.new({ "BRD", "SHD", 
 Config.Constants.RGHybrid                             = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
 Config.Constants.RGTank                               = Set.new({ "WAR", "PAL", "SHD", })
 Config.Constants.RGPetClass                           = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
-Config.Constants.RGMezAnims                           = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
+Config.Constants.RGNotMezzedAnims                     = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
 Config.Constants.ModRods                              = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
 Config.Constants.SpellBookSlots                       = 1120
 Config.Constants.CastCompleted                        = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
@@ -154,6 +154,9 @@ Config.Constants.SpireChoices = { "First", "Second", "Third", "Disabled", }
 
 Config.Constants.LastGemRemem = { "Do Nothing", "Mem Previous Spell", "Mem Loadout Spell", }
 Config.Constants.DebuffChoice = { "Never", "Based on Con Color", "Always", }
+
+Config.Constants.ScanNamedPriority = { "Named", "No Preference", "Non-Named", }
+Config.Constants.ScanHPPriority = { "Lowest HP%", "No Preference", "Highest HP%", }
 
 -- Defaults
 Config.DefaultConfig = {
@@ -741,7 +744,7 @@ Config.DefaultConfig = {
         DisplayName = "Auto Target",
         Group = "Combat",
         Header = "Targeting",
-        Category = "Targeting",
+        Category = "Targeting Behavior",
         Index = 1,
         Tooltip = "Automatically change targets.",
         Default = true,
@@ -753,7 +756,7 @@ Config.DefaultConfig = {
         DisplayName = "Stay On Target",
         Group = "Combat",
         Header = "Targeting",
-        Category = "Targeting",
+        Category = "Targeting Behavior",
         Index = 2,
         Tooltip = "Stick to your target. Default: true; Tank Mode Defaults: false. false allows intelligent target swapping based on aggro/named/ etc.",
         Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
@@ -765,7 +768,7 @@ Config.DefaultConfig = {
         DisplayName = "Use Safe Targeting",
         Group = "Combat",
         Header = "Targeting",
-        Category = "Targeting",
+        Category = "Targeting Behavior",
         Index = 3,
         Tooltip = "Do not target mobs that are fighting others.",
         Default = true,
@@ -773,24 +776,51 @@ Config.DefaultConfig = {
         FAQ = "Why do I keep targeting mobs that are fighting other players?",
         Answer = "You can set the [SafeTargeting] option to true to avoid targeting mobs that are fighting other players.",
     },
-    ['OnlyScanXT']           = {
-        DisplayName = "Only Scan XTargets",
+    ['ScanNamedPriority']    = {
+        DisplayName = "Scan Priority:",
         Group = "Combat",
         Header = "Targeting",
-        Category = "Targeting",
-        Index = 4,
-        Tooltip = "When MA looks for a target use only XTargets instead of doing an area scan, area scan can cause aggro to unintentional mobs use wih caution.",
-        Default = true,
+        Category = "MA Target Selection",
+        Index = 1,
+        Tooltip = "Choose whether this PC will prioritize Named or Non-Named mobs if set as MA.",
+        Type = "Combo",
+        ComboOptions = Config.Constants.ScanNamedPriority,
+        Default = 1,
+        Min = 1,
+        Max = #Config.Constants.ScanNamedPriority,
         ConfigType = "Advanced",
-        FAQ = "Why am I targeting mobs that are not in camp?",
-        Answer = "You can set the [OnlyScanXT] option to true to only use XTargets when looking for a target.",
+    },
+    ['ScanHPPriority']       = {
+        DisplayName = "Scan HP% Priority:",
+        Group = "Combat",
+        Header = "Targeting",
+        Category = "MA Target Selection",
+        Index = 2,
+        Tooltip = "Choose whether this PC will prioritize low or high HP% mobs if set as MA.\n" ..
+            "If no preference is selected, we will simply choose the lowest mob ID.",
+        Type = "Combo",
+        ComboOptions = Config.Constants.ScanHPPriority,
+        Default = 1,
+        Min = 1,
+        Max = #Config.Constants.ScanHPPriority,
+        ConfigType = "Advanced",
+    },
+    ['AreaScanFallback']     = {
+        DisplayName = "Area Scan Fallback",
+        Group = "Combat",
+        Header = "Targeting",
+        Category = "MA Target Selection",
+        Index = 3,
+        Tooltip = "Scan for targets via spawnsearch in the abscence of XTargets. Use with caution, can aggro mobs unintentionally.",
+        Default = false,
+        ConfigType = "Advanced",
     },
     ['MAScanZRange']         = {
         DisplayName = "Main Assist Scan ZRange",
         Group = "Combat",
         Header = "Targeting",
-        Category = "Targeting",
-        Index = 5,
+        Category = "MA Target Selection",
+        Index = 4,
         Tooltip = "Distance in Z direction to look for targets.",
         Default = 45,
         Min = 15,
@@ -798,6 +828,16 @@ Config.DefaultConfig = {
         ConfigType = "Advanced",
         FAQ = "I have trouble pulling targets on hills and ledges, how do I fix this?",
         Answer = "You can set the [MAScanZRange] option to the distance in the Z direction to look for targets.",
+    },
+    ['MAScanAggro']          = {
+        DisplayName = "Scan for Aggro",
+        Group = "Combat",
+        Header = "Targeting",
+        Category = "MA Target Selection",
+        Index = 5,
+        Tooltip = "Scan hate levels of XT haters and prioritize those who aren't aggroed on this PC.",
+        Default = true,
+        ConfigType = "Advanced",
     },
 
     -- Assisting
