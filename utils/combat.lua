@@ -232,72 +232,110 @@ end
 --- @param zradius number The vertical radius to scan for targets.
 --- @return number spawn id of the new target.
 function Combat.MATargetScan(radius, zradius)
-    local aggroSearch    = string.format("npc radius %d zradius %d targetable playerstate 4", radius, zradius)
-    local aggroSearchPet = string.format("npcpet radius %d zradius %d targetable playerstate 4", radius, zradius)
+    local aggroSearch      = string.format("npc radius %d zradius %d targetable playerstate 4", radius, zradius)
+    local aggroSearchPet   = string.format("npcpet radius %d zradius %d targetable playerstate 4", radius, zradius)
+    local lowestHP         = 101 -- we used to initialize this as the autotarget HP, but that won't work if we are switching between trash/named...
+    local highestHP        = 0   -- unless we used some convoluted logic to initialize them that is more expensive than the extra checks
+    local killId           = Config.Globals.AutoTargetID or 0
+    local namedSpawn       = nil -- initialize fallback for attacking a named when we prefer trash and its the only thing left
+    local preferNamed      = Config.Constants.ScanNamedPriority[Config:GetSetting('ScanNamedPriority')] == "Named"
+    local preferTrash      = Config.Constants.ScanNamedPriority[Config:GetSetting('ScanNamedPriority')] == "Non-Named"
+    local preferLowHealth  = Config.Constants.ScanHPPriority[Config:GetSetting('ScanHPPriority')] == "Lowest HP%"
+    local preferHighHealth = Config.Constants.ScanHPPriority[Config:GetSetting('ScanHPPriority')] == "Highest HP%"
+    local xtCount          = mq.TLO.Me.XTarget()
 
-    local lowestHP       = Targeting.GetAutoTargetPctHPs() > 0 and Targeting.GetAutoTargetPctHPs() or 101
-    local killId         = Config.Globals.AutoTargetID or 0
+    local function TargetScanLowHealth(targetSpawn)
+        if (targetSpawn.PctHPs() or 101) < lowestHP then
+            Logger.log_verbose("MATargetScan \atFound Possible Target: %s :: %d --  Storing for Lowest HP Check", targetSpawn.CleanName(), targetSpawn.ID())
+            lowestHP = targetSpawn.PctHPs() or 0
+            killId = targetSpawn.ID() or 0
+        end
+    end
 
-    -- Maybe spawn search is failing us -- look through the xtarget list
-    local xtCount        = mq.TLO.Me.XTarget()
+    local function TargetScanHighHealth(targetSpawn)
+        if (targetSpawn.PctHPs() or 0) > highestHP then
+            Logger.log_verbose("MATargetScan \atFound Possible Target: %s :: %d --  Storing for Highest HP Check", targetSpawn.CleanName(), targetSpawn.ID())
+            highestHP = targetSpawn.PctHPs() or 101
+            killId = targetSpawn.ID() or 0
+        end
+    end
 
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
         if xtSpawn and xtSpawn() and (xtSpawn.ID() or 0) > 0 and not xtSpawn.Dead() and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
             if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(xtSpawn, radius) then
-                Logger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName() or "None", xtSpawn.ID() or 0,
+                Logger.log_verbose("MATargetScan Found %s [%d] Distance: %d", xtSpawn.CleanName() or "None", xtSpawn.ID() or 0,
                     xtSpawn.Distance() or 0)
                 if (xtSpawn.Distance() or 999) <= radius then
-                    -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
-                    -- get aggro data from the spawn data type.
-                    if mq.TLO.Me.Level() >= 20 then
+                    -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can only get aggro data from xtargs
+                    if Config:GetSetting("MAScanAggro") and mq.TLO.Me.Level() >= 20 then
                         -- Added move check to prevent false positives on the pull from things like bard song aggro. Testing. Algar 3/5/25
                         if xtSpawn.PctAggro() < 100 and not xtSpawn.Moving() and Core.IsTanking() then
                             -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
-                            if Config.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
-                                Logger.log_verbose("\agHave not fully aggro'd %s -- returning %s [%d]",
-                                    xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
+                            if Config.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) then
+                                Logger.log_verbose("MATargetScan \agHave not fully aggro'd %s -- returning %s [%d]", xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
                                 return xtSpawn.ID() or 0
                             end
                         end
                     end
 
-                    -- If a name has take priority.
-                    if Targeting.IsNamed(xtSpawn) then
-                        Logger.log_verbose("\agFound Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
-                        return xtSpawn.ID() or 0
-                    end
-
-                    if (xtSpawn.Body.Name() or "none"):lower() == "Giant" then
-                        return xtSpawn.ID() or 0
-                    end
-
-                    if (xtSpawn.PctHPs() or 101) < lowestHP then
-                        Logger.log_verbose("\atFound Possible Target: %s :: %d --  Storing for Lowest HP Check", xtSpawn.CleanName(), xtSpawn.ID())
-                        lowestHP = xtSpawn.PctHPs() or 0
-                        killId = xtSpawn.ID() or 0
+                    local spawnIsNamed = Targeting.IsNamed(xtSpawn)
+                    if preferNamed and spawnIsNamed then
+                        if preferLowHealth then
+                            TargetScanLowHealth(xtSpawn)
+                        elseif preferHighHealth then
+                            TargetScanHighHealth(xtSpawn)
+                        else -- We don't care. Choose... THIS ONE!
+                            Logger.log_verbose("\agMATargetScan Returning: \at%d", killId)
+                            return xtSpawn.ID() or 0
+                        end
+                        Logger.log_verbose("MATargetScan \agFound Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
+                    elseif preferTrash then
+                        if not spawnIsNamed then -- prioritize trash
+                            if preferLowHealth then
+                                TargetScanLowHealth(xtSpawn)
+                            elseif preferHighHealth then
+                                TargetScanHighHealth(xtSpawn)
+                            else -- We don't care. Choose... THIS ONE!
+                                Logger.log_verbose("\agMATargetScan Returning: \at%d", killId)
+                                return xtSpawn.ID() or 0
+                            end
+                        else -- keep this around in case its the only mob left... if we have multiple named and prefer trash, we won't sort them
+                            Logger.log_verbose("MATargetScan \agFound a named to kill last: %s (%d)", xtSpawn.CleanName(), xtSpawn.ID())
+                            namedSpawn = xtSpawn
+                        end
+                    else -- No preference on whether it's named or not... just sort by health.
+                        if preferLowHealth then
+                            TargetScanLowHealth(xtSpawn)
+                        elseif preferHighHealth then
+                            TargetScanHighHealth(xtSpawn)
+                        else -- We don't care. Choose... THIS ONE!
+                            Logger.log_verbose("\agMATargetScan Returning: \at%d", killId)
+                            return xtSpawn.ID() or 0
+                        end
                     end
                 else
-                    Logger.log_verbose("\ar%s distance[%d] is out of radius: %d", xtSpawn.CleanName(), xtSpawn.Distance() or 0, radius)
+                    Logger.log_verbose("MATargetScan \ar%s distance[%d] is out of radius: %d", xtSpawn.CleanName(), xtSpawn.Distance() or 0, radius)
                 end
             else
-                Logger.log_verbose("XTarget %s [%d] Distance: %d - is fighting someone else - ignoring it.",
+                Logger.log_verbose("MATargetScan XTarget %s [%d] Distance: %d - is fighting someone else - ignoring it.",
                     xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
             end
         end
     end
 
-    if not Config:GetSetting('OnlyScanXT') then
-        Logger.log_verbose("We apparently didn't find anything on xtargets, doing a search for mezzed targets")
-
-        -- We didn't find anything to kill yet so spawn search
-        if killId == 0 then
-            Logger.log_verbose("Falling back on Spawn Searching")
+    if killId == 0 then
+        if namedSpawn and namedSpawn() then
+            Logger.log_verbose("MATargetScan \ag%s is named, but we only have named left! -- returning %d", namedSpawn.CleanName(), namedSpawn.ID())
+            killId = namedSpawn.ID()
+        elseif Config:GetSetting('AreaScanFallback') then
+            -- We didn't find anything to kill yet so spawn search
+            Logger.log_verbose("MATargetScan Falling back on Spawn Searching")
             local aggroMobCount = mq.TLO.SpawnCount(aggroSearch)()
             local aggroMobPetCount = mq.TLO.SpawnCount(aggroSearchPet)()
-            Logger.log_verbose("NPC Target Scan: %s ===> %d", aggroSearch, aggroMobCount)
-            Logger.log_verbose("NPCPET Target Scan: %s ===> %d", aggroSearchPet, aggroMobPetCount)
+            Logger.log_verbose("MATargetScan NPC Target Scan: %s ===> %d", aggroSearch, aggroMobCount)
+            Logger.log_verbose("MATargetScan NPCPET Target Scan: %s ===> %d", aggroSearchPet, aggroMobPetCount)
 
             for i = 1, aggroMobCount do
                 local spawn = mq.TLO.NearestSpawn(i, aggroSearch)
@@ -305,37 +343,23 @@ function Combat.MATargetScan(radius, zradius)
                 if spawn and spawn() and (spawn.CleanName() or "None"):find("Guard") == nil then
                     -- If the spawn is already in combat with someone else, we should skip them.
                     if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(spawn, radius) then
-                        -- If a name has pulled in we target the name first and return. Named always
-                        -- take priority. Note: More mobs as of ToL are "named" even though they really aren't.
-
-                        if Targeting.IsNamed(spawn) then
-                            Logger.log_verbose("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
-                            return spawn.ID()
-                        end
-
-                        -- Unmezzables
-                        if (spawn.Body.Name() or "none"):lower() == "Giant" then
-                            return spawn.ID()
-                        end
-
-                        -- Lowest HP
-                        if (spawn.PctHPs() or 101) < lowestHP then
-                            lowestHP = spawn.PctHPs()
-                            killId = spawn.ID()
+                        --These are fallback checks... if we missed more than one named on XT, we are FUBAR. Let's skip the advanced logic.
+                        if preferNamed and Targeting.IsNamed(spawn) then
+                            Logger.log_verbose("MATargetScan DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
+                            killId = spawn.ID() or 0
+                        else
+                            TargetScanLowHealth(spawn)
                         end
                     end
                 end
             end
 
             for i = 1, aggroMobPetCount do
-                local spawn = mq.TLO.NearestSpawn(i, aggroSearchPet)
+                local petSpawn = mq.TLO.NearestSpawn(i, aggroSearchPet)
 
-                if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(spawn, radius) then
-                    -- Lowest HP
-                    if (spawn.PctHPs() or 101) < lowestHP then
-                        lowestHP = spawn.PctHPs()
-                        killId = spawn.ID()
-                    end
+                if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(petSpawn, radius) then
+                    -- this is a fallback check, unconcerned with advanced options
+                    TargetScanLowHealth(petSpawn)
                 end
             end
         end

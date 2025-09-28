@@ -53,7 +53,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.FA_HEART,
         IconImage = OptionsUI.LoadIcon("swordicon"),
         Headers = {
-            { Name = 'Targeting',   Categories = { "Targeting", }, },                                          -- Auto engage, med break, stay on target, etc
+            { Name = 'Targeting',   Categories = { "Targeting Behavior", "MA Target Selection", }, },          -- Auto engage, med break, stay on target, etc
             { Name = 'Assisting',   Categories = { "Assisting", }, },                                          -- this will include pet and merc percentages/commands
             { Name = 'Positioning', Categories = { "General Positioning", "Tank Positioning", "Archery", }, }, -- stick, face, etc
             { Name = 'Burning',     Categories = { "Burning", }, },
