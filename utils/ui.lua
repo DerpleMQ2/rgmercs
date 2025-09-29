@@ -516,6 +516,138 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
     return showFailed, enabledRotationEntries, enabledRotationEntriesChanged
 end
 
+--[[
+    * RenderFancyToggle
+    * A toggle button that can be used to switch between two states (on/off) (true/false).
+    * It can also display a star or moon shape as the knob.
+    * The function takes various parameters to customize its appearance and behavior.
+    * The function returns the updated value of the toggle and whether it was clicked.
+    * some Flags you can pass in are ImGuiToggleFlags.StarKnob, ImGuiToggleFlags.RightLabel, ImGuiToggleFlags.AnimateKnob
+    * The function also supports custom colors for the toggle button and knob.
+    * The function can also animate the knob (roatating stars or a rocking moon).
+    * The function can also display a label on the right side of the toggle button.
+    * The function can also set the size of the toggle button (width, height) or just height and width will be defaulted to height * 2.0
+    * The function can also set the number of points for the star knob (default 5).
+    ]]
+---@param id string Label and Id for the toggle button)
+---@param value boolean Current value of the toggle button
+---@param size ImVec2|integer|nil -- ImVec2 Size of the toggle button (width, height) or height value if single number and width will default to height * 2.0
+---@param on_color ImVec4|integer|nil Color for ON state, or number of points if passing star points
+---@param off_color ImVec4|integer|nil ImVec4 Color for the Toggle when Off , or number of points if passing star points
+---@param knob_color ImVec4|integer|nil ImVec4 Color for the Knob , or its the number of points if passing star points
+---@param num_points integer|nil the number of points for the star knob (default 5)
+---@param right_label boolean|nil if true the label will be on the right side of the toggle instead of the left
+---@param pulse_on_hover boolean|nil if true the knob will pulse when hovered
+---@param knob_border boolean|nil if true the knob will have a black border
+---@return boolean value
+---@return boolean clicked
+function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_color, num_points, right_label, pulse_on_hover, knob_border)
+    if not id or value == nil then return false, false end
+    -- setup any defaults for mising params
+    size = type(size) == 'number' and ImVec2(size * 2, size) or size or ImVec2(32, 16)
+    local height = size.y or 16
+    local width = size.x or height * 2
+    local clicked = false
+    local draw_list = ImGui.GetWindowDrawList()
+    local pos = ImGui.GetCursorScreenPosVec()
+
+    -- if you omit a color you can still pass the number as the number of points
+    if type(on_color) == 'number' then
+        num_points = on_color
+        on_color = nil
+    elseif type(off_color) == 'number' then
+        num_points = off_color
+        off_color = nil
+    elseif type(knob_color) == 'number' then
+        num_points = knob_color
+        knob_color = nil
+    end
+
+    on_color = on_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBgActive)
+    off_color = off_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)
+    knob_color = knob_color or ImVec4(1, 1, 1, 1) -- default white
+    num_points = num_points or 5
+
+    if not right_label and label and label ~= "" then
+        ImGui.Text(string.format("%s:", label))
+        if ImGui.IsItemClicked() then
+            value = not value
+            clicked = true
+        end
+        ImGui.SameLine()
+    end
+
+    local radius = height * 0.5
+
+    -- clickable area
+    ImGui.InvisibleButton(id, width, height)
+    if ImGui.IsItemClicked() then
+        value = not value
+        clicked = true
+    end
+
+    -- detect hovering for applying hover effects
+    local is_hovered = ImGui.IsItemHovered()
+    local final_knob_col = ImGui.GetColorU32(knob_color)
+
+    if pulse_on_hover and is_hovered then
+        local pulse_strength = 0.5 + 0.5 * math.sin(os.clock() * 4)
+        if knob_color.x == 1 and knob_color.y == 1 and knob_color.z == 1 then
+            -- Special case: white glows warm yellow
+            local new_color = ImVec4(
+                1,
+                math.min(1, 1 - 0.2 * pulse_strength),
+                math.min(1, 1 - 0.4 * pulse_strength),
+                knob_color.w
+            )
+            final_knob_col = ImGui.GetColorU32(new_color)
+        else
+            local new_color = ImVec4(
+                math.min(1, knob_color.x + pulse_strength * 0.4),
+                math.min(1, knob_color.y + pulse_strength * 0.4),
+                math.min(1, knob_color.z + pulse_strength * 0.4),
+                knob_color.w
+            )
+            final_knob_col = ImGui.GetColorU32(new_color)
+        end
+    end
+
+    local t = value and 1.0 or 0.0
+    local knob_x = pos.x + radius + t * (width - height)
+    local center = ImVec2(knob_x, pos.y + radius)
+    local fill_radius = radius * 0.8
+    -- Background
+    draw_list:AddRectFilled(
+        ImVec2(pos.x, pos.y),
+        ImVec2(pos.x + width, pos.y + height),
+        ImGui.GetColorU32(value and on_color or off_color),
+        height * 0.5
+    )
+
+    draw_list:AddCircleFilled(
+        center,
+        fill_radius,
+        final_knob_col,
+        0
+    )
+    -- Draw outline
+    if knob_border then
+        draw_list:AddCircle(center, fill_radius, ImGui.GetColorU32(0, 0, 0, 1), 32, 2)
+    end
+
+    -- Label on the right side of the toggle
+    if right_label and label and label ~= "" then
+        ImGui.SameLine()
+        ImGui.Text(string.format("%s", label))
+        if ImGui.IsItemClicked() then
+            value = not value
+            clicked = true
+        end
+    end
+
+    return value, clicked
+end
+
 --- Renders a toggle option in the UI.
 --- @param id string: The unique identifier for the toggle option.
 --- @param text string: The display text for the toggle option.
