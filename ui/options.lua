@@ -470,89 +470,87 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
         self.FirstRender = false
     end
 
-    if not Config.Globals.Minimized then
-        local flags = ImGuiWindowFlags.None
+    local flags = ImGuiWindowFlags.None
 
-        if Config:GetSetting('MainWindowLocked') then
-            flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
-        end
-
-        ImGui.SetNextWindowSize(ImVec2(700, 500), ImGuiCond.FirstUseEver)
-        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
-
-        ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
-
-        if shouldDrawGUI then
-            local _, y = ImGui.GetContentRegionAvail()
-            if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
-                local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.ScrollY)
-                -- figure out icons once headings are finalized
-                local textChanged = false
-                local inputBoxPosX = ImGui.GetCursorPosX()
-                local style = ImGui.GetStyle()
-                local searchBarUsableWidth = ImGui.GetWindowContentRegionWidth() - (ImGui.GetFontSize() + style.FramePadding.y + style.WindowPadding.x * 2)
-                ImGui.SetNextItemWidth(searchBarUsableWidth)
-
-                self.configFilter, textChanged = ImGui.InputText("###OptionsUISearchText", self.configFilter)
-                if textChanged then
-                    self:ApplySearchFilter()
-                end
-
-                if not ImGui.IsItemActive() and self.configFilter:len() == 0 then
-                    ImGui.SameLine()
-                    local curPosX = ImGui.GetCursorPosX()
-                    ImGui.SetCursorPosX(inputBoxPosX + (style.WindowPadding.x / 2))
-                    ImGui.TextColored(0.8, 0.8, 0.8, 0.75, "Search Configs...")
-                    ImGui.SameLine()
-                    ImGui.SetCursorPosX(curPosX)
-                else
-                    ImGui.SameLine()
-                end
-
-                if ImGui.SmallButton(Icons.MD_CLEAR) then
-                    self.configFilter = ""
-                    self:ApplySearchFilter()
-                end
-                Ui.Tooltip("Clear Search Text")
-                local ShowAdvancedOpts = Config:GetSetting('ShowAdvancedOpts')
-                local changed = false
-                ShowAdvancedOpts, changed = Ui.RenderOptionToggle("show_adv_tog###OptionsUI", "Show Advanced Options", ShowAdvancedOpts)
-                if changed then
-                    Config:SetSetting('ShowAdvancedOpts', ShowAdvancedOpts)
-                    self:ApplySearchFilter()
-                end
-
-                if ImGui.BeginTable('configmenu##RGmercsOptions', 1, flags, 0, 0, 0.0) then
-                    ImGui.TableNextColumn()
-                    for _, group in ipairs(self.FilteredGroups) do
-                        if group.IconImage then
-                            self:RenderGroupPanelWithImage(group)
-                        else
-                            self:RenderGroupPanel(string.format("%s %s", group.Icon, group.Name), group.Name)
-                        end
-                        ImGui.TableNextColumn()
-                    end
-                    ImGui.EndTable()
-                end
-            end
-            ImGui.EndChild()
-            ImGui.SameLine()
-            local x, _ = ImGui.GetContentRegionAvail()
-            if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
-                local flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
-                if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
-                    ImGui.TableNextColumn()
-                    self:RenderCurrentTab()
-                    ImGui.EndTable()
-                end
-            end
-            ImGui.EndChild()
-        end
-
-        ImGui.PopID()
-
-        ImGui.End()
+    if Config:GetSetting('MainWindowLocked') then
+        flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
     end
+
+    ImGui.SetNextWindowSize(ImVec2(700, 500), ImGuiCond.FirstUseEver)
+    openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+
+    ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
+
+    if shouldDrawGUI then
+        local _, y = ImGui.GetContentRegionAvail()
+        if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
+            local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.ScrollY)
+            -- figure out icons once headings are finalized
+            local textChanged = false
+            local inputBoxPosX = ImGui.GetCursorPosX()
+            local style = ImGui.GetStyle()
+            local searchBarUsableWidth = ImGui.GetWindowContentRegionWidth() - (ImGui.GetFontSize() + style.FramePadding.y + style.WindowPadding.x * 2)
+            ImGui.SetNextItemWidth(searchBarUsableWidth)
+
+            self.configFilter, textChanged = ImGui.InputText("###OptionsUISearchText", self.configFilter)
+            if textChanged then
+                self:ApplySearchFilter()
+            end
+
+            if not ImGui.IsItemActive() and self.configFilter:len() == 0 then
+                ImGui.SameLine()
+                local curPosX = ImGui.GetCursorPosX()
+                ImGui.SetCursorPosX(inputBoxPosX + (style.WindowPadding.x / 2))
+                ImGui.TextColored(0.8, 0.8, 0.8, 0.75, "Search Configs...")
+                ImGui.SameLine()
+                ImGui.SetCursorPosX(curPosX)
+            else
+                ImGui.SameLine()
+            end
+
+            if ImGui.SmallButton(Icons.MD_CLEAR) then
+                self.configFilter = ""
+                self:ApplySearchFilter()
+            end
+            Ui.Tooltip("Clear Search Text")
+            local ShowAdvancedOpts = Config:GetSetting('ShowAdvancedOpts')
+            local changed = false
+            ShowAdvancedOpts, changed = Ui.RenderOptionToggle("show_adv_tog###OptionsUI", "Show Advanced Options", ShowAdvancedOpts)
+            if changed then
+                Config:SetSetting('ShowAdvancedOpts', ShowAdvancedOpts)
+                self:ApplySearchFilter()
+            end
+
+            if ImGui.BeginTable('configmenu##RGmercsOptions', 1, flags, 0, 0, 0.0) then
+                ImGui.TableNextColumn()
+                for _, group in ipairs(self.FilteredGroups) do
+                    if group.IconImage then
+                        self:RenderGroupPanelWithImage(group)
+                    else
+                        self:RenderGroupPanel(string.format("%s %s", group.Icon, group.Name), group.Name)
+                    end
+                    ImGui.TableNextColumn()
+                end
+                ImGui.EndTable()
+            end
+        end
+        ImGui.EndChild()
+        ImGui.SameLine()
+        local x, _ = ImGui.GetContentRegionAvail()
+        if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
+            local flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
+            if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
+                ImGui.TableNextColumn()
+                self:RenderCurrentTab()
+                ImGui.EndTable()
+            end
+        end
+        ImGui.EndChild()
+    end
+
+    ImGui.PopID()
+
+    ImGui.End()
 
     return openGUI
 end
