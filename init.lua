@@ -145,7 +145,7 @@ local function RGMercsGUI()
             end
 
             if Config:GetSetting('EnableOptionsUI') then
-                local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, curState, openGUI)
+                local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, curState, true)
                 if not openOptionsUI then
                     Config:SetSetting('EnableOptionsUI', false)
                 end
