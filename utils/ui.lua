@@ -531,17 +531,18 @@ end
     ]]
 ---@param id string Label and Id for the toggle button)
 ---@param value boolean Current value of the toggle button
----@param size ImVec2|integer|nil -- ImVec2 Size of the toggle button (width, height) or height value if single number and width will default to height * 2.0
----@param on_color ImVec4|integer|nil Color for ON state, or number of points if passing star points
----@param off_color ImVec4|integer|nil ImVec4 Color for the Toggle when Off , or number of points if passing star points
----@param knob_color ImVec4|integer|nil ImVec4 Color for the Knob , or its the number of points if passing star points
----@param num_points integer|nil the number of points for the star knob (default 5)
----@param right_label boolean|nil if true the label will be on the right side of the toggle instead of the left
----@param pulse_on_hover boolean|nil if true the knob will pulse when hovered
----@param knob_border boolean|nil if true the knob will have a black border
+---@param size? ImVec2|integer -- ImVec2 Size of the toggle button (width, height) or height value if single number and width will default to height * 2.0
+---@param on_color? ImVec4|integer Color for ON state, or number of points if passing star points
+---@param off_color? ImVec4|integer ImVec4 Color for the Toggle when Off , or number of points if passing star points
+---@param knob_color? ImVec4|integer ImVec4 Color for the Knob , or its the number of points if passing star points
+---@param num_points? integer the number of points for the star knob (default 5)
+---@param right_label? boolean if true the label will be on the right side of the toggle instead of the left
+---@param pulse_on_hover? boolean if true the knob will pulse when hovered
+---@param knob_border? boolean if true the knob will have a black border
+---@param center_vertically? boolean if true the toggle will be centered vertically in the frame
 ---@return boolean value
 ---@return boolean clicked
-function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_color, num_points, right_label, pulse_on_hover, knob_border)
+function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_color, num_points, right_label, pulse_on_hover, knob_border, center_vertically)
     if not id or value == nil then return false, false end
     -- setup any defaults for mising params
     size = type(size) == 'number' and ImVec2(size * 2, size) or size or ImVec2(32, 16)
@@ -550,6 +551,11 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
     local clicked = false
     local draw_list = ImGui.GetWindowDrawList()
     local pos = ImGui.GetCursorScreenPosVec()
+
+    -- center it in the frame
+    if center_vertically then
+        pos.y = pos.y + (ImGui.GetFrameHeight() * 0.5) - (height * 0.5)
+    end
 
     -- if you omit a color you can still pass the number as the number of points
     if type(on_color) == 'number' then
@@ -652,10 +658,12 @@ end
 --- @param id string: The unique identifier for the toggle option.
 --- @param text string: The display text for the toggle option.
 --- @param on boolean: The current state of the toggle option (true for on, false for off).
+--- @param center_vertically boolean?: If true, centers the toggle vertically within its frame.
 --- @return boolean: state
 --- @return boolean: changed
-function Ui.RenderOptionToggle(id, text, on)
-    local toggled = false
+function Ui.RenderOptionToggle(id, text, on, center_vertically)
+    return Ui.RenderFancyToggle(id, text, on, ImVec2(26, 14), ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, 5, true, true, true, center_vertically)
+    --[[    local toggled = false
     local state   = on
     ImGui.PushID(id .. "_togg_btn")
 
@@ -681,7 +689,7 @@ function Ui.RenderOptionToggle(id, text, on)
     ImGui.SameLine()
     ImGui.Text(text)
 
-    return state, toggled
+    return state, toggled]]
 end
 
 --- Renders a progress bar.
@@ -786,7 +794,7 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
             ((pressed or false) and (requiresLoadoutChange))
         any_pressed = any_pressed or (pressed or false)
     elseif type == 'boolean' then
-        setting, pressed = Ui.RenderOptionToggle(id, "", setting)
+        setting, pressed = Ui.RenderOptionToggle(id, "", setting, true)
         new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
         any_pressed = any_pressed or pressed
     elseif type == 'number' then
