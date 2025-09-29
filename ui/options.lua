@@ -382,6 +382,7 @@ function OptionsUI:RenderCategorySettings(category)
                 ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
             end
 
+            --ImGui.TableNextRow(ImGuiTableRowFlags.None, 40.0)
             for idx, settingName in ipairs(settingsForCategory or {}) do
                 local settingDefaults = Config:GetSettingDefaults(settingName)
 
@@ -391,6 +392,11 @@ function OptionsUI:RenderCategorySettings(category)
                     local id             = "##" .. settingName
                     local settingTooltip = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
                     if settingDefaults.Type ~= "Custom" then
+                        --
+                        if idx % numCols == 1 then
+                            ImGui.TableNextRow(ImGuiTableRowFlags.None, ImGui.GetFrameHeightWithSpacing())
+                        end
+
                         ImGui.TableNextColumn()
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
@@ -429,7 +435,7 @@ function OptionsUI:RenderCategorySettings(category)
                                 end
                             end
                         else
-                            --ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
+                            ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
                         end
                     end
                 else
