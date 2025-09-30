@@ -532,17 +532,16 @@ end
 ---@param id string Label and Id for the toggle button)
 ---@param value boolean Current value of the toggle button
 ---@param size? ImVec2|integer -- ImVec2 Size of the toggle button (width, height) or height value if single number and width will default to height * 2.0
----@param on_color? ImVec4|integer Color for ON state, or number of points if passing star points
----@param off_color? ImVec4|integer ImVec4 Color for the Toggle when Off , or number of points if passing star points
----@param knob_color? ImVec4|integer ImVec4 Color for the Knob , or its the number of points if passing star points
----@param num_points? integer the number of points for the star knob (default 5)
+---@param on_color? ImVec4 Color for ON state, or number
+---@param off_color? ImVec4 ImVec4 Color for the Toggle when Off
+---@param knob_color? ImVec4 ImVec4 Color for the Knob
 ---@param right_label? boolean if true the label will be on the right side of the toggle instead of the left
 ---@param pulse_on_hover? boolean if true the knob will pulse when hovered
 ---@param knob_border? boolean if true the knob will have a black border
 ---@param center_vertically? boolean if true the toggle will be centered vertically in the frame
 ---@return boolean value
 ---@return boolean clicked
-function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_color, num_points, right_label, pulse_on_hover, knob_border, center_vertically)
+function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_color, right_label, pulse_on_hover, knob_border, center_vertically)
     if not id or value == nil then return false, false end
     -- setup any defaults for mising params
     size = type(size) == 'number' and ImVec2(size * 2, size) or size or ImVec2(32, 16)
@@ -557,30 +556,19 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
         pos.y = pos.y + (ImGui.GetFrameHeight() * 0.5) - (height * 0.5)
     end
 
-    -- if you omit a color you can still pass the number as the number of points
-    if type(on_color) == 'number' then
-        num_points = on_color
-        on_color = nil
-    elseif type(off_color) == 'number' then
-        num_points = off_color
-        off_color = nil
-    elseif type(knob_color) == 'number' then
-        num_points = knob_color
-        knob_color = nil
-    end
-
     on_color = on_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBgActive)
     off_color = off_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)
     knob_color = knob_color or ImVec4(1, 1, 1, 1) -- default white
-    num_points = num_points or 5
 
-    if not right_label and label and label ~= "" then
-        ImGui.Text(string.format("%s:", label))
+    if not right_label and label and label:len() > 0 then
+        ImGui.Text(label)
         if ImGui.IsItemClicked() then
             value = not value
             clicked = true
         end
         ImGui.SameLine()
+        local text_len, _ = ImGui.CalcTextSize(label)
+        pos.x = pos.x + text_len + ImGui.GetStyle().ItemSpacing.x
     end
 
     local radius = height * 0.5
@@ -622,6 +610,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
     local knob_x = pos.x + radius + t * (width - height)
     local center = ImVec2(knob_x, pos.y + radius)
     local fill_radius = radius * 0.8
+
     -- Background
     draw_list:AddRectFilled(
         ImVec2(pos.x, pos.y),
@@ -662,34 +651,7 @@ end
 --- @return boolean: state
 --- @return boolean: changed
 function Ui.RenderOptionToggle(id, text, on, center_vertically)
-    return Ui.RenderFancyToggle(id, text, on, ImVec2(26, 14), ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, 5, true, true, true, center_vertically)
-    --[[    local toggled = false
-    local state   = on
-    ImGui.PushID(id .. "_togg_btn")
-
-    ImGui.PushStyleColor(ImGuiCol.ButtonActive, 1.0, 1.0, 1.0, 0)
-    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 1.0, 1.0, 1.0, 0)
-    ImGui.PushStyleColor(ImGuiCol.Button, 1.0, 1.0, 1.0, 0)
-
-    if on then
-        ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.9)
-        if ImGui.Button(Icons.FA_TOGGLE_ON) then
-            toggled = true
-            state   = false
-        end
-    else
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
-        if ImGui.Button(Icons.FA_TOGGLE_OFF) then
-            toggled = true
-            state   = true
-        end
-    end
-    ImGui.PopStyleColor(4)
-    ImGui.PopID()
-    ImGui.SameLine()
-    ImGui.Text(text)
-
-    return state, toggled]]
+    return Ui.RenderFancyToggle(id, text, on, ImVec2(26, 14), ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true, true, true, center_vertically)
 end
 
 --- Renders a progress bar.
