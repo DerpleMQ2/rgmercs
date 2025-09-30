@@ -56,7 +56,7 @@ function HudUI:RenderToggleHud()
         local toggleHeight = 16
 
         local pause_main, pause_main_pushed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pause", lbl, not Config.Globals.PauseMain, ImVec2(32, toggleHeight),
-            ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, 5, true)
+            ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true)
 
         ImGui.SameLine()
         ImGui.SetCursorPosX(miniWidth - 20 - ImGui.GetStyle().WindowPadding.x)
@@ -77,7 +77,7 @@ function HudUI:RenderToggleHud()
         cursorPos.y = cursorPos.y + toggleHeight + ImGui.GetStyle().ItemSpacing.y
         ImGui.SetCursorPos(cursorPos)
         local pull_toggle, pull_toggle_changed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pulls", lbl, Config:GetSetting('DoPull'), nil,
-            ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, 5, true)
+            ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true)
         ImGui.SetCursorPos(cursorPosAfter)
 
         if pull_toggle_changed then
