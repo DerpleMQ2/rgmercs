@@ -405,10 +405,14 @@ function OptionsUI:RenderCategorySettings(category)
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PopStyleColor(1)
                         end
+                        local defaultValue = tostring(settingDefaults.Default)
+                        if settingDefaults.Type == "Combo" then
+                            defaultValue = string.format("%s - %s", settingDefaults.Default, settingDefaults.ComboOptions[settingDefaults.Default])
+                        end
                         Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
                             settingTooltip,
                             settingName,
-                            tostring(settingDefaults.Default)))
+                            tostring(defaultValue)))
                         ImGui.TableNextColumn()
                         local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
                         if (settingDefaults.Type or ""):find("Array") then
