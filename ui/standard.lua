@@ -98,18 +98,19 @@ function StandardUI:RenderWindowControls()
         Config:ClearAllHighlightedModules()
         Config:SetSetting('EnableOptionsUI', not Config:GetSetting('EnableOptionsUI'))
     end
+    Ui.Tooltip("Open the RGMercs Options Window")
     ImGui.SameLine()
 
     if ImGui.SmallButton((Config:GetSetting('MainWindowLocked') or false) and Icons.FA_LOCK or Icons.FA_UNLOCK) then
         Config:SetSetting('MainWindowLocked', not Config:GetSetting('MainWindowLocked'))
     end
+    Ui.Tooltip("Lock the Main Window")
     ImGui.SameLine()
 
     if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
         Config.Globals.Minimized = true
     end
-
-    Ui.Tooltip("Minimize Main Window")
+    Ui.Tooltip("Activate Mini Mode")
 
     ImGui.SetCursorPos(position)
 end

@@ -178,16 +178,14 @@ Module.DefaultConfig                   = {
         Tooltip = "Enable pulling",
         Default = false,
         Type = "Custom",
-        FAQ = "My Puller isn't Pulling, what do I do?",
-        Answer = "Make sure you have [DoPull] enabled.",
     },
     ['PullAbility']                            = {
         DisplayName = "Pull Ability",
         Tooltip = "What should we pull with?",
         Default = 1,
         Type = "Custom",
-        FAQ = "I want to use a different ability to pull, how do I change it?",
-        Answer = "Select a different ability from the [PullAbility] dropdown.",
+        FAQ = "I don't see an ability that I want to use in the Pull Ability list. How can I add it?",
+        Answer = "Default pull abilities can generally be added by feedback. Alternatively, they can be added via customization of a class config.",
     },
     ['PullMode']                               = {
         DisplayName = "Pull Mode",
@@ -195,12 +193,12 @@ Module.DefaultConfig                   = {
         Default = 1,
         Min = 1,
         Max = 4,
-        FAQ = "What are the different Pull Modes and how do I use them?",
-        Answer = "Select a different mode from the [PullMode] dropdown.\n" ..
-            "Normal = Pull to Camp Location and attempt to pull 1 mob at a time.\n" ..
-            "Chain = Pull to Camp Location and attempt to pull multiple mobs at a time. You can set the Number in [ChainCount]\n" ..
-            "Hunt = Roam the Hunt Pull Radius moving to each mob to fight.\n" ..
-            "Farm = Follow the Farm Path waypoints and kill at each stop.\n",
+        FAQ = "What are the different Pull modes and how do they work?",
+        Answer = "You can adjust Pull Modes on the Pull module tab.\n" ..
+            "Normal = Attempt to pull single mobs back to a static camp location.\n" ..
+            "Chain = Attempt to pull (ChainCount Setting) number of mobs to a static camp location.\n" ..
+            "Hunt = Move from target to target within a defined circular area, fighting as you go.\n" ..
+            "Farm = Move from waypoint to waypoint, hunting mobs in a defined radius from each.\n",
     },
     ['FarmWayPoints']                          = {
         DisplayName = "Farming Waypoints",
@@ -208,8 +206,8 @@ Module.DefaultConfig                   = {
         Tooltip = "",
         Type = "Custom",
         Default = {},
-        FAQ = "How can I set a path for my characters to follow while farming?",
-        Answer = "You can set a path for your characters to follow while farming by adding waypoints to the [FarmWayPoints] list.",
+        FAQ = "How do I use Farm mode for pulling?",
+        Answer = "Farm mode needs to have valid farming waypoints added to move between. You can add points in the Pull module tab.",
     },
     ['PullAllowList']                          = {
         DisplayName = "Allow List",
@@ -217,8 +215,10 @@ Module.DefaultConfig                   = {
         Tooltip = "",
         Type = "Custom",
         Default = {},
-        FAQ = "Can I manually add a mob to the pull list?",
-        Answer = "You can add a mob to the [PullAllowList] and it will be pulled.",
+        FAQ = "I only want to attack a specific set of mobs in my pull mode, how do I set this up?",
+        Answer = "In the Pull Allow List (found on your Pull module tab), you will find a button to add your target to that list.\n" ..
+            "Alternatively, you can use /rgl pullallow <mobname> or /rgl pullallowrm <mobname> to adjust this list from the command line.\n" ..
+            "We will still engage mobs that aggro us, regardless of their abscence from this list.",
     },
     ['PullDenyList']                           = {
         DisplayName = "Deny List",
@@ -226,8 +226,10 @@ Module.DefaultConfig                   = {
         Tooltip = "",
         Type = "Custom",
         Default = {},
-        FAQ = "Can I manually add a mob to the pull deny list?",
-        Answer = "You can add a mob to the [PullDenyList] and it will not be pulled.",
+        FAQ = "I want to avoid pulling a specific mob (or mobs) in my pull mode, can I do that?",
+        Answer = "In the Pull Deny List (found on your Pull module tab), you will find a button to add your target to that list.\n" ..
+            "Alternatively, you can use /rgl pulldeny <mobname> or /rgl pulldenyrm <mobname> to adjust this list from the command line.\n" ..
+            "We will still engage mobs that aggro us, regardless of their presence on this list.",
     },
     ['PullSafeZones']                          = {
         DisplayName = "SafeZones",
@@ -245,9 +247,6 @@ Module.DefaultConfig                   = {
         Category = "Custom",
         Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
-        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-        Answer =
-        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 
     -- Rules
@@ -257,23 +256,20 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Pull Rules",
         Index = 1,
-        Tooltip = "Seconds between pulls",
+        Tooltip = "Delay X seconds between pulls to allow for buffs, looting, etc.",
         Default = 5,
         Min = 1,
         Max = 300,
-        FAQ = "I want to adjust the time between pulls so I have time to Manually Loot, how do I do that?",
-        Answer = "You can adjust the time between pulls with [PullDelay].",
     },
     ['AutoSetRoles']                           = {
-        DisplayName = "Auto Set Roles",
+        DisplayName = "Auto Set Group Roles",
         Group = "Movement",
         Header = "Pulling",
         Category = "Pull Rules",
         Index = 2,
-        Tooltip = "Make yourself MA and Puller when you start pulls.",
+        Tooltip =
+        "As the group leader, automatically update MA and Puller group roles when pulling is enabled. We will set ourselves as puller, and attempt to set the assigned RGMercs MA as the group MA.",
         Default = true,
-        FAQ = "I keep forgetting to set myself as MA and Puller, how do I fix this?",
-        Answer = "Enable [AutoSetRoles] and you will be set as MA and Puller when you start pulls.",
     },
     ['PullDebuffed']                           = {
         DisplayName = "Pull While Debuffed",
@@ -284,8 +280,6 @@ Module.DefaultConfig                   = {
         Tooltip = "Pull in spite of being debuffed (Not ignored: Rez Sickness, Root.)",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "I keep stopping pulls while diseased or debuffed, how do I fix this?",
-        Answer = "Enable [PullDebuffed] and you will pull even if you are debuffed.",
     },
     ['PullMobsInWater']                        = {
         DisplayName = "Pull Mobs In Water",
@@ -293,10 +287,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Pull Rules",
         Index = 4,
-        Tooltip = "Pull Mobs that are in water bodies? If you are low level you might drown.",
+        Tooltip = "Allow pulling mobs that are in water. Check your EB effects if enabled!.",
         Default = false,
-        FAQ = "I keep pulling mobs in the water and drowning, how do I fix this?",
-        Answer = "Disable [PullMobsInWater] and you will NOT pull mobs in the water.",
     },
     ['PullBackwards']                          = {
         DisplayName = "Pull Facing Backwards",
@@ -304,10 +296,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Pull Rules",
         Index = 5,
-        Tooltip = "Run back to camp facing the mmob",
+        Tooltip = "When moving back to camp, back up and continually face your target. (Prevents stuns, etc.)",
         Default = true,
-        FAQ = "I don't like getting backstabbed when I pull, how do I fix this?",
-        Answer = "Enable [PullBackwards] and you will run back to camp facing the mob.",
     },
     ['ChainCount']                             = {
         DisplayName = "Chain Count",
@@ -319,8 +309,6 @@ Module.DefaultConfig                   = {
         Default = 3,
         Min = 1,
         Max = 100,
-        FAQ = "Can I adjust the number of mobs I pull in Chain Mode?",
-        Answer = "Yes, you can adjust the number of mobs in the chain with [ChainCount].",
     },
     ['PullIgnoreTime']                         = {
         DisplayName = "Ignore Timer",
@@ -332,8 +320,10 @@ Module.DefaultConfig                   = {
         Default = 15,
         Min = 5,
         Max = 60,
-        FAQ = "I want to adjust the time between pulls so I have time to Manually Loot, how do I do that?",
-        Answer = "You can adjust the time between pulls with [PullDelay].",
+        FAQ = "I keep trying to pull an invalid target, can I fix this?",
+        Answer =
+            "You should likely add that target to the Pull Deny List, which persists across sessions. However, RGMercs will auto-detect a repeatedly failed pull and will ignore that mob for the remainder of the pulling session. \n" ..
+            "The Ignore Timer can adjust how long it takes before we do so.",
     },
     ['StopPullAfterDeath']                     = {
         DisplayName = "Stop Pulling After Death",
@@ -341,10 +331,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Pull Rules",
         Index = 8,
-        Tooltip = "Stop pulling after you die and are rezed back.",
+        Tooltip = "Disable Pulling once you have died (even if you are rezzed).",
         Default = true,
-        FAQ = "I keep trying to pull after I die, how do I stop this?",
-        Answer = "Enable [StopPullAfterDeath] and you will stop pulling after you die.",
     },
     -- Distance
     ['PullRadius']                             = {
@@ -353,12 +341,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Distance",
         Index = 1,
-        Tooltip = "Distance to pull",
+        Tooltip = "Camp Mode: The distance to scan from your camp for valid pull targets.",
         Default = 350,
         Min = 1,
         Max = 10000,
-        FAQ = "I want to adjust the distance I pull from, how do I do that?",
-        Answer = "You can adjust the distance you pull from with [PullRadius].",
     },
     ['PullRadiusHunt']                         = {
         DisplayName = "Pull Radius (Hunt)",
@@ -366,12 +352,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Distance",
         Index = 2,
-        Tooltip = "Distance to pull in Hunt mode from your starting position",
+        Tooltip = "Hunt Mode: The distance to scan from your starting hunt position for valid pull targets.",
         Default = 500,
         Min = 1,
         Max = 10000,
-        FAQ = "I run out of spawns to pull in Hunt Mode, how do I fix this?",
-        Answer = "You can adjust the distance you pull from in Hunt Mode with [PullRadiusHunt].",
     },
     ['PullRadiusFarm']                         = {
         DisplayName = "Pull Radius (Farm)",
@@ -379,12 +363,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Distance",
         Index = 3,
-        Tooltip = "Distance to pull in Farm mode",
+        Tooltip = "Farm Mode: The distance to scan from your current farm waypoint for valid pull targets.",
         Default = 90,
         Min = 1,
         Max = 10000,
-        FAQ = "I want to adjust the distance I pull from at the waypoint stops in Farm Mode, how do I do that?",
-        Answer = "You can adjust how far you pull from at the stops using the [PullRadiusFarm] setting.",
     },
     ['PullZRadius']                            = {
         DisplayName = "Pull Z Radius",
@@ -392,12 +374,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Distance",
         Index = 4,
-        Tooltip = "Distance to pull on Z axis",
+        Tooltip = "All Modes: The z-axis (up and down) distance to scan for valid pull targets.",
         Default = 90,
         Min = 1,
         Max = 350,
-        FAQ = "I can't seem to pull mobs on this ledge/hill/pit?",
-        Answer = "You can adjust the distance you pull on the Z axis with [PullZRadius].",
     },
     ['MaxPathRange']                           = {
         DisplayName = "Max Path Range",
@@ -405,12 +385,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Distance",
         Index = 5,
-        Tooltip = "Maximum distance to pull using navigation pathing distance",
+        Tooltip = "All Modes: The maximum travel distance allowed when scanning for valid pull targets. Checks the actual path, rather than straight-line distance.",
         Default = 1000,
         Min = 1,
         Max = 10000,
-        FAQ = "A mob is with in range but the path to get to them is very long, how can I adjust how far I will path to my target?",
-        Answer = "You can adjust the path distance you pull from with [MaxPathRange].",
     },
     ['MaxMoveTime']                            = {
         DisplayName = "Max Move Time",
@@ -418,13 +396,13 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Distance",
         Index = 6,
-        Tooltip = "The max number of seconds we will navigate to our intended pull target without reassessing targets.",
+        Tooltip = "The max number of seconds we will navigate to our intended pull target before we rescan for valid pull targets.",
         Default = 5,
         Min = 1,
         Max = 60,
-        FAQ = "Why does my puller stop every so often before running again to the same target?",
-        Answer = "The puller will periodically reassess targets if navigation has been active for a while.\n" ..
-            "This can be adjusted by changing the Max Move Time on the Pull Distance tab.",
+        FAQ = "Why does my puller stop every so often before running again to the same target, or change targets while pulling?",
+        Answer = "The puller will periodically reassess targets if navigation has been active for a while to improve efficiency.\n" ..
+            "The time period can be adjusted with the Max Move Time setting in the Pulling Distance category.",
     },
     ['HuntFromPlayer']                         = {
         DisplayName = "Hunt from Player",
@@ -432,10 +410,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Distance",
         Index = 7,
-        Tooltip = "Off means that we always scan from the hunt starting position, On means that we scan from your current player location",
+        Tooltip = "Hunt Mode: Reset the starting location to your current location after every pull. In most cases, this will allow zone-wide roaming.",
         Default = false,
-        FAQ = "How do I just Hunt then entire zone?",
-        Answer = "Enable [HuntFromPlayer] and you will scan from your current location after every pull, instead of the Hunt Starting Position.",
     },
     -- Puller Vitals
     ['PullHPPct']                              = {
@@ -444,12 +420,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Puller Vitals",
         Index = 1,
-        Tooltip = "Make sure you have at least this much HP %",
+        Tooltip = "The minimum health for a puller to continue to pull.",
         Default = 60,
         Min = 1,
         Max = 100,
-        FAQ = "I keep trying to pull when I have half health. I don't want to die, how do I fix this?",
-        Answer = "You can adjust the HP % for pulls with [PullHPPct] and you will not pull until you are above that setting.",
     },
     ['PullManaPct']                            = {
         DisplayName = "Puller Mana %",
@@ -457,12 +431,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Puller Vitals",
         Index = 2,
-        Tooltip = "Make sure you have at least this much Mana %",
+        Tooltip = "The minimum mana for a puller to continue to pull.",
         Default = 60,
         Min = 0,
         Max = 100,
-        FAQ = "I keep trying to pull when I have half mana. I don't want to run out, how do I fix this?",
-        Answer = "You can adjust the Mana % for pulls with [PullManaPct] and you will not pull until you are above that setting.",
     },
     ['PullEndPct']                             = {
         DisplayName = "Puller End %",
@@ -470,12 +442,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Puller Vitals",
         Index = 3,
-        Tooltip = "Make sure you have at least this much Endurance %",
+        Tooltip = "The minimum endurance for a puller to continue to pull.",
         Default = 30,
         Min = 0,
         Max = 100,
-        FAQ = "I keep trying to pull when I have half endurance. I don't want to run out, how do I fix this?",
-        Answer = "You can adjust the Endurance % for pulls with [PullEndPct] and you will not pull until you are above that setting.",
     },
     ['PullRespectMedState']                    = {
         DisplayName = "Respect Med State",
@@ -485,8 +455,6 @@ Module.DefaultConfig                   = {
         Index = 4,
         Tooltip = "Hold pulls if you are currently meditating.",
         Default = false,
-        FAQ = "My puller only meds long enough to meet the pull minimums, what can be done?",
-        Answer = "If you turn on Respect Med State in the Group Watch options, your puller will remain medding until those thresholds are reached.",
     },
     ['PullBuffCount']                          = {
         DisplayName = "Min Buff Count",
@@ -495,12 +463,10 @@ Module.DefaultConfig                   = {
         Category = "Puller Vitals",
         egory = "Puller",
         Index = 5,
-        Tooltip = "The minimum number of buffs in our buff window we should have before pulling (0 disables).",
+        Tooltip = "The minimum number of buffs in the buff window for a puller to continue to pull (0 disables).",
         Default = 0,
         Min = 0,
         Max = 40,
-        FAQ = "How do I make it so my puller doesn't pull with no buffs?",
-        Answer = "Set the min number of buffs before pulling with Min Buff Count and the pulling will pause to wait for that number of buffs.",
     },
     --Targets
     ['PullMinCon']                             = {
@@ -509,15 +475,12 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Targets",
         Index = 1,
-        Tooltip = "Min Con Mobs to consider pulling",
+        Tooltip = "The minimum con color to be considered a valid pull target.",
         Default = 2,
         Min = 1,
         Max = #Config.Constants.ConColors,
         Type = "Combo",
         ComboOptions = Config.Constants.ConColors,
-        FAQ = "Why am I pulling Grey con mobs?",
-        Answer = "You probably have your [PullMinCon] set too low, adjust it to the lowest con you want to pull.",
-
     },
     ['PullMaxCon']                             = {
         DisplayName = "Pull Max Con",
@@ -525,39 +488,33 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Targets",
         Index = 2,
-        Tooltip = "Max Con Mobs to consider pulling",
+        Tooltip = "The maximum con color to be considered a valid pull target.",
         Default = 5,
         Min = 1,
         Max = #Config.Constants.ConColors,
         Type = "Combo",
         ComboOptions = Config.Constants.ConColors,
-        FAQ = "Why am I not pulling Red con mobs?",
-        Answer = "You probably have your [PullMaxCon] set too low, adjust it to the highest con you want to pull.",
     },
     ['MaxLevelDiff']                           = {
-        DisplayName = "Max Level Diff",
+        DisplayName = "Max Red Con Level Diff",
         Group = "Movement",
         Header = "Pulling",
         Category = "Targets",
         Index = 3,
-        Tooltip = "If set to pull Red con mobs, limit the level gap to this value.",
+        Tooltip = "The maximum level gap allowed between the puller and pull target if Con Colors are being used.",
         Default = 6,
         Min = 4,
-        Max = 20,
-        FAQ = "Why am I pulling deep Red con mobs?",
-        Answer = "You can set your Max Level Diff to control whether deep red mobs will be pulled.",
+        Max = 125,
     },
     ['UsePullLevels']                          = {
-        DisplayName = "Use Pull Levels",
+        DisplayName = "Use Level-Based Pulling",
         Group = "Movement",
         Header = "Pulling",
         Category = "Targets",
         Index = 4,
-        Tooltip = "Use Min and Max Levels Instead of Con.",
+        Tooltip = "Use direct level comparisons to find pull targets, instead of Con Colors.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Con colors have to wide of a range, can I use levels instead?",
-        Answer = "Enable [UsePullLevels] and you will use Min and Max Levels instead of Con Colors.",
     },
     ['PullMinLevel']                           = {
         DisplayName = "Pull Min Level",
@@ -565,13 +522,11 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Targets",
         Index = 5,
-        Tooltip = "Min Level Mobs to consider pulling",
+        Tooltip = "The minimum level to be considered a valid pull target (if Level-Based Pulling is enabled).",
         Default = mq.TLO.Me.Level() - 3,
         Min = 1,
         Max = 150,
         ConfigType = "Advanced",
-        FAQ = "I keep pulling low level mobs, how do I fix this?",
-        Answer = "You probably have your [PullMinLevel] set too low, adjust it to the lowest level you want to pull.",
     },
     ['PullMaxLevel']                           = {
         DisplayName = "Pull Max Level",
@@ -579,13 +534,11 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Targets",
         Index = 6,
-        Tooltip = "Max Level Mobs to consider pulling",
+        Tooltip = "The maximum level to be considered a valid pull target (if Level-Based Pulling is enabled).",
         Default = mq.TLO.Me.Level() + 3,
         Min = 1,
         Max = 150,
         ConfigType = "Advanced",
-        FAQ = "I keep pulling high level mobs, how do I fix this?",
-        Answer = "You probably have your [PullMaxLevel] set too high, adjust it to the highest level you want to pull.",
     },
     --Group Vitals
     ['GroupWatch']                             = {
@@ -594,10 +547,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 1,
-        Tooltip = "Watch the mana and/or endurance of the group members selected below.",
+        Tooltip = "Watch the mana and/or endurance of the groupmembers selected below.",
         Default = true,
-        FAQ = "I want to make sure my group is ready before I pull, how do I do that?",
-        Answer = "You can Enable Group Watch on the Group Watch tab to watch the selected groupmembers for low MP and/or Endurance.",
     },
     ['GroupWatchF2']                           = {
         DisplayName = mq.TLO.Group.Member(1)() and string.format("Watch %s", mq.TLO.Group.Member(1).CleanName()) or "No GroupMember",
@@ -605,10 +556,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 2,
-        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Tooltip = "Watch the mana and/or endurance of the selected groupmember (if present).",
         Default = false,
-        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
-        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchF3']                           = {
         DisplayName = mq.TLO.Group.Member(2)() and string.format("Watch %s", mq.TLO.Group.Member(2).CleanName()) or "No GroupMember",
@@ -616,20 +565,16 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 3,
-        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Tooltip = "Watch the mana and/or endurance of the selected groupmember (if present).",
         Default = false,
-        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
-        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchF4']                           = {
         Group = "Movement",
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 4,
-        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Tooltip = "Watch the mana and/or endurance of the selected groupmember (if present).",
         Default = false,
-        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
-        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchF5']                           = {
         DisplayName = mq.TLO.Group.Member(4)() and string.format("Watch %s", mq.TLO.Group.Member(4).CleanName()) or "No GroupMember",
@@ -637,10 +582,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 5,
-        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Tooltip = "Watch the mana and/or endurance of the selected groupmember (if present).",
         Default = false,
-        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
-        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchF6']                           = {
         DisplayName = mq.TLO.Group.Member(5)() and string.format("Watch %s", mq.TLO.Group.Member(5).CleanName()) or "No GroupMember",
@@ -648,10 +591,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 6,
-        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Tooltip = "Watch the mana and/or endurance of the selected groupmember (if present).",
         Default = false,
-        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
-        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchEnd']                          = {
         DisplayName = "Watch Group Endurance",
@@ -659,10 +600,8 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 9,
-        Tooltip = "Check for Endurance on Group Members.",
+        Tooltip = "Check for endurance when checking selected group members' vitals.",
         Default = false,
-        FAQ = "I want to make sure my group has enough Endurance before I pull, how do I do that?",
-        Answer = "Enable [GroupWatchEnd] and you will check for Endurance on Group Members.",
     },
     ['GroupWatchStopPct']                      = {
         DisplayName = "Pulling Pause %",
@@ -670,13 +609,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 7,
-        Tooltip = "If your group member is below [X]% resource, stop pulls.",
+        Tooltip = "Stop pulls when a selected groupmembers' vitals fall under this percent.",
         Default = 40,
         Min = 1,
         Max = 100,
-        FAQ = "Why are my group members always OOM?",
-        Answer = "Make sure [GroupWatch] is enabled. \n" ..
-            "You can adjust the stop % for pulls with [GroupWatchStopPct] and you will stop pulling until they are above that setting.",
     },
     ['GroupWatchStartPct']                     = {
         DisplayName = "Pulling Resume %",
@@ -684,12 +620,10 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 8,
-        Tooltip = "If your group member is above [X]% resource, start pulls again.",
+        Tooltip = "Resume pulls when a selected groupmembers' vitals climb above this percent.",
         Default = 80,
         Min = 1,
         Max = 100,
-        FAQ = "My Cleric never meds to full, how do I fix this?",
-        Answer = "You can adjust the start % for pulls with [GroupWatchStartPct] and you will not pull until they are above that setting.",
     },
     ['PullWaitCorpse']                         = {
         DisplayName = "Hold for Corpses",
@@ -697,13 +631,11 @@ Module.DefaultConfig                   = {
         Header = "Pulling",
         Category = "Group Vitals",
         Index = 10,
-        Tooltip = "Hold pulls while we detect a groupmember's corpse in the vicinity.",
+        Tooltip = "Hold pulls while we detect any groupmember's corpse in the vicinity.",
         Default = true,
-        FAQ = "Why do I stop pulling every time someone dies?",
-        Answer = "By default, the puller will hold pulls when the corpse of a groupmember is nearby. You can turn this off in the Group Watch options.",
     },
     ['WaitAfterRez']                           = {
-        DisplayName = "Wait After Rez",
+        DisplayName = "Delay After Rez",
         Group = "Movement",
         Header = "Pulling",
         Category = "Group Vitals",
@@ -713,15 +645,13 @@ Module.DefaultConfig                   = {
         Default = 0,
         Min = 0,
         Max = 90,
-        FAQ = "How can I pause pulls to allow more time to rebuff after death?",
-        Answer = "You can adjust the Wait After Rez setting in the Group Watch tab to allow time for your group to rebuff after a death.",
     },
 }
 
 Module.CommandHandlers                 = {
     pulltarget = {
         usage = "/rgl pulltarget",
-        about = "Pulls your current target using your rgmercs pull ability",
+        about = "Pulls your current target using the currently selected Pull Ability.",
         handler = function(self, ...)
             self:SetPullTarget()
             return true
@@ -729,7 +659,7 @@ Module.CommandHandlers                 = {
     },
     pullstart = {
         usage = "/rgl pullstart",
-        about = "Starts the puller",
+        about = "Enables pulling in the currently selected Pull Mode.",
         handler = function(self, ...)
             self:StartPuller()
             return true
@@ -737,7 +667,7 @@ Module.CommandHandlers                 = {
     },
     pullstop = {
         usage = "/rgl pullstop",
-        about = "Stops the puller",
+        about = "Disables the active Pull Mode.",
         handler = function(self, ...)
             self:StopPuller()
             return true
@@ -745,7 +675,7 @@ Module.CommandHandlers                 = {
     },
     pulldeny = {
         usage = "/rgl pulldeny \"<name>\"",
-        about = "Adds <name> to the Pull Deny List.",
+        about = "Adds <name> to the Pull Deny List. Ensure quotes are used on multi-word mob names!",
         handler = function(self, name)
             self:AddMobToList("PullDenyList", name)
             return true
@@ -753,7 +683,7 @@ Module.CommandHandlers                 = {
     },
     pullallow = {
         usage = "/rgl pullallow \"<name>\"",
-        about = "Adds <name> to the Pull Allow List.",
+        about = "Adds <name> to the Pull Allow List. Ensure quotes are used on multi-word mob names!",
         handler = function(self, name)
             self:AddMobToList("PullAllowList", name)
             return true
@@ -767,23 +697,42 @@ Module.CommandHandlers                 = {
             return true
         end,
     },
-    -- These are broken. Would need to adjust the delete function to look up the ID with name
-    -- pulldenyrm = {
-    --     usage = "/rgl pulldenyrm \"<name>\"",
-    --     about = "Removes <name> from the pull deny list",
-    --     handler = function(self, name)
-    --         self:AddMobToList("PullDenyList", name)
-    --         return true
-    --     end,
-    -- },
-    -- pullallowrm = {
-    --     usage = "/rgl pullallowrm \"<name>\"",
-    --     about = "Removes <name> from the pull allow list",
-    --     handler = function(self, name)
-    --         self:AddMobToList("PullAllowList", name)
-    --         return true
-    --     end,
-    -- },
+    pulldenyrm = {
+        usage = "/rgl pulldenyrm \"<name>\"",
+        about = "Removes \"<name>\" from the Pull Deny List. Ensure quotes are used on multi-word mob names!",
+        handler = function(self, name)
+            local zoneAllowList = Config:GetSetting('PullDenyList')[mq.TLO.Zone.ShortName()]
+            if name and zoneAllowList then
+                for idx, mobName in ipairs(zoneAllowList) do
+                    if mobName:lower() == name:lower() then
+                        self:DeleteMobFromList("PullDenyList", idx)
+                        break
+                    end
+                end
+            else
+                Logger.log_error("Pull Deny Remove: Please supply a valid name to remove!")
+            end
+            return true
+        end,
+    },
+    pullallowrm = {
+        usage = "/rgl pullallowrm \"<name>\"",
+        about = "Removes \"<name>\" from the Pull Allow List. Ensure quotes are used on multi-word mob names!",
+        handler = function(self, name)
+            local zoneAllowList = Config:GetSetting('PullAllowList')[mq.TLO.Zone.ShortName()]
+            if name and zoneAllowList then
+                for idx, mobName in ipairs(zoneAllowList) do
+                    if mobName:lower() == name:lower() then
+                        self:DeleteMobFromList("PullAllowList", idx)
+                        break
+                    end
+                end
+            else
+                Logger.log_error("Pull Allow Remove: Please supply a valid name to remove!")
+            end
+            return true
+        end,
+    },
 }
 
 local function getConfigFileName()
@@ -1086,6 +1035,9 @@ function Module:Render()
         pullMode, pressed = ImGui.Combo("Pull Mode", pullMode, self.Constants.PullModes, #self.Constants.PullModes)
         if pressed then
             Config:SetSetting('PullMode', pullMode)
+        end
+        if ImGui.IsItemHovered() then
+            Ui.Tooltip("Please refer to the in-game FAQ for a description of Pull Modes.")
         end
         if #self.TempSettings.ValidPullAbilities > 0 then
             local pullAbility = Config:GetSetting('PullAbility')

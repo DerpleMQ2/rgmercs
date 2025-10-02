@@ -25,7 +25,7 @@ function HudUI:RenderToggleHud()
                 Config.Globals.Minimized = not Config.Globals.Minimized
             end
             if ImGui.IsItemHovered() then
-                ImGui.SetTooltip("RGMercs is Paused.")
+                Ui.Tooltip("RGMercs is Paused.\n Click to open the main window.")
             end
         else
             if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then
@@ -35,9 +35,9 @@ function HudUI:RenderToggleHud()
                 ImGui.BeginTooltip()
                 if Casting.LastBurnCheck then
                     ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
-                        string.format("RGMercs is BURNING!!"))
+                        string.format("RGMercs is BURNING!\nClick to open the main window."))
                 else
-                    ImGui.Text("RGMercs is Running")
+                    ImGui.Text("RGMercs is Running.\n Click to open the main window.")
                 end
                 ImGui.EndTooltip()
             end
