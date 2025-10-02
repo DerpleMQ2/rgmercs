@@ -12,8 +12,6 @@ local Strings          = require("utils.strings")
 local Module           = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }
 Module.__index         = Module
 Module.DefaultConfig   = {}
-Module.FAQ             = {}
-Module.ClassFAQ        = {}
 Module.TempSettings    = {}
 Module.SaveRequested   = nil
 
@@ -37,6 +35,18 @@ Module.CommandHandlers = {
 		handler = function(self, _)
 			self:ExportFAQToWiki()
 		end,
+	},
+}
+
+Module.FAQ             = {
+	[1] = {
+		Question = "How do I broadcast commands to other PCs on my network?",
+		Answer = "In short, however you would prefer to.\n" ..
+			"While it is typical to use MQ2DanNet (or \"DanNet\" for short, a networking plugin included with MQ), other broadcasting solutions (such as EQBCS or E3BCA) should function without issue.\n" ..
+			"RGMercs defaults to using DanNet for some PC-to-PC functions (such as buff or vital checking) to avoid undesired targeting." ..
+			"Note that certain commands such as \"pauseall\" or the \"say\" style commands will broadcast to multiple PCs, but they explicitly state so in tooltips or descriptions." ..
+			"This feature is used sparingly, to allow users agency over what is broadcasted to their PCs.",
+		Settings_Used = "",
 	},
 }
 
@@ -99,7 +109,7 @@ function Module:ShouldRender()
 	return false
 end
 
-function Module:SearchMaches(search)
+function Module:SearchMatches(search)
 	self.TempSettings.Search = search
 	for cmd, data in pairs(Binds.Handlers) do
 		if cmd ~= "help" then

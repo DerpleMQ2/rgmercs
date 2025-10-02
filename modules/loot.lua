@@ -21,7 +21,15 @@ Module.SaveRequested     = nil
 Module.ModuleLoaded      = false
 Module.TempSettings      = {}
 
-Module.FAQ               = {}
+Module.FAQ               = {
+	[1] = {
+		Question = "How can I loot corpses on emu servers?",
+		Answer = "RGMercs offers a Loot Module to direct and integrate LootNScoot (LNS), an emu loot management script." ..
+			"Refer to the RG forums or the LNS github for installation or usage instructions, settings here are simply to control how RGMercs interacts with it." ..
+			"Note that at one time, we offered an integrated version of LNS, but that feature has been discontinued.",
+		Settings_Used = "",
+	},
+}
 
 Module.DefaultConfig     = {
 	['DoLoot']                                 = {
@@ -32,8 +40,6 @@ Module.DefaultConfig     = {
 		Index = 1,
 		Tooltip = "Load the integrated LootNScoot in directed mode. Turning this off will unload the looting script.",
 		Default = false,
-		FAQ = "What is this silver coin thing? How do I turn it off?",
-		Answer = "The silver coin is our integration of LootNScoot, looting automation for Emu. It can be disabled as you choose.",
 	},
 	['CombatLooting']                          = {
 		DisplayName = "Combat Looting",
@@ -43,8 +49,6 @@ Module.DefaultConfig     = {
 		Index = 2,
 		Tooltip = "Enables looting during RGMercs-defined combat.",
 		Default = false,
-		FAQ = "How do i make sure my guys are looting during combat?, incase I die or something.",
-		Answer = "You can enable [CombatLooting] to loot during combat, I recommend only having one or 2 characters do this and NOT THE MA!!.",
 	},
 	['LootRespectMedState']                    = {
 		DisplayName = "Respect Med State",
@@ -54,9 +58,6 @@ Module.DefaultConfig     = {
 		Index = 3,
 		Tooltip = "Hold looting if you are currently meditating.",
 		Default = false,
-		FAQ = "Why is the PC sitting there and not medding?",
-		Answer =
-		"If you turn on Respect Med State in the Group Watch options, your looter will remain medding until those thresholds are reached.\nIf Stand When Done is not enabled, the looter may continue to sit after those thresholds are reached.",
 	},
 	['LootingTimeout']                         = {
 		DisplayName = "Looting Timeout",
@@ -68,10 +69,6 @@ Module.DefaultConfig     = {
 		Default = 5,
 		Min = 1,
 		Max = 30,
-		FAQ = "Why do my guys take too long to loot, or sometimes miss corpses?",
-		Answer =
-			"While RGMercs doesn't necessary control what LNS is doing, exactly, we do have a timeout setting that dictates how long we will allow it to do it before re-checking for other actions. \n" ..
-			"You can adjust this advanced setting in the Loot options. Please note, if no other actions are required by mercs, we will simply allow LNS to continue.",
 	},
 	['MaxChaseTargetDistance']                 = {
 		DisplayName = "Max Chase Targ Dist",
@@ -87,30 +84,12 @@ Module.DefaultConfig     = {
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
 		Type = "Custom",
-		Category = "Custom",
-		Tooltip = Module._name .. " Pop Out Into Window",
 		Default = false,
-		FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-		Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling loot_Popped",
 	},
 }
 
 Module.FAQ               = {
-	[1] = {
-		Questions = "How can I set the same settings on all of my characters?",
-		Answer = "You can copy your Loot_Server_Name_CharName_CLASS.lua and rename them for the other characters.\n\n" ..
-			"Example: Loot_Project_Lazarus_Grimmier_CLR.lua\n\n" ..
-			"We may add an option at a later date to copy settings from one character to another directly.",
-		Settings_Used = "DoLoot",
-	},
-	[2] = {
-		Question = "What is the difference between GlobalItem and NormalItem?",
-		Answer =
-			"GlobalItem is a setting that will always be used for that item.\nNormalItem is a setting that will be used for that item unless it is set as a GlobalItem.\n" ..
-			"NormalItem settings are evaluated each time if you have [AlwaysEval] turned on, which can change your setting if the item no longer meets the criteria.\n" ..
-			"Setting an items as a GlobalItem will prevent it from being re-evaluated and always use the GlobalItem setting.",
-		Settings_Used = "GlobalLootOn",
-	},
+
 }
 
 Module.CommandHandlers   = {
@@ -213,6 +192,9 @@ end
 
 function Module:Render()
 	Ui.RenderPopAndSettings(self._name)
+	ImGui.Text("Directed LNS looting is %s.", Config:GetSetting('DoLoot') and "ENABLED" or "DISABLED")
+	ImGui.Text(
+		"Directed control of the LootNScoot script for looting on emu servers.\nSee the Loot category in the General options for integration settings.\nPlease refer to LNS documentation for all else.")
 end
 
 function Module:Pop()
