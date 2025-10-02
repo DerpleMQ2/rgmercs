@@ -91,14 +91,14 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         },
     },
     {
-        Name = "FAQ",
-        Description = "Frequently Asked Questions",
+        Name = "Commands/FAQ",
+        Description = "Command List and Frequently Asked Questions",
         Icon = Icons.MD_RESTAURANT_MENU,
         IconImage = OptionsUI.LoadIcon("faqicon"),
         Headers = {
         },
         HiddenOnSearch = function(self)
-            return not Modules:ExecModule("FAQ", "SearchMaches", self.configFilter)
+            return not Modules:ExecModule("FAQ", "SearchMatches", self.configFilter)
         end,
 
         HeaderRender = function(self)
@@ -502,7 +502,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                 ImGui.SameLine()
                 local curPosX = ImGui.GetCursorPosX()
                 ImGui.SetCursorPosX(inputBoxPosX + (style.WindowPadding.x / 2))
-                ImGui.TextColored(0.8, 0.8, 0.8, 0.75, "Search Configs...")
+                ImGui.TextColored(0.8, 0.8, 0.8, 0.75, "Search All...")
                 ImGui.SameLine()
                 ImGui.SetCursorPosX(curPosX)
             else

@@ -20,7 +20,6 @@ Module.ModuleLoaded                = false
 Module.TempSettings                = {}
 Module.TempSettings.CampZoneId     = 0
 Module.TempSettings.LastCmd        = ""
-Module.FAQ                         = {}
 Module.SaveRequested               = nil
 
 Module.Constants                   = {}
@@ -69,7 +68,47 @@ Module.Constants.CampfireTypes = { 'All Off', }
 for t, _ in pairs(Module.Constants.CampfireNameToKit) do table.insert(Module.Constants.CampfireTypes, t) end
 table.sort(Module.Constants.CampfireTypes)
 
+Module.FAQ             = {
+    [1] = {
+        Question = "How do I move my PCs or have them follow my driver?",
+        Answer = "Enable \"Chase\" on the Movement tab (or via Command-Line) and adjust settings in the Following category (Movement Options) to your liking.\n" ..
+            "There are two commonly used forms of following in MQ currently: \"Nav\" and \"A(dvanced)Follow\".\n" ..
+            "Nav uses the MQ2Nav plugin to check zone geometry to move from point-to-point. This is the type of movement that RGMercs uses by default.\n" ..
+            "Afollow, which is a feature of MQ2AdvPath, uses recording and playback of player movement to mimic the PC being followed. This is the type of nav typically seen on \"Follow Me\" buttons in the group window.\n" ..
+            "There are times when Chase(Nav) and Afollow both have advantages, so situationally using both is common.",
+        Settings_Used = "",
+    },
+    [2] = {
+        Question = "What is a camp in RGMercs? How do I use one?",
+        Answer = "Camping is setting a tether to a particular location.\n" ..
+            "Rather than chasing/following another PC, you will continually return to the vicinity of the camp location you've set.\n" ..
+            "This mode is mutually-exclusive with Chase, i.e, you cannot Chase and Camp at the same time. Enabling one disables the other." ..
+            "Camp settings can be adjusted in the Following category (Movement Options).",
+        Settings_Used = "",
+    },
+}
+
 Module.DefaultConfig   = {
+    --Custom
+    ['ReturnToCamp']                           = {
+        DisplayName = "Return To Camp",
+        Type = "Custom",
+        Default = false,
+        FAQ = "How do I set a camp?",
+        Answer = "You can set a camp using a button on the Movement tab, or by using the campon command (see command list) .",
+    },
+    [string.format("%s_Popped", Module._name)] = {
+        DisplayName = Module._name .. " Popped",
+        Type = "Custom",
+        Default = false,
+    },
+    ['ChaseTarget']                            = {
+        DisplayName = "Chase Target",
+        Type = "Custom",
+        Default = "",
+        FAQ = "How do I set my chase target?",
+        Answer = "You can set your chase target using a button on the Movement tab, or by using the chaseon command (see command list).",
+    },
     -- Chase
     ['ChaseOn']                                = {
         DisplayName = "Chase On",
@@ -77,10 +116,8 @@ Module.DefaultConfig   = {
         Header = "Following",
         Category = "Chase",
         Index = 1,
-        Tooltip = "Chase your Chase Target.",
+        Tooltip = "Follow the Chase target using MQ2Nav. Requires navmeshes!",
         Default = false,
-        FAQ = "How do I make my follow my driver?",
-        Answer = "Set the Driver to [ChaseTarget] and Turn on [ChaseOn] and you will follow your Chase Target.",
     },
     ['RunMovePaused']                          = {
         DisplayName = "Chase While Paused",
@@ -88,11 +125,8 @@ Module.DefaultConfig   = {
         Header = "Following",
         Category = "Chase",
         Index = 2,
-        Tooltip = "Runs the Movement/Chase module even if the Main loop is paused",
+        Tooltip = "Continue to follow your Chase target, even if RGMercs is paused.",
         Default = true,
-        ConfigType = "Advanced",
-        FAQ = "I want to make sure my characters always follow me, even if I pause the main loop. How do I do that?",
-        Answer = "Enable [RunMovePaused] and your characters will follow you even if the main loop is paused.",
     },
     ['ChaseDistance']                          = {
         DisplayName = "Chase Distance",
@@ -100,12 +134,10 @@ Module.DefaultConfig   = {
         Header = "Following",
         Category = "Chase",
         Index = 3,
-        Tooltip = "How Far your Chase Target can get before you Chase.",
+        Tooltip = "The distance away from our chase target before we will begin to navigate to them. (This starts chase movement.)",
         Default = 25,
         Min = 5,
         Max = 100,
-        FAQ = "How can I adjust when my characters all start following me?",
-        Answer = "Set [ChaseDistance] the distance you want them to start chasing, when you are outside of this range they will start to come your way.",
     },
     ['ChaseStopDistance']                      = {
         DisplayName = "Chase Stop Distance",
@@ -113,12 +145,10 @@ Module.DefaultConfig   = {
         Header = "Following",
         Category = "Chase",
         Index = 4,
-        Tooltip = "How close to get to your chase target before you stop.",
+        Tooltip = "The distance to our chase target to end navigation to them. (This ends chase movement.) High run speed may overshoot this value.",
         Default = 25,
         Min = 5,
         Max = 100,
-        FAQ = "How do I make my goobers not try and stand on top of me?",
-        Answer = "Set [ChaseStopDistance] to a higher number stop chasing you further away.",
     },
     ['RequireLoS']                             = {
         DisplayName = "Require LOS",
@@ -126,10 +156,9 @@ Module.DefaultConfig   = {
         Header = "Following",
         Category = "Chase",
         Index = 5,
-        Tooltip = "Require LOS when using /nav",
-        Default = Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()),
-        FAQ = "I want to make sure my characters always have line of sight to their target, how do I do that?",
-        Answer = "Enable [RequireLoS] and your characters will try and maintain line of sight to their target when using NAV.",
+        Tooltip = "Require Line-of-Sight to the chase target before navigation to them is ended.",
+        Default = true,
+        ConfigType = "Advanced",
     },
     ['PriorityFollow']                         = {
         DisplayName = "Prioritize Follow",
@@ -137,11 +166,10 @@ Module.DefaultConfig   = {
         Header = "Following",
         Category = "Chase",
         Index = 6,
-        Tooltip = "If enabled (and you are not the Chase Target), you will prioritize staying in range of the Chase Target over any other actions.",
+        Tooltip =
+        "Prioritize staying in range of the Chase Target over any other actions. This will prevent any rotations (heals, buffs, etc) from being processed if we are out of range of the chase target.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "I want to make sure my characters always follow me, we can rebuff when we arrive. How do I do that?",
-        Answer = "Enable [PriorityFollow] and your characters will prioritize staying in range of the Chase Target over any other actions.",
     },
     ['BreakOnDeath']                           = {
         DisplayName = "Break On Death",
@@ -149,102 +177,60 @@ Module.DefaultConfig   = {
         Header = "Following",
         Category = "Chase",
         Index = 7,
-        Tooltip = "Stop chasing when you die.",
+        Tooltip = "Stop chasing after when you die.",
         Default = false,
-        FAQ = "I died and my character started running back to my driver, how do I stop that?",
-        Answer = "Enable [BreakOnDeath] and your character will stop chasing when you die.",
+        ConfigType = "Advanced",
     },
     -- Camp
     ['AutoCampRadius']                         = {
-        DisplayName = "Auto Camp Radius",
+        DisplayName = "Camp Radius",
         Group = "Movement",
         Header = "Following",
         Category = "Camp",
         Index = 1,
-        Tooltip = "Return to camp after you get this far away",
+        Tooltip = "The distance to allow from camp before you return to it. During combat, we relax this distance slightly.",
         Default = (Config.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60),
         Min = 10,
         Max = 300,
-        FAQ = "I want to keep all of my characters within the same range for the camp, how do I do that?",
-        Answer = "Enabling [AutoCampRadius] will make all of your characters return to camp when they are this far away from their camp location.",
-    },
-    ['ReturnToCamp']                           = {
-        DisplayName = "Return To Camp",
-        Group = "Movement",
-        Header = "Following",
-        Category = "Camp",
-        Index = 2,
-        Tooltip = "Return to Camp After Combat (requires you to /rgl campon)",
-        Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
-        FAQ = "How do I make my characters return to camp after combat?",
-        Answer = "Enable [ReturnToCamp] and your characters will return to camp after combat.",
     },
     ['CampHard']                               = {
         DisplayName = "Camp Hard",
         Group = "Movement",
         Header = "Following",
         Category = "Camp",
-        Index = 3,
-        Tooltip = "Return to Camp Loc Everytime",
+        Index = 2,
+        Tooltip = "Return to the exact camp location whenever possible, even if we are within the Camp Radius.",
         Default = false,
-        FAQ = "I want to make sure my characters always return to camp, and always stay in the same positions within camp. How do I do that?",
-        Answer = "Enable [CampHard] and your characters will always return to camp after combat and in the same positions (loc) within camp.",
     },
     ['MaintainCampfire']                       = {
         DisplayName = "Maintain Campfire",
         Group = "Movement",
         Header = "Following",
         Category = "Camp",
-        Index = 4,
-        Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;",
+        Index = 3,
+        Tooltip = "Official Servers: Maintain the selected Fellowship Campfire.",
         Type = "Combo",
         ComboOptions = Module.Constants.CampfireTypes,
         Default = 1,
         Min = 1,
         Max = #Module.Constants.CampfireTypes,
-        FAQ = "I want to make sure my characters always have a campfire, how do I do that?",
-        Answer = "Enable [MaintainCampfire] and your characters will always have a campfire." ..
-            "You can select the type of campfire you want to use from the drop down.",
     },
     ['DoFellow']                               = {
         DisplayName = "Enable Fellowship Insignia",
         Group = "Movement",
         Header = "Following",
         Category = "Camp",
-        Index = 5,
-        Tooltip = "Use fellowship insignia automatically.",
+        Index = 4,
+        Tooltip = "Official Servers: Use your fellowship insignia to automatically return to the zone you were camped in after death.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "I have my Fellowship Insignia and want to use it, how do I do that?",
-        Answer = "Enable [DoFellow] and your characters will use the fellowship insignia automatically.",
-    },
-    [string.format("%s_Popped", Module._name)] = {
-        DisplayName = Module._name .. " Popped",
-        Type = "Custom",
-        Category = "Custom",
-        Tooltip = Module._name .. " Pop Out Into Window",
-        Default = false,
-        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-        Answer =
-        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
-    },
-    ['ChaseTarget']                            = {
-        DisplayName = "Chase Target",
-        Group = "Movement",
-        Header = "Following",
-        Category = "Chase",
-        Tooltip = "Character you are Chasing",
-        Type = "Custom",
-        Default = "",
-        FAQ = "How do I tell my group who to follow?",
-        Answer = "Set the person to follow as the [ChaseTarget] and Turn on [ChaseOn] and you will follow your Chase Target.",
     },
 }
 
 Module.CommandHandlers = {
     chaseon = {
         usage = "/rgl chaseon <name?>",
-        about = "Chase <name> (uses your current target if no name is supplied).",
+        about = "Chase <name> (uses your current target if no name is supplied). Clears your camp.",
         handler = function(self, params)
             self:ChaseOn(params)
         end,
@@ -258,7 +244,7 @@ Module.CommandHandlers = {
     },
     campon = {
         usage = "/rgl campon",
-        about = "Set a camp here.",
+        about = "Set a camp here. Disables Chase.",
         handler = function(self, _)
             self:CampOn()
         end,
@@ -538,6 +524,7 @@ function Module:Render()
         if ImGui.Button(Config:GetSetting('ChaseOn') and "Chase Off" or "Chase On", ImGui.GetWindowWidth() * .3, 25) then
             self:RunCmd("/rgl chase%s", Config:GetSetting('ChaseOn') and "off" or "on")
         end
+        Ui.Tooltip("Find more information about Chasing by checking the Command List or FAQs in the Options Window.")
 
         local haveChaseTarget = self:ValidChaseTarget() and chaseSpawn() and chaseSpawn.ID() > 0
 
@@ -586,6 +573,7 @@ function Module:Render()
             end
             ImGui.PopStyleVar(1)
         end
+        Ui.Tooltip("Find more information about Camping by checking the Command List or FAQs in the Options Window.")
 
         local me = mq.TLO.Me
         local distanceToCamp = Math.GetDistance(me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0)
