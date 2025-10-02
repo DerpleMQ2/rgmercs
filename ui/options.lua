@@ -97,9 +97,12 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         IconImage = OptionsUI.LoadIcon("faqicon"),
         Headers = {
         },
-        HiddenOnSearch = true,
+        HiddenOnSearch = function(self)
+            return not Modules:ExecModule("FAQ", "SearchMaches", self.configFilter)
+        end,
+
         HeaderRender = function(self)
-            return Modules:ExecModule("FAQ", "RenderConfig")
+            return Modules:ExecModule("FAQ", "RenderConfig", self.configFilter)
         end,
     },
     {
@@ -107,7 +110,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Description = "Credits to those who helped",
         Icon = Icons.MD_RESTAURANT_MENU,
         IconImage = OptionsUI.LoadIcon("contribicon"),
-        HiddenOnSearch = false,
+        HiddenOnSearch = function(self) return false end,
         Headers = {
         },
         HeaderRender = function(self)
@@ -245,7 +248,7 @@ function OptionsUI:ApplySearchFilter()
             end
         end
 
-        if #(newGroup.Headers or {}) > 0 or (newGroup.HeaderRender and (filter:len() == 0 or not newGroup.HiddenOnSearch)) then
+        if #(newGroup.Headers or {}) > 0 or (newGroup.HeaderRender and (filter:len() == 0 or not (newGroup.HiddenOnSearch and newGroup.HiddenOnSearch(self) or false))) then
             table.insert(filtered, newGroup)
         end
     end
