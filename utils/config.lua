@@ -2262,7 +2262,7 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
         if v.Type ~= "Custom" then
             settingCategories:add(v.Category)
         end
-        faq[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
+        faq[k] = { Question = v.FAQ, Answer = v.Answer, Settings_Used = k, }
     end
 
     -- Setup Defaults
