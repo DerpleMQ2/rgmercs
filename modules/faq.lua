@@ -99,6 +99,30 @@ function Module:ShouldRender()
 	return false
 end
 
+function Module:SearchMaches(search)
+	self.TempSettings.Search = search
+	for cmd, data in pairs(Binds.Handlers) do
+		if cmd ~= "help" then
+			if self:MatchSearch(data.usage, data.about, cmd) then
+				return true
+			end
+		end
+	end
+
+	local moduleCommands = Modules:ExecAll("GetCommandHandlers")
+
+	for module, info in pairs(moduleCommands) do
+		if info.CommandHandlers then
+			for cmd, data in pairs(info.CommandHandlers or {}) do
+				if self:MatchSearch(data.usage, data.about, cmd, module) then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
 function Module:MatchSearch(...)
 	local allText = { ..., }
 	for _, t in ipairs(allText) do
@@ -269,7 +293,7 @@ function Module:FaqFind(question)
 	self.TempSettings.Search = ''
 end
 
-function Module:RenderConfig()
+function Module:RenderConfig(search)
 	ImGui.Spacing()
 	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1, 1, 0, 1))
 	ImGui.Text("Local FAQ Browser Link")
@@ -289,11 +313,8 @@ function Module:RenderConfig()
 		return
 	end
 
-	ImGui.Text("Search")
-	ImGui.SameLine()
-	self.TempSettings.Search, _ = ImGui.InputText("##Search", self.TempSettings.Search or "")
+	self.TempSettings.Search = search
 
-	ImGui.SetNextWindowSizeConstraints(0, 0, ImGui.GetWindowWidth(), 600)
 	if ImGui.BeginChild("##FAQCommandContainer", ImVec2(0, 0), ImGuiChildFlags.Border, ImGuiWindowFlags.AlwaysAutoResize) then
 		if ImGui.CollapsingHeader("Command List") then
 			if ImGui.BeginTable("##CommandHelper", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
