@@ -890,6 +890,7 @@ function Ui.RenderPopAndSettings(moduleName)
         Config:HighlightModule(moduleName)
         Config:SetSetting('EnableOptionsUI', true)
     end
+    Ui.Tooltip(string.format("Open the RGMercs Options with %s settings highlighted.", moduleName))
 
     if Config:HaveSetting(moduleName .. "_Popped") then
         ImGui.SameLine()
@@ -994,7 +995,6 @@ end
 --- Generates a tooltip with the given description.
 --- @param desc string: The description to be displayed in the tooltip.
 function Ui.Tooltip(desc)
-    ImGui.SameLine()
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0)
@@ -1006,7 +1006,6 @@ function Ui.Tooltip(desc)
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
     end
-    ImGui.NewLine()
 end
 
 --- Renders text as strikethrough

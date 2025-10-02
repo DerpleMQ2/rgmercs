@@ -32,7 +32,7 @@ Module.TempSettings                          = {}
 Module.CombatState                           = "None"
 Module.CurrentRotation                       = { name = "None", state = 0, }
 Module.ClassConfig                           = nil
-Module.ClassFAQ                              = {}
+Module.FAQ                                   = {}
 Module.SaveRequested                         = nil
 
 Module.Constants                             = {}
@@ -351,7 +351,7 @@ function Module:LoadSettings()
         Default = {},
     }
 
-    Config:RegisterModuleSettings(self._name, settings, self.ClassConfig.DefaultConfig, self.ClassFAQ, firstSaveRequired)
+    Config:RegisterModuleSettings(self._name, settings, self.ClassConfig.DefaultConfig, self.FAQ, firstSaveRequired)
 
     self:RescanLoadout()
 end
@@ -1578,7 +1578,7 @@ function Module:GetFAQ()
 end
 
 function Module:GetClassFAQ()
-    return { module = self._name, FAQ = self.ClassFAQ or {}, }
+    return { module = "Class Config", FAQ = self.ClassConfig.ClassFAQ or {}, }
 end
 
 ---@param cmd string
