@@ -253,7 +253,7 @@ function Module:FaqFind(question)
 		end
 	end
 
-	local classFaq = Modules:ExecMOdule("Class", "GetClassFAQ")
+	local classFaq = Modules:ExecModule("Class", "GetClassFAQ")
 	if classFaq ~= nil then
 		for module, info in pairs(classFaq or {}) do
 			if info.FAQ then
@@ -295,7 +295,7 @@ function Module:RenderConfig()
 
 	ImGui.SetNextWindowSizeConstraints(0, 0, ImGui.GetWindowWidth(), 600)
 	if ImGui.BeginChild("##FAQCommandContainer", ImVec2(0, 0), ImGuiChildFlags.Border, ImGuiWindowFlags.AlwaysAutoResize) then
-		if ImGui.CollapsingHeader("FAQ Commands") then
+		if ImGui.CollapsingHeader("Command List") then
 			if ImGui.BeginTable("##CommandHelper", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
 				ImGui.TableSetupColumn("Command", ImGuiTableColumnFlags.WidthFixed, 100)
 				ImGui.TableSetupColumn("Usage", ImGuiTableColumnFlags.WidthFixed, 200)
@@ -337,13 +337,12 @@ function Module:RenderConfig()
 			end
 		end
 
-		if ImGui.CollapsingHeader("FAQ General") then
+		if ImGui.CollapsingHeader("Frequently Asked Questions") then
 			local questions = Modules:ExecAll("GetFAQ")
 			local configFaq = {}
 
-			if ImGui.BeginTable("FAQ", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
-				ImGui.TableSetupColumn("SettingName", ImGuiTableColumnFlags.WidthFixed, 100)
-				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 200)
+			if ImGui.BeginTable("FAQ", 2, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
+				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 250)
 				ImGui.TableSetupColumn("Answer", ImGuiTableColumnFlags.WidthStretch)
 				ImGui.TableSetupScrollFreeze(0, 1)
 				ImGui.TableHeadersRow()
@@ -351,10 +350,8 @@ function Module:RenderConfig()
 					for module, info in pairs(questions or {}) do
 						if info.FAQ then
 							for _, data in pairs(info.FAQ or {}) do
-								if self:MatchSearch(data.Question, data.Answer, data.Settings_Used, module) then
+								if self:MatchSearch(data.Question, data.Answer) then
 									ImGui.TableNextRow()
-									ImGui.TableNextColumn()
-									ImGui.TextWrapped(data.Settings_Used)
 									ImGui.TableNextColumn()
 									ImGui.TextWrapped(data.Question)
 									ImGui.TableNextColumn()
@@ -368,10 +365,8 @@ function Module:RenderConfig()
 				configFaq.Config = Config:GetFAQ()
 				if configFaq ~= nil then
 					for k, v in pairs(configFaq.Config or {}) do
-						if self:MatchSearch(v.Question, v.Answer, v.Settings_Used, "Config") then
+						if self:MatchSearch(v.Question, v.Answer) then
 							ImGui.TableNextRow()
-							ImGui.TableNextColumn()
-							ImGui.TextWrapped(v.Settings_Used)
 							ImGui.TableNextColumn()
 							ImGui.TextWrapped(v.Question)
 							ImGui.TableNextColumn()
@@ -380,33 +375,16 @@ function Module:RenderConfig()
 						end
 					end
 				end
-				ImGui.EndTable()
-			end
-		end
-
-		if ImGui.CollapsingHeader("FAQ Class Config") then
-			local classFaq = Modules:ExecModule("Class", "GetClassFAQ")
-			if ImGui.BeginTable("FAQClass", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
-				ImGui.TableSetupColumn("SettingName", ImGuiTableColumnFlags.WidthFixed, 100)
-				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 200)
-				ImGui.TableSetupColumn("Answer", ImGuiTableColumnFlags.WidthStretch)
-				ImGui.TableSetupScrollFreeze(0, 1)
-				ImGui.TableHeadersRow()
+				local classFaq = Modules:ExecModule("Class", "GetClassFAQ")
 				if classFaq ~= nil then
-					for module, info in pairs(classFaq or {}) do
-						if info.FAQ then
-							for _, data in pairs(info.FAQ or {}) do
-								if self:MatchSearch(data.Question, data.Answer, data.Settings_Used, module) then
-									ImGui.TableNextRow()
-									ImGui.TableNextColumn()
-									ImGui.TextWrapped(data.Settings_Used)
-									ImGui.TableNextColumn()
-									ImGui.TextWrapped(data.Question)
-									ImGui.TableNextColumn()
-									ImGui.TextWrapped(data.Answer)
-									ImGui.Spacing()
-								end
-							end
+					for k, v in pairs(classFaq.FAQ) do
+						if self:MatchSearch(v.Question, v.Answer) then
+							ImGui.TableNextRow()
+							ImGui.TableNextColumn()
+							ImGui.TextWrapped(v.Question)
+							ImGui.TableNextColumn()
+							ImGui.TextWrapped(v.Answer)
+							ImGui.Spacing()
 						end
 					end
 				end
@@ -450,10 +428,6 @@ end
 
 function Module:GetFAQ()
 	return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
-function Module:GetClassFAQ()
-	return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string
