@@ -120,6 +120,40 @@ function Module:SearchMaches(search)
 			end
 		end
 	end
+
+	local questions = Modules:ExecAll("GetFAQ")
+	local configFaq = {}
+
+	if questions ~= nil then
+		for _, info in pairs(questions or {}) do
+			if info.FAQ then
+				for _, data in pairs(info.FAQ or {}) do
+					if self:MatchSearch(data.Question, data.Answer) then
+						return true
+					end
+				end
+			end
+		end
+	end
+
+	configFaq.Config = Config:GetFAQ()
+	if configFaq ~= nil then
+		for _, v in pairs(configFaq.Config or {}) do
+			if self:MatchSearch(v.Question, v.Answer) then
+				return true
+			end
+		end
+	end
+
+	local classFaq = Modules:ExecModule("Class", "GetClassFAQ")
+	if classFaq ~= nil then
+		for _, v in pairs(classFaq.FAQ) do
+			if self:MatchSearch(v.Question, v.Answer) then
+				return true
+			end
+		end
+	end
+
 	return false
 end
 
