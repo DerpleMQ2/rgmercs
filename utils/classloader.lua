@@ -10,23 +10,25 @@ local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple
 function ClassLoader.getClassConfigFileName(class)
     local baseConfigDir = Config.Globals.ScriptDir .. "/class_configs"
 
-    local customConfigFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, Config.Globals.BuildType, class:lower())
-
     local classConfigDir = Config:GetSetting('ClassConfigDir')
-    local customConfig = (classConfigDir == "Custom")
+    local configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
+    local useCustomConfig = (classConfigDir:find("Custom: ") ~= nil)
 
-    local configFile = customConfig and customConfigFile or string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
+    if useCustomConfig then
+        classConfigDir = classConfigDir:sub(9) -- remove "Custom:"
+        configFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, classConfigDir, class:lower())
+    end
 
     if not Files.file_exists(configFile) then
         -- Fall back to the appropriate config.
         local oldConfig = configFile
-        customConfig = false
+        useCustomConfig = false
         local folder = Core.OnLaz() and "Project Lazarus" or "Live"
         configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, folder, class:lower())
         Logger.log_error("Could not find requested class config:\n \ay(%s)\n\awFalling back to:\n\ag%s", oldConfig, configFile)
     end
 
-    return configFile, customConfig
+    return configFile, useCustomConfig
 end
 
 ---@param class string # EQ Class ShortName
