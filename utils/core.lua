@@ -28,7 +28,19 @@ function Core.ScanConfigDirs()
         end
     end
 
-    table.insert(Config.Globals.ClassConfigDirs, "Custom")
+    local customConfigFile = string.format("%s/rgmercs/class_configs", mq.configDir)
+    for dir in LuaFS.dir(customConfigFile) do
+        if dir ~= "." and dir ~= ".." and LuaFS.attributes(customConfigFile .. "/" .. dir).mode == "directory" then
+            -- scan for valid configs inside this directory.
+            for file in LuaFS.dir(customConfigFile .. "/" .. dir) do
+                local class = file:match("(.*)_class_config.lua")
+                if class and class == curloadedClassName then
+                    Logger.log_debug("Found class config: %s for class %s in directory %s", file, class, dir)
+                    table.insert(Config.Globals.ClassConfigDirs, "Custom: " .. dir)
+                end
+            end
+        end
+    end
 end
 
 --- Safely calls a function and logs information.
