@@ -53,38 +53,43 @@ end
 
 function ClassLoader.writeCustomConfig(class)
     -- Define file paths
-    local base_config_file = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.luaDir, Config:GetSetting('ClassConfigDir'), class:lower())
-    local custom_config_old = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
-    local custom_config_file = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, Config.Globals.BuildType, class:lower())
-    local backup_config_file = string.format("%s/rgmercs/class_configs/BACKUP/%s/%s_class_config_%s.lua", mq.configDir, Config.Globals.BuildType, class:lower(),
-        os.date("%Y%m%d_%H%M%S"))
-
-    if not Files.file_exists(custom_config_file) then
-        if not Files.file_exists(custom_config_old) then
-            mq.pickle(custom_config_file, {}) -- build the path so we don't get an error
-        end
+    local currentConfigPath = mq.luaDir
+    local currentConfigDir = Config:GetSetting('ClassConfigDir')
+    if string.find(currentConfigDir, "Custom:") then
+        currentConfigPath = mq.configDir
+        currentConfigDir = currentConfigDir:gsub("Custom: ", "")
     end
+    local current_File = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", currentConfigPath, currentConfigDir, class:lower())
+    local configType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or mq.TLO.EverQuest.Server()
+    local customFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, configType, class:lower())
+    local backupFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config_%s.lua", mq.configDir, configType, class:lower(), os.date("%Y%m%d_%H%M%S"))
+
     -- Backup the custom config file if one exists
-    local fileCustom = io.open(custom_config_file, "r")
-    if fileCustom then
-        mq.pickle(backup_config_file, {}) -- build the path so we don't get an error
+    local fileCustom = io.open(customFile, "r")
+    if fileCustom ~= nil then
+        mq.pickle(backupFile, {}) -- build the path so we don't get an error
         local content = fileCustom:read("*all")
         fileCustom:close()
 
-        local fileBackup, err = io.open(backup_config_file, "w")
+        local fileBackup, err = io.open(backupFile, "w")
         if not fileBackup then
-            Logger.log_error("Failed to Backup Custom Core Class Config: %s %s", backup_config_file, err)
+            Logger.log_error("Failed to Backup Custom Core Class Config: %s %s", backupFile, err)
             return
         end
 
         fileBackup:write(content)
         fileBackup:close()
+        Logger.log_info("Custom Class Config Backup Created: %s", backupFile)
     end
 
-    -- Load the default config file content
-    local file = io.open(base_config_file, "r")
+    if not Files.file_exists(customFile) then
+        mq.pickle(customFile, {}) -- build the path so we don't get an error
+    end
+
+    -- Load the current config file content
+    local file = io.open(current_File, "r")
     if not file then
-        Logger.log_error("Failed to Load Base Class Config: %s", base_config_file)
+        Logger.log_error("Failed to Load Base Class Config: %s", current_File)
         return
     end
 
@@ -92,17 +97,17 @@ function ClassLoader.writeCustomConfig(class)
     file:close()
 
     -- Write the updated content to the custom config file
-    mq.pickle(custom_config_file, {}) -- incase the path isn't made yet
-    local custom_file, err = io.open(custom_config_file, "w")
+    mq.pickle(customFile, {}) -- incase the path isn't made yet
+    local custom_file, err = io.open(customFile, "w")
     if not custom_file then
-        Logger.log_error("Failed to Write Custom Core Class Config: %s Error:", custom_config_file)
+        Logger.log_error("Failed to Write Custom Class Config: %s", customFile)
         return
     end
 
     custom_file:write(content)
     custom_file:close()
 
-    Logger.log_info("Custom Core Class Config Written: %s", custom_config_file)
+    Logger.log_info("Custom Class Config Written: %s", customFile)
 end
 
 function ClassLoader.mergeTables(tblA, tblB)
