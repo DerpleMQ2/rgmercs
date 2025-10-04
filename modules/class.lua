@@ -161,7 +161,7 @@ Module.CommandHandlers                       = {
     },
     cast = {
         usage = "/rgl cast \"<spell>\" <targetId?>",
-        about = "Uses a spell or AA (memorizes if necessary). If no targetId is entered, your target is used.",
+        about = "Queus a spell for use (memorizes if necessary), falls back to AA if the spell is invalid. If no targetId is entered, your target is used.",
         handler = function(self, spell, targetId)
             targetId = targetId and tonumber(targetId)
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
@@ -180,7 +180,7 @@ Module.CommandHandlers                       = {
     },
     castaa = {
         usage = "/rgl castaa \"<AAName>\" <targetId?>",
-        about = "Uses an AA. If no targetId is entered, your target is used.",
+        about = "Queues an AA for use. If no targetId is entered, your target is used.",
         handler = function(self, aaname, targetId)
             targetId = targetId and tonumber(targetId)
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
@@ -197,9 +197,28 @@ Module.CommandHandlers                       = {
             return true
         end,
     },
+    useitem = {
+        usage = "/rgl useitem \"<ItemName>\" <targetId?>",
+        about = "Queues an item for use. If no targetId is entered, your target is used.",
+        handler = function(self, itemName, targetId)
+            targetId = targetId and tonumber(targetId)
+            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
+            Logger.log_debug("\atUsing Item: \aw\"\am%s\aw\" on targetId(\am%d\aw)", itemName, tonumber(targetId) or mq.TLO.Target.ID())
+
+            table.insert(self.TempSettings.QueuedAbilities, {
+                name = itemName,
+                targetId = targetId,
+                target = mq.TLO.Spawn(targetId),
+                type = "item",
+                queuedTime = os.clock(),
+            })
+
+            return true
+        end,
+    },
     usemap = {
         usage = "/rgl usemap \"<maptype>\" \"<mapname>\" <targetId?>",
-        about = "RGMercs will use the mapped spell, song, AA, disc, or item (using smart targeting, or, if provided, on the specified <targetID>).",
+        about = "RGMercs will queue the mapped spell, song, AA, disc, or item (using smart targeting, or, if provided, on the specified <targetID>).",
         handler = function(self, mapType, mapName, targetId)
             local action = Modules:ExecModule("Class", "GetResolvedActionMapItem", mapName)
             if not action or not action() then
