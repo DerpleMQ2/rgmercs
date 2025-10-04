@@ -123,7 +123,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
     -- different from items in that they are configured by the user instead of the class.
     if entry.type:lower() == "clickyitem" then
-        local itemName = caller.settings[entry.name]
+        local itemName = Config:GetSetting(entry.name)
 
         if not itemName or itemName:len() == 0 then return false end
 
