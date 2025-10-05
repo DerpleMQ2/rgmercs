@@ -535,7 +535,7 @@ end
 --- This function evaluates the current aggro level and allows actions based on the result.
 --- @return boolean True if you have less aggro than your aggro threshold setting or have disabled aggro throttling, false otherwise
 function Targeting.AggroCheckOkay()
-    if Core.IsTanking() then return true end
+    if not mq.TLO.Group() or (mq.TLO.Group.MainTank.ID() or 0) == mq.TLO.Me.ID() or Core.IsTanking() then return true end
     return (mq.TLO.Target.PctAggro() or 0) < Config:GetSetting('MobMaxAggro') or not Config:GetSetting('AggroThrottling')
 end
 
