@@ -35,18 +35,14 @@ Module.DefaultConfig      = {
         Min = 10,
         Max = 120,
         Step = 5,
-        FAQ = "I want to see a longer span of time, can I adjust this?",
-        Answer = "Yes, you can adjust the number of [SecondsToStore] in the history with this setting.",
     },
     ['EnablePerfMonitoring']                   = {
         DisplayName = "Enable Performance Monitoring",
         Group       = "General",
         Header      = "Misc",
         Category    = "Misc",
-        Tooltip     = "Might cause some lag so only use if you want it",
+        Tooltip     = "Enable the Performance Module for advanced testing.",
         Default     = false,
-        FAQ         = "I want to see how long my modules are taking to run, how do I do that?",
-        Answer      = "Enable [EnablePerfMonitoring] and you will see the performance of your modules in the Performance Monitor.",
     },
     ['PlotFillLines']                          = {
         DisplayName = "Enable Fill Lines",
@@ -55,18 +51,11 @@ Module.DefaultConfig      = {
         Category = "Misc",
         Tooltip = "Fill in the Plot Lines",
         Default = true,
-        FAQ = "Can I toggle between Lines and Bars?",
-        Answer = "Yes, Sort of. You can enable [PlotFillLines] and the graph will fill under the lines.",
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Type = "Custom",
-        Category = "Custom",
-        Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
-        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-        Answer =
-        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
 

@@ -39,8 +39,6 @@ Module.DefaultConfig           = {
         Index = 1,
         Default = true,
         Tooltip = "Enables mezzing all forms of mezzing as a quick toggle, select particular actions to use below.",
-        FAQ = "How do I turn on Mez?",
-        Answer = "Toggle [MezOn] to the on position.",
     },
     ['DoSTMez']                                = {
         DisplayName = "ST Mez Song/Spells",
@@ -49,10 +47,8 @@ Module.DefaultConfig           = {
         Category = "Mez General",
         Index = 2,
         Default = true,
-        Tooltip = "Set to enable use of ST mez spells/songs.",
+        Tooltip = "Enable the memorization and use of ST mez spells/songs.",
         RequiresLoadoutChange = true,
-        FAQ = "How come my character is only using the AE Mez?",
-        Answer = "To use Single Target mez turn on [DoSTMez].",
     },
     ['DoAEMez']                                = {
         DisplayName = "AE Mez Song/Spells",
@@ -61,10 +57,8 @@ Module.DefaultConfig           = {
         Category = "Mez General",
         Index = 3,
         Default = true,
-        Tooltip = "Set to enable use of AE mez spells/songs.",
+        Tooltip = "Enable the memorization and use of AE mez spells/songs.",
         RequiresLoadoutChange = true,
-        FAQ = "How come my character is only using the ST Mez?",
-        Answer = "To use AE mez turn on AE Mez in the mez options..",
     },
     ['DoAAMez']                                = {
         DisplayName = "Use Mez AA",
@@ -74,8 +68,6 @@ Module.DefaultConfig           = {
         Index = 4,
         Default = true,
         Tooltip = "Use Beam of Slumber(ENC) or Dirge of the Sleepwalker(BRD) when able.",
-        FAQ = "Why am I not using XXX AA to mez?",
-        Answer = "Currently Beam of Slumber and Dirge of the Sleepwalker are supported. Feedback is always welcome!",
     },
     ['MezStartCount']                          = {
         DisplayName = "Mez Start Count",
@@ -86,9 +78,7 @@ Module.DefaultConfig           = {
         Default = 2,
         Min = 1,
         Max = 20,
-        Tooltip = "Sets # of mobs needed to start using Mez spells. ( Default 2 )",
-        FAQ = "How do I control when to cast Mez?",
-        Answer = "You can adjust your [MezStartCount] to set how many mobs are on XTarget before casting Mez spells",
+        Tooltip = "Number of xtarget mobs before we will being mezzing.",
     },
     ['MezAECount']                             = {
         DisplayName = "Mez AE Count",
@@ -213,12 +203,7 @@ Module.DefaultConfig           = {
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Type = "Custom",
-        Category = "Custom",
-        Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
-        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-        Answer =
-        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
 

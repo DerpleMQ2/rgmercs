@@ -55,9 +55,9 @@ function ClassLoader.writeCustomConfig(class)
     -- Define file paths
     local currentConfigPath = mq.luaDir
     local currentConfigDir = Config:GetSetting('ClassConfigDir')
-    if string.find(currentConfigDir, "Custom:") then
+    if currentConfigDir:find("Custom: ") ~= nil then
         currentConfigPath = mq.configDir
-        currentConfigDir = currentConfigDir:gsub("Custom: ", "")
+        currentConfigDir = currentConfigDir:sub(9)
     end
     local current_File = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", currentConfigPath, currentConfigDir, class:lower())
     local configType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or mq.TLO.EverQuest.Server()

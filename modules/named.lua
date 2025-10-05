@@ -38,17 +38,11 @@ Module.DefaultConfig   = {
         Answer =
             "RGMercs has a built-in named list that is suitable for official EQ servers. However, other servers may change or add named mobs. In that case, you can replace the default list by loading your Alert Master or MQ2SpawnMaster list instead.\n" ..
             "Please note that regardless of which list you choose, we will use the MQ2SpawnMaster TLO (if loaded) to check that list for the purposes of when to burn or use certain abilities.",
-
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Type = "Custom",
-        Category = "Custom",
-        Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
-        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-        Answer =
-        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
 

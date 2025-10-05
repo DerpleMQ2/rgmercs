@@ -51,6 +51,7 @@ Module.TempSettings.RezTimers                = {}
 Module.TempSettings.CureCheckTimer           = 0
 Module.TempSettings.ShowFailedSpells         = false
 Module.TempSettings.ResolvingActions         = true
+Module.TempSettings.CombatModeSet            = false
 Module.TempSettings.NewCombatMode            = false
 Module.TempSettings.MissingSpells            = {}
 Module.TempSettings.MissingSpellsHighestOnly = true
@@ -371,8 +372,6 @@ function Module:LoadSettings()
     }
 
     Config:RegisterModuleSettings(self._name, settings, self.ClassConfig.DefaultConfig, self.FAQ, firstSaveRequired)
-
-    self:RescanLoadout()
 end
 
 function Module:WriteCustomConfig()
@@ -1338,13 +1337,8 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    if Config.ShouldPriorityFollow() then
-        Logger.log_verbose("\arSkipping Class GiveTime because we are moving and follow is the priority.")
-        return
-    end
-
     -- Main Module logic goes here.
-    if self.TempSettings.NewCombatMode and combat_state == "Downtime" then
+    if (self.TempSettings.NewCombatMode and combat_state == "Downtime") or not self.TempSettings.CombatModeSet then
         Logger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[Config:GetSetting('Mode')])
 
         self:SetCombatMode(self.ClassConfig.Modes[Config:GetSetting('Mode')])
@@ -1355,18 +1349,24 @@ function Module:GiveTime(combat_state)
             end
         end
         self.TempSettings.NewCombatMode = false
+        self.TempSettings.CombatModeSet = true
     end
 
     if self.CombatState ~= combat_state and combat_state == "Downtime" then
         self:ResetRotation()
     end
 
+    self.CombatState = combat_state
+
+    if Config.ShouldPriorityFollow() then
+        Logger.log_verbose("\arSkipping Class GiveTime because we are moving and follow is the priority.")
+        return
+    end
+
     if self:ProcessQueuedEvents() then
         -- more to do next frame.
         return
     end
-
-    self.CombatState = combat_state
 
     -- Healing happens first and anytime we aren't in downtime while invis and set not to break it.
     if self:IsHealing() then

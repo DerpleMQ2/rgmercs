@@ -72,17 +72,17 @@ Module.FAQ             = {
     [1] = {
         Question = "How do I move my PCs or have them follow my driver?",
         Answer = "Enable \"Chase\" on the Movement tab (or via Command-Line) and adjust settings in the Following category (Movement Options) to your liking.\n" ..
-            "There are two commonly used forms of following in MQ currently: \"Nav\" and \"A(dvanced)Follow\".\n" ..
-            "Nav uses the MQ2Nav plugin to check zone geometry to move from point-to-point. This is the type of movement that RGMercs uses by default.\n" ..
-            "Afollow, which is a feature of MQ2AdvPath, uses recording and playback of player movement to mimic the PC being followed. This is the type of nav typically seen on \"Follow Me\" buttons in the group window.\n" ..
-            "There are times when Chase(Nav) and Afollow both have advantages, so situationally using both is common.",
+            "  There are two commonly used forms of following in MQ currently: \"Nav\" and \"A(dvanced)Follow\".\n\n" ..
+            "  Nav uses the MQ2Nav plugin to check zone geometry to move from point-to-point. This is the type of movement that RGMercs uses by default.\n\n" ..
+            "  Afollow, which is a feature of MQ2AdvPath, uses recording and playback of player movement to mimic the PC being followed. This is the type of nav typically seen on \"Follow Me\" buttons in the group window.\n\n" ..
+            "  There are times when Chase(Nav) and Afollow both have advantages, so situationally using both is common.",
         Settings_Used = "",
     },
     [2] = {
         Question = "What is a camp in RGMercs? How do I use one?",
-        Answer = "Camping is setting a tether to a particular location.\n" ..
-            "Rather than chasing/following another PC, you will continually return to the vicinity of the camp location you've set.\n" ..
-            "This mode is mutually-exclusive with Chase, i.e, you cannot Chase and Camp at the same time. Enabling one disables the other." ..
+        Answer = "Camping is setting a tether to a particular location.\n\n" ..
+            "  Rather than chasing/following another PC, you will continually return to the vicinity of the camp location you've set.\n\n" ..
+            "  This mode is mutually-exclusive with Chase, i.e, you cannot Chase and Camp at the same time. Enabling one disables the other." ..
             "Camp settings can be adjusted in the Following category (Movement Options).",
         Settings_Used = "",
     },

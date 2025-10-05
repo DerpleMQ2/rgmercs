@@ -194,11 +194,11 @@ Module.DefaultConfig                   = {
         Min = 1,
         Max = 4,
         FAQ = "What are the different Pull modes and how do they work?",
-        Answer = "You can adjust Pull Modes on the Pull module tab.\n" ..
-            "Normal = Attempt to pull single mobs back to a static camp location.\n" ..
-            "Chain = Attempt to pull (ChainCount Setting) number of mobs to a static camp location.\n" ..
-            "Hunt = Move from target to target within a defined circular area, fighting as you go.\n" ..
-            "Farm = Move from waypoint to waypoint, hunting mobs in a defined radius from each.\n",
+        Answer = "You can adjust Pull Modes on the Pull module tab.\n\n" ..
+            "Normal: Attempt to pull single mobs back to a static camp location.\n\n" ..
+            "Chain: Attempt to pull (ChainCount Setting) number of mobs to a static camp location.\n\n" ..
+            "Hunt: Move from target to target within a defined circular area, fighting as you go.\n\n" ..
+            "Farm: Move from waypoint to waypoint, hunting mobs in a defined radius from each.",
     },
     ['FarmWayPoints']                          = {
         DisplayName = "Farming Waypoints",
@@ -216,8 +216,8 @@ Module.DefaultConfig                   = {
         Type = "Custom",
         Default = {},
         FAQ = "I only want to attack a specific set of mobs in my pull mode, how do I set this up?",
-        Answer = "In the Pull Allow List (found on your Pull module tab), you will find a button to add your target to that list.\n" ..
-            "Alternatively, you can use /rgl pullallow <mobname> or /rgl pullallowrm <mobname> to adjust this list from the command line.\n" ..
+        Answer = "In the Pull Allow List (found on your Pull module tab), you will find a button to add your target to that list.\n\n" ..
+            "Alternatively, you can use /rgl pullallow <mobname> or /rgl pullallowrm <mobname> to adjust this list from the command line.\n\n" ..
             "We will still engage mobs that aggro us, regardless of their abscence from this list.",
     },
     ['PullDenyList']                           = {
@@ -227,8 +227,8 @@ Module.DefaultConfig                   = {
         Type = "Custom",
         Default = {},
         FAQ = "I want to avoid pulling a specific mob (or mobs) in my pull mode, can I do that?",
-        Answer = "In the Pull Deny List (found on your Pull module tab), you will find a button to add your target to that list.\n" ..
-            "Alternatively, you can use /rgl pulldeny <mobname> or /rgl pulldenyrm <mobname> to adjust this list from the command line.\n" ..
+        Answer = "In the Pull Deny List (found on your Pull module tab), you will find a button to add your target to that list.\n\n" ..
+            "Alternatively, you can use /rgl pulldeny <mobname> or /rgl pulldenyrm <mobname> to adjust this list from the command line.\n\n" ..
             "We will still engage mobs that aggro us, regardless of their presence on this list.",
     },
     ['PullSafeZones']                          = {
@@ -244,8 +244,6 @@ Module.DefaultConfig                   = {
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Type = "Custom",
-        Category = "Custom",
-        Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
     },
 
@@ -322,7 +320,7 @@ Module.DefaultConfig                   = {
         Max = 60,
         FAQ = "I keep trying to pull an invalid target, can I fix this?",
         Answer =
-            "You should likely add that target to the Pull Deny List, which persists across sessions. However, RGMercs will auto-detect a repeatedly failed pull and will ignore that mob for the remainder of the pulling session. \n" ..
+            "You should likely add that target to the Pull Deny List, which persists across sessions. However, RGMercs will auto-detect a repeatedly failed pull and will ignore that mob for the remainder of the pulling session.\n\n" ..
             "The Ignore Timer can adjust how long it takes before we do so.",
     },
     ['StopPullAfterDeath']                     = {
