@@ -187,7 +187,7 @@ function Ui.RenderForceTargetList(showPopout)
             if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or Targeting.ForceCombat) then
                 ImGui.TableNextColumn()
                 if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
-                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, IM_COL32(255, 255, 0, 64))
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, Ui.GetConHighlightBySpawn(xtarg))
                 end
                 if Config.Globals.ForceTargetID > 0 and Config.Globals.ForceTargetID == xtarg.ID() then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
@@ -978,6 +978,51 @@ function Ui.GetConColorBySpawn(spawn)
     if not spawn or not spawn or spawn.Dead() then return Ui.GetConColor("Dead") end
 
     return Ui.GetConColor(spawn.ConColor())
+end
+
+--- @param spawn MQSpawn The spawn object for which to determine the con color.
+--- @return number, number, number, number The con color associated with the given spawn in RGBA format.
+function Ui.GetConHighlightBySpawn(spawn)
+    if not spawn or not spawn or spawn.Dead() then return Ui.GetConColor("Dead") end
+
+    return Ui.GetConHighlight(spawn.ConColor())
+end
+
+--- Get the con color based on the provided color value.
+--- @param color string The color value to determine the con color.
+--- @return number, number, number, number The corresponding con color in RGBA format
+function Ui.GetConHighlight(color)
+    if color then
+        if color:lower() == "dead" then
+            return 0.4, 0.4, 0.4, 0.1
+        end
+
+        if color:lower() == "grey" then
+            return 0.6, 0.6, 0.6, 0.3
+        end
+
+        if color:lower() == "green" then
+            return 0.02, 0.8, 0.2, 0.3
+        end
+
+        if color:lower() == "light blue" then
+            return 0.02, 0.8, 1.0, 0.3
+        end
+
+        if color:lower() == "blue" then
+            return 0.02, 0.4, 1.0, 0.3
+        end
+
+        if color:lower() == "yellow" then
+            return 0.8, 0.8, 0.02, 0.3
+        end
+
+        if color:lower() == "red" then
+            return 0.8, 0.2, 0.2, 0.3
+        end
+    end
+
+    return 1.0, 1.0, 1.0, 0.3
 end
 
 --- Checks if navigation is enabled for a given location.
