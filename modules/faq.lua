@@ -19,12 +19,7 @@ Module.DefaultConfig   = {
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
 		Type = "Custom",
-		Category = "Custom",
-		Tooltip = Module._name .. " Pop Out Into Window",
 		Default = false,
-		FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-		Answer =
-		"You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
 	},
 }
 
@@ -41,11 +36,31 @@ Module.CommandHandlers = {
 Module.FAQ             = {
 	[1] = {
 		Question = "How do I broadcast commands to other PCs on my network?",
-		Answer = "In short, however you would prefer to.\n" ..
-			"While it is typical to use MQ2DanNet (or \"DanNet\" for short, a networking plugin included with MQ), other broadcasting solutions (such as EQBCS or E3BCA) should function without issue.\n" ..
-			"RGMercs defaults to using DanNet for some PC-to-PC functions (such as buff or vital checking) to avoid undesired targeting." ..
-			"Note that certain commands such as \"pauseall\" or the \"say\" style commands will broadcast to multiple PCs, but they explicitly state so in tooltips or descriptions." ..
-			"This feature is used sparingly, to allow users agency over what is broadcasted to their PCs.",
+		Answer = "  In short, however you would prefer to.\n\n" ..
+			"  While it is typical to use MQ2DanNet (or \"DanNet\" for short, a networking plugin included with MQ), other broadcasting solutions (such as EQBCS or E3BCA) should function without issue.\n\n" ..
+			"  RGMercs defaults to using DanNet for some PC-to-PC functions (such as buff or vital checking) to avoid undesired targeting.\n\n" ..
+			"  Note that certain commands such as \"pauseall\" or the \"say\" style commands will broadcast to multiple PCs, but they explicitly state so in tooltips or descriptions.\n\n" ..
+			"  This feature is used sparingly, to allow users agency over what is broadcasted to their PCs.",
+		Settings_Used = "",
+	},
+	[2] = {
+		Question = "How do I assign a Main Assist in RGMercs?",
+		Answer = "There are multiple ways to choose an assist in RGMercs:\n\n" ..
+			"  If you are in a group, and have set the Main Assist role in the EQ group window, no further action is required.\n\n" ..
+			"  If you are in a raid, and your raid leader has set one or more Raid Assists, use the Raid Assist Target setting (Options > Combat > Assisting) to select one to assist.\n\n" ..
+			"  In all other situations (whether you are in a group, raid or not), you will use the Assist List found on the Main tab to set up who you are assisting. See the Assist List FAQ for more details.\n\n" ..
+			"  Additionally, depending on the current Self-Assist Fallback setting (Options > Combat > Assisting), the PC may assign themsleves as MA if there is no valid (in-zone, alive, etc) MA." ..
+			"As soon as a valid MA is identified, the PC will seamlessly change to assisting them again.",
+		Settings_Used = "",
+	},
+	[3] = {
+		Question = "How do I use the Assist List?",
+		Answer = "First, find the Assist List UI on the Main tab, or familiarize yourself with related commands in the command list above.\n\n" ..
+			"  Add characters as you see fit to this list. RGMercs will check the list in order and use the first valid PC it finds as the Main Assist. \n\n" ..
+			"  The list can be reordered, cleared, or otherwise adjusted from this UI (or command-line), during downtime or combat, to change MAs on the fly.\n\n" ..
+			"  To assign an MA using the Assist List, it must be enabled. If no assist is found, we will fallback to using ourselves as MA," ..
+			"if we are configured to use Self-Assist Fallback (Options > Combat > Assisting).\n\n" ..
+			"  In addition to being used as a list of potential assists, we will process group buff checks on valid members of the assist list, even if the list is not currently enabled.",
 		Settings_Used = "",
 	},
 }
