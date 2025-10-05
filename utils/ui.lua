@@ -41,7 +41,7 @@ function Ui.RenderAssistList()
         end
         ImGui.PopID()
     end
-    if ImGui.BeginTable("AssistList Names", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("AssistList Names", 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 
         ImGui.TableSetupColumn('ID', (ImGuiTableColumnFlags.WidthFixed), 20.0)
@@ -55,6 +55,9 @@ function Ui.RenderAssistList()
         for idx, name in ipairs(Config:GetSetting('AssistList') or {}) do
             local spawn = mq.TLO.Spawn(string.format("PC =%s", name))
             ImGui.TableNextColumn()
+            if name == Config.Globals.MainAssist then
+                ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, IM_COL32(255, 255, 0, 64))
+            end
             ImGui.Text(tostring(idx))
             ImGui.TableNextColumn()
             local _, clicked = ImGui.Selectable(name, false)
@@ -162,7 +165,7 @@ function Ui.RenderForceTargetList(showPopout)
         Config.Globals.ForceTargetID = 0
     end
 
-    if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 7 or 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable)) then
+    if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 7 or 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
         if Config:GetSetting("ExtendedFTInfo") then
@@ -179,11 +182,13 @@ function Ui.RenderForceTargetList(showPopout)
         ImGui.TableHeadersRow()
 
         local xtCount = mq.TLO.Me.XTarget() or 0
-
         for i = 1, xtCount do
             local xtarg = mq.TLO.Me.XTarget(i)
             if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or Targeting.ForceCombat) then
                 ImGui.TableNextColumn()
+                if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
+                    ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, IM_COL32(255, 255, 0, 64))
+                end
                 if Config.Globals.ForceTargetID > 0 and Config.Globals.ForceTargetID == xtarg.ID() then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
                     ImGui.Text(Icons.MD_STAR)
