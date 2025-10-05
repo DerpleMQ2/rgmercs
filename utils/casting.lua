@@ -632,15 +632,19 @@ end
 --- @param waitSpellReady boolean Whether to wait until the spell is ready to be memorized.
 --- @param maxWait number The maximum time to wait for the spell to be ready, in seconds.
 function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
+    local me = mq.TLO.Me
+    if me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100) then
+        Logger.log_warning("\ar %s was not memorized in slot %d due to aggro! The loadout may need manual rescan after combat.", spell, gem)
+        return false
+    end
     Logger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
     Core.DoCmd("/memspell %d \"%s\"", gem, spell)
 
     Casting.Memorizing = true
 
-    while (mq.TLO.Me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not mq.TLO.Me.SpellReady(gem)())) and maxWait > 0 do
-        local me = mq.TLO.Me
+    while (me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not me.SpellReady(gem)())) and maxWait > 0 do
         Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
-        if me.CombatState():lower() == "combat" or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+        if (me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100)) or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
             Logger.log_debug(
                 "I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s))",
                 spell, gem, me.CombatState(), me.Casting() or "None", Strings.BoolToColorString(me.Moving()), Strings.BoolToColorString(mq.TLO.Stick.Active()),
@@ -648,7 +652,7 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
                 Strings.BoolToColorString(mq.TLO.AdvPath.Following()))
             break
         end
-        if not mq.TLO.Me.Book(spell)() then
+        if not me.Book(spell)() then
             Logger.log_debug("I was trying to memorize %s as my persona was changed, aborting.", spell)
             break
         end

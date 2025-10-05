@@ -139,12 +139,7 @@ Module.DefaultConfig                    = {
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Type = "Custom",
-        Category = "Custom",
-        Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
-        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-        Answer =
-        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
 

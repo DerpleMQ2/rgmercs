@@ -176,16 +176,12 @@ Config.DefaultConfig = {
         Tooltip = "Allow assisting characters outside of your group.",
         Type = "Custom",
         Default = false,
-        FAQ = "How do I use the Assist List?",
-        Answer = "You can add characters to the list on the main tab, and enable use assist list option to allow you to assist them.",
     },
     ['AssistList']           = {
         DisplayName = "List of User-Defined Assists",
         Tooltip = "List of User-Defined Assists",
         Type = "Custom",
         Default = {},
-        FAQ = "How do I Setup who to assist from outside of my group?",
-        Answer = "You can add characters to the [AssistList] to allow you to assist them.",
     },
     ['ShowAdvancedOpts']     = {
         DisplayName = "Show Advanced Options",
