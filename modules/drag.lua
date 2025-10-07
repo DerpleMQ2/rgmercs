@@ -21,45 +21,36 @@ Module.DefaultConfig = {
         Group = "Movement",
         Header = "Drag",
         Category = "Drag",
-        Tooltip = "Enable Dragging Corpses with you",
+        Tooltip = "Enable dragging friendly corpses in your vacinity.",
         Index = 1,
         Default = false,
-        FAQ = "How do I make a character drag group member corpses to me?",
-        Answer = "Enable [DoDrag] and you will drag corpses to you.",
-    },
-    ['DoSearchDrag']                           = {
-        DisplayName = "Use Spawn Search Dragging",
-        Group = "Movement",
-        Header = "Drag",
-        Category = "Drag",
-        Tooltip = "Use Search to find drag targets",
-        Index = 3,
-        Default = false,
-        FAQ = "I want to Find Corpses to Drag, how do I do that?",
-        Answer = "Enable [DoSearchDrag] and you will Search for Party Member Corpses in your [SearchDrag] Radius and if found grab them.",
-    },
-    ['SearchDrag']                             = {
-        DisplayName = "Spawn Search",
-        Group = "Movement",
-        Header = "Drag",
-        Category = "Drag",
-        Tooltip = "Enable Dragging Corpses with you",
-        Index = 4,
-        Default = "pccorpse group radius 60",
-        FAQ = "Can I adjust the range of the Search? What about finding other corpses not in my group?",
-        Answer = "With [DoDrag] and [DoSearchDrag] enabled you can adjust the search radius with [SearchDrag]." ..
-            " You can also remove group from the string to find other player corpses.",
     },
     ['DoDanNetDrag']                           = {
         DisplayName = "Use DanNet Dragging",
         Group = "Movement",
         Header = "Drag",
         Category = "Drag",
-        Tooltip = "Use DanNet to find drag targets",
+        Tooltip = "Use DanNet peer checks to identify corpses that should be dragged within a 95 unit radius.",
         Index = 2,
         Default = true,
-        FAQ = "My Guys are not dragging corpses with me, what do I do?",
-        Answer = "Make sure if you are using DanNet that you have [DoDanNetDrag] enabled as well as [DoDrag].",
+    },
+    ['DoSearchDrag']                           = {
+        DisplayName = "Use Spawn Search Dragging",
+        Group = "Movement",
+        Header = "Drag",
+        Category = "Drag",
+        Tooltip = "Use an MQ Spawn Search to identify corpses that should be dragged.",
+        Index = 3,
+        Default = false,
+    },
+    ['SearchDrag']                             = {
+        DisplayName = "Spawn Search",
+        Group = "Movement",
+        Header = "Drag",
+        Category = "Drag",
+        Tooltip = "The MQ Spawn Search used when Spawn Search Dragging is enabled above. Note the max drag distance is 100 units.",
+        Index = 4,
+        Default = "pccorpse group radius 95",
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
@@ -155,7 +146,7 @@ end
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
 
-    local corpseSearch = "pccorpse %s's radius 60"
+    local corpseSearch = "pccorpse %s's radius 90"
     if Config:GetSetting('DoDrag') then
         local myCorpse = mq.TLO.Spawn(string.format(corpseSearch, mq.TLO.Me.DisplayName()))
 

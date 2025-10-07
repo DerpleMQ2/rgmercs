@@ -15,7 +15,17 @@ local animItems                         = mq.FindTextureAnimation("A_DragItem")
 
 local Module                            = { _version = '0.1a', _name = "Clickies", _author = 'Derple', }
 Module.__index                          = Module
-Module.FAQ                              = {}
+Module.FAQ                              = {
+    [1] = {
+        Question = "How do I set RGmercs up to use a clicky item?",
+        Answer = "  Using the GUI on the Clickies tab, you can add, remove and organize clickies you would like your PCs to use, under customizable conditions.\n\n" ..
+            "  If we don't currently support the clicky by default***, you can use the GUI to add items and conditions as you see fit.\nCan't quite find the right conditions in the Clickies Logic Blocks? Feedback is highly welcome. Please bear in mind that some conditions are restricted due to technical limitations.\n\n" ..
+            "  Ultimately, it is important to realize that class configs have better access to functions and conditions to fine-tune the use of a clicky, and for best results, some clickies may need to be added there instead.\n\n" ..
+            "  Feedback on the default configs is welcome, but creating a custom config of your own is another possibility.\n\n" ..
+            "  *** - Some clickies are already handled by default, or by a class config (like modrods). Options for these items are generally found in (Options > Items > Clickies). Additionally, some non-optional defaults may have Rotation Entries, which can be viewed on the Class tab.",
+        Settings_Used = "",
+    },
+}
 Module.SaveRequested                    = nil
 Module.ClickyRotationIndex              = 1
 
@@ -118,15 +128,12 @@ Module.DefaultConfig                    = {
         Header = "Clickies",
         Category = "User Clickies",
         Index = 1,
-        Tooltip = "The max number of clickies to allow to successfully be used per frame, 0 for no limit.",
+        Tooltip =
+        "The max number of clickies that can successfully be used per frame/processing cycle before we move on, 0 for no limit.\nThis setting may help prevent delays in other processing if a high number of clickies are used.",
         Default = 0,
         Min = 0,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "My clickies are preventing other actions, what can I do?",
-        Answer = "By default, there is no limit to the number of clickies that can be used per frame.\n" ..
-            "If you are finding that your clickies are interfering with other actions, you can set a limit here.\n" ..
-            "This will limit the number of clickies that can be used per frame, allowing other actions to occur.",
     },
     ['Clickies']                               = {
         DisplayName = "Item %d",
@@ -284,7 +291,7 @@ Module.LogicBlocks                      = {
             return false
         end,
         cond_targets = Module.NonCombatTargetTypes,
-        tooltip = "Only use if [target] Health or Mana or Endurance is above/below this percent.",
+        tooltip = "Only use if [target] vitals are above/below these percents.",
         render_header_text = function(self, cond)
             return string.format("%s is between [%d%% >= HP <= %d%%] or [%d%% >= Mana <= %d%%] or [%d%% >= End <= %d%%]", cond.target or "Self",
                 cond.args[1] or 0, cond.args[2] or 100,
@@ -307,7 +314,7 @@ Module.LogicBlocks                      = {
             return (mq.TLO.Group.Injured(hp)() or 0) >= cnt
         end,
         cond_targets = { 'Self', },
-        tooltip = "Only use if [Count] group members are below [X] HP.",
+        tooltip = "Only use if [Count] group members are below [X] HP%.",
         render_header_text = function(self, cond)
             return string.format("%d group members are <= %d%% HP", cond.args[1] or 0, cond.args[2] or 100)
         end,
@@ -406,7 +413,7 @@ Module.LogicBlocks                      = {
 
             return true
         end,
-        tooltip = "Only use if XT Haters are above/below this count.",
+        tooltip = "Only use if haters on your XTarget are above/below this count.",
         render_header_text = function(self, cond)
             return string.format("XT Hater Count is between %d and %d", cond.args[1] or 0, cond.args[2] or 50)
         end,
@@ -426,7 +433,7 @@ Module.LogicBlocks                      = {
                 return burning
             end
         end,
-        tooltip = "Only use when burns are active/not active.",
+        tooltip = "Only use when burns are (not) active. (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("Burning is %sactivated", cond.args[1] and "not " or "")
         end,
@@ -445,7 +452,7 @@ Module.LogicBlocks                      = {
                 return isNamed
             end
         end,
-        tooltip = "Only use when RGMercs or SpawnMaster has identified a mob as Named/NonNamed.",
+        tooltip = "Only use when RGMercs or SpawnMaster has (not) identified a mob as Named. (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("Auto Target is %s", cond.args[1] and "not Named" or "Named")
         end,
@@ -464,7 +471,7 @@ Module.LogicBlocks                      = {
                 return hasEffect
             end
         end,
-        tooltip = "Only use when you have this effect on you (Buffs or Songs)",
+        tooltip = "Only use when you (do not) have this buff or song effect on you. (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("You %s Effect '%s'", cond.args[2] and "don't have" or "have", cond.args[1] or "None")
         end,
@@ -485,7 +492,7 @@ Module.LogicBlocks                      = {
                 return hasEffect
             end
         end,
-        tooltip = "Only use when you have this effect on your pet",
+        tooltip = "Only use when this effect is (not) present on your pet. (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("Your Pet %s Effect '%s'", cond.args[2] and "doesn't have" or "has", cond.args[1] or "None")
         end,
@@ -506,7 +513,7 @@ Module.LogicBlocks                      = {
                 return hasEffect
             end
         end,
-        tooltip = "Only use when the RGMercs Auto Target has this effect on them",
+        tooltip = "Only use when this effect is (not) present on the RGMercs AutoTarget. (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("RGMercs Auto Target %s Effect: '%s'", cond.args[2] and "doen't have" or "has", cond.args[1] or "None")
         end,
@@ -541,7 +548,7 @@ Module.LogicBlocks                      = {
 
             return Config:HaveSetting(setting) and (Config:GetSetting(setting) == value) or false
         end,
-        tooltip = "Only use if the value of GetSetting(setting) == value",
+        tooltip = "Only use if the specifed setting returns the specified value.",
         render_header_text = function(self, cond)
             return Config:HaveSetting(cond.args[1]) and string.format("The '%s' setting is %s", cond.args[1], tostring(cond.args[2])) or
                 "Please set a valid setting name..."
@@ -609,7 +616,7 @@ Module.LogicBlocks                      = {
 
             return bNotInZone
         end,
-        tooltip = "Check if you are in any of these zones (full or short name, comma separated).",
+        tooltip = "Only use if you are (not) in the following zones. (Full or short name accepted, comma separated).",
 
         render_header_text = function(self, cond)
             local zoneList = ""

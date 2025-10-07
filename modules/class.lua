@@ -32,7 +32,6 @@ Module.TempSettings                          = {}
 Module.CombatState                           = "None"
 Module.CurrentRotation                       = { name = "None", state = 0, }
 Module.ClassConfig                           = nil
-Module.FAQ                                   = {}
 Module.SaveRequested                         = nil
 
 Module.Constants                             = {}
@@ -62,6 +61,31 @@ Module.TempSettings.NeedCuresList            = {}
 Module.TempSettings.NeedCuresListMutex       = false
 Module.TempSettings.CureChecksStale          = false
 Module.TempSettings.ImmuneTargets            = {}
+
+Module.FAQ                                   = {
+    [1] = {
+        Question = "How do I add, remove, or change what spells, AA, items or disciplines I am using or memorizing?",
+        Answer = "  RGMercs is designed to choose actions automatically based on the currently loaded 'Class Config'.\n\n" ..
+            "  In addition to being able to adjust common settings, the default class configs generally offer some options to enable, disable, or fine-tune action use. These are generally found in (Options > Abililties).\n\n" ..
+            "  If you open the options menu from the Class tab, all options added by the class config will have highlighting added.\n\n" ..
+            "  Some default configs may also offer different role-based modes, such as a Shaman having a Healing Mode or Hybrid mode, or a Paladin having a Tank Mode and a DPS Mode. These modes can be selected on the Class tab.\n\n" ..
+            "  If you find that the options or loadouts do not meet your needs, we support a system to allow the use of 'Custom Configs' that can be freely edited by the user.",
+        Settings_Used = "",
+    },
+    [2] = {
+        Question = "How do I create a Custom Class Config?",
+        Answer = "  The GUI can be found on the Class Tab. Near the config load area, you will find a button to create the custom config.\n\n" ..
+            "  The final destination will vary by server, but all files will be created in the (MQconfigdir)/rgmercs/class_configs directory. If you are currently on Live or Test, look for the 'Live folder there, otherwise, on emu, look for a server-specifc folder.\n\n" ..
+            "  The process will copy the currently loaded config, so ensure you have selected the config you wish to use as a base before hitting the button. If the currently loaded config is *already* a custom config, it will be backed up with a date/time append on the old config.",
+        Settings_Used = "",
+    },
+    [3] = {
+        Question = "How do I change which Class Config is loaded, or, how do I use my new Custom Class Config?",
+        Answer = "  The GUI to change your currently loaded config can be found on the Class Tab.\n\n" ..
+            "  The drop-down selection box can be used to choose which config you have loaded. Any configs found for your class (both default and custom) will be displayed.",
+        Settings_Used = "",
+    },
+}
 
 Module.CommandHandlers                       = {
     setmode = {
@@ -98,7 +122,7 @@ Module.CommandHandlers                       = {
     },
     spellreload = {
         usage = "/rgl spellreload",
-        about = "Rescans and (if necessary) reloads your default spell gems.",
+        about = "Updates your class rotations and entries based on current settings. Rescans and (if necessary) reloads your default spell gems.",
         handler = function(self)
             self:RescanLoadout()
 
@@ -219,7 +243,8 @@ Module.CommandHandlers                       = {
     },
     usemap = {
         usage = "/rgl usemap \"<maptype>\" \"<mapname>\" <targetId?>",
-        about = "RGMercs will queue the mapped spell, song, AA, disc, or item (using smart targeting, or, if provided, on the specified <targetID>).",
+        about =
+        "RGMercs will queue the mapped spell, song, AA, disc, or item (using smart targeting, or, if provided, on the specified <targetID>). The 'mapname' is the entry name from your rotation window.",
         handler = function(self, mapType, mapName, targetId)
             local action = Modules:ExecModule("Class", "GetResolvedActionMapItem", mapName)
             if not action or not action() then
@@ -357,16 +382,12 @@ function Module:LoadSettings()
     -- Add this to all class configs
     self.ClassConfig.DefaultConfig['EnabledRotationEntries'] = {
         DisplayName = "EnabledRotationEntries",
-        Category = "None",
-        Tooltip = "",
         Type = "Custom",
         Default = {},
     }
 
     self.ClassConfig.DefaultConfig['EnabledRotations'] = {
         DisplayName = "EnabledRotations",
-        Category = "None",
-        Tooltip = "",
         Type = "Custom",
         Default = {},
     }
