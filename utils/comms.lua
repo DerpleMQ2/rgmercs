@@ -1,5 +1,4 @@
 local mq         = require('mq')
-local Core       = require("utils.core")
 local Logger     = require("utils.logger")
 
 local Comms      = { _version = '1.0', _name = "Comms", _author = 'Derple', }
@@ -12,8 +11,22 @@ Comms.ScriptName = "RGMercs"
 --- @param module string The name of the module to broadcast the update to.
 --- @param event string The event type to broadcast.
 --- @param data table? The data associated with the event.
-function Comms.BroadcastUpdate(module, event, data)
+function Comms.BroadcastMessage(module, event, data)
     Comms.Actors.send({
+        from = mq.TLO.Me.DisplayName(),
+        script = Comms.ScriptName,
+        module = module,
+        event =
+            event,
+        data = data,
+    })
+end
+
+--- @param module string The name of the module to broadcast the update to.
+--- @param event string The event type to broadcast.
+--- @param data table? The data associated with the event.
+function Comms.SendMessage(peer, module, event, data)
+    Comms.Actors.send({ character = peer, }, {
         from = mq.TLO.Me.DisplayName(),
         script = Comms.ScriptName,
         module = module,
@@ -30,7 +43,7 @@ function Comms.PrintGroupMessage(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
 
-    Core.DoCmd("/dgt group_%s_%s %s", mq.TLO.EverQuest.Server():gsub(" ", ""), mq.TLO.Group.Leader() or "None", output)
+    mq.cmdf("/dgt group_%s_%s %s", mq.TLO.EverQuest.Server():gsub(" ", ""), mq.TLO.Group.Leader() or "None", output)
 end
 
 --- Displays a pop-up message with the given text.
@@ -40,7 +53,7 @@ function Comms.PopUp(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
 
-    Core.DoCmd("/popupecho 15 5 %s", output)
+    mq.cmdf("/popupecho 15 5 %s", output)
 end
 
 --- Handles the announcement message.
@@ -50,7 +63,7 @@ end
 function Comms.HandleAnnounce(msg, sendGroup, sendDan)
     if sendGroup then
         local cleanMsg = msg:gsub("\a.", "")
-        Core.DoCmd("/gsay %s", cleanMsg)
+        mq.cmdf("/gsay %s", cleanMsg)
     end
 
     if sendDan then

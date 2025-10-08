@@ -16,6 +16,7 @@ OptionsUI.HighlightedSettings   = Set.new({})
 OptionsUI.configFilter          = ""
 OptionsUI.lastSortTime          = 0
 OptionsUI.lastHighlightTime     = 0
+OptionsUI.selectedCharacter     = mq.TLO.Me.Name()
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -166,7 +167,8 @@ function OptionsUI:ApplySearchFilter()
     end
 
     local allModuleCategories = Set.new({})
-    local allCategories = Config:GetAllModuleSettingCategories()
+    local allCategories = Config:PeerGetAllModuleSettingCategories(self.selectedCharacter)
+
     for _, categories in pairs(allCategories or {}) do -- module to categories
         local categoryList = categories:toList() or {}
         for _, category in ipairs(categoryList) do     -- all categories in module
@@ -199,15 +201,14 @@ function OptionsUI:ApplySearchFilter()
 
                 local categoryMatches = categoryLower:find(filter, 1, true) ~= nil
 
-                local settingsForCategory = Config:GetAllSettingsForCategory(category)
+                local settingsForCategory = Config:PeerGetAllSettingsForCategory(self.selectedCharacter, category)
 
                 for _, settingName in ipairs(settingsForCategory or {}) do
-                    local settingDefaults         = Config:GetSettingDefaults(settingName)
+                    local settingDefaults         = Config:PeerGetSettingDefaults(self.selectedCharacter, settingName)
                     local settingDisplayNameLower = (settingDefaults.DisplayName or ""):lower()
                     local settingTooltipLower     = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or (settingDefaults.Tooltip or "")):lower()
                     local customSetting           = (settingDefaults.Type == "Custom")
-                    local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or
-                        (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
+                    local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
 
                     if showAdv and not customSetting and (headerMatches or categoryMatches or settingDisplayNameLower:find(filter, 1, true) ~= nil or
                             settingTooltipLower:find(filter, 1, true) ~= nil) then
@@ -215,7 +216,7 @@ function OptionsUI:ApplySearchFilter()
                         table.insert(self.FilteredSettingsByCat[category], settingName)
 
                         -- set highlighting
-                        if Config:IsModuleHighlighted(Config:GetModuleForSetting(settingName)) then
+                        if Config:IsModuleHighlighted(Config:PeerGetModuleForSetting(self.selectedCharacter, settingName)) then
                             newGroup.Highlighted = true
                             self.HighlightedSettings:add(settingName)
                             self.HighlightedCategories:add(category)
@@ -225,8 +226,8 @@ function OptionsUI:ApplySearchFilter()
                 end
 
                 table.sort(self.FilteredSettingsByCat[category] or {}, function(k1, k2)
-                    local k1Defaults = Config:GetSettingDefaults(k1)
-                    local k2Defaults = Config:GetSettingDefaults(k2)
+                    local k1Defaults = Config:PeerGetSettingDefaults(self.selectedCharacter, k1)
+                    local k2Defaults = Config:PeerGetSettingDefaults(self.selectedCharacter, k2)
                     if (k1Defaults.Index ~= nil or k2Defaults.Index ~= nil) and (k1Defaults.Index ~= k2Defaults.Index) then
                         return (k1Defaults.Index or 999) < (k2Defaults.Index or 999)
                     end
@@ -387,13 +388,14 @@ function OptionsUI:RenderCategorySettings(category)
 
             --ImGui.TableNextRow(ImGuiTableRowFlags.None, 40.0)
             for idx, settingName in ipairs(settingsForCategory or {}) do
-                local settingDefaults = Config:GetSettingDefaults(settingName)
+                local settingDefaults = Config:PeerGetSettingDefaults(self.selectedCharacter, settingName)
 
                 -- defaults can go away when a different class config is loaded in.
                 if settingDefaults then
-                    local setting        = Config:GetSetting(settingName)
+                    local setting        = Config:PeerGetSetting(self.selectedCharacter, settingName)
                     local id             = "##" .. settingName
                     local settingTooltip = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
+
                     if settingDefaults.Type ~= "Custom" then
                         --
                         if idx % numCols == 1 then
@@ -434,9 +436,10 @@ function OptionsUI:RenderCategorySettings(category)
 
                             --  need to update setting here and notify module
                             if pressed then
-                                Config:SetSetting(settingName, setting)
+                                printf("PRESS")
+                                Config:PeerSetSetting(self.selectedCharacter, settingName, setting)
 
-                                if new_loadout then
+                                if new_loadout and self.selectedCharacter == mq.TLO.Me.Name() then
                                     Modules:ExecModule("Class", "RescanLoadout")
                                     new_loadout = false
                                 end
@@ -486,13 +489,29 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
         local _, y = ImGui.GetContentRegionAvail()
         if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
             local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.ScrollY)
-            -- figure out icons once headings are finalized
             local textChanged = false
             local inputBoxPosX = ImGui.GetCursorPosX()
             local style = ImGui.GetStyle()
             local searchBarUsableWidth = ImGui.GetWindowContentRegionWidth() - (ImGui.GetFontSize() + style.FramePadding.y + style.WindowPadding.x * 2)
-            ImGui.SetNextItemWidth(searchBarUsableWidth)
 
+            ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth())
+            -- character selecter
+            local peerList = Config:GetPeers()
+            table.insert(peerList, 1, mq.TLO.Me.Name())
+            local peerListIdx = 1
+            for idx, name in ipairs(peerList) do
+                if name == self.selectedCharacter then
+                    peerListIdx = idx
+                    self:ApplySearchFilter()
+                    break
+                end
+            end
+            local newPeerIdx, peerChanged = ImGui.Combo("##OptionsUICharSelect", peerListIdx, peerList, #peerList)
+            if peerChanged and newPeerIdx >= 1 and newPeerIdx <= #peerList then
+                self.selectedCharacter = peerList[newPeerIdx]
+            end
+
+            ImGui.SetNextItemWidth(searchBarUsableWidth)
             self.configFilter, textChanged = ImGui.InputText("###OptionsUISearchText", self.configFilter)
             if textChanged then
                 self:ApplySearchFilter()

@@ -269,6 +269,8 @@ local function RGInit(...)
     initMsg = "Storing Initial Positioning Data..."
     Config:StoreLastMove()
 
+    Config:RequestPeerConfigs()
+
     initMsg = "Done!"
     initPctComplete = 100
 end
@@ -473,12 +475,38 @@ local script_actor = Comms.Actors.register(function(message)
         msg.module,
         msg.event)
 
-    if msg.module then
-        if msg.module == "main" then
-            Config:LoadSettings()
-        else
-            Modules:ExecModule(msg.module, msg.event, msg.data)
+    if msg.event == "SettingsUpdate" then
+        Logger.log_info("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.module, msg.from)
+        Logger.log_debug("Settings: \ag%s", Strings.TableToString(msg.data.settings))
+        Logger.log_debug("defaultSettings: \ag%s", Strings.TableToString(msg.data.defaultSettings))
+        Config:UpdatePeerSettings(msg.from, msg.module, msg.data.settings, msg.data.settingCategories, msg.data.defaultSettings)
+        return
+    end
+
+    if msg.event == "RequestPeerConfigs" then
+        Logger.log_info("Received RequestPeerConfigs from %s - sending our configs.", msg.from)
+        local modules = { "Core", }
+
+        for _, name in ipairs(Modules:GetModuleOrderedNames()) do
+            table.insert(modules, name)
         end
+
+        for _, name in ipairs(modules) do
+            if Config.moduleSettings[name] ~= nil then
+                Comms.BroadcastMessage(name, "SettingsUpdate", {
+                    settings = Config:GetAllModuleSettings()[name],
+                    settingCategories = Config:GetAllModuleSettingCategories()[name],
+                    defaultSettings = Config:GetAllModuleDefaultSettings()[name],
+                })
+            end
+        end
+        return
+    end
+
+    if msg.event == "SetSetting" and msg.data and msg.data.Setting and (msg.data.Value ~= nil) then
+        Logger.log_info("Received SetSetting for module \at%s \awfrom \am%s \awSetSetting :: \at%s \awto \ag%s", msg.module, msg.from, msg.data.Setting, tostring(msg.data.Value))
+        Config:SetSetting(msg.data.Setting, msg.data.Value)
+        return
     end
 end)
 

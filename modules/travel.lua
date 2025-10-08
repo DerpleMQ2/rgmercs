@@ -75,7 +75,7 @@ function Module:WriteSettings()
     mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
 
     if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastUpdate(self._name, "LoadSettings")
+        Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
     Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
@@ -121,11 +121,11 @@ end
 
 function Module:SendPorterInfo()
     Logger.log_debug("\atBroadcasting TravelerUpdate")
-    Comms.BroadcastUpdate(self._name, "TravelerUpdate", self.TransportSpells[Config.Globals.CurLoadedChar])
+    Comms.BroadcastMessage(self._name, "TravelerUpdate", self.TransportSpells[Config.Globals.CurLoadedChar])
 end
 
 function Module:RequestPorterInfo()
-    Comms.BroadcastUpdate(self._name, "SendPorterInfo")
+    Comms.BroadcastMessage(self._name, "SendPorterInfo")
 end
 
 function Module.New()
