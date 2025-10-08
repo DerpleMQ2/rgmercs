@@ -67,7 +67,7 @@ Module.DefaultConfig           = {
         Category = "Mez General",
         Index = 4,
         Default = true,
-        Tooltip = "Use Beam of Slumber(ENC) or Dirge of the Sleepwalker(BRD) when able.",
+        Tooltip = "Use Beam of Slumber(ENC, Directional Beam) or Dirge of the Sleepwalker(BRD, Single-Target) when able.",
     },
     ['MezStartCount']                          = {
         DisplayName = "Mez Start Count",
@@ -78,7 +78,7 @@ Module.DefaultConfig           = {
         Default = 2,
         Min = 1,
         Max = 20,
-        Tooltip = "Number of xtarget mobs before we will being mezzing.",
+        Tooltip = "The minimum number of xtargets before we will attempt to use a ST mez.",
     },
     ['MezAECount']                             = {
         DisplayName = "Mez AE Count",
@@ -86,9 +86,7 @@ Module.DefaultConfig           = {
         Header = "Mez",
         Category = "Mez General",
         Index = 6,
-        Tooltip = "Mez if you have at least [X] on xtarget",
-        FAQ = "How do I set my AE mes limits?",
-        Answer = "Set your [MezAECount] Setting to the minimum number of Mobs on Xtarget before using AE Mez.",
+        Tooltip = "The minimum number of xtargets before we will attempt to use an AE mez.",
         Default = 3,
         Min = 1,
         Max = 20,
@@ -102,9 +100,7 @@ Module.DefaultConfig           = {
         Default = 13,
         Min = 1,
         Max = 20,
-        Tooltip = "Maximum # of mobs to CC ( Default is 13 )",
-        FAQ = "My Character stops mezzing and there are still mobs in camp, why?",
-        Answer = "You may hae the [MaxMezCount] set too low, increase it to allow more mobs to be mezzed. (max value = 20)",
+        Tooltip = "The maximum number of xtargets before we will cease attempts to mez.",
     },
     ['MezRadius']                              = {
         DisplayName = "Mez Radius",
@@ -115,9 +111,7 @@ Module.DefaultConfig           = {
         Default = 100,
         Min = 1,
         Max = 200,
-        Tooltip = "Radius for mobs to be in to start Mezing, An area twice this size is monitored for aggro mobs",
-        FAQ = "I keep trying to mez mobs that are too far away, how do I fix this?",
-        Answer = "Adnust your [MezRadius] to the distance you want to start mezzing mobs.",
+        Tooltip = "The maximum distance away a potential mez target can be from the PC.",
     },
     ['MezZRadius']                             = {
         DisplayName = "Mez ZRadius",
@@ -128,10 +122,7 @@ Module.DefaultConfig           = {
         Default = 15,
         Min = 1,
         Max = 200,
-        Tooltip =
-        "Height radius (z-value) for mobs to be in to start mezzing. An area twice this size is monitored for aggro mobs. If you're enchanter is not mezzing on hills -- increase this value.",
-        FAQ = "I can't get my enchanter to mez mobs on hills, how do I fix this?",
-        Answer = "Adjust your [MezZRadius] to the height above/below you want to start mezzing mobs.",
+        Tooltip = "The maximum height difference between the potential mez target and the PC.",
     },
     ['SafeAEMez']                              = {
         DisplayName = "AE Mez Safety Check",
@@ -156,9 +147,7 @@ Module.DefaultConfig           = {
         Default = 80,
         Min = 1,
         Max = 100,
-        Tooltip = "Mob HP% to stop trying to mez",
-        FAQ = "I keep trying to mez mobs that are about to die -- how do I fix this?",
-        Answer = "Adjust your [MezStopHPs] to the HP% you want to stop trying to mez mobs.",
+        Tooltip = "Don't try to mez a mob that is below this HP%.",
     },
     ['AutoLevelRange']                         = {
         DisplayName = "Auto Level Range",
@@ -167,9 +156,7 @@ Module.DefaultConfig           = {
         Category = "Mez Targets",
         Index = 2,
         Default = true,
-        Tooltip = "Set to enable automatic mez level detection based on spells.",
-        FAQ = "I'm Lazy and hate updating my thresholds. How do I make my character do it for me?",
-        Answer = "Turning on [AutoLevelRange] will automatically adjust the level range for mezzing based on the spells you have.",
+        Tooltip = "Use automatic mez max-level detection based on the current mez spell.",
     },
     ['MezMinLevel']                            = {
         DisplayName = "Mez Min Level",
@@ -180,10 +167,8 @@ Module.DefaultConfig           = {
         Default = 0,
         Min = 1,
         Max = 200,
-        Tooltip = "Minimum Level a mob must be to Mez - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!",
+        Tooltip = "If Auto Level Range is disabled, the minimum level of a potential mez target for mez spells.",
         ConfigType = "Advanced",
-        FAQ = "Why do I keep mezzing the Grey con mobs?",
-        Answer = "You may have your [MezMinLevel] set too low, increase it to avoid mezzing grey con mobs.",
     },
     ['MezMaxLevel']                            = {
         DisplayName = "Mez Max Level",
@@ -194,10 +179,8 @@ Module.DefaultConfig           = {
         Default = 0,
         Min = 1,
         Max = 200,
-        Tooltip = "Maximum Level a mob must be to Mez - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!",
+        Tooltip = "If Auto Level Range is disabled, the maximum level of a potential mez target for mez spells.",
         ConfigType = "Advanced",
-        FAQ = "Why won't my enchanter mez this mob? His new spell should work on it.",
-        Answer = "You most likely have [AutoLevelRange] turned off and forgot to increase the [MezMaxLevel] to the max for this spell.",
     },
 
     [string.format("%s_Popped", Module._name)] = {

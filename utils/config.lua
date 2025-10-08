@@ -17,7 +17,6 @@ Config.moduleSettings                                 = {}
 Config.moduleDefaultSettings                          = {}
 Config.moduleTempSettings                             = {}
 Config.moduleSettingCategories                        = {}
-Config.FAQ                                            = {}
 Config.SettingsLoadComplete                           = false
 
 Config.TempSettings                                   = {}
@@ -150,99 +149,74 @@ Config.Constants.ConColors         = {
 Config.Constants.ConColorsNameToId = {}
 for i, v in ipairs(Config.Constants.ConColors) do Config.Constants.ConColorsNameToId[v:upper()] = i end
 
-Config.Constants.SpireChoices = { "First", "Second", "Third", "Disabled", }
+Config.Constants.SpireChoices      = { "First", "Second", "Third", "Disabled", }
 
-Config.Constants.LastGemRemem = { "Do Nothing", "Mem Previous Spell", "Mem Loadout Spell", }
-Config.Constants.DebuffChoice = { "Never", "Based on Con Color", "Always", }
+Config.Constants.LastGemRemem      = { "Do Nothing", "Mem Previous Spell", "Mem Loadout Spell", }
+Config.Constants.DebuffChoice      = { "Never", "Based on Con Color", "Always", }
 
 Config.Constants.ScanNamedPriority = { "Named", "No Preference", "Non-Named", }
-Config.Constants.ScanHPPriority = { "Lowest HP%", "No Preference", "Highest HP%", }
+Config.Constants.ScanHPPriority    = { "Lowest HP%", "No Preference", "Highest HP%", }
 
+Config.FAQ                         = {
+    [1] = {
+        Question = "What do Announcements do?",
+        Answer = "  Announcments are used to broadcast the selected options to the DanNet channel. The Group Announce optios will output the announcement to /gsay.",
+        Settings_Used = "",
+    },
+}
 -- Defaults
-Config.DefaultConfig = {
+Config.DefaultConfig               = {
 
     -- Custom: These use custom UI elements and do not display in normal settings windows.
     ['ClassConfigDir']       = {
         DisplayName = "Class Config Dir",
-        Category = "Main",
-        Tooltip = "Which version of class configs to Load",
         Type = "Custom",
         Default = mq.TLO.EverQuest.Server() == "Project Lazarus" and "Project Lazarus" or "Live",
-        FAQ = "How do I load configuration file for different servers types?",
-        Answer = "You can change the config type by selecting a different Server Type from the main panel.",
     },
     ['UseAssistList']        = {
         DisplayName = "Assist Outside of Group",
-        Tooltip = "Allow assisting characters outside of your group.",
         Type = "Custom",
         Default = false,
     },
     ['AssistList']           = {
         DisplayName = "List of User-Defined Assists",
-        Tooltip = "List of User-Defined Assists",
         Type = "Custom",
         Default = {},
     },
     ['ShowAdvancedOpts']     = {
         DisplayName = "Show Advanced Options",
-        Tooltip = "Show Advanced Options",
         Type = "Custom",
         Default = false,
-        ConfigType = "Advanced",
-        FAQ = "How do I see the Advanced Options?",
-        Answer = "You can set the [ShowAdvancedOpts] option to true to show the Advanced Options.",
     },
     ['PopOutForceTarget']    = {
         DisplayName = "Pop Out Force Target",
         Type = "Custom",
-        Tooltip = "Pop out the Force Target into it's own Window",
         Default = false,
-        ConfigType = "Advanced",
-        FAQ = "How do I pop out the Force Target?",
-        Answer =
-        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
     ['PopOutConsole']        = {
         DisplayName = "Pop Out Console",
         Type = "Custom",
-        Tooltip = "Pop out the Console into it's own Window",
         Default = false,
-        ConfigType = "Advanced",
-        FAQ = "How do I pop out the Console?",
-        Answer =
-        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
     ['MainWindowLocked']     = {
         DisplayName = "Main Window Locked",
-        Tooltip = "Lock UI",
         Default = false,
         Type = "Custom",
-        FAQ = "How do I lock the Main UI Window in place?",
-        Answer = "You can click the Lock Icon on the main UI panel or toggle the [MainWindowLocked] option to true.",
     },
 
     ['LogLevel']             = {
         DisplayName = "Log Level",
         Category = "Debug",
-        Tooltip = "1 = Errors, 2 = Warnings, 3 = Info, 4 = Debug, 5 = Verbose",
         Type = "Custom",
         Default = 3,
         Min = 1,
         Max = 6,
-        ConfigType = "Advanced",
-        FAQ = "Why am I not seeing any logs?",
-        Answer = "You can set the [LogLevel] option to the level of logs you would like to see.\n" ..
-            "Each level shows more information than the previous.",
     },
     ['LogToFile']            = {
         DisplayName = "Log To File",
         Category = "Debug",
-        Tooltip = "Write all logs to the mqlog file.",
         Type = "Custom",
         Default = false,
-        ConfigType = "Advanced",
-        FAQ = "How do I log to a file?",
-        Answer = "You can set the [LogToFile] option to true to write all logs to the mqlog file.",
     },
     ['EnableDebugging']      = {
         DisplayName = "Enable Debugging",
@@ -259,11 +233,9 @@ Config.DefaultConfig = {
         Header = "Announcements",
         Category = "Announcements",
         Index = 1,
-        Tooltip = "Announces Target over DanNet in kissassist format, incase you are running a mixed set on your group.Config",
+        Tooltip = "Announces the current combat target. Uses KissAssist format.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing the target?",
-        Answer = "You can set the [AnnounceTarget] option to true to announce the target over DanNet in kissassist format.",
     },
     ['AnnounceTargetGroup']  = {
         DisplayName = "Announce Target to Group",
@@ -271,11 +243,9 @@ Config.DefaultConfig = {
         Header = "Announcements",
         Category = "Announcements",
         Index = 2,
-        Tooltip = "Announces Target over /gsay",
+        Tooltip = "Announces Target over /gsay.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing the target to the group?",
-        Answer = "You can set the [AnnounceTargetGroup] option to true to announce the target over /gsay.",
     },
     ['MezAnnounce']          = {
         DisplayName = "Mez Announce",
@@ -284,10 +254,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 3,
         Default = false,
-        Tooltip = "Set to announce mez casts.",
+        Tooltip = "Announces mez use.",
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing mez casts and breaks?",
-        Answer = "You can set the [MezAnnounce] option to true to announce mez information.",
     },
     ['MezAnnounceGroup']     = {
         DisplayName = "Mez Announce to Group",
@@ -296,10 +264,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 4,
         Default = false,
-        Tooltip = "Set to announce mez casts In group.",
+        Tooltip = "Announces mez use to /gsay.",
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing mez casts and breaks to the group?",
-        Answer = "You can set the [MezAnnounceGroup] option to true to announce mez information in group.",
     },
     ['CharmAnnounce']        = {
         DisplayName = "Charm Announce",
@@ -308,10 +274,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 5,
         Default = false,
-        Tooltip = "Set to announce Charm casts.",
+        Tooltip = "Announces charm use.",
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing Charm casts?",
-        Answer = "You can set the [CharmAnnounce] option to true to announce Charm casts.",
     },
     ['CharmAnnounceGroup']   = {
         DisplayName = "Charm Announce to Group",
@@ -320,10 +284,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 6,
         Default = false,
-        Tooltip = "Set to announce Charm casts In group.",
+        Tooltip = "Announces charm use to /gsay.",
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing Charm casts to the group?",
-        Answer = "You can set the [CharmAnnounceGroup] option to true to announce Charm casts in group.",
     },
     ['HealAnnounce']         = {
         DisplayName = "Heal Announce",
@@ -332,10 +294,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 7,
         Default = false,
-        Tooltip = "Set to announce Heal casts.",
+        Tooltip = "Announces heal spell use.",
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing Heal casts?",
-        Answer = "You can set the [HealAnnounce] option to true to announce Heal casts.",
     },
     ['HealAnnounceGroup']    = {
         DisplayName = "Heal Announce to Group",
@@ -344,10 +304,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 8,
         Default = false,
-        Tooltip = "Set to announce Heal casts In group.",
+        Tooltip = "Announces heal spell use to /gsay.",
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing Heal casts to the group?",
-        Answer = "You can set the [HealAnnounceGroup] option to true to announce Heal casts in group.",
     },
     ['CureAnnounce']         = {
         DisplayName = "Cure Announce",
@@ -356,10 +314,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 9,
         Default = false,
-        Tooltip = "Set to announce Cure casts.",
+        Tooltip = "Announces cure use.",
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing Cure casts?",
-        Answer = "You can set the [CureAnnounce] option to true to announce Cure casts.",
     },
     ['CureAnnounceGroup']    = {
         DisplayName = "Cure Announce to Group",
@@ -368,10 +324,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 10,
         Default = false,
-        Tooltip = "Set to announce Cure casts In group.",
+        Tooltip = "Announces cure use to /gsay.",
         ConfigType = "Advanced",
-        FAQ = "Why am I not announcing Cure casts to the group?",
-        Answer = "You can set the [CureAnnounceGroup] option to true to announce Cure casts in group.",
     },
     ['ReagentAnnounce']      = {
         DisplayName = "Reagent Announce",
@@ -380,11 +334,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 11,
         Default = false,
-        Tooltip = "Set to announce a failed Reagent check in dannet.",
+        Tooltip = "Announces an aborted cast due to missing spell reagent.",
         ConfigType = "Advanced",
-        FAQ = "What is a Reagent check?",
-        Answer = "A reagent is a required material spell component (bone chips, peridots, etc).\n" ..
-            "We check to ensure we have reagents before we will cast spells requiring them.",
     },
     ['ReagentAnnounceGroup'] = {
         DisplayName = "Reagent Announce to Group",
@@ -393,10 +344,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 12,
         Default = false,
-        Tooltip = "Set to announce a failed Reagent check in group. (Warning: Not recommended due to message spam!)",
+        Tooltip = "Announces an aborted cast due to missing spell reagent to /gsay. (Warning: Often spammy.)",
         ConfigType = "Advanced",
-        FAQ = "What is a Reagent Announce?",
-        Answer = "When a PC attempts to cast a spell he doesn't have a reagent for, he will announce this if the setting is enabled.",
     },
     ['PullAnnounce']         = {
         DisplayName = "Pull Announce",
@@ -405,10 +354,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 13,
         Default = false,
-        Tooltip = "Set to announce pull-related messages in dannet.",
+        Tooltip = "Announce pull-related messages.",
         ConfigType = "Advanced",
-        FAQ = "How can I display a little more information about pulling module status?",
-        Answer = "You can enable Pull Announce in the Announcements tabs to be give verbose messages via DanNet.",
     },
     ['PullAnnounceGroup']    = {
         DisplayName = "Pull Announce to Group",
@@ -417,10 +364,8 @@ Config.DefaultConfig = {
         Category = "Announcements",
         Index = 14,
         Default = false,
-        Tooltip = "Set to announce pull-related messages in group. (Warning: Not recommended due to message spam!)",
+        Tooltip = "Announce pull-related messages in /gsay. (Warning: Often spammy.)",
         ConfigType = "Advanced",
-        FAQ = "Why are these messages spamming my group or dannet channel?",
-        Answer = "You should check the Announcements tab to ensure that those settings are to your taste.",
     },
 
     --Misc
@@ -430,11 +375,9 @@ Config.DefaultConfig = {
         Header = "Misc",
         Category = "Misc",
         Index = 1,
-        Tooltip = "Instantly release when you die.",
+        Tooltip = "Instantly release to spawn point when you die.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why am I not releasing instantly after death?",
-        Answer = "You can set the [InstantRelease] option to true to instantly release when you die.",
     },
     ['ForceKillPet']         = { --Algarnote: I don't like this setting, I think I've fixed the issues... consider removal or a more elegant solution
         DisplayName = "Force Kill Pet",
@@ -442,11 +385,10 @@ Config.DefaultConfig = {
         Header = "Misc",
         Category = "Misc",
         Index = 2,
-        Tooltip = "Force kill pcpet if on xtarget.",
+        Tooltip =
+        "Force kill a peer's pet if found on xtarget after other means of correction have failed. Failsafe for buggy xtargeting on Emu servers. Please report if you need to use this setting!",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Someones pet is causing issues, how do I fix this?",
-        Answer = "You can set the [ForceKillPet] option to true to force kill pcpet if on xtarget.",
     },
 
     -- Meditation/Med Rules
@@ -463,11 +405,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 3,
         ConfigType = "Normal",
-        FAQ = "How do I change when I meditate?",
-        Answer = "You can set the [DoMed] option to the desired Meditation Setting." ..
-            "'Out of Combat' Will only Meditate Outside of Combat." ..
-            "'In Combat' Will Meditate in and out of Combat." ..
-            "'Off' Will not Meditate.",
     },
     ['StandWhenDone']        = {
         DisplayName = "Stand When Done Medding",
@@ -475,10 +412,8 @@ Config.DefaultConfig = {
         Header = "Meditation",
         Category = "Med Rules",
         Index = 2,
-        Tooltip = "Force a stand when medding thresholds are reached.",
+        Tooltip = "Force a stand to end meditation when thresholds are reached.",
         Default = false,
-        FAQ = "I don't want to stand up after medding, I prefer to stay seated until combat starts or I take another action, how do I change this?",
-        Answer = "You can set the [StandWhenDone] option to false to stay seated until something else requires you to stand.",
     },
     ['AfterCombatMedDelay']  = {
         DisplayName = "After Combat Med Delay",
@@ -486,13 +421,11 @@ Config.DefaultConfig = {
         Header = "Meditation",
         Category = "Med Rules",
         Index = 3,
-        Tooltip = "How long to delay after combat in seconds before sitting.",
+        Tooltip = "How may seconds to delay after combat before sitting to meditate.",
         Default = 6,
         Min = 0,
         Max = 60,
         ConfigType = "Advanced",
-        FAQ = "I keep sitting after combat to med and getting attacked within seconds, how do I fix this?",
-        Answer = "You can set the [AfterCombatMedDelay] option to the number of seconds you would like to wait after combat before sitting to med.",
     },
     ['MedAggroCheck']        = {
         DisplayName = "Med Aggro Check",
@@ -500,14 +433,12 @@ Config.DefaultConfig = {
         Header = "Meditation",
         Category = "Med Rules",
         Index = 4,
-        Tooltip = "Force a stand we have aggro higher than the below setting from an xtarget.",
+        Tooltip = "Force a stand when we have aggro higher than the Med Aggro Percent setting from an xtarget.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I trying to meditate when I am being hit or targeted in combat?",
-        Answer = "You can enable the Med Aggro Check on the Med/Mana tab to stop meditation in these conditions.",
     },
     ['MedAggroPct']          = {
-        DisplayName = "Med Aggro Pct",
+        DisplayName = "Med Aggro Percent",
         Group = "Movement",
         Header = "Meditation",
         Category = "Med Rules",
@@ -517,96 +448,80 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I trying to meditate when I am being hit or targeted in combat?",
-        Answer = "You can adjust the Med Aggro Percent on the Med/Mana tab to stop meditation in these conditions. Ensure the Med Aggro Check is enabled.",
     },
 
     -- Meditation/Med Thresholds
     ['HPMedPct']             = {
-        DisplayName = "Med HP %",
+        DisplayName = "Med Start HP%",
         Group = "Movement",
         Header = "Meditation",
         Category = "Med Thresholds",
         Index = 1,
-        Tooltip = "What HP % to hit before medding.",
+        Tooltip = "Attempt to meditate when at or under this HP percentage.",
         Default = 60,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "I want to Regen health when I am low what do I need to do?",
-        Answer = "You can set the [HPMedPct] option to the percent health you would like to sit and start to regenerate at.",
     },
     ['HPMedPctStop']         = {
-        DisplayName = "Med HP % Stop",
+        DisplayName = "Med Stop HP%",
         Group = "Movement",
         Header = "Meditation",
         Category = "Med Thresholds",
         Index = 2,
-        Tooltip = "What HP % to hit before stopping medding.",
+        Tooltip = "Cease attempts to meditate when at or under this HP percentage.",
         Default = 90,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why am I only Regenerating to 60% Health?",
-        Answer = "You can set the [HPMedPctStop] option to the percent health you would like to stop meditating at.",
     },
     ['ManaMedPct']           = {
-        DisplayName = "Med Mana %",
+        DisplayName = "Med Start Mana%",
         Group = "Movement",
         Header = "Meditation",
         Category = "Med Thresholds",
         Index = 3,
-        Tooltip = "What Mana % to hit before medding.",
+        Tooltip = "Attempt to meditate when at or under this Mana percentage.",
         Default = 60,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why am I not meditating?",
-        Answer = "Make sure [DoMed] is not set to 'Off'." ..
-            "You can set the [ManaMedPct] option to the percent mana you would like to start meditating at.",
     },
     ['ManaMedPctStop']       = {
-        DisplayName = "Med Mana % Stop",
+        DisplayName = "Med Stop Mana%",
         Group = "Movement",
         Header = "Meditation",
         Category = "Med Thresholds",
         Index = 4,
-        Tooltip = "What Mana % to hit before stopping medding.",
+        Tooltip = "Cease attempts to meditate when at or under this Mana percentage.",
         Default = 90,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why am I only Meditating to 60% Mana?",
-        Answer = "You can set the [ManaMedPctStop] option to the percent mana you would like to stop meditating at.",
     },
     ['EndMedPct']            = {
-        DisplayName = "Med Endurance %",
+        DisplayName = "Med Start End%",
         Group = "Movement",
         Header = "Meditation",
         Category = "Med Thresholds",
         Index = 5,
-        Tooltip = "What Endurance % to hit before medding.",
+        Tooltip = "Attempt to meditate when at or under this Endurance percentage.",
         Default = 60,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why am I always out of endurance?",
-        Answer = "Make sure [DoMed] is not set to 'Off'." ..
-            "You can set the [EndMedPct] option to the percent endurance you would like to start regenerating at.",
     },
     ['EndMedPctStop']        = {
-        DisplayName = "Med Endurance % Stop",
+        DisplayName = "Med Stop End%",
         Group = "Movement",
         Header = "Meditation",
         Category = "Med Thresholds",
         Index = 6,
-        Tooltip = "What Endurance % to hit before stopping medding.",
+        Tooltip = "Cease attempts to meditate when at or under this HP percentage.",
         Default = 90,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why am I only Recovering to 60% Endurance?",
-        Answer = "You can set the [EndMedPctStop] option to the percent endurance you would like to stop meditating at.",
     },
 
     -- Clickies(Pre-Configured)
@@ -616,11 +531,9 @@ Config.DefaultConfig = {
         Header = "Clickies",
         Category = "General Clickies",
         Index = 1,
-        Tooltip = "Auto use Mod Rods if we have them",
+        Tooltip = "Use available Mod Rods (Laz: Azure Crystals) when we have less that the Mod Rod Mana % setting.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "How do I automate using Mod Rods?",
-        Answer = "You can set the [DoModRod] option to true to automatically use Mod Rods when your mana drops below the [ModRodManaPct] setting.",
     },
     ['ModRodManaPct']        = {
         DisplayName = "Mod Rod Mana %",
@@ -628,13 +541,11 @@ Config.DefaultConfig = {
         Header = "Clickies",
         Category = "General Clickies",
         Index = 2,
-        Tooltip = "What Mana % to hit before using a rod.",
+        Tooltip = "Use the first available Mod Rod when at or under this mana percentage, as long as it won't kill us.",
         Default = 60,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "How do I automate using Mod Rods?",
-        Answer = "You can set the [ModRodManaPct] option to the percent mana you would like to start using Mod Rods at.",
     },
     ['DoMount']              = {
         DisplayName = "Summon Mount:",
@@ -649,9 +560,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 3,
         ConfigType = "Normal",
-        FAQ = "How do I automate using mounts?",
-        Answer = "You can set the [MountItem] option to the name of the item you would like to use to cast mount.\n" ..
-            "Also set the [DoMount] option to 'For use as mount' to enable using mounts.",
     },
     ['MountItem']            = {
         DisplayName = "Mount Item",
@@ -659,13 +567,10 @@ Config.DefaultConfig = {
         Header = "Clickies",
         Category = "General Clickies",
         Index = 4,
-        Tooltip = "Item to use to cast mount",
+        Tooltip = "Mount Clicky item to use.",
         Type = "ClickyItem",
         Default = "",
         ConfigType = "Normal",
-        FAQ = "How do I automate using mounts?",
-        Answer = "You can set the [MountItem] option to the name of the item you would like to use to cast mount.\n" ..
-            "Also set the [DoMount] option to 'For use as mount' to enable using mounts.",
     },
     ['DoShrink']             = {
         DisplayName = "Do Shrink",
@@ -673,12 +578,9 @@ Config.DefaultConfig = {
         Header = "Clickies",
         Category = "General Clickies",
         Index = 5,
-        Tooltip = "Enable auto shrinking",
+        Tooltip = "Use Shrink items.",
         Default = false,
         ConfigType = "Normal",
-        FAQ = "How do I automatically shrink myself?",
-        Answer = "You can set the [DoShrink] option to true to automatically shrink yourself." ..
-            "You can also set the [ShrinkItem] option to the name of the item you would like to use to shrink yourself.",
     },
     ['ShrinkItem']           = {
         DisplayName = "Shrink Item",
@@ -686,12 +588,10 @@ Config.DefaultConfig = {
         Header = "Clickies",
         Category = "General Clickies",
         Index = 6,
-        Tooltip = "Item to use to Shrink yourself",
+        Tooltip = "Item to use to Shrink yourself.",
         Type = "ClickyItem",
         Default = "",
         ConfigType = "Normal",
-        FAQ = "How do I automate using Shrink Items?",
-        Answer = "You can set the [ShrinkItem] option to the name of the item you would like to use to shrink yourself.",
     },
 
     -- Pet/Pet Summoning
@@ -704,8 +604,6 @@ Config.DefaultConfig = {
         Tooltip = "Enable the summoning and buffing of pets.",
         Default = true,
         ConfigType = "Normal",
-        FAQ = "How do I turn off pet summoning and/or pet buffing?",
-        Answer = "You can set the Summon Pet option on the Pet/Merc tab to enable or disable pet summoning.\nNote that swarm pets may still be summoned.",
     },
 
     -- Pet/Pet Buffs
@@ -715,11 +613,9 @@ Config.DefaultConfig = {
         Header = "Pet",
         Category = "Pet Buffs",
         Index = 1,
-        Tooltip = "Enable auto shrinking your pet",
+        Tooltip = "Use a Shrink Clicky on your pet.",
         Default = false,
         ConfigType = "Normal",
-        FAQ = "How do I automatically shrink my pets?",
-        Answer = "You can set the [DoShrinkPet] option to true to automatically shrink your pet.",
     },
     ['ShrinkPetItem']        = {
         DisplayName = "Shrink Pet Item",
@@ -727,12 +623,10 @@ Config.DefaultConfig = {
         Header = "Pet",
         Category = "Pet Buffs",
         Index = 2,
-        Tooltip = "Item to use to shrink your pet",
+        Tooltip = "Item to use to shrink your pet.",
         Type = "ClickyItem",
         Default = "",
         ConfigType = "Normal",
-        FAQ = "How do I shrink my pet? I have a clicky item that does it.",
-        Answer = "You can set the [ShrinkPetItem] option to the name of the item you would like to use to shrink your pet.",
     },
 
     -- Targeting
@@ -742,11 +636,9 @@ Config.DefaultConfig = {
         Header = "Targeting",
         Category = "Targeting Behavior",
         Index = 1,
-        Tooltip = "Automatically change targets.",
+        Tooltip = "Allow RGMercs to automatically change your target. This applies to combat, healing, and most other actions.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I Always changing targets?",
-        Answer = "You can set the [DoAutoTarget] option to false to stop automatically changing targets.",
     },
     ['StayOnTarget']         = {
         DisplayName = "Stay On Target",
@@ -754,11 +646,9 @@ Config.DefaultConfig = {
         Header = "Targeting",
         Category = "Targeting Behavior",
         Index = 2,
-        Tooltip = "Stick to your target. Default: true; Tank Mode Defaults: false. false allows intelligent target swapping based on aggro/named/ etc.",
-        Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
+        Tooltip = "Don't change combat targets when the MA does.",
+        Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why am I not changing targets when I am in Tank Mode?",
-        Answer = "You can set the [StayOnTarget] option to false to allow intelligent target swapping based on aggro/named/ etc.",
     },
     ['SafeTargeting']        = {
         DisplayName = "Use Safe Targeting",
@@ -766,11 +656,9 @@ Config.DefaultConfig = {
         Header = "Targeting",
         Category = "Targeting Behavior",
         Index = 3,
-        Tooltip = "Do not target mobs that are fighting others.",
+        Tooltip = "Do not target mobs that are fighting others (except if those others pass safety checks, such as if they are DanNet peers.).",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why do I keep targeting mobs that are fighting other players?",
-        Answer = "You can set the [SafeTargeting] option to true to avoid targeting mobs that are fighting other players.",
     },
     ['ScanNamedPriority']    = {
         DisplayName = "Scan Priority:",
@@ -817,13 +705,11 @@ Config.DefaultConfig = {
         Header = "Targeting",
         Category = "MA Target Selection",
         Index = 4,
-        Tooltip = "Distance in Z direction to look for targets.",
+        Tooltip = "Allowable height difference between mobs and the MA when scanning for targets.",
         Default = 45,
         Min = 15,
         Max = 200,
         ConfigType = "Advanced",
-        FAQ = "I have trouble pulling targets on hills and ledges, how do I fix this?",
-        Answer = "You can set the [MAScanZRange] option to the distance in the Z direction to look for targets.",
     },
     ['MAScanAggro']          = {
         DisplayName = "Scan for Aggro",
@@ -846,22 +732,18 @@ Config.DefaultConfig = {
         Tooltip = "Automatically engage targets.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I not attacking the mob?",
-        Answer = "You can set the [DoAutoEngage] option to true to automatically engage targets.",
     },
     ['AutoAssistAt']         = {
-        DisplayName = "Auto Assist At",
+        DisplayName = "Auto Assist Percent",
         Group = "Combat",
         Header = "Assisting",
         Category = "Assisting",
         Index = 2,
-        Tooltip = "Melee attack when target hits [x] HP %.",
+        Tooltip = "Begin combat actions against the auto target when its reaches this health percentage.",
         Default = 98,
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not attacking the mob?",
-        Answer = "You can set the [AutoAssistAt] option to the percent health you would like to start attacking at.",
     },
     ['AssistRange']          = {
         DisplayName = "Assist Range",
@@ -869,13 +751,11 @@ Config.DefaultConfig = {
         Header = "Assisting",
         Category = "Assisting",
         Index = 3,
-        Tooltip = "Distance to the target before you engage.",
-        Default = Config.Constants.RGCasters:contains(Config.Globals.CurLoadedClass) and 90 or 45,
+        Tooltip = "Engage the combat target when it is within this distance.",
+        Default = Config.Constants.RGCasters:contains(Config.Globals.CurLoadedClass) and 100 or 50,
         Min = 0,
-        Max = 200,
+        Max = 300,
         ConfigType = "Advanced",
-        FAQ = "Why am I running to engage mobs that are not in camp?",
-        Answer = "You can set the [AssistRange] option to the distance you would like to engage mobs at.",
     },
     ['DoMelee']              = {
         DisplayName = "Enable Melee Combat",
@@ -883,11 +763,9 @@ Config.DefaultConfig = {
         Header = "Assisting",
         Category = "Assisting",
         Index = 4,
-        Tooltip = "Melee targets.",
+        Tooltip = "Auto attack the combat target.",
         Default = Config.Globals.CurLoadedClass ~= "RNG" and Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass),
         ConfigType = "Normal",
-        FAQ = "Why am I not attacking the mob?",
-        Answer = "You can set the [DoMelee] option to true to enable melee combat.",
     },
     ['AllowMezBreak']        = {
         DisplayName = "Allow Mez Break",
@@ -895,11 +773,9 @@ Config.DefaultConfig = {
         Header = "Assisting",
         Category = "Assisting",
         Index = 5,
-        Tooltip = "Allow Mez Breaking.",
+        Tooltip = "Allow combat actions if the target is mezzed.",
         Default = (Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
         ConfigType = "Advanced",
-        FAQ = "Why is my Tank not breaking Mez?\nWhy is X Char Breaking Mez all the time?",
-        Answer = "Check the [AllowMezBreak] option, true will allow Mez Breaking.",
     },
     ['DoPetCommands']        = {
         DisplayName = "Pet Control",
@@ -910,23 +786,18 @@ Config.DefaultConfig = {
         Tooltip = "Allow RGMercs to issue pet commands.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why isn't my pet doing anything?",
-        Answer =
-        "Ensure that the Pet Control option is checked on the Pet/Merc tab.\nNote that this also affects the /pet swarm command for swarm pets.",
     },
     ['PetEngagePct']         = {
-        DisplayName = "Pet Engage HPs",
+        DisplayName = "Pet Assist Percent",
         Group = "Combat",
         Header = "Assisting",
         Category = "Assisting",
         Index = 7,
-        Tooltip = "Send in pet when target hits [x] HP %.",
+        Tooltip = "Send pets to attack the combat target when it reaches this health percentage.",
         Default = 96,
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "How do I change when my pet engages?",
-        Answer = "You can set the [PetEngagePct] option to the percent health you would like your pet to engage at.",
     },
     ['DoMercenary']          = {
         DisplayName = "Merc Control",
@@ -934,11 +805,9 @@ Config.DefaultConfig = {
         Header = "Assisting",
         Category = "Assisting",
         Index = 8,
-        Tooltip = "Allow RGMercs to issue mercenary commands.",
+        Tooltip = "Allow RGMercs to issue mercenary commands. We plan to add selectable stances in a future update.",
         Default = (Config.Globals.BuildType ~= 'Emu'),
         ConfigType = "Normal",
-        FAQ = "How do I use Mercenaries in my group?",
-        Answer = "You can set the [DoMercenary] option to true to allow RGMercs to issue mercenary commands.",
     },
     ['FollowMarkTarget']     = {
         DisplayName = "Follow Mark Target",
@@ -946,11 +815,9 @@ Config.DefaultConfig = {
         Header = "Assisting",
         Category = "Assisting",
         Index = 9,
-        Tooltip = "Auto target MA target Marks.",
+        Tooltip = "Prioritize the Marked target as the combat target.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why am I not following the Marked target?",
-        Answer = "You can set the [FollowMarkTarget] option to true to automatically target the MA's Marked target.",
     },
     ['RaidAssistTarget']     = {
         DisplayName = "Raid Assist Target",
@@ -965,8 +832,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 3,
         ConfigType = "Normal",
-        FAQ = "Why am I not following the Raid Assist target I want?",
-        Answer = "You can set the preferred Raid Assist Target on the Engage tab of the main options.",
     },
     ['SelfAssistFallback']   = {
         DisplayName = "Self-Assist Fallback",
@@ -993,8 +858,6 @@ Config.DefaultConfig = {
         Tooltip = "Periodically /face your target while in combat.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I getting warnings about not facing my target?",
-        Answer = "You can set the [FaceTarget] option to true to periodically /face your target while in combat.",
     },
     ['StickHow']             = {
         DisplayName = "Stick How",
@@ -1002,12 +865,15 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "General Positioning",
         Index = 2,
-        Tooltip = "Custom /stick command",
+        Tooltip = "Custom arguments for /stick command. Leave blank for default (varies on class).",
         Default = "",
         ConfigType = "Advanced",
-        FAQ = "How do I change the /stick command?",
-        Answer = "You can set the [StickHow] option to the custom /stick command you would like to use.\n" ..
-            "See the MQ2Stick documentation for more information.",
+        FAQ = "What are the default stick settings?",
+        Answer = "   If the Stick How entry is left blank, we will use default stick settings as follows:\n" ..
+            "If MA: < 10 moveback* uw >\n" ..
+            "Others: < 10** behindonce moveback uw >\n\n" ..
+            "* - Optional moveback flag (if 'Moveback As Tank' is enabled).\n" ..
+            "** - On larger targets this value becomes 20.",
     },
     ['BellyCastStick']       = {
         DisplayName = "Stick for Belly Cast",
@@ -1015,7 +881,7 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "General Positioning",
         Index = 3,
-        Tooltip = "If Melee is off, pin at 40 units on named with a dragon bodytype in case of possible bellycaster.",
+        Tooltip = "If Melee Combat is disabled, pin at 40 units on named with a dragon bodytype in case of possible bellycaster.",
         Default = false,
         ConfigType = "Advanced",
     },
@@ -1025,11 +891,9 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "General Positioning",
         Index = 4,
-        Tooltip = "Auto stands you up from FD if combat starts.",
+        Tooltip = "Stand up if feigning at the start of combat.",
         Default = true,
         ConfigType = "Normal",
-        FAQ = "Why am I not standing up from Feign Death?",
-        Answer = "You can set the [AutoStandFD] option to true to automatically stand up from Feign Death if combat starts.",
     },
     ['HandleCantSeeTarget']  = {
         DisplayName = "Handle Cannot See Target",
@@ -1037,11 +901,9 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "General Positioning",
         Index = 5,
-        Tooltip = "If you get a cannot see your target message this will try to correct for it.",
+        Tooltip = "Attempt to adjust positioning if you receive a 'cannot see your target' message.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "When I cannot see my target my characters [do or do not] move to try to fix it.",
-        Answer = "You can enabled or disable [HandleCantSeeTarget] to tell rgmercs if it should try to handle cannot see target messages.",
     },
     ['HandleTooClose']       = {
         DisplayName = "Handle Too Close",
@@ -1049,11 +911,9 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "General Positioning",
         Index = 6,
-        Tooltip = "If you get a target too close message this will try to correct for it.",
+        Tooltip = "Attempt to adjust positioning if you receive a 'too close to use a ranged weapon' message.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "When my target is too close, my characters [do or do not] move to try to fix it.",
-        Answer = "You can enabled or disable [HandleTooClose] to tell rgmercs if it should try to handle target too close messages.",
     },
     ['HandleTooFar']         = {
         DisplayName = "Handle Too Far",
@@ -1061,11 +921,9 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "General Positioning",
         Index = 7,
-        Tooltip = "If you get a target too far message this will try to correct for it.",
+        Tooltip = "Attempt to adjust positioning if you receive a 'too far away' or 'cant hit them from here' message.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "When my target is too far, my characters [do or do not] move to try to fix it.",
-        Answer = "You can enabled or disable [HandleTooFar] to tell rgmercs if it should try to handle target too far messages.",
     },
     -- Positioning/Tank
     ['MovebackWhenTank']     = {
@@ -1074,11 +932,9 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "Tank Positioning",
         Index = 1,
-        Tooltip = "Adds 'moveback' to stick command when tanking. Helpful to keep mobs from getting behind you.",
+        Tooltip = "Adds 'moveback' to the default stick command when tanking. Helpful to keep mobs from getting behind you.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "I keep getting You can not see your target, messages while tanking. How do I fix this?",
-        Answer = "You can set the [MovebackWhenTank] option to true to add 'moveback' to the stick command when tanking.",
     },
     ['MovebackWhenBehind']   = {
         DisplayName = "Moveback if Mob Behind",
@@ -1086,11 +942,9 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "Tank Positioning",
         Index = 2,
-        Tooltip = "Causes you to move back if we detect an XTarget is behind you when tanking.",
+        Tooltip = "Initiates a stick moveback if we detect an XTarget is behind you when tanking.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "I keep getting Backstabbed, how do I fix this?",
-        Answer = "You can set the [MovebackWhenBehind] option to true to move back if we detect an XTarget is behind you when tanking.",
     },
     ['MovebackDistance']     = {
         DisplayName = "Units to Moveback",
@@ -1098,18 +952,16 @@ Config.DefaultConfig = {
         Header = "Positioning",
         Category = "Tank Positioning",
         Index = 3,
-        Tooltip = "Default: 20. May require adjustment based on mob size or run speed.",
+        Tooltip = "Distance from mob to moveback to. May require adjustment for larger targets or due to overshooting from high move speed.",
         Default = 20,
         Min = 1,
         Max = 40,
         ConfigType = "Advanced",
-        FAQ = "I backed up off the ledge, how do I fix this?",
-        Answer = "You can set the [MovebackDistance] option to the number of units to move back when tanking.",
     },
 
     --Common/Rules
     ['MobLowHP']             = {
-        DisplayName = "Mob Low HP:",
+        DisplayName = "Mob Low HP%",
         Group = "Abilities",
         Header = "Common",
         Category = "Common Rules",
@@ -1119,11 +971,11 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not casting Dots?",
-        Answer = "We will check the health of a mob with Mob Low HP or Named Low HP to determine whether to do things like cast Dots, or long nukes.",
+        FAQ = "Why do I stop using certain abilities when mob health gets lower?",
+        Answer = "Default class configs will check the health of a mob with 'Mob Low HP%' or 'Named Low HP%' to determine whether to do things like cast Dots, or long nukes.",
     },
     ['NamedLowHP']           = {
-        DisplayName = "Named Low HP:",
+        DisplayName = "Named Low HP%",
         Group = "Abilities",
         Header = "Common",
         Category = "Common Rules",
@@ -1133,8 +985,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why do I keep dotting the named when it is below the Mob Low HP threshold?",
-        Answer = "Named Targets have their own setting for low HP, Adjust the Named Low HP option instead.",
     },
     ['AggroThrottling']      = {
         DisplayName = "Use Aggro Throttling",
@@ -1145,8 +995,6 @@ Config.DefaultConfig = {
         Tooltip = "(Non-Tank Modes): Don't use nukes and similar spells when your aggro percent is above the Aggro To Cast value below.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I not casting some spells when I have aggro?",
-        Answer = "You can disable the setting to use nukes and similar spells regardless of your aggro on the current target.",
     },
     ['MobMaxAggro']          = {
         DisplayName = "Start Aggro Throttle:",
@@ -1159,8 +1007,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 999,
         ConfigType = "Advanced",
-        FAQ = "Why am I not casting or acting on my target at high aggro?",
-        Answer = "You can set the Max Aggro option to the maximum aggro to cast or use most offensive actions at.",
     },
     ['LastGemRemem']         = {
         DisplayName = "Remem After Buff:",
@@ -1178,8 +1024,6 @@ Config.DefaultConfig = {
         Type = "Combo",
         ComboOptions = Config.Constants.LastGemRemem,
         ConfigType = "Advanced",
-        FAQ = "Why am I constantly rememorizing buffs in the last slot?",
-        Answer = "You can control how and what we will remem in the last gem after buffing on the Spells/Abils options tab.",
     },
     ['IgnoreLevelCheck']     = {
         DisplayName = "Ignore Spell Level Checks",
@@ -1187,7 +1031,7 @@ Config.DefaultConfig = {
         Header = "Common",
         Category = "Common Rules",
         Index = 6,
-        Tooltip = "If your server allows for higher level spells to land on lower level characters check this.",
+        Tooltip = "Ignore checks for minimum level on spells. Used on servers that allow heals, buffs and other spells to land on PCs regardless of level.",
         Default = false,
         ConfigType = "Advanced",
     },
@@ -1201,8 +1045,6 @@ Config.DefaultConfig = {
         Tooltip = "This will cause RGMercs to use '/cast =<Spell>' which , must be supported by your MQ version but will avoid things like 'Bane' casting 'Bane of Nife' instead.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why is the wrong spell being cast/a spell not being cast when it says it is?",
-        Answer = "If the spell name is not unique, you can set the [UseExactSpellNames] option to true to use the exact spell name when casting.",
     },
     ['CastReadyDelayFact']   = {
         DisplayName = "Cast Ready Delay Factor",
@@ -1215,8 +1057,6 @@ Config.DefaultConfig = {
         Min = 0,
         Max = 10,
         ConfigType = "Advanced",
-        FAQ = "Why am I getting spell not ready spam?",
-        Answer = "Your spell may not be ready set the [CastReadyDelayFact] option to the number of milliseconds to wait before checking again.",
     },
     ['SongClipDelayFact']    = {
         DisplayName = "Song Clip Delay Factor",
@@ -1229,8 +1069,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 10,
         ConfigType = "Advanced",
-        FAQ = "Why are my songs not landing before casting a new one?",
-        Answer = "You can set the [SongClipDelayFact] option to the number of milliseconds to wait before casting a new song.",
     },
 
     -- Damage/Direct
@@ -1245,8 +1083,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not casting Nukes?",
-        Answer = "You can set the [ManaToNuke] option to the minimum mana to casting nukes at.",
     },
     --Damage/Over Time
     ['ManaToDot']            = {
@@ -1260,8 +1096,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not casting Dots?",
-        Answer = "You can set the [ManaToDot] option to the minimum mana to casting dots at.",
     },
 
     -- Debuffs
@@ -1276,8 +1110,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not casting Debuffs?",
-        Answer = "You can set the [ManaToDebuff] option to the minimum mana to casting debuffs at.",
     },
     ['DebuffMinCon']         = {
         DisplayName = "Debuff Min Con",
@@ -1292,8 +1124,6 @@ Config.DefaultConfig = {
         Type = "Combo",
         ComboOptions = Config.Constants.ConColors,
         ConfigType = "Advanced",
-        FAQ = "Why am I not debuffing the mob?",
-        Answer = "You can set the [DebuffMinCon] option to the minimum con color to debuff.",
     },
     ['MobDebuff']            = {
         DisplayName = "Mob Debuffing:",
@@ -1308,8 +1138,6 @@ Config.DefaultConfig = {
         Type = "Combo",
         ComboOptions = Config.Constants.DebuffChoice,
         ConfigType = "Advanced",
-        FAQ = "Why am I not debuffing a normal trash mob?",
-        Answer = "Ensure that you have selected your preferred options on the Main Spells/Abils tab. Double-check your min con color if debuffing based on that.",
     },
     ['NamedDebuff']          = {
         DisplayName = "Named Debuffing:",
@@ -1324,9 +1152,6 @@ Config.DefaultConfig = {
         Type = "Combo",
         ComboOptions = Config.Constants.DebuffChoice,
         ConfigType = "Advanced",
-        FAQ = "Why am I not debuffing a named mob?",
-        Answer = "Ensure that you have selected your preferred options on the Main Spells/Abils tab. Double-check your min con color if debuffing based on that.\n" ..
-            "Also, ensure that the mob is properly being tracked by mercs as a named mob (see the named tab for more information.)",
     },
 
     -- Emergency
@@ -1336,28 +1161,24 @@ Config.DefaultConfig = {
         Header = "Utility",
         Category = "Emergency",
         Index = 1,
-        Tooltip = "Auto stands you up if you fall to the ground.",
+        Tooltip = "Stand up if a failed feign is detected ('fall to the ground').",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I not standing up from Feign Death when it fails?",
-        Answer = "You can set the [StandFailedFD] option to true to automatically stand up if you fail to Feign Death.",
     },
 
     -- Buffs/Rules
     ['DoBuffs']              = {
-        DisplayName = "Do Buffs",
+        DisplayName = "Do Downtime/Group Buffs",
         Group = "Abilities",
         Header = "Buffs",
         Category = "Buff Rules",
         Index = 1,
-        Tooltip = "Do Non-Class Specific Buffs.",
+        Tooltip = "Process Downtime and Group Buff Rotations (see your rotations on the class tab).",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I not buffing?",
-        Answer = "You can set the [DoBuffs] option to true to do non-class specific buffs.",
     },
     ['BuffWaitMoveTimer']    = {
-        DisplayName = "Buff Wait Timer",
+        DisplayName = "After-Move Buff Delay",
         Group = "Abilities",
         Header = "Buffs",
         Category = "Buff Rules",
@@ -1367,8 +1188,6 @@ Config.DefaultConfig = {
         Min = 0,
         Max = 60,
         ConfigType = "Advanced",
-        FAQ = "Why am I trying to buff every time we stop moving?",
-        Answer = "You can set the [BuffWaitMoveTimer] option to the number of seconds to wait after stopping movement before doing buffs.",
     },
     ['BuffRezables']         = {
         DisplayName = "Buff Rezables",
@@ -1380,9 +1199,6 @@ Config.DefaultConfig = {
         "If a PC has a corpse near us, buff them even though they are likely to get rezed. (Note: If disabled, they may still be receiving group buffs aimed at those without corpses.)",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why am I buffing the people before they are rezzed?",
-        Answer =
-        "You can set the [BuffRezables] option to false to skip buffing the people who have corpses nearby, but note they may receive group buffs aimed at those without corpses.",
     },
     ['UseCounterActions']    = {
         DisplayName = "Use Aureate's Bane", --this can be freely changed later if another system is added. Avoiding confusion for now.
@@ -1393,9 +1209,6 @@ Config.DefaultConfig = {
         Tooltip =
         "Automatically use counter actions (such as the Aureate's Bane AA to counter Curse of Subjugation in TOB zones.",
         Default = (mq.TLO.MacroQuest.BuildName() or ""):lower() ~= "emu",
-        FAQ = "How do I get rid of the TOB Debuff, Curse of Subjugation?",
-        Answer =
-        "If you select to Use Aureate's Bane on the Buff Tab of the main config options, you will attempt to clear Curse of Subjugation automatically.",
     },
     ['BreakInvisForSay']     = {
         DisplayName = "Break Invis for Say Commands",
@@ -1413,11 +1226,9 @@ Config.DefaultConfig = {
         Header = "Buffs",
         Category = "Self",
         Index = 99,
-        Tooltip = "Automatically cast Alliance spells.",
+        Tooltip = "Enable the use of Alliance spells.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why am I not casting Alliance spells?",
-        Answer = "You can set the [DoAlliance] option to true to automatically cast Alliance spells.",
     },
 
     --Recovery/General
@@ -1442,8 +1253,6 @@ Config.DefaultConfig = {
         Tooltip = "Break invis to heal, cure and rez when out of combat (Does not affect combat actions).",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why aren't I being healed outside of combat?",
-        Answer = "Outside of combat, healers won't break invis to heal unless the \"Break Invis\" option is toggled in the Heal/Rez settings.",
     },
     ['PriorityHealing']      = {
         DisplayName = "Priority Healing",
@@ -1454,8 +1263,6 @@ Config.DefaultConfig = {
         Tooltip = "Standby for healing over engaging in combat actions. Stops mob engaging and most other rotations.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "Why are my healers attacking the mob and not healing?",
-        Answer = "You can set the [PriorityHealing] option to true to enforce healing over engaging in combat actions.",
     },
     ['HealOutside']          = {
         DisplayName = "Heal Outside",
@@ -1466,8 +1273,6 @@ Config.DefaultConfig = {
         Tooltip = "Heal PCs that have been added to your xtarget list (and their pets, if pet healing is enabled).",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why are my healers attacking the mob and not healing?",
-        Answer = "You can set the [PriorityHealing] option to true to enforce healing over engaging in combat actions.",
     },
     -- Recovery/Thresholds
     ['MaxHealPoint']         = {
@@ -1481,8 +1286,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why am I not healing?",
-        Answer = "You can set the [MaxHealPoint] option to the percent health you would like to start healing at.",
     },
     ['LightHealPoint']       = {
         DisplayName = "Light Heal Point",
@@ -1490,13 +1293,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Healing Thresholds",
         Index = 2,
-        Tooltip = "Minimum PctHPs to use the Light Heal Rotation.",
+        Tooltip = "Minimum PctHPs to use the Light Heal Rotation or actions that check whether Light Heals are needed.",
         Default = mq.TLO.Me.Class.ShortName() == "CLR" and 95 or 90,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",
-        FAQ = "Why am I not healing with my LIGHT HEAL?",
-        Answer = "You can set the [LightHealPoint] option to the percent health you would like to start using the Light Heal Rotation at.",
     },
     ['MainHealPoint']        = {
         DisplayName = "Main Heal Point",
@@ -1504,13 +1305,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Healing Thresholds",
         Index = 3,
-        Tooltip = "Minimum PctHPs to use the Main Heal Rotation.",
+        Tooltip = "Minimum PctHPs to use the Main Heal Rotation or actions that check whether Main Heals are needed.",
         Default = 80,
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not healing?",
-        Answer = "You can set the [MainHealPoint] option to the percent health you would like to start healing at.",
     },
     ['BigHealPoint']         = {
         DisplayName = "Big Heal Point",
@@ -1518,13 +1317,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Healing Thresholds",
         Index = 4,
-        Tooltip = "Minimum PctHPs to use the Big Heal Rotation.",
+        Tooltip = "Minimum PctHPs to use the Big Heal Rotation or actions that check whether BigHeals are needed.",
         Default = 50,
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not healing with my BIG HEAL?",
-        Answer = "You can set the [BigHealPoint] option to the percent health you would like to start using the Big Heal Rotation at.",
     },
     ['GroupHealPoint']       = {
         DisplayName = "Group Heal Point",
@@ -1532,14 +1329,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Healing Thresholds",
         Index = 5,
-        Tooltip = "Minimum PctHPs to use the Group Heal Rotation.",
+        Tooltip = "Minimum PctHPs to use the Group Heal Rotation or actions that check whether Group Heals are needed.",
         Default = 75,
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not using my Group heals?",
-        Answer = "You can set the [GroupHealPoint] option to the percent health you would like to start using the Group Heal Rotation at.\n" ..
-            "You can also set the [GroupInjureCnt] option to the number of group members that must be under the above threshold.",
     },
     ['GroupInjureCnt']       = {
         DisplayName = "Group Injured Count",
@@ -1547,13 +1341,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Healing Thresholds",
         Index = 6,
-        Tooltip = "Number of group members that must be under the above threshold.",
+        Tooltip = "Number of group members that must be under the Group Heal Point percentage threshold.",
         Default = 3,
         Min = 1,
         Max = 5,
         ConfigType = "Advanced",
-        FAQ = "Why am I not using my Group heals?",
-        Answer = "You can set the [GroupInjureCnt] option to the number of group members that must be under the [GroupHealPoint] threshold.",
     },
     ['PetHealPoint']         = {
         DisplayName = "Pet Heal Point",
@@ -1561,14 +1353,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Healing Thresholds",
         Index = 7,
-        Tooltip = "The min HP to consider pets as valid targets for PC healing rotations.",
+        Tooltip = "Minimum PctHPs to process standard PC Healing Rotations on pets (if enabled). See 'Heal Pets as PCs' setting.",
         Default = 50,
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why am I not healing pets?",
-        Answer = "You can set the [PetHealPoint] option to the percent health you would like to start using the Pet Heal Rotation at.\n" ..
-            "You also need to set the [DoPetHeals] option to true to heal pets in your group.",
     },
     --Recovery/Curing
     ['DoCureSpells']         = {
@@ -1580,8 +1369,6 @@ Config.DefaultConfig = {
         Tooltip = "Use Cure spells to clear detrimental effects from your group or yourself.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "I want to control cures manually or with an outside script or LEM. Can I do that??",
-        Answer = "Yes, you can turn off Cure Spell or Cure AA use (individually) on the Main Heal/Rez tab (Advanced Option).",
     },
     ['DoCureAA']             = {
         DisplayName = "Do Cure AA",
@@ -1592,8 +1379,6 @@ Config.DefaultConfig = {
         Tooltip = "Use Cure AA to clear detrimental effects from your group or yourself.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I wasting Radiant Cure?",
-        Answer = "You can adjust whether we will attempt to cure effects with AA or spells on the Main Heal/Rez tab (Advanced Option).",
     },
     ['CureInterval']         = {
         DisplayName = "Downtime Cure Check Interval",
@@ -1601,14 +1386,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Curing",
         Index = 3,
-        Tooltip = "The delay between making cure checks during downtime (to prevent unnecessary queries).",
+        Tooltip = "The delay in seconds between making cure checks during downtime (to prevent unnecessary queries).",
         Default = 5,
         Min = 1,
         Max = 30,
         ConfigType = "Advanced",
-        FAQ = "Why am I not curing fast or often enough?",
-        Answer = "You can set the [CureInterval] option to the number of seconds to wait between checking for cures." ..
-            "Lowering this number will increase the frequency of cure checks.",
     },
     --Recovery/Rezzing
     ['DoRez']                = {
@@ -1620,8 +1402,6 @@ Config.DefaultConfig = {
         Tooltip = "Use Rezes. If disabled, no rez spells will be used at any time.",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I not rezzing?",
-        Answer = "You can set the [DoRez] option to true to use Rez while in combat.",
     },
     ['DoBattleRez']          = {
         DisplayName = "Do Battle Rez",
@@ -1629,11 +1409,9 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Rezzing",
         Index = 2,
-        Tooltip = "Use Rez while in combat",
+        Tooltip = "Enable rezzing while in combat",
         Default = mq.TLO.Me.Class.ShortName():lower() == "clr",
         ConfigType = "Advanced",
-        FAQ = "Why am I not rezzing in combat?",
-        Answer = "You can set the [DoBattleRez] option to true to use Rez while in combat.",
     },
     ['RezOutside']           = {
         DisplayName = "Rez Outside",
@@ -1651,13 +1429,11 @@ Config.DefaultConfig = {
         Header = "Recovery",
         Category = "Rezzing",
         Index = 4,
-        Tooltip = "Attempt to rez a corpse every X seconds.",
+        Tooltip = "Delay in seconds between rez attempts.",
         Default = 6,
         Min = 1,
         Max = 60,
         ConfigType = "Advanced",
-        FAQ = "Why am I trying to rez the same corpse over and over?",
-        Answer = "You can set the [RetryRezDelay] option to the number of seconds to wait between attempting to rez a corpse.",
     },
     ['RezInZonePC']          = {
         DisplayName = "Rez In-Zone PCs",
@@ -1695,8 +1471,6 @@ Config.DefaultConfig = {
         Tooltip = "Use Burn rotations when the conditions below are met.",
         Default = true,
         ConfigType = "Normal",
-        FAQ = "Why am I not burning?",
-        Answer = "You can set the [BurnAuto] option to true to automatically burn when the conditions are met.",
     },
     ['BurnAlways']           = {
         DisplayName = "Auto Burn: Always",
@@ -1707,8 +1481,6 @@ Config.DefaultConfig = {
         Tooltip = "Automatically use Burn rotations on any/every target.",
         Default = false,
         ConfigType = "Advanced",
-        FAQ = "How do I force Burns on every target?",
-        Answer = "You can set the [BurnAlways] option to true to burn on any/every target.",
     },
     ['BurnMobCount']         = {
         DisplayName = "Auto Burn: Mob Threshold",
@@ -1721,8 +1493,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 10,
         ConfigType = "Advanced",
-        FAQ = "I only want to burn when there are a lot of mobs, how do I do this?",
-        Answer = "You can set the [BurnMobCount] option to the number of haters before we start burning.",
     },
     ['BurnNamed']            = {
         DisplayName = "Auto Burn: Named",
@@ -1733,8 +1503,6 @@ Config.DefaultConfig = {
         Tooltip = "Automatically use Burn rotations when we are fighting a named mob(must be present in RGMerc Named List or SpawnMaster ini).",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "Why am I not burning the named?",
-        Answer = "You can set the [BurnNamed] option to true to automatically burn named mobs.",
     },
     ['NamedMinLevel']        = {
         DisplayName = "Named Min Level",
@@ -1747,8 +1515,6 @@ Config.DefaultConfig = {
         Min = 1,
         Max = 150,
         ConfigType = "Advanced",
-        FAQ = "Why am I using burns on weak, low-level named?",
-        Answer = "Adjust the min level to treat a named as such on the Burns Tab.",
     },
 
 
@@ -1761,8 +1527,6 @@ Config.DefaultConfig = {
         Index = 1,
         Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
         Default = false,
-        FAQ = "When my auto target is empty how can I see information about my current manually set target?",
-        Answer = "You can enabled [DisplayManualTarget] and it will show your manual target in the UI if there is no auto target.",
     },
     ['ExtendedFTInfo']       = {
         DisplayName = "Extended ForceTarget Info",
@@ -1779,11 +1543,9 @@ Config.DefaultConfig = {
         Header = "Interface",
         Category = "Interface",
         Index = 3,
-        Tooltip = "Always show the Mini button.",
+        Tooltip = "Always show the RGMercs Mini Mode button, even when the main window is displayed.",
         Default = false,
         ConfigType = "Normal",
-        FAQ = "How do I keep the mini button on the screen as a toggle?",
-        Answer = "You can set the [AlwaysShowMiniButton] option to true and the button will stay on screen at all times.",
     },
     ['EscapeMinimizes']      = {
         DisplayName = "Escape Closes Main Window",
@@ -1791,7 +1553,7 @@ Config.DefaultConfig = {
         Header = "Interface",
         Category = "Interface",
         Index = 4,
-        Tooltip = "In always-show minibutton mode, closes the main window with escape if enabled.",
+        Tooltip = "In always-show mini button mode, closes the main window with escape if enabled.",
         Default = false,
         ConfigType = "Normal",
     },
@@ -1815,8 +1577,6 @@ Config.DefaultConfig = {
         Default = 100,
         Min = 20,
         Max = 100,
-        FAQ = "How do I change the background opacity?",
-        Answer = "You can set the [BgOpacity] option to the opacity for the RGMercs UI.",
     },
     ['FrameEdgeRounding']    = {
         DisplayName = "Frame Edge Rounding",
@@ -1828,8 +1588,6 @@ Config.DefaultConfig = {
         Default = 6,
         Min = 0,
         Max = 50,
-        FAQ = "I like round corners on my UI, how do I change this?",
-        Answer = "You can set the [FrameEdgeRounding] option to the frame edge rounding for the RGMercs UI.",
     },
     ['ScrollBarRounding']    = {
         DisplayName = "Scroll Bar Rounding",
@@ -1841,8 +1599,6 @@ Config.DefaultConfig = {
         Default = 10,
         Min = 0,
         Max = 50,
-        FAQ = "I like round ScrollBars on my UI, how do I change this?",
-        Answer = "You can set the [ScrollBarRounding] option to the Scroll Bar rounding for the RGMercs UI.",
     },
 
     --Deprecated/Need Adjusted to Custom/Etc
@@ -1853,8 +1609,6 @@ Config.DefaultConfig = {
         Category = "Interface",
         Tooltip = "Toggle between Full UI and a Simple UI [Experimental]",
         Default = true,
-        FAQ = "The UI is overwhelming how can I make it simpler?",
-        Answer = "You can click off the Use Full UI option under UI settings for a simpler version of the UI.",
     },
     ['EnableOptionsUI']      = {
         DisplayName = "Enable Options UI",
@@ -1867,7 +1621,7 @@ Config.DefaultConfig = {
     },
 }
 
-Config.CommandHandlers = {}
+Config.CommandHandlers             = {}
 
 local function deep_copy(orig, copies)
     copies = copies or {} -- to handle cycles

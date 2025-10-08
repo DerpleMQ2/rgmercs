@@ -196,7 +196,7 @@ Module.DefaultConfig                   = {
         FAQ = "What are the different Pull modes and how do they work?",
         Answer = "You can adjust Pull Modes on the Pull module tab.\n\n" ..
             "Normal: Attempt to pull single mobs back to a static camp location.\n\n" ..
-            "Chain: Attempt to pull (ChainCount Setting) number of mobs to a static camp location.\n\n" ..
+            "Chain: Continuously pull single mobs back to a static camp location until the chain count has been reached.\n\n" ..
             "Hunt: Move from target to target within a defined circular area, fighting as you go.\n\n" ..
             "Farm: Move from waypoint to waypoint, hunting mobs in a defined radius from each.",
     },
@@ -305,6 +305,9 @@ Module.DefaultConfig                   = {
         Index = 6,
         Tooltip = "Number of mobs in chain pull mode on xtarg before we stop pulling",
         Default = 3,
+        FAQ = "How do I pull using the Chain mode? What is the Chain Count?",
+        Answer = "   Chain mode is intended for a non-tank, non-assist puller to pull a stream of mobs back to a camp, one at a time.\n\n" ..
+            "   Once the puller no longer has aggro, it should leave the camp to pull again, until the number of haters on xtarget count matches or exceeds the Chain Count.",
         Min = 1,
         Max = 100,
     },

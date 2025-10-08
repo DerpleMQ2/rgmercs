@@ -92,7 +92,7 @@ Module.DefaultConfig             = {
 		Default     = 80,
 		Min         = 1,
 		Max         = 100,
-		Tooltip     = "Stop attempting to charm a mob that is below this HP%.",
+		Tooltip     = "Don't try to charm a mob that is below this HP%.",
 	},
 	['AutoLevelRangeCharm']                    = {
 		DisplayName = "Auto Level Range",
