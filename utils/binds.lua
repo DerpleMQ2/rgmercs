@@ -46,6 +46,13 @@ Binds.Handlers    = {
             Config:HandleBind(config, value)
         end,
     },
+    ['peer_set'] = {
+        usage = "/rgl peer_set <peer> <setting> <value>",
+        about = "Sets a specific setting for an RGMercs peer.",
+        handler = function(peer, config, value)
+            Config:PeerSetSetting(peer, config, value)
+        end,
+    },
     ['tempset'] = {
         usage = "/rgl tempset <setting> <value>",
         about = "Temporarily sets a specific RGMercs setting until you reload or restart.",
