@@ -1207,8 +1207,6 @@ local _ClassConfig = {
             Tooltip = "Use your single-target cold nukes.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I using poison nukes? The mobs are poison-resistant.",
-            Answer = "You can change which nukes you are using in your class settings.",
         },
         ['DoPoisonNuke']      = {
             DisplayName = "Poison Nuke",
@@ -1219,8 +1217,6 @@ local _ClassConfig = {
             Tooltip = "Use your single-target poison nukes.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I nuking? A shaman is a healer.",
-            Answer = "You can disable this in your class settings.",
         },
         ['DoTwinHealNuke']    = {
             DisplayName = "Twinheal Nuke",
@@ -1231,8 +1227,6 @@ local _ClassConfig = {
             Tooltip = "Use your twinheal nuke (cold damage with a twinheal buff effect).",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why is my twinheal nuke targeting the mob, that isn't how it works?!",
-            Answer = "On Lazarus, the twinheal nuke targets the mob to function, the in-game description is incorrect.",
         },
         ['DoSaryrnDot']       = {
             DisplayName = "Poison Dot",
@@ -1243,8 +1237,6 @@ local _ClassConfig = {
             Tooltip = "Use your Saryrn line of dots (poison damage, single target).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my fire debuff (Flame Lick) dot?",
-            Answer = "Make sure the dot is enabled in your class settings.",
         },
         ['DoUltorDot']        = {
             DisplayName = "Disease Dot",
@@ -1255,8 +1247,6 @@ local _ClassConfig = {
             Tooltip = "Use your Ultor line of dots (disease damage, single target).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my fire (Vengeance) dot?",
-            Answer = "Make sure the dot is enabled in your class settings.",
         },
         ['DoCurseDot']        = {
             DisplayName = "Magic Dot",
@@ -1267,8 +1257,6 @@ local _ClassConfig = {
             Tooltip = "Use your Curse line of dots (magic damage, single target).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my magic (Swarm) dot?",
-            Answer = "Make sure the dot is enabled in your class settings.",
         },
         ['DotNamedOnly']      = {
             DisplayName = "Only Dot Named",
@@ -1278,9 +1266,6 @@ local _ClassConfig = {
             Index = 104,
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
-            FAQ = "Why am I not using my dots?",
-            Answer = "Make sure the dot is enabled in your class settings and make sure that the mob is named if that option is selected.\n" ..
-                "You can read more about named mobs on the RGMercs named tab (and learn how to add one on your own!)",
         },
 
         -- Healing
@@ -1294,8 +1279,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why does my Shaman randomly use HoTs in downtime?",
-            Answer = "Maintaining HoTs prevents emergencies and hopefully allows for better DPS. It also grants Synergy Procs at high level.",
         },
         ['DoSnareHot']        = {
             DisplayName = "Use Snare HoT",
@@ -1307,8 +1290,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why does my Shaman randomly use HoTs in downtime?",
-            Answer = "Maintaining HoTs prevents emergencies and hopefully allows for better DPS. It also grants Synergy Procs at high level.",
         },
         ['KeepPoisonMemmed']  = {
             DisplayName = "Mem Cure Poison",
@@ -1321,9 +1302,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['KeepDiseaseMemmed'] = {
             DisplayName = "Mem Cure Disease",
@@ -1336,9 +1314,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['KeepCurseMemmed']   = {
             DisplayName = "Mem Remove Curse",
@@ -1351,9 +1326,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['GroupHealAsCure']   = {
             DisplayName = "Use Group Heal to Cure",
@@ -1365,10 +1337,6 @@ local _ClassConfig = {
                 "Please note that we will prioritize Remove Greater Curse if you have selected to keep it memmed as above (due to the counter disparity).",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I using my Group Heal when I should be curing?",
-            Answer =
-                "Word of Reconsitatutioon claers poison/disease/curse counters and is used optionally as a cure. You can disable this behavior in your class options on the Utility tab.\n" ..
-                "Some earlier group heal spells also clear counters, but the config must be customized to use them.",
         },
 
         -- Canni
@@ -1382,8 +1350,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true, -- This is a load condition
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using the Canni AA?",
-            Answer = "Check your HP/Mana percent settings, and, for combat, ensure you have selected the combat option as well.",
         },
         ['AACanniManaPct']    = {
             DisplayName = "AA Canni Mana %",
@@ -1396,8 +1362,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Can you explain Canni Mana Settings?",
-            Answer = "Setting the Mana % setting will use that form of Canni when you are below that mana percent.",
         },
         ['AACanniMinHP']      = {
             DisplayName = "AA Canni HP %",
@@ -1410,8 +1374,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Can you explain Canni HP Settings?",
-            Answer = "Setting the HP % setting will stop you from using the form of Canni if you are below that HP percent.",
         },
         ['DoSpellCanni']      = {
             DisplayName = "Use Spell Canni",
@@ -1423,9 +1385,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I still using a Canni spell, now that I have the AA?",
-            Answer =
-            "By default, the Canni spell will be used while the gems are still available to do so, as Canni AA may not be enough at earlier levels. Use Spell Canni can be turned off at any time.",
         },
         ['SpellCanniManaPct'] = {
             DisplayName = "Spell Canni Mana %",
@@ -1438,8 +1397,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why do I wait so long to use my canni spell?",
-            Answer = "Your Spell Canni Mana % governs how low you mana gets before you start using the spell.",
         },
         ['SpellCanniMinHP']   = {
             DisplayName = "Spell Canni HP %",
@@ -1452,8 +1409,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why are Canni HP % settings so high?",
-            Answer = "Default thresholds are conservative to prevent knee-jerk healing and can configured as needed.",
         },
         ['DoCombatCanni']     = {
             DisplayName = "Canni in Combat",
@@ -1464,9 +1419,6 @@ local _ClassConfig = {
             Tooltip = "Use Canni AA and Spells in combat",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "My shaman spends his time in combat doing canni while I prefer him to do xyz other thing, what gives?",
-            Answer =
-            "Canni in Combat can be disabled at your discretion; you could also tune HP or Mana settings for Canni Spell or AA.",
         },
 
         -- Buffs
@@ -1483,9 +1435,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my SHM using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Buffs tab.",
         },
         ['DoRunSpeed']        = {
             DisplayName = "Do Run Speed",
@@ -1508,7 +1457,7 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Group Shrink is enabled, why are my dudes still big?",
             Answer =
-            "For simplicity, the check to use it is keyed to the Shaman's height, rather than checking each group member. Also, the AA isn't available until level 80 (on official servers).",
+            "For simplicity, the check to use it is keyed to the Shaman's height, rather than checking each group member.",
         },
         ['DoRegenBuff']       = {
             DisplayName = "Regen Buff",
@@ -1530,8 +1479,6 @@ local _ClassConfig = {
             Tooltip = "Do Haste Spells/AAs",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why aren't I casting Talisman of Celerity or other haste buffs?",
-            Answer = "Even with Use Haste enabled, these buffs are part of your Focus spell (Unity) at very high levels, so they may not be needed.",
         },
         ['DoArcanumWeave']    = {
             DisplayName = "Weave Arcanums",
@@ -1542,9 +1489,6 @@ local _ClassConfig = {
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
-            FAQ = "What is an Arcanum and why would I want to weave them?",
-            Answer =
-            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
         ['DoVetAA']           = {
             DisplayName = "Do Vet AA",
@@ -1555,8 +1499,6 @@ local _ClassConfig = {
             Tooltip = "Use Veteran AA during burns (See FAQ).",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "What Veteran AA's will be used with Do Vet AA set?",
-            Answer = "Currently, Shaman will use Intensity of the Resolute during burns. More may be added in the future.",
         },
 
         -- Debuffs
@@ -1569,8 +1511,6 @@ local _ClassConfig = {
             Tooltip = "Do ST Malo Spells/AAs",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Cast Malo is selected, why am I not using it?",
-            Answer = "Ensure that your Debuff settings in the RGMercs Main config are set properly, as there are options for con colors and named mobs there.",
         },
         ['DoAEMalo']          = {
             DisplayName = "Do AE Malo",
@@ -1581,8 +1521,6 @@ local _ClassConfig = {
             Tooltip = "Do AE Malo Spells/AAs",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "I have Do AE Malo selected, why isn't it being used?",
-            Answer = "The AE Malo Spell comes later in the levels for Shaman than AE Slows, and the AA later than that. Check your level. Also, ensure your count is set properly. ",
         },
         ['DoSTSlow']          = {
             DisplayName = "Do ST Slow",
@@ -1593,9 +1531,7 @@ local _ClassConfig = {
             Tooltip = "Do ST Slow Spells/AAs",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not slowing mobs?",
-            Answer =
-            "Certain low level slow spells are omitted due to the defensive benefit not being worth the mana. Also, check your debuff settings on the RGMercs Main config tabs, as there are options such as the minimum con color to debuff.",
+
         },
         ['DoAESlow']          = {
             DisplayName = "Do AE Slow",
@@ -1606,8 +1542,6 @@ local _ClassConfig = {
             Tooltip = "Do AE Slow Spells/AAs",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why am I using a single-target slow after the AE Slow Spell?",
-            Answer = "The AE Slow Spell is a lower slow percentage than the ST Version. AA, however, are identical other than number of targets.",
         },
         ['AESlowCount']       = {
             DisplayName = "AE Slow Count",
@@ -1620,8 +1554,6 @@ local _ClassConfig = {
             Default = 2,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "We are fighting more than one mob, why am I not using my AE Slow?",
-            Answer = "AE Slow Count governs the minimum number of targets before the AE Slow is used.",
         },
         ['AEMaloCount']       = {
             DisplayName = "AE Malo Count",
@@ -1634,8 +1566,6 @@ local _ClassConfig = {
             Default = 2,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "We are fighting more than one mob, why am I not using my AE Malo?",
-            Answer = "AE Malo Count governs the minimum number of targets before the AE Malo is used.",
         },
         ['DoDiseaseSlow']     = {
             DisplayName = "Disease Slow",
@@ -1661,8 +1591,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using Putrid Decay",
-            Answer = "Ensure the option is enabled on the Debuffs tab and ensure that your debuff settings are set in the main options.",
         },
 
         -- Low Level Buffs
@@ -1675,10 +1603,6 @@ local _ClassConfig = {
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using HP buffs at lower levels?",
-            Answer =
-                "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
-                "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
         },
         ['DoLLAgiBuff']       = {
             DisplayName = "Agility Buff (LowLvl)",
@@ -1689,10 +1613,6 @@ local _ClassConfig = {
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using stat buffs at lower levels?",
-            Answer =
-                "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
-                "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
         },
         ['DoLLStaBuff']       = {
             DisplayName = "Stamina Buff (LowLvl)",
@@ -1703,10 +1623,6 @@ local _ClassConfig = {
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using stat buffs at lower levels?",
-            Answer =
-                "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
-                "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
         },
         ['DoLLStrBuff']       = {
             DisplayName = "Strength Buff (LowLvl)",
@@ -1717,10 +1633,6 @@ local _ClassConfig = {
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using stat buffs at lower levels?",
-            Answer =
-                "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
-                "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
         },
     },
 }

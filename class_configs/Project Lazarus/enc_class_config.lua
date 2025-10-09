@@ -1092,9 +1092,6 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 5,
-            FAQ = "Why am I using the wrong aura?",
-            Answer = "Aura choice can be made on the buff tab.\n" ..
-                "Once the PC has purchased Auroria Mastery, this setting is ignored in favor of using the AA.",
         },
         ['RuneChoice']         = {
             DisplayName = "Rune Selection:",
@@ -1109,9 +1106,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I putting an aggro-reducing buff on the tank?",
-            Answer =
-            "You can configure your rune selections to use a single-target hate increasing rune on the tank, while using group (hate reducing) or single target runes on others.",
         },
         ['DoGroupSpellShield'] = {
             DisplayName = "Do Group Spellshield",
@@ -1122,9 +1116,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting the Group Spell Shield Line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not using Group Spell Shield?",
-            Answer = "The Do Group Spellshield setting determines whether or not your PC will cast the Group Spell Shield Line.\n" ..
-                "If you are not using Group DoT Shield, you may need to Enable the Do Group Spellshield setting.",
         },
         ['DoProcBuff']         = {
             DisplayName = "Do Spellproc Buff",
@@ -1135,8 +1126,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting the spell proc (Mana ... ) line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I using a spell proc buff on ... class?",
-            Answer = "By default, the spell proc buff will be used on any casters (including tanks/hybrids). You can change this option on the Buffs tab.",
         },
         ['DoNDTBuff']          = {
             DisplayName = "Cast NDT",
@@ -1144,12 +1133,9 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Group",
             Index = 105,
-            Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).",
+            Tooltip = "Enable casting your Melee Proc Buff (Night's Dark Terror Line) on melee.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not using NDT?",
-            Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
-                "Please note that the single target versions are only set to be used on melee.",
         },
         ['DoHateBuff']         = {
             DisplayName = "Do Hate Visage",
@@ -1160,8 +1146,6 @@ local _ClassConfig = {
             Tooltip = "Use your hatred visage buff on your tank.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How can I use my hate buff on the tank?",
-            Answer = "You can change this option on the Buffs tab.",
         },
         ['DoArcanumWeave']     = {
             DisplayName = "Weave Arcanums",
@@ -1172,9 +1156,6 @@ local _ClassConfig = {
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
-            FAQ = "What is an Arcanum and why would I want to weave them?",
-            Answer =
-            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
 
         --Debuffs
@@ -1187,9 +1168,6 @@ local _ClassConfig = {
             Tooltip = "Cast Tash Spells",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not Tashing?",
-            Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
-                "If you are not Tashing, you may need to Enable the [DoTash] setting.",
         },
         ['DoSlow']             = {
             DisplayName = "Cast Slow",
@@ -1200,9 +1178,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting Slow spells.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not Slowing?",
-            Answer = "The [DoSlow] setting determines whether or not your PC will cast Slow spells.\n" ..
-                "If you are not Slowing, you may need to Enable the [DoSlow] setting.",
         },
         ['DoCrippleSpell']     = {
             DisplayName = "Cast Cripple Spell",
@@ -1213,9 +1188,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting Cripple spells.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not Crippling?",
-            Answer = "The [DoCrippleSpell] setting determines whether or not your PC will cast Cripple spells.\n" ..
-                "If you are not Crippling, you may need to Enable the [DoCrippleSpell] setting.",
         },
         ['DoCrippleAA']        = {
             DisplayName = "Use AE Cripple AA",
@@ -1226,9 +1198,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting Crippling Aurora when we meet the AE threshold, or on a named if we don't have the spell above selected.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not AE Crippling?",
-            Answer = "The [DoCrippleAA] setting determines whether or not your PC will cast AE Cripple spells.\n" ..
-                "If you are not Crippling, you may need to Enable the settings in the Debuffs tab.",
         },
         ['DoDispel']           = {
             DisplayName = "Do Dispel",
@@ -1239,9 +1208,6 @@ local _ClassConfig = {
             Tooltip = "Enable removing beneficial enemy effects.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not dispelling buffs?",
-            Answer = "The [DoDispel] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
-                "If you are not dispelling, you may need to Enable the [DoDispel] setting.",
         },
 
         --Combat
@@ -1258,9 +1224,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my SHM using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Buffs tab.",
         },
         ['AECount']            = {
             DisplayName = "AE Count",
@@ -1272,8 +1235,6 @@ local _ClassConfig = {
             Min = 1,
             Default = 3,
             Max = 15,
-            FAQ = "Why am I not using AE Abilities?",
-            Answer = "Adjust your AE Count on the Combat Tab.",
         },
         ['DoSpinStun']         = {
             DisplayName = "Spin Stun use:",
@@ -1289,8 +1250,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why am I stunning everything?!??",
-            Answer = "You can choose the conditions under which you will use your Spin Stun on the Combat tab.",
         },
         ['DoAEStun']           = {
             DisplayName = "PBAE Stun use:",
@@ -1306,8 +1265,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why am I stunning everything?!??",
-            Answer = "You can choose the conditions under which you will use your PBAE Stun on the Combat tab.",
         },
         ['EmergencyStart']     = {
             DisplayName = "Emergency Start",
@@ -1320,8 +1277,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my emergency abilities?",
-            Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
         ['DoSoothing']         = {
             DisplayName = "Do Soothing Words",
@@ -1332,8 +1287,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Tooltip = "Use the Soothing Words AA (large aggro reduction) on a named whose target is not our MA.",
             Default = false,
-            FAQ = "Why won't I use the Soothing Words AA?",
-            Answer = "Ensure the option is selected on the combat tab and that the current target is designated as a named (check named tab or add in spawnmaster).",
         },
         ['DoBeguilers']        = {
             DisplayName = "Do Beguiler's",
@@ -1344,8 +1297,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Tooltip = "Use Beguiler's (Directed) Banishment AA when you have aggro.",
             Default = false,
-            FAQ = "Why won't I use either of the Beguiler's Banishment AA?",
-            Answer = "Ensure the option is selected on the combat tab.",
         },
 
         --DPS
@@ -1358,8 +1309,6 @@ local _ClassConfig = {
             Tooltip = "Use your primary magic nuke line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my magic Nuke?",
-            Answer = "You can enable the magic nuke line in the Spells and Abilities tab.",
         },
         ['DoColored']          = {
             DisplayName = "Colored Chaos",
@@ -1370,8 +1319,6 @@ local _ClassConfig = {
             Tooltip = "Use the Colored Chaos magic nuke.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my Colored Chaos?",
-            Answer = "You can enable the Colored Chaos line in the Spells and Abilities tab.",
         },
         ['DoChroma']           = {
             DisplayName = "Chromaburst",
@@ -1382,8 +1329,6 @@ local _ClassConfig = {
             Tooltip = "Use the Chromaburst magic nuke.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my Chromaburst nuke?",
-            Answer = "You can enable the Chromaburst nuke line in the Spells and Abilities tab.",
         },
         ['DoStrangleDot']      = {
             DisplayName = "Strangle Dot",
@@ -1394,8 +1339,6 @@ local _ClassConfig = {
             Tooltip = "Use your magic damage (Strangle Line) Dot.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "I turned Cast DOTS off, why am I still using them?",
-            Answer = "The Modern Era mode does not respect this setting, as DoTs are integral to the DPS rotation.",
         },
         ['DoMindDot']          = {
             DisplayName = "Mind Dot",
@@ -1406,8 +1349,6 @@ local _ClassConfig = {
             Tooltip = "Use your mana drain/magic damage (Mind Line) Dot on Named.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not using my Mind Dot when I have it selected?",
-            Answer = "This Dot is set to be used on named or when you don't already have the recourse active.",
         },
         ['DotNamedOnly']       = {
             DisplayName = "Only Dot Named",
@@ -1417,9 +1358,6 @@ local _ClassConfig = {
             Index = 103,
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
-            FAQ = "Why am I not using my dots?",
-            Answer = "Make sure the dot is enabled in your class settings and make sure that the mob is named if that option is selected.\n" ..
-                "You can read more about named mobs on the RGMercs named tab (and learn how to add one on your own!)",
         },
 
         -- Crystal Summoning
@@ -1432,8 +1370,6 @@ local _ClassConfig = {
             Tooltip = "Summon Azure Mind Crystals (Mana Restore) for the group.",
             RequiresLoadoutChange = true, -- this is a load condition
             Default = true,
-            FAQ = "Why am I not summoning crystals for my group?",
-            Answer = "Ensure that you have purchased the AA and your settings are as desired on the Crystals tab.",
         },
         ['SummonSanguine']     = {
             DisplayName = "Sanguine Mind Crystal",
@@ -1444,8 +1380,6 @@ local _ClassConfig = {
             Tooltip = "Summon Sanguine Mind Crystals (Health Restore) for the group.",
             RequiresLoadoutChange = true, -- this is a load condition
             Default = true,
-            FAQ = "When will my party use the (Azure or Sanguine) crystals I have summoned for them?",
-            Answer = "Azure Crystals use ModRod mana percent settings; Sanguine Crystals will be used based off of Emergency HP settings (or 45% as a fallback.)",
         },
         ['AICrystalDelay']     = {
             DisplayName = "Crystal Autoinv Delay",
@@ -1457,9 +1391,6 @@ local _ClassConfig = {
             Default = 150,
             Min = 1,
             Max = 500,
-            FAQ = "Why do I always have items stuck on the cursor?",
-            Answer = "You can adjust the delay before autoinventory by setting the [AICrystalDelay] setting.\n" ..
-                "Increase the delay if you notice items left on cursors regularly.",
         },
     },
 }
