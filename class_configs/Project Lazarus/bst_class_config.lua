@@ -786,7 +786,7 @@ return {
             end,
         },
     },
-    ['DefaultConfig']     = { --TODO: Condense pet proc options into a combo box and update entry conditions appropriately
+    ['DefaultConfig']     = {
         ['Mode']           = {
             DisplayName = "Mode",
             Category = "Combat",
