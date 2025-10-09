@@ -34,6 +34,7 @@ Config.TempSettings.PeerModuleSettingsLowerToNameCache   = {}
 Config.TempSettings.PeerSettingToModuleCache             = {}
 Config.TempSettings.PeerSettingsCategoryToSettingMapping = {}
 Config.TempSettings.Peers                                = Set.new({})
+Config.TempSettings.PeersHeartbeats                      = {}
 
 Config.TempSettings.HighlightedModules                   = Set.new({})
 
@@ -1852,6 +1853,18 @@ Config.DefaultConfig = {
         FAQ = "I like round ScrollBars on my UI, how do I change this?",
         Answer = "You can set the [ScrollBarRounding] option to the Scroll Bar rounding for the RGMercs UI.",
     },
+    -- Cross client comms
+    ['PeerTimeout']          = {
+        DisplayName = "Peer Timeout",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 9,
+        Tooltip = "Time in seconds to wait before considering a peer disconnected.",
+        Default = 30,
+        Min = 10,
+        Max = 120,
+    },
 
     --Deprecated/Need Adjusted to Custom/Etc
     ['FullUI']               = {
@@ -2448,6 +2461,28 @@ function Config:SaveModuleSettings(module, settings)
 
     -- broadcast the change to any listeners.
     Comms.BroadcastMessage(module, "SettingsUpdate", { settings = settings, settingCategories = settingsCategories, defaultSettings = defaultSettings, })
+end
+
+function Config:UpdatePeerHeartbeat(peer, data)
+    Config.TempSettings.PeersHeartbeats[peer] = Config.TempSettings.PeersHeartbeats[peer] or {}
+    Config.TempSettings.PeersHeartbeats[peer].LastHeartbeat = os.time()
+    Config.TempSettings.PeersHeartbeats[peer].Data = data or {}
+end
+
+function Config:ValidatePeers()
+    for peer, heartbeat in pairs(Config.TempSettings.PeersHeartbeats) do
+        if os.time() - heartbeat.LastHeartbeat > Config:GetSetting("PeerTimeout") then
+            Logger.log_info("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
+            Config.TempSettings.Peers:remove(peer)
+            Config.TempSettings.PeersHeartbeats[peer] = nil
+            self.peerModuleSettings[peer] = nil
+            self.peerModuleDefaultSettings[peer] = nil
+            self.peerModuleSettingCategories[peer] = nil
+            self.TempSettings.PeerModuleSettingsLowerToNameCache[peer] = nil
+            self.TempSettings.PeerSettingToModuleCache[peer] = nil
+            self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] = nil
+        end
+    end
 end
 
 function Config:UpdatePeerSettings(peer, module, settings, settingsCategories, defaultSettings)

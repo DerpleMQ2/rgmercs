@@ -289,6 +289,10 @@ local function Main()
         return
     end
 
+    -- send heartbeat to peers.
+    Comms.SendHeartbeat(Core.GetMainAssistId(), curState, Targeting.GetAutoTarget() and Targeting.GetAutoTarget().ID() or 0)
+    Config:ValidatePeers()
+
     notifyZoning = true
 
     if mq.TLO.Me.NumGems() ~= Casting.UseGem then
@@ -500,6 +504,12 @@ local script_actor = Comms.Actors.register(function(message)
                 })
             end
         end
+        return
+    end
+
+    if msg.event == "Heartbeat" then
+        --Logger.log_debug("Received Heartbeat from \am%s\aw: \ag%s", msg.from, Strings.TableToString(msg.data))
+        Config:UpdatePeerHeartbeat(msg.from, msg.data)
         return
     end
 

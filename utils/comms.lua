@@ -1,10 +1,12 @@
-local mq         = require('mq')
-local Logger     = require("utils.logger")
+local mq            = require('mq')
+local Logger        = require("utils.logger")
 
-local Comms      = { _version = '1.0', _name = "Comms", _author = 'Derple', }
-Comms.__index    = Comms
-Comms.Actors     = require('actors')
-Comms.ScriptName = "RGMercs"
+local Comms         = { _version = '1.0', _name = "Comms", _author = 'Derple', }
+Comms.__index       = Comms
+Comms.Actors        = require('actors')
+Comms.ScriptName    = "RGMercs"
+Comms.LastHeartbeat = 0
+
 
 --- Broadcasts an update event to the specified module.
 ---
@@ -33,6 +35,24 @@ function Comms.SendMessage(peer, module, event, data)
         event =
             event,
         data = data,
+    })
+end
+
+function Comms.SendHeartbeat(assist, curState, curAutoTarget)
+    if os.time() - Comms.LastHeartbeat < 5 then return end
+    Comms.LastHeartbeat = os.time()
+    Comms.BroadcastMessage("RGMercs", "Heartbeat", {
+        Zone = mq.TLO.Zone.Name(),
+        X = mq.TLO.Me.X(),
+        Y = mq.TLO.Me.Y(),
+        Z = mq.TLO.Me.Z(),
+        HPs = mq.TLO.Me.PctHPs(),
+        Mana = mq.TLO.Me.PctMana(),
+        Endurance = mq.TLO.Me.PctEndurance(),
+        TargetID = mq.TLO.Target.ID(),
+        AutoTarget = curAutoTarget,
+        Assist = assist,
+        State = curState,
     })
 end
 
