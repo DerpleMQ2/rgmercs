@@ -27,6 +27,7 @@ Module.TempSettings.PullTargets           = {}
 Module.TempSettings.PullTargetsMetaData   = {}
 Module.TempSettings.PullIgnoreTargets     = {}
 Module.TempSettings.AbortPull             = false
+Module.TempSettings.PullListUpdated       = false
 Module.TempSettings.PullID                = 0
 Module.TempSettings.LastPullAbilityCheck  = 0
 Module.TempSettings.LastPullerMercCheck   = 0
@@ -1256,7 +1257,7 @@ function Module:AddMobToList(list, mobName)
 
     -- if we are pulling start over.
     if Config:GetSetting('DoPull') then
-        Core.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
+        self.TempSettings.PullListUpdated = true
     end
 end
 
@@ -1825,6 +1826,12 @@ end
 ---@param pullID number
 ---@return boolean
 function Module:CheckForAbort(pullID, bNavigating)
+    if self.TempSettings.PullListUpdated then
+        Logger.log_debug("\ar ALERT: Aborting pull due to change in pull allow or deny list. \ax")
+        self.TempSettings.PullListUpdated = false
+        return true
+    end
+
     if self.TempSettings.AbortPull then
         Logger.log_debug("\ar ALERT: Aborting pull on user request. \ax")
         self.TempSettings.AbortPull = false
