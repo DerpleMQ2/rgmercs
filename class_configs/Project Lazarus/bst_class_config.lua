@@ -810,11 +810,6 @@ return {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Paragon of Spirit(s) abilities?",
-            Answer = "Make sure you have [DoParagon] enabled.\n" ..
-                "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
-                "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
-                "If you want to use Focused Paragon outside of combat, enable [DowntimeFP].",
         },
         ['ParaPct']        = {
             DisplayName = "Paragon %",
@@ -827,11 +822,6 @@ return {
             Min = 1,
             Max = 99,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my Paragon Abilities?",
-            Answer = "Make sure you have [DoParagon] enabled.\n" ..
-                "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
-                "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
-                "If you want to use Focused Paragon outside of combat, enable [DowntimeFP].",
         },
         ['FParaPct']       = {
             DisplayName = "F.Paragon %",
@@ -844,11 +834,6 @@ return {
             Min = 1,
             Max = 99,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my Paragon Abilities?",
-            Answer = "Make sure you have [DoParagon] enabled.\n" ..
-                "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
-                "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
-                "If you want to use Focused Paragon outside of combat, enable [DowntimeFP].",
         },
         ['DowntimeFP']     = {
             DisplayName = "Downtime F.Paragon",
@@ -859,11 +844,6 @@ return {
             Tooltip = "Use Focused Paragon outside of Combat.",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my Paragon Abilities?",
-            Answer = "Make sure you have [DoParagon] enabled.\n" ..
-                "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
-                "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
-                "If you want to use Focused Paragon outside of combat, enable [DowntimeFP].",
         },
         --Pets
         ['DoPetHealSpell'] = {
@@ -875,23 +855,17 @@ return {
             Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "My Pet Keeps Dying, What Can I Do?",
-            Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
-                "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
         },
         ['PetHealPct']     = {
-            DisplayName = "Pet Heal %",
+            DisplayName = "Pet Heal Spell HP%",
             Group = "Abilities",
             Header = "Recovery",
             Category = "Healing Thresholds",
             Index = 101,
-            Tooltip = "Heal pet at [X]% HPs",
+            Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
             Default = 60,
             Min = 1,
             Max = 99,
-            FAQ = "My pet keeps dying, how do I keep it alive?",
-            Answer = "You can set the [PetHealPct] to a lower value to heal your pet sooner.\n" ..
-                "Also make sure that [DoPetHeals] is enabled.",
         },
         ['DoPetSlow']      = {
             DisplayName = "Pet Slow Proc",
@@ -901,10 +875,6 @@ return {
             Index = 101,
             Tooltip = "Use your Pet Slow Proc Buff (does not stack with Pet Damage or Snare Proc Buff).",
             Default = false,
-            FAQ = "Why am I not buffing my pet with (Slow, Damage, Snare) proc buff?",
-            Answer =
-                "Pet proc buffs do not stack with each other and the one you wish to use should be selected.\n" ..
-                "If neither Snare nor Slow proc are selected, the Damage proc will be used.",
         },
         ['DoPetSnare']     = {
             DisplayName = "Pet Snare Proc",
@@ -914,7 +884,7 @@ return {
             Index = 102,
             Tooltip = "Use your Pet Snare Proc Buff (does not stack with Pet Damage or Slow Proc Buff).",
             Default = false,
-            FAQ = "Why am I continually buffing my pet?",
+            FAQ = "Why am I continually using proc buffs on my pet?",
             Answer = "Pet proc buffs do not stack, you should only select one.\n" ..
                 "If neither Snare nor Slow proc are selected, the Damage proc will be used.",
         },
@@ -926,8 +896,6 @@ return {
             Index = 101,
             Tooltip = "Click your Epic Weapon.",
             Default = false,
-            FAQ = "How do I use my Epic Weapon?",
-            Answer = "Enable Do Epic to click your Epic Weapon.",
         },
         ['KeepPetMemmed']  = {
             DisplayName = "Always Mem Pet",
@@ -937,8 +905,6 @@ return {
             Index = 101,
             Tooltip = "Keep your pet spell memorized (allows combat resummoning).",
             Default = false,
-            FAQ = "Why won't I resummon my pet on combat?",
-            Answer = "Enable the setting to Always Mem your Pet on the Pet Management tab in the class options.",
         },
         --Spells/Abilities
         ['DoHeals']        = {
@@ -950,9 +916,6 @@ return {
             Tooltip = "Mem and cast your Mending spell.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "I want to help with healing, what can I do?",
-            Answer = "Make sure you have [DoHeals] enabled.\n" ..
-                "If you want to help with pet healing, enable [DoPetHealSpell].",
         },
         ['DoSlow']         = {
             DisplayName = "Do Slow",
@@ -963,8 +926,6 @@ return {
             Tooltip = "Use your slow spell or AA.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my BST slowing, when I have a SHM in group?",
-            Answer = "Simply deselect the option to Do Slow.",
         },
         ['DoDot']          = {
             DisplayName = "Cast DOTs",
@@ -975,9 +936,6 @@ return {
             Tooltip = "Enable casting Damage Over Time spells.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I using so many DOTs? I'm always running low mana!",
-            Answer = "Generally, BST DoT spells are worth using at all levels of play.\n" ..
-                "Dots have additional settings in the RGMercs Main config, such as the min mana% to use them, or mob HP to stop using them",
         },
         ['DotNamedOnly']   = {
             DisplayName = "Only Dot Named",
@@ -985,11 +943,8 @@ return {
             Header = "Damage",
             Category = "Over Time",
             Index = 102,
-            Tooltip = "Any selected dot above will only be used on a named mob.",
+            Tooltip = "Only use DoTs on a named mob.",
             Default = true,
-            FAQ = "Why am I not using my dots?",
-            Answer = "Make sure the dot is enabled in your class settings and make sure that the mob is named if that option is selected.\n" ..
-                "You can read more about named mobs on the RGMercs named tab (and learn how to add one on your own!)",
         },
         ['DoRunSpeed']     = {
             DisplayName = "Do Run Speed",
@@ -997,10 +952,8 @@ return {
             Header = "Buffs",
             Category = "Group",
             Index = 101,
-            Tooltip = "Do Run Speed Spells/AAs",
+            Tooltip = "Use your Run/Move Speed buff spells or AA.",
             Default = false,
-            FAQ = "Why are my buffers in a run speed buff war?",
-            Answer = "Many run speed spells freely stack and overwrite each other, you will need to disable Run Speed Buffs on some of the buffers.",
         },
         ['DoAvatar']       = {
             DisplayName = "Do Avatar",
@@ -1010,9 +963,6 @@ return {
             Index = 102,
             Tooltip = "Buff Group/Pet with Infusion of Spirit",
             Default = false,
-            FAQ = "How do I use my Avatar Buffs?",
-            Answer = "Make sure you have [DoAvatar] enabled.\n" ..
-                "Also double check [DoBuffs] is enabled so you can cast on others.",
         },
         ['DoVetAA']        = {
             DisplayName = "Use Vet AA",
@@ -1020,10 +970,8 @@ return {
             Header = "Buffs",
             Category = "Self",
             Index = 101,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
-            FAQ = "What Vet AA's does SHD use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
         --Combat
         ['DoAEDamage']     = {
@@ -1035,8 +983,6 @@ return {
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
             Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['AETargetCnt']    = {
             DisplayName = "AE Target Count",
@@ -1048,9 +994,6 @@ return {
             Default = 2,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
@@ -1091,8 +1034,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
@@ -1100,10 +1041,8 @@ return {
             Header = "Clickies",
             Category = "Class Config Clickies",
             Index = 102,
-            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Tooltip = "Click your Blood Drinker's Coating in an emergency.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
     },
 }

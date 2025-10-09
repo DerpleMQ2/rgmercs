@@ -1069,7 +1069,7 @@ function Module:RunHealRotation()
         self:HealById(mq.TLO.Me.ID())
     end
 
-    if Config:GetSetting('DoPetHeals') and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.PctHPs() < Config:GetSetting('PetHealPoint') then
+    if Config:GetSetting('DoPetHeals') and mq.TLO.Me.Pet.ID() > 0 and (mq.TLO.Me.Pet.PctHPs() or 101) < Config:GetSetting('PetHealPoint') then
         self:HealById(mq.TLO.Me.Pet.ID())
     end
 end

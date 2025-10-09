@@ -788,9 +788,6 @@ return {
             Default = 2,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
         ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
@@ -846,8 +843,6 @@ return {
             Tooltip = "Use Nav to Circle your target while autofiring.",
             Default = false,
             RequiresLoadoutChange = true, -- this is a load condition
-            FAQ = "Can Circle the target on my map?",
-            Answer = "Enabling [NavCircle] will run in a circle around your target on the map.",
         },
 
         --Buffs
@@ -864,8 +859,6 @@ return {
             Default = 1,
             Min = 1,
             Max = 2,
-            FAQ = "I would prefer to use another element arrow buff, how can I do that?",
-            Answer = "You can adjust which arrow buff and Scout's Mastery you prefer on the Buffs tab of the Class options.",
         },
         ['DoMoveBuffs']     = {
             DisplayName = "Do Spirit of Eagle",
@@ -926,8 +919,6 @@ return {
             Index = 106,
             Tooltip = "Use your group cold resist buff.",
             Default = false,
-            FAQ = "Why am I not using my single-target resist buff?",
-            Answer = "By default, we will use the group versions you select. Config customization is required if you wish to use the single-target version.",
         },
 
 
@@ -941,8 +932,6 @@ return {
             Tooltip = "Use your Swarm line of dots (magic damage, 54s duration).",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my magic (Swarm) dot?",
-            Answer = "Make sure the dot is enabled in your class settings.",
         },
         ['DotNamedOnly']   = {
             DisplayName = "Only Dot Named",
@@ -952,9 +941,6 @@ return {
             Index = 102,
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
-            FAQ = "Why am I not using my dots?",
-            Answer = "Make sure the dot is enabled in your class settings and make sure that the mob is named if that option is selected.\n" ..
-                "You can read more about named mobs on the RGMercs named tab (and learn how to add one on your own!)",
         },
         ['UseEpic']        = {
             DisplayName = "Epic Use:",
@@ -968,9 +954,6 @@ return {
             Default = 3,
             Min = 1,
             Max = 3,
-            FAQ = "Why is my RNG using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time outside of raids.\n" ..
-                "This can be adjusted on the Offensive tab in the class options.",
         },
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
@@ -983,8 +966,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
@@ -992,10 +973,8 @@ return {
             Header = "Clickies",
             Category = "Class Config Clickies",
             Index = 102,
-            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Tooltip = "Click your Blood Drinker's Coating in an emergency.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
         ['DoVetAA']        = {
             DisplayName = "Use Vet AA",
@@ -1003,10 +982,8 @@ return {
             Header = "Buffs",
             Category = "Self",
             Index = 102,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
-            FAQ = "What Vet AA's does RNG use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
 
         --Utility
@@ -1019,8 +996,6 @@ return {
             Tooltip = "Mem and cast your Salve spell.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "I want to help with healing, what can I do?",
-            Answer = "Make sure you have [DoHeals] enabled.",
         },
         ['DoJoltSpell']    = {
             DisplayName = "Do Jolt Spell",
@@ -1052,9 +1027,6 @@ return {
             Default = 3,
             Min = 1,
             Max = 99,
-            FAQ = "Why is my Ranger not snaring?",
-            Answer = "Make sure you have Use Snares enabled in your class settings.\n" ..
-                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
     },
 }
