@@ -16,7 +16,7 @@ OptionsUI.HighlightedSettings   = Set.new({})
 OptionsUI.configFilter          = ""
 OptionsUI.lastSortTime          = 0
 OptionsUI.lastHighlightTime     = 0
-OptionsUI.selectedCharacter     = mq.TLO.Me.Name()
+OptionsUI.selectedCharacter     = mq.TLO.Me.DisplayName()
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -439,7 +439,7 @@ function OptionsUI:RenderCategorySettings(category)
                                 printf("PRESS")
                                 Config:PeerSetSetting(self.selectedCharacter, settingName, setting)
 
-                                if new_loadout and self.selectedCharacter == mq.TLO.Me.Name() then
+                                if new_loadout and self.selectedCharacter == mq.TLO.Me.DisplayName() then
                                     Modules:ExecModule("Class", "RescanLoadout")
                                     new_loadout = false
                                 end
@@ -497,7 +497,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth())
             -- character selecter
             local peerList = Config:GetPeers()
-            table.insert(peerList, 1, mq.TLO.Me.Name())
+            table.insert(peerList, 1, mq.TLO.Me.DisplayName())
             local peerListIdx = 1
             for idx, name in ipairs(peerList) do
                 if name == self.selectedCharacter then
