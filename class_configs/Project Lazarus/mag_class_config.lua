@@ -1872,7 +1872,7 @@ _ClassConfig      = {
             Min = 1,
             Max = 3,
             FAQ = "What is the difference between the modes?",
-            Answer = "Fire Mode will use Fire Nukes and strive for DPS.\n" ..
+            Answer = "DPS Mode performs exactly as described.\n" ..
                 "PetTank mode will Focus on keeping the Pet alive as the main tank.\n" ..
                 "PBAE Mode will use PBAE spells when configured, alongside the DPS rotation.",
         },
@@ -1882,11 +1882,9 @@ _ClassConfig      = {
             Header = "Pet",
             Category = "Pet Summoning",
             Index = 102,
-            Tooltip = "Pocket your pet during downtime",
+            Tooltip = "Use suspend minion to pocket your pet during downtime.",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "I have suspend Minion AA, how do I keep a spare pet suspended?",
-            Answer = "You can use the [DoPocketPet] feature to keep a spare pet suspended.",
         },
         ['DoPetArmor']     = {
             DisplayName = "Do Pet Armor",
@@ -1896,8 +1894,6 @@ _ClassConfig      = {
             Index = 101,
             Tooltip = "Summon Armor for Pets",
             Default = false,
-            FAQ = "I want to make sure my pet is always armored, how do I do that?",
-            Answer = "You can use the [DoPetArmor] feature to summon pet armor.",
         },
         ['DoPetWeapons']   = {
             DisplayName = "Do Pet Weapons",
@@ -1907,8 +1903,6 @@ _ClassConfig      = {
             Index = 102,
             Tooltip = "Summon Weapons for Pets",
             Default = false,
-            FAQ = "I want to make sure my pet is always armed, how do I do that?",
-            Answer = "You can use the [DoPetWeapons] feature to summon pet weapons.",
         },
         ['PetType']        = {
             DisplayName = "Pet Type",
@@ -1922,8 +1916,6 @@ _ClassConfig      = {
             Default = 2,
             Min = 1,
             Max = 4,
-            FAQ = "Can I specify the type of pet I want to use?",
-            Answer = "Yes, you can select the type of pet you want to summon using the [PetType] setting.",
         },
         ['DoPetHeirlooms'] = {
             DisplayName = "Do Pet Heirlooms",
@@ -1933,8 +1925,6 @@ _ClassConfig      = {
             Index = 103,
             Tooltip = "Summon Heirlooms for Pets",
             Default = false,
-            FAQ = "I want to make sure my pet is always Heirloomed, how do I do that?",
-            Answer = "You can use the [DoPetHeirlooms] feature to summon pet Heirlooms.",
         },
         ['DoPetHealSpell'] = {
             DisplayName = "Pet Heal Spell",
@@ -1945,23 +1935,18 @@ _ClassConfig      = {
             Tooltip = "Mem and cast your Pet Heal spell. AA Pet Heals are always used in emergencies.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "My Pet Keeps Dying, What Can I Do?",
-            Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
-                "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
         },
         ['PetHealPct']     = {
-            DisplayName = "Pet Heal %",
+            DisplayName = "Pet Heal Spell HP%",
             Group = "Abilities",
             Header = "Recovery",
             Category = "Healing Thresholds",
             Index = 101,
-            Tooltip = "Heal pet at [X]% HPs",
+            Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
+
             Default = 60,
             Min = 1,
             Max = 99,
-            FAQ = "My pet keeps dying, how do I keep it alive?",
-            Answer = "You can set the [PetHealPct] to a lower value to heal your pet sooner.\n" ..
-                "Also make sure that [DoPetHeals] is enabled.",
         },
         ['SummonModRods']  = {
             DisplayName = "Summon Mod Rods",
@@ -1972,8 +1957,6 @@ _ClassConfig      = {
             Tooltip = "Summon Mod Rods",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Can I summon mod rods for my group?",
-            Answer = "Yes, you can summon mod rods for your group by setting the [SummonModRods] setting.",
         },
         ['ElementChoice']  = {
             DisplayName = "Element Choice:",
@@ -1988,8 +1971,6 @@ _ClassConfig      = {
             Min = 1,
             Max = 2,
             RequiresLoadoutChange = true,
-            FAQ = "I'm fighting fire-resistant mobs, how can I use my magic nukes?",
-            Answer = "If you are under level 70, you can swap to magic nukes on the DPS Low Level tab.",
         },
         ['DoSwarmPet']     = {
             DisplayName = "Swarm Pet Spell:",
@@ -2004,8 +1985,6 @@ _ClassConfig      = {
             Min = 1,
             Max = 3,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my swarmp pet?",
-            Answer = "Do to mana constraints with fresh level 70's, the swarm pet will only be used on named by default. You can change this in the options.",
         },
         ['DoFranticDS']    = {
             DisplayName = "Frantic Flames",
@@ -2016,8 +1995,6 @@ _ClassConfig      = {
             Tooltip = "Use Frantic Flames during burns.",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
-            FAQ = "I want to use Frantic Flames in my rotation, how do I do that?",
-            Answer = "You can enable the Frantic DS in your class options.",
         },
         ['AISelfDelay']    = {
             DisplayName = "Autoinv Delay (Self)",
@@ -2029,9 +2006,6 @@ _ClassConfig      = {
             Default = 50,
             Min = 1,
             Max = 250,
-            FAQ = "Why do I always have items stuck on the cursor?",
-            Answer = "You can adjust the delay before autoinventory by setting the [AISelfDelay] setting.\n" ..
-                "Increase the delay if you notice items left on cursors regularly.",
         },
         ['AIGroupDelay']   = {
             DisplayName = "Autoinv Delay (Group)",
@@ -2043,9 +2017,6 @@ _ClassConfig      = {
             Default = 150,
             Min = 1,
             Max = 500,
-            FAQ = "Why do I always have items stuck on the cursor?",
-            Answer = "You can adjust the delay before autoinventory by setting the [AIGroupDelay] setting.\n" ..
-                "Increase the delay if you notice items left on cursors regularly.",
         },
         ['DoMalo']         = {
             DisplayName = "Cast Malo",
@@ -2056,8 +2027,6 @@ _ClassConfig      = {
             Tooltip = "Do Malo Spells/AAs",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
-            FAQ = "I want to use Malo in my rotation, how do I do that?",
-            Answer = "You can use the [DoMalo] feature to use Malo in your rotation.",
         },
         ['DoAEMalo']       = {
             DisplayName = "Cast AE Malo",
@@ -2068,8 +2037,6 @@ _ClassConfig      = {
             Tooltip = "Do AE Malo Spells/AAs",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = false,
-            FAQ = "I want to use AE Malo in my rotation, how do I do that?",
-            Answer = "You can use the [DoAEMalo] feature to use AE Malo in your rotation.",
         },
         ['AEMaloCount']    = {
             DisplayName = "AE Malo Count",
@@ -2082,8 +2049,6 @@ _ClassConfig      = {
             Default = 2,
             Max = 30,
             ConfigType = "Advanced",
-            FAQ = "We are fighting more than one mob, why am I not using my AE Malo?",
-            Answer = "AE Malo Count governs the minimum number of targets before the AE Malo is used.",
         },
         ['CombatModRod']   = {
             DisplayName = "Combat Mod Rods",
@@ -2094,9 +2059,6 @@ _ClassConfig      = {
             Tooltip = "Summon Mod Rods in combat if the criteria below are met.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Can i summon mod rods in combat?",
-            Answer = "Yes, you can summon mod rods in combat by setting the [CombatModRod] setting.\n" ..
-                "Otherwise we will only summon them during Downtime.",
         },
         ['GroupManaPct']   = {
             DisplayName = "Combat ModRod %",
@@ -2109,10 +2071,6 @@ _ClassConfig      = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why am I Not summoning Mod Rods?",
-            Answer = "You can adjust the mana percentage to begin summoning Mod Rods in combat by setting the [GroupManaPct] setting.\n" ..
-                "Also Make sure you have the [CombatModRod] setting enabled if you want to resummon them during combat.\n" ..
-                "Finally make sure you have the [SummonModRods] setting enabled.",
         },
         ['GroupManaCt']    = {
             DisplayName = "Combat ModRod Count",
@@ -2125,11 +2083,6 @@ _ClassConfig      = {
             Min = 1,
             Max = 6,
             ConfigType = "Advanced",
-            FAQ = "Why am I not summoning Mod Rods?",
-            Answer =
-                "You can adjust the number of party members that need to be under the above mana percentage to summon Mod Rods in combat by setting the [GroupManaCt] setting.\n" ..
-                "Also Make sure you have the [CombatModRod] setting enabled if you want to resummon them during combat.\n" ..
-                "Finally make sure you have the [SummonModRods] setting enabled.",
         },
         ['DoArcanumWeave'] = {
             DisplayName = "Weave Arcanums",
@@ -2140,9 +2093,6 @@ _ClassConfig      = {
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
-            FAQ = "What is an Arcanum and why would I want to weave them?",
-            Answer =
-            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
 
         --Damage (AE)
@@ -2168,9 +2118,6 @@ _ClassConfig      = {
             Default = 4,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I not using my PBAE spells?",
-            Answer =
-            "You can adjust the PB Target Count to control when you will use actions PBAE Spells such as the of Flame line.",
         },
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",

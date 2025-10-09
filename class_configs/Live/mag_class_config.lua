@@ -2020,11 +2020,13 @@ _ClassConfig      = {
                 "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
         },
         ['PetHealPct']     = {
-            DisplayName = "Pet Heal %",
+            DisplayName = "Pet Heal Spell HP%",
+
             Group = "Abilities",
             Header = "Recovery",
             Category = "Healing Thresholds",
-            Tooltip = "Heal pet at [X]% HPs",
+            Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
+
             Default = 80,
             Min = 1,
             Max = 99,

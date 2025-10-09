@@ -905,9 +905,8 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 1,
-            FAQ = "What is the difference between Heal and Hybrid Modes?",
-            Answer = "Heal Mode is for when you are the primary healer in a group.\n" ..
-                "Hybrid Mode is for when you are the secondary healer in a group and need to do some DPS. (Temp Disabled)",
+            FAQ = "What is the difference between the modes?",
+            Answer = "Clerics currently only have one Mode. This may change in the future.",
         },
         --Buffs
         ['AegoSymbol']        = {
@@ -923,8 +922,6 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 4,
-            FAQ = "Why aren't I using Aego and/or Symbol buffs?",
-            Answer = "Please set which buff you would like to use on the Buffs/Debuffs tab.",
         },
         ['DoACBuff']          = {
             DisplayName = "Use AC Buff",
@@ -935,12 +932,9 @@ local _ClassConfig = {
             Tooltip =
                 "Use your single-slot AC Buff on the Main Assist. USE CASES:\n" ..
                 "You have Aegolism selected and are below level 40 (We are still using a HP Type One buff).\n" ..
-                "You have Symbol selected and you are below level 95 (We don't have Unified Symbols yet).\n" ..
+                "You have Symbol selected and don't have someone else providing a Type One buff.\n" ..
                 "Leaving this on in other cases is not likely to cause issue, but may cause unnecessary buff checking.",
             Default = false,
-            FAQ = "Why aren't I used my AC Buff Line?",
-            Answer =
-            "You may need to select the option in Buffs/Debuffs. Alternatively, this line does not stack with Aegolism, and it is automatically included in \"Unified\" Symbol buffs.",
         },
         ['DoVieBuff']         = {
             DisplayName = "Use Vie Buff",
@@ -950,9 +944,6 @@ local _ClassConfig = {
             Index = 103,
             Tooltip = "Use your Melee Damage absorb (Vie) line.",
             Default = true,
-            FAQ = "Why am I using the Vie and Shining buffs together when the melee gaurd does not stack?",
-            Answer = "We will always use the Shining line on the tank, but if selected, we will also use the Vie Buff on the Group.\n" ..
-                "Before we have the Shining Buff, we will use our single-target Vie buff only on the tank.",
         },
         ['UseAura']           = {
             DisplayName = "Aura Spell Choice:",
@@ -966,11 +957,9 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 3,
-            FAQ = "Why am I not using the aura I prefer?",
-            Answer = "You can select which aura to use (prior to purchase of Spirit Mastery) by changing your Aura Spell Choice option.",
         },
         ['DoDivineBuff']      = {
-            DisplayName = "Do Divine Buff",
+            DisplayName = "Do Divine Intervetion",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
@@ -979,8 +968,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my Cleric using the Divine Intervention buff?",
-            Answer = "The Divine Intervention buff line requires a pair of emeralds.",
         },
 
         --Combat
@@ -994,9 +981,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I using the Twin Heal Nuke?",
-            Answer =
-            "You can turn off the Twin Heal Nuke in the Spells and Abilities tab.",
         },
         ['DoHealStun']        = {
             DisplayName = "Timer 6 Stun",
@@ -1007,11 +991,6 @@ local _ClassConfig = {
             Tooltip = "Use the Timer 6 Stun (\"Sound of\" Line).",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Which stun spells does the Cleric use?",
-            Answer =
-                "At low levels, we will use the \"Stun\" spell (until 58, if selected) and either \"Holy Might\", \"Force\", or \"Tarnation\" until level 65.\n" ..
-                "After that, we transition to the Timer 6 stuns (\"Sound of\" line), which have a ToT heal from Level 88.\n" ..
-                "Please note that the low level spell named \"Stun\" is controlled by the Low Level Stun option.",
         },
         ['DoLLStun']          = {
             DisplayName = "Low Level Stun",
@@ -1036,8 +1015,6 @@ local _ClassConfig = {
             Tooltip = "Use the Undead nuke line.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How can I use my Undead Nuke?",
-            Answer = "You can enable the undead nuke line in the Spells and Abilities tab.",
         },
         ['DoMagicNuke']       = {
             DisplayName = "Do Magic Nuke",
@@ -1048,8 +1025,6 @@ local _ClassConfig = {
             Tooltip = "Use the Magic nuke line.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How can I use my Magic Nuke?",
-            Answer = "You can enable the magic nuke line in the Spells and Abilities tab.",
         },
         -- Heals and Cures
         ['DoCompleteHeal']    = {
@@ -1062,9 +1037,9 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my cleric using Complete Heal?",
+            FAQ = "Does RGMercs support Complete Heal Chains (CHC)?",
             Answer =
-            "Complete Heal use can be enabled in the Spells and Abilities tab. Please note that, if enabled, we will not use the healing Light line on the MA.",
+            "No, it does not. If this is important to you, there are resources on RedGuides that can handle it! You could, though, consider staggering Complete Heal percentages to break up CH usage amongst multiple clerics.",
         },
         ['CompleteHealPct']   = {
             DisplayName = "Complete Heal Pct",
@@ -1077,8 +1052,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 99,
             ConfigType = "Advanced",
-            FAQ = "How can I stagger my clerics to use Complete Heal at different times?",
-            Answer = "Adjust the Complete Heal Pct on the Spells and Abilities tab to different amounts to help stagger Complete Heals.",
         },
         ['DoSingleElixir']    = {
             DisplayName = "Single Elixir",
@@ -1090,8 +1063,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my Cleric using the Single Elixir?",
-            Answer = "You can adjust this behavior in the class options tab.",
         },
         ['DoGroupElixir']     = {
             DisplayName = "Group Elixir",
@@ -1103,8 +1074,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why is my cleric running out of mana keeping up the group Elixir HoT?",
-            Answer = "You can adjust Elixir Uptime in the Class options..",
         },
         ['GroupElixirUptime'] = {
             DisplayName = "Group Elixir Uptime",
@@ -1115,8 +1084,6 @@ local _ClassConfig = {
             Tooltip = "In combat, attempt to keep full uptime on your Group Elixir. Note: There are scenarios where single elixirs could interfere with uptime.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my Cleric keeping the Group Elixir on the tank when I the uptime option selected?",
-            Answer = "Clerics will check themselves for the group elixir and recast as necessary. Single elixirs may at time interfere with this.",
         },
         ['KeepPoisonMemmed']  = {
             DisplayName = "Mem Cure Poison",
@@ -1129,9 +1096,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['KeepDiseaseMemmed'] = {
             DisplayName = "Mem Cure Disease",
@@ -1144,9 +1108,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['KeepCurseMemmed']   = {
             DisplayName = "Mem Remove Curse",
@@ -1159,9 +1120,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['GroupHealAsCure']   = {
             DisplayName = "Use Group Heal to Cure",
@@ -1173,10 +1131,6 @@ local _ClassConfig = {
                 "Please note that we will prioritize single target cures if you have selected to keep them memmed above (due to the counter disparity).",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I using my Group Heal when I should be curing?",
-            Answer =
-                "Word of Reconsitatutioon claers poison/disease/curse counters and is used optionally as a cure. You can disable this behavior in your class options on the Utility tab.\n" ..
-                "Some earlier group heal spells also clear counters, but the config must be customized to use them.",
         },
 
         --Damage(AE)
@@ -1202,8 +1156,6 @@ local _ClassConfig = {
             Tooltip =
             "**WILL BREAK MEZ** Use your Magic PB AE Spells . **WILL BREAK MEZ**",
             Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['DoPBAEStun']        = {
             DisplayName = "Use PBAE Stun",
@@ -1215,8 +1167,6 @@ local _ClassConfig = {
             Tooltip =
             "**WILL BREAK MEZ** Use your Magic PB AE Stun Spells . **WILL BREAK MEZ**",
             Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Tgt Cnt",
@@ -1228,9 +1178,6 @@ local _ClassConfig = {
             Default = 4,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I not using my PBAE spells?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use the abilities.",
         },
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
@@ -1272,10 +1219,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true, -- used as a load condition
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "What circumstances do we use Veturika's or Quiet Miracle?",
-            Answer =
-                "If the Mana Restore AA setting is set on the Spells and Abilities tab, we will use either of these once the Mana Restore Pct threshold is crossed.\n" ..
-                "We will also use Veturika's as an emergency self-heal if required.",
         },
         ['ManaRestorePct']    = {
             DisplayName = "Mana Restore Pct",
@@ -1288,8 +1231,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 99,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using Veturika's or Quiet Miracle?",
-            Answer = "Ensure that your Mana Restore Pct is configured to the value you would like to start using these abilities.",
         },
         ['DoYaulp']           = {
             DisplayName = "Use Yaulp",
@@ -1308,10 +1249,8 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 102,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
-            FAQ = "What Vet AA's does CLR use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns. Clerics have tools that largely leave Armor of Experience unused.",
         },
     },
 }

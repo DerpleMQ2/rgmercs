@@ -439,36 +439,28 @@ return {
             Group = "Items",
             Header = "Clickies",
             Category = "Class Config Clickies",
-            Tooltip = "Click the poison you want to use here",
+            Tooltip = "Click the poison you want to use here.",
             Type = "ClickyItem",
             Default = "",
-            FAQ = "Can I specify the poison I want to use?",
-            Answer = "Yes you set your poison item by placing its name into the [PoisonName] field.\n" ..
-                "You can drag and drop the poison item from your inventory into the field.",
         },
         ['PoisonClicky']    = {
             DisplayName = "Poison Clicky",
             Group = "Items",
             Header = "Clickies",
             Category = "Class Config Clickies",
-            Tooltip = "Click the poison summoner you want to use here",
+            Tooltip = "Click the poison summoner you want to use here.",
             Type = "ClickyItem",
             Default = "",
-            FAQ = "I want to use a clicky item to summon my poisons, how do I do that?",
-            Answer = "You can set your poison summoner by placing its name into the [PoisonClicky] field.\n" ..
-                "You can drag and drop the poison summoner item from your inventory into the field.",
         },
         ['PoisonItemCount'] = {
             DisplayName = "Poison Item Count",
             Group = "Items",
             Header = "Clickies",
             Category = "Class Config Clickies",
-            Tooltip = "Min number of poison before we start summoning more",
+            Tooltip = "Min number of poison before we start summoning more.",
             Default = 3,
             Min = 1,
             Max = 50,
-            FAQ = "I am always summoning more poison, how can I make sure to summon enough the first time?",
-            Answer = "You can set the minimum number of poisons you want to have before summoning more by setting the [PoisonItemCount] field.",
         },
         -- Abilities
         ['DoHideSneak']     = {
@@ -477,11 +469,8 @@ return {
             Header = "Buffs",
             Category = "Self",
             Index = 101,
-            Tooltip = "Use Hide/Sneak during Downtime",
+            Tooltip = "Use Hide/Sneak during Downtime.",
             Default = true,
-            FAQ = "How can I make sure to always be sneaking / hiding for maximum DPS?",
-            Answer = "Enable [DoHideSneak] if you want to use Hide/Sneak during Downtime.\n" ..
-                "This will keep you ready to ambush or backstab at a moments notice.",
         },
         ['DoOpener']        = {
             DisplayName = "Use Openers",
@@ -491,8 +480,6 @@ return {
             Index = 101,
             Tooltip = "Use Sneak Attack line to start combat (e.g, Daggerslash).",
             Default = true,
-            FAQ = "Why would I not want to use Openers?",
-            Answer = "Enable [DoOpener] if you want to use the opener ability.",
         },
         ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
@@ -515,9 +502,6 @@ return {
             Default = 2,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
         ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
@@ -558,8 +542,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['HideAggro']       = {
             DisplayName = "Hide Aggro%",
@@ -571,8 +553,6 @@ return {
             Default = 90,
             Min = 1,
             Max = 100,
-            FAQ = "Can I customize when to use Hide?",
-            Answer = "Yes, you can set the aggro % at which to use Hide with the [HideAggro] setting.",
         },
         ['DoVetAA']         = {
             DisplayName = "Use Vet AA",
@@ -580,10 +560,8 @@ return {
             Header = "Damage",
             Category = "AE",
             Index = 102,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
-            FAQ = "What Vet AA's does MNK use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
         --Equipment
         ['UseEpic']         = {
@@ -599,9 +577,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my BRD using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Utility/Items/Misc tab.",
         },
         ['DoCoating']       = {
             DisplayName = "Use Coating",
@@ -609,10 +584,8 @@ return {
             Header = "Clickies",
             Category = "Class Config Clickies",
             Index = 102,
-            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Tooltip = "Click your Blood Drinker's Coating in an emergency.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
     },
 }

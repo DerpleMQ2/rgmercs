@@ -964,8 +964,6 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 2,
-            FAQ = "I want to only use a Rogue Pet for the Backstabs, how do I do that?",
-            Answer = "Set the [PetType] setting to Rog and the Necro will only summon Rogue pets.",
         },
         ['DoPetHealSpell']    = {
             DisplayName = "Pet Heal Spell",
@@ -976,23 +974,18 @@ local _ClassConfig = {
             Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "My Pet Keeps Dying, What Can I Do?",
-            Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
-                "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
         },
         ['PetHealPct']        = {
-            DisplayName = "Pet Heal %",
+            DisplayName = "Pet Heal Spell HP%",
             Group = "Abilities",
             Header = "Recovery",
             Category = "Healing Thresholds",
             Index = 101,
-            Tooltip = "Heal pet at [X]% HPs",
+            Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
+
             Default = 60,
             Min = 1,
             Max = 99,
-            FAQ = "My pet keeps dying, how do I keep it alive?",
-            Answer = "You can set the [PetHealPct] to a lower value to heal your pet sooner.\n" ..
-                "Also make sure that [DoPetHeals] is enabled.",
         },
 
         --Debuffs
@@ -1025,8 +1018,6 @@ local _ClassConfig = {
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not snaring?",
-            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
         ['SnareCount']        = {
             DisplayName = "Snare Max Mob Count",
@@ -1038,9 +1029,6 @@ local _ClassConfig = {
             Default = 3,
             Min = 1,
             Max = 99,
-            FAQ = "Why is my Shadow Knight Not snaring?",
-            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
-                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
 
         --Combat
@@ -1053,8 +1041,6 @@ local _ClassConfig = {
             Tooltip = "Use the your ST Lifetap nuke line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my Lifetap?",
-            Answer = "You can enable the Lifetap line on the Combat tab of your Class options.",
         },
         ['DoUndeadNuke']      = {
             DisplayName = "Do Undead Nuke",
@@ -1065,8 +1051,6 @@ local _ClassConfig = {
             Tooltip = "Use the Undead nuke line.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How can I use my Undead Nuke?",
-            Answer = "You can enable the undead nuke line on the Combat tab of your Class options.",
         },
         ['WakeDeadCorpseCnt'] = {
             DisplayName = "WtD Corpse Count",
@@ -1079,8 +1063,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 20,
             ConfigType = "Advanced",
-            FAQ = "I want to use Wake the Dead when I have X corpses nearby, how do I do that?",
-            Answer = "Set the [WakeDeadCorpseCnt] setting to the desired number of corpses you want to cast Wake the Dead at.",
         },
         ['DoLifeBurn']        = {
             DisplayName = "Use Life Burn",
@@ -1092,8 +1074,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "I want to use my Life Burn AA, how do I do that?",
-            Answer = "Set the [DoLifeBurn] setting to true and the Necro will use Life Burn AA if their aggro is below 25%.",
         },
         ['UseEpic']           = {
             DisplayName = "Epic Use:",
@@ -1108,9 +1088,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my SHM using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Buffs tab.",
         },
         ['SpireChoice']       = {
             DisplayName = "Spire Choice:",
@@ -1127,8 +1104,6 @@ local _ClassConfig = {
             Default = 3,
             Min = 1,
             Max = #Config.Constants.SpireChoices,
-            FAQ = "Why am I using the wrong spire?",
-            Answer = "You can choose which spire you prefer in the Class Options.",
         },
         ['EmergencyStart']    = {
             DisplayName = "Emergency HP%",
@@ -1136,13 +1111,11 @@ local _ClassConfig = {
             Header = "Utility",
             Category = "Emergency",
             Index = 101,
-            Tooltip = "Your HP % before we begin to use emergency mitigation abilities. Also, the minimum HP we need to use the Flesh Buff.",
+            Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['AggroFeign']        = {
             DisplayName = "Emergency Feign",
@@ -1152,9 +1125,6 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
-            FAQ = "How do I use my Feign Death?",
-            Answer = "Make sure you have [AggroFeign] enabled.\n" ..
-                "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
         },
 
         --Utility
@@ -1167,9 +1137,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting Lich spells.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I want to use my Lich spells, how do I do that?",
-            Answer = "Set the [DoLich] setting to true and the Necro will use Lich spells.\n" ..
-                "You will also want to set your [StopLichHP] and [StopLichMana] settings to the desired values so you do not Lich to Death.",
         },
         ['StopLichHP']        = {
             DisplayName = "Stop Lich HP",
@@ -1177,13 +1144,11 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 102,
-            Tooltip = "Cancel Lich at HP Pct [x]",
+            Tooltip = "Cancel your Lich spell once your health has dropped to this percentage.",
             RequiresLoadoutChange = false,
             Default = 25,
             Min = 1,
             Max = 99,
-            FAQ = "I want to stop Liching at a certain HP %, how do I do that?",
-            Answer = "Set the [StopLichHP] setting to the desired % of HP you want to stop Liching at.",
         },
         ['StartLichMana']     = {
             DisplayName = "Start Lich Mana",
@@ -1191,7 +1156,7 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 103,
-            Tooltip = "Start Lich at Mana Pct [x]",
+            Tooltip = "Use your Lich spell when your mana has dropped to this percentage.",
             RequiresLoadoutChange = false,
             Default = 70,
             Min = 1,
@@ -1203,13 +1168,11 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 104,
-            Tooltip = "Cancel Lich at Mana Pct [x]",
+            Tooltip = "Cancel your Lich spell when your mana has increased to this percentage.",
             RequiresLoadoutChange = false,
             Default = 100,
             Min = 1,
             Max = 100,
-            FAQ = "I want to stop Liching at a certain Mana %, how do I do that?",
-            Answer = "Set the [StopLichMana] setting to the desired % of Mana you want to stop Liching at.",
         },
         ['DeathBloomPercent'] = {
             DisplayName = "Death Bloom %",
@@ -1217,13 +1180,11 @@ local _ClassConfig = {
             Header = "Recovery",
             Category = "Other Recovery",
             Index = 101,
-            Tooltip = "Mana % at which to cast Death Bloom",
+            Tooltip = "Use Death Bloom when your mana has dropped to this percentage.",
             Default = 40,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "I am using Death Bloom to early or late, how do I adjust it?",
-            Answer = "Set the [DeathBloomPercent] setting to the desired % of mana you want to cast Death Bloom at.",
         },
         ['DoPustules']        = {
             DisplayName = "Use Pustules",
@@ -1235,8 +1196,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "I want to use my Life Burn AA, how do I do that?",
-            Answer = "Set the [DoLifeBurn] setting to true and the Necro will use Life Burn AA if their aggro is below 25%.",
         },
         ['DoArcanumWeave']    = {
             DisplayName = "Weave Arcanums",
@@ -1248,9 +1207,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "What is an Arcanum and why would I want to weave them?",
-            Answer =
-            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
         ['DoOrbNuke']         = {
             DisplayName = "Summon Orbs",
@@ -1261,8 +1217,6 @@ local _ClassConfig = {
             Tooltip = "Use your Orb nuke to summon more Soul/Shadow orbs when needed.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my Lifetap?",
-            Answer = "You can enable the Lifetap line on the Combat tab of your Class options.",
         },
     },
 }
