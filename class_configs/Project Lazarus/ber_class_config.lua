@@ -368,8 +368,8 @@ return {
             Default = 1,
             Min = 1,
             Max = 1,
-            FAQ = "What do the different modes do?",
-            Answer = "Currently Berserkers Only have DPS mode. More modes will be added in the future.",
+            FAQ = "What do the different combat modes do?",
+            Answer = "Currently Berserkers only have a DPS mode. More modes may be added in the future.",
         },
 
         --Equipment
@@ -386,9 +386,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my BER using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Buffs tab.",
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
@@ -396,10 +393,8 @@ return {
             Header = "Clickies",
             Category = "Class Config Clickies",
             Index = 102,
-            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Tooltip = "Click your Blood Drinker's Coating in an emergency.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
 
         -- Combat
@@ -409,10 +404,8 @@ return {
             Header = "Damage",
             Category = "Direct",
             Index = 101,
-            Tooltip = "Enable using Battle Leap",
+            Tooltip = "Use the Battle Leap AA on cooldown.",
             Default = true,
-            FAQ = "Why am I not using Battle Leap?",
-            Answer = "Make sure you have [DoBattleLeap] enabled.",
         },
         ['DoSnare']        = {
             DisplayName = "Do Snare",
@@ -422,8 +415,6 @@ return {
             Index = 101,
             Tooltip = "Snare opponents with low health.",
             Default = false,
-            FAQ = "Why am I not snaring mobs?",
-            Answer = "You can enable the Snare discs in your class options.",
         },
         ['SnareCount']     = {
             DisplayName = "Snare Max Mob Count",
@@ -435,9 +426,6 @@ return {
             Default = 3,
             Min = 1,
             Max = 99,
-            FAQ = "Why is my berserker not using snare?",
-            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
-                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
         ['DoStun']         = {
             DisplayName = "Do Stun",
@@ -461,8 +449,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['DoVetAA']        = {
             DisplayName = "Use Vet AA",
@@ -470,10 +456,8 @@ return {
             Header = "Buffs",
             Category = "Self",
             Index = 101,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
-            FAQ = "What Vet AA's does SHD use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
 
         --AE Damage
@@ -498,9 +482,6 @@ return {
             Default = 2,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
@@ -543,9 +524,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my BER using Rampage on these trash mobs?",
-            Answer = "By default, we use the Rampage in any combat with enough AE targets (per your AE settings).\n" ..
-                "This can be adjusted in the Buffs tab.",
         },
     },
 }

@@ -1018,10 +1018,10 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Group",
             Index = 101,
-            Tooltip = "Cast Movement Spells/AA.",
+            Tooltip = "Cast Run/Movement Spells/AA.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why am I spamming movement buffs?",
+            FAQ = "Why am I spamming movement or runspeed buffs?",
             Answer = "Some move spells freely overwrite those of other classes, so if multiple movebuffs are being used, a buff loop may occur.\n" ..
                 "Simply turn off movement buffs for the undesired class in their class options.",
         },
@@ -1034,8 +1034,6 @@ local _ClassConfig = {
             Tooltip = "Use your group HP Buff. Disable as desired to prevent conflicts with CLR or PAL buffs.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I in a buff war with my Paladin or Druid? We are constantly overwriting each other's buffs.",
-            Answer = "Disable [DoHPBuff] to prevent issues with Aego/Symbol lines overwriting. Alternatively, you can adjust the settings for the other class instead.",
         },
         ['DoGroupRegen']      = {
             DisplayName = "Group Regen Buff",
@@ -1059,7 +1057,8 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why do my druid and mage constantly both try to use the damage shield?",
-            Answer = "You can disable the group damage shield (DS) buff option on the Buffs tab.",
+            Answer =
+            "The internal mechanisms used to check stacking for these DS buffs report cross-stacking and can lead to spamming. Disable using damage shields on one or the other.",
         },
         ['UseEpic']           = {
             DisplayName = "Epic Use:",
@@ -1074,9 +1073,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my DRU using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Buffs tab.",
         },
         ['SpireChoice']       = {
             DisplayName = "Spire Choice:",
@@ -1093,8 +1089,6 @@ local _ClassConfig = {
             Default = 3,
             Min = 1,
             Max = #Config.Constants.SpireChoices,
-            FAQ = "Why am I using the wrong spire?",
-            Answer = "You can choose which spire you prefer in the Class Options.",
         },
         ['WolfSpiritChoice']  = {
             DisplayName = "Self Wolfbuff Choice:",
@@ -1110,8 +1104,6 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 2,
-            FAQ = "Why am I using the wrong wolf form?",
-            Answer = "You can choose which wolf form you prefer in the Class Options.",
         },
 
         --Debuffs
@@ -1124,8 +1116,6 @@ local _ClassConfig = {
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not snaring?",
-            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
         ['SnareCount']        = {
             DisplayName = "Snare Max Mob Count",
@@ -1137,9 +1127,6 @@ local _ClassConfig = {
             Default = 3,
             Min = 1,
             Max = 99,
-            FAQ = "Why is my Shadow Knight Not snaring?",
-            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
-                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
         ['DoFireDebuff']      = {
             DisplayName = "Fire Debuff",
@@ -1150,8 +1137,6 @@ local _ClassConfig = {
             Tooltip = "Use your fire resist debuff (to include the (Hand > Blessing) of Ro AA).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my fire resist debuff?",
-            Answer = "Make sure the debuff is enabled in your class settings.",
         },
         ['DoColdDebuff']      = {
             DisplayName = "Cold Debuff",
@@ -1162,8 +1147,6 @@ local _ClassConfig = {
             Tooltip = "Use your cold resist debuff.",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my cold resist debuff?",
-            Answer = "Make sure the debuff is enabled in your class settings.",
         },
         ['DoATKDebuff']       = {
             DisplayName = "ATK Debuff",
@@ -1174,8 +1157,6 @@ local _ClassConfig = {
             Tooltip = "Use your attack resist debuff.",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my attack resist debuff?",
-            Answer = "Make sure the debuff is enabled in your class settings.",
         },
 
         --Damage
@@ -1188,8 +1169,6 @@ local _ClassConfig = {
             Tooltip = "Use your single-target fire nukes.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I nuking? A druid is a healer.",
-            Answer = "You can disable this in your class settings.",
         },
         ['DoIceNuke']         = {
             DisplayName = "Cold Nuke",
@@ -1200,8 +1179,6 @@ local _ClassConfig = {
             Tooltip = "Use your single-target cold nukes.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why am I using fire nukes? The mobs are fire-resistant.",
-            Answer = "You can change which nukes you are using in your class settings.",
         },
         ['DoStunNuke']        = {
             DisplayName = "Stun Nuke",
@@ -1212,8 +1189,6 @@ local _ClassConfig = {
             Tooltip = "Use your stun nukes (magic damage with stun component).",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why is my twinheal nuke targeting the mob, that isn't how it works?!",
-            Answer = "On Lazarus, the twinheal nuke targets the mob to function, the in-game description is incorrect.",
         },
         ['DoTwinHealNuke']    = {
             DisplayName = "Twinheal Nuke",
@@ -1224,8 +1199,6 @@ local _ClassConfig = {
             Tooltip = "Use your twinheal nuke (fire damage with a twinheal buff effect).",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why is my twinheal nuke targeting the mob, that isn't how it works?!",
-            Answer = "On Lazarus, the twinheal nuke targets the mob to function, the in-game description is incorrect.",
         },
         ['DoFlameLickDot']    = {
             DisplayName = "Fire Debuff Dot",
@@ -1236,8 +1209,6 @@ local _ClassConfig = {
             Tooltip = "Use your Flame Lick line of dots (fire damage, fire resist debuff, 60s duration).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my fire debuff (Flame Lick) dot?",
-            Answer = "Make sure the dot is enabled in your class settings.",
         },
         ['DoVengeanceDot']    = {
             DisplayName = "Fire Dot",
@@ -1248,8 +1219,6 @@ local _ClassConfig = {
             Tooltip = "Use your Vengeance line of dots (fire damage, 30s duration).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my fire (Vengeance) dot?",
-            Answer = "Make sure the dot is enabled in your class settings.",
         },
         ['DoSwarmDot']        = {
             DisplayName = "Magic Dot",
@@ -1260,8 +1229,6 @@ local _ClassConfig = {
             Tooltip = "Use your Swarm line of dots (magic damage, 54s duration).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my magic (Swarm) dot?",
-            Answer = "Make sure the dot is enabled in your class settings.",
         },
         ['DotNamedOnly']      = {
             DisplayName = "Only Dot Named",
@@ -1272,8 +1239,6 @@ local _ClassConfig = {
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
             FAQ = "Why am I not using my dots?",
-            Answer = "Make sure the dot is enabled in your class settings and make sure that the mob is named if that option is selected.\n" ..
-                "You can read more about named mobs on the RGMercs named tab (and learn how to add one on your own!)",
         },
 
         --Damage(AE)
@@ -1299,8 +1264,6 @@ local _ClassConfig = {
             Tooltip =
             "**WILL BREAK MEZ** Use your Magic PB AE Spells . **WILL BREAK MEZ**",
             Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['DoRain']            = {
             DisplayName = "Use Ice Rain",
@@ -1312,8 +1275,6 @@ local _ClassConfig = {
             ConfigType = "Advanced",
             Tooltip = "**WILL BREAK MEZ** Use your cold damage rain spell. **WILL BREAK MEZ***",
             Default = false,
-            FAQ = "How can I use my rain nuke?",
-            Answer = "This can be enabled on the AEDamage tab, ensure you also have AE damage on.",
         },
         ['RainDistance']      = {
             DisplayName = "Min Rain Distance",
@@ -1322,12 +1283,10 @@ local _ClassConfig = {
             Category = "AE",
             Index = 104,
             ConfigType = "Advanced",
-            Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25').",
+            Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25'). Used to avoid damaging the caster.",
             Default = 30,
             Min = 0,
             Max = 100,
-            FAQ = "Why does minimum rain distance matter?",
-            Answer = "Rain spells, if cast close enough, can damage the caster. The AE range of a Rain is 25'.",
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Tgt Cnt",
@@ -1339,9 +1298,6 @@ local _ClassConfig = {
             Default = 4,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I not using my PBAE spells?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use the abilities.",
         },
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
@@ -1397,9 +1353,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['KeepDiseaseMemmed'] = {
             DisplayName = "Mem Cure Disease",
@@ -1412,9 +1365,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['KeepCurseMemmed']   = {
             DisplayName = "Mem Remove Curse",
@@ -1427,9 +1377,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['GroupHealAsCure']   = {
             DisplayName = "Use Group Heal to Cure",
@@ -1441,10 +1388,6 @@ local _ClassConfig = {
                 "Please note that we will prioritize Remove Greater Curse if you have selected to keep it memmed as above (due to the counter disparity).",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I using my Group Heal when I should be curing?",
-            Answer =
-                "Word of Reconsitatutioon claers poison/disease/curse counters and is used optionally as a cure. You can disable this behavior in your class options on the Utility tab.\n" ..
-                "Some earlier group heal spells also clear counters, but the config must be customized to use them.",
         },
         ['DoArcanumWeave']    = {
             DisplayName = "Weave Arcanums",
@@ -1455,9 +1398,6 @@ local _ClassConfig = {
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
-            FAQ = "What is an Arcanum and why would I want to weave them?",
-            Answer =
-            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
         ['KeepEvacMemmed']    = {
             DisplayName = "Memorize Evac",
@@ -1468,8 +1408,6 @@ local _ClassConfig = {
             Tooltip = "Keep (Lesser) Succor memorized.",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "I want my druid to keep an evac memorized, is this possible?",
-            Answer = "Enable the Memorize Evac setting to keep Succor or Lessor Succor on your spell bar.",
         },
     },
 }

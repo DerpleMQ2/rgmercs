@@ -352,11 +352,9 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 102,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "What Vet AA's does MNK use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
         ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
@@ -379,9 +377,6 @@ local _ClassConfig = {
             Default = 2,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
         ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
@@ -430,9 +425,6 @@ local _ClassConfig = {
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Feign Death?",
-            Answer = "Make sure you have [AggroFeign] enabled.\n" ..
-                "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
         },
         ['EmergencyStart']  = {
             DisplayName = "Emergency HP%",
@@ -445,8 +437,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['DoCoating']       = {
             DisplayName = "Use Coating",
@@ -457,8 +447,6 @@ local _ClassConfig = {
             Tooltip = "Click your Blood Drinker's Coating in an emergency.",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
     },
 }

@@ -1115,8 +1115,8 @@ return {
             Default = 1,
             Min = 1,
             Max = 2,
-            FAQ = "What do the different Modes Do?",
-            Answer = "Tank Mode will focus on tanking and DPS Mode will focus on DPS.",
+            FAQ = "What Modes does the Paladin have?",
+            Answer = "Paladins have a mode for Tanking and a mode for DPS.",
         },
 
         --AE(All Modes)
@@ -1140,8 +1140,6 @@ return {
             Index = 102,
             Tooltip = "Use your Targeted AE Stun (Stun Command or Sacred Word) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
             Default = true,
-            FAQ = "Why am I not using my AE Stun?",
-            Answer = "The AE stun is set to be used to reclaim aggro on AE targets when necessary.",
         },
         ['DoPBAEStun']        = {
             DisplayName = "Do PBAE Stun",
@@ -1151,8 +1149,6 @@ return {
             Index = 103,
             Tooltip = "Use your PBAE Stun (The Silent Command) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
             Default = true,
-            FAQ = "Why am I memorizing an AE stun as a DPS?",
-            Answer = "You can select which AE stuns you will keep memorized (if any) in your class options.",
         },
         ['AEStunUse']         = {
             DisplayName = "AEStun Use(DPS Mode):",
@@ -1167,8 +1163,6 @@ return {
             Default = 1,
             Min = 1,
             Max = 3,
-            FAQ = "Why am I stunning everything?!??",
-            Answer = "You can choose the conditions under which you will use your PBAE Stun on the Combat tab.",
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Target Count",
@@ -1180,9 +1174,6 @@ return {
             Default = 2,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
@@ -1265,8 +1256,6 @@ return {
             Min = 1,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
-            Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
         },
         ['DefenseStart']      = {
             DisplayName = "Defense HP",
@@ -1279,8 +1268,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "My SHD health spikes up and down a lot and abilities aren't being triggered, what gives?",
-            Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
         ['EmergencyStart']    = {
             DisplayName = "Emergency Start",
@@ -1293,8 +1280,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What rotations are cut during emergencies?",
-            Answer = "Snare, Burn, Combat Weave and Combat rotations are disabled when your health is at emergency levels.\nAdditionally, we will only use non-spell hate tools.",
         },
         ['HPCritical']        = {
             DisplayName = "HP Critical",
@@ -1303,14 +1288,11 @@ return {
             Category = "Defenses",
             Index = 104,
             Tooltip =
-            "The HP % that we will use abilities like Leechcurse and Leech Touch.\nMost other rotations are cut to give our full focus to survival (See FAQ).",
+            "The HP % that we will use abilities like Lay on Hands or Gift of Life.\nMost other rotations are cut to give our full focus to survival.",
             Default = 20,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What rotations are cut when HP % is critical?",
-            Answer =
-            "Hate Tools (including AE) and Leech Effect rotations are cut when HP% is critical.\nAdditionally, reaching the emergency threshold would've also cut the Snare, Burn, Combat Weave and Combat Rotations.",
         },
 
         --Equipment
@@ -1327,9 +1309,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my PAL using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Buffs tab.",
         },
         ['DoCoating']         = {
             DisplayName = "Use Coating",
@@ -1339,8 +1318,6 @@ return {
             Index = 102,
             Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
         ['UseBandolier']      = {
             DisplayName = "Dynamic Weapon Swap",
@@ -1351,9 +1328,6 @@ return {
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"2Hand\" TO USE THIS FUNCTION.***",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not using Dynamic Weapon Swapping?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['EquipShield']       = {
             DisplayName = "Equip Shield",
@@ -1366,9 +1340,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using a shield?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['Equip2Hand']        = {
             DisplayName = "Equip 2Hand",
@@ -1381,9 +1352,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using a 2Hand?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['NamedShieldLock']   = {
             DisplayName = "Shield on Named",
@@ -1393,8 +1361,6 @@ return {
             Index = 104,
             Tooltip = "Keep Shield equipped for Named mobs(must be in SpawnMaster or named.lua)",
             Default = true,
-            FAQ = "Why does my SHD switch to a Shield on puny gray named?",
-            Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
         },
 
         --Heals/Cures
@@ -1412,8 +1378,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my paladin changing targets to heal so often?",
-            Answer = "You can control when a Paladin will use their single target heals on the Heals/Cures tab in Class options.",
         },
         ['DoLightHeal']       = {
             DisplayName = "Light Heal Use:",
@@ -1429,8 +1393,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my paladin memorizing these weak ToT Light of heals?",
-            Answer = "You can control which ToT/Light heals (if any) a Paladin will use on the Heals/Cures tab in Class options.",
         },
         ['DoWaveHeal']        = {
             DisplayName = "Wave Heal Use:",
@@ -1446,8 +1408,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my paladin changing targets to heal so often?",
-            Answer = "You can control when a Paladin will use their group heals on the Heals/Cures tab in Class options.",
         },
         ['WaveHealUse']       = {
             DisplayName = "Use Waves for ST:",
@@ -1463,8 +1423,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my paladin changing targets to heal so often?",
-            Answer = "You can control when a Paladin will use their heals on the Heals/Cures tab in Class options.",
         },
         ['DoCleansing']       = {
             DisplayName = "Cleansing HoT:",
@@ -1480,8 +1438,6 @@ return {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my Paladin using the his HoT?",
-            Answer = "You can adjust this behavior in the class options tabs.",
         },
         ['KeepPurityMemmed']  = {
             DisplayName = "Mem Crusader's Cure",
@@ -1493,9 +1449,6 @@ return {
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
         ['KeepCurseMemmed']   = {
             DisplayName = "Mem Remove Curse",
@@ -1507,9 +1460,6 @@ return {
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
-            Answer =
-            "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
 
         --Combat
@@ -1523,8 +1473,6 @@ return {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I using the Twin Heal Nuke?",
-            Answer = "You can turn off the Twin Heal Nuke on the Combat tab of your Class options.",
         },
         ['DoSereneStun']      = {
             DisplayName = "Do Serene Stun",
@@ -1535,8 +1483,6 @@ return {
             Tooltip = "Use the Quellious/Serene stun line (long duration stun with DD component).",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How can I use my Serene Stun?",
-            Answer = "You can enable the Serene stun line on the Combat tab of your Class options.",
         },
         ['DoUndeadNuke']      = {
             DisplayName = "Do Undead Nuke",
@@ -1547,8 +1493,6 @@ return {
             Tooltip = "Use the standard Undead nuke line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my Undead Nuke?",
-            Answer = "You can enable the undead nuke line on the Combat tab of your Class options.",
         },
         ['DoQuickUndeadNuke'] = {
             DisplayName = "Do Undead Quick Nuke",
@@ -1559,8 +1503,6 @@ return {
             Tooltip = "Use the quick undead nuke line (which includes a potential snare and ac debuff trigger).",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my Undead Nuke?",
-            Answer = "You can enable the undead nuke line on the Combat tab of your Class options.",
         },
         ['DoValorousRage']    = {
             DisplayName = "Valorous Rage",
@@ -1570,8 +1512,6 @@ return {
             Index = 101,
             Tooltip = "Use the Valorous Rage AA during burns.",
             Default = false,
-            FAQ = "What is Valorous Rage and how can I use it?",
-            Answer = "Valorous Rage is an AA that increases your damage output while hurting your ability to heal and can be toggled in the Combat tab of the Class options.",
         },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
@@ -1579,10 +1519,8 @@ return {
             Header = "Buffs",
             Category = "Self",
             Index = 102,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
-            FAQ = "What Vet AA's does PAL use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
 
         --Buffs
@@ -1599,8 +1537,6 @@ return {
             Default = 1,
             Min = 1,
             Max = 4,
-            FAQ = "Why aren't I using Aego and/or Symbol buffs?",
-            Answer = "Please set which buff you would like to use on the Buffs/Debuffs tab.",
         },
         ['DoACBuff']          = {
             DisplayName = "Use AC Buff",
@@ -1611,12 +1547,9 @@ return {
             Tooltip =
                 "Use your single-slot AC Buff on the Main Assist. USE CASES:\n" ..
                 "You have Aegolism selected and are below level 40 (We are still using a HP Type One buff).\n" ..
-                "You have Symbol selected and you are below level 95 (We don't have Unified Symbols yet).\n" ..
+                "You have Symbol selected and don't have another Type One Buff.\n" ..
                 "Leaving this on in other cases is not likely to cause issue, but may cause unnecessary buff checking.",
             Default = false,
-            FAQ = "Why aren't I used my AC Buff Line?",
-            Answer =
-            "You may need to select the option in Buffs/Debuffs. Alternatively, this line does not stack with Aegolism, and it is automatically included in \"Unified\" Symbol buffs.",
         },
         ['DoBrells']          = {
             DisplayName = "Do Brells",
@@ -1626,8 +1559,6 @@ return {
             Index = 103,
             Tooltip = "Enable Casting Brells",
             Default = true,
-            FAQ = "Why am I not casting Brells?",
-            Answer = "Make sure you have the [DoBrells] setting enabled.",
         },
         ['DoWardProc']        = {
             DisplayName = "Do Ward Proc",
@@ -1637,8 +1568,6 @@ return {
             Index = 103,
             Tooltip = "Use your Ward of Tunare defensive proc buff.",
             Default = true,
-            FAQ = "I'd rather use Reptile, how do I turn off my Ward of Tunare?",
-            Answer = "Select the option in the Buffs tab to disable the ward proc buff, it is enabled by default.",
         },
         ['DoSalvation']       = {
             DisplayName = "Marr's Salvation",
@@ -1648,8 +1577,6 @@ return {
             Index = 104,
             Tooltip = "Use your group hatred reduction buff AA.",
             Default = true,
-            FAQ = "Why is Marr's Salvation being used?",
-            Answer = "Select the option in the Buffs tab to use this buff, it is enabled by default.",
         },
         ['ProcChoice']        = {
             DisplayName = "Proc Buff Choice:",
@@ -1667,7 +1594,7 @@ return {
             Max = 3,
             FAQ = "Why am I using and Undead proc, I'm not fighting any undead?",
             Answer = "If you have elected to use the Standard DD proc (default) and it is not yet available, we will use the Undead proc still.\n" ..
-                "Your desired proc can be adjusted on the Abilities tab.",
+                "Your desired proc can be adjusted with the Proc Buff Choice setting in Self Buff category.",
         },
     },
 }
