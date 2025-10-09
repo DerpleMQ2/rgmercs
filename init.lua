@@ -505,7 +505,7 @@ local script_actor = Comms.Actors.register(function(message)
 
     if msg.event == "SetSetting" and msg.data and msg.data.Setting and (msg.data.Value ~= nil) then
         Logger.log_info("Received SetSetting for module \at%s \awfrom \am%s \awSetSetting :: \at%s \awto \ag%s", msg.module, msg.from, msg.data.Setting, tostring(msg.data.Value))
-        Config:SetSetting(msg.data.Setting, msg.data.Value)
+        Config:HandleBind(msg.data.Setting, msg.data.Value)
         return
     end
 end)
