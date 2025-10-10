@@ -332,7 +332,7 @@ function Module:RenderInventoryClickyPopup(clickies)
         end
 
         ImGui.SameLine()
-        local filterChanged, newFilter = ImGui.InputTextWithHint("##inventory_clicky_filter", "Filter items...", self.InventoryCatalogFilter or "")
+        local filterChanged, newFilter = ImGui.InputTextWithHint("##inventory_clicky_filter", "Filter items...", tostring(self.InventoryCatalogFilter or ""))
         if filterChanged then
             self.InventoryCatalogFilter = newFilter
         end
@@ -342,7 +342,7 @@ function Module:RenderInventoryClickyPopup(clickies)
         local filterLower = to_lower(self.InventoryCatalogFilter)
         local totalMatches = 0
 
-        if ImGui.BeginChild("##inventory_clicky_left", ImVec2(260, 300), true) then
+        if ImGui.BeginChild("##inventory_clicky_left", ImVec2(260, 300), ImGuiChildFlags.Border) then
             for _, category in ipairs(self.InventoryCatalogOrder) do
                 local entries = self.InventoryCatalog[category]
                 if entries and #entries > 0 then
@@ -387,7 +387,7 @@ function Module:RenderInventoryClickyPopup(clickies)
 
         ImGui.SameLine()
 
-        if ImGui.BeginChild("##inventory_clicky_right", ImVec2(0, 300), true) then
+        if ImGui.BeginChild("##inventory_clicky_right", ImVec2(0, 300), ImGuiChildFlags.Border) then
             local selection = self.InventorySelectedEntry
 
             if selection then
@@ -1864,7 +1864,7 @@ function Module:RenderInventoryClickyPopupPeer(clickies, selectedCharacter)
         end
 
         ImGui.SameLine()
-        local filterChanged, newFilter = ImGui.InputTextWithHint("##inventory_clicky_filter", "Filter items...", self.InventoryCatalogFilter or "")
+        local filterChanged, newFilter = ImGui.InputTextWithHint("##inventory_clicky_filter", "Filter items...", tostring(self.InventoryCatalogFilter or ""))
         if filterChanged then
             self.InventoryCatalogFilter = newFilter
         end
@@ -1874,7 +1874,7 @@ function Module:RenderInventoryClickyPopupPeer(clickies, selectedCharacter)
         local filterLower = to_lower(self.InventoryCatalogFilter)
         local totalMatches = 0
 
-        if ImGui.BeginChild("##inventory_clicky_left", ImVec2(260, 300), true) then
+        if ImGui.BeginChild("##inventory_clicky_left", ImVec2(260, 300), ImGuiChildFlags.Border) then
             for _, category in ipairs(catalogOrderToUse) do
                 local entries = catalogToUse[category]
                 if entries and #entries > 0 then
@@ -1928,7 +1928,7 @@ function Module:RenderInventoryClickyPopupPeer(clickies, selectedCharacter)
 
         ImGui.SameLine()
 
-        if ImGui.BeginChild("##inventory_clicky_right", ImVec2(0, 300), true) then
+        if ImGui.BeginChild("##inventory_clicky_right", ImVec2(0, 300), ImGuiChildFlags.Border) then
             local selection = self.InventorySelectedEntry
 
             if selection then
@@ -2437,7 +2437,7 @@ function Module:GiveTime(combat_state)
                         end
                         Logger.log_super_verbose("\ayClicky: \awTesting Condition: \at%s\aw on target: \at%s", cond.type, target and (target.CleanName() or "None") or "None")
 
-                        if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
+                        if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, table.unpack(cond.args or {})) then
                             Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \arFailed!")
                             allConditionsMet = false
                             break
