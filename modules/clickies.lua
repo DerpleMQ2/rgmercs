@@ -33,6 +33,23 @@ Module.TempSettings                     = {}
 Module.TempSettings.ClickyState         = {}
 Module.TempSettings.CombatClickiesTimer = 0
 
+Module.InventoryCatalog                 = {
+    Heals = {},
+    Beneficial = {},
+    Detrimental = {},
+    Utility = {},
+    Uncategorized = {},
+}
+Module.PeerInventoryCatalogs            = {}
+Module.InventoryCatalogFilter           = ""
+Module.InventoryCatalogOrder            = { 'Heals', 'Beneficial', 'Detrimental', 'Utility', 'Uncategorized' }
+Module.InventoryScanTimestamp           = 0
+Module.InventorySelectedEntry           = nil
+Module.InventorySelectedKey             = nil
+Module.InventoryCatalogStatus           = ''
+Module.InventoryCatalogStatusType       = 'info'
+Module.InventoryCatalogStatusTime       = 0
+
 Module.ServerClickies                   = {}
 Module.ServerClickies.ProjectLazarus    = {
     [1] = {
@@ -137,7 +154,7 @@ Module.DefaultConfig                    = {
     },
     ['Clickies']                               = {
         DisplayName = "Item %d",
-        Category    = "Clickies",
+        Category    = "User Clickies",
         Tooltip     = "Clicky Item to use",
         Type        = "Custom",
         Default     = {},
@@ -153,6 +170,330 @@ Module.DefaultConfig                    = {
 Module.CombatTargetTypes                = { 'Self', 'Pet', 'Main Assist', 'Auto Target', }
 Module.NonCombatTargetTypes             = { 'Self', 'Pet', 'Main Assist', }
 Module.CombatStates                     = { 'Downtime', 'Combat', 'Any', }
+
+local function safe_mq_eval(fn, default)
+    local ok, result = pcall(fn)
+    if ok then return result end
+    return default
+end
+
+local function to_lower(value)
+    return value and value:lower() or ''
+end
+
+local function icon_safe(iconValue)
+    if type(iconValue) == 'string' then
+        return iconValue
+    end
+    return ''
+end
+
+function Module:ResetInventoryCatalog()
+    self.InventoryCatalog = {}
+    for _, category in ipairs(self.InventoryCatalogOrder) do
+        self.InventoryCatalog[category] = {}
+    end
+end
+
+function Module:CategorizeClicky(item)
+    local clickySpell = safe_mq_eval(function() return item.Clicky.Spell end, nil)
+    if not (clickySpell and clickySpell()) then
+        return 'Uncategorized'
+    end
+
+    local categoryText = to_lower(safe_mq_eval(function() return clickySpell.Category() end, ''))
+    local subcategoryText = to_lower(safe_mq_eval(function() return clickySpell.Subcategory() end, ''))
+    if categoryText:find('heal') or subcategoryText:find('heal') then
+        return 'Heals'
+    end
+
+    local isBeneficial = safe_mq_eval(function() return clickySpell.Beneficial() end, nil)
+    local isDetrimental = safe_mq_eval(function() return clickySpell.Detrimental() end, nil)
+
+    if isBeneficial then
+        return 'Beneficial'
+    end
+
+    if categoryText:find('damage') or categoryText:find('nuke') or categoryText:find('dot') or subcategoryText:find('damage') then
+        return 'Detrimental'
+    end
+
+    if isDetrimental then
+        return 'Detrimental'
+    end
+
+    if categoryText:find('beneficial') or subcategoryText:find('beneficial') or categoryText:find('buff') then
+        return 'Beneficial'
+    end
+
+    return 'Utility'
+end
+
+function Module:ScanInventoryClickies(force)
+    if not mq.TLO.Me() then return end
+
+    local lastScan = self.InventoryScanTimestamp or 0
+    if not force and lastScan ~= 0 and (os.clock() - lastScan < 2) then
+        return
+    end
+
+    self.InventoryScanTimestamp = os.clock()
+    self:ResetInventoryCatalog()
+    self.InventorySelectedEntry = nil
+
+    local seenNames = {}
+
+    local function registerItem(item)
+        if not (item and item()) then return end
+        if not safe_mq_eval(function() return item.Clicky() end, nil) then return end
+
+        local name = safe_mq_eval(function() return item.Name() end, '')
+        if name == '' or seenNames[name] then return end
+        seenNames[name] = true
+
+        local classification = self:CategorizeClicky(item)
+        if not self.InventoryCatalog[classification] then
+            self.InventoryCatalog[classification] = {}
+        end
+
+        local entry = {
+            itemName = name,
+            itemID = safe_mq_eval(function() return item.ID() end, 0),
+            iconId = safe_mq_eval(function()
+                local iconValue = (item.Icon() or 500) - 500
+                return iconValue >= 0 and iconValue or 0
+            end, 0),
+            charges = safe_mq_eval(function() return item.Charges() end, 0),
+            requiredLevel = safe_mq_eval(function() return item.Clicky.RequiredLevel() end, 0),
+            recLevel = safe_mq_eval(function() return item.RequiredLevel() end, 0),
+            spellName = safe_mq_eval(function()
+                local clickySpell = item.Clicky.Spell
+                if clickySpell and clickySpell() then
+                    return clickySpell.RankName and clickySpell.RankName.Name() or clickySpell.Name() or ''
+                end
+                return ''
+            end, ''),
+            spellDesc = safe_mq_eval(function()
+                local clickySpell = item.Clicky.Spell
+                return clickySpell and clickySpell() and (clickySpell.Description() or '') or ''
+            end, ''),
+            categoryText = safe_mq_eval(function()
+                local clickySpell = item.Clicky.Spell
+                return clickySpell and clickySpell() and (clickySpell.Category() or '') or ''
+            end, ''),
+            subcategoryText = safe_mq_eval(function()
+                local clickySpell = item.Clicky.Spell
+                return clickySpell and clickySpell() and (clickySpell.Subcategory() or '') or ''
+            end, ''),
+            category = classification,
+        }
+
+        entry.catalogKey = string.format("%s|%d|%s", classification, entry.itemID or 0, entry.itemName)
+        if entry.catalogKey == self.InventorySelectedKey then
+            self.InventorySelectedEntry = entry
+        end
+
+        table.insert(self.InventoryCatalog[classification], entry)
+    end
+
+    local function scanInventorySlot(slotIndex)
+        local item = safe_mq_eval(function() return mq.TLO.Me.Inventory(slotIndex) end, nil)
+        registerItem(item)
+
+        local containerSlots = safe_mq_eval(function() return item.Container() end, 0)
+        if containerSlots and containerSlots > 0 then
+            for i = 1, containerSlots do
+                registerItem(safe_mq_eval(function() return item.Item(i) end, nil))
+            end
+        end
+    end
+
+    for invSlot = 1, 34 do
+        scanInventorySlot(invSlot)
+    end
+
+    for _, entries in pairs(self.InventoryCatalog) do
+        table.sort(entries, function(lhs, rhs)
+            return to_lower(lhs.itemName) < to_lower(rhs.itemName)
+        end)
+    end
+end
+
+function Module:RenderInventoryClickyPopup(clickies)
+    self:ScanInventoryClickies(false)
+
+    ImGui.SetNextWindowSize(650, 420, ImGuiCond.FirstUseEver)
+    if ImGui.BeginPopup("Select Inventory Clicky") then
+        ImGui.Text("Inventory Clickies")
+        ImGui.Separator()
+
+        if ImGui.SmallButton(icon_safe(Icons.FA_SYNC or Icons.FA_REPEAT or Icons.FA_REFRESH) .. " Refresh") then
+            self:ScanInventoryClickies(true)
+        end
+
+        ImGui.SameLine()
+        local filterChanged, newFilter = ImGui.InputTextWithHint("##inventory_clicky_filter", "Filter items...", self.InventoryCatalogFilter or "")
+        if filterChanged then
+            self.InventoryCatalogFilter = newFilter
+        end
+
+        ImGui.Separator()
+
+        local filterLower = to_lower(self.InventoryCatalogFilter)
+        local totalMatches = 0
+
+        if ImGui.BeginChild("##inventory_clicky_left", ImVec2(260, 300), true) then
+            for _, category in ipairs(self.InventoryCatalogOrder) do
+                local entries = self.InventoryCatalog[category]
+                if entries and #entries > 0 then
+                    local matchCount = 0
+                    for _, entry in ipairs(entries) do
+                        if filterLower == '' or to_lower(entry.itemName):find(filterLower, 1, true) or to_lower(entry.spellName):find(filterLower, 1, true) then
+                            matchCount = matchCount + 1
+                        end
+                    end
+
+                    if matchCount > 0 then
+                        totalMatches = totalMatches + matchCount
+                        local treeLabel = string.format("%s (%d)", category, matchCount)
+                        local treeFlags = (ImGuiTreeNodeFlags and ImGuiTreeNodeFlags.DefaultOpen) or 0
+                        if ImGui.TreeNodeEx(treeLabel, treeFlags) then
+                            for entryIdx, entry in ipairs(entries) do
+                                local itemMatch = filterLower == '' or to_lower(entry.itemName):find(filterLower, 1, true) or to_lower(entry.spellName):find(filterLower, 1, true)
+                                if itemMatch then
+                                    local label = string.format("%s##inventory_clicky_%s_%d", entry.itemName, category, entryIdx)
+                                    local isSelected = self.InventorySelectedKey == entry.catalogKey
+                                    if ImGui.Selectable(label, isSelected) then
+                                        self.InventorySelectedKey = entry.catalogKey
+                                        self.InventorySelectedEntry = entry
+                                    end
+
+                                    if entry.spellName and entry.spellName ~= '' then
+                                        Ui.Tooltip(string.format("Spell: %s", entry.spellName))
+                                    end
+                                end
+                            end
+                            ImGui.TreePop()
+                        end
+                    end
+                end
+            end
+
+            if totalMatches == 0 then
+                ImGui.TextDisabled("No clicky items found. Refresh after picking up new items.")
+            end
+        end
+        ImGui.EndChild()
+
+        ImGui.SameLine()
+
+        if ImGui.BeginChild("##inventory_clicky_right", ImVec2(0, 300), true) then
+            local selection = self.InventorySelectedEntry
+
+            if selection then
+                ImGui.TextColored(0.9, 0.85, 0.35, 1.0, selection.itemName or "Unknown Item")
+                if selection.spellName and selection.spellName ~= '' then
+                    ImGui.TextDisabled(selection.spellName)
+                end
+
+                ImGui.Separator()
+
+                ImGui.Text(string.format("Category: %s", selection.category or "Unknown"))
+                if selection.categoryText and selection.categoryText ~= '' then
+                    ImGui.Text(string.format("Spell Category: %s", selection.categoryText))
+                end
+                if selection.subcategoryText and selection.subcategoryText ~= '' then
+                    ImGui.Text(string.format("Spell Subcategory: %s", selection.subcategoryText))
+                end
+
+                local chargesText = selection.charges and selection.charges > 0 and tostring(selection.charges) or "Unlimited"
+                ImGui.Text(string.format("Charges: %s", chargesText))
+                if selection.requiredLevel and selection.requiredLevel > 0 then
+                    ImGui.Text(string.format("Required Level: %d", selection.requiredLevel))
+                end
+                if selection.recLevel and selection.recLevel > 0 then
+                    ImGui.Text(string.format("Recommended Level: %d", selection.recLevel))
+                end
+
+                if selection.spellDesc and selection.spellDesc ~= '' then
+                    ImGui.Separator()
+                    ImGui.PushTextWrapPos()
+                    ImGui.TextWrapped(selection.spellDesc)
+                    ImGui.PopTextWrapPos()
+                end
+
+                local function addSelection(closeAfter)
+                    for _, existing in ipairs(clickies or {}) do
+                        if existing.itemName == selection.itemName then
+                            self.InventoryCatalogStatus = string.format("%s already configured.", selection.itemName)
+                            self.InventoryCatalogStatusType = 'error'
+                            self.InventoryCatalogStatusTime = os.clock()
+                            if closeAfter then
+                                ImGui.CloseCurrentPopup()
+                            end
+                            return
+                        end
+                    end
+
+                    table.insert(clickies, {
+                        itemName = selection.itemName,
+                        target = 'Self',
+                        combat_state = 'Any',
+                        conditions = {},
+                        iconId = selection.iconId,
+                    })
+                    self:SaveSettings(false)
+                    self.InventoryCatalogStatus = string.format("Added %s.", selection.itemName)
+                    self.InventoryCatalogStatusType = 'success'
+                    self.InventoryCatalogStatusTime = os.clock()
+                    if closeAfter then
+                        ImGui.CloseCurrentPopup()
+                        self.InventorySelectedKey = nil
+                        self.InventorySelectedEntry = nil
+                    end
+                end
+
+                if ImGui.Button("Add Clicky") then
+                    addSelection(false)
+                end
+
+                ImGui.SameLine()
+                if ImGui.Button("Add & Close") then
+                    addSelection(true)
+                end
+            else
+                ImGui.TextDisabled("Select a clicky item to view its details.")
+            end
+
+            if self.InventoryCatalogStatus ~= '' then
+                if os.clock() - (self.InventoryCatalogStatusTime or 0) < 6 then
+                    local color = {0.6, 0.75, 0.95, 1.0}
+                    if self.InventoryCatalogStatusType == 'success' then
+                        color = {0.4, 0.85, 0.4, 1.0}
+                    elseif self.InventoryCatalogStatusType == 'error' then
+                        color = {0.9, 0.4, 0.4, 1.0}
+                    end
+                    ImGui.Separator()
+                    ImGui.TextColored(color[1], color[2], color[3], color[4], self.InventoryCatalogStatus)
+                else
+                    self.InventoryCatalogStatus = ''
+                end
+            end
+        end
+        ImGui.EndChild()
+
+        ImGui.Separator()
+
+        if ImGui.Button("Close") then
+            self.InventoryCatalogStatus = ''
+            self.InventorySelectedKey = nil
+            self.InventorySelectedEntry = nil
+            ImGui.CloseCurrentPopup()
+        end
+
+        ImGui.EndPopup()
+    end
+end
 
 -- each of these becomes a condition you can set per clickie
 Module.LogicBlocks                      = {
@@ -685,12 +1026,142 @@ function Module:WriteSettings()
     mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
 
     if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastMessage(self._name, "LoadSettings")
+        -- Broadcast clickies list to peers
+        local clickies = Config:GetSetting('Clickies') or {}
+        Comms.BroadcastMessage(self._name, "ClickiesUpdate", {
+            clickies = clickies,
+            from = mq.TLO.Me.DisplayName(),
+        })
     end
 
     Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
 
     self.SaveRequested = nil
+end
+
+function Module:HandleClickiesUpdate(data)
+    -- Handle incoming clickies update from a peer
+    if data and data.clickies and data.from then
+        Logger.log_info("\ayClickies: \awReceived clickies update from \ag%s\aw (%d clickies)", data.from, #data.clickies)
+        
+        -- Update the peer's clickies in the config system
+        -- This allows the Settings panel to show peer clickies when viewing their configuration
+        Config:PeerSetSetting(data.from, 'Clickies', data.clickies, true)
+    end
+end
+
+function Module:HandleInventoryCatalogRequest(data)
+    -- Handle request for inventory catalog from a peer
+    if data and data.from and data.target then
+        -- Only respond if we are the target
+        if data.target ~= mq.TLO.Me.DisplayName() then
+            return
+        end
+        
+        Logger.log_info("\ayClickies: \awReceived inventory catalog request from \ag%s", data.from)
+        
+        -- Scan our inventory and send it back
+        self:ScanInventoryClickies(true)
+        
+        -- Broadcast response
+        Comms.BroadcastMessage(self._name, "InventoryCatalogResponse", {
+            catalog = self.InventoryCatalog,
+            from = mq.TLO.Me.DisplayName(),
+            to = data.from,
+        })
+        
+        Logger.log_info("\ayClickies: \awSent inventory catalog to \ag%s (%d categories)", data.from, 
+            self.InventoryCatalog and #self.InventoryCatalogOrder or 0)
+    end
+end
+
+function Module:HandleInventoryCatalogResponse(data)
+    -- Handle inventory catalog response from a peer
+    if data and data.catalog and data.from and data.to then
+        -- Only process if we are the target
+        if data.to ~= mq.TLO.Me.DisplayName() then
+            return
+        end
+        
+        Logger.log_info("\ayClickies: \awReceived inventory catalog from \ag%s", data.from)
+        
+        -- Store the peer's inventory catalog
+        self.PeerInventoryCatalogs = self.PeerInventoryCatalogs or {}
+        self.PeerInventoryCatalogs[data.from] = {
+            catalog = data.catalog,
+            timestamp = os.clock()
+        }
+        
+        -- Count total items for logging
+        local totalItems = 0
+        for _, category in pairs(data.catalog or {}) do
+            if type(category) == "table" then
+                totalItems = totalItems + #category
+            end
+        end
+        
+        Logger.log_info("\ayClickies: \awStored inventory catalog from \ag%s\aw (%d total items)", data.from, totalItems)
+    else
+        Logger.log_debug("\ayClickies: \arReceived invalid inventory catalog response: catalog=%s, from=%s", 
+            data and data.catalog and "present" or "missing",
+            data and data.from or "unknown")
+    end
+end
+
+function Module:RequestPeerInventoryCatalog(peerName)
+    -- Request inventory catalog from a specific peer
+    Logger.log_info("\ayClickies: \awRequesting inventory catalog from \ag%s", peerName)
+    
+    -- Broadcast message - global handler will forward to target
+    local messageData = {
+        from = mq.TLO.Me.DisplayName(),
+        target = peerName,
+    }
+    
+    Logger.log_info("\ayClickies: \awBroadcasting message: module=%s, event=InventoryCatalogRequest, data=%s", 
+        self._name, Strings.TableToString(messageData))
+    
+    Comms.BroadcastMessage(self._name, "InventoryCatalogRequest", messageData)
+end
+
+function Module:BroadcastClickies()
+    -- Broadcast current clickies to all peers
+    local clickies = Config:GetSetting('Clickies') or {}
+    Comms.BroadcastMessage(self._name, "ClickiesUpdate", {
+        clickies = clickies,
+        from = mq.TLO.Me.DisplayName(),
+    })
+    Logger.log_info("\ayClickies: \awBroadcasted %d clickies to peers", #clickies)
+end
+
+function Module:ClickiesMessageHandler()
+    local Actors = require('actors')
+    self.Actor = Actors.register('clickies_module', function(message)
+        local mail = message()
+        local module = mail.module or ''
+        local event = mail.event or ''
+        local data = mail.data or {}
+        local from = mail.from or ''
+        
+        Logger.log_info("\ayClickies: \awReceived message - module: %s, event: %s, from: %s", module, event, from)
+
+        -- Only handle Clickies module messages
+        if module ~= self._name then 
+            Logger.log_debug("\ayClickies: \arIgnoring message for different module: %s (we are %s)", module, self._name)
+            return 
+        end
+
+        -- Handle different event types
+        if event == 'ClickiesUpdate' then
+            self:HandleClickiesUpdate(data)
+        elseif event == 'InventoryCatalogRequest' then
+            self:HandleInventoryCatalogRequest(data)
+        elseif event == 'InventoryCatalogResponse' then
+            self:HandleInventoryCatalogResponse(data)
+        else
+            Logger.log_debug("\ayClickies: \arUnknown event type: %s", event)
+        end
+    end)
 end
 
 function Module:LoadSettings()
@@ -769,6 +1240,9 @@ end
 function Module:Init()
     Logger.log_debug("Clicky Module Loaded.")
     self:LoadSettings()
+
+    -- Register message handler for clickies updates
+    self:ClickiesMessageHandler()
 
     self.ModuleLoaded = true
 
@@ -1089,6 +1563,12 @@ function Module:RenderClickiesWithConditions(type, clickies)
         self:InsertDefaultClickies()
     end
     Ui.Tooltip("Add server-specific default clickies to the end of the list.")
+    ImGui.SameLine()
+    if ImGui.SmallButton(icon_safe(Icons.FA_LIST or Icons.FA_BARS or Icons.FA_BOXES) .. " Choose From Inventory") then
+        self:ScanInventoryClickies(true)
+        ImGui.OpenPopup("Select Inventory Clicky")
+    end
+    self:RenderInventoryClickyPopup(clickies)
     if #clickies > 0 then
         for clickyIdx, clicky in ipairs(clickies) do
             if clicky.itemName:len() > 0 then
@@ -1200,6 +1680,685 @@ function Module:Render()
     self:RenderClickiesWithConditions("Clickies", Config:GetSetting('Clickies'))
 end
 
+function Module:RenderConfig(selectedCharacter)
+    -- Custom render function for the Settings panel
+
+    -- Get the selected character's clickies for the Settings panel
+    selectedCharacter = selectedCharacter or mq.TLO.Me.DisplayName()
+    local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+    
+    -- Render the clickies configuration with peer support
+    self:RenderClickiesWithConditionsPeer("User Clickies", clickies, selectedCharacter)
+end
+
+function Module:RenderClickiesWithConditionsPeer(type, clickies, selectedCharacter)
+    -- Peer-aware version of RenderClickiesWithConditions for Options UI
+    selectedCharacter = selectedCharacter or mq.TLO.Me.DisplayName()
+    local isCurrentChar = selectedCharacter == mq.TLO.Me.DisplayName()
+    
+    -- Show add buttons for current character, and inventory catalog for all characters
+    if isCurrentChar then
+        -- Current character - show all options
+        if not mq.TLO.Cursor() then
+            ImGui.BeginDisabled(true)
+        end
+        if ImGui.SmallButton(mq.TLO.Cursor.Name() and string.format("%s Add %s to %s", Icons.FA_PLUS, mq.TLO.Cursor.Name() or "N/A", type) or "Pickup an Item To Add") then
+            if mq.TLO.Cursor() then
+                table.insert(clickies, {
+                    itemName = mq.TLO.Cursor.Name(),
+                    target = 'Self',
+                    combat_state = 'Any',
+                    conditions = {},
+                })
+                Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+            end
+        end
+        if not mq.TLO.Cursor() then
+            ImGui.EndDisabled()
+        end
+        
+        ImGui.SameLine()
+        if ImGui.SmallButton("Add Server Defaults") then
+            if Core.OnLaz() then
+                for _, defaultClicky in ipairs(self.ServerClickies.ProjectLazarus) do
+                    table.insert(clickies, defaultClicky)
+                end
+                Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+            end
+        end
+        Ui.Tooltip("Add server-specific default clickies to the end of the list.")
+        
+        ImGui.SameLine()
+        if ImGui.SmallButton(icon_safe(Icons.FA_LIST or Icons.FA_BARS or Icons.FA_BOXES) .. " Choose From Inventory") then
+            self:ScanInventoryClickies(true)
+            ImGui.OpenPopup("Select Inventory Clicky")
+        end
+        self:RenderInventoryClickyPopupPeer(clickies, selectedCharacter)
+    else
+        -- Peer character - show inventory catalog option
+        ImGui.TextColored(0.8, 0.8, 0.9, 1.0, "Viewing %s's clickies:", selectedCharacter)
+        
+        if ImGui.SmallButton(icon_safe(Icons.FA_LIST or Icons.FA_BARS or Icons.FA_BOXES) .. " Choose From " .. selectedCharacter .. "'s Inventory") then
+            self:RequestPeerInventoryCatalog(selectedCharacter)
+            ImGui.OpenPopup("Select Inventory Clicky")
+        end
+        Ui.Tooltip("Request " .. selectedCharacter .. "'s inventory catalog and add clickies from their items.")
+        
+        self:RenderInventoryClickyPopupPeer(clickies, selectedCharacter)
+        ImGui.Spacing()
+    end
+    
+    -- Validate and clean up clickies first
+    clickies = self:ValidateClickiesPeer(selectedCharacter)
+    
+    -- Render existing clickies
+    if #clickies > 0 then
+        for clickyIdx, clicky in ipairs(clickies) do
+            if clicky.itemName:len() > 0 then
+                local headerScreenPos = ImGui.GetCursorScreenPosVec()
+                local headerCursorPos = ImGui.GetCursorPosVec()
+                self:RenderClickyControlsPeer(clickies, clickyIdx, headerCursorPos, headerScreenPos, selectedCharacter, true)
+
+                ImGui.PushID("##clicky_header_peer_" .. selectedCharacter .. "_" .. clickyIdx)
+                if ImGui.CollapsingHeader("             " .. clicky.itemName) then
+                    if clicky.enabled == false then
+                        ImGui.BeginDisabled(true)
+                    end
+                    ImGui.Indent()
+                    self:RenderClickyCombatStateComboPeer(clicky, clickyIdx, selectedCharacter)
+                    self:RenderClickyTargetComboPeer(clicky, clickyIdx, selectedCharacter)
+                    ImGui.SeparatorText("Usage Info")
+                    self:RenderClickyDataPeer(clicky, clickyIdx, selectedCharacter)
+                    ImGui.SeparatorText("Conditions")
+                    ImGui.PushID("##clicky_conditions_btn_peer_" .. selectedCharacter .. "_" .. clickyIdx)
+                    if ImGui.SmallButton(Icons.FA_PLUS .. " Add Condition") then
+                        table.insert(clicky.conditions, { type = 'None', args = {}, target = 'Self', })
+                        Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+                    end
+                    ImGui.PopID()
+                    ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
+
+                    ImGui.BeginChild("##clicky_conditions_child_peer_" .. selectedCharacter .. "_" .. clickyIdx, ImVec2(0, 0),
+                        bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
+                        bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
+
+                    for condIdx, cond in ipairs(clicky.conditions or {}) do
+                        if self:GetLogicBlockByType(cond.type) then
+                            local headerPos = ImGui.GetCursorPosVec()
+                            if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_peer_" .. selectedCharacter .. "_" .. clickyIdx .. "_" .. condIdx) then
+                                Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
+
+                                self:RenderConditionTypesComboPeer(cond, condIdx, selectedCharacter)
+                                ImGui.Indent()
+                                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
+                                ImGui.BeginChild("##clicky_cond_child_peer_" .. selectedCharacter .. "_" .. clickyIdx .. "_" .. condIdx, ImVec2(0, 0),
+                                    bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
+                                    bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
+                                self:RenderConditionTargetComboPeer(cond, condIdx, selectedCharacter)
+                                self:RenderConditionArgsPeer(cond, condIdx, clickyIdx, selectedCharacter)
+                                ImGui.EndChild()
+                                ImGui.PopStyleVar(1)
+                                ImGui.Unindent()
+                                ImGui.TreePop()
+                            else
+                                Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
+                            end
+
+                            self:RenderConditionControlsPeer(clickyIdx, condIdx, clicky.conditions, headerPos, selectedCharacter)
+                        end
+                    end
+
+                    if clicky.enabled == false then
+                        ImGui.EndDisabled()
+                    end
+
+                    ImGui.EndChild()
+                    ImGui.PopStyleVar(1)
+
+                    ImGui.Unindent()
+                end
+
+                self:RenderClickyControlsPeer(clickies, clickyIdx, headerCursorPos, headerScreenPos, selectedCharacter, false)
+
+                ImGui.PopID()
+            end
+        end
+    end
+    
+    ImGui.Separator()
+end
+
+function Module:RenderInventoryClickyPopupPeer(clickies, selectedCharacter)
+    local isCurrentChar = selectedCharacter == mq.TLO.Me.DisplayName()
+    local catalogToUse = self.InventoryCatalog
+    local catalogOrderToUse = self.InventoryCatalogOrder
+    local windowTitle = "Inventory Clickies"
+    
+    if isCurrentChar then
+        self:ScanInventoryClickies(false)
+    else
+        -- Use peer catalog if available
+        self.PeerInventoryCatalogs = self.PeerInventoryCatalogs or {}
+        local peerCatalogData = self.PeerInventoryCatalogs[selectedCharacter]
+        if peerCatalogData then
+            catalogToUse = peerCatalogData.catalog
+            windowTitle = selectedCharacter .. "'s Inventory Clickies"
+        else
+            catalogToUse = {}
+        end
+    end
+
+    ImGui.SetNextWindowSize(650, 420, ImGuiCond.FirstUseEver)
+    if ImGui.BeginPopup("Select Inventory Clicky") then
+        ImGui.Text(windowTitle)
+        ImGui.Separator()
+
+        if isCurrentChar then
+            if ImGui.SmallButton(icon_safe(Icons.FA_SYNC or Icons.FA_REPEAT or Icons.FA_REFRESH) .. " Refresh") then
+                self:ScanInventoryClickies(true)
+            end
+        else
+            if ImGui.SmallButton(icon_safe(Icons.FA_SYNC or Icons.FA_REPEAT or Icons.FA_REFRESH) .. " Request " .. selectedCharacter .. "'s Inventory") then
+                self:RequestPeerInventoryCatalog(selectedCharacter)
+            end
+        end
+
+        ImGui.SameLine()
+        local filterChanged, newFilter = ImGui.InputTextWithHint("##inventory_clicky_filter", "Filter items...", self.InventoryCatalogFilter or "")
+        if filterChanged then
+            self.InventoryCatalogFilter = newFilter
+        end
+
+        ImGui.Separator()
+
+        local filterLower = to_lower(self.InventoryCatalogFilter)
+        local totalMatches = 0
+
+        if ImGui.BeginChild("##inventory_clicky_left", ImVec2(260, 300), true) then
+            for _, category in ipairs(catalogOrderToUse) do
+                local entries = catalogToUse[category]
+                if entries and #entries > 0 then
+                    local matchCount = 0
+                    for _, entry in ipairs(entries) do
+                        if filterLower == '' or to_lower(entry.itemName):find(filterLower, 1, true) or to_lower(entry.spellName):find(filterLower, 1, true) then
+                            matchCount = matchCount + 1
+                        end
+                    end
+
+                    if matchCount > 0 then
+                        totalMatches = totalMatches + matchCount
+                        local treeLabel = string.format("%s (%d)", category, matchCount)
+                        local treeFlags = (ImGuiTreeNodeFlags and ImGuiTreeNodeFlags.DefaultOpen) or 0
+                        if ImGui.TreeNodeEx(treeLabel, treeFlags) then
+                            for entryIdx, entry in ipairs(entries) do
+                                local itemMatch = filterLower == '' or to_lower(entry.itemName):find(filterLower, 1, true) or to_lower(entry.spellName):find(filterLower, 1, true)
+                                if itemMatch then
+                                    local label = string.format("%s##inventory_clicky_%s_%d", entry.itemName, category, entryIdx)
+                                    local isSelected = self.InventorySelectedKey == entry.catalogKey
+                                    if ImGui.Selectable(label, isSelected) then
+                                        self.InventorySelectedKey = entry.catalogKey
+                                        self.InventorySelectedEntry = entry
+                                    end
+
+                                    if entry.spellName and entry.spellName ~= '' then
+                                        Ui.Tooltip(string.format("Spell: %s", entry.spellName))
+                                    end
+                                end
+                            end
+                            ImGui.TreePop()
+                        end
+                    end
+                end
+            end
+
+            if totalMatches == 0 then
+                if isCurrentChar then
+                    ImGui.TextDisabled("No clicky items found. Refresh after picking up new items.")
+                else
+                    local peerCatalogData = self.PeerInventoryCatalogs and self.PeerInventoryCatalogs[selectedCharacter]
+                    if peerCatalogData then
+                        ImGui.TextDisabled("No clicky items found in " .. selectedCharacter .. "'s inventory.")
+                    else
+                        ImGui.TextDisabled("Waiting for " .. selectedCharacter .. "'s inventory...\nClick 'Request Inventory' to try again.")
+                    end
+                end
+            end
+        end
+        ImGui.EndChild()
+
+        ImGui.SameLine()
+
+        if ImGui.BeginChild("##inventory_clicky_right", ImVec2(0, 300), true) then
+            local selection = self.InventorySelectedEntry
+
+            if selection then
+                ImGui.TextColored(0.9, 0.85, 0.35, 1.0, selection.itemName or "Unknown Item")
+                if selection.spellName and selection.spellName ~= '' then
+                    ImGui.TextDisabled(selection.spellName)
+                end
+
+                ImGui.Separator()
+
+                ImGui.Text(string.format("Category: %s", selection.category or "Unknown"))
+                if selection.categoryText and selection.categoryText ~= '' then
+                    ImGui.Text(string.format("Spell Category: %s", selection.categoryText))
+                end
+                if selection.subcategoryText and selection.subcategoryText ~= '' then
+                    ImGui.Text(string.format("Spell Subcategory: %s", selection.subcategoryText))
+                end
+
+                local chargesText = selection.charges and selection.charges > 0 and tostring(selection.charges) or "Unlimited"
+                ImGui.Text(string.format("Charges: %s", chargesText))
+                if selection.requiredLevel and selection.requiredLevel > 0 then
+                    ImGui.Text(string.format("Required Level: %d", selection.requiredLevel))
+                end
+                if selection.recLevel and selection.recLevel > 0 then
+                    ImGui.Text(string.format("Recommended Level: %d", selection.recLevel))
+                end
+
+                if selection.spellDesc and selection.spellDesc ~= '' then
+                    ImGui.Separator()
+                    ImGui.PushTextWrapPos()
+                    ImGui.TextWrapped(selection.spellDesc)
+                    ImGui.PopTextWrapPos()
+                end
+
+                local function addSelection(closeAfter)
+                    for _, existing in ipairs(clickies or {}) do
+                        if existing.itemName == selection.itemName then
+                            self.InventoryCatalogStatus = string.format("%s already configured.", selection.itemName)
+                            self.InventoryCatalogStatusType = 'error'
+                            self.InventoryCatalogStatusTime = os.clock()
+                            if closeAfter then
+                                ImGui.CloseCurrentPopup()
+                            end
+                            return
+                        end
+                    end
+
+                    table.insert(clickies, {
+                        itemName = selection.itemName,
+                        target = 'Self',
+                        combat_state = 'Any',
+                        conditions = {},
+                        iconId = selection.iconId,
+                    })
+                    Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+                    self.InventoryCatalogStatus = string.format("Added %s.", selection.itemName)
+                    self.InventoryCatalogStatusType = 'success'
+                    self.InventoryCatalogStatusTime = os.clock()
+                    if closeAfter then
+                        ImGui.CloseCurrentPopup()
+                        self.InventorySelectedKey = nil
+                        self.InventorySelectedEntry = nil
+                    end
+                end
+
+                if ImGui.Button("Add Clicky") then
+                    addSelection(false)
+                end
+
+                ImGui.SameLine()
+                if ImGui.Button("Add & Close") then
+                    addSelection(true)
+                end
+            else
+                ImGui.TextDisabled("Select for Details")
+            end
+
+            if self.InventoryCatalogStatus ~= '' then
+                if os.clock() - (self.InventoryCatalogStatusTime or 0) < 6 then
+                    local color = {0.6, 0.75, 0.95, 1.0}
+                    if self.InventoryCatalogStatusType == 'success' then
+                        color = {0.4, 0.85, 0.4, 1.0}
+                    elseif self.InventoryCatalogStatusType == 'error' then
+                        color = {0.9, 0.4, 0.4, 1.0}
+                    end
+                    ImGui.Separator()
+                    ImGui.TextColored(color[1], color[2], color[3], color[4], self.InventoryCatalogStatus)
+                else
+                    self.InventoryCatalogStatus = ''
+                end
+            end
+        end
+        ImGui.EndChild()
+
+        ImGui.Separator()
+
+        if ImGui.Button("Close") then
+            self.InventoryCatalogStatus = ''
+            self.InventorySelectedKey = nil
+            self.InventorySelectedEntry = nil
+            ImGui.CloseCurrentPopup()
+        end
+
+        ImGui.EndPopup()
+    end
+end
+
+function Module:RenderClickyControlsPeer(clickies, clickyIdx, headerCursorPos, headerScreenPos, selectedCharacter, preRender)
+    local startingPosVec = ImGui.GetCursorPosVec()
+    local offset_trash = 40
+    local offset_enable = 160
+    local offset_up = 80
+    local offset_down = 120
+
+    self:RenderClickyHeaderIcon(clickies[clickyIdx], headerScreenPos)
+
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_enable, headerCursorPos.y)
+
+    ImGui.PushID("##_small_btn_ctrl_clicky_peer_" .. selectedCharacter .. "_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
+
+    if clickies[clickyIdx] then
+        local changed = false
+        local enabled = clickies[clickyIdx].enabled == nil or clickies[clickyIdx].enabled
+
+        enabled, changed = Ui.RenderOptionToggle("##EnableDrawn" .. tostring(clickyIdx), "", enabled)
+        if changed then
+            clickies[clickyIdx].enabled = enabled
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+    end
+
+    if clickyIdx > 1 then
+        ImGui.SameLine()
+        ImGui.PushID("##_small_btn_up_clicky_peer_" .. selectedCharacter .. "_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
+        if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
+            clickies[clickyIdx], clickies[clickyIdx - 1] = clickies[clickyIdx - 1], clickies[clickyIdx]
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+        ImGui.PopID()
+    else
+        ImGui.SameLine()
+        ImGui.InvisibleButton(Icons.FA_CHEVRON_UP, ImVec2(22, 1))
+    end
+
+    if clickyIdx < #clickies then
+        ImGui.SameLine()
+        ImGui.PushID("##_small_btn_dn_clicky_peer_" .. selectedCharacter .. "_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
+        if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
+            clickies[clickyIdx], clickies[clickyIdx + 1] = clickies[clickyIdx + 1], clickies[clickyIdx]
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+        ImGui.PopID()
+    else
+        ImGui.SameLine()
+        ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
+    end
+
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_trash, headerCursorPos.y + 3)
+
+    if ImGui.SmallButton(Icons.FA_TRASH) then
+        clickies[clickyIdx].Delete = true
+    end
+    ImGui.PopID()
+
+    ImGui.SetCursorPos(startingPosVec)
+end
+
+function Module:RenderConditionControlsPeer(clickyIdx, idx, conditionsTable, headerPos, selectedCharacter)
+    local startingPosVec = ImGui.GetCursorPosVec()
+    local offset = 110
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset, headerPos.y)
+
+    ImGui.PushID("##_small_btn_up_wp_peer_" .. selectedCharacter .. "_" .. tostring(clickyIdx) .. "_" .. tostring(idx))
+    if idx == 1 then
+        ImGui.InvisibleButton(Icons.FA_CHEVRON_UP, ImVec2(22, 1))
+    else
+        if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
+            conditionsTable[idx], conditionsTable[idx - 1] = conditionsTable[idx - 1], conditionsTable[idx]
+            -- Need to save the entire clickies list
+            local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+    end
+    ImGui.PopID()
+    ImGui.SameLine()
+    ImGui.PushID("##_small_btn_dn_cond_peer_" .. selectedCharacter .. "_" .. tostring(clickyIdx) .. "_" .. tostring(idx))
+    if idx == #conditionsTable then
+        ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
+    else
+        if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
+            conditionsTable[idx], conditionsTable[idx + 1] = conditionsTable[idx + 1], conditionsTable[idx]
+            -- Need to save the entire clickies list
+            local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+    end
+    ImGui.PopID()
+    ImGui.SameLine()
+    ImGui.PushID("##_small_btn_delete_cond_peer_" .. selectedCharacter .. "_" .. tostring(clickyIdx) .. "_" .. tostring(idx))
+    if ImGui.SmallButton(Icons.FA_TRASH) then
+        conditionsTable[idx].Delete = true
+    end
+    ImGui.PopID()
+
+    ImGui.SetCursorPos(startingPosVec)
+end
+
+function Module:RenderConditionArgsPeer(cond, condIdx, clickyIdx, selectedCharacter)
+    if ImGui.BeginTable("##clicky_cond_args_table_peer_" .. selectedCharacter .. "_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 80)
+        ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
+
+        for argIdx = 1, #cond.args do
+            ImGui.TableNextColumn()
+            ImGui.Text(self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).name or ("Arg " .. tostring(argIdx)))
+            ImGui.TableNextColumn()
+
+            if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "setting_value" then
+                -- the arg before this must be a valid setting for this to work.
+                if argIdx == 1 or not Config:HaveSetting(cond.args[argIdx - 1]) then
+                    ImGui.TextDisabled("Please select a valid setting in the previous argument.")
+                else
+                    local settingName = cond.args[argIdx - 1] or ""
+                    local settingInfo = Config:GetSettingDefaults(settingName)
+
+                    self:RenderClickyOptionPeer(type(settingInfo.Default), cond, condIdx, argIdx, clickyIdx, selectedCharacter)
+                end
+            else
+                self:RenderClickyOptionPeer(self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type, cond, condIdx, argIdx, clickyIdx, selectedCharacter)
+            end
+        end
+        ImGui.EndTable()
+    end
+end
+
+function Module:RenderClickyOptionPeer(type, cond, condIdx, argIdx, clickyIdx, selectedCharacter)
+    local changed = false
+
+    if type == "number" then
+        cond.args[argIdx], changed = Ui.RenderOptionNumber("##clicky_arg_peer_" .. selectedCharacter .. "_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
+            "", cond.args[argIdx], self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).min, self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).max)
+    elseif type == "boolean" then
+        cond.args[argIdx], changed = Ui.RenderOptionToggle("##clicky_arg_peer_" .. selectedCharacter .. "_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
+            "",
+            cond.args[argIdx])
+    elseif type == "string" then
+        cond.args[argIdx], changed = ImGui.InputText("##clicky_arg_peer_" .. selectedCharacter .. "_" .. clickyIdx .. "_" .. condIdx .. "_" .. argIdx,
+            cond.args[argIdx])
+    else
+        ImGui.TextDisabled("Invalid Option Type: %s", type)
+    end
+
+    if changed then
+        if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).on_changed then
+            Core.SafeCallFunc("On Changed Callback", self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).on_changed, self, cond.args[argIdx], cond)
+        end
+
+        -- Need to save the entire clickies list
+        local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+        Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+    end
+end
+
+function Module:RenderClickyDataPeer(clicky, clickyIdx, selectedCharacter)
+    if ImGui.BeginTable("##clickies_table_peer_" .. selectedCharacter .. "_" .. clicky.itemName .. tostring(clickyIdx), 3, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('Last Used', (ImGuiTableColumnFlags.WidthFixed), 100.0)
+        ImGui.TableSetupColumn('Item', (ImGuiTableColumnFlags.WidthFixed), 150.0)
+        ImGui.TableSetupColumn('Effect', (ImGuiTableColumnFlags.WidthStretch), 200.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        if clicky.itemName:len() > 0 then
+            -- For peer characters, we can't access their TempSettings, so show limited info
+            if selectedCharacter == mq.TLO.Me.DisplayName() then
+                local lastUsed = self.TempSettings.ClickyState[clicky.itemName] and (self.TempSettings.ClickyState[clicky.itemName].lastUsed or 0) or 0
+                local item = self.TempSettings.ClickyState[clicky.itemName] and
+                    (self.TempSettings.ClickyState[clicky.itemName].item and self.TempSettings.ClickyState[clicky.itemName].item.Clicky.Spell.RankName.Name() or "None")
+                    or "None"
+                ImGui.TableNextColumn()
+                ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.clock() - lastUsed)) or "Never")
+                ImGui.TableNextColumn()
+                ImGui.Text(clicky.itemName)
+                ImGui.TableNextColumn()
+                ImGui.Text(item)
+            else
+                ImGui.TableNextColumn()
+                ImGui.Text("N/A")
+                ImGui.TableNextColumn()
+                ImGui.Text(clicky.itemName)
+                ImGui.TableNextColumn()
+                ImGui.Text("N/A")
+            end
+        end
+
+        ImGui.EndTable()
+    end
+    ImGui.Separator()
+end
+
+function Module:ValidateClickiesPeer(selectedCharacter)
+    local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+    local clickiesChanged = false
+    
+    for idx = #clickies, 1, -1 do
+        local clicky = clickies[idx]
+        
+        -- Ensure conditions table exists
+        if not clicky.conditions then
+            clicky.conditions = {}
+            clickiesChanged = true
+        end
+
+        -- Validate conditions
+        for condIdx = #clicky.conditions, 1, -1 do
+            local condition = clicky.conditions[condIdx]
+            if condition and condition.Delete then
+                table.remove(clicky.conditions, condIdx)
+                clickiesChanged = true
+            end
+        end
+
+        -- Validate clickies
+        if (not clicky.itemName or clicky.itemName:len() == 0) or clicky.Delete then
+            table.remove(clickies, idx)
+            clickiesChanged = true
+        end
+    end
+
+    if clickiesChanged then
+        Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+    end
+    
+    return clickies
+end
+
+function Module:RenderClickyCombatStateComboPeer(clicky, clickyIdx, selectedCharacter)
+    if ImGui.BeginTable("##clicky_combat_state_table_peer_" .. selectedCharacter .. "_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 100)
+        ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
+        ImGui.TableNextColumn()
+        ImGui.Text("Combat State")
+        ImGui.TableNextColumn()
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_combat_state_peer_" .. selectedCharacter .. "_" .. clickyIdx, tonumber(self.CombatStateIDs[clicky.combat_state or "Any"]) or 1,
+            self.CombatStates,
+            #self.CombatStates)
+        if changed then
+            clicky.combat_state = self.CombatStates[selectedNum] or "Any"
+            local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+        ImGui.EndTable()
+    end
+end
+
+function Module:RenderClickyTargetComboPeer(clicky, clickyIdx, selectedCharacter)
+    if ImGui.BeginTable("##clicky_target_table_peer_" .. selectedCharacter .. "_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 100)
+        ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
+        ImGui.TableNextColumn()
+        ImGui.Text("Target")
+        ImGui.TableNextColumn()
+        local targetTypeIDs = self.CombatTargetTypeIDs
+        local targetTypes = self.CombatTargetTypes
+
+        if clicky.combat_state == "Downtime" then
+            targetTypeIDs = self.NonCombatTargetTypeIDs
+            targetTypes = self.NonCombatTargetTypes
+        end
+
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_target_peer_" .. selectedCharacter .. "_" .. clickyIdx, tonumber(targetTypeIDs[clicky.target or "Self"]) or 1,
+            targetTypes,
+            #targetTypes)
+        if changed then
+            clicky.target = targetTypes[selectedNum] or "Self"
+            local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+        ImGui.EndTable()
+    end
+end
+
+function Module:RenderConditionTypesComboPeer(cond, condIdx, selectedCharacter)
+    if ImGui.BeginTable("##clicky_cond_type_table_peer_" .. selectedCharacter .. "_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 50)
+        ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
+        ImGui.TableNextColumn()
+        ImGui.Text("Type")
+        ImGui.TableNextColumn()
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_type_peer_" .. selectedCharacter .. "_" .. condIdx, self.LogicBlockTypeIDs[cond.type or "None"] or 1,
+            function(idx)
+                return self.LogicBlocks[idx].name or "None"
+            end,
+            #self.LogicBlocks)
+
+        if changed then
+            cond.type = self.LogicBlocks[selectedNum].name or "None"
+            cond.args = {}
+            for argIdx, arg in ipairs(self:GetLogicBlockArgsByType(cond.type) or {}) do
+                cond.args[argIdx] = arg.default
+            end
+            local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+        ImGui.EndTable()
+    end
+end
+
+function Module:RenderConditionTargetComboPeer(cond, condIdx, selectedCharacter)
+    local condBlock = self:GetLogicBlockByType(cond.type)
+    if not condBlock or not condBlock.cond_targets then
+        return
+    end
+    if ImGui.BeginTable("##clicky_cond_target_table_peer_" .. selectedCharacter .. "_" .. condIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 50)
+        ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
+        ImGui.TableNextColumn()
+        ImGui.Text("Target")
+        ImGui.TableNextColumn()
+        local selectedNum, changed = ImGui.Combo("##clicky_cond_target_peer_" .. selectedCharacter .. "_" .. condIdx, tonumber(condBlock.cond_targetIDs[cond.target or "Self"]) or 1, condBlock.cond_targets,
+            #condBlock.cond_targets)
+        if changed then
+            cond.target = condBlock.cond_targets[selectedNum] or "Self"
+            local clickies = Config:PeerGetSetting(selectedCharacter, 'Clickies') or {}
+            Config:PeerSetSetting(selectedCharacter, 'Clickies', clickies)
+        end
+        ImGui.EndTable()
+    end
+end
+
 function Module:Pop()
     Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
@@ -1209,16 +2368,21 @@ function Module:ValidateClickies()
     local clickiesChanged = false
     for idx = #clickies, 1, -1 do
         local clicky = clickies[idx]
+        
+        -- Ensure conditions table exists
+        if not clicky.conditions then
+            clicky.conditions = {}
+        end
 
-        for idx = #clicky.conditions, 1, -1 do
-            local condition = clicky.conditions[idx]
+        for condIdx = #clicky.conditions, 1, -1 do
+            local condition = clicky.conditions[condIdx]
             if condition.Delete then
-                table.remove(clicky.conditions, idx)
+                table.remove(clicky.conditions, condIdx)
                 clickiesChanged = true
             end
         end
 
-        if clicky.itemName:len() == 0 or clicky.Delete then
+        if not clicky.itemName or clicky.itemName:len() == 0 or clicky.Delete then
             table.remove(clickies, idx)
             clickiesChanged = true
         end

@@ -210,7 +210,7 @@ function OptionsUI:ApplySearchFilter()
                     local customSetting           = (settingDefaults.Type == "Custom")
                     local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
 
-                    if showAdv and not customSetting and (headerMatches or categoryMatches or settingDisplayNameLower:find(filter, 1, true) ~= nil or
+                    if showAdv and (headerMatches or categoryMatches or settingDisplayNameLower:find(filter, 1, true) ~= nil or
                             settingTooltipLower:find(filter, 1, true) ~= nil) then
                         self.FilteredSettingsByCat[category] = self.FilteredSettingsByCat[category] or {}
                         table.insert(self.FilteredSettingsByCat[category], settingName)
@@ -347,7 +347,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
                     ImGui.PopStyleColor(1)
                 end
                 for _, category in ipairs(header.Categories) do
-                    if #Config:GetAllSettingsForCategory(category) > 0 then
+                    if #(self.FilteredSettingsByCat[category] or {}) > 0 then
                         -- only draw the seperator if the category name is different from the heading
                         if header.Name ~= category then
                             self:RenderCategorySeperator(category)
@@ -379,83 +379,108 @@ function OptionsUI:RenderCategorySettings(category)
     local numCols             = math.max(1, math.floor(windowWidth / renderWidth))
     local settingsForCategory = self.FilteredSettingsByCat[category] or {}
 
-    if ImGui.BeginChild("catchild_" .. category, ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY), ImGuiWindowFlags.None) then
-        if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
-            for _ = 1, numCols do
-                ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 180.0)
-                ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
-            end
-
-            --ImGui.TableNextRow(ImGuiTableRowFlags.None, 40.0)
-            for idx, settingName in ipairs(settingsForCategory or {}) do
-                local settingDefaults = Config:PeerGetSettingDefaults(self.selectedCharacter, settingName)
-
-                -- defaults can go away when a different class config is loaded in.
-                if settingDefaults then
-                    local setting        = Config:PeerGetSetting(self.selectedCharacter, settingName)
-                    local id             = "##" .. settingName
-                    local settingTooltip = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
-
-                    if settingDefaults.Type ~= "Custom" then
-                        --
-                        if idx % numCols == 1 then
-                            ImGui.TableNextRow(ImGuiTableRowFlags.None, ImGui.GetFrameHeightWithSpacing())
-                        end
-
-                        ImGui.TableNextColumn()
-                        if self.HighlightedSettings:contains(settingName) then
-                            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
-                        end
-                        ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
-                        if self.HighlightedSettings:contains(settingName) then
-                            ImGui.PopStyleColor(1)
-                        end
-                        local defaultValue = tostring(settingDefaults.Default)
-                        if settingDefaults.Type == "Combo" then
-                            defaultValue = string.format("%s - %s", settingDefaults.Default, settingDefaults.ComboOptions[settingDefaults.Default])
-                        end
-                        Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
-                            settingTooltip,
-                            settingName,
-                            tostring(defaultValue)))
-                        ImGui.TableNextColumn()
-                        local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
-                        if (settingDefaults.Type or ""):find("Array") then
-                            typeOfSetting = settingDefaults.Type:sub(7)
-                        end
-
-                        if settingDefaults ~= nil then
-                            setting, loadout_change, pressed = Ui.RenderOption(
-                                typeOfSetting,
-                                setting,
-                                id,
-                                settingDefaults.RequiresLoadoutChange or false,
-                                settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
-                            new_loadout = new_loadout or loadout_change
-                            any_pressed = any_pressed or pressed
-
-                            --  need to update setting here and notify module
-                            if pressed then
-                                printf("PRESS")
-                                Config:PeerSetSetting(self.selectedCharacter, settingName, setting)
-
-                                if new_loadout and self.selectedCharacter == mq.TLO.Me.DisplayName() then
-                                    Modules:ExecModule("Class", "RescanLoadout")
-                                    new_loadout = false
-                                end
-                            end
-                        else
-                            ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
-                        end
-                    end
-                else
-                    ImGui.TableNextColumn()
-                    ImGui.Text(string.format("\arError: Setting not found - %s\ax", settingName))
-                    ImGui.TableNextColumn()
-                    ImGui.Text(string.format("\arError: Setting not found - %s\ax", settingName))
+    -- Check if this category has a custom render function (like User Clickies)
+    local hasCustomRender = false
+    local customModule = nil
+    
+    for _, settingName in ipairs(settingsForCategory or {}) do
+        local settingDefaults = Config:PeerGetSettingDefaults(self.selectedCharacter, settingName)
+        if settingDefaults and settingDefaults.Type == "Custom" then
+            local moduleName = Config:PeerGetModuleForSetting(self.selectedCharacter, settingName)
+            if moduleName and moduleName ~= "Core" then
+                -- Check if the module has a RenderConfig function
+                if Modules:ExecModule(moduleName, "ShouldRender") then
+                    hasCustomRender = true
+                    customModule = moduleName
+                    break
                 end
             end
-            ImGui.EndTable()
+        end
+    end
+
+    if ImGui.BeginChild("catchild_" .. category, ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY), ImGuiWindowFlags.None) then
+        -- Use custom render function if available
+        if hasCustomRender and customModule then
+            Modules:ExecModule(customModule, "RenderConfig", self.selectedCharacter)
+        else
+            -- Standard settings rendering
+            if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
+                for _ = 1, numCols do
+                    ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 180.0)
+                    ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
+                end
+
+                --ImGui.TableNextRow(ImGuiTableRowFlags.None, 40.0)
+                for idx, settingName in ipairs(settingsForCategory or {}) do
+                    local settingDefaults = Config:PeerGetSettingDefaults(self.selectedCharacter, settingName)
+
+                    -- defaults can go away when a different class config is loaded in.
+                    if settingDefaults then
+                        local setting        = Config:PeerGetSetting(self.selectedCharacter, settingName)
+                        local id             = "##" .. settingName
+                        local settingTooltip = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
+
+                        if settingDefaults.Type ~= "Custom" then
+                            --
+                            if idx % numCols == 1 then
+                                ImGui.TableNextRow(ImGuiTableRowFlags.None, ImGui.GetFrameHeightWithSpacing())
+                            end
+
+                            ImGui.TableNextColumn()
+                            if self.HighlightedSettings:contains(settingName) then
+                                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
+                            end
+                            ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
+                            if self.HighlightedSettings:contains(settingName) then
+                                ImGui.PopStyleColor(1)
+                            end
+                            local defaultValue = tostring(settingDefaults.Default)
+                            if settingDefaults.Type == "Combo" then
+                                defaultValue = string.format("%s - %s", settingDefaults.Default, settingDefaults.ComboOptions[settingDefaults.Default])
+                            end
+                            Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
+                                settingTooltip,
+                                settingName,
+                                tostring(defaultValue)))
+                            ImGui.TableNextColumn()
+                            local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
+                            if (settingDefaults.Type or ""):find("Array") then
+                                typeOfSetting = settingDefaults.Type:sub(7)
+                            end
+
+                            if settingDefaults ~= nil then
+                                setting, loadout_change, pressed = Ui.RenderOption(
+                                    typeOfSetting,
+                                    setting,
+                                    id,
+                                    settingDefaults.RequiresLoadoutChange or false,
+                                    settingDefaults.ComboOptions or settingDefaults.Min, settingDefaults.Max, settingDefaults.Step or 1)
+                                new_loadout = new_loadout or loadout_change
+                                any_pressed = any_pressed or pressed
+
+                                --  need to update setting here and notify module
+                                if pressed then
+                                    printf("PRESS")
+                                    Config:PeerSetSetting(self.selectedCharacter, settingName, setting)
+
+                                    if new_loadout and self.selectedCharacter == mq.TLO.Me.DisplayName() then
+                                        Modules:ExecModule("Class", "RescanLoadout")
+                                        new_loadout = false
+                                    end
+                                end
+                            else
+                                ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Error: Setting not found - " .. settingName)
+                            end
+                        end
+                    else
+                        ImGui.TableNextColumn()
+                        ImGui.Text(string.format("\arError: Setting not found - %s\ax", settingName))
+                        ImGui.TableNextColumn()
+                        ImGui.Text(string.format("\arError: Setting not found - %s\ax", settingName))
+                    end
+                end
+                ImGui.EndTable()
+            end
         end
         ImGui.EndChild()
     end

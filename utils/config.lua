@@ -2014,7 +2014,7 @@ function Config:PeerSetSetting(peer, setting, value, tempOnly)
         return self:SetSetting(setting, value, tempOnly)
     end
 
-    Logger.log_info("\aw[\ar%s\aw] Sending => \ag%s = \a-y%s", peer, setting, tostring(value))
+    Logger.log_debug("\aw[\ar%s\aw] Sending => \ag%s = \a-y%s", peer, setting, tostring(value))
     Comms.SendMessage(peer, self._name, "SetSetting", { Setting = setting, Value = value, })
 end
 
