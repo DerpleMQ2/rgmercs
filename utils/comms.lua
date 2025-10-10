@@ -10,11 +10,18 @@ Comms.LastHeartbeat = 0
 
 -- Putting this here for lack of a beter spot.
 function Comms.GetPeerName()
-    return string.format("%s.%s", mq.TLO.EverQuest.Server(), mq.TLO.Me.DisplayName())
+    local server = mq.TLO.EverQuest.Server()
+    --upper first letter if it isnt (Live)
+    if server:len() > 0 then
+        server = server:sub(1, 1):upper() .. server:sub(2)
+    end
+
+    return string.format("%s (%s)", mq.TLO.Me.DisplayName(), server)
 end
 
-function Comms.GetServerAndCharFromPeer(peer)
-    return peer:match("^(.-)%.(.-)$")
+function Comms.GetCharAndServerFromPeer(peer)
+    --return peer:match("^(.-)%.(.-)$")
+    return peer:match("^(.-) %((.-)%)$")
 end
 
 --- Broadcasts an update event to the specified module.
@@ -36,7 +43,7 @@ end
 --- @param event string The event type to broadcast.
 --- @param data table? The data associated with the event.
 function Comms.SendMessage(peer, module, event, data)
-    local server, char = Comms.GetServerAndCharFromPeer(peer)
+    local char, server = Comms.GetCharAndServerFromPeer(peer)
     Comms.Actors.send({ server = server, character = char, }, {
         From = Comms.GetPeerName(),
         Script = Comms.ScriptName,
