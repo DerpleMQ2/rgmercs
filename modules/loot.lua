@@ -129,7 +129,7 @@ function Module:WriteSettings()
 	end
 
 	if self.SaveRequested.doBroadcast == true then
-		Comms.BroadcastUpdate(self._name, "LoadSettings")
+		Comms.BroadcastMessage(self._name, "LoadSettings")
 	end
 
 	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))

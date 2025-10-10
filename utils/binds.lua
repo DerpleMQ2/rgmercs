@@ -46,6 +46,26 @@ Binds.Handlers    = {
             Config:HandleBind(config, value)
         end,
     },
+    ['set_peer'] = {
+        usage = "/rgl set_peer <peer> <setting> <value>",
+        about = "Sets a specific setting for an RGMercs peer.",
+        handler = function(peer, config, value)
+            Config:PeerSetSetting(peer, config, value)
+        end,
+    },
+    ['set_all'] = {
+        usage = "/rgl set_all <setting> <value>",
+        about = "Sets a specific setting for this character and all RGMercs peers.",
+        handler = function(config, value)
+            Config:HandleBind(config, value)
+            local peers = Config:GetPeers()
+            for _, peer in pairs(peers) do
+                if peer ~= mq.TLO.Me.Name() then
+                    Config:PeerSetSetting(peer, config, value)
+                end
+            end
+        end,
+    },
     ['tempset'] = {
         usage = "/rgl tempset <setting> <value>",
         about = "Temporarily sets a specific RGMercs setting until you reload or restart.",

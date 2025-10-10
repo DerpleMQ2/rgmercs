@@ -80,7 +80,7 @@ function Modules:GetModule(m)
 end
 
 function Modules:ExecModule(m, fn, ...)
-    if self.ModuleList[m] == nil then
+    if self.ModuleList[m] ~= nil then
         return self.ModuleList[m][fn](self.ModuleList[m], ...)
     end
 
