@@ -1809,7 +1809,7 @@ function Config:GetModuleSettings(module)
 end
 
 function Config:PeerGetModuleSettings(peer, module)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetModuleSettings(module)
     end
 
@@ -1821,7 +1821,7 @@ function Config:GetModuleDefaultSettings(module)
 end
 
 function Config:PeerGetModuleDefaultSettings(peer, module)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetModuleDefaultSettings(module)
     end
 
@@ -1833,7 +1833,7 @@ function Config:GetModuleSettingCategories(module)
 end
 
 function Config:PeerGetModuleSettingCategories(peer, module)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetModuleSettingCategories(module)
     end
 
@@ -1849,7 +1849,7 @@ function Config:GetAllModuleDefaultSettings()
 end
 
 function Config:PeerGetAllModuleDefaultSettings(peer)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetAllModuleDefaultSettings()
     end
     return self.peerModuleDefaultSettings[peer] or {}
@@ -1860,7 +1860,7 @@ function Config:GetAllModuleSettingCategories()
 end
 
 function Config:PeerGetAllModuleSettingCategories(peer)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetAllModuleSettingCategories()
     end
 
@@ -1872,7 +1872,7 @@ function Config:GetAllSettingsForCategory(category)
 end
 
 function Config:PeerGetAllSettingsForCategory(peer, category)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetAllSettingsForCategory(category)
     end
     return (Config.TempSettings.PeerSettingsCategoryToSettingMapping[peer] and Config.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category] or {}) or {}
@@ -1883,7 +1883,7 @@ function Config:GetModuleForSetting(setting)
 end
 
 function Config:PeerGetModuleForSetting(peer, setting)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetModuleForSetting(setting)
     end
     return (Config.TempSettings.PeerSettingToModuleCache[peer] and Config.TempSettings.PeerSettingToModuleCache[peer][setting] or "None") or "None"
@@ -1906,7 +1906,7 @@ end
 --- @param failOk boolean? If true, the function will not raise an error if the setting is not found.
 --- @return any The value of the setting, or nil if the setting is not found and failOk is true.
 function Config:PeerGetSetting(peer, setting, failOk)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetSetting(setting, failOk)
     end
     if not Config.TempSettings.PeerSettingToModuleCache[peer] or not Config.TempSettings.PeerSettingToModuleCache[peer][setting] then
@@ -1949,7 +1949,7 @@ end
 --- @param setting string The name of the setting to retrieve.
 --- @return any The value of the setting, or nil if the setting is not found and failOk is true.
 function Config:PeerGetSettingDefaults(peer, setting)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:GetSettingDefaults(setting)
     end
 
@@ -2010,7 +2010,7 @@ end
 --- @param value any: The new value to assign to the setting.
 --- @param tempOnly boolean?: The new value to assign to the setting.
 function Config:PeerSetSetting(peer, setting, value, tempOnly)
-    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+    if peer == nil or peer == Comms.GetPeerName() then
         return self:SetSetting(setting, value, tempOnly)
     end
 

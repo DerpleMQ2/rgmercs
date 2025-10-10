@@ -5,6 +5,7 @@ local Logger                    = require('utils.logger')
 local Ui                        = require('utils.ui')
 local Icons                     = require('mq.ICONS')
 local Modules                   = require('utils.modules')
+local Comms                     = require('utils.comms')
 local Strings                   = require('utils.strings')
 local Set                       = require("mq.Set")
 
@@ -16,7 +17,7 @@ OptionsUI.HighlightedSettings   = Set.new({})
 OptionsUI.configFilter          = ""
 OptionsUI.lastSortTime          = 0
 OptionsUI.lastHighlightTime     = 0
-OptionsUI.selectedCharacter     = mq.TLO.Me.DisplayName()
+OptionsUI.selectedCharacter     = Comms.GetPeerName()
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -436,10 +437,9 @@ function OptionsUI:RenderCategorySettings(category)
 
                             --  need to update setting here and notify module
                             if pressed then
-                                printf("PRESS")
                                 Config:PeerSetSetting(self.selectedCharacter, settingName, setting)
 
-                                if new_loadout and self.selectedCharacter == mq.TLO.Me.DisplayName() then
+                                if new_loadout and self.selectedCharacter == Comms.GetPeerName() then
                                     Modules:ExecModule("Class", "RescanLoadout")
                                     new_loadout = false
                                 end
@@ -497,7 +497,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth())
             -- character selecter
             local peerList = Config:GetPeers()
-            table.insert(peerList, 1, mq.TLO.Me.DisplayName())
+            table.insert(peerList, 1, Comms.GetPeerName())
             local peerListIdx = 1
             for idx, name in ipairs(peerList) do
                 if name == self.selectedCharacter then

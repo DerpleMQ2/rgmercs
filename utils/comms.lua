@@ -8,6 +8,15 @@ Comms.ScriptName    = "RGMercs"
 Comms.LastHeartbeat = 0
 
 
+-- Putting this here for lack of a beter spot.
+function Comms.GetPeerName()
+    return string.format("%s.%s", mq.TLO.EverQuest.Server(), mq.TLO.Me.DisplayName())
+end
+
+function Comms.GetServerAndCharFromPeer(peer)
+    return peer:match("^(.-)%.(.-)$")
+end
+
 --- Broadcasts an update event to the specified module.
 ---
 --- @param module string The name of the module to broadcast the update to.
@@ -15,12 +24,11 @@ Comms.LastHeartbeat = 0
 --- @param data table? The data associated with the event.
 function Comms.BroadcastMessage(module, event, data)
     Comms.Actors.send({
-        from = mq.TLO.Me.DisplayName(),
-        script = Comms.ScriptName,
-        module = module,
-        event =
-            event,
-        data = data,
+        From = Comms.GetPeerName(),
+        Script = Comms.ScriptName,
+        Module = module,
+        Event = event,
+        Data = data,
     })
 end
 
@@ -28,13 +36,13 @@ end
 --- @param event string The event type to broadcast.
 --- @param data table? The data associated with the event.
 function Comms.SendMessage(peer, module, event, data)
-    Comms.Actors.send({ character = peer, }, {
-        from = mq.TLO.Me.DisplayName(),
-        script = Comms.ScriptName,
-        module = module,
-        event =
-            event,
-        data = data,
+    local server, char = Comms.GetServerAndCharFromPeer(peer)
+    Comms.Actors.send({ server = server, character = char, }, {
+        From = Comms.GetPeerName(),
+        Script = Comms.ScriptName,
+        Module = module,
+        Event = event,
+        Data = data,
     })
 end
 
@@ -42,6 +50,7 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget)
     if os.time() - Comms.LastHeartbeat < 5 then return end
     Comms.LastHeartbeat = os.time()
     Comms.BroadcastMessage("RGMercs", "Heartbeat", {
+        From = Comms.GetPeerName(),
         Zone = mq.TLO.Zone.Name(),
         X = mq.TLO.Me.X(),
         Y = mq.TLO.Me.Y(),
