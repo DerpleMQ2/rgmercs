@@ -783,8 +783,6 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
     local startingPosVec = ImGui.GetCursorPosVec()
     local offset_trash = 40
     local offset_enable = 160
-    local offset_up = 80
-    local offset_down = 120
 
     self:RenderClickyHeaderIcon(clickies[clickyIdx], headerScreenPos)
 
@@ -796,7 +794,7 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
         local changed = false
         local enabled = clickies[clickyIdx].enabled == nil or clickies[clickyIdx].enabled
 
-        enabled, changed = Ui.RenderOptionToggle("##EnableDrawn" .. tostring(clickyIdx), "", enabled)
+        enabled, changed = Ui.RenderOptionToggle("##EnableDrawn" .. tostring(clickyIdx), "", enabled, true)
         if changed then
             clickies[clickyIdx].enabled = enabled
             self:SaveSettings(false)
