@@ -1,73 +1,83 @@
-local mq                                              = require('mq')
-local Modules                                         = require("utils.modules")
-local Tables                                          = require("utils.tables")
-local Strings                                         = require("utils.strings")
-local Files                                           = require("utils.files")
-local Logger                                          = require("utils.logger")
-local Set                                             = require("mq.Set")
+local mq                                                 = require('mq')
+local Modules                                            = require("utils.modules")
+local Tables                                             = require("utils.tables")
+local Strings                                            = require("utils.strings")
+local Files                                              = require("utils.files")
+local Logger                                             = require("utils.logger")
+local Comms                                              = require("utils.comms")
+local Set                                                = require("mq.Set")
 
-local Config                                          = {
+local Config                                             = {
     _version = '1.3',
     _subVersion = "The Outer Brood",
     _name = "RGMercs Lua Edition",
     _author = 'Lead Devs: Derple, Algar',
 }
-Config.__index                                        = Config
-Config.moduleSettings                                 = {}
-Config.moduleDefaultSettings                          = {}
-Config.moduleTempSettings                             = {}
-Config.moduleSettingCategories                        = {}
-Config.SettingsLoadComplete                           = false
+Config.__index                                           = Config
+Config.moduleSettings                                    = {}
+Config.moduleDefaultSettings                             = {}
+Config.moduleTempSettings                                = {}
+Config.moduleSettingCategories                           = {}
+Config.peerModuleSettings                                = {}
+Config.peerModuleDefaultSettings                         = {}
+Config.peerModuleSettingCategories                       = {}
+Config.FAQ                                               = {}
+Config.SettingsLoadComplete                              = false
 
-Config.TempSettings                                   = {}
-Config.TempSettings.lastModuleRegisteredTime          = 0
-Config.TempSettings.lastHighlightTime                 = os.time()
-Config.TempSettings.SettingToModuleCache              = {}
-Config.TempSettings.SettingsLowerToNameAndModuleCache = {}
-Config.TempSettings.SettingsCategoryToSettingMapping  = {}
+Config.TempSettings                                      = {}
+Config.TempSettings.lastModuleRegisteredTime             = 0
+Config.TempSettings.lastHighlightTime                    = os.time()
+Config.TempSettings.SettingToModuleCache                 = {}
+Config.TempSettings.SettingsLowerToNameCache             = {}
+Config.TempSettings.SettingsCategoryToSettingMapping     = {}
+Config.TempSettings.PeerModuleSettingsLowerToNameCache   = {}
+Config.TempSettings.PeerSettingToModuleCache             = {}
+Config.TempSettings.PeerSettingsCategoryToSettingMapping = {}
+Config.TempSettings.Peers                                = Set.new({})
+Config.TempSettings.PeersHeartbeats                      = {}
 
-Config.TempSettings.HighlightedModules                = Set.new({})
+Config.TempSettings.HighlightedModules                   = Set.new({})
 
 -- Global State
-Config.Globals                                        = {}
-Config.Globals.MainAssist                             = ""
-Config.Globals.ScriptDir                              = ""
-Config.Globals.AutoTargetID                           = 0
-Config.Globals.ForceTargetID                          = 0
-Config.Globals.LastPulledID                           = 0
-Config.Globals.SubmodulesLoaded                       = false
-Config.Globals.PauseMain                              = false
-Config.Globals.LastMove                               = nil
-Config.Globals.BackOffFlag                            = false
-Config.Globals.InMedState                             = false
-Config.Globals.LastPetCmd                             = 0
-Config.Globals.LastFaceTime                           = 0
-Config.Globals.CurZoneId                              = mq.TLO.Zone.ID()
-Config.Globals.CurInstance                            = mq.TLO.Me.Instance()
-Config.Globals.CurLoadedChar                          = mq.TLO.Me.DisplayName()
-Config.Globals.CurLoadedClass                         = mq.TLO.Me.Class.ShortName()
-Config.Globals.CurServer                              = mq.TLO.EverQuest.Server():gsub(" ", "")
-Config.Globals.CastResult                             = 0
-Config.Globals.BuildType                              = mq.TLO.MacroQuest.BuildName()
-Config.Globals.Minimized                              = false
-Config.Globals.LastUsedSpell                          = "None"
-Config.Globals.CorpseConned                           = false
-Config.Globals.RezzedCorpses                          = {}
+Config.Globals                                           = {}
+Config.Globals.MainAssist                                = ""
+Config.Globals.ScriptDir                                 = ""
+Config.Globals.AutoTargetID                              = 0
+Config.Globals.ForceTargetID                             = 0
+Config.Globals.LastPulledID                              = 0
+Config.Globals.SubmodulesLoaded                          = false
+Config.Globals.PauseMain                                 = false
+Config.Globals.LastMove                                  = nil
+Config.Globals.BackOffFlag                               = false
+Config.Globals.InMedState                                = false
+Config.Globals.LastPetCmd                                = 0
+Config.Globals.LastFaceTime                              = 0
+Config.Globals.CurZoneId                                 = mq.TLO.Zone.ID()
+Config.Globals.CurInstance                               = mq.TLO.Me.Instance()
+Config.Globals.CurLoadedChar                             = mq.TLO.Me.DisplayName()
+Config.Globals.CurLoadedClass                            = mq.TLO.Me.Class.ShortName()
+Config.Globals.CurServer                                 = mq.TLO.EverQuest.Server():gsub(" ", "")
+Config.Globals.CastResult                                = 0
+Config.Globals.BuildType                                 = mq.TLO.MacroQuest.BuildName()
+Config.Globals.Minimized                                 = false
+Config.Globals.LastUsedSpell                             = "None"
+Config.Globals.CorpseConned                              = false
+Config.Globals.RezzedCorpses                             = {}
 
 -- Constants
-Config.Constants                                      = {}
-Config.Constants.RGCasters                            = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
+Config.Constants                                         = {}
+Config.Constants.RGCasters                               = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
     "SHM", "WIZ", })
-Config.Constants.RGMelee                              = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
-Config.Constants.RGHybrid                             = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
-Config.Constants.RGTank                               = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGPetClass                           = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
-Config.Constants.RGNotMezzedAnims                     = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
-Config.Constants.ModRods                              = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
-Config.Constants.SpellBookSlots                       = 1120
-Config.Constants.CastCompleted                        = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
+Config.Constants.RGMelee                                 = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
+Config.Constants.RGHybrid                                = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
+Config.Constants.RGTank                                  = Set.new({ "WAR", "PAL", "SHD", })
+Config.Constants.RGPetClass                              = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
+Config.Constants.RGNotMezzedAnims                        = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
+Config.Constants.ModRods                                 = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
+Config.Constants.SpellBookSlots                          = 1120
+Config.Constants.CastCompleted                           = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
 
-Config.Constants.CastResults                          = {
+Config.Constants.CastResults                             = {
     ['CAST_RESULT_NONE'] = 0,
     ['CAST_SUCCESS']     = 1,
     ['CAST_BLOCKED']     = 2,
@@ -93,7 +103,7 @@ Config.Constants.CastResults                          = {
     ['CAST_OVERWRITTEN'] = 22,
 }
 
-Config.Constants.CastResultsIdToName                  = {}
+Config.Constants.CastResultsIdToName                     = {}
 for k, v in pairs(Config.Constants.CastResults) do Config.Constants.CastResultsIdToName[v] = k end
 
 Config.Constants.ExpansionNameToID = {
@@ -1600,6 +1610,18 @@ Config.DefaultConfig               = {
         Min = 0,
         Max = 50,
     },
+    -- Cross client comms
+    ['PeerTimeout']          = {
+        DisplayName = "Peer Timeout",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 9,
+        Tooltip = "Time in seconds to wait before considering a peer disconnected.",
+        Default = 30,
+        Min = 10,
+        Max = 120,
+    },
 
     --Deprecated/Need Adjusted to Custom/Etc
     ['FullUI']               = {
@@ -1786,12 +1808,36 @@ function Config:GetModuleSettings(module)
     return self.moduleTempSettings[module] or {}
 end
 
+function Config:PeerGetModuleSettings(peer, module)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetModuleSettings(module)
+    end
+
+    return (self.peerModuleSettings[peer] and self.peerModuleSettings[peer][module] or {}) or {}
+end
+
 function Config:GetModuleDefaultSettings(module)
     return self.moduleDefaultSettings[module] or {}
 end
 
+function Config:PeerGetModuleDefaultSettings(peer, module)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetModuleDefaultSettings(module)
+    end
+
+    return (self.peerModuleDefaultSettings[peer] and self.peerModuleDefaultSettings[peer][module] or {}) or {}
+end
+
 function Config:GetModuleSettingCategories(module)
     return self.moduleSettingCategories[module] or {}
+end
+
+function Config:PeerGetModuleSettingCategories(peer, module)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetModuleSettingCategories(module)
+    end
+
+    return (self.peerModuleSettingCategories[peer] and self.peerModuleSettingCategories[peer][module] or {}) or {}
 end
 
 function Config:GetAllModuleSettings()
@@ -1802,16 +1848,45 @@ function Config:GetAllModuleDefaultSettings()
     return self.moduleDefaultSettings or {}
 end
 
+function Config:PeerGetAllModuleDefaultSettings(peer)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetAllModuleDefaultSettings()
+    end
+    return self.peerModuleDefaultSettings[peer] or {}
+end
+
 function Config:GetAllModuleSettingCategories()
     return self.moduleSettingCategories or {}
+end
+
+function Config:PeerGetAllModuleSettingCategories(peer)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetAllModuleSettingCategories()
+    end
+
+    return self.peerModuleSettingCategories[peer] or {}
 end
 
 function Config:GetAllSettingsForCategory(category)
     return Config.TempSettings.SettingsCategoryToSettingMapping[category] or {}
 end
 
+function Config:PeerGetAllSettingsForCategory(peer, category)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetAllSettingsForCategory(category)
+    end
+    return (Config.TempSettings.PeerSettingsCategoryToSettingMapping[peer] and Config.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category] or {}) or {}
+end
+
 function Config:GetModuleForSetting(setting)
     return Config.TempSettings.SettingToModuleCache[setting] or "None"
+end
+
+function Config:PeerGetModuleForSetting(peer, setting)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetModuleForSetting(setting)
+    end
+    return (Config.TempSettings.PeerSettingToModuleCache[peer] and Config.TempSettings.PeerSettingToModuleCache[peer][setting] or "None") or "None"
 end
 
 function Config:SettingsLoaded()
@@ -1823,6 +1898,25 @@ end
 --- @return boolean true if this setting exists.
 function Config:HaveSetting(setting)
     return Config.TempSettings.SettingToModuleCache[setting] ~= nil
+end
+
+--- Retrieves a specified setting.
+--- @param peer string The name of the peer to retrieve the setting for.
+--- @param setting string The name of the setting to retrieve.
+--- @param failOk boolean? If true, the function will not raise an error if the setting is not found.
+--- @return any The value of the setting, or nil if the setting is not found and failOk is true.
+function Config:PeerGetSetting(peer, setting, failOk)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetSetting(setting, failOk)
+    end
+    if not Config.TempSettings.PeerSettingToModuleCache[peer] or not Config.TempSettings.PeerSettingToModuleCache[peer][setting] then
+        if not failOk then
+            Logger.log_error("Setting %s was not found in the module cache for: %s!", setting, peer)
+        end
+        return nil
+    end
+
+    return self:PeerGetModuleSettings(peer, Config.TempSettings.PeerSettingToModuleCache[peer][setting])[setting]
 end
 
 --- Retrieves a specified setting.
@@ -1848,6 +1942,22 @@ function Config:GetSettingDefaults(setting)
         return nil
     end
     return self:GetModuleDefaultSettings(Config.TempSettings.SettingToModuleCache[setting])[setting]
+end
+
+--- Retrieves a specified setting default info for a peer.
+--- @param peer string The name of the peer to retrieve the setting for.
+--- @param setting string The name of the setting to retrieve.
+--- @return any The value of the setting, or nil if the setting is not found and failOk is true.
+function Config:PeerGetSettingDefaults(peer, setting)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:GetSettingDefaults(setting)
+    end
+
+    if not Config.TempSettings.PeerSettingToModuleCache[peer] or not Config.TempSettings.PeerSettingToModuleCache[peer][setting] then
+        Logger.log_error("Setting %s was not found in the module cache!", setting)
+        return nil
+    end
+    return self:PeerGetModuleDefaultSettings(peer, Config.TempSettings.PeerSettingToModuleCache[peer][setting])[setting]
 end
 
 --- Validates and sets a configuration setting for a specified module.
@@ -1889,9 +1999,23 @@ end
 --- @param setting string The original setting name that needs to be validated and formatted.
 --- @return string, string The module of the setting and The validated and formatted setting name.
 function Config:MakeValidSettingName(setting)
-    local validSetting = self.TempSettings.SettingsLowerToNameAndModuleCache[setting:lower()] or "None"
+    local validSetting = self.TempSettings.SettingsLowerToNameCache[setting:lower()] or "None"
 
     return Config.TempSettings.SettingToModuleCache[validSetting] or "None", validSetting
+end
+
+---Sets a setting from either in global or a module setting table.
+--- @param peer string: The name of the peer to set the setting for.
+--- @param setting string: The name of the setting to be updated.
+--- @param value any: The new value to assign to the setting.
+--- @param tempOnly boolean?: The new value to assign to the setting.
+function Config:PeerSetSetting(peer, setting, value, tempOnly)
+    if peer == nil or peer == mq.TLO.Me.DisplayName() then
+        return self:SetSetting(setting, value, tempOnly)
+    end
+
+    Logger.log_info("\aw[\ar%s\aw] Sending => \ag%s = \a-y%s", peer, setting, tostring(value))
+    Comms.SendMessage(peer, self._name, "SetSetting", { Setting = setting, Value = value, })
 end
 
 ---Sets a setting from either in global or a module setting table.
@@ -1994,8 +2118,14 @@ end
 
 function Config:RegisterCategoryToSettingMapping(setting)
     local category = Config:GetSettingDefaults(setting).Category
-    Config.TempSettings.SettingsCategoryToSettingMapping[category] = Config.TempSettings.SettingsCategoryToSettingMapping[category] or {}
-    table.insert(Config.TempSettings.SettingsCategoryToSettingMapping[category], setting)
+    self.TempSettings.SettingsCategoryToSettingMapping[category] = self.TempSettings.SettingsCategoryToSettingMapping[category] or {}
+    table.insert(self.TempSettings.SettingsCategoryToSettingMapping[category], setting)
+end
+
+function Config:RegisterPeerCategoryToSettingMapping(peer, setting)
+    local category = Config:PeerGetSettingDefaults(peer, setting).Category
+    self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category] = self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category] or {}
+    table.insert(self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category], setting)
 end
 
 function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, firstSaveRequired)
@@ -2036,22 +2166,25 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
             self:RegisterCategoryToSettingMapping(setting)
         else
             Config.TempSettings.SettingToModuleCache[setting] = module
-            Config.TempSettings.SettingsLowerToNameAndModuleCache[setting:lower()] = setting
+            Config.TempSettings.SettingsLowerToNameCache[setting:lower()] = setting
             self:RegisterCategoryToSettingMapping(setting)
         end
     end
 
     if firstSaveRequired or settingsChanged then
-        if module == "Core" then
-            self:SaveSettings()
-        else
-            Modules:ExecModule(module, "SaveSettings", false)
-        end
+        self:SaveModuleSettings(module, settings)
+    else
+        -- send settings even if we dont save.
+        Comms.BroadcastMessage(module, "SettingsUpdate", { settings = settings, settingCategories = settingCategories, defaultSettings = defaultSettings, })
     end
 
     self.TempSettings.lastModuleRegisteredTime = os.time()
 
     Logger.log_info("\agModule %s - registered settings!", module)
+end
+
+function Config:RequestPeerConfigs()
+    Comms.BroadcastMessage(self._name, "RequestPeerConfigs", {})
 end
 
 function Config:GetLastModuleRegisteredTime()
@@ -2064,19 +2197,87 @@ function Config:ClearAllModuleSettings()
     self.moduleDefaultSettings = {}
     self.moduleSettingCategories = {}
     self.TempSettings.SettingToModuleCache = {}
-    self.TempSettings.SettingsLowerToNameAndModuleCache = {}
+    self.TempSettings.SettingsLowerToNameCache = {}
     self.TempSettings.SettingsCategoryToSettingMapping = {}
     self.SettingsLoadComplete = false
 end
 
 function Config:SaveModuleSettings(module, settings)
     self.moduleSettings[module] = settings
+    local defaultSettings = self:GetModuleDefaultSettings(module)
+    local settingsCategories = self:GetModuleSettingCategories(module):toList() or {}
+
     if module == "Core" then
         self:SaveSettings()
     else
         Modules:ExecModule(module, "SaveSettings", false)
     end
     Logger.log_debug("\agModule %s - save settings requested!", module)
+
+    -- broadcast the change to any listeners.
+    Comms.BroadcastMessage(module, "SettingsUpdate", { settings = settings, settingCategories = settingsCategories, defaultSettings = defaultSettings, })
+end
+
+function Config:UpdatePeerHeartbeat(peer, data)
+    Config.TempSettings.PeersHeartbeats[peer] = Config.TempSettings.PeersHeartbeats[peer] or {}
+    Config.TempSettings.PeersHeartbeats[peer].LastHeartbeat = os.time()
+    Config.TempSettings.PeersHeartbeats[peer].Data = data or {}
+end
+
+function Config:ValidatePeers()
+    for peer, heartbeat in pairs(Config.TempSettings.PeersHeartbeats) do
+        if os.time() - heartbeat.LastHeartbeat > Config:GetSetting("PeerTimeout") then
+            Logger.log_info("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
+            Config.TempSettings.Peers:remove(peer)
+            Config.TempSettings.PeersHeartbeats[peer] = nil
+            self.peerModuleSettings[peer] = nil
+            self.peerModuleDefaultSettings[peer] = nil
+            self.peerModuleSettingCategories[peer] = nil
+            self.TempSettings.PeerModuleSettingsLowerToNameCache[peer] = nil
+            self.TempSettings.PeerSettingToModuleCache[peer] = nil
+            self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] = nil
+        end
+    end
+end
+
+function Config:UpdatePeerSettings(peer, module, settings, settingsCategories, defaultSettings)
+    self.peerModuleSettings[peer]                                = self.peerModuleSettings[peer] or {}
+    self.peerModuleDefaultSettings[peer]                         = self.peerModuleDefaultSettings[peer] or {}
+    self.peerModuleSettingCategories[peer]                       = self.peerModuleSettingCategories[peer] or {}
+    self.TempSettings.PeerModuleSettingsLowerToNameCache[peer]   = self.TempSettings.PeerModuleSettingsLowerToNameCache[peer] or {}
+    self.TempSettings.PeerSettingToModuleCache[peer]             = self.TempSettings.PeerSettingToModuleCache[peer] or {}
+    self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] = self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] or {}
+    self.peerModuleDefaultSettings[peer][module]                 = defaultSettings
+
+    -- remove old settings from caches
+    for setting, _ in pairs(self.peerModuleSettings[peer][module] or {}) do
+        if self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] and Config:PeerGetSettingDefaults(peer, setting) then
+            local categoryListLen = #self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][Config:PeerGetSettingDefaults(peer, setting).Category] or 0
+            for i = categoryListLen, 1, -1 do
+                if self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][Config:PeerGetSettingDefaults(peer, setting).Category][i] == setting then
+                    table.remove(self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][Config:PeerGetSettingDefaults(peer, setting).Category], i)
+                    break
+                end
+            end
+        end
+        self.TempSettings.PeerSettingToModuleCache[peer][setting] = nil
+        self.TempSettings.PeerModuleSettingsLowerToNameCache[peer][setting:lower()] = nil
+    end
+
+    self.peerModuleSettings[peer][module] = deep_copy(settings)
+    self.peerModuleSettingCategories[peer][module] = Set.new(settingsCategories)
+
+    for setting, _ in pairs(settings) do
+        self.TempSettings.PeerSettingToModuleCache[peer][setting] = module
+        self.TempSettings.PeerModuleSettingsLowerToNameCache[peer][setting:lower()] = setting
+        self:RegisterPeerCategoryToSettingMapping(peer, setting)
+    end
+
+    self.TempSettings.Peers:add(peer)
+end
+
+function Config:GetPeers()
+    return self.TempSettings.Peers:toList() or {}
 end
 
 --- Adds the given name to the Assist List.

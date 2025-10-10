@@ -1,18 +1,19 @@
-local mq         = require('mq')
-local Core       = require("utils.core")
-local Logger     = require("utils.logger")
+local mq            = require('mq')
+local Logger        = require("utils.logger")
 
-local Comms      = { _version = '1.0', _name = "Comms", _author = 'Derple', }
-Comms.__index    = Comms
-Comms.Actors     = require('actors')
-Comms.ScriptName = "RGMercs"
+local Comms         = { _version = '1.0', _name = "Comms", _author = 'Derple', }
+Comms.__index       = Comms
+Comms.Actors        = require('actors')
+Comms.ScriptName    = "RGMercs"
+Comms.LastHeartbeat = 0
+
 
 --- Broadcasts an update event to the specified module.
 ---
 --- @param module string The name of the module to broadcast the update to.
 --- @param event string The event type to broadcast.
 --- @param data table? The data associated with the event.
-function Comms.BroadcastUpdate(module, event, data)
+function Comms.BroadcastMessage(module, event, data)
     Comms.Actors.send({
         from = mq.TLO.Me.DisplayName(),
         script = Comms.ScriptName,
@@ -23,6 +24,38 @@ function Comms.BroadcastUpdate(module, event, data)
     })
 end
 
+--- @param module string The name of the module to broadcast the update to.
+--- @param event string The event type to broadcast.
+--- @param data table? The data associated with the event.
+function Comms.SendMessage(peer, module, event, data)
+    Comms.Actors.send({ character = peer, }, {
+        from = mq.TLO.Me.DisplayName(),
+        script = Comms.ScriptName,
+        module = module,
+        event =
+            event,
+        data = data,
+    })
+end
+
+function Comms.SendHeartbeat(assist, curState, curAutoTarget)
+    if os.time() - Comms.LastHeartbeat < 5 then return end
+    Comms.LastHeartbeat = os.time()
+    Comms.BroadcastMessage("RGMercs", "Heartbeat", {
+        Zone = mq.TLO.Zone.Name(),
+        X = mq.TLO.Me.X(),
+        Y = mq.TLO.Me.Y(),
+        Z = mq.TLO.Me.Z(),
+        HPs = mq.TLO.Me.PctHPs(),
+        Mana = mq.TLO.Me.PctMana(),
+        Endurance = mq.TLO.Me.PctEndurance(),
+        TargetID = mq.TLO.Target.ID(),
+        AutoTarget = curAutoTarget,
+        Assist = assist,
+        State = curState,
+    })
+end
+
 --- Prints a group message with the given format and arguments.
 --- @param msg string: The message format string.
 --- @param ... any: Additional arguments to format the message.
@@ -30,7 +63,7 @@ function Comms.PrintGroupMessage(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
 
-    Core.DoCmd("/dgt group_%s_%s %s", mq.TLO.EverQuest.Server():gsub(" ", ""), mq.TLO.Group.Leader() or "None", output)
+    mq.cmdf("/dgt group_%s_%s %s", mq.TLO.EverQuest.Server():gsub(" ", ""), mq.TLO.Group.Leader() or "None", output)
 end
 
 --- Displays a pop-up message with the given text.
@@ -40,7 +73,7 @@ function Comms.PopUp(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
 
-    Core.DoCmd("/popupecho 15 5 %s", output)
+    mq.cmdf("/popupecho 15 5 %s", output)
 end
 
 --- Handles the announcement message.
@@ -50,7 +83,7 @@ end
 function Comms.HandleAnnounce(msg, sendGroup, sendDan)
     if sendGroup then
         local cleanMsg = msg:gsub("\a.", "")
-        Core.DoCmd("/gsay %s", cleanMsg)
+        mq.cmdf("/gsay %s", cleanMsg)
     end
 
     if sendDan then

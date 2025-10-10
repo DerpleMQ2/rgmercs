@@ -764,7 +764,7 @@ function Module:WriteSettings()
     mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
 
     if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastUpdate(self._name, "LoadSettings")
+        Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
     Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
@@ -791,7 +791,6 @@ function Module:LoadSettings()
     if not err and pathsConfig then
         Module.TempSettings.MyPaths = pathsConfig()
     end
-
     Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     -- turn off at startup for safety
