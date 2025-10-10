@@ -481,7 +481,7 @@ local script_actor = Comms.Actors.register(function(message)
         msg.event)
 
     if msg.event == "SettingsUpdate" then
-        Logger.log_info("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.module, msg.from)
+        Logger.log_debug("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.module, msg.from)
         Logger.log_debug("Settings: \ag%s", Strings.TableToString(msg.data.settings))
         Logger.log_debug("defaultSettings: \ag%s", Strings.TableToString(msg.data.defaultSettings))
         Config:UpdatePeerSettings(msg.from, msg.module, msg.data.settings, msg.data.settingCategories, msg.data.defaultSettings)
@@ -518,6 +518,16 @@ local script_actor = Comms.Actors.register(function(message)
         Logger.log_info("Received SetSetting for module \at%s \awfrom \am%s \awSetSetting :: \at%s \awto \ag%s", msg.module, msg.from, msg.data.Setting, tostring(msg.data.Value))
         Config:HandleBind(msg.data.Setting, msg.data.Value)
         return
+    end
+    
+    -- Forward inventory catalog messages to the Clickies module
+    if msg.module == "Clickies" then
+        Logger.log_info("Received Clickies message: event=%s, from=%s", msg.event, msg.from)
+        if msg.event == "InventoryCatalogRequest" or msg.event == "InventoryCatalogResponse" then
+            Logger.log_info("Forwarding %s message from %s to Clickies module", msg.event, msg.from)
+            Modules:ExecModule("Clickies", msg.event == "InventoryCatalogRequest" and "HandleInventoryCatalogRequest" or "HandleInventoryCatalogResponse", msg.data)
+            return
+        end
     end
 end)
 
