@@ -832,8 +832,8 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_trash, headerCursorPos.y + 3)
 
     if ImGui.SmallButton(Icons.FA_TRASH) then
-        table.remove(clickies, clickyIdx)
-        self:SaveSettings(false)
+        -- if we do this in the UI thread then there could be a race condition if the user is clicking fast
+        clickies[clickyIdx].Delete = true
     end
     ImGui.PopID()
 
@@ -869,8 +869,7 @@ function Module:RenderConditionControls(clickyIdx, idx, conditionsTable, headerP
     ImGui.SameLine()
     ImGui.PushID("##_small_btn_delete_cond_" .. tostring(clickyIdx) .. "_" .. tostring(idx))
     if ImGui.SmallButton(Icons.FA_TRASH) then
-        table.remove(conditionsTable, idx)
-        self:SaveSettings(false)
+        conditionsTable[idx].Delete = true
     end
     ImGui.PopID()
 
@@ -1210,7 +1209,16 @@ function Module:ValidateClickies()
     local clickiesChanged = false
     for idx = #clickies, 1, -1 do
         local clicky = clickies[idx]
-        if clicky.itemName:len() == 0 then
+
+        for idx = #clicky.conditions, 1, -1 do
+            local condition = clicky.conditions[idx]
+            if condition.Delete then
+                table.remove(clicky.conditions, idx)
+                clickiesChanged = true
+            end
+        end
+
+        if clicky.itemName:len() == 0 or clicky.Delete then
             table.remove(clickies, idx)
             clickiesChanged = true
         end
