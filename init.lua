@@ -302,6 +302,7 @@ local function Main()
         end
         Modules:ExecModule("Drag", "GiveTime", curState)
         Modules:ExecModule("Debug", "GiveTime", curState)
+        Modules:ExecModule("Clickies", "ValidateClickies")
         Modules:ExecAll("WriteSettings") -- this needs to happen even when paused.
         return
     end
