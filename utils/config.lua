@@ -2264,8 +2264,8 @@ function Config:UpdatePeerSettings(peer, module, settings, settingsCategories, d
         self.TempSettings.PeerModuleSettingsLowerToNameCache[peer][setting:lower()] = nil
     end
 
-    self.peerModuleSettings[peer][module] = deep_copy(settings)
-    self.peerModuleSettingCategories[peer][module] = Set.new(settingsCategories)
+    self.peerModuleSettings[peer][module] = deep_copy(settings or {})
+    self.peerModuleSettingCategories[peer][module] = Set.new(settingsCategories or {})
 
     for setting, _ in pairs(settings) do
         self.TempSettings.PeerSettingToModuleCache[peer][setting] = module
