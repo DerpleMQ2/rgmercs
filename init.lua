@@ -473,23 +473,23 @@ end
 ---@diagnostic disable-next-line: unused-local
 local script_actor = Comms.Actors.register(function(message)
     local msg = message()
-    if msg.from == Config.Globals.CurLoadedChar then return end
-    if msg.script ~= Comms.ScriptName then return end
+    if msg.From == Comms.GetPeerName() then return end
+    if msg.Script ~= Comms.ScriptName then return end
 
-    Logger.log_verbose("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", msg.from,
-        msg.module,
-        msg.event)
+    Logger.log_verbose("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", msg.From,
+        msg.Module,
+        msg.Event)
 
-    if msg.event == "SettingsUpdate" then
-        Logger.log_info("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.module, msg.from)
-        Logger.log_debug("Settings: \ag%s", Strings.TableToString(msg.data.settings))
-        Logger.log_debug("defaultSettings: \ag%s", Strings.TableToString(msg.data.defaultSettings))
-        Config:UpdatePeerSettings(msg.from, msg.module, msg.data.settings, msg.data.settingCategories, msg.data.defaultSettings)
+    if msg.Event == "SettingsUpdate" then
+        Logger.log_info("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.module, msg.From)
+        Logger.log_debug("Settings: \ag%s", Strings.TableToString(msg.Data.settings))
+        Logger.log_debug("defaultSettings: \ag%s", Strings.TableToString(msg.Data.defaultSettings))
+        Config:UpdatePeerSettings(msg.From, msg.Module, msg.Data.settings, msg.Data.settingCategories, msg.Data.defaultSettings)
         return
     end
 
-    if msg.event == "RequestPeerConfigs" then
-        Logger.log_info("Received RequestPeerConfigs from %s - sending our configs.", msg.from)
+    if msg.Event == "RequestPeerConfigs" then
+        Logger.log_info("Received RequestPeerConfigs from %s - sending our configs.", msg.From)
         local modules = { "Core", }
 
         for _, name in ipairs(Modules:GetModuleOrderedNames()) do
@@ -508,15 +508,15 @@ local script_actor = Comms.Actors.register(function(message)
         return
     end
 
-    if msg.event == "Heartbeat" then
-        --Logger.log_debug("Received Heartbeat from \am%s\aw: \ag%s", msg.from, Strings.TableToString(msg.data))
-        Config:UpdatePeerHeartbeat(msg.from, msg.data)
+    if msg.Event == "Heartbeat" then
+        --Logger.log_debug("Received Heartbeat from \am%s\aw: \ag%s", msg.From, Strings.TableToString(msg.Data))
+        Config:UpdatePeerHeartbeat(msg.From, msg.Data)
         return
     end
 
-    if msg.event == "SetSetting" and msg.data and msg.data.Setting and (msg.data.Value ~= nil) then
-        Logger.log_info("Received SetSetting for module \at%s \awfrom \am%s \awSetSetting :: \at%s \awto \ag%s", msg.module, msg.from, msg.data.Setting, tostring(msg.data.Value))
-        Config:HandleBind(msg.data.Setting, msg.data.Value)
+    if msg.Event == "SetSetting" and msg.Data and msg.Data.Setting and (msg.Data.Value ~= nil) then
+        Logger.log_info("Received SetSetting for module \at%s \awfrom \am%s \awSetSetting :: \at%s \awto \ag%s", msg.Module, msg.From, msg.Data.Setting, tostring(msg.Data.Value))
+        Config:HandleBind(msg.Data.Setting, msg.Data.Value)
         return
     end
 end)
