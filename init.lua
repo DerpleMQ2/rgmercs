@@ -481,15 +481,15 @@ local script_actor = Comms.Actors.register(function(message)
         msg.Event)
 
     if msg.Event == "SettingsUpdate" then
-        Logger.log_info("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.Module, msg.From)
-        Logger.log_debug("Settings: \ag%s", Strings.TableToString(msg.Data.settings))
-        Logger.log_debug("defaultSettings: \ag%s", Strings.TableToString(msg.Data.defaultSettings))
+        Logger.log_debug("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.Module, msg.From)
+        --Logger.log_debug("Settings: \ag%s", Strings.TableToString(msg.Data.settings))
+        --Logger.log_debug("defaultSettings: \ag%s", Strings.TableToString(msg.Data.defaultSettings))
         Config:UpdatePeerSettings(msg.From, msg.Module, msg.Data.settings, msg.Data.settingCategories, msg.Data.defaultSettings)
         return
     end
 
     if msg.Event == "RequestPeerConfigs" then
-        Logger.log_info("Received RequestPeerConfigs from %s - sending our configs.", msg.From)
+        Logger.log_debug("Received RequestPeerConfigs from %s - sending our configs.", msg.From)
         local modules = { "Core", }
 
         for _, name in ipairs(Modules:GetModuleOrderedNames()) do
@@ -515,7 +515,7 @@ local script_actor = Comms.Actors.register(function(message)
     end
 
     if msg.Event == "SetSetting" and msg.Data and msg.Data.Setting and (msg.Data.Value ~= nil) then
-        Logger.log_info("Received SetSetting for module \at%s \awfrom \am%s \awSetSetting :: \at%s \awto \ag%s", msg.Module, msg.From, msg.Data.Setting, tostring(msg.Data.Value))
+        Logger.log_debug("Received SetSetting for module \at%s \awfrom \am%s \awSetSetting :: \at%s \awto \ag%s", msg.Module, msg.From, msg.Data.Setting, tostring(msg.Data.Value))
         Config:HandleBind(msg.Data.Setting, msg.Data.Value)
         return
     end
