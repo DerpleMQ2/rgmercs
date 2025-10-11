@@ -569,7 +569,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
         if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
             local flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
             if self.selectedCharacter ~= Comms:GetPeerName() and Config:GetPeerLastConfigReceivedTime(self.selectedCharacter) == 0 then
-                ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Waiting for configuration from " .. self.selectedCharacter .. "...")
+                ImGui.TextColored(0.2, 0.2, 0.8, 1.0, "Waiting for configuration from " .. self.selectedCharacter .. "...")
             else
                 if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
