@@ -481,7 +481,7 @@ local script_actor = Comms.Actors.register(function(message)
         msg.Event)
 
     if msg.Event == "SettingsUpdate" then
-        Logger.log_info("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.module, msg.From)
+        Logger.log_info("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.Module, msg.From)
         Logger.log_debug("Settings: \ag%s", Strings.TableToString(msg.Data.settings))
         Logger.log_debug("defaultSettings: \ag%s", Strings.TableToString(msg.Data.defaultSettings))
         Config:UpdatePeerSettings(msg.From, msg.Module, msg.Data.settings, msg.Data.settingCategories, msg.Data.defaultSettings)
