@@ -1373,6 +1373,9 @@ function Module:GiveTime(combat_state)
         end
         self.TempSettings.NewCombatMode = false
         self.TempSettings.CombatModeSet = true
+
+        -- update our peers about our new state.
+        Config:BroadcastConfigs()
     end
 
     if self.CombatState ~= combat_state and combat_state == "Downtime" then
