@@ -17,7 +17,7 @@ OptionsUI.HighlightedSettings   = Set.new({})
 OptionsUI.configFilter          = ""
 OptionsUI.lastSortTime          = 0
 OptionsUI.lastHighlightTime     = 0
-OptionsUI.selectedCharacter     = Comms.GetPeerName()
+OptionsUI.selectedCharacter     = ""
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -469,6 +469,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     local shouldDrawGUI = true
 
     if self.FirstRender or self.lastSortTime < Config:GetLastModuleRegisteredTime() or self.lastHighlightTime < Config:GetLastHighlightChangeTime() then
+        self.selectedCharacter = Comms.GetPeerName()
         self:ApplySearchFilter()
         Logger.log_debug("\ayOptionsUI: \awSettings re-sorted due to new module settings being registered.")
         self.FirstRender = false
@@ -502,13 +503,13 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             for idx, name in ipairs(peerList) do
                 if name == self.selectedCharacter then
                     peerListIdx = idx
-                    self:ApplySearchFilter()
                     break
                 end
             end
             local newPeerIdx, peerChanged = ImGui.Combo("##OptionsUICharSelect", peerListIdx, peerList, #peerList)
             if peerChanged and newPeerIdx >= 1 and newPeerIdx <= #peerList then
                 self.selectedCharacter = peerList[newPeerIdx]
+                self:ApplySearchFilter()
             end
 
             ImGui.SetNextItemWidth(searchBarUsableWidth)
