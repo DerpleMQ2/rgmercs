@@ -348,7 +348,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
                     ImGui.PopStyleColor(1)
                 end
                 for _, category in ipairs(header.Categories) do
-                    if #Config:GetAllSettingsForCategory(category) > 0 then
+                    if #Config:PeerGetAllSettingsForCategory(self.selectedCharacter, category) > 0 then
                         -- only draw the seperator if the category name is different from the heading
                         if header.Name ~= category then
                             self:RenderCategorySeperator(category)
