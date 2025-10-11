@@ -2112,7 +2112,7 @@ function Config:SetSetting(setting, value, tempOnly)
     end
 
     local _, afterUpdate = Config:GetUsageText(setting, false, defaultConfig)
-    Logger.log_info("(%s) \ag%s\aw is now:\ax %-5s \ay[Previous:\ax %s\ay]", settingModuleName, setting, afterUpdate, beforeUpdate)
+    Logger.log_debug("(%s) \ag%s\aw is now:\ax %-5s \ay[Previous:\ax %s\ay]", settingModuleName, setting, afterUpdate, beforeUpdate)
 end
 
 --- Temporarily sets a setting
