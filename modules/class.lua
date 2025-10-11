@@ -585,7 +585,6 @@ function Module:Render()
 
     ---@type boolean|nil
     local pressed = false
-    local loadoutChange = false
 
     if self.ClassConfig and self.ModuleLoaded then
         ImGui.Text("Active Mode:")

@@ -2099,6 +2099,10 @@ function Config:SetSetting(setting, value, tempOnly)
         end
     end
 
+    if defaultConfig[setting].RequiresLoadoutChange then
+        Modules:ExecModule("Class", "RescanLoadout")
+    end
+
     local _, afterUpdate = Config:GetUsageText(setting, false, defaultConfig)
     Logger.log_info("(%s) \ag%s\aw is now:\ax %-5s \ay[Previous:\ax %s\ay]", settingModuleName, setting, afterUpdate, beforeUpdate)
 end
