@@ -393,6 +393,9 @@ function Module:LoadSettings()
     }
 
     Config:RegisterModuleSettings(self._name, settings, self.ClassConfig.DefaultConfig, self.FAQ, firstSaveRequired)
+
+    -- for config file change
+    Module.TempSettings.CombatModeSet = false
 end
 
 function Module:WriteCustomConfig()
