@@ -255,7 +255,7 @@ local function RGInit(...)
     end
 
     printf("\aw****************************")
-    printf("\aw\awWelcome to \ag%s", Config._name)
+    printf("\aw\awWelcome to \ag%s", Config._AppName)
     printf("\aw\awVersion \ag%s \aw(\at%s\aw)", Config._version, Config._subVersion)
     printf("\aw\awBy \ag%s", Config._author)
     printf("\aw****************************")
@@ -478,41 +478,23 @@ local script_actor = Comms.Actors.register(function(message)
         msg.Module,
         msg.Event)
 
-    if msg.Event == "SettingsUpdate" then
-        Logger.log_debug("Received SettingsUpdate for module \at%s \awfrom \am%s", msg.Module, msg.From)
-        Config:UpdatePeerSettings(msg.From, msg.Module, msg.Data.settings, msg.Data.settingCategories, msg.Data.defaultSettings)
-        return
-    end
-
-    if msg.Event == "RequestPeerConfigs" then
-        Logger.log_debug("Received RequestPeerConfigs from %s - sending our configs.", msg.From)
-        local modules = { "Core", }
-
-        for _, name in ipairs(Modules:GetModuleOrderedNames()) do
-            table.insert(modules, name)
-        end
-
-        for _, name in ipairs(modules) do
-            if Config.moduleSettings[name] ~= nil then
-                Comms.BroadcastMessage(name, "SettingsUpdate", {
-                    settings = Config:GetAllModuleSettings()[name],
-                    settingCategories = Config:GetAllModuleSettingCategories()[name],
-                    defaultSettings = Config:GetAllModuleDefaultSettings()[name],
-                })
-            end
-        end
-        return
-    end
-
+    -- This is a core event so handle it here.
     if msg.Event == "Heartbeat" then
         --Logger.log_debug("Received Heartbeat from \am%s\aw: \ag%s", msg.From, Strings.TableToString(msg.Data))
         Config:UpdatePeerHeartbeat(msg.From, msg.Data)
         return
     end
 
-    if msg.Event == "SetSetting" and msg.Data and msg.Data.Setting and (msg.Data.Value ~= nil) then
-        Logger.log_debug("Received SetSetting for module \at%s \awfrom \am%s \awSetSetting :: \at%s \awto \ag%s", msg.Module, msg.From, msg.Data.Setting, tostring(msg.Data.Value))
-        Config:HandleBind(msg.Data.Setting, msg.Data.Value)
+    if msg.Module == "Config" then
+        if msg.Event and Config[msg.Event] then
+            Config[msg.Event](Config, msg.Data)
+        end
+        return
+    end
+
+    -- all other handlers
+    if Modules:GetModule(msg.Module) then
+        Modules:ExecModule(msg.Module, msg.Event, msg.Data)
         return
     end
 end)

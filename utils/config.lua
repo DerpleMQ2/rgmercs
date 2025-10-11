@@ -10,7 +10,8 @@ local Set                                                = require("mq.Set")
 local Config                                             = {
     _version = '1.3',
     _subVersion = "The Outer Brood",
-    _name = "RGMercs Lua Edition",
+    _name = "Config",
+    _AppName = "RGMercs Lua Edition",
     _author = 'Lead Devs: Derple, Algar',
 }
 Config.__index                                           = Config
@@ -2067,7 +2068,14 @@ function Config:PeerSetSetting(peer, setting, value, tempOnly)
     end
 
     Logger.log_info("\aw[\ar%s\aw] Sending => \ag%s = \a-y%s", peer, setting, tostring(value))
-    Comms.SendMessage(peer, self._name, "SetSetting", { Setting = setting, Value = value, })
+    Comms.SendMessage(peer, self._name, "RemoteSetSetting", { Setting = setting, Value = value, })
+end
+
+function Config:RemoteSetSetting(data)
+    if data and data.Setting and data.Value ~= nil then
+        Logger.log_debug("Received SetSetting for module \awSetSetting :: \at%s \awto \ag%s", data.Setting, tostring(data.Value))
+        self:HandleBind(data.Setting, data.Value)
+    end
 end
 
 ---Sets a setting from either in global or a module setting table.
@@ -2237,7 +2245,29 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
 end
 
 function Config:RequestPeerConfigs(peer)
-    Comms.SendMessage(peer, self._name, "RequestPeerConfigs", {})
+    Comms.SendMessage(peer, self._name, "RequestConfigs", { from = Comms:GetPeerName(), })
+end
+
+function Config:RequestConfigs(data)
+    Logger.log_debug("Received RequestConfigs from %s - sending our configs.", data.from)
+    local modules = { "Core", }
+
+    for _, name in ipairs(Modules:GetModuleOrderedNames()) do
+        table.insert(modules, name)
+    end
+
+    for _, name in ipairs(modules) do
+        if Config.moduleSettings[name] ~= nil then
+            Comms.SendMessage(data.from, self._name, "UpdatePeerSettings", {
+                peer = Comms:GetPeerName(),
+                module = name,
+                settings = Config:GetAllModuleSettings()[name],
+                settingCategories = Config:GetAllModuleSettingCategories()[name],
+                defaultSettings = Config:GetAllModuleDefaultSettings()[name],
+            })
+        end
+    end
+    return
 end
 
 function Config:GetCurrentPeer()
@@ -2272,7 +2302,8 @@ function Config:SaveModuleSettings(module, settings)
     Logger.log_debug("\agModule %s - save settings requested!", module)
 
     -- broadcast the change to any listeners.
-    Comms.BroadcastMessage(module, "SettingsUpdate", { settings = settings, settingCategories = settingsCategories, defaultSettings = defaultSettings, })
+    Comms.BroadcastMessage(self._name, "UpdatePeerSettings",
+        { peer = Comms:GetPeerName(), module = module, settings = settings, settingCategories = settingsCategories, defaultSettings = defaultSettings, })
 end
 
 function Config:UpdatePeerHeartbeat(peer, data)
@@ -2316,10 +2347,15 @@ function Config:SetRemotePeer(peer)
     end
 end
 
-function Config:UpdatePeerSettings(peer, module, settings, settingsCategories, defaultSettings)
+function Config:UpdatePeerSettings(data)
+    local peer   = data.peer
+    local module = data.module
+
     if self.currentPeer ~= peer then
         return
     end
+
+    local settings, settingsCategories, defaultSettings = data.settings or {}, data.settingsCategories or {}, data.defaultSettings or {}
 
     self.peerModuleDefaultSettings[module] = defaultSettings
 
