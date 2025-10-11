@@ -1,5 +1,6 @@
 local mq            = require('mq')
 local Logger        = require("utils.logger")
+local Strings       = require("utils.strings")
 
 local Comms         = { _version = '1.0', _name = "Comms", _author = 'Derple', }
 Comms.__index       = Comms
@@ -37,6 +38,7 @@ function Comms.BroadcastMessage(module, event, data)
         Event = event,
         Data = data,
     })
+    Logger.log_debug("Broadcasted: %s event: %s", event, Strings.TableToString(data or {}, 512))
 end
 
 --- @param module string The name of the module to broadcast the update to.
@@ -51,6 +53,7 @@ function Comms.SendMessage(peer, module, event, data)
         Event = event,
         Data = data,
     })
+    Logger.log_debug("Sent Message: %s to:  %s event: %s", event, peer, Strings.TableToString(data or {}, 512))
 end
 
 function Comms.SendHeartbeat(assist, curState, curAutoTarget)

@@ -2245,11 +2245,21 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
 end
 
 function Config:RequestPeerConfigs(peer)
-    Comms.SendMessage(peer, self._name, "RequestConfigs", { from = Comms:GetPeerName(), })
+    Comms.SendMessage(peer, self._name, "SendConfigs", { from = Comms:GetPeerName(), })
 end
 
-function Config:RequestConfigs(data)
-    Logger.log_debug("Received RequestConfigs from %s - sending our configs.", data.from)
+function Config:PackageConfig(module)
+    return {
+        peer = Comms:GetPeerName(),
+        module = module,
+        settings = Config:GetAllModuleSettings()[module],
+        settingCategories = Config:GetAllModuleSettingCategories()[module],
+        defaultSettings = Config:GetAllModuleDefaultSettings()[module],
+    }
+end
+
+function Config:SendConfigs(data)
+    Logger.log_debug("Received SendConfigs from %s - sending our configs.", data.from)
     local modules = { "Core", }
 
     for _, name in ipairs(Modules:GetModuleOrderedNames()) do
@@ -2258,16 +2268,23 @@ function Config:RequestConfigs(data)
 
     for _, name in ipairs(modules) do
         if Config.moduleSettings[name] ~= nil then
-            Comms.SendMessage(data.from, self._name, "UpdatePeerSettings", {
-                peer = Comms:GetPeerName(),
-                module = name,
-                settings = Config:GetAllModuleSettings()[name],
-                settingCategories = Config:GetAllModuleSettingCategories()[name],
-                defaultSettings = Config:GetAllModuleDefaultSettings()[name],
-            })
+            Comms.SendMessage(data.from, self._name, "UpdatePeerSettings", self:PackageConfig(name))
         end
     end
-    return
+end
+
+function Config:BroadcastConfigs()
+    local modules = { "Core", }
+
+    for _, name in ipairs(Modules:GetModuleOrderedNames()) do
+        table.insert(modules, name)
+    end
+
+    for _, name in ipairs(modules) do
+        if Config.moduleSettings[name] ~= nil then
+            Comms.BroadcastMessage(self._name, "UpdatePeerSettings", self:PackageConfig(name))
+        end
+    end
 end
 
 function Config:GetCurrentPeer()
