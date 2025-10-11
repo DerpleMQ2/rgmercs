@@ -18,6 +18,7 @@ OptionsUI.configFilter          = ""
 OptionsUI.lastSortTime          = 0
 OptionsUI.lastHighlightTime     = 0
 OptionsUI.selectedCharacter     = ""
+OptionsUI.lastPeerUpdate        = 0
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -509,7 +510,13 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             local newPeerIdx, peerChanged = ImGui.Combo("##OptionsUICharSelect", peerListIdx, peerList, #peerList)
             if peerChanged and newPeerIdx >= 1 and newPeerIdx <= #peerList then
                 self.selectedCharacter = peerList[newPeerIdx]
+                Config:SetRemotePeer(self.selectedCharacter)
+                self.lastPeerUpdate = 0
+            end
+
+            if Config:GetPeerLastConfigReceivedTime(self.selectedCharacter) > 0 and self.lastPeerUpdate < Config:GetPeerLastConfigReceivedTime(self.selectedCharacter) then
                 self:ApplySearchFilter()
+                self.lastPeerUpdate = Config:GetPeerLastConfigReceivedTime(self.selectedCharacter)
             end
 
             ImGui.SetNextItemWidth(searchBarUsableWidth)
@@ -557,16 +564,21 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
         end
         ImGui.EndChild()
         ImGui.SameLine()
+
         local x, _ = ImGui.GetContentRegionAvail()
         if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
             local flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
-            if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
-                ImGui.TableNextColumn()
-                self:RenderCurrentTab()
-                ImGui.EndTable()
+            if self.selectedCharacter ~= Comms:GetPeerName() and Config:GetPeerLastConfigReceivedTime(self.selectedCharacter) == 0 then
+                ImGui.TextColored(1.0, 0.0, 0.0, 1.0, "Waiting for configuration from " .. self.selectedCharacter .. "...")
+            else
+                if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
+                    ImGui.TableNextColumn()
+                    self:RenderCurrentTab()
+                    ImGui.EndTable()
+                end
             end
+            ImGui.EndChild()
         end
-        ImGui.EndChild()
     end
 
     ImGui.PopID()

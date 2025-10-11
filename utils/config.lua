@@ -18,6 +18,7 @@ Config.moduleSettings                                    = {}
 Config.moduleDefaultSettings                             = {}
 Config.moduleTempSettings                                = {}
 Config.moduleSettingCategories                           = {}
+Config.currentPeer                                       = ""
 Config.peerModuleSettings                                = {}
 Config.peerModuleDefaultSettings                         = {}
 Config.peerModuleSettingCategories                       = {}
@@ -35,6 +36,7 @@ Config.TempSettings.PeerSettingToModuleCache             = {}
 Config.TempSettings.PeerSettingsCategoryToSettingMapping = {}
 Config.TempSettings.Peers                                = Set.new({})
 Config.TempSettings.PeersHeartbeats                      = {}
+Config.TempSettings.LastPeerConfigReceivedTime           = 0
 
 Config.TempSettings.HighlightedModules                   = Set.new({})
 
@@ -1813,7 +1815,12 @@ function Config:PeerGetModuleSettings(peer, module)
         return self:GetModuleSettings(module)
     end
 
-    return (self.peerModuleSettings[peer] and self.peerModuleSettings[peer][module] or {}) or {}
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetModuleSettings called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return {}
+    end
+
+    return self.peerModuleSettings[module] or {}
 end
 
 function Config:GetModuleDefaultSettings(module)
@@ -1825,7 +1832,12 @@ function Config:PeerGetModuleDefaultSettings(peer, module)
         return self:GetModuleDefaultSettings(module)
     end
 
-    return (self.peerModuleDefaultSettings[peer] and self.peerModuleDefaultSettings[peer][module] or {}) or {}
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetModuleDefaultSettings called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return {}
+    end
+
+    return self.peerModuleDefaultSettings[module] or {}
 end
 
 function Config:GetModuleSettingCategories(module)
@@ -1837,7 +1849,12 @@ function Config:PeerGetModuleSettingCategories(peer, module)
         return self:GetModuleSettingCategories(module)
     end
 
-    return (self.peerModuleSettingCategories[peer] and self.peerModuleSettingCategories[peer][module] or {}) or {}
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetModuleSettingCategories called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return {}
+    end
+
+    return self.peerModuleSettingCategories[module] or {}
 end
 
 function Config:GetAllModuleSettings()
@@ -1852,7 +1869,13 @@ function Config:PeerGetAllModuleDefaultSettings(peer)
     if peer == nil or peer == Comms.GetPeerName() then
         return self:GetAllModuleDefaultSettings()
     end
-    return self.peerModuleDefaultSettings[peer] or {}
+
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetAllModuleDefaultSettings called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return {}
+    end
+
+    return self.peerModuleDefaultSettings or {}
 end
 
 function Config:GetAllModuleSettingCategories()
@@ -1864,7 +1887,12 @@ function Config:PeerGetAllModuleSettingCategories(peer)
         return self:GetAllModuleSettingCategories()
     end
 
-    return self.peerModuleSettingCategories[peer] or {}
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetAllModuleSettingCategories called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return {}
+    end
+
+    return self.peerModuleSettingCategories or {}
 end
 
 function Config:GetAllSettingsForCategory(category)
@@ -1875,7 +1903,13 @@ function Config:PeerGetAllSettingsForCategory(peer, category)
     if peer == nil or peer == Comms.GetPeerName() then
         return self:GetAllSettingsForCategory(category)
     end
-    return (Config.TempSettings.PeerSettingsCategoryToSettingMapping[peer] and Config.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category] or {}) or {}
+
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetAllSettingsForCategory called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return {}
+    end
+
+    return Config.TempSettings.PeerSettingsCategoryToSettingMapping[category] or {}
 end
 
 function Config:GetModuleForSetting(setting)
@@ -1886,7 +1920,13 @@ function Config:PeerGetModuleForSetting(peer, setting)
     if peer == nil or peer == Comms.GetPeerName() then
         return self:GetModuleForSetting(setting)
     end
-    return (Config.TempSettings.PeerSettingToModuleCache[peer] and Config.TempSettings.PeerSettingToModuleCache[peer][setting] or "None") or "None"
+
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetModuleForSetting called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return {}
+    end
+
+    return Config.TempSettings.PeerSettingToModuleCache[setting] or "None"
 end
 
 function Config:SettingsLoaded()
@@ -1909,14 +1949,20 @@ function Config:PeerGetSetting(peer, setting, failOk)
     if peer == nil or peer == Comms.GetPeerName() then
         return self:GetSetting(setting, failOk)
     end
-    if not Config.TempSettings.PeerSettingToModuleCache[peer] or not Config.TempSettings.PeerSettingToModuleCache[peer][setting] then
+
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetSetting called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return nil
+    end
+
+    if not Config.TempSettings.PeerSettingToModuleCache[setting] then
         if not failOk then
             Logger.log_error("Setting %s was not found in the module cache for: %s!", setting, peer)
         end
         return nil
     end
 
-    return self:PeerGetModuleSettings(peer, Config.TempSettings.PeerSettingToModuleCache[peer][setting])[setting]
+    return self:PeerGetModuleSettings(peer, Config.TempSettings.PeerSettingToModuleCache[setting])[setting]
 end
 
 --- Retrieves a specified setting.
@@ -1953,11 +1999,17 @@ function Config:PeerGetSettingDefaults(peer, setting)
         return self:GetSettingDefaults(setting)
     end
 
-    if not Config.TempSettings.PeerSettingToModuleCache[peer] or not Config.TempSettings.PeerSettingToModuleCache[peer][setting] then
+    if self.currentPeer ~= peer then
+        Logger.log_error("PeerGetSettingDefaults called for %s but current peer is %s", peer, self.currentPeer or "nil")
+        return nil
+    end
+
+    if not Config.TempSettings.PeerSettingToModuleCache[setting] then
         Logger.log_error("Setting %s was not found in the module cache!", setting)
         return nil
     end
-    return self:PeerGetModuleDefaultSettings(peer, Config.TempSettings.PeerSettingToModuleCache[peer][setting])[setting]
+
+    return self:PeerGetModuleDefaultSettings(peer, Config.TempSettings.PeerSettingToModuleCache[setting])[setting]
 end
 
 --- Validates and sets a configuration setting for a specified module.
@@ -2122,10 +2174,10 @@ function Config:RegisterCategoryToSettingMapping(setting)
     table.insert(self.TempSettings.SettingsCategoryToSettingMapping[category], setting)
 end
 
-function Config:RegisterPeerCategoryToSettingMapping(peer, setting)
+function Config:PeerRegisterCategoryToSettingMapping(peer, setting)
     local category = Config:PeerGetSettingDefaults(peer, setting).Category
-    self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category] = self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category] or {}
-    table.insert(self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][category], setting)
+    self.TempSettings.PeerSettingsCategoryToSettingMapping[category] = self.TempSettings.PeerSettingsCategoryToSettingMapping[category] or {}
+    table.insert(self.TempSettings.PeerSettingsCategoryToSettingMapping[category], setting)
 end
 
 function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, firstSaveRequired)
@@ -2173,9 +2225,6 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
 
     if firstSaveRequired or settingsChanged then
         self:SaveModuleSettings(module, settings)
-    else
-        -- send settings even if we dont save.
-        Comms.BroadcastMessage(module, "SettingsUpdate", { settings = settings, settingCategories = settingCategories, defaultSettings = defaultSettings, })
     end
 
     self.TempSettings.lastModuleRegisteredTime = os.time()
@@ -2183,8 +2232,12 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
     Logger.log_info("\agModule %s - registered settings!", module)
 end
 
-function Config:RequestPeerConfigs()
-    Comms.BroadcastMessage(self._name, "RequestPeerConfigs", {})
+function Config:RequestPeerConfigs(peer)
+    Comms.SendMessage(peer, self._name, "RequestPeerConfigs", {})
+end
+
+function Config:GetCurrentPeer()
+    return self.currentPeer
 end
 
 function Config:GetLastModuleRegisteredTime()
@@ -2219,6 +2272,7 @@ function Config:SaveModuleSettings(module, settings)
 end
 
 function Config:UpdatePeerHeartbeat(peer, data)
+    self.TempSettings.Peers:add(peer)
     Config.TempSettings.PeersHeartbeats[peer] = Config.TempSettings.PeersHeartbeats[peer] or {}
     Config.TempSettings.PeersHeartbeats[peer].LastHeartbeat = os.time()
     Config.TempSettings.PeersHeartbeats[peer].Data = data or {}
@@ -2230,50 +2284,74 @@ function Config:ValidatePeers()
             Logger.log_info("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
             Config.TempSettings.Peers:remove(peer)
             Config.TempSettings.PeersHeartbeats[peer] = nil
-            self.peerModuleSettings[peer] = nil
-            self.peerModuleDefaultSettings[peer] = nil
-            self.peerModuleSettingCategories[peer] = nil
-            self.TempSettings.PeerModuleSettingsLowerToNameCache[peer] = nil
-            self.TempSettings.PeerSettingToModuleCache[peer] = nil
-            self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] = nil
+            if self.currentPeer == peer then
+                self.peerModuleSettings                                = {}
+                self.peerModuleDefaultSettings                         = {}
+                self.peerModuleSettingCategories                       = {}
+                self.TempSettings.PeerModuleSettingsLowerToNameCache   = {}
+                self.TempSettings.PeerSettingToModuleCache             = {}
+                self.TempSettings.PeerSettingsCategoryToSettingMapping = {}
+                self.currentPeer                                       = nil
+            end
         end
     end
 end
 
+function Config:SetRemotePeer(peer)
+    if self.currentPeer ~= peer then
+        self.peerModuleSettings                                = {}
+        self.peerModuleDefaultSettings                         = {}
+        self.peerModuleSettingCategories                       = {}
+        self.TempSettings.PeerModuleSettingsLowerToNameCache   = {}
+        self.TempSettings.PeerSettingToModuleCache             = {}
+        self.TempSettings.PeerSettingsCategoryToSettingMapping = {}
+        self.currentPeer                                       = peer
+        self.TempSettings.LastPeerConfigReceivedTime           = 0
+
+        self:RequestPeerConfigs(peer)
+    end
+end
+
 function Config:UpdatePeerSettings(peer, module, settings, settingsCategories, defaultSettings)
-    self.peerModuleSettings[peer]                                = self.peerModuleSettings[peer] or {}
-    self.peerModuleDefaultSettings[peer]                         = self.peerModuleDefaultSettings[peer] or {}
-    self.peerModuleSettingCategories[peer]                       = self.peerModuleSettingCategories[peer] or {}
-    self.TempSettings.PeerModuleSettingsLowerToNameCache[peer]   = self.TempSettings.PeerModuleSettingsLowerToNameCache[peer] or {}
-    self.TempSettings.PeerSettingToModuleCache[peer]             = self.TempSettings.PeerSettingToModuleCache[peer] or {}
-    self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] = self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] or {}
-    self.peerModuleDefaultSettings[peer][module]                 = defaultSettings
+    if self.currentPeer ~= peer then
+        return
+    end
+
+    self.peerModuleDefaultSettings[module] = defaultSettings
 
     -- remove old settings from caches
-    for setting, _ in pairs(self.peerModuleSettings[peer][module] or {}) do
-        if self.TempSettings.PeerSettingsCategoryToSettingMapping[peer] and Config:PeerGetSettingDefaults(peer, setting) then
-            local categoryListLen = #self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][Config:PeerGetSettingDefaults(peer, setting).Category] or 0
+    for setting, _ in pairs(self.peerModuleSettings[module] or {}) do
+        if self.TempSettings.PeerSettingsCategoryToSettingMapping and Config:PeerGetSettingDefaults(peer, setting) then
+            local categoryListLen = #self.TempSettings.PeerSettingsCategoryToSettingMapping[Config:PeerGetSettingDefaults(peer, setting).Category] or 0
             for i = categoryListLen, 1, -1 do
-                if self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][Config:PeerGetSettingDefaults(peer, setting).Category][i] == setting then
-                    table.remove(self.TempSettings.PeerSettingsCategoryToSettingMapping[peer][Config:PeerGetSettingDefaults(peer, setting).Category], i)
+                if self.TempSettings.PeerSettingsCategoryToSettingMapping[Config:PeerGetSettingDefaults(peer, setting).Category][i] == setting then
+                    table.remove(self.TempSettings.PeerSettingsCategoryToSettingMapping[Config:PeerGetSettingDefaults(peer, setting).Category], i)
                     break
                 end
             end
         end
-        self.TempSettings.PeerSettingToModuleCache[peer][setting] = nil
-        self.TempSettings.PeerModuleSettingsLowerToNameCache[peer][setting:lower()] = nil
+        self.TempSettings.PeerSettingToModuleCache[setting] = nil
+        self.TempSettings.PeerModuleSettingsLowerToNameCache[setting:lower()] = nil
     end
 
-    self.peerModuleSettings[peer][module] = deep_copy(settings or {})
-    self.peerModuleSettingCategories[peer][module] = Set.new(settingsCategories or {})
+    self.peerModuleSettings[module] = deep_copy(settings or {})
+    self.peerModuleSettingCategories[module] = Set.new(settingsCategories or {})
 
     for setting, _ in pairs(settings) do
-        self.TempSettings.PeerSettingToModuleCache[peer][setting] = module
-        self.TempSettings.PeerModuleSettingsLowerToNameCache[peer][setting:lower()] = setting
-        self:RegisterPeerCategoryToSettingMapping(peer, setting)
+        self.TempSettings.PeerSettingToModuleCache[setting] = module
+        self.TempSettings.PeerModuleSettingsLowerToNameCache[setting:lower()] = setting
+        self:PeerRegisterCategoryToSettingMapping(peer, setting)
     end
 
-    self.TempSettings.Peers:add(peer)
+    self.TempSettings.LastPeerConfigReceivedTime = os.time()
+end
+
+function Config:GetPeerLastConfigReceivedTime(peer)
+    if peer ~= self.currentPeer then
+        return 0
+    end
+
+    return self.TempSettings.LastPeerConfigReceivedTime or 0
 end
 
 function Config:GetPeers()
