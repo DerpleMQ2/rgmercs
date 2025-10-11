@@ -33,91 +33,123 @@ Module.TempSettings                     = {}
 Module.TempSettings.ClickyState         = {}
 Module.TempSettings.CombatClickiesTimer = 0
 
-Module.ServerClickies                   = {}
-Module.ServerClickies.ProjectLazarus    = {
-    [1] = {
-        ['conditions'] = {
-            [1] = {
-                target = 'Self',
-                args = {
-                    [1] = 0,
-                    [2] = 30,
+Module.DefaultServerClickies            = {
+    ['Project Lazarus'] = {
+        [1] = {
+            ['conditions'] = {
+                [1] = {
+                    target = 'Self',
+                    args = {
+                        [1] = 0,
+                        [2] = 30,
+                    },
+                    type = 'HP Threshold',
                 },
-                type = 'HP Threshold',
             },
+            ['iconId'] = 2484,
+            ['itemName'] = 'Draught of Opulent Healing I',
+            ['target'] = 'Self',
+            ['combat_state'] = 'Combat',
         },
-        ['iconId'] = 2484,
-        ['itemName'] = 'Draught of Opulent Healing I',
-        ['target'] = 'Self',
-        ['combat_state'] = 'Combat',
+        [2] = {
+            ['conditions'] = {
+                [1] = {
+                    ['target'] = 'Main Assist',
+                    ['args'] = {
+                        [1] = 0,
+                        [2] = 40,
+                    },
+                    ['type'] = 'HP Threshold',
+                },
+            },
+            ['iconId'] = 1002,
+            ['itemName'] = 'Orb of Shadows',
+            ['target'] = 'Main Assist',
+            ['combat_state'] = 'Combat',
+        },
+        [3] = {
+            ['conditions'] = {
+                [1] = {
+                    ['target'] = 'Self',
+                    ['args'] = {
+                        [1] = 0,
+                        [2] = 40,
+                    },
+                    ['type'] = 'HP Threshold',
+                },
+            },
+            ['iconId'] = 936,
+            ['itemName'] = 'Sanguine Mind Crystal III',
+            ['target'] = 'Self',
+            ['combat_state'] = 'Combat',
+        },
+        [4] = {
+            ['conditions'] = {
+                [1] = {
+                    ['target'] = 'Self',
+                    ['args'] = {
+                        [1] = 0,
+                        [2] = 40,
+                        [3] = 0,
+                        [4] = 40,
+                        [5] = 0,
+                        [6] = 40,
+                    },
+                    ['type'] = 'Any Threshold',
+                },
+            },
+            ['iconId'] = 178,
+            ['itemName'] = 'Forsaken Fungus Covered Scale Tunic',
+            ['target'] = 'Self',
+            ['combat_state'] = 'Combat',
+        },
+        [5] = {
+            ['conditions'] = {
+                [1] = {
+                    ['target'] = 'Self',
+                    ['args'] = {
+                        [1] = 0,
+                        [2] = 50,
+                    },
+                    ['type'] = 'HP Threshold',
+                },
+            },
+            ['iconId'] = 1002,
+            ['itemName'] = 'Orb of Shadows',
+            ['target'] = 'Self',
+            ['combat_state'] = 'Combat',
+        },
     },
-    [2] = {
-        ['conditions'] = {
-            [1] = {
-                ['target'] = 'Main Assist',
-                ['args'] = {
-                    [1] = 0,
-                    [2] = 40,
+
+    ['EQ Might']        = {
+        [1] = {
+            ['target'] = 'Self',
+            ['combat_state'] = 'Combat',
+            ['itemName'] = 'Veeshan\'s Distillate of Celestial Healing',
+            ['conditions'] = {
+                [1] = {
+                    ['target'] = 'Self',
+                    ['type'] = 'HP Threshold',
+                    ['args'] = {
+                        [1] = 0,
+                        [2] = 65,
+                    },
                 },
-                ['type'] = 'HP Threshold',
-            },
-        },
-        ['iconId'] = 1002,
-        ['itemName'] = 'Orb of Shadows',
-        ['target'] = 'Main Assist',
-        ['combat_state'] = 'Combat',
-    },
-    [3] = {
-        ['conditions'] = {
-            [1] = {
-                ['target'] = 'Self',
-                ['args'] = {
-                    [1] = 0,
-                    [2] = 40,
+                [2] = {
+                    ['target'] = 'Self',
+                    ['type'] = 'None',
+                    ['args'] = {},
                 },
-                ['type'] = 'HP Threshold',
             },
+            ['iconId'] = 656,
         },
-        ['iconId'] = 936,
-        ['itemName'] = 'Sanguine Mind Crystal III',
-        ['target'] = 'Self',
-        ['combat_state'] = 'Combat',
-    },
-    [4] = {
-        ['conditions'] = {
-            [1] = {
-                ['target'] = 'Self',
-                ['args'] = {
-                    [1] = 0,
-                    [2] = 40,
-                    [3] = 0,
-                    [4] = 40,
-                    [5] = 0,
-                    [6] = 40,
-                },
-                ['type'] = 'Any Threshold',
-            },
+        [2] = {
+            ['target'] = 'Self',
+            ['combat_state'] = 'Downtime',
+            ['itemName'] = 'Ring of the Warden',
+            ['conditions'] = {},
+            ['iconId'] = 6136,
         },
-        ['iconId'] = 178,
-        ['itemName'] = 'Forsaken Fungus Covered Scale Tunic',
-        ['target'] = 'Self',
-        ['combat_state'] = 'Combat',
-    },
-    [5] = {
-        ['conditions'] = {
-            [1] = {
-                ['target'] = 'Self',
-                ['args'] = {
-                    [1] = 0,
-                    [2] = 50,
-                },
-                ['type'] = 'HP Threshold',
-            },
-        },
-        ['iconId'] = 1002,
-        ['itemName'] = 'Orb of Shadows',
-        ['target'] = 'Self',
-        ['combat_state'] = 'Combat',
     },
 }
 
@@ -710,15 +742,15 @@ function Module:LoadSettings()
 
     local settingsChanged = false
 
-    local defaultServerClickies = self.ServerClickies
-    -- this can be refactored as needed when other servers/environments are added
-    if (mq.TLO.EverQuest.Server() or ""):lower() == "project lazarus" then
-        defaultServerClickies = self.ServerClickies.ProjectLazarus
-    end
-
+    -- insert default server clickies on very first run per PC
     if not settings.Clickies then
-        settings.Clickies = defaultServerClickies
-        settingsChanged = true
+        -- Live/Test use "Live". Emu servers use server-specific.
+        local serverType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or mq.TLO.EverQuest.Server()
+        local defaultClickyList = self.DefaultServerClickies[serverType]
+        if defaultClickyList then
+            settings.Clickies = defaultClickyList
+            settingsChanged = true
+        end
     end
 
     for _, clicky in ipairs(settings.DowntimeClickies or {}) do
@@ -1228,11 +1260,14 @@ function Module:ValidateClickies()
 end
 
 function Module:InsertDefaultClickies()
-    if Core.OnLaz() then
-        for _, defaultClicky in ipairs(self.ServerClickies.ProjectLazarus) do
+    -- Live/Test use "Live". Emu servers use server-specific.
+    local serverType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or mq.TLO.EverQuest.Server()
+    local defaultClickyList = self.DefaultServerClickies[serverType]
+    if defaultClickyList then
+        for _, defaultClicky in ipairs(defaultClickyList) do
             table.insert(Config:GetSetting('Clickies'), defaultClicky)
-            self:SaveSettings(false)
         end
+        self:SaveSettings(false)
     end
 end
 
