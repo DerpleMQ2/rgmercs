@@ -565,19 +565,35 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
         end
         ImGui.EndChild()
         ImGui.SameLine()
-        local totalHeight = ImGui.GetWindowHeight() * 1.3
 
         local x, _ = ImGui.GetContentRegionAvail()
-        if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
-            local child_pos = ImGui.GetCursorScreenPosVec()
-            local child_size = ImGui.GetContentRegionAvailVec()
-            local draw_list = ImGui.GetWindowDrawList()
+
+        local right_start = ImGui.GetCursorPosVec()
+        if ImGui.BeginChild("right##RGmercsOptionsBG", x, y - 1, ImGuiChildFlags.Border) then
+            local cr_min       = ImGui.GetWindowContentRegionMinVec()
+            local cr_max       = ImGui.GetWindowContentRegionMaxVec()
+            local wp           = ImGui.GetCursorScreenPosVec()
+            local top_left     = ImVec2(wp.x + cr_min.x, wp.y + cr_min.y)
+            local bottom_right = ImVec2(wp.x + cr_max.x, (wp.y + cr_max.y) * 1.25)
+
+            top_left.x         = top_left.x + ImGui.GetScrollX()
+            bottom_right.x     = bottom_right.x + ImGui.GetScrollX()
+            top_left.y         = top_left.y + ImGui.GetScrollY()
+            bottom_right.y     = bottom_right.y + ImGui.GetScrollY()
+
+            local draw_list    = ImGui.GetWindowDrawList()
+            draw_list:PushClipRect(top_left, bottom_right, true)
             draw_list:AddImage(self.bgImg:GetTextureID(),
-                child_pos,
-                ImVec2(child_pos.x + child_size.x, child_pos.y + totalHeight),
+                top_left,
+                bottom_right,
                 ImVec2(0, 0), ImVec2(1, 1),
                 IM_COL32(255, 255, 255, 30))
+            draw_list:PopClipRect()
+            ImGui.EndChild()
+        end
 
+        ImGui.SetCursorPos(right_start)
+        if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
             flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
             if self.selectedCharacter ~= Comms:GetPeerName() and Config:GetPeerLastConfigReceivedTime(self.selectedCharacter) == 0 then
                 ImGui.TextColored(0.2, 0.2, 0.8, 1.0, "Waiting for configuration from " .. self.selectedCharacter .. "...")
