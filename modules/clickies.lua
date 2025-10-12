@@ -750,6 +750,9 @@ function Module:LoadSettings()
         if defaultClickyList then
             settings.Clickies = defaultClickyList
             settingsChanged = true
+        else
+            settings.Clickies = {}
+            settingsChanged = true
         end
     end
 
