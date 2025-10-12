@@ -1367,7 +1367,6 @@ _ClassConfig      = {
                 end,
                 custom_func = function(self)
                     Logger.log_info("\atPocketPet: \arNo pet while in combat! \agPulling out pocket pet")
-                    Targeting.SetTarget(mq.TLO.Me.ID())
                     Casting.UseAA("Companion's Suspension", mq.TLO.Me.ID())
                     self.TempSettings.PocketPet = false
 

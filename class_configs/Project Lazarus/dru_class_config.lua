@@ -974,11 +974,6 @@ local _ClassConfig = {
                 end
             end
 
-            if rezAction and mq.TLO.Spawn(corpseId).Distance3D() > 25 then
-                Targeting.SetTarget(corpseId)
-                Core.DoCmd("/corpse")
-            end
-
             return rezAction
         end,
 
