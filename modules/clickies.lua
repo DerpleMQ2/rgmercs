@@ -747,13 +747,8 @@ function Module:LoadSettings()
         -- Live/Test use "Live". Emu servers use server-specific.
         local serverType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or mq.TLO.EverQuest.Server()
         local defaultClickyList = self.DefaultServerClickies[serverType]
-        if defaultClickyList then
-            settings.Clickies = defaultClickyList
-            settingsChanged = true
-        else
-            settings.Clickies = {}
-            settingsChanged = true
-        end
+        settings.Clickies = defaultClickyList or {}
+        settingsChanged = true
     end
 
     for _, clicky in ipairs(settings.DowntimeClickies or {}) do
