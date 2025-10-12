@@ -555,4 +555,12 @@ function Targeting.HateToolsNeeded()
     return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget())
 end
 
+--- Checks spawn surname to check if it is a pet that has evaded other TLO checks.
+--- @param spawn MQSpawn The spawn to check.
+function Targeting.IsTempPet(spawn)
+    if not spawn() then return false end
+    local surname = spawn.Surname()
+    return surname and (surname:find("'s Pet", 1, true) or surname:find("Doppelganger", 1, true))
+end
+
 return Targeting
