@@ -263,7 +263,7 @@ function Combat.MATargetScan(radius, zradius)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn and xtSpawn() and (xtSpawn.ID() or 0) > 0 and not xtSpawn.Dead() and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
+        if xtSpawn and xtSpawn() and (xtSpawn.ID() or 0) > 0 and not xtSpawn.Dead() and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) and not Targeting.IsTempPet(xtSpawn) then
             if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(xtSpawn, radius) then
                 Logger.log_verbose("MATargetScan Found %s [%d] Distance: %d", xtSpawn.CleanName() or "None", xtSpawn.ID() or 0,
                     xtSpawn.Distance() or 0)
@@ -340,7 +340,7 @@ function Combat.MATargetScan(radius, zradius)
             for i = 1, aggroMobCount do
                 local spawn = mq.TLO.NearestSpawn(i, aggroSearch)
 
-                if spawn and spawn() and (spawn.CleanName() or "None"):find("Guard") == nil then
+                if spawn and spawn() and not Targeting.IsTempPet(spawn) and (spawn.CleanName() or "None"):find("Guard") == nil then
                     -- If the spawn is already in combat with someone else, we should skip them.
                     if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(spawn, radius) then
                         --These are fallback checks... if we missed more than one named on XT, we are FUBAR. Let's skip the advanced logic.
