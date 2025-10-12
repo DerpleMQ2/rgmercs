@@ -19,6 +19,7 @@ OptionsUI.lastSortTime          = 0
 OptionsUI.lastHighlightTime     = 0
 OptionsUI.selectedCharacter     = ""
 OptionsUI.lastPeerUpdate        = 0
+OptionsUI.bgImg                 = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/options_bg.png")
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -564,10 +565,20 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
         end
         ImGui.EndChild()
         ImGui.SameLine()
+        local totalHeight = ImGui.GetWindowHeight() * 1.3
 
         local x, _ = ImGui.GetContentRegionAvail()
         if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
-            local flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
+            local child_pos = ImGui.GetCursorScreenPosVec()
+            local child_size = ImGui.GetContentRegionAvailVec()
+            local draw_list = ImGui.GetWindowDrawList()
+            draw_list:AddImage(self.bgImg:GetTextureID(),
+                child_pos,
+                ImVec2(child_pos.x + child_size.x, child_pos.y + totalHeight),
+                ImVec2(0, 0), ImVec2(1, 1),
+                IM_COL32(255, 255, 255, 30))
+
+            flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
             if self.selectedCharacter ~= Comms:GetPeerName() and Config:GetPeerLastConfigReceivedTime(self.selectedCharacter) == 0 then
                 ImGui.TextColored(0.2, 0.2, 0.8, 1.0, "Waiting for configuration from " .. self.selectedCharacter .. "...")
             else
@@ -582,7 +593,6 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     end
 
     ImGui.PopID()
-
     ImGui.End()
 
     return openGUI

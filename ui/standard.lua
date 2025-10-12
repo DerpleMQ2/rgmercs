@@ -130,7 +130,6 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
         ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
 
         if shouldDrawGUI then
-            local pressed
             local imgDisplayed = Casting.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
             ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
             ImGui.SameLine()
