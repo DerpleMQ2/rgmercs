@@ -131,9 +131,7 @@ end
 
 function Casting.SelfBuffCheck(spell)
     if not (spell and spell()) then return false end
-    ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell()).ID() or spell.RankName.ID() -- this checks the book first but allows us to still pass spells we don't know as variables to check
-    return Casting.LocalBuffCheck(spellId, false)
+    return Casting.LocalBuffCheck(Casting.GetUseableSpellId(spell), false)
 end
 
 function Casting.SelfBuffAACheck(aaName)
@@ -150,8 +148,7 @@ end
 function Casting.PetBuffCheck(spell)
     if not (spell and spell()) then return false end
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell()).ID() or spell.RankName.ID() -- this checks the book first but allows us to still pass spells we don't know as variables to check
-    return Casting.LocalBuffCheck(spellId, true)
+    return Casting.LocalBuffCheck(Casting.GetUseableSpellId(spell), true)
 end
 
 function Casting.PetBuffAACheck(aaName)
@@ -174,8 +171,7 @@ function Casting.GroupBuffCheck(spell, target, spellId)
     if not (spell and spell()) then return false end
     if not (target and target()) then return false end
 
-    ---@diagnostic disable-next-line: undefined-field
-    if not spellId then spellId = mq.TLO.Me.Spell(spell()).ID() or spell.RankName.ID() end -- this checks the book first but allows us to still pass spells we don't know as variables to check
+    if not spellId then spellId = Casting.GetUseableSpellId(spell) end
 
     local ret = false
 
@@ -762,8 +758,7 @@ function Casting.DetSpellCheck(spell, target)
     if not (spell and spell()) then return false end
     if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell()).ID() or spell.RankName.ID()
-    return Casting.TargetBuffCheck(spellId, target)
+    return Casting.TargetBuffCheck(Casting.GetUseableSpellId(spell), target)
 end
 
 function Casting.DetAACheck(aaName, target)
@@ -787,10 +782,8 @@ function Casting.DotSpellCheck(spell, target)
     if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
 
     if Targeting.MobHasLowHP(target) then return false end
-    ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell()).ID() or spell.RankName.ID()
 
-    return Casting.TargetBuffCheck(spellId, target, true, true)
+    return Casting.TargetBuffCheck(Casting.GetUseableSpellId(spell), target, true, true)
 end
 
 function Casting.DotItemCheck(itemName, target)
@@ -1809,6 +1802,36 @@ function Casting.StunImmuneTarget(target)
     if not target then target = mq.TLO.Target end
     local targetId = target.ID() or 0
     return Modules:ExecModule("Class", "TargetIsImmune", "Stun", targetId)
+end
+
+--- Return the proper spell ID based on subscription level and "Spell Unlocker" purchase
+--- @param spell MQSpell The spell effect to check for
+--- @return number spellId The proper ID of the spell to use in (de)buff checks
+function Casting.GetUseableSpellId(spell)
+    if not spell and not spell() then return 0 end
+
+    -- first check if *we* have the spell
+    ---@diagnostic disable-next-line: undefined-field
+    local mySpell = mq.TLO.Me.Spell
+    local baseName = spell.BaseName()
+
+    local spellId = mySpell(baseName).ID() or 0
+
+    if spellId > 0 then
+        local rankCap = mq.TLO.Me.SpellRankCap()
+        -- we have the spell, lets check our spell rank cap
+        if rankCap == 1 then
+            -- they aren't subscribed and haven't purchased the rank 2 unlocker.
+            spellId = mq.TLO.Spell(baseName).ID()
+        elseif rankCap == 2 and (mySpell(baseName).Rank() or 0) > 2 then
+            --they've purchased the rank 2 unlocker
+            local trueSpell = string.gsub(mySpell(baseName)(), "III", "II")
+            spellId = mq.TLO.Spell(trueSpell).ID()
+        end
+    end
+
+    -- also allow for buff checking spells we don't have
+    return spellId > 0 and spellId or spell.ID()
 end
 
 return Casting
