@@ -569,7 +569,7 @@ function Module:RenderRotationWithToggle(r, rotationTable)
     -- Move back to where the invisible Button is and render the toggle button just for looks
     -- This has to come here because if we put it where the invisible button is then it renders under the header
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - toggleOffset, cursorScreenPos.y)
-    Ui.RenderOptionToggle("##EnableDrawn" .. rotationName, "", not rotationDisabled)
+    Ui.RenderOptionToggle("##EnableDrawn" .. rotationName, "", not rotationDisabled, true)
 
     if Config:GetSetting('ShowDebugTiming') then
         -- Draw Timing Data
