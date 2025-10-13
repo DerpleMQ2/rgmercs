@@ -1723,7 +1723,10 @@ _ClassConfig      = {
                 name = "FireOrbSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
+                    if not spell() then return false end
+                    local myId = Casting.GetUseableSpellId(spell) -- Adjust for possible unsubbed accounts
+                    local baseItem = mq.TLO.Spell(myId).Base(1)() or 0
+                    return baseItem > 0 and mq.TLO.FindItemCount(baseItem)() == 0
                 end,
                 post_activate = function(self, spell, success)
                     if success then
@@ -1735,7 +1738,10 @@ _ClassConfig      = {
                 name = "EarthPetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
+                    if not spell() then return false end
+                    local myId = Casting.GetUseableSpellId(spell) -- Adjust for possible unsubbed accounts
+                    local baseItem = mq.TLO.Spell(myId).Base(1)() or 0
+                    return baseItem > 0 and mq.TLO.FindItemCount(baseItem)() == 0
                 end,
                 post_activate = function(self, spell, success)
                     if success then
@@ -1747,7 +1753,10 @@ _ClassConfig      = {
                 name = "FirePetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
+                    if not spell() then return false end
+                    local myId = Casting.GetUseableSpellId(spell) -- Adjust for possible unsubbed accounts
+                    local baseItem = mq.TLO.Spell(myId).Base(1)() or 0
+                    return baseItem > 0 and mq.TLO.FindItemCount(baseItem)() == 0
                 end,
                 post_activate = function(self, spell, success)
                     if success then
@@ -1791,9 +1800,11 @@ _ClassConfig      = {
                 name = "ManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if not spell() then return false end
                     if Casting.CanUseAA("Summon Modulation Shard") or not Config:GetSetting('SummonModRods') or not Targeting.TargetIsACaster(target) then return false end
-                    local modRodItem = spell.RankName.Base(1)()
-                    return modRodItem and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
+                    local myId = Casting.GetUseableSpellId(spell) -- Adjust for possible unsubbed accounts
+                    local modRodItemId = mq.TLO.Spell(myId).Base(1)() or 0
+                    return (mq.TLO.Spell(myId).Base(1)() or 0) > 0 and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItemId), 1000) == "0" and
                         (mq.TLO.Cursor.ID() or 0) == 0
                 end,
                 post_activate = function(self, spell, success)
@@ -1806,8 +1817,10 @@ _ClassConfig      = {
                 name = "SelfManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell, target, combat_state)
-                    if target.ID() ~= mq.TLO.Me.ID() then return false end
-                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0 and (mq.TLO.Cursor.ID() or 0) == 0 and
+                    if target.ID() ~= mq.TLO.Me.ID() or not spell() then return false end
+                    local myId = Casting.GetUseableSpellId(spell) -- Adjust for possible unsubbed accounts
+                    local modRodItemId = mq.TLO.Spell(myId).Base(1)() or 0
+                    return modRodItemId > 0 and mq.TLO.FindItemCount(modRodItemId)() == 0 and (mq.TLO.Cursor.ID() or 0) == 0 and
                         not (combat_state == "Combat" and mq.TLO.Me.PctMana() > Config:GetSetting('GroupManaPct'))
                 end,
                 post_activate = function(self, spell, success)
