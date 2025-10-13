@@ -358,7 +358,7 @@ function Module:LoadSettings()
     local settings = {}
     local firstSaveRequired = false
 
-    Logger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
+    Logger.log_debug("\ar%s\ao Core Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
         Config.Globals.CurLoadedChar)
     Logger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author,
         self.ClassConfig._version)

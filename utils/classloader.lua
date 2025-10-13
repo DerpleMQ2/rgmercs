@@ -34,7 +34,7 @@ end
 ---@param class string # EQ Class ShortName
 function ClassLoader.load(class)
     local classConfigFile, customConfig = ClassLoader.getClassConfigFileName(class)
-    Logger.log_info("Loading Base Config:\n\ag%s", classConfigFile)
+    Logger.log_debug("Loading Base Config:\n\ag%s", classConfigFile)
 
     if Files.file_exists(classConfigFile) then
         local config, err = loadfile(classConfigFile)

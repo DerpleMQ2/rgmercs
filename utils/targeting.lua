@@ -30,12 +30,10 @@ function Targeting.SetTarget(targetId, ignoreBuffPopulation)
 
     if targetId == mq.TLO.Target.ID() then return end
     Logger.log_debug("SetTarget(): Setting Target: %d (buffPopWait: %d)", targetId, ignoreBuffPopulation and 0 or maxWaitBuffs)
-    if Config:GetSetting('DoAutoTarget') then
-        if Targeting.GetTargetID() ~= targetId then
-            mq.TLO.Spawn(targetId).DoTarget()
-            mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
-            mq.delay(maxWaitBuffs, function() return ignoreBuffPopulation or (mq.TLO.Target() and mq.TLO.Target.BuffsPopulated()) end)
-        end
+    if Targeting.GetTargetID() ~= targetId then
+        mq.TLO.Spawn(targetId).DoTarget()
+        mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
+        mq.delay(maxWaitBuffs, function() return ignoreBuffPopulation or (mq.TLO.Target() and mq.TLO.Target.BuffsPopulated()) end)
     end
     Logger.log_debug("SetTarget(): Set Target to: %d (buffsPopulated: %s)", targetId, Strings.BoolToColorString(mq.TLO.Target.BuffsPopulated()))
 end
