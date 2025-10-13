@@ -176,6 +176,16 @@ Config.FAQ                         = {
         Answer = "  Announcments are used to broadcast the selected options to the DanNet channel. The Group Announce optios will output the announcement to /gsay.",
         Settings_Used = "",
     },
+    [2] = {
+        Question = "I want to manually control my driver and choose my own targets. What do I need to adjust?",
+        Answer = "The following settings may require adjustment to drive yourself:\n\n" ..
+            "Targeting:\nAuto Target (controls scanning for combat targets and changing targets to them).\n\n" ..
+            "Assisting:\nAuto Engage (controls navigating to targets, sticking, and using melee if enabled).\n\n" ..
+            "Positioning:\nFace Target In Combat (Mercs will still assume you are facing properly for abilities that require it!)\n\n" ..
+            "Mercs will still manage the action, and we should return to the target you had if needed after a heal, buff, item use, etc. You can pause mercs to take full control." ..
+            "These settings and interactions have been recently adjusted, and feedback is requested if you see something not quite right!",
+        Settings_Used = "",
+    },
 }
 -- Defaults
 Config.DefaultConfig               = {
@@ -649,7 +659,8 @@ Config.DefaultConfig               = {
         Header = "Targeting",
         Category = "Targeting Behavior",
         Index = 1,
-        Tooltip = "Allow RGMercs to automatically change your target. This applies to combat, healing, and most other actions.",
+        Tooltip =
+        "MA: Allow RGMercs to scan for and assign targets in combat.\nNon-MA: Allow RGMercs to adjust your target to the MA-provided autotarget.\nTarget changes to use spells/songs/AA/items will occur, but you will return to your original target after doing so.",
         Default = true,
         ConfigType = "Advanced",
     },
@@ -659,7 +670,7 @@ Config.DefaultConfig               = {
         Header = "Targeting",
         Category = "Targeting Behavior",
         Index = 2,
-        Tooltip = "Don't change combat targets when the MA does.",
+        Tooltip = "Don't change combat targets when the MA changes its Mercs autotarget. Stay on the original enemy.",
         Default = false,
         ConfigType = "Advanced",
     },
@@ -2241,7 +2252,7 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
 
     self.TempSettings.lastModuleRegisteredTime = os.time()
 
-    Logger.log_info("\agModule %s - registered settings!", module)
+    Logger.log_debug("\agModule %s - registered settings!", module)
 end
 
 function Config:RequestPeerConfigs(peer)

@@ -1050,7 +1050,8 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
 
         retryCount = retryCount or 2
 
-        if targetId > 0 then
+        local oldTargetId = mq.TLO.Target.ID()
+        if targetId > 0 and targetId ~= oldTargetId then
             Targeting.SetTarget(targetId, true)
         end
 
@@ -1079,6 +1080,10 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
         until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
         Config.Globals.LastUsedSpell = spellName
+        if oldTargetId > 0 then
+            Logger.log_debug("UseSpell():switching target back to old target after spell use.")
+            Targeting.SetTarget(oldTargetId, true)
+        end
         return true
     end
 
@@ -1143,7 +1148,8 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             return false
         end
 
-        if targetId > 0 and targetId ~= mq.TLO.Me.ID() then
+        local oldTargetId = mq.TLO.Target.ID()
+        if targetId > 0 and targetId ~= oldTargetId and targetId ~= mq.TLO.Me.ID() then
             Targeting.SetTarget(targetId, true)
         end
 
@@ -1221,6 +1227,11 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             classConfig.HelperFunctions.SwapInst("Weapon")
         end
 
+        if oldTargetId > 0 then
+            Logger.log_debug("UseSong():switching target back to old target after song use.")
+            Targeting.SetTarget(oldTargetId, true)
+        end
+
         return Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS
     end
 
@@ -1280,7 +1291,6 @@ end
 --- @return boolean True if the AA ability was successfully used, false otherwise.
 function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     local me = mq.TLO.Me
-    local oldTargetId = mq.TLO.Target.ID()
 
     local aaAbility = mq.TLO.Me.AltAbility(aaName)
 
@@ -1321,7 +1331,8 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
 
     Casting.ActionPrep()
 
-    if Targeting.GetTargetID() ~= targetId and targetSpawn() then
+    local oldTargetId = mq.TLO.Target.ID()
+    if targetId > 0 and targetId ~= oldTargetId and targetSpawn() then
         if me.Combat() and Targeting.TargetIsType("pc", targetSpawn) then
             Logger.log_debug("\awUseAA():NOTICE:\ax Turning off autoattack to cast on a PC.")
             Core.DoCmd("/attack off")
@@ -1358,7 +1369,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
         Core.DoCmd(cmd)
         mq.delay(5)
         if oldTargetId > 0 then
-            Logger.log_debug("UseAA():switching target back to old target after casting aa")
+            Logger.log_debug("UseAA():switching target back to old target after AA use.")
             Targeting.SetTarget(oldTargetId, true)
         end
     end
@@ -1428,8 +1439,10 @@ function Casting.UseItem(itemName, targetId)
         return false
     end
 
-    local oldTargetId = Targeting.GetTargetID()
-    Targeting.SetTarget(targetId, true)
+    local oldTargetId = mq.TLO.Target.ID()
+    if targetId > 0 and targetId ~= oldTargetId and targetId ~= mq.TLO.Me.ID() then
+        Targeting.SetTarget(targetId, true)
+    end
 
     Logger.log_debug("\awUseItem(\ag%s\aw): Using Item!", itemName)
 
@@ -1488,7 +1501,7 @@ function Casting.ActionPrep()
         mq.TLO.Me.Stand()
         mq.delay(10, function() return mq.TLO.Me.Standing() end)
 
-        Config.Globals.InMedState = false
+        --Config.Globals.InMedState = false -- allow us to sit back down after the action, automed has been adjusted
     end
 
     if mq.TLO.Window("SpellBookWnd").Open() then
