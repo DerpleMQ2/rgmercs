@@ -259,10 +259,10 @@ local function RGInit(...)
     printf("\aw\awVersion \ag%s \aw(\at%s\aw)", Config._version, Config._subVersion)
     printf("\aw\awBy \ag%s", Config._author)
     printf("\aw****************************")
-    -- keep these for easy editing/additon later
-    printf("\agOur Assist System has been revamped! See our recent forum post or commit messages.")
+    -- keep these for easy editing/addition later
+    --  printf("\agThe new options panel is live! See our recent forum post or commit messages.")
     printf("\awPlease visit us on the RG forums for the most recent news and updates.")
-    printf("\aw use \ag /rg \aw for a list of commands")
+    printf("\aw Use \ag /rgl \aw or check our options panel for a list of commands.")
 
     -- store initial positioning data.
     initPctComplete = 90

@@ -515,19 +515,21 @@ function Combat.FindBestAutoTarget(validateFn)
     Logger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", Config.Globals.AutoTargetID or 0,
         mq.TLO.Target.ID())
 
-    local autoTargetId = Config.Globals.AutoTargetID
-    if autoTargetId > 0 and (validateFn and validateFn(autoTargetId)) then
-        if mq.TLO.Target.ID() ~= autoTargetId then
-            Targeting.SetTarget(autoTargetId)
-        end
+    if Config:GetSetting('DoAutoTarget') then -- don't adjust target if autotargeting is off
+        local autoTargetId = Config.Globals.AutoTargetID
+        if autoTargetId > 0 and (validateFn and validateFn(autoTargetId)) then
+            if mq.TLO.Target.ID() ~= autoTargetId then
+                Targeting.SetTarget(autoTargetId)
+            end
 
-        -- For Assist Lists, this ensures we correctly and quickly receive health percent to assist in a timely manner
-        -- For Emu, this helps correct for emu xtarget bugs
-        -- Second dead check because targets were ocasionally dying between the validateFn and this check
-        if Config:GetSetting('UseAssistList') or Core.OnEMU() then
-            if mq.TLO.Spawn(autoTargetId)() and not mq.TLO.Spawn(autoTargetId).Dead() and not Targeting.IsSpawnXTHater(autoTargetId) then
-                Targeting.AddXTByID(1, Config.Globals.AutoTargetID)
-                Logger.log_verbose("FindTarget(): FoundTargetID(%d) not on xt list, adding.", autoTargetId or 0)
+            -- For Assist Lists, this ensures we correctly and quickly receive health percent to assist in a timely manner
+            -- For Emu, this helps correct for emu xtarget bugs
+            -- Second dead check because targets were ocasionally dying between the validateFn and this check
+            if Config:GetSetting('UseAssistList') or Core.OnEMU() then
+                if mq.TLO.Spawn(autoTargetId)() and not mq.TLO.Spawn(autoTargetId).Dead() and not Targeting.IsSpawnXTHater(autoTargetId) then
+                    Targeting.AddXTByID(1, Config.Globals.AutoTargetID)
+                    Logger.log_verbose("FindTarget(): FoundTargetID(%d) not on xt list, adding.", autoTargetId or 0)
+                end
             end
         end
     end
