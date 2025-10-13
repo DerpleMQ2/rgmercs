@@ -1080,8 +1080,8 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
         until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
         Config.Globals.LastUsedSpell = spellName
-        if oldTargetId > 0 and oldTargetId == Config.Globals.AutoTargetID then
-            Logger.log_debug("UseSpell():Switching target back to autotarget after spell use.")
+        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
+            Logger.log_debug("UseSpell(): Retargeting previous target after spell use.")
             Targeting.SetTarget(oldTargetId, true)
         end
         return true
@@ -1227,8 +1227,8 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             classConfig.HelperFunctions.SwapInst("Weapon")
         end
 
-        if oldTargetId > 0 and oldTargetId == Config.Globals.AutoTargetID then
-            Logger.log_debug("UseSong():Switching target back to autotarget after song use.")
+        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
+            Logger.log_debug("UseSong(): Retargeting previous target after song use.")
             Targeting.SetTarget(oldTargetId, true)
         end
 
@@ -1368,8 +1368,8 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     else
         Core.DoCmd(cmd)
         mq.delay(5)
-        if oldTargetId > 0 and oldTargetId == Config.Globals.AutoTargetID then
-            Logger.log_debug("UseAA():Switching target back to autotarget after AA use.")
+        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
+            Logger.log_debug("UseAA(): Retargeting previous target after AA use.")
             Targeting.SetTarget(oldTargetId, true)
         end
     end
@@ -1484,8 +1484,8 @@ function Casting.UseItem(itemName, targetId)
         Core.DoCmd("/autoinv")
     end
 
-    if oldTargetId > 0 and oldTargetId == Config.Globals.AutoTargetID then
-        Logger.log_debug("UseItem():Switching target back to autotarget after item use.")
+    if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
+        Logger.log_debug("UseItem(): Retargeting previous target after item use.")
         Targeting.SetTarget(oldTargetId, true)
     end
 
