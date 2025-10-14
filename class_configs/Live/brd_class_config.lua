@@ -1372,8 +1372,6 @@ local _ClassConfig = {
     ['DefaultConfig']   = {
         ['Mode']                = {
             DisplayName = "Mode",
-            Category = "Combat",
-            Tooltip = "Select the Combat Mode for this Toon",
             Type = "Custom",
             RequiresLoadoutChange = true,
             Default = 1,
@@ -1393,9 +1391,6 @@ local _ClassConfig = {
             Tooltip = "Allows the bard to meditate.\nPlease note that this comes at the cost of disabling all normal downtime actions while meditating.",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my bard meditating?",
-            Answer =
-            "If your bard is medding, you can enable the Respect Med Settings setting on the Mana/End Sustain tab. Please note that the bard will not take any downtime actions while medding!",
         },
 
         --Abilities
@@ -1440,8 +1435,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.SlowSong,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my single target Slow song?",
-            Answer = "Simply enable the Use Slow (ST) option.",
         },
         ['DoAESlow']            = {
             DisplayName = "Use Slow (AE)",
@@ -1452,8 +1445,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.AESlowSong,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my AE Slow song?",
-            Answer = "Simply enable the Use Slow (AE) option.",
         },
         ['DoDispel']            = {
             DisplayName = "Use Dispel",
@@ -1464,8 +1455,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.DispelSong,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my Dispel song?",
-            Answer = "You can enable Use Dispel to use your Dispel song when the target has beneficial effects.",
         },
 
         --Other Recovery
@@ -1475,7 +1464,7 @@ local _ClassConfig = {
             Header = "Recovery",
             Category = "Other Recovery",
             Index = 101,
-            Tooltip = "Select the Regen Song to be used, if any. Always used out of combat if selected. Use in-combat is determined by sustain settings.",
+            Tooltip = "Select the Regen Song to be used, if any.",
             RequiresLoadoutChange = true,
             Type = "Combo",
             ComboOptions = { 'None', 'Group', 'Area', },
@@ -1498,9 +1487,6 @@ local _ClassConfig = {
             Default = 3,
             Min = 1,
             Max = 4,
-            FAQ = "Can I change when I sing my regen songs?",
-            Answer = "You can change when you sing your regen songs by changing the [UseRegen] setting.\n" ..
-                "Try changing this setting to determine when you want to use your regen songs.",
         },
         ['UseCrescendo']        = {
             DisplayName = "Crescendo Delayed Heal",
@@ -1511,8 +1497,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.CrescendoSong,
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why aren't my Crescendoes being used?",
-            Answer = "Crescendo Delayed Heals aren't used until the thresholds set in the Mana sustain settings tab.",
         },
         ['GroupManaPct']        = {
             DisplayName = "Group Mana %",
@@ -1520,14 +1504,12 @@ local _ClassConfig = {
             Header = "Recovery",
             Category = "Other Recovery",
             Index = 104,
-            Tooltip = "Mana% to begin managing group mana (See FAQ)",
+            Tooltip =
+            "Enable the use of Crescendoes, Reflexive Strikes, and Regen songs (if configured) when we have a count (see below) of group members at or below this mana percentage.",
             Default = 80,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What does the Group Mana % setting control exactly??",
-            Answer = "Group Mana % controls when we begin using Crescendoes and Reflexive Strikes.\n" ..
-                "If configured under the Regen Song options, it also governs when Regen Song will be sung.",
         },
         ['GroupManaCt']         = {
             DisplayName = "Group Mana Count",
@@ -1540,9 +1522,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 6,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my Crescendo or Reflexive Strike songs?",
-            Answer = "You may not have enough party members under the Group Mana % setting in group mana.\n" ..
-                "Try adjusting Group Mana Count to the number of party members that must be below that amount before using these abilities.",
         },
         -- Curing
         ['UseCure']             = {
@@ -1554,8 +1533,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.CureSong,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my Cure song?",
-            Answer = "Select the Cure Ailments setting in the Regen/Healing tab to use your Cure song when the group has detrimental effects.",
         },
         -- Direct
         ['UseBellow']           = {
@@ -1588,9 +1565,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using the second insult when I selected Current + Old?",
-            Answer = "Depending on how crowded your song selection is, you may not see this cast often.\n" ..
-                "You may need to adjust your selections to accomodate this one.",
         },
         ['UseLLInsult']         = {
             DisplayName = "Use Low-Level Insults",
@@ -1612,8 +1586,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.FireDotSong,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my Fire Dot song?",
-            Answer = "You can enable [UseFireDots] to use your Fire Dot song when you are in combat.",
         },
         ['UseIceDots']          = {
             DisplayName = "Use Ice Dots",
@@ -1624,8 +1596,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.IceDotSong,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my Ice Dot song?",
-            Answer = "You can enable [UseIceDots] to use your Ice Dot song when you are in combat.",
         },
         ['UsePoisonDots']       = {
             DisplayName = "Use Poison Dots",
@@ -1636,8 +1606,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.PoisonDotSong,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my Poison Dot song?",
-            Answer = "You can enable [UsePoisonDots] to use your Poison Dot song when you are in combat.",
         },
         ['UseDiseaseDots']      = {
             DisplayName = "Use Disease Dots",
@@ -1648,8 +1616,6 @@ local _ClassConfig = {
             Tooltip = Tooltips.DiseaseDotSong,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "How do I use my Disease Dot song?",
-            Answer = "You can enable [UseDiseaseDots] to use your Disease Dot song when you are in combat.",
         },
         -- Under the Hood
         ['RefreshDT']           = {
@@ -1698,9 +1664,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Amplification song?",
-            Answer = "You can enable the Use Amp option in Buffs and Defenses to use your Amplification song." ..
-                "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
         },
         ['UseJonthan']          = {
             DisplayName = "Use Jonthan",
@@ -1716,9 +1679,6 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Jonthan song?",
-            Answer = "You can enable [UseJonthan] to use your Jonthan song." ..
-                "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
         },
         ['UseAlliance']         = {
             DisplayName = "Use Alliance",
@@ -1730,8 +1690,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Alliance song?",
-            Answer = "You can enable Use Alliance to use your Alliance song when you are in combat.",
         },
         ['DoVetAA']             = {
             DisplayName = "Use Vet AA",
@@ -1739,12 +1697,10 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 104,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
-            FAQ = "What Vet AA's does BRD use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
         --Group
         ['UseRunBuff']          = {
@@ -1756,8 +1712,6 @@ local _ClassConfig = {
             Tooltip = "Use the best runspeed buff you have available. Short Duration > Long Duration > Selo's Sonata AA",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using [x] run speed (Selo) buff?",
-            Answer = "You can configure your run speed buff selection in the Utility tab, this may need to be adjusted as you level.",
         },
         ['UseEndBreath']        = {
             DisplayName = "Use Enduring Breath",
@@ -1769,8 +1723,6 @@ local _ClassConfig = {
             Default = false,
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Enduring Breath song?",
-            Answer = "You can enable Use Enduring Breath to use your Enduring Breath song when you are in water.",
         },
         ['UseAura']             = {
             DisplayName = "Use Bard Aura",
@@ -1803,9 +1755,6 @@ local _ClassConfig = {
             Max = 3,
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
-            FAQ = "Why is Fierce Eye being being used on trash?",
-            Answer = "By default, Fierce Eye will fire any time it is available in combat, as holding it for Burns tends to be an overall DPS loss.\n" ..
-                "Adjust to your personal taste.",
         },
         ['UseAria']             = {
             DisplayName = "Use Aria",
@@ -1820,8 +1769,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my Vah Shir overhaste song?",
-            Answer = "Choose which you will prioritize before they are combined in the Aria line on the DPS - Group options tab in your class settings.",
         },
         ['LLAria']              = {
             DisplayName = "Pre-Aria Choice:",
@@ -1836,8 +1783,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I not using my Rizlona's spell damage song?",
-            Answer = "Choose which you will prioritize before they are combined in the Aria line on the DPS - Group options tab in your class settings.",
         },
         ['UseMarch']            = {
             DisplayName = "Use War March",
@@ -1852,8 +1797,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I using the War March line? I have enchanter haste.",
-            Answer = "The War March line of songs can be enabled or disabled on the Offesive tab in the class options.",
         },
         ['UseArcane']           = {
             DisplayName = "Use Arcane Line",
@@ -1868,8 +1811,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I using the Arcane line all the time? It isn't that great...",
-            Answer = "The Arcane line of songs was buffed on live in early 2024, and is now worthy of prioritizing over any other song but Aria and (possibly War March).",
         },
         ['UseSuffering']        = {
             DisplayName = "Use Suffering Line",
@@ -1884,8 +1825,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I singing Suffering line? It isn't great!",
-            Answer = "By default we will sing this line during downtime in hopes that the proc can provide a slight aDPS boost when we next engage.",
         },
         ['UseDicho']            = {
             DisplayName = "Psalm (Dicho) Use:",
@@ -1919,9 +1858,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Spiteful song?",
-            Answer = "You can enable Use Spiteful to use your Spiteful song." ..
-                "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
         },
         ['UseSpry']             = {
             DisplayName = "Use Spry",
@@ -1936,9 +1872,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Spry Sonata song?",
-            Answer = "You can enable Use Spry to use your Spry Sonata song." ..
-                "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
         },
         ['UseResist']           = {
             DisplayName = "Use DS/Resist Psalm",
@@ -1953,9 +1886,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Damage Shield / Resist Psalm?",
-            Answer = "You can enable the DS/Resist Psalm in the Buffs and Defenses tab." ..
-                "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
         },
         ['UseReckless']         = {
             DisplayName = "Use Reckless",
@@ -1970,9 +1900,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my bard singing the Reckless line?",
-            Answer = "Reckless is sung out of combat if all other songs are up as a partial filler that can potentially increase healing early in the fight." ..
-                "You can adjust or disable this as desired in the Buffs and Defenses tab.",
         },
         ['UseAccelerando']      = {
             DisplayName = "Use Accelerando",
@@ -1988,9 +1915,6 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Accelerando song?",
-            Answer = "You can enable Use Accelerando to use your Accelerando song." ..
-                "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
         },
         ['UseFireBuff']         = {
             DisplayName = "Use Fire Spell Buff",
@@ -2006,9 +1930,6 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my bard using the spell/dot proc buffs?",
-            Answer = "Outside of limited scenarios and limited level ranges, these procs underperform compared to any other song option.\n" ..
-                "Nonetheless, the options can be found in the DPS - Group Tab if you find yourself in the above scenarios.",
         },
         ['UseColdBuff']         = {
             DisplayName = "Use Cold Spell Buff",
@@ -2024,9 +1945,6 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my bard using the spell/dot proc buffs?",
-            Answer = "Outside of limited scenarios and limited level ranges, these procs underperform compared to any other song option.\n" ..
-                "Nonetheless, the options can be found in the DPS - Group Tab if you find yourself in the above scenarios.",
         },
         ['UseDotBuff']          = {
             DisplayName = "Use Fire/Magic DoT Buff",
@@ -2042,9 +1960,6 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "Why isn't my bard using the spell/dot proc buffs?",
-            Answer = "Outside of limited scenarios and limited level ranges, these procs underperform compared to any other song option.\n" ..
-                "Nonetheless, the options can be found in the DPS - Group Tab if you find yourself in the above scenarios.",
         },
 
         -- Clickies
@@ -2062,9 +1977,6 @@ local _ClassConfig = {
             Max = 3,
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
-            FAQ = "Why is my BRD using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Utility/Items/Misc tab.",
         },
         ['DoChestClick']        = {
             DisplayName = "Chest Click",
@@ -2104,9 +2016,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my emergency abilities?",
-            Answer = "You may not be below your Emergency HP % in the Utility tab.\n" ..
-                "Try adjusting this to the minimum amount of HP you want to have before using these abilities.",
         },
         ['UseFading']           = {
             DisplayName = "Use Combat Escape",
@@ -2118,9 +2027,6 @@ local _ClassConfig = {
             Default = true,
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
-            FAQ = "Why is my BRD regularly using Fading Memories",
-            Answer = "When Use Combat Escape is enabled, Fading Memories will be used when the Bard has any unwanted aggro.\n" ..
-                "This helps the common issue of bards gaining aggro from singing before a tank has the chance to secure it.",
         },
 
         --Instruments--
@@ -2132,8 +2038,6 @@ local _ClassConfig = {
             Category = "Instruments",
             Tooltip = "Auto swap instruments for songs",
             Default = false,
-            FAQ = "Does RGMercs BRD support instrument swapping?",
-            Answer = "Auto Swap Instruments can be enabled and configured on the Instruments tab.",
         },
         ['Offhand']             = {
             DisplayName = "Offhand",
@@ -2144,9 +2048,6 @@ local _ClassConfig = {
             Tooltip = "Item to swap in when no instrument is available or needed.",
             Type = "ClickyItem",
             Default = "",
-            FAQ = "How do I make sure we put back the correct item after using an instrument?",
-            Answer = "Place your desired off-hand item on your cursor and select the proper text box on your Instrument tab.\n" ..
-                "Also, make sure you have Auto Swap Instrument enabled.",
         },
         ['BrassInst']           = {
             DisplayName = "Brass Instrument",
@@ -2157,9 +2058,6 @@ local _ClassConfig = {
             Tooltip = "Brass Instrument to Swap in as needed.",
             Type = "ClickyItem",
             Default = "",
-            FAQ = "How do I use my Brass Instrument?",
-            Answer = "Place the correct instrument on your cursor and select the proper text box on your Instrument tab.\n" ..
-                "Also, make sure you have Auto Swap Instrument enabled.",
         },
         ['WindInst']            = {
             DisplayName = "Wind Instrument",
@@ -2170,9 +2068,6 @@ local _ClassConfig = {
             Tooltip = "Wind Instrument to Swap in as needed.",
             Type = "ClickyItem",
             Default = "",
-            FAQ = "How do I use my Wind Instrument?",
-            Answer = "Place the correct instrument on your cursor and select the proper text box on your Instrument tab.\n" ..
-                "Also, make sure you have Auto Swap Instrument enabled.",
         },
         ['PercInst']            = {
             DisplayName = "Percussion Instrument",
@@ -2183,9 +2078,6 @@ local _ClassConfig = {
             Tooltip = "Percussion Instrument to Swap in as needed.",
             Type = "ClickyItem",
             Default = "",
-            FAQ = "How do I use my Percussion Instrument?",
-            Answer = "Place the correct instrument on your cursor and select the proper text box on your Instrument tab.\n" ..
-                "Also, make sure you have Auto Swap Instrument enabled.",
         },
         ['StringedInst']        = {
             DisplayName = "Stringed Instrument",
@@ -2196,9 +2088,6 @@ local _ClassConfig = {
             Tooltip = "Stringed Instrument to Swap in as needed.",
             Type = "ClickyItem",
             Default = "",
-            FAQ = "How do I use my Stringed Instrument?",
-            Answer = "Place the correct instrument on your cursor and select the proper text box on your Instrument tab.\n" ..
-                "Also, make sure you have Auto Swap Instrument enabled.",
         },
     },
 }

@@ -663,9 +663,7 @@ return {
             {
                 name = "Intimidation",
                 type = "Ability",
-                cond = function(self, abilityName)
-                    return Config:GetSetting('DoIntimidate')
-                end,
+                load_cond = function(self) return Casting.AARank("Intimidation") > 1 end,
             },
             {
                 name = "AESlice",
@@ -816,7 +814,7 @@ return {
             Min = 1,
             Max = 1,
             FAQ = "What do the different modes do?",
-            Answer = "Currently Berserkers Only have DPS mode. More modes will be added in the future.",
+            Answer = "Currently Berserkers Only have DPS mode.",
         },
         ['DoEpic']          = {
             DisplayName = "Do Epic",
@@ -825,8 +823,6 @@ return {
             Category = "Class Config Clickies",
             Tooltip = "Enable using your epic clicky",
             Default = true,
-            FAQ = "Why am I not using my Epic clicky?",
-            Answer = "Make sure you have [DoEpic] enabled.",
         },
         ['DoOpener']        = {
             DisplayName = "Use Openers",
@@ -835,8 +831,6 @@ return {
             Category = "Direct",
             Tooltip = "Use Opening Arrow Shot Silent Shot Line.",
             Default = true,
-            FAQ = "Why am I not using my opener?",
-            Answer = "Make sure you have [DoOpener] enabled.",
         },
         ['DoBattleLeap']    = {
             DisplayName = "Do Battle Leap",
@@ -845,19 +839,6 @@ return {
             Category = "Direct",
             Tooltip = "Enable using Battle Leap",
             Default = true,
-            FAQ = "Why am I not using Battle Leap?",
-            Answer = "Make sure you have [DoBattleLeap] enabled.",
-        },
-        ['DoIntimidate']    = {
-            DisplayName = "Do Intimidate",
-            Group = "Abilities",
-            Header = "Debuffs",
-            Category = "Misc Debuffs",
-            Tooltip = "Enable using Intimidate",
-            Default = false,
-            FAQ = "Why am I not using Intimidate?",
-            Answer = "Make sure you have [DoIntimidate] enabled.\n" ..
-                "Early levels of Intimidate can fear the target.\nUSE WITH CAUTION!",
         },
         ['DoAoe']           = {
             DisplayName = "Do AoE",
@@ -866,8 +847,6 @@ return {
             Category = "AE",
             Tooltip = "Enable using AoE Abilities",
             Default = true,
-            FAQ = "Why am I not using AoE?",
-            Answer = "Make sure you have [DoAoe] enabled.",
         },
         ['SummonAxes']      = {
             DisplayName = "Summon Axes",
@@ -877,8 +856,6 @@ return {
             Index = 101,
             Tooltip = "Enable Summon Axes",
             Default = true,
-            FAQ = "Why am I not summoning Axes?",
-            Answer = "Make sure you have [SummonAxes] enabled.",
         },
         ['AutoAxeCount']    = {
             DisplayName = "Auto Axe Count",
@@ -890,8 +867,6 @@ return {
             Default = 100,
             Min = 0,
             Max = 600,
-            FAQ = "I keep running out of Axes, what do I do?",
-            Answer = "Increase the [AutoAxeCount] to summon more Axes when you hit this threshold remaining.",
         },
         ['DichoAxeCount']   = {
             DisplayName = "Auto Dicho Axe Count",
@@ -903,8 +878,6 @@ return {
             Default = 100,
             Min = 0,
             Max = 600,
-            FAQ = "I keep running out of Dicho Axes, what do I do?",
-            Answer = "Increase the [DichoAxeCount] to summon more Dicho Axes when you hit this threshold remaining.",
         },
         ['SummonDichoAxes'] = {
             DisplayName = "Summon Dicho Axes",
@@ -914,8 +887,6 @@ return {
             Index = 103,
             Tooltip = "Enable Summon Dicho Axes",
             Default = true,
-            FAQ = "Why am I not summoning Dicho Axes?",
-            Answer = "Make sure you have [SummonDichoAxes] enabled.",
         },
         ['DoDisconDisc']    = {
             DisplayName = "Do Discon Disc",
@@ -924,8 +895,6 @@ return {
             Category = "Self",
             Tooltip = "Enable using Disconcerting Discipline",
             Default = true,
-            FAQ = "Why am I not using Disconcerting Discipline?",
-            Answer = "Make sure you have [DoDisconDisc] enabled.",
         },
     },
 }

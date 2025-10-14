@@ -1088,9 +1088,7 @@ local _ClassConfig = {
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
         },
         ['Malo'] = {
@@ -2006,16 +2004,15 @@ local _ClassConfig = {
             Answer = "You can set the [DoSelfWard] option to true to enable Ward Type Spells.",
         },
         ['DoVetAA']           = {
-            DisplayName = "Do Vet AA",
+            DisplayName = "Use Vet AA",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Self",
             Index = 102,
-            Tooltip = "Use Veteran AA during burns (See FAQ).",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "What Veteran AA's will be used with Do Vet AA set?",
-            Answer = "Currently, Shaman will use Intensity of the Resolute during burns. More may be added in the future.",
+            RequiresLoadoutChange = true,
         },
         --Debuffs
         ['DoSTMalo']          = {

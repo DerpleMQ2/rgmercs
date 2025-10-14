@@ -670,9 +670,7 @@ local _ClassConfig = {
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
             {
                 name = "Shattered Gnoll Slayer",
@@ -1491,14 +1489,15 @@ local _ClassConfig = {
             Default = true,
         },
         ['DoVetAA']           = {
-            DisplayName = "Do Vet AA",
+            DisplayName = "Use Vet AA",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Self",
             Index = 102,
-            Tooltip = "Use Veteran AA during burns (See FAQ).",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
 
         -- Debuffs

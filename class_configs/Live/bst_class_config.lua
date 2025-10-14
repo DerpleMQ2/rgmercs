@@ -7,7 +7,7 @@ local Casting   = require("utils.casting")
 local Logger    = require("utils.logger")
 
 return {
-    _version              = "1.3 - Live",
+    _version              = "1.4 - Live",
     _author               = "Derple, Algar",
     ['Modes']             = {
         'DPS',
@@ -822,8 +822,9 @@ return {
             { --Chest Click, name function stops errors in rotation window when slot is empty
                 name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
+                load_cond = function(self) return Config:GetSetting('DoChestClick') end,
                 cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    if not Casting.ItemHasClicky(itemName) then return false end
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
@@ -886,15 +887,14 @@ return {
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
         },
         ['Slow'] = {
             {
                 name = "Sha's Reprisal",
                 type = "AA",
+                load_cond = function(self) return Casting.CanUseAA("Sha's Reprisal") end,
                 cond = function(self, aaName, target)
                     local aaSpell = Casting.GetAASpell(aaName)
                     return Casting.DetAACheck(aaName) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and not Casting.SlowImmuneTarget(target)
@@ -903,8 +903,8 @@ return {
             {
                 name = "SlowSpell",
                 type = "Spell",
+                load_cond = function(self) return not Casting.CanUseAA("Sha's Reprisal") end,
                 cond = function(self, spell, target)
-                    if Casting.CanUseAA("Sha's Reprisal") then return false end
                     return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and not Casting.SlowImmuneTarget(target)
                 end,
             },
@@ -921,8 +921,8 @@ return {
             {
                 name = "Armor of Experience",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
                     return mq.TLO.Me.PctHPs() < 35
                 end,
             },
@@ -978,8 +978,8 @@ return {
             {
                 name = "Paragon of Spirit",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoParagon') end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoParagon') then return false end
                     return (mq.TLO.Group.LowMana(Config:GetSetting('ParaPct'))() or -1) > 0
                 end,
             },
@@ -993,8 +993,8 @@ return {
             {
                 name = "Feralgia",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoFeralgia') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoFeralgia') then return false end
                     --This checks to see if the Growl portion is up on the pet (or about to expire) before using this, those who prefer the swarm pets can use the actual swarm pet spell in conjunction with this for mana savings.
                     --There are some instances where the Growl isn't needed, but that is a giant TODO and of minor benefit.
                     ---@diagnostic disable-next-line: undefined-field
@@ -1056,24 +1056,25 @@ return {
             {
                 name = "Icelance2",
                 type = "Spell",
+                load_cond = function(self) return not Config:GetSetting('DoAERoar') end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting("DoAERoar") then return false end
                     return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "AERoar",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoAERoar') end,
                 cond = function(self, spell, target)
-                    if not (Config:GetSetting("DoAERoar") and Config:GetSetting("DoAEDamage")) then return false end
+                    if not Config:GetSetting("DoAEDamage") then return false end
                     return Casting.OkayToNuke() and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
                 name = "SwarmPet",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSwarmPet') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSwarmPet') then return false end
                     --We will let Feralgia apply swarm pets if our pet currently doesn't have its Growl Effect.
                     local feralgia = self.ResolvedActionMap['Feralgia']
                     return (feralgia and feralgia() and mq.TLO.Me.PetBuff(mq.TLO.Spell(feralgia).RankName.Trigger(2).ID())) and Casting.HaveManaToNuke()
@@ -1084,16 +1085,12 @@ return {
             {
                 name = "Round Kick",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return Casting.CanUseAA("Feral Swipe")
-                end,
+                load_cond = function(self) return Casting.CanUseAA("Feral Swipe") end,
             },
             {
                 name = "Kick",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return not Casting.CanUseAA("Feral Swipe")
-                end,
+                load_cond = function(self) return not Casting.CanUseAA("Feral Swipe") end,
             },
             {
                 name = "Tiger Claw",
@@ -1163,16 +1160,17 @@ return {
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRunSpeed') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoRunSpeed') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "AvatarSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoAvatar') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAvatar') or not Targeting.TargetIsAMelee(target) then return false end
+                    if not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1256,8 +1254,8 @@ return {
             {
                 name = "KillShotBuff",
                 type = "Spell",
+                load_cond = function(self) return not Casting.CanUseAA("Feralist's Unity") end,
                 cond = function(self, spell)
-                    if Casting.CanUseAA("Feralist's Unity") then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -1273,53 +1271,59 @@ return {
             {
                 name = "Epic",
                 type = "Item",
+                load_cond = function(self) return Config:GetSetting('DoEpic') end,
                 cond = function(self, itemName)
-                    if not Config:GetSetting('DoEpic') then return false end
                     return not mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() and not mq.TLO.Me.PetBuff("Might of the Wild Spirits")()
                 end,
             },
             {
                 name = "Hobble of Spirits",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('PetProcChoice') == 3 end,
                 cond = function(self, aaName, target)
                     local slowProc = self.ResolvedActionMap['PetSlowProc']
-                    return Config:GetSetting('DoPetSnare') and (slowProc and slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
+                    return (slowProc and slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
                         mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name())() == nil
                 end,
             },
             {
                 name = "AvatarSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoAvatar') end,
                 cond = function(self, spell)
-                    return Config:GetSetting('DoAvatar') and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRunSpeed') end,
                 cond = function(self, spell)
-                    return Config:GetSetting('DoRunSpeed') and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetOffenseBuff",
                 type = "Spell",
+                load_cond = function(self) return not Config:GetSetting('DoTankPet') end,
                 cond = function(self, spell)
-                    return (not Config:GetSetting('DoTankPet')) and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetDefenseBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoTankPet') end,
                 cond = function(self, spell)
-                    return Config:GetSetting('DoTankPet') and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetSlowProc",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('PetProcChoice') == 2 end,
                 cond = function(self, spell)
-                    return Config:GetSetting('DoPetSlow') and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
@@ -1332,8 +1336,9 @@ return {
             {
                 name = "PetDamageProc",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('PetProcChoice') == 1 end,
                 cond = function(self, spell)
-                    return (not Config:GetSetting('DoTankPet')) and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
@@ -1346,15 +1351,16 @@ return {
             {
                 name = "PetSpellGuard",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSpellGuard') end,
                 cond = function(self, spell)
-                    return Config:GetSetting('DoSpellGuard') and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetGrowl",
                 type = "Spell",
+                load_cond = function(self) return not Config:GetSetting('DoFeralgia') end,
                 cond = function(self, spell)
-                    if Config:GetSetting('DoFeralgia') then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -1510,7 +1516,7 @@ return {
             Min = 1,
             Max = 1,
             FAQ = "What is the difference between the modes?",
-            Answer = "Beastlords currently only have one Mode. This may change in the future.",
+            Answer = "Beastlords currently only have one Mode.",
         },
         --Other Recovery
         ['DoParagon']      = {
@@ -1523,11 +1529,6 @@ return {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Paragon of Spirit(s) abilities?",
-            Answer = "Make sure you have [DoParagon] enabled.\n" ..
-                "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
-                "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
-                "If you want to use Focused Paragon outside of combat, enable [DowntimeFP].",
         },
         ['ParaPct']        = {
             DisplayName = "Paragon %",
@@ -1540,11 +1541,6 @@ return {
             Min = 1,
             Max = 99,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my Paragon Abilities?",
-            Answer = "Make sure you have [DoParagon] enabled.\n" ..
-                "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
-                "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
-                "If you want to use Focused Paragon outside of combat, enable [DowntimeFP].",
         },
         ['FParaPct']       = {
             DisplayName = "F.Paragon %",
@@ -1557,11 +1553,6 @@ return {
             Min = 1,
             Max = 99,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my Paragon Abilities?",
-            Answer = "Make sure you have [DoParagon] enabled.\n" ..
-                "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
-                "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
-                "If you want to use Focused Paragon outside of combat, enable [DowntimeFP].",
         },
         ['DowntimeFP']     = {
             DisplayName = "Downtime F.Paragon",
@@ -1572,11 +1563,6 @@ return {
             Tooltip = "Use Focused Paragon outside of Combat.",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my Paragon Abilities?",
-            Answer = "Make sure you have [DoParagon] enabled.\n" ..
-                "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
-                "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
-                "If you want to use Focused Paragon outside of combat, enable [DowntimeFP].",
         },
         --Pet Buffs
         ['DoTankPet']      = {
@@ -1587,47 +1573,33 @@ return {
             Index = 101,
             Tooltip = "Use abilities designed for your pet to tank.",
             Default = false,
-            FAQ = "Why am I not giving my pet tank buffs?",
-            Answer = "Enable [DoTankPet] to use abilities designed for your pet to tank.\n" ..
-                "Disable [DoTankPet] to use abilities designed for your pet to DPS.",
+            RequiresLoadoutChange = true,
         },
-        ['DoPetSlow']      = {
-            DisplayName = "Pet Slow Proc",
+        ['PetProcChoice']  = {
+            DisplayName = "Pet Proc Choice:",
             Group = "Abilities",
             Header = "Pet",
             Category = "Pet Buffs",
             Index = 102,
-            Tooltip = "Use your Pet Slow Proc Buff (does not stack with Pet Damage or Snare Proc Buff).",
-            Default = false,
-            FAQ = "Why am I not buffing my pet with (Slow, Damage, Snare) proc buff?",
-            Answer =
-                "Pet proc buffs do not stack with each other and the one you wish to use should be selected.\n" ..
-                "If neither Snare nor Slow proc are selected, the Damage proc will be used.",
-        },
-        ['DoPetSnare']     = {
-            DisplayName = "Pet Snare Proc",
-            Group = "Abilities",
-            Header = "Pet",
-            Category = "Pet Buffs",
-            Index = 103,
-            Tooltip = "Use your Pet Snare Proc Buff (does not stack with Pet Damage or Slow Proc Buff).",
-            Default = false,
-            FAQ = "Why am I continually buffing my pet?",
-            Answer = "Pet proc buffs do not stack, you should only select one.\n" ..
-                "If neither Snare nor Slow proc are selected, the Damage proc will be used.",
+            Tooltip = "Select your preferred pet proc buff type.",
+            Type = "Combo",
+            ComboOptions = { 'Damage', 'Slow', 'Snare', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            RequiresLoadoutChange = true,
+            ConfigType = "Advanced",
         },
         ['DoSpellGuard']   = {
             DisplayName = "Do Spellguard",
             Group = "Abilities",
             Header = "Pet",
             Category = "Pet Buffs",
-            Index = 104,
+            Index = 103,
             Tooltip = "Do Pet Spell Guard. (Warning! Long refresh time.)",
             Default = false,
+            RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Pet Spell Guard?",
-            Answer = "Enable [DoSpellGuard] to use your Pet Spell Guard.\n" ..
-                "This has a long refresh time, so expect delays in use.",
         },
         ['DoFeralgia']     = {
             DisplayName = "Do Feralgia",
@@ -1639,8 +1611,6 @@ return {
             Default = true,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "Why is my BST not using the Growl Buff?",
-            Answer = "Feralgia provides a similar buff and also summons swarm pets and is enabled by default. Disable it to use Growl.",
         },
         -- Swarm Pets
         ['DoSwarmPet']     = {
@@ -1667,9 +1637,6 @@ return {
             Tooltip = "Mem and cast your Mending spell.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "I want to help with healing, what can I do?",
-            Answer = "Make sure you have [DoHeals] enabled.\n" ..
-                "If you want to help with pet healing, enable [DoPetHealSpell].",
         },
         ['DoPetHealSpell'] = {
             DisplayName = "Pet Heal Spell",
@@ -1680,26 +1647,18 @@ return {
             Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "My Pet Keeps Dying, What Can I Do?",
-            Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
-                "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
         },
         -- Healing Thresholds
         ['PetHealPct']     = {
             DisplayName = "Pet Heal Spell HP%",
-
             Group = "Abilities",
             Header = "Recovery",
             Category = "Healing Thresholds",
             Index = 101,
             Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
-
             Default = 80,
             Min = 1,
             Max = 99,
-            FAQ = "My pet keeps dying, how do I keep it alive?",
-            Answer = "You can set the [PetHealPct] to a lower value to heal your pet sooner.\n" ..
-                "Also make sure that [DoPetHeals] is enabled.",
         },
 
         --Abilities
@@ -1712,8 +1671,6 @@ return {
             Tooltip = "Use your slow spell or AA.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my BST slowing, when I have a SHM in group?",
-            Answer = "Simply deselect the option to Do Slow.",
         },
         ['DoDot']          = {
             DisplayName = "Cast DOTs",
@@ -1724,9 +1681,6 @@ return {
             Tooltip = "Enable casting Damage Over Time spells.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "Why am I using so many DOTs? I'm always running low mana!",
-            Answer = "Generally, BST DoT spells are worth using at all levels of play.\n" ..
-                "Dots have additional settings in the RGMercs Main config, such as the min mana% to use them, or mob HP to stop using them",
         },
         ['DoRunSpeed']     = {
             DisplayName = "Do Run Speed",
@@ -1734,8 +1688,9 @@ return {
             Header = "Buffs",
             Category = "Group",
             Index = 101,
-            Tooltip = "Do Run Speed Spells/AAs",
+            Tooltip = "Do Run or Move Speed Spells/AAs",
             Default = true,
+            RequiresLoadoutChange = true,
             FAQ = "Why are my buffers in a run speed buff war?",
             Answer = "Many run speed spells freely stack and overwrite each other, you will need to disable Run Speed Buffs on some of the buffers.",
         },
@@ -1747,9 +1702,7 @@ return {
             Index = 102,
             Tooltip = "Buff Group/Pet with Infusion of Spirit",
             Default = false,
-            FAQ = "How do I use my Avatar Buffs?",
-            Answer = "Make sure you have [DoAvatar] enabled.\n" ..
-                "Also double check [DoBuffs] is enabled so you can cast on others.",
+            RequiresLoadoutChange = true,
         },
         ['DoVetAA']        = {
             DisplayName = "Use Vet AA",
@@ -1757,10 +1710,10 @@ return {
             Header = "Buffs",
             Category = "Self",
             Index = 101,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
-            FAQ = "What Vet AA's does SHD use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
+            ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
         --Combat
         ['DoAEDamage']     = {
@@ -1783,8 +1736,7 @@ return {
             Index = 102,
             Tooltip = "Use your AE Roar (Timer 11) spell line.",
             Default = false,
-            FAQ = "Why am I not using the Roar line? It is better than this weak Ice Lance?",
-            Answer = "Enable Use AE Roar to memorize the spell.\nNote that Do AE Damage must also be enabled for the Roar to be used.",
+            RequiresLoadoutChange = true,
         },
         ['AETargetCnt']    = {
             DisplayName = "AE Target Count",
@@ -1796,9 +1748,6 @@ return {
             Default = 2,
             Min = 1,
             Max = 10,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
@@ -1839,8 +1788,6 @@ return {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['AggroFeign']     = {
             DisplayName = "Emergency Feign",
@@ -1850,9 +1797,8 @@ return {
             Index = 101,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
+            RequiresLoadoutChange = true,
             FAQ = "How do I use my Feign Death?",
-            Answer = "Make sure you have [AggroFeign] enabled.\n" ..
-                "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
@@ -1862,6 +1808,7 @@ return {
             Index = 103,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
+            RequiresLoadoutChange = true,
             FAQ = "What is a Coating?",
             Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
@@ -1873,6 +1820,7 @@ return {
             Index = 102,
             Tooltip = "Click your chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
+            RequiresLoadoutChange = true,
             ConfigType = "Advanced",
             FAQ = "What is a Chest Click?",
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
@@ -1886,8 +1834,7 @@ return {
             Index = 101,
             Tooltip = "Click your Epic Weapon.",
             Default = false,
-            FAQ = "How do I use my Epic Weapon?",
-            Answer = "Enable Do Epic to click your Epic Weapon.",
+            RequiresLoadoutChange = true,
         },
     },
 }
