@@ -1220,9 +1220,7 @@ local _ClassConfig = {
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
             { --homework: Check if this is necessary (does not exceed 50% spell haste cap)
                 name = "Celestial Rapidity",
@@ -1867,10 +1865,10 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 101,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
-            FAQ = "What Vet AA's does CLR use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns. Clerics have tools that largely leave Armor of Experience unused.",
+            ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
         --Damage
         ['InterContraChoice'] = {

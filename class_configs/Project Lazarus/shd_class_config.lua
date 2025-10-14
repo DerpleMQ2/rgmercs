@@ -633,8 +633,9 @@ local _ClassConfig = {
                 name = "Armor of Experience",
                 type = "AA",
                 tooltip = Tooltips.ArmorofExperience,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') and Config:GetSetting('DoVetAA')
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical')
                 end,
             },
             {
@@ -759,9 +760,7 @@ local _ClassConfig = {
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
             {
                 name_func = function(self)
@@ -1186,6 +1185,8 @@ local _ClassConfig = {
             Index = 103,
             Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
+            ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
 
         --Taps

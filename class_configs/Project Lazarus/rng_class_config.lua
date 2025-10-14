@@ -436,9 +436,7 @@ return {
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
             {
                 name = "OoW_Chest",
@@ -499,8 +497,8 @@ return {
             {
                 name = "Armor of Experience",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
                     return mq.TLO.Me.PctHPs() < 35 and Targeting.IHaveAggro(100)
                 end,
             },
@@ -984,6 +982,8 @@ return {
             Index = 102,
             Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
+            ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
 
         --Utility

@@ -244,9 +244,7 @@ local _ClassConfig = {
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoVetAA')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
             },
             {
                 name = "Five Point Palm",
@@ -354,6 +352,7 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
+            ConfigType = "Advanced",
             RequiresLoadoutChange = true,
         },
         ['DoAEDamage']      = {

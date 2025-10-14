@@ -764,8 +764,9 @@ return {
             {
                 name = "Armor of Experience",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') and Config:GetSetting('DoVetAA')
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical')
                 end,
             },
             {
@@ -1521,6 +1522,8 @@ return {
             Index = 102,
             Tooltip = "Use Veteran AA such as Intensity of the Resolute or Armor of Experience as necessary.",
             Default = true,
+            ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
 
         --Buffs
