@@ -1958,7 +1958,7 @@ end
 function Module:GiveTime(combat_state)
     self:RefreshGroupNames()
 
-    if combat_state ~= "Downtime" then
+    if combat_state ~= "Downtime" and not self:IsPullMode("Chain") then
         Logger.log_verbose("PULL:GiveTime() we are in %s, not ready for pulling.", combat_state)
         return
     end
