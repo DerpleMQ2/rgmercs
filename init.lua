@@ -34,9 +34,11 @@ Modules:load()
 require('utils.datatypes')
 
 -- ImGui Variables
-local openGUI         = true
-local notifyZoning    = true
-local curState        = "Downtime"
+local openGUI            = true
+local notifyZoning       = true
+local curState           = "Downtime"
+local heartbeatCoroutine = nil
+
 
 local initPctComplete = 0
 local initMsg         = "Initializing RGMercs..."
@@ -180,6 +182,16 @@ mq.imgui.init('RGMercsUI', RGMercsGUI)
 -- End UI --
 local unloadedPlugins = {}
 
+local function CreateHeartBeat()
+    heartbeatCoroutine = coroutine.create(function()
+        while (1) do
+            Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or curState,
+                Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
+            coroutine.yield()
+        end
+    end)
+end
+
 local function RGInit(...)
     Core.CheckPlugins({
         "MQ2Rez",
@@ -203,6 +215,9 @@ local function RGInit(...)
             end
         end
     end
+
+    -- send heartbeat to peers.
+    CreateHeartBeat()
 
     initPctComplete = 10
     initMsg = "Scanning for Configurations..."
@@ -298,9 +313,17 @@ local function Main()
         return
     end
 
-    -- send heartbeat to peers.
-    Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or curState,
-        Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
+    if heartbeatCoroutine then
+        if coroutine.status(heartbeatCoroutine) ~= 'dead' then
+            local success, err = coroutine.resume(heartbeatCoroutine)
+            if not success then
+                Logger.log_error("\arError in Heartbeat Coroutine: %s", err)
+            end
+        else
+            CreateHeartBeat()
+        end
+    end
+
     Config:ValidatePeers()
 
     notifyZoning = true

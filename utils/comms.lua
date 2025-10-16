@@ -57,7 +57,7 @@ function Comms.SendMessage(peer, module, event, data)
 end
 
 function Comms.SendHeartbeat(assist, curState, curAutoTarget, chase)
-    if os.time() - Comms.LastHeartbeat < 1 then return end
+    --if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()
     Comms.BroadcastMessage("RGMercs", "Heartbeat", {
         From = Comms.GetPeerName(),
