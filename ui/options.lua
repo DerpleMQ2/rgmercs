@@ -562,8 +562,8 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                 end
                 ImGui.EndTable()
             end
+            ImGui.EndChild()
         end
-        ImGui.EndChild()
         ImGui.SameLine()
 
         local x, _ = ImGui.GetContentRegionAvail()
