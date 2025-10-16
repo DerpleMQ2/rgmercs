@@ -368,6 +368,7 @@ function Module:ChaseOff()
     Logger.log_info("\ayNo longer chasing \at%s\ay.", Config:GetSetting('ChaseTarget') or "None")
     Config:SetSetting('ChaseOn', false)
     Config:SetSetting('ChaseTarget', "")
+    Core.DoCmd("/squelch /nav stop")
     self:SaveSettings(false)
 end
 

@@ -300,7 +300,7 @@ local function Main()
 
     -- send heartbeat to peers.
     Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or curState,
-        Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or 0, Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
+        Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
     Config:ValidatePeers()
 
     notifyZoning = true
@@ -494,6 +494,13 @@ local script_actor = Comms.Actors.register(function(message)
     if msg.Event == "Heartbeat" then
         --Logger.log_debug("Received Heartbeat from \am%s\aw: \ag%s", msg.From, Strings.TableToString(msg.Data))
         Config:UpdatePeerHeartbeat(msg.From, msg.Data)
+        return
+    end
+
+    if msg.Event == "DoCmd" then
+        --Logger.log_debug("Received Heartbeat from \am%s\aw: \ag%s", msg.From, Strings.TableToString(msg.Data))
+        Logger.log_debug("Received Command from \am%s\aw: \ag%s", msg.From, msg.Data.cmd or "nil")
+        Core.DoCmd(msg.Data.cmd)
         return
     end
 
