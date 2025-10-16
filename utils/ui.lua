@@ -3,6 +3,7 @@ local Config        = require('utils.config')
 local Modules       = require("utils.modules")
 local Logger        = require("utils.logger")
 local Core          = require("utils.core")
+local Comms         = require("utils.comms")
 local Targeting     = require("utils.targeting")
 local Icons         = require('mq.ICONS')
 local Strings       = require("utils.strings")
@@ -178,11 +179,13 @@ function Ui.RenderMercsStatus(showPopout)
         local mercs = Config:GetAllPeerHeartbeats()
 
         for peer, data in pairs(mercs) do
+            ImGui.PushID(string.format("##table_entry_%s", peer))
             ImGui.TableNextColumn()
             local _, clicked = ImGui.Selectable(peer, false)
             if clicked then
-                if data and data.From then
-                    mq.TLO.Spawn(data.From).DoTarget()
+                local name, _ = Comms.GetCharAndServerFromPeer(peer)
+                if name then
+                    mq.TLO.Spawn("=" .. name).DoTarget()
                 end
             end
             ImGui.TableNextColumn()
@@ -196,11 +199,24 @@ function Ui.RenderMercsStatus(showPopout)
             ImGui.TableNextColumn()
             ImGui.Text(string.format("%s", data.Data.Assist or "None"))
             ImGui.TableNextColumn()
-            ImGui.Text(string.format("%s", data.Data.Chase or "None"))
+            _, clicked = ImGui.Selectable(string.format("%s", data.Data.Chase or "None"), false)
+            if clicked then
+                Comms.SendMessage(peer, "Core", "DoCmd", {
+                    cmd = string.format("/rgl %s",
+                        data.Data.Chase == "Chase Off" and ("chaseon " .. mq.TLO.Me.CleanName()) or "chaseoff"),
+                })
+            end
+
             ImGui.TableNextColumn()
-            ImGui.Text(string.format("%s", data.Data.State or "None"))
+
+            _, clicked = ImGui.Selectable(string.format("%s", data.Data.State or "None"), false)
+            if clicked then
+                Comms.SendMessage(peer, "Core", "DoCmd", { cmd = string.format("/rgl %s", data.Data.State == "Paused" and "unpause" or "pause"), })
+            end
+
             ImGui.TableNextColumn()
             ImGui.Text(string.format("%s", Strings.FormatTime(os.time() - data.LastHeartbeat) or "None"))
+            ImGui.PopID()
         end
 
         ImGui.EndTable()

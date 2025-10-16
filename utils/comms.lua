@@ -38,7 +38,7 @@ function Comms.BroadcastMessage(module, event, data)
         Event = event,
         Data = data,
     })
-    Logger.log_debug("Broadcasted: %s event: %s", event, Strings.TableToString(data or {}, 512))
+    Logger.log_verbose("Broadcasted: %s event: %s", event, Strings.TableToString(data or {}, 512))
 end
 
 --- @param module string The name of the module to broadcast the update to.
