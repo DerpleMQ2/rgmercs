@@ -120,6 +120,17 @@ local function RGMercsGUI()
                     showFT = false
                 end
             end
+            if Config:GetSetting('PopOutMercsStatus') then
+                local openFT, showFT = ImGui.Begin("Mercs Status", Config:GetSetting('PopOutMercsStatus'))
+                if showFT then
+                    Ui.RenderMercsStatus()
+                end
+                ImGui.End()
+                if not openFT then
+                    Config:SetSetting('PopOutMercsStatus', false)
+                    showFT = false
+                end
+            end
             if Config:GetSetting('PopOutConsole') then
                 local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", Config:GetSetting('PopOutConsole'))
                 if showConsole then
@@ -288,7 +299,8 @@ local function Main()
     end
 
     -- send heartbeat to peers.
-    Comms.SendHeartbeat(Core.GetMainAssistId(), curState, Targeting.GetAutoTarget() and Targeting.GetAutoTarget().ID() or 0)
+    Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or curState,
+        Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or 0, Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
     Config:ValidatePeers()
 
     notifyZoning = true

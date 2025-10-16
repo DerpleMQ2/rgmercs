@@ -152,6 +152,61 @@ function Ui.RenderConfigSelector()
     end
 end
 
+function Ui.RenderMercsStatus(showPopout)
+    if showPopout then
+        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
+            Config:SetSetting('PopOutMercsStatus', true)
+        end
+        Ui.Tooltip("Pop the Mercs Status Panel out into its own window.")
+        ImGui.NewLine()
+    end
+
+    if ImGui.BeginTable("MercStatusTable", 9, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 150)
+        ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.TableSetupColumn('Mana %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.TableSetupColumn('AutoTarget', (ImGuiTableColumnFlags.WidthFixed), 120.0)
+        ImGui.TableSetupColumn('Assist', (ImGuiTableColumnFlags.WidthFixed), 120.0)
+        ImGui.TableSetupColumn('Chase', (ImGuiTableColumnFlags.WidthFixed), 120.0)
+        ImGui.TableSetupColumn('CurState', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.TableSetupColumn('Last Update', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        local mercs = Config:GetAllPeerHeartbeats()
+
+        for peer, data in pairs(mercs) do
+            ImGui.TableNextColumn()
+            local _, clicked = ImGui.Selectable(peer, false)
+            if clicked then
+                if data and data.From then
+                    mq.TLO.Spawn(data.From).DoTarget()
+                end
+            end
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%d%%", math.ceil(data.Data.HPs or 0)))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%d%%", math.ceil(data.Data.Mana or 0)))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%s", data.Data.Target or "None"))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%s", data.Data.AutoTarget or "None"))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%s", data.Data.Assist or "None"))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%s", data.Data.Chase or "None"))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%s", data.Data.State or "None"))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%s", Strings.FormatTime(os.time() - data.LastHeartbeat) or "None"))
+        end
+
+        ImGui.EndTable()
+    end
+end
+
 function Ui.RenderForceTargetList(showPopout)
     if showPopout then
         if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then

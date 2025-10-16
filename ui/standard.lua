@@ -191,6 +191,14 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
                             ImGui.Unindent()
                         end
                     end
+
+                    if not Config:GetSetting('PopOutMercsStatus') then
+                        if ImGui.CollapsingHeader("Mercs Status") then
+                            ImGui.Indent()
+                            Ui.RenderMercsStatus(true)
+                            ImGui.Unindent()
+                        end
+                    end
                     ImGui.EndTabItem()
                 end
 
