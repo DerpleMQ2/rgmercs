@@ -484,11 +484,12 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     end
 
     ImGui.SetNextWindowSize(ImVec2(700, 500), ImGuiCond.FirstUseEver)
+    ImGui.SetNextWindowSizeConstraints(ImVec2(400, 300), ImVec2(2000, 2000))
+
     openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
 
-    ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
-
     if shouldDrawGUI then
+        ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
         local _, y = ImGui.GetContentRegionAvail()
         if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
             local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.ScrollY)
@@ -606,9 +607,9 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             end
             ImGui.EndChild()
         end
+        ImGui.PopID()
     end
 
-    ImGui.PopID()
     ImGui.End()
 
     return openGUI
