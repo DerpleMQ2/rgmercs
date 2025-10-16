@@ -216,6 +216,11 @@ Config.DefaultConfig               = {
         Type = "Custom",
         Default = false,
     },
+    ['PopOutMercsStatus']    = {
+        DisplayName = "Pop Out Mercs Status",
+        Type = "Custom",
+        Default = false,
+    },
     ['PopOutConsole']        = {
         DisplayName = "Pop Out Console",
         Type = "Custom",
@@ -2332,6 +2337,10 @@ function Config:SaveModuleSettings(module, settings)
     -- broadcast the change to any listeners.
     Comms.BroadcastMessage(self._name, "UpdatePeerSettings",
         { peer = Comms:GetPeerName(), module = module, settings = settings, settingCategories = settingsCategories, defaultSettings = defaultSettings, })
+end
+
+function Config:GetAllPeerHeartbeats()
+    return self.TempSettings.PeersHeartbeats or {}
 end
 
 function Config:UpdatePeerHeartbeat(peer, data)

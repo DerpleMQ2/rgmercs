@@ -56,8 +56,8 @@ function Comms.SendMessage(peer, module, event, data)
     Logger.log_debug("Sent Message: %s to:  %s event: %s", event, peer, Strings.TableToString(data or {}, 512))
 end
 
-function Comms.SendHeartbeat(assist, curState, curAutoTarget)
-    if os.time() - Comms.LastHeartbeat < 5 then return end
+function Comms.SendHeartbeat(assist, curState, curAutoTarget, chase)
+    if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()
     Comms.BroadcastMessage("RGMercs", "Heartbeat", {
         From = Comms.GetPeerName(),
@@ -68,10 +68,11 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget)
         HPs = mq.TLO.Me.PctHPs(),
         Mana = mq.TLO.Me.PctMana(),
         Endurance = mq.TLO.Me.PctEndurance(),
-        TargetID = mq.TLO.Target.ID(),
+        Target = mq.TLO.Target.DisplayName(),
         AutoTarget = curAutoTarget,
         Assist = assist,
         State = curState,
+        Chase = chase,
     })
 end
 
