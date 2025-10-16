@@ -85,14 +85,14 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
         else
             if Casting.AbilityReady("Taunt") then
                 Logger.log_debug("TooCloseHandler: Naving to target to use Taunt.")
-                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
+                Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Taunt")
                 Logger.log_debug("TooCloseHandler: Attempting to Taunt.")
             end
             if Casting.AbilityReady("Kick") then
                 Logger.log_debug("TooCloseHandler: Naving to target to use Kick.")
-                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
+                Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Kick")
                 Logger.log_debug("TooCloseHandler: Attempting to Kick.")
