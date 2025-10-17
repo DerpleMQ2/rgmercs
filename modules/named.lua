@@ -13,7 +13,6 @@ local Nameds           = require("utils.nameds")
 local Module           = { _version = '0.1a', _name = "Named", _author = 'Grimmier', }
 Module.__index         = Module
 Module.DefaultConfig   = {}
-Module.FAQ             = {}
 Module.CachedNamedList = {}
 Module.SaveRequested   = nil
 
@@ -48,6 +47,19 @@ Module.DefaultConfig   = {
 
 Module.CommandHandlers = {
 
+}
+
+Module.FAQ             = {
+    [1] = {
+        Question = "Why am I not taking any special actions on a Named, boss, or mission mob?",
+        Answer =
+            "  RGMercs default class configs fully support burning, using defenses, or other special actions on Named mobs, however, your target must be indentified as such. There are two methods for doing so:\n\n" ..
+            "  1) The Spawn Master TLO: If the MQ2SpawnMaster plugin is loeaded (highly recommended), you can simply add a mob to its watch list (see '/spawnmaster help'). We will query SpawnMaster via built-in data reporting (TLO), and if the mob is present, treat it as a named.\n\n" ..
+            "  Using this method, it is very easy to treat mission bosses as named, without adding them to the Named List, which is typically aimed at typical PH/rare spawn style mobs.\n\n" ..
+            "  2) The Named List: RGMercs will consult the built-in Named List. If the mob is found on the list, it will be treated as a Named. It is also possible to use an external Named List, such as the Alert Master or MQ2SpawnMaster list (see other FAQs).\n\n" ..
+            "  Specific feedback on missing, incorrect, or otherwise erroneous entries on the RGMercs Named List is always welcome!\n\n",
+        Settings_Used = "",
+    },
 }
 
 local function getConfigFileName()
