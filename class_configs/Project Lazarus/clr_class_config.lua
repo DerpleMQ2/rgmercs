@@ -658,8 +658,9 @@ local _ClassConfig = {
                 name = "GroupElixir",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoGroupElixir') end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoGroupElixir') or not Config:GetSetting('GroupElixirUptime') then return false end
+                    if not Config:GetSetting('GroupElixirUptime') then return false end
                     return spell.RankName.Stacks() and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 6
                 end,
             },
@@ -667,8 +668,8 @@ local _ClassConfig = {
                 name = "Yaulp",
                 type = "AA",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoYaulp') and Casting.CanUseAA("Yaulp") end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoYaulp') then return false end
                     return not mq.TLO.Me.Mount() and Casting.SelfBuffAACheck(aaName)
                 end,
             },
@@ -676,32 +677,32 @@ local _ClassConfig = {
                 name = "YaulpSpell",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoYaulp') and not Casting.CanUseAA("Yaulp") end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoYaulp') or Casting.CanUseAA("Yaulp") then return false end
                     return not mq.TLO.Me.Mount() and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "TwinHealNuke",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoTwinHeal') end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoTwinHeal') then return false end
                     return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
                 name = "StunTimer6",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHealStun') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHealStun') then return false end
                     return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target) and not Casting.StunImmuneTarget(target)
                 end,
             },
             {
                 name = "LowLevelStun",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLStun') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLStun') then return false end
                     return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target) and not Casting.StunImmuneTarget(target)
                 end,
             },
@@ -715,16 +716,17 @@ local _ClassConfig = {
             {
                 name = "UndeadNuke",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoUndeadNuke') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoUndeadNuke') or not Targeting.TargetBodyIs(target, "Undead") then return false end
+                    if not Targeting.TargetBodyIs(target, "Undead") then return false end
                     return Casting.OkayToNuke()
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoMagicNuke') end,
                 cond = function(self)
-                    if not Config:GetSetting('DoMagicNuke') then return false end
                     return Casting.OkayToNuke()
                 end,
             },
@@ -741,6 +743,7 @@ local _ClassConfig = {
                 name = "PBAEStun",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoPBAEStun') end,
                 cond = function(self, spell, target)
                     return Casting.HaveManaToNuke(true) and Targeting.InSpellRange(spell, target)
                 end,
@@ -749,6 +752,7 @@ local _ClassConfig = {
                 name = "PBAENuke",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoPBAENuke') end,
                 cond = function(self, spell, target)
                     return Casting.OkayToNuke() and Targeting.InSpellRange(spell, target)
                 end,
@@ -1129,6 +1133,7 @@ local _ClassConfig = {
                 "Please note that we will prioritize single target cures if you have selected to keep them memmed above (due to the counter disparity).",
             Default = true,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
 
         --Damage(AE)
@@ -1238,6 +1243,7 @@ local _ClassConfig = {
             Index = 101,
             Tooltip = "Use your Yaulp (AA or spell line) to help maintain your mana and buff your melee ability.",
             Default = true,
+            RequiresLoadoutChange = true,
             FAQ = "Why am I using Yaulp? Clerics are not supposed to melee!",
             Answer = "The Yaulp spells we use also contain a mana regen component. You can disable this behavior on the Utility tab in the Class Options.",
         },
