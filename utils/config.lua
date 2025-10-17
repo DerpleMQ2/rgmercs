@@ -38,6 +38,7 @@ Config.TempSettings.PeerSettingsCategoryToSettingMapping = {}
 Config.TempSettings.Peers                                = Set.new({})
 Config.TempSettings.PeersHeartbeats                      = {}
 Config.TempSettings.LastPeerConfigReceivedTime           = 0
+Config.TempSettings.ResetOptionsUIPosition               = false
 
 Config.TempSettings.HighlightedModules                   = Set.new({})
 

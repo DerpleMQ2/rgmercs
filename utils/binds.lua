@@ -405,6 +405,15 @@ Binds.Handlers    = {
             Modules:ExecModule('FAQ', "FaqFind", config)
         end,
     },
+    ['reset_config_position'] = {
+        usage = "/rgl reset_config_position",
+        about = "Resets the Options Window position to the center of the screen.",
+        handler = function()
+            Config.TempSettings.ResetOptionsUIPosition = true
+            Logger.log_info("\agOptions Window position will be reset on next open.")
+        end,
+    },
+
 }
 
 return Binds
