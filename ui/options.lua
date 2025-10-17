@@ -6,7 +6,6 @@ local Ui                        = require('utils.ui')
 local Icons                     = require('mq.ICONS')
 local Modules                   = require('utils.modules')
 local Comms                     = require('utils.comms')
-local Strings                   = require('utils.strings')
 local Set                       = require("mq.Set")
 
 local OptionsUI                 = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
@@ -459,8 +458,8 @@ function OptionsUI:RenderCategorySettings(category)
             end
             ImGui.EndTable()
         end
-        ImGui.EndChild()
     end
+    ImGui.EndChild()
 end
 
 function OptionsUI:RenderCurrentTab()
@@ -483,6 +482,11 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
         flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
     end
 
+    if Config.TempSettings.ResetOptionsUIPosition then
+        ImGui.SetNextWindowPos(ImVec2(100, 100), ImGuiCond.Always)
+        Config.TempSettings.ResetOptionsUIPosition = false
+    end
+
     ImGui.SetNextWindowSize(ImVec2(700, 500), ImGuiCond.FirstUseEver)
     ImGui.SetNextWindowSizeConstraints(ImVec2(400, 300), ImVec2(2000, 2000))
 
@@ -491,6 +495,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     if shouldDrawGUI then
         ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
         local _, y = ImGui.GetContentRegionAvail()
+
         if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
             local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.ScrollY)
             local textChanged = false
@@ -563,8 +568,8 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                 end
                 ImGui.EndTable()
             end
-            ImGui.EndChild()
         end
+        ImGui.EndChild()
         ImGui.SameLine()
 
         local x, _ = ImGui.GetContentRegionAvail()
@@ -590,8 +595,8 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                 ImVec2(0, 0), ImVec2(1, 1),
                 IM_COL32(255, 255, 255, 30))
             draw_list:PopClipRect()
-            ImGui.EndChild()
         end
+        ImGui.EndChild()
 
         ImGui.SetCursorPos(right_start)
         if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
@@ -605,8 +610,8 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                     ImGui.EndTable()
                 end
             end
-            ImGui.EndChild()
         end
+        ImGui.EndChild()
         ImGui.PopID()
     end
 
