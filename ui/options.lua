@@ -376,7 +376,7 @@ function OptionsUI:RenderCategorySettings(category)
     local new_loadout         = false
     local pressed             = false
     local loadout_change      = false
-    local renderWidth         = 300
+    local renderWidth         = 325
     local windowWidth         = ImGui.GetWindowWidth()
     local numCols             = math.max(1, math.floor(windowWidth / renderWidth))
     local settingsForCategory = self.FilteredSettingsByCat[category] or {}
