@@ -635,7 +635,8 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoOrbNuke') end,
                 cond = function(self, spell, target)
-                    return (mq.TLO.FindItemCount("=Orb of Shadows")() or 0) < 101
+                    local orbItem = spell() and spell.Trigger.Base(1)()
+                    return orbItem ~= nil and (mq.TLO.FindItemCount(orbItem)() or 0) < 101
                 end,
             },
             {
