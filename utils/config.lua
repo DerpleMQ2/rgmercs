@@ -2344,6 +2344,14 @@ function Config:GetAllPeerHeartbeats()
     return self.TempSettings.PeersHeartbeats or {}
 end
 
+function Config:GetPeerHeartbeatByName(peerName)
+    return self.TempSettings.PeersHeartbeats[Comms.GetPeerName(peerName)] or {}
+end
+
+function Config:GetPeerHeartbeat(peer)
+    return self.TempSettings.PeersHeartbeats[peer] or {}
+end
+
 function Config:UpdatePeerHeartbeat(peer, data)
     self.TempSettings.Peers:add(peer)
     Config.TempSettings.PeersHeartbeats[peer] = Config.TempSettings.PeersHeartbeats[peer] or {}

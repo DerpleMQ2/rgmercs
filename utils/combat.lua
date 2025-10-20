@@ -482,7 +482,13 @@ function Combat.FindBestAutoTarget(validateFn)
             local peer = mq.TLO.DanNet(Config.Globals.MainAssist)()
             local assistTarget = nil
 
-            if peer then
+            local heartbeat = Config:GetPeerHeartbeatByName(Config.Globals.MainAssist)
+            if heartbeat and heartbeat.Data and heartbeat.Data.TargetID then
+                local targetID = tonumber(heartbeat.Data.TargetID)
+                if targetID and type(targetID) == 'number' then
+                    assistTarget = mq.TLO.Spawn(targetID)
+                end
+            elseif peer then
                 local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
                 if queryResult then
                     assistTarget = mq.TLO.Spawn(queryResult)
@@ -551,12 +557,22 @@ function Combat.FindBestAutoTargetCheck()
     if (Config:GetSetting('UseAssistList') or Core.OnEMU()) and not Core.IAmMA() and Config.Globals.MainAssist:len() > 0 then
         --- @diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet(Config.Globals.MainAssist)()
-        if peer then
+
+        local heartbeat = Config:GetPeerHeartbeatByName(Config.Globals.MainAssist)
+        if heartbeat and heartbeat.Data and heartbeat.Data.TargetID then
+            local targetID = tonumber(heartbeat.Data.TargetID)
+            if targetID and type(targetID) == 'number' then
+                Logger.log_verbose("\ayFindTargetCheck Assist's Target via ActorNet :: %s", assistTarget.CleanName() or "None")
+                local assistTarget = mq.TLO.Spawn(targetID)
+                if assistTarget and assistTarget() then
+                    assistTarg = true
+                end
+            end
+        elseif peer then
             local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
             if queryResult then
                 local assistTarget = mq.TLO.Spawn(queryResult)
-                Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
-                    assistTarget.CleanName() or "None")
+                Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s", assistTarget.CleanName() or "None")
                 if assistTarget and assistTarget() then
                     assistTarg = true
                 end

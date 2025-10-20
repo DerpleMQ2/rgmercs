@@ -1,5 +1,6 @@
 local mq = require('mq')
 local Logger = require("utils.logger")
+local Strings = require("utils.strings")
 
 local helpers = {}
 
@@ -29,6 +30,25 @@ end
 function helpers.unobserve(peer, query)
     mq.cmdf('/dobserve %s -q "%s" -drop', peer, query)
     Logger.log_verbose('\ayRemoving Observer - mq.TLO.DanNet(%s).O(%s) = %s', peer, query, mq.TLO.DanNet(peer).O(query)())
+end
+
+function helpers.getPeer(peerIdx)
+    if peerIdx < 1 or peerIdx > mq.TLO.DanNet.PeerCount() then
+        Logger.log_warn('\argetPeer: Invalid peer index %d (1-%d)', peerIdx, mq.TLO.DanNet.PeerCount())
+        return nil
+    end
+
+    ---@diagnostic disable-next-line: redundant-parameter
+    local peer = mq.TLO.DanNet.Peers(peerIdx)()
+    Logger.log_verbose('\ayGetting Peer - mq.TLO.DanNet.Peers(%d) = %s', peerIdx, peer)
+    return peer
+end
+
+function helpers.getAllPeers()
+    ---@diagnostic disable-next-line: redundant-parameter
+    local peers = Strings.split(mq.TLO.DanNet.Peers() or "", "|")
+    Logger.log_verbose('\ayGetting All Peers - mq.TLO.DanNet.Peers() = %s', Strings.TableToString(peers, 512))
+    return peers
 end
 
 return helpers

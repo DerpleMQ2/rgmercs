@@ -1,14 +1,14 @@
 -- Drag Module
-local mq        = require('mq')
-local Config    = require('utils.config')
-local Core      = require("utils.core")
-local Targeting = require("utils.targeting")
-local Ui        = require("utils.ui")
-local Comms     = require("utils.comms")
-local Logger    = require("utils.logger")
-local Strings   = require("utils.strings")
-local Set       = require("mq.Set")
-
+local mq             = require('mq')
+local Config         = require('utils.config')
+local Core           = require("utils.core")
+local Targeting      = require("utils.targeting")
+local Ui             = require("utils.ui")
+local Comms          = require("utils.comms")
+local Logger         = require("utils.logger")
+local Strings        = require("utils.strings")
+local DanNet         = require('lib.dannet.helpers')
+local Set            = require("mq.Set")
 
 local Module         = { _version = '0.1a', _name = "Drag", _author = 'Derple', }
 Module.__index       = Module
@@ -165,7 +165,8 @@ function Module:GiveTime(combat_state)
             local dannetPeers = mq.TLO.DanNet.PeerCount()
             for i = 1, dannetPeers do
                 ---@diagnostic disable-next-line: redundant-parameter
-                local peer = mq.TLO.DanNet.Peers(i)()
+                local peer = DanNet.getPeer(i)
+
                 if peer and peer:len() > 0 then
                     Logger.log_debug("Searching corpses for: %s", peer)
                     local currentSearch = string.format(corpseSearch, peer)

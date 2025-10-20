@@ -1063,7 +1063,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
             Logger.log_verbose("\ayUseSpell(): Attempting to cast: %s", spellName)
             Core.DoCmd(cmd)
             Logger.log_verbose("\ayUseSpell(): Waiting to start cast: %s", spellName)
-            mq.delay("1s", function() return mq.TLO.Me.Casting() end)
+            mq.delay("1s", function() return mq.TLO.Me.Casting() ~= nil end)
             Logger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
             Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
             mq.doevents()
@@ -1350,7 +1350,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
             Logger.log_verbose("\ayUseAA(): Attempting to cast: %s", aaName)
             Core.DoCmd(cmd)
             Logger.log_verbose("\ayUseAA(): Waiting to start cast: %s", aaName)
-            mq.delay("1s", function() return mq.TLO.Me.Casting() end)
+            mq.delay("1s", function() return mq.TLO.Me.Casting() ~= nil end)
             Logger.log_verbose("\ayUseAA(): Started to cast: %s - waiting to finish", aaName)
             Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
             mq.doevents()
@@ -1383,8 +1383,9 @@ end
 --- Uses an item on a specified target.
 --- @param itemName string The name of the item to be used.
 --- @param targetId number The ID of the target on which the item will be used.
+--- @param forceTarget? boolean Whether to force targeting even if the item does not require it - even if self.
 --- @return boolean
-function Casting.UseItem(itemName, targetId)
+function Casting.UseItem(itemName, targetId, forceTarget)
     local me = mq.TLO.Me
 
     if not itemName then
@@ -1433,7 +1434,7 @@ function Casting.UseItem(itemName, targetId)
     end
 
     local oldTargetId = mq.TLO.Target.ID()
-    if targetId > 0 and targetId ~= oldTargetId and targetId ~= mq.TLO.Me.ID() then
+    if targetId > 0 and targetId ~= oldTargetId and (forceTarget or targetId ~= mq.TLO.Me.ID()) then
         Targeting.SetTarget(targetId, true)
     end
 

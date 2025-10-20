@@ -10,14 +10,15 @@ Comms.LastHeartbeat = 0
 
 
 -- Putting this here for lack of a beter spot.
-function Comms.GetPeerName()
+--- @param peerName string? The character name string if not supplied then we use Me.DisplayName()
+function Comms.GetPeerName(peerName)
     local server = mq.TLO.EverQuest.Server()
     --upper first letter if it isnt (Live)
     if server:len() > 0 then
         server = server:sub(1, 1):upper() .. server:sub(2)
     end
 
-    return string.format("%s (%s)", mq.TLO.Me.DisplayName(), server)
+    return string.format("%s (%s)", peerName and peerName or mq.TLO.Me.DisplayName(), server)
 end
 
 function Comms.GetCharAndServerFromPeer(peer)
@@ -60,19 +61,27 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget, chase)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()
     Comms.BroadcastMessage("RGMercs", "Heartbeat", {
-        From = Comms.GetPeerName(),
-        Zone = mq.TLO.Zone.Name(),
-        X = mq.TLO.Me.X(),
-        Y = mq.TLO.Me.Y(),
-        Z = mq.TLO.Me.Z(),
-        HPs = mq.TLO.Me.PctHPs(),
-        Mana = mq.TLO.Me.PctMana(),
-        Endurance = mq.TLO.Me.PctEndurance(),
-        Target = mq.TLO.Target.DisplayName(),
+        From       = Comms.GetPeerName(),
+        Zone       = mq.TLO.Zone.Name(),
+        X          = mq.TLO.Me.X(),
+        Y          = mq.TLO.Me.Y(),
+        Z          = mq.TLO.Me.Z(),
+        Poison     = tostring(mq.TLO.Me.Poisoned.ID()),
+        Disease    = tostring(mq.TLO.Me.Diseased.ID()),
+        Curse      = tostring(mq.TLO.Me.Cursed.ID()),
+        ---@diagnostic disable-next-line: undefined-field
+        Mezzed     = tostring(mq.TLO.Me.Mezzed.ID()),
+        Corruption = tostring(mq.TLO.Me.Diseased.ID()),
+        Stunned    = mq.TLO.Me.Stunned(),
+        HPs        = mq.TLO.Me.PctHPs(),
+        Mana       = mq.TLO.Me.PctMana(),
+        Endurance  = mq.TLO.Me.PctEndurance(),
+        Target     = mq.TLO.Target.DisplayName() or "None",
+        TargetID   = mq.TLO.Target.ID() or 0,
         AutoTarget = curAutoTarget,
-        Assist = assist,
-        State = curState,
-        Chase = chase,
+        Assist     = assist,
+        State      = curState,
+        Chase      = chase,
     })
 end
 

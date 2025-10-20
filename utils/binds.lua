@@ -6,6 +6,7 @@ local Targeting   = require("utils.targeting")
 local Strings     = require("utils.strings")
 local Logger      = require("utils.logger")
 local ConfigShare = require("utils.rg_config_share")
+local DanNet      = require('lib.dannet.helpers')
 
 local Binds       = { _version = '0.1a', _name = "Binds", _author = 'Derple', }
 
@@ -337,7 +338,7 @@ Binds.Handlers    = {
 
             for i = 1, peerCount do
                 ---@diagnostic disable-next-line: redundant-parameter
-                local peer = mq.TLO.DanNet.Peers(i)()
+                local peer = DanNet.getPeer(i)
                 if peer and peer:len() > 0 then
                     local radians = i * angle_step
                     local xMove = math.cos(radians) * (i + radius)
