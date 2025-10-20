@@ -1166,7 +1166,7 @@ function Module:CheckActorForCures(peer, targetId)
 
             Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
 
-            if effectId:lower() ~= "null" and effectId ~= "0" then
+            if effectId and effectId:lower() ~= "nil" and effectId:lower() ~= "null" and effectId ~= "0" then
                 if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
                     self:AddCureToList(targetId, data.type)
                 end
