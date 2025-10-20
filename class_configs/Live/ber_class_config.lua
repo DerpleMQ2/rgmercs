@@ -728,13 +728,6 @@ return {
                     return mq.TLO.Me.PctEndurance() <= 75
                 end,
             },
-            {
-                name = "Intimidation",
-                type = "Ability",
-                cond = function(self, abilityName)
-                    return Config:GetSetting('DoIntimidate')
-                end,
-            },
         },
         ['DPS2'] = {
             {
