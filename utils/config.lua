@@ -2262,12 +2262,12 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
 end
 
 function Config:RequestPeerConfigs(peer)
-    Comms.SendMessage(peer, self._name, "SendConfigs", { from = Comms:GetPeerName(), })
+    Comms.SendMessage(peer, self._name, "SendConfigs", { from = Comms.GetPeerName(), })
 end
 
 function Config:PackageConfig(module)
     return {
-        peer = Comms:GetPeerName(),
+        peer = Comms.GetPeerName(),
         module = module,
         settings = Config:GetAllModuleSettings()[module],
         settingCategories = Config:GetAllModuleSettingCategories()[module],
@@ -2337,7 +2337,7 @@ function Config:SaveModuleSettings(module, settings)
 
     -- broadcast the change to any listeners.
     Comms.BroadcastMessage(self._name, "UpdatePeerSettings",
-        { peer = Comms:GetPeerName(), module = module, settings = settings, settingCategories = settingsCategories, defaultSettings = defaultSettings, })
+        { peer = Comms.GetPeerName(), module = module, settings = settings, settingCategories = settingsCategories, defaultSettings = defaultSettings, })
 end
 
 function Config:GetAllPeerHeartbeats()
