@@ -47,7 +47,7 @@ Module.TempSettings.RotationTable            = {}
 Module.TempSettings.HealRotationTable        = {}
 Module.TempSettings.RotationTimers           = {}
 Module.TempSettings.RezTimers                = {}
-Module.TempSettings.CureCheckTimer           = 0
+Module.TempSettings.CureCheckTimer           = os.clock() -- set this out a bit so we have time to get actor data.
 Module.TempSettings.ShowFailedSpells         = false
 Module.TempSettings.ResolvingActions         = true
 Module.TempSettings.CombatModeSet            = false
@@ -856,7 +856,7 @@ function Module:ReleaseCuresListMutex(reason)
         return false
     end
 
-    Logger.log_debug("\amReleaseCuresListMutex(%s): Mutex was released!", reason or "Unknown")
+    Logger.log_verbose("\amReleaseCuresListMutex(%s): Mutex was released!", reason or "Unknown")
     self.TempSettings.NeedCuresListMutex = false
     return true
 end
@@ -879,7 +879,7 @@ function Module:GetCuresListMutex(reason, maxWaitTime)
         end
     end
 
-    Logger.log_debug("\amReleaseCuresListMutex(%s): Mutex was acquired!", reason or "Unknown")
+    Logger.log_verbose("\amReleaseCuresListMutex(%s): Mutex was acquired!", reason or "Unknown")
     self.TempSettings.NeedCuresListMutex = true
     return true
 end
@@ -1148,6 +1148,39 @@ function Module:ProcessCuresList()
     end
 end
 
+function Module:CheckActorForCures(peer, targetId)
+    local checks = {
+        { type = "Poison", },
+        { type = "Disease", },
+        { type = "Curse", },
+        { type = "Mezzed", },
+    }
+    if not Core.OnLaz() then
+        table.insert(checks, { type = "Corruption", })
+    end
+
+    local heartbeat = Config:GetPeerHeartbeat(peer)
+    if heartbeat and heartbeat.Data then
+        for _, data in ipairs(checks) do
+            local effectId = heartbeat.Data[data.type] or "null"
+
+            Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
+
+            if effectId:lower() ~= "null" and effectId ~= "0" then
+                if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
+                    self:AddCureToList(targetId, data.type)
+                end
+                Logger.log_verbose("\ay[Cures] CheckActorForCures %s :: Found effect: %s type %s", peer, tostring(effectId), data.type)
+            end
+        end
+        Logger.log_verbose("\ay[Cures] CheckActorForCures %s :: All checks complete", peer)
+        return true
+    else
+        Logger.log_verbose("\ay[Cures] CheckActorForCures %s :: Actor heartbeat not found.", peer)
+    end
+    return false
+end
+
 function Module:CheckPeerForCures(peer, targetId)
     local checks = {
         { type = "Poison",  check = "Me.Poisoned.ID", },
@@ -1254,39 +1287,67 @@ function Module:RunCureRotation(combat_state)
     self.TempSettings.CureChecksStale = false
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
+    local actorPeers = Config:GetAllPeerHeartbeats()
+    local handledPeers = Set.new({})
+
+    for peer, _ in pairs(actorPeers) do
+        local char, _ = Comms.GetCharAndServerFromPeer(peer)
+        local cureTarget = mq.TLO.Spawn(string.format("pc =%s", char))
+        local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
+        local handled = false
+        --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
+        if cureTargetID > 0 then
+            if cureTargetID == mq.TLO.Me.ID() then
+                Logger.log_super_verbose("[Cures] Peer is myself, skipping.")
+            elseif (cureTarget.Distance() or 999) < 150 then
+                handled = self:CheckActorForCures(peer, cureTargetID)
+            else
+                Logger.log_verbose("\ao[Cures] %s is \arNOT\ao in range", peer or "Unknown")
+            end
+        else
+            Logger.log_verbose("\ao[Cures] No valid ID for %s, \arNOT\ao in zone", peer or "Unknown")
+        end
+
+        Logger.log_verbose("\ay[Cures] CheckActorForCures %s :: Handled = %s", peer, tostring(handled))
+
+        if handled then
+            handledPeers:add(char)
+        end
+    end
 
     for i = 1, dannetPeers do
-        ---@diagnostic disable-next-line: redundant-parameter
-        local peer = mq.TLO.DanNet.Peers(i)()
-        if peer and peer:len() > 0 then
-            local startindex = string.find(peer, "_")
-            if startindex then
-                peer = string.sub(peer, startindex + 1)
-            end
-            local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
-            local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
+        local peer = DanNet.getPeer(i)
+        if not handledPeers:contains(peer) then
+            if peer and peer:len() > 0 then
+                local startindex = string.find(peer, "_")
+                if startindex then
+                    peer = string.sub(peer, startindex + 1)
+                end
+                local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
+                local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
 
-            --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
-            if cureTargetID > 0 then
-                if cureTargetID == mq.TLO.Me.ID() then
-                    Logger.log_super_verbose("[Cures] Peer is myself, skipping.")
-                elseif (cureTarget.Distance() or 999) < 150 then
-                    Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
+                --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
+                if cureTargetID > 0 then
+                    if cureTargetID == mq.TLO.Me.ID() then
+                        Logger.log_super_verbose("[Cures] Peer is myself, skipping.")
+                    elseif (cureTarget.Distance() or 999) < 150 then
+                        Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
 
-                    local newCoroutine = coroutine.create(function()
-                        self:CheckPeerForCures(peer, cureTargetID)
-                    end)
+                        local newCoroutine = coroutine.create(function()
+                            self:CheckPeerForCures(peer, cureTargetID)
+                        end)
 
-                    if newCoroutine then
-                        table.insert(self.TempSettings.CureCoroutines, newCoroutine)
+                        if newCoroutine then
+                            table.insert(self.TempSettings.CureCoroutines, newCoroutine)
+                        else
+                            Logger.log_error("\ar[Cures] Failed to create coroutine for %s", peer)
+                        end
                     else
-                        Logger.log_error("\ar[Cures] Failed to create coroutine for %s", peer)
+                        Logger.log_verbose("\ao[Cures] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
                     end
                 else
-                    Logger.log_verbose("\ao[Cures] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
+                    Logger.log_verbose("\ao[Cures] %d::No valid ID for %s, \arNOT\ao in zone", i, peer or "Unknown")
                 end
-            else
-                Logger.log_verbose("\ao[Cures] %d::No valid ID for %s, \arNOT\ao in zone", i, peer or "Unknown")
             end
         end
     end

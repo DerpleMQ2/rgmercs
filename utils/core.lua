@@ -201,6 +201,14 @@ function Core.GetMainAssistPctHPs()
         return groupMember.PctHPs() or 100
     end
 
+    local heartbeat = Config:GetPeerHeartbeatByName(Config.Globals.MainAssist)
+    if heartbeat and heartbeat.Data and heartbeat.Data.HPs then
+        local hpPct = tonumber(heartbeat.Data.HPs)
+        if hpPct and type(hpPct) == 'number' then
+            return hpPct
+        end
+    end
+
     local ret = tonumber(DanNet.query(Config.Globals.MainAssist, "Me.PctHPs", 1000))
 
     if ret and type(ret) == 'number' then return ret end

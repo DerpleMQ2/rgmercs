@@ -1145,7 +1145,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
 
                     ImGui.BeginChild("##clicky_conditions_child_" .. clickyIdx, ImVec2(0, 0),
                         bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
-                        bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
+                        bit32.bor(ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
 
                     for condIdx, cond in ipairs(clicky.conditions or {}) do
                         if self:GetLogicBlockByType(cond.type) then
@@ -1158,7 +1158,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
                                 ImGui.BeginChild("##clicky_cond_child_" .. clickyIdx .. "_" .. condIdx, ImVec2(0, 0),
                                     bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
-                                    bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
+                                    bit32.bor(ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
                                 self:RenderConditionTargetCombo(cond, condIdx)
                                 self:RenderConditionArgs(cond, condIdx, clickyIdx)
                                 ImGui.EndChild()
@@ -1343,7 +1343,7 @@ function Module:GiveTime(combat_state)
                         self.TempSettings.ClickyState[clicky.itemName].item = item
                         if buffCheckPassed and Casting.ItemReady(item()) then
                             Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                            Casting.UseItem(item.Name(), target.ID())
+                            Casting.UseItem(item.Name(), target.ID(), true)
                             clickiesUsedThisFrame = clickiesUsedThisFrame + 1
                             if maxClickiesPerFrame > 0 and clickiesUsedThisFrame >= maxClickiesPerFrame then
                                 Logger.log_debug("\ayClicky: \a-tMax Clickies Per Frame of \am%d\a-t reached, stopping for this frame and picking up with %d next frame.",
