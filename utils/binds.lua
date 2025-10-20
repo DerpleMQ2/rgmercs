@@ -69,17 +69,25 @@ Binds.Handlers    = {
     },
     ['tempset'] = {
         usage = "/rgl tempset <setting> <value>",
-        about = "Temporarily sets a specific RGMercs setting until you reload or restart.",
+        about = "Temporarily sets a specific RGMercs setting until you restart the script or clear the temp setting.",
         handler = function(config, value)
             Config:HandleTempSet(config, value)
         end,
     },
     ['cleartempset'] = {
-        usage = "/rgl tempset <setting>",
-        about = "Clears a specific Temporarily set RGMercs setting back to the saved value.",
+        usage = "/rgl cleartempset <setting>",
+        about = "Clears a specific temporarily set RGMercs setting back to the saved value.",
 
         handler = function(config)
             Config:ClearTempSetting(config)
+        end,
+    },
+    ['cleartempall'] = {
+        usage = "/rgl cleartempall",
+        about = "Clears all temporarily set RGMercs setting back to their saved values.",
+
+        handler = function(config)
+            Config:ClearAllTempSettings()
         end,
     },
     ['forcecombat'] = {
