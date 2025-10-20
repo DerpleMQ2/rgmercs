@@ -562,8 +562,8 @@ function Combat.FindBestAutoTargetCheck()
         if heartbeat and heartbeat.Data and heartbeat.Data.TargetID then
             local targetID = tonumber(heartbeat.Data.TargetID)
             if targetID and type(targetID) == 'number' then
-                Logger.log_verbose("\ayFindTargetCheck Assist's Target via ActorNet :: %s", assistTarget.CleanName() or "None")
                 local assistTarget = mq.TLO.Spawn(targetID)
+                Logger.log_verbose("\ayFindTargetCheck Assist's Target via ActorNet :: %s", assistTarget.CleanName() or "None")
                 if assistTarget and assistTarget() then
                     assistTarg = true
                 end
