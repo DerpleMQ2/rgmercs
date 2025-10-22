@@ -120,9 +120,6 @@ function Module:WriteSettings()
 			end
 
 			if not self.Actor then Module:LootMessageHandler() end
-
-			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'combatlooting', CombatLooting = Config:GetSetting('CombatLooting'), })
 		else
 			Core.DoCmd("/lua stop lootnscoot")
 		end
@@ -238,14 +235,8 @@ function Module:LootMessageHandler()
 		local mail = message()
 		local subject = mail.Subject or ''
 		local who = mail.Who or ''
-		local CombatLooting = mail.CombatLooting or false
-		local currSetting = Config:GetSetting('CombatLooting')
 
 		if who ~= Config.Globals.CurLoadedChar then return end
-
-		if currSetting ~= CombatLooting then
-			Config:SetSetting('CombatLooting', CombatLooting)
-		end
 
 		if subject == ('done_looting' or 'done_processing') then
 			Module.TempSettings.Looting = false
