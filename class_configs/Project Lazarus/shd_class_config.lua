@@ -981,18 +981,20 @@ local _ClassConfig = {
                 name = "PowerTapAC",
                 type = "Spell",
                 tooltip = Tooltips.PowerTapAC,
+                load_cond = function(self) return Config:GetSetting('DoACTap') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoACTap') or not spell or not spell() then return false end
-                    return not Casting.IHaveBuff(spell.Trigger())
+                    local triggerSpell = spell() and spell.Trigger()
+                    return triggerSpell and not Casting.IHaveBuff(triggerSpell)
                 end,
             },
             {
                 name = "PowerTapAtk",
                 type = "Spell",
                 tooltip = Tooltips.PowerTapAtk,
+                load_cond = function(self) return Config:GetSetting('DoAtkTap') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAtkTap') or not spell or not spell() then return false end
-                    return not Casting.IHaveBuff(spell.Trigger())
+                    local triggerSpell = spell() and spell.Trigger()
+                    return triggerSpell and not Casting.IHaveBuff(triggerSpell)
                 end,
             },
             {
@@ -1006,6 +1008,7 @@ local _ClassConfig = {
             {
                 name = "Slam",
                 type = "Ability",
+                load_cond = function(self) return mq.TLO.Me.Ability("Slam")() end,
                 tooltip = Tooltips.Slam,
             },
         },
