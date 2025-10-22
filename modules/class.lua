@@ -1524,6 +1524,11 @@ function Module:GiveTime(combat_state)
         end
     end
 
+    -- stop singing after pause so we can take over again (if we are active, we will stop our own songs). If paused, allow user to manage their own songs.
+    if Core.MyClassIs("BRD") and not Config.Globals.PauseMain and mq.TLO.Me.Casting() ~= nil and not mq.TLO.Window("CastingWindow").Open() then
+        Core.DoCmd("/stopsong")
+    end
+
     -- Downtime rotation will just run a full rotation to completion
     for idx, r in ipairs(self.TempSettings.RotationStates) do
         Logger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
