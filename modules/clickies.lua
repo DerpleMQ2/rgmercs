@@ -557,6 +557,25 @@ Module.LogicBlocks                      = {
     },
 
     {
+        name = "I Have A Pet",
+        cond = function(self, _, negate)
+            if negate then
+                return not mq.TLO.Me.Pet.ID() > 0
+            else
+                return mq.TLO.Me.Pet.ID() > 0
+            end
+        end,
+        tooltip = "Only use this when I have a pet. (Optional Negate)",
+        render_header_text = function(self, cond)
+            return string.format("You %s a pet.", cond.args[1] and "don't have" or "have")
+        end,
+        cond_targets = { "Self", },
+        args = {
+            { name = "Negate", type = "boolean", default = false, },
+        },
+    },
+
+    {
         name = "Item Count",
         cond = function(self, target, item, belowCount, aboveCount)
             local itemCount = mq.TLO.FindItemCount(string.format("=%s", item))()
