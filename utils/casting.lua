@@ -316,7 +316,7 @@ function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
     end
 
     local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spellId), 1000)
-    if spellResult:lower() == "null" then
+    if (spellResult or "null"):lower() == "null" then
         Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellId, targetName, targetId)
         local numEffects = mq.TLO.Spell(spellName).NumEffects()
         local triggerCount = 0
