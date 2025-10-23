@@ -70,6 +70,7 @@ Config.Globals.RezzedCorpses                             = {}
 
 -- Constants
 Config.Constants                                         = {}
+Config.Constants.LootModuleTypes                         = { 'None', 'Smart Loot', 'LootNScoot', }
 Config.Constants.RGCasters                               = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
     "SHM", "WIZ", })
 Config.Constants.RGMelee                                 = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
@@ -1643,6 +1644,23 @@ Config.DefaultConfig               = {
         Max = 120,
     },
 
+    ['LootModuleType']       = {
+        DisplayName = "Loot Module Type",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 10,
+        Tooltip = "Choose which loot module to use.",
+        Default = (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu" and 2 or 1,
+        Min = 1,
+        Max = #Config.Constants.LootModuleTypes,
+        Type = "Combo",
+        ComboOptions = Config.Constants.LootModuleTypes,
+        OnChange = function(newValue)
+            Logger.log_info("\ayLoot Module changed to: \ag%s", Config.Constants.LootModuleTypes[newValue] or "Unknown")
+        end,
+    },
+
     --Deprecated/Need Adjusted to Custom/Etc
     ['FullUI']               = {
         DisplayName = "Use Full UI",
@@ -2130,6 +2148,10 @@ function Config:SetSetting(setting, value, tempOnly)
 
     local _, afterUpdate = Config:GetUsageText(setting, false, defaultConfig)
     Logger.log_debug("(%s) \ag%s\aw is now:\ax %-5s \ay[Previous:\ax %s\ay]", settingModuleName, setting, afterUpdate, beforeUpdate)
+
+    if defaultConfig[setting].OnChange then
+        defaultConfig[setting].OnChange(cleanValue)
+    end
 end
 
 --- Temporarily sets a setting

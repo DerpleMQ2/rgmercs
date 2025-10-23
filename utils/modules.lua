@@ -60,6 +60,18 @@ function Modules:load()
     }
 end
 
+function Modules:unloadModule(moduleName)
+    if self.ModuleList[moduleName] ~= nil then
+        self.ModuleList[moduleName]:Shutdown()
+        self.ModuleList[moduleName] = nil
+    end
+end
+
+function Modules:loadModule(moduleName, filePath)
+    self:unloadModule(moduleName)
+    self.ModuleList[moduleName] = require(filePath).New()
+end
+
 function Modules:GetModuleList()
     return self.ModuleList
 end
