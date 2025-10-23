@@ -328,7 +328,7 @@ function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
                 local triggerName = triggerSpell.Name()
                 local triggerID = triggerSpell.ID()
                 local triggerResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", triggerID), 1000)
-                if triggerResult:lower() == "null" then
+                if (triggerResult or "null"):lower() == "null" then
                     Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), checking stacking.", triggerName, triggerID, targetName, targetId)
                     local triggerStackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", triggerName), 1000)
                     if triggerStackResult:lower() == "true" then
@@ -338,7 +338,7 @@ function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
                         Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not stack on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
                         triggerFound = triggerFound + 1
                     end
-                elseif triggerResult:lower() == triggerName:lower() then
+                elseif (triggerResult or "null"):lower() == triggerName:lower() then
                     Logger.log_verbose("PeerBuffCheck: %s(ID:%d) found on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
                     triggerFound = triggerFound + 1
                 end
@@ -352,7 +352,7 @@ function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
             Logger.log_verbose("PeerBuffCheck: Total triggers for %s(ID:%d): %d. Present or non-stacking triggers: %d. Ending Check.", spellName, spellId, triggerCount, triggerFound)
             return false
         end
-    elseif spellResult:lower() == spellName:lower() then
+    elseif (spellResult or "null"):lower() == spellName:lower() then
         Logger.log_verbose("PeerBuffCheck: %s(ID:%d) found on %s(ID:%d), ending check.", spellName, spellId, targetName, targetId)
         return false
     else
@@ -363,7 +363,7 @@ function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
     end
 
     local stackResult = DanNet.query(targetName, string.format("Spell[%d].Stacks", spellId), 1000)
-    if stackResult:lower() == "true" then
+    if (stackResult or "null"):lower() == "true" then
         Logger.log_verbose("PeerBuffCheck: %s(ID:%d) seems to stack on %s(ID:%d), let's do it!", spellName, spellId, targetName, targetId)
         return true
     end

@@ -12,7 +12,7 @@ function helpers.query(peer, query, timeout)
     end
     local value = mq.TLO.DanNet(peer).Q(query)()
     Logger.log_verbose('\ayQuerying - mq.TLO.DanNet(%s).Q(%s) = %s [%d]', peer, query, value, mq.TLO.DanNet(peer).Q(query).Received() or 0)
-    return value
+    return value or "null"
 end
 
 function helpers.observe(peer, query, timeout)
