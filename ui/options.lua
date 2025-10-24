@@ -144,6 +144,11 @@ local function shallow_copy(orig)
     return copy
 end
 
+function OptionsUI:SetSearchFilter(filterText)
+    self.configFilter = filterText or ""
+    self:ApplySearchFilter()
+end
+
 function OptionsUI:ApplySearchFilter()
     self.FilteredGroups        = self.Groups
     self.FilteredSettingsByCat = {}

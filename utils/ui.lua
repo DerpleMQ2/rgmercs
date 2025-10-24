@@ -982,6 +982,18 @@ function Ui.RenderPopAndSettings(moduleName)
     end
 end
 
+function Ui.RenderHyperText(text, normalColor, highlightColor, callback)
+    local startingPos = ImGui.GetCursorPosVec()
+    local version = Modules:ExecModule("Class", "GetVersionString")
+    if ImGui.InvisibleButton("###" .. text .. "__invisbutton", ImGui.CalcTextSize(version), ImGui.GetTextLineHeight()) then
+        if callback then
+            callback()
+        end
+    end
+    ImGui.SetCursorPos(startingPos)
+    ImGui.TextColored(ImGui.IsItemHovered() and highlightColor or normalColor, text)
+end
+
 --- Generates a dynamic tooltip for a given spell action.
 --- @param action string The action identifier for the spell.
 --- @return string The generated tooltip for the spell.

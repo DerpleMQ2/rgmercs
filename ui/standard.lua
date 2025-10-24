@@ -1,5 +1,6 @@
 local mq           = require('mq')
 local GitCommit    = require('extras.version')
+local OptionsUI    = require("ui.options")
 local ImGui        = require('ImGui')
 local Config       = require('utils.config')
 local Ui           = require('utils.ui')
@@ -133,10 +134,30 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             local imgDisplayed = Casting.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
             ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
             ImGui.SameLine()
-            ImGui.Text(string.format("RGMercs %s [%s]\nClass Config: %s\nAuthor(s): %s",
+            local titlePos = ImGui.GetCursorPosVec()
+
+            ImGui.Text(string.format("RGMercs %s [%s]",
                 Config._version,
-                GitCommit.commitId or "None",
-                Modules:ExecModule("Class", "GetVersionString"),
+                GitCommit.commitId or "None"
+            ))
+
+            titlePos = ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing())
+            ImGui.SetCursorPos(titlePos)
+
+            ImGui.Text(string.format("Class Config: "))
+            ImGui.SameLine()
+
+            local version = Modules:ExecModule("Class", "GetVersionString")
+            Ui.RenderHyperText(version, IM_COL32(255, 255, 255, 255), IM_COL32(52, 52, 255, 255),
+                function()
+                    Config:SetSetting('EnableOptionsUI', true)
+                    OptionsUI:SetSearchFilter("What is the current status of this class config")
+                end)
+
+            titlePos = ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing())
+            ImGui.SetCursorPos(titlePos)
+
+            ImGui.Text(string.format("Author(s): %s",
                 Modules:ExecModule("Class", "GetAuthorString"))
             )
 
