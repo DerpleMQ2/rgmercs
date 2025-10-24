@@ -23,7 +23,7 @@ function ClassLoader.getClassConfigFileName(class)
         -- Fall back to the appropriate config.
         local oldConfig = configFile
         useCustomConfig = false
-        local folder = ClassLoader.getFallBackClassConfigFolder()
+        local folder = ClassLoader.getFallbackClassConfigFolder()
         configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, folder, class:lower())
     end
 
@@ -146,3 +146,4 @@ function ClassLoader.changeLoadedClass()
 end
 
 return ClassLoader
+
