@@ -146,8 +146,7 @@ end
 
 function OptionsUI:OpenAndSetSearchFilter(filterText)
     Config:SetSetting('EnableOptionsUI', true)
-    self.configFilter = filterText or ""
-    self:ApplySearchFilter()
+    self:SetSearchFilter(filterText)
 end
 
 function OptionsUI:SetSearchFilter(filterText)
