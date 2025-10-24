@@ -97,10 +97,8 @@ Module.CommandHandlers   = {
 }
 
 local function getConfigFileName()
-	local server = mq.TLO.EverQuest.Server()
-	server = server:gsub(" ", "")
 	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar ..
+		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar ..
 		"_" .. Config.Globals.CurLoadedClass .. '.lua'
 end
 
@@ -163,8 +161,7 @@ function Module:Init()
 	self:LoadSettings()
 	self:LootMessageHandler()
 	if not Core.OnEMU() then
-		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s",
-			mq.TLO.MacroQuest.BuildName())
+		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s", Config.Globals.BuildType)
 	else
 		if Config:GetSetting('DoLoot') then
 			if mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' then
