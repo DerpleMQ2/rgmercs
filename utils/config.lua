@@ -60,7 +60,8 @@ Config.Globals.CurZoneId                                 = mq.TLO.Zone.ID()
 Config.Globals.CurInstance                               = mq.TLO.Me.Instance()
 Config.Globals.CurLoadedChar                             = mq.TLO.Me.DisplayName()
 Config.Globals.CurLoadedClass                            = mq.TLO.Me.Class.ShortName()
-Config.Globals.CurServer                                 = mq.TLO.EverQuest.Server():gsub(" ", "")
+Config.Globals.CurServer                                 = mq.TLO.EverQuest.Server()
+Config.Globals.CurServerNormalized                       = mq.TLO.EverQuest.Server():gsub(" ", "")
 Config.Globals.CastResult                                = 0
 Config.Globals.BuildType                                 = mq.TLO.MacroQuest.BuildName()
 Config.Globals.Minimized                                 = false
@@ -196,7 +197,7 @@ Config.DefaultConfig               = {
     ['ClassConfigDir']       = {
         DisplayName = "Class Config Dir",
         Type = "Custom",
-        Default = mq.TLO.EverQuest.Server() == "Project Lazarus" and "Project Lazarus" or "Live",
+        Default = Config.Globals.BuildType:lower() ~= "emu" and "Live" or Config.Globals.CurServer,
     },
     ['UseAssistList']        = {
         DisplayName = "Assist Outside of Group",
@@ -1722,9 +1723,10 @@ function Config:SaveSettings()
 end
 
 function Config:LoadSettings()
-    self.Globals.CurLoadedChar  = mq.TLO.Me.DisplayName()
-    self.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
-    self.Globals.CurServer      = mq.TLO.EverQuest.Server():gsub(" ", "")
+    self.Globals.CurLoadedChar       = mq.TLO.Me.DisplayName()
+    self.Globals.CurLoadedClass      = mq.TLO.Me.Class.ShortName()
+    self.Globals.CurServer           = mq.TLO.EverQuest.Server()
+    self.Globals.CurServerNormalized = mq.TLO.EverQuest.Server():gsub(" ", "")
     Logger.log_info(
         "\ayLoading Main Settings for %s!",
         self.Globals.CurLoadedChar)

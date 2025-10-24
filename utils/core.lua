@@ -64,14 +64,14 @@ end
 ---
 --- @return boolean True if the environment is EMU, false otherwise.
 function Core.OnEMU()
-    return (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu"
+    return Config.Globals.BuildType:lower() == "emu"
 end
 
 --- Checks if the current server is Project Lazarus.
 ---
 --- @return boolean True if the server is Project Lazarus, false otherwise.
 function Core.OnLaz()
-    return (mq.TLO.EverQuest.Server() or ""):lower() == "project lazarus"
+    return Config.Globals.CurServer:lower() == "project lazarus"
 end
 
 --- Executes a given command with optional arguments.

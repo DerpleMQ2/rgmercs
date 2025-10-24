@@ -10,7 +10,7 @@ local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple
 function ClassLoader.getClassConfigFileName(class)
     local baseConfigDir = Config.Globals.ScriptDir .. "/class_configs"
 
-    local classConfigDir = Config:GetSetting('ClassConfigDir')
+    local classConfigDir = Config:GetSetting('ClassConfigDir') -- now defaults to current server
     local configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
     local useCustomConfig = (classConfigDir:find("Custom: ") ~= nil)
 
@@ -23,12 +23,23 @@ function ClassLoader.getClassConfigFileName(class)
         -- Fall back to the appropriate config.
         local oldConfig = configFile
         useCustomConfig = false
-        local folder = Core.OnLaz() and "Project Lazarus" or "Live"
+        local folder = ClassLoader.getFallBackClassConfigFolder()
         configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, folder, class:lower())
-        Logger.log_error("Could not find requested class config:\n \ay(%s)\n\awFalling back to:\n\ag%s", oldConfig, configFile)
     end
 
     return configFile, useCustomConfig
+end
+
+function ClassLoader.getFallbackClassConfigFolder()
+    if Core.OnEMU() then
+        local supportedServers = { "Project Lazarus", } --"HiddenForest", "EQ Might", }
+        for _, serverName in ipairs(supportedServers) do
+            if Config.Globals.CurServer:lower() == serverName:lower() then
+                return serverName
+            end
+        end
+    end
+    return "Live"
 end
 
 ---@param class string # EQ Class ShortName
@@ -60,7 +71,7 @@ function ClassLoader.writeCustomConfig(class)
         currentConfigDir = currentConfigDir:sub(9)
     end
     local current_File = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", currentConfigPath, currentConfigDir, class:lower())
-    local configType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or mq.TLO.EverQuest.Server()
+    local configType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or Config.Globals.CurServer
     local customFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, configType, class:lower())
     local backupFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config_%s.lua", mq.configDir, configType, class:lower(), os.date("%Y%m%d_%H%M%S"))
 
