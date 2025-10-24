@@ -144,6 +144,10 @@ local function shallow_copy(orig)
     return copy
 end
 
+function OptionsUI:OpenAndHighlightModule(module)
+    Config:OpenOptionsUIAndHighlightModule(module)
+end
+
 function OptionsUI:OpenAndSetSearchFilter(filterText)
     Config:SetSetting('EnableOptionsUI', true)
     self:SetSearchFilter(filterText)
