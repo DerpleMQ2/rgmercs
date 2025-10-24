@@ -2599,6 +2599,11 @@ function Config:ClearAllHighlightedModules()
     self.lastHighlightTime = os.time()
 end
 
+function Config:OpenOptionsUIAndHighlightModule(module)
+    self:SetSetting("EnableOptionsUI", true)
+    self:HighlightModule(module)
+end
+
 function Config:HighlightModule(module)
     -- only allow for 1 at a time for now but later we might enhance this.
     self.TempSettings.HighlightedModules = Set.new({})

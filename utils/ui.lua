@@ -963,8 +963,7 @@ end
 
 function Ui.RenderPopAndSettings(moduleName)
     if ImGui.SmallButton(Icons.MD_SETTINGS) then
-        Config:HighlightModule(moduleName)
-        Config:SetSetting('EnableOptionsUI', true)
+        Config:OpenOptionsUIAndHighlightModule(moduleName)
     end
     Ui.Tooltip(string.format("Open the RGMercs Options with %s settings highlighted.", moduleName))
 
