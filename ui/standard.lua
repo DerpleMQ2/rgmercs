@@ -150,8 +150,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             local version = Modules:ExecModule("Class", "GetVersionString")
             Ui.RenderHyperText(version, IM_COL32(255, 255, 255, 255), IM_COL32(52, 52, 255, 255),
                 function()
-                    Config:SetSetting('EnableOptionsUI', true)
-                    OptionsUI:SetSearchFilter("What is the current status of this class config")
+                    OptionsUI:OpenAndSetSearchFilter("What is the current status of this class config")
                 end)
 
             titlePos = ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing())

@@ -144,6 +144,12 @@ local function shallow_copy(orig)
     return copy
 end
 
+function OptionsUI:OpenAndSetSearchFilter(filterText)
+    Config:SetSetting('EnableOptionsUI', true)
+    self.configFilter = filterText or ""
+    self:ApplySearchFilter()
+end
+
 function OptionsUI:SetSearchFilter(filterText)
     self.configFilter = filterText or ""
     self:ApplySearchFilter()
