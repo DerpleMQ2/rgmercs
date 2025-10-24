@@ -29,7 +29,7 @@ local Movement    = require("utils.movement")
 
 -- Initialize class-based moduldes
 local Modules     = require("utils.modules")
-Modules:load()
+Modules:load(Config.Constants.LootModuleTypes[Config:GetSetting('LootModuleType')])
 
 require('utils.datatypes')
 

@@ -71,7 +71,7 @@ Config.Globals.RezzedCorpses                             = {}
 
 -- Constants
 Config.Constants                                         = {}
-Config.Constants.LootModuleTypes                         = { 'None', 'Smart Loot', 'LootNScoot', }
+Config.Constants.LootModuleTypes                         = { 'None', 'LootNScoot', 'SmartLoot', }
 Config.Constants.RGCasters                               = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
     "SHM", "WIZ", })
 Config.Constants.RGMelee                                 = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
@@ -1648,17 +1648,30 @@ Config.DefaultConfig               = {
     ['LootModuleType']       = {
         DisplayName = "Loot Module Type",
         Group = "General",
-        Header = "Interface",
-        Category = "Interface",
+        Header = "Loot(Emu)",
+        Category = "Looting Script",
         Index = 10,
         Tooltip = "Choose which loot module to use.",
-        Default = (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu" and 2 or 1,
+        Default = 1,
         Min = 1,
         Max = #Config.Constants.LootModuleTypes,
         Type = "Combo",
         ComboOptions = Config.Constants.LootModuleTypes,
-        OnChange = function(newValue)
-            Logger.log_info("\ayLoot Module changed to: \ag%s", Config.Constants.LootModuleTypes[newValue] or "Unknown")
+        OnChange = function(oldValue, newValue)
+            if Config.Globals.BuildType:lower() ~= "emu" and newValue > 1 then
+                Logger.log_error("\ayLoot Modules are not used on offical servers.")
+                Config:SetSetting("LootModuleType", 1, false)
+                return
+            end
+            local oldLootModule = Config.Constants.LootModuleTypes[oldValue]
+            local newLootModule = Config.Constants.LootModuleTypes[newValue]
+            Logger.log_info("\ayLoot Module changed from %s to: \ag%s", oldLootModule or "Unknown", newLootModule or "Unknown")
+            Modules:unloadModule(oldLootModule)
+            if newValue > 1 then
+                local path = string.format("modules." .. newLootModule:lower())
+                Logger.log_info("\ayLoot Module: \ag%s", newLootModule:lower() or "Unknown")
+                Modules:loadModule(newLootModule, path)
+            end
         end,
     },
 
@@ -2130,6 +2143,7 @@ function Config:SetSetting(setting, value, tempOnly)
         return
     end
 
+    local oldValue = Config:GetSetting(setting)
     local defaultConfig = self:GetModuleDefaultSettings(settingModuleName)
 
     local cleanValue = self:MakeValidSetting(settingModuleName, setting, value)
@@ -2151,8 +2165,9 @@ function Config:SetSetting(setting, value, tempOnly)
     local _, afterUpdate = Config:GetUsageText(setting, false, defaultConfig)
     Logger.log_debug("(%s) \ag%s\aw is now:\ax %-5s \ay[Previous:\ax %s\ay]", settingModuleName, setting, afterUpdate, beforeUpdate)
 
-    if defaultConfig[setting].OnChange then
-        defaultConfig[setting].OnChange(cleanValue)
+
+    if defaultConfig[setting].OnChange and oldValue ~= cleanValue then
+        defaultConfig[setting].OnChange(oldValue, cleanValue)
     end
 end
 

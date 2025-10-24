@@ -14,7 +14,7 @@ local Icons              = require('mq.ICONS')
 local serverLNSFormat    = mq.TLO.EverQuest.Server():gsub(" ", "_")
 local warningMessageSent = false
 
-local Module             = { _version = '1.1 for LNS', _name = "Loot", _author = 'Derple, Grimmier, Algar', }
+local Module             = { _version = '1.2', _name = "LootNScoot", _author = 'Derple, Grimmier, Algar', }
 Module.__index           = Module
 Module.SaveRequested     = nil
 
@@ -35,7 +35,7 @@ Module.DefaultConfig     = {
 	['DoLoot']                                 = {
 		DisplayName = "Load LootNScoot",
 		Group = "General",
-		Header = "Loot",
+		Header = "Loot(Emu)",
 		Category = "LNS",
 		Index = 1,
 		Tooltip = "Load the integrated LootNScoot in directed mode. Turning this off will unload the looting script.",
@@ -44,7 +44,7 @@ Module.DefaultConfig     = {
 	['CombatLooting']                          = {
 		DisplayName = "Combat Looting",
 		Group = "General",
-		Header = "Loot",
+		Header = "Loot(Emu)",
 		Category = "LNS",
 		Index = 2,
 		Tooltip = "Enables looting during RGMercs-defined combat.",
@@ -53,7 +53,7 @@ Module.DefaultConfig     = {
 	['LootRespectMedState']                    = {
 		DisplayName = "Respect Med State",
 		Group = "General",
-		Header = "Loot",
+		Header = "Loot(Emu)",
 		Category = "LNS",
 		Index = 3,
 		Tooltip = "Hold looting if you are currently meditating.",
@@ -62,7 +62,7 @@ Module.DefaultConfig     = {
 	['LootingTimeout']                         = {
 		DisplayName = "Looting Timeout",
 		Group = "General",
-		Header = "Loot",
+		Header = "Loot(Emu)",
 		Category = "LNS",
 		Index = 4,
 		Tooltip = "The length of time in seconds that RGMercs will allow LNS to process loot actions in a single check.",
@@ -73,7 +73,7 @@ Module.DefaultConfig     = {
 	['MaxChaseTargetDistance']                 = {
 		DisplayName = "Max Chase Targ Dist",
 		Group = "General",
-		Header = "Loot",
+		Header = "Loot(Emu)",
 		Category = "LNS",
 		Index = 5,
 		Tooltip = "If chase is on, we won't loot (and will abort looting) any corpses when the chase target is farther than this value away from us.",
@@ -169,12 +169,10 @@ function Module:Init()
 				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 			end
 			Core.DoCmd("/lua run lootnscoot directed rgmercs")
-			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'getcombatsetting', })
 		end
 		self.TempSettings.Looting = false
 		--pass settings to lootnscoot lib
-		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
+		Logger.log_debug("\ay[LOOT]: \agLoot(LNS) module Loaded.")
 	end
 
 	return { self = self, defaults = self.DefaultConfig, }
@@ -340,7 +338,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-	Logger.log_debug("\ay[LOOT]: \axEMU Loot Module Unloaded.")
+	Logger.log_debug("\ay[LOOT]: \axLoot(LNS) Module Unloaded.")
 	Core.DoCmd("/lua stop lootnscoot")
 end
 
