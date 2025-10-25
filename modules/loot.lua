@@ -169,8 +169,6 @@ function Module:Init()
 				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 			end
 			Core.DoCmd("/lua run lootnscoot directed rgmercs")
-			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'getcombatsetting', })
 		end
 		self.TempSettings.Looting = false
 		--pass settings to lootnscoot lib
