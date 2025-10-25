@@ -15,5 +15,6 @@ return {
         "RobbanEQ",
         "mackal",
         "guest01",
+        "Fargrim",
     },
 }
