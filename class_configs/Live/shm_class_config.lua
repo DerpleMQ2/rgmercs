@@ -428,7 +428,8 @@ local _ClassConfig = {
             "Stoicism",
         },
         ["CanniSpell"] = {
-            -- Convert Health to Mana - Level  23 - 113
+            -- Convert Health to Mana - Level  23 - 124
+			"Traumatic Exchange",
             "Hoary Agreement",
             "Ancient Bargain",
             "Tribal Bargain",
@@ -551,7 +552,7 @@ local _ClassConfig = {
             -- Pandemic Dot Long Dot(84s) Level 103+
             -- Two resist types because it throws 2 dots
             -- Stacking: Kralbor's Pandemic  -    Stacking: Breath of Ultor
-            "Hotarion Pandemic",
+            "Hotariton Pandemic",
             "Tegi Pandemic",
             "Bledrek's Pandemic",
             "Elkikatar's Pandemic",
