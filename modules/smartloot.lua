@@ -328,7 +328,7 @@ function Module:ProcessLooting(combat_state)
 		end
 
 		-- Check for combat and abort if needed
-		if combat_state == 'Combat' or smartLoot.State() == "CombatDetected" then
+		if combat_state == 'Combat' or self:GetSLState() == "CombatDetected" then
 			Logger.log_debug("\ay[LOOT]: \arCombat detected - aborting looting")
 			if mq.TLO.Window("LootWnd").Open() then
 				mq.TLO.Window("LootWnd").DoClose()
@@ -337,7 +337,7 @@ function Module:ProcessLooting(combat_state)
 			break
 		end
 
-		if self:GetSLIsIdle() then -- we dont need to check for the TLO because it will close mercs if it isn't there
+		if self:GetSLState() == "Idle" then -- we dont need to check for the TLO because it will close mercs if it isn't there
 			Logger.log_verbose("\ay[LOOT]: \agSmartLoot processing complete (%.1fs elapsed)", elapsed / 1000)
 			self.TempSettings.Looting = false
 			break
