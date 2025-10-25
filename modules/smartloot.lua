@@ -10,9 +10,6 @@ local Logger             = require("utils.logger")
 local Targeting          = require("utils.targeting")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
----@diagnostic disable-next-line: undefined-field
-local smartLoot          = mq.TLO.SmartLoot -- we should likely establish actors, but this will work, for now.
-
 local Module             = { _version = '1.0', _name = "SmartLoot", _author = 'andude2, Algar', }
 Module.__index           = Module
 Module.SettingCategories = {}
@@ -184,6 +181,40 @@ function Module:ShouldRender()
 	return Core.OnEMU()
 end
 
+function Module:GetSLState()
+	---@diagnostic disable-next-line: undefined-field
+	if not mq.TLO.SmartLoot then
+		return "Unknown"
+	end
+
+	---@diagnostic disable-next-line: undefined-field
+	return mq.TLO.SmartLoot.State()
+end
+
+function Module:GetSLMode()
+	---@diagnostic disable-next-line: undefined-field
+	if not mq.TLO.SmartLoot then
+		return "Unknown"
+	end
+
+	---@diagnostic disable-next-line: undefined-field
+	return mq.TLO.SmartLoot.Mode()
+end
+
+function Module:GetSLTLO()
+	---@diagnostic disable-next-line: undefined-field
+	if not mq.TLO.SmartLoot then
+		return nil
+	end
+
+	---@diagnostic disable-next-line: undefined-field
+	return mq.TLO.SmartLoot
+end
+
+function Module:IsLSLoaded()
+	return mq.TLO.Lua.Script('smartloot').Status() == 'RUNNING'
+end
+
 function Module:Render()
 	Ui.RenderPopAndSettings(self._name)
 	-- SmartLoot status display
@@ -191,18 +222,11 @@ function Module:Render()
 	local statusColor = { 1.0, 0.3, 0.3, 1.0, } -- Red
 
 	if self:IsSmartLootReady() then
-		local success, slState, slMode = pcall(function()
-			if smartLoot then
-				return smartLoot.State() or "Unknown", smartLoot.Mode() or "Unknown"
-			end
-			return "Unknown", "Unknown"
-		end)
-
-		if success then
-			smartLootStatus = string.format("%s (%s)", slState, slMode)
+		if self:IsLSLoaded() then
+			smartLootStatus = string.format("%s (%s)", self:GetSLState(), self:GetSLMode())
 			statusColor = { 0.3, 1.0, 0.3, 1.0, } -- Green
 		else
-			smartLootStatus = "Error Reading Status"
+			smartLootStatus = "SmartLoot Not Running"
 			statusColor = { 1.0, 1.0, 0.3, 1.0, } -- Yellow
 		end
 	end
@@ -212,11 +236,6 @@ function Module:Render()
 
 	ImGui.Text("This module integrates with SmartLoot for automated looting.")
 	ImGui.Text("SmartLoot must be running separately: /lua run smartloot")
-
-
-	if ImGui.CollapsingHeader("Config Options") then
-		_, _ = Ui.RenderModuleSettings(self._name, self.DefaultConfig, self.SettingCategories)
-	end
 end
 
 function Module:Pop()
@@ -231,19 +250,18 @@ function Module:InitializeSmartLoot()
 	end
 
 	-- Check for SmartLoot availability
-	local smartLootStatus = mq.TLO.Lua.Script('smartloot')
-	if smartLootStatus and smartLootStatus.Status() == 'RUNNING' then
+	local smartLootScript = mq.TLO.Lua.Script('smartloot')
+	if smartLootScript and smartLootScript.Status() == 'RUNNING' then
 		self.useSmartLoot = true
 		Logger.log_info("\ay[LOOT]: \agSmartLoot integration enabled, please ensure you have a Main Looter set!")
 		if Config:GetSetting('SLMainLooter') then
-			mq.cmd('/sl_mode rgmain')
+			Core.DoCmd('/sl_mode rgmain')
 			Logger.log_info("Loot: Setting this character as the main looter for SmartLoot.")
 		end
 		self.smartLootInitialized = true
 	else
 		self.useSmartLoot = false
 		self.smartLootInitialized = false
-		Logger.log_warn("\ay[LOOT]: \arSmartLoot not running - looting disabled")
 	end
 end
 
@@ -319,7 +337,7 @@ function Module:ProcessLooting(combat_state)
 			break
 		end
 
-		if smartLoot.IsIdle() then -- we dont need to check for the TLO because it will close mercs if it isn't there
+		if self:GetSLIsIdle() then -- we dont need to check for the TLO because it will close mercs if it isn't there
 			Logger.log_verbose("\ay[LOOT]: \agSmartLoot processing complete (%.1fs elapsed)", elapsed / 1000)
 			self.TempSettings.Looting = false
 			break
@@ -335,7 +353,7 @@ end
 
 function Module:GiveTime(combat_state)
 	if not Config:GetSetting('UseSmartLoot') then return end
-	if not smartLoot.IsEnabled() then return end
+	if not self:GetSLTLO() or not self:GetSLTLO().IsEnabled() then return end
 	if Config.Globals.PauseMain then return end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
@@ -346,7 +364,7 @@ function Module:GiveTime(combat_state)
 	end
 
 	-- Check for corpses using SmartLoot
-	if self.TempSettings.Looting or (smartLoot.HasNewCorpses() and smartLoot.SafeToLoot()) then
+	if self.TempSettings.Looting or (self:GetSLTLO() and (self:GetSLTLO().HasNewCorpses() and self:GetSLTLO().SafeToLoot())) then
 		if self:DoLoot() then
 			Logger.log_verbose("\ay[LOOT]: \agInitiated SmartLoot processing")
 			-- Process looting immediately
