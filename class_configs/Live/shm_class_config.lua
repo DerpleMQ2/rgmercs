@@ -429,7 +429,7 @@ local _ClassConfig = {
         },
         ["CanniSpell"] = {
             -- Convert Health to Mana - Level  23 - 124
-			"Traumatic Exchange",
+            "Traumatic Exchange",
             "Hoary Agreement",
             "Ancient Bargain",
             "Tribal Bargain",
@@ -2162,6 +2162,16 @@ local _ClassConfig = {
             Answer =
                 "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
                 "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
+        },
+    },
+    ['ClassFAQ']          = {
+        [1] = {
+            Question = "What is the current status of this class config?",
+            Answer = "This class config is a current release aimed at official servers.\n\n" ..
+                "  This config should perform well from from start to endgame, but a TLP or emu player may find it to be lacking exact customization for a specific era.\n\n" ..
+                "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
+                "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
         },
     },
 }

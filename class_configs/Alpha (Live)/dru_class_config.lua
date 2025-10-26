@@ -1664,6 +1664,15 @@ local _ClassConfig = {
             Answer = "Make sure Use Snares is enabled in your class settings.",
         },
     },
+    ['ClassFAQ']          = {
+        [1] = {
+            Question = "What is the current status of this class config?",
+            Answer = "This class config is an Alpha config aimed at late game live.\n\n" ..
+                "  It should perform well as a healer, but may be lacking typical options or configuration.\n\n" ..
+                "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
+        },
+    },
 }
 
 return _ClassConfig

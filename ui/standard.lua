@@ -150,8 +150,14 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             local version = Modules:ExecModule("Class", "GetVersionString")
             Ui.RenderHyperText(version, IM_COL32(255, 255, 255, 255), IM_COL32(52, 52, 255, 255),
                 function()
-                    OptionsUI:OpenAndSetSearchFilter("What is the current status of this class config")
+                    OptionsUI:OpenAndSetSearchFilter("what is the current status of this class config")
                 end)
+            Ui.Tooltip("Click to display notes about the status of this class config.")
+            ImGui.SameLine()
+            if ImGui.SmallButton(Icons.MD_INFO_OUTLINE) then
+                OptionsUI:OpenAndSetSearchFilter("what is the current status of this class config")
+            end
+            Ui.Tooltip("Click to display notes about the status of this class config.")
 
             titlePos = ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing())
             ImGui.SetCursorPos(titlePos)

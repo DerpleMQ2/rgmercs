@@ -32,7 +32,7 @@ end
 
 function ClassLoader.getFallbackClassConfigFolder()
     if Core.OnEMU() then
-        local supportedServers = { "Project Lazarus", } --"HiddenForest", "EQ Might", }
+        local supportedServers = { "Project Lazarus", "HiddenForest", "EQ Might", }
         for _, serverName in ipairs(supportedServers) do
             if Config.Globals.CurServer:lower() == serverName:lower() then
                 return serverName
@@ -146,4 +146,3 @@ function ClassLoader.changeLoadedClass()
 end
 
 return ClassLoader
-

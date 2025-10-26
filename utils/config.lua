@@ -587,7 +587,7 @@ Config.DefaultConfig               = {
         Tooltip = "Choose how/when to use mounts.",
         Type = "Combo",
         ComboOptions = { 'Never', 'For use as mount', 'For buff only', },
-        Default = 1,
+        Default = 2,
         Min = 1,
         Max = 3,
         ConfigType = "Normal",
@@ -1715,9 +1715,9 @@ end
 
 function Config:GetConfigFileName()
     local oldFile = mq.configDir ..
-        '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServer .. "_" .. self.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServerNormalized .. "_" .. self.Globals.CurLoadedChar .. '.lua'
     local newFile = mq.configDir ..
-        '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServer .. "_" .. self.Globals.CurLoadedChar .. "_" .. self.Globals.CurLoadedClass:lower() .. '.lua'
+        '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServerNormalized .. "_" .. self.Globals.CurLoadedChar .. "_" .. self.Globals.CurLoadedClass:lower() .. '.lua'
 
     if Files.file_exists(newFile) then
         return newFile
@@ -2775,7 +2775,8 @@ end
 --- This function checks certain conditions to decide if the character should dismount.
 --- @return boolean True if the character should dismount, false otherwise.
 function Config.ShouldDismount()
-    return Config:GetSetting('DoMount') ~= 2 and ((mq.TLO.Me.Mount.ID() or 0) > 0)
+    -- if mount item is empty and we are on a mount then the user probably wants mount on.
+    return (Config:GetSetting('MountItem') or ""):len() > 0 and Config:GetSetting('DoMount') ~= 2 and ((mq.TLO.Me.Mount.ID() or 0) > 0)
 end
 
 --- Determines if the priority follow condition is met.

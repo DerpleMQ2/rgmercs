@@ -151,6 +151,63 @@ Module.DefaultServerClickies            = {
             ['iconId'] = 6136,
         },
     },
+    ['HiddenForest']    = {
+        [1] = {
+            ['itemName'] = 'Orb of Spirits',
+            ['iconId'] = 986,
+            ['combat_state'] = 'Combat',
+            ['target'] = 'Self',
+            ['conditions'] = {
+                [1] = {
+                    ['target'] = 'Self',
+                    ['type'] = 'Mana Threshold',
+                    ['args'] = {
+                        [1] = 0,
+                        [2] = 5,
+                    },
+                },
+            },
+        },
+        [2] = {
+            ['itemName'] = 'Orb of Spirits',
+            ['iconId'] = 986,
+            ['combat_state'] = 'Downtime',
+            ['target'] = 'Self',
+            ['conditions'] = {
+                [1] = {
+                    ['target'] = 'Self',
+                    ['type'] = 'Mana Threshold',
+                    ['args'] = {
+                        [1] = 0,
+                        [2] = 15,
+                    },
+                },
+            },
+        },
+        [3] = {
+            ['itemName'] = 'Staff of Force I',
+            ['iconId'] = 912,
+            ['combat_state'] = 'Combat',
+            ['target'] = 'Auto Target',
+            ['conditions'] = {
+                [1] = {
+                    ['target'] = 'Self',
+                    ['type'] = 'During Burns',
+                    ['args'] = {
+                        [1] = false,
+                    },
+                },
+                [2] = {
+                    ['target'] = 'Auto Target',
+                    ['type'] = 'HP Threshold',
+                    ['args'] = {
+                        [1] = 0,
+                        [2] = 95,
+                    },
+                },
+            },
+        },
+    },
 }
 
 Module.DefaultConfig                    = {
