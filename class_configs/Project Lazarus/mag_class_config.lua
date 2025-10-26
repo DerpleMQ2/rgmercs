@@ -980,151 +980,6 @@ _ClassConfig      = {
             if shroudSpell.Level() > aaSpell.Level() then return false end
             return true
         end,
-        give_pet_toys = function(self, petId)
-            if Config:GetSetting('DoPetWeapons') then
-                self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Weapon", petId)
-            end
-            if Config:GetSetting('DoPetArmor') then
-                self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Armor", petId)
-            end
-            if Config:GetSetting('DoPetHeirlooms') then
-                self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Heirlooms", petId)
-            end
-        end,
-        handle_pet_toys = function(self)
-            if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then
-                Logger.log_debug("handle_pet_toys() ==> \arFailed your level is below 73 or you dont have inv slots open!")
-                return false
-            end
-            if (mq.TLO.Me.Pet.Equipment("Primary")() or 0) ~= 0 then
-                Logger.log_verbose("handle_pet_toys() ==> \arFailed your pet already has weapons!")
-                return false
-            end
-
-            if mq.TLO.Me.CombatState():lower() ~= "combat" then
-                return self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
-            end
-            return false
-        end,
-        group_toys = function(self)
-            -- first Things first see if i can even Make Pet toys. if i am To Low Level or have no Inventory Return
-            if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
-
-
-            -- Check if the Groups pet need toys by checking if the pet has weapons.
-            -- If they Are Not a Mage - Also Give them Armor
-            for i = 1, mq.TLO.Group.Members() do
-                local member = mq.TLO.Group.Member(i)
-                if member and member() and (member.Pet.ID() or 0) > 0 and (member.Pet.Equipment("primary")() or 0) == 0 then
-                    if mq.TLO.Me.CombatState():lower() ~= "combat" then
-                        self.ClassConfig.HelperFunctions.give_pet_toys(self, member.Pet.ID())
-                    end
-                end
-            end
-        end,
-        summon_pet_toy = function(self, type, targetId)
-            local petToyResolvedSpell = self.ResolvedActionMap[string.format("Pet%sSummon", type)]
-
-            if not petToyResolvedSpell or not petToyResolvedSpell() then
-                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed to resolve Pet%sSummon item type!", type)
-                return false
-            end
-
-            if mq.TLO.Me.Level() < petToyResolvedSpell.Level() then
-                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed your level is below the pet toy spell(%s) level: %d!", petToyResolvedSpell.RankName(),
-                    petToyResolvedSpell.Level())
-                return false
-            end
-
-            if not Casting.SpellReady(petToyResolvedSpell) then
-                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed SpellReady() Check!", type)
-                return false
-            end
-
-            -- find a slot for the item
-            local openSlot = 0
-            for i = 1, 10 do
-                if mq.TLO.InvSlot("pack" .. tostring(i)).Item.Container() == nil and mq.TLO.InvSlot("pack" .. tostring(i)).Item.ID() == nil then
-                    openSlot = i
-                    break
-                end
-            end
-
-            if openSlot == 0 then
-                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed to find open top level inv slot!", openSlot)
-                return
-            end
-
-            Logger.log_super_verbose("summon_pet_toy() ==> \agUsing PackID=%d", openSlot)
-
-            Casting.UseSpell(petToyResolvedSpell.RankName(), mq.TLO.Me.ID(), Targeting.GetXTHaterCount() == 0)
-
-            mq.delay("5s", function() return (mq.TLO.Cursor.ID() or 0) > 0 end)
-
-            if (mq.TLO.Cursor.ID() or 0) == 0 then return false end
-
-            local packName = string.format("pack%d", openSlot)
-
-            while mq.TLO.Cursor.ID() do
-                Core.DoCmd("/shiftkey /itemnotify %s leftmouseup", packName)
-                mq.delay("1s", function() return mq.TLO.Cursor.ID() == nil end)
-            end
-
-            -- What happens if the bag is a Folded Pack
-            while string.find(mq.TLO.InvSlot(packName).Item.Name(), "Folded Pack") ~= nil do
-                Core.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
-                -- Folded backs end up on our cursor.
-                mq.delay("5s", function() return (mq.TLO.Cursor.ID() or 0) > 0 end)
-                -- Drop the unfolded pack back in our inventory
-                while mq.TLO.Cursor.ID() do
-                    Core.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
-                    mq.delay("1s", function() return mq.TLO.Cursor.ID() == nil end)
-                end
-            end
-
-            -- Hand Toy off to the Pet
-            -- Open our pack
-            Core.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
-
-            -- TODO: Need a condition to check if the pack window has opened
-            mq.delay("1s")
-
-            if type == "Armor" or type == "Heirloom" then
-                -- Loop through each item in our bag and give it to the pet
-                for i = 1, mq.TLO.InvSlot(packName).Item.Container() do
-                    if mq.TLO.InvSlot(packName).Item.Item(i).Name() ~= nil then
-                        ItemManager.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
-                    end
-                end
-            else
-                -- Must be a weapon
-                -- Hand Weapons off to the pet
-                local itemsToGive = { 2, 4, }
-                if Core.IsModeActive("PetTank") then
-                    -- If we're pet tanking, give the pet the hate swords in bag slots
-                    -- 7 and 8. At higher levels this only ends up with one aggro swords
-                    -- so perhaps there's a way of generalizing later.
-                    itemsToGive = { 7, 8, }
-                end
-
-                for _, i in ipairs(itemsToGive) do
-                    Logger.log_debug("Item Name %s", mq.TLO.InvSlot(packName).Item.Item(i).Name())
-                    ItemManager.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
-                end
-            end
-
-            -- Delete the satchel if it's still there
-            if mq.TLO.InvSlot(packName).Item.ID() ~= nil then
-                Core.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
-                mq.delay("5s", function() return mq.TLO.Cursor.ID() ~= nil end)
-
-                -- Just double check and make sure it's a temporary
-                if mq.TLO.Cursor.ID() and mq.TLO.Cursor.NoRent() then
-                    Core.DoCmd("/destroy")
-                    mq.delay(30, function() return mq.TLO.Cursor.ID() == nil end)
-                end
-            end
-        end,
         summon_pet = function(self)
             local petSpellVar = string.format("%sPetSpell", self.ClassConfig.DefaultConfig.PetType.ComboOptions[Config:GetSetting('PetType')])
             local resolvedPetSpell = self.ResolvedActionMap[petSpellVar]
@@ -1175,9 +1030,6 @@ _ClassConfig      = {
                         Casting.UseSpell(resolvedPetHasteSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
                         local resolvedPetBuffSpell = self.ResolvedActionMap["PetIceFlame"]
                         Casting.UseSpell(resolvedPetBuffSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
-                        if mq.TLO.Me.Pet.ID() then
-                            self.ClassConfig.HelperFunctions.handle_pet_toys(self)
-                        end
                         Casting.UseAA("Suspended Minion", mq.TLO.Me.ID(), true)
                         self.TempSettings.PocketPet = true
                     end
@@ -1317,14 +1169,6 @@ _ClassConfig      = {
             },
         },
         ['PetBuff'] = {
-            {
-                name = "HandlePetToys",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    if not Config:GetSetting("DoPetWeapons") and not Config:GetSetting("DoPetArmor") and not Config:GetSetting("DoPetHeirlooms") then return false end
-                    return self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
-                end,
-            },
             { --if the buff is removed from the pet, the invisible rathe aura object remains; if we don't check for it, a spam condition could ensue
                 -- buff will be lost on zone
                 name = "PetAura",
@@ -1706,13 +1550,6 @@ _ClassConfig      = {
                     end
                 end,
             },
-            {
-                name = "HandleGroupToys",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    return self.ClassConfig.HelperFunctions.group_toys and self.ClassConfig.HelperFunctions.group_toys(self) or false
-                end,
-            },
         },
         ['Downtime'] = {
             {
@@ -1885,24 +1722,24 @@ _ClassConfig      = {
             Default = false,
             RequiresLoadoutChange = true,
         },
-        ['DoPetArmor']     = {
-            DisplayName = "Do Pet Armor",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Index = 101,
-            Tooltip = "Summon Armor for Pets",
-            Default = false,
-        },
-        ['DoPetWeapons']   = {
-            DisplayName = "Do Pet Weapons",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Index = 102,
-            Tooltip = "Summon Weapons for Pets",
-            Default = false,
-        },
+        -- ['DoPetArmor']     = {
+        --     DisplayName = "Do Pet Armor",
+        --     Group = "Items",
+        --     Header = "Item Summoning",
+        --     Category = "Item Summoning",
+        --     Index = 101,
+        --     Tooltip = "Summon Armor for Pets",
+        --     Default = false,
+        -- },
+        -- ['DoPetWeapons']   = {
+        --     DisplayName = "Do Pet Weapons",
+        --     Group = "Items",
+        --     Header = "Item Summoning",
+        --     Category = "Item Summoning",
+        --     Index = 102,
+        --     Tooltip = "Summon Weapons for Pets",
+        --     Default = false,
+        -- },
         ['PetType']        = {
             DisplayName = "Pet Type",
             Group = "Abilities",
@@ -1916,15 +1753,15 @@ _ClassConfig      = {
             Min = 1,
             Max = 4,
         },
-        ['DoPetHeirlooms'] = {
-            DisplayName = "Do Pet Heirlooms",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Index = 103,
-            Tooltip = "Summon Heirlooms for Pets",
-            Default = false,
-        },
+        -- ['DoPetHeirlooms'] = {
+        --     DisplayName = "Do Pet Heirlooms",
+        --     Group = "Items",
+        --     Header = "Item Summoning",
+        --     Category = "Item Summoning",
+        --     Index = 103,
+        --     Tooltip = "Summon Heirlooms for Pets",
+        --     Default = false,
+        -- },
         ['DoPetHealSpell'] = {
             DisplayName = "Pet Heal Spell",
             Group = "Abilities",
@@ -2145,6 +1982,17 @@ _ClassConfig      = {
             Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
+        },
+    },
+    ['ClassFAQ']          = {
+        [1] = {
+            Question = "What is the current status of this class config?",
+            Answer = "This class config is a current release customized specifically for Project Lazarus server.\n\n" ..
+                "  This config should perform admirably from start to endgame.\n\n" ..
+                "  Clickies that aren't already included should be managed via the clickies tab, or by customizing the config to add them directly.\n" ..
+                "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
+                "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
         },
     },
 }
