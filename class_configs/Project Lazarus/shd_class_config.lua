@@ -401,7 +401,7 @@ local _ClassConfig = {
             doFullRotation = true,
             load_cond = function()
                 return Core.IsTanking() and
-                    ((Config:GetSetting('AETauntSpell') and Core.GetResolvedActionMapItem('AETauntSpell')) or (Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))))
+                    ((Config:GetSetting('AETauntSpell') and Core.GetResolvedActionMapItem('AETaunt')) or (Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))))
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -1536,6 +1536,17 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why does my SHD switch to a Shield on puny gray named?",
             Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
+        },
+    },
+    ['ClassFAQ']        = {
+        [1] = {
+            Question = "What is the current status of this class config?",
+            Answer = "This class config is a current release customized specifically for Project Lazarus server.\n\n" ..
+                "  This config should perform admirably from start to endgame.\n\n" ..
+                "  Clickies that aren't already included should be managed via the clickies tab, or by customizing the config to add them directly.\n" ..
+                "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
+                "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
         },
     },
 }
