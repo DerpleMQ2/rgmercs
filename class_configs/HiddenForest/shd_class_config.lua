@@ -204,7 +204,6 @@ local _ClassConfig = {
         },
         ['LifeTap'] = {
             "Touch of the Devourer",
-            "Arel's Touch of Draygun",
             "Arel's Touch of Inruku",
             "Arel's Touch of Innoruuk",
             "Arel's Touch of Volatis",
@@ -218,7 +217,7 @@ local _ClassConfig = {
             "Greevel's Lifetap",   -- Level 8
         },
         ['LifeTap2'] = {
-            "Arel's Touch of Draygun",
+            "Touch of the Devourer",
             "Arel's Touch of Inruku",
             "Arel's Touch of Innoruuk",
             "Arel's Touch of Volatis",

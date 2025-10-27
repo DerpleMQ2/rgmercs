@@ -1747,8 +1747,6 @@ local _ClassConfig = {
             Tooltip = "Use Nav to Circle your target while autofiring.",
             Default = false,
             RequiresLoadoutChange = true, -- this is a load condition
-            FAQ = "Can Circle the target on my map?",
-            Answer = "Enabling [NavCircle] will run in a circle around your target on the map.",
         },
         ['DoSnare']           = {
             DisplayName = "Cast Snares",
@@ -1757,8 +1755,6 @@ local _ClassConfig = {
             Category = "Snare",
             Tooltip = "Enable casting Snare spells.",
             Default = true,
-            FAQ = "Why am I not casting my snare spells?",
-            Answer = "Make sure you have [DoSnare] Enabled and you will cast your Snare Spells.",
         },
         ['DoDot']             = {
             DisplayName = "Cast DOTs",
@@ -1767,8 +1763,6 @@ local _ClassConfig = {
             Category = "Over Time",
             Tooltip = "Enable casting Damage Over Time spells.",
             Default = true,
-            FAQ = "Why am I not casting my DOT spells?",
-            Answer = "Make sure you have [DoDot] Enabled and you will cast your DOT Spells.",
         },
         ['DoHeals']           = {
             DisplayName = "Cast Heals",
@@ -1777,8 +1771,6 @@ local _ClassConfig = {
             Category = "General Healing",
             Tooltip = "Enable casting of Healing spells.",
             Default = true,
-            FAQ = "Why am I not casting my Heal spells?",
-            Answer = "Make sure you have [DoHeals] Enabled and you will cast your Heal Spells.",
         },
         ['DoRegen']           = {
             DisplayName = "Cast Regen Spells",
@@ -1787,8 +1779,6 @@ local _ClassConfig = {
             Category = "Group",
             Tooltip = "Enable casting of Regen spells.",
             Default = true,
-            FAQ = "Why am I not casting my Regen spells?",
-            Answer = "Make sure you have [DoRegen] Enabled and you will cast your Regen Spells.",
         },
         ['DoRunSpeed']        = {
             DisplayName = "Cast Run Speed Buffs",
@@ -1797,8 +1787,6 @@ local _ClassConfig = {
             Category = "Group",
             Tooltip = "Use Ranger Run Speed Buffs.",
             Default = true,
-            FAQ = "Why am I not casting my Run Speed Buffs?",
-            Answer = "Make sure you have [DoRunSpeed] Enabled and you will cast your Run Speed Buffs.",
         },
         ['DoMask']            = {
             DisplayName = "Cast Mask Spell",
@@ -1807,8 +1795,6 @@ local _ClassConfig = {
             Category = "Self",
             Tooltip = "Use Ranger Mask Spell",
             Default = false,
-            FAQ = "Why am I not casting my Mask Spell?",
-            Answer = "Make sure you have [DoMask] Enabled and you will cast your Mask Spell.",
         },
         ['DoFireFist']        = {
             DisplayName = "Cast FireFist",
@@ -1817,8 +1803,6 @@ local _ClassConfig = {
             Category = "Self",
             Tooltip = "Use Ranger FireFist Line of Spells",
             Default = true,
-            FAQ = "Why am I not casting my FireFist Spells?",
-            Answer = "Make sure you have [DoFireFist] Enabled and you will cast your FireFist Spells.",
         },
         ['DoAoE']             = {
             DisplayName = "Use AoEs",
@@ -1827,8 +1811,6 @@ local _ClassConfig = {
             Category = "AE",
             Tooltip = "Enable AoE abilities and spells.",
             Default = false,
-            FAQ = "Why am I not casting my AoE spells?",
-            Answer = "Make sure you have [DoAoE] Enabled and you will cast your AoE Spells.",
         },
         ['DoOpener']          = {
             DisplayName = "Use Openers",
@@ -1837,8 +1819,6 @@ local _ClassConfig = {
             Category = "Direct",
             Tooltip = "Use Opening Arrow Shot Silent Shot Line.",
             Default = true,
-            FAQ = "Why am I not casting my Opener spells?",
-            Answer = "Make sure you have [DoOpener] Enabled and you will cast your Opener Spells.",
         },
         ['DoPoisonArrow']     = {
             DisplayName = "Use Poison Arrow",
@@ -1847,8 +1827,6 @@ local _ClassConfig = {
             Category = "Group",
             Tooltip = "Enable use of Poison Arrow.",
             Default = true,
-            FAQ = "Why am I not casting my Poison Arrow spells?",
-            Answer = "Make sure you have [DoPoisonArrow] Enabled and you will cast your Poison Arrow Spells.",
         },
         ['DoReagentArrow']    = {
             DisplayName = "Use Reagent Arrow",
@@ -1857,8 +1835,6 @@ local _ClassConfig = {
             Category = "Direct",
             Tooltip = "Toggle usage of Spells and Openers that require Reagent arrows.",
             Default = false,
-            FAQ = "Why am I not casting my Reagent Arrow spells?",
-            Answer = "Make sure you have [DoReagentArrow] Enabled and you will cast your Reagent Arrow Spells.",
         },
         ['DoAgroReducerBuff'] = {
             DisplayName = "Cast Agro Reducer Buff",
@@ -1867,20 +1843,18 @@ local _ClassConfig = {
             Category = "Self",
             Tooltip = "Use Agro Reduction Buffs.",
             Default = true,
-            FAQ = "How do I manage aggro as a Ranger?",
-            Answer = "Make sure you have [DoAgroReducerBuff] Enabled and you will cast your Agro Reducer Buffs.",
         },
     },
     ['ClassFAQ']          = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is a current release aimed at official servers.\n\n" ..
-                "  This config should perform well from from start to endgame, but a TLP or emu player may find it to be lacking exact customization for a specific era.\n\n" ..
-                "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
+                "  This config is largely a port from older code, and has seen only minor adjustments. It has been flagged for revamp when we have the chance!\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
     },
+
 }
 
 return _ClassConfig

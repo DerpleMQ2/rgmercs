@@ -1663,8 +1663,6 @@ local _ClassConfig = {
             Tooltip = "Overwrite DPU with single buffs when they are better than the DPU effect.",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "I have new buffs but I am still using DPU, why?",
-            Answer = "Toggle to Overwrite DPU with single buffs when appropriate from the Buffs/Debuffs tab. This is disabled by default to speed up buffing.",
         },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
@@ -1684,9 +1682,6 @@ local _ClassConfig = {
             Category = "Self",
             Tooltip = "Use Undead proc over Fury proc until Fury is rolled into Divine Protector's Unity (Level 80).",
             Default = false,
-            FAQ = "I was using an undead proc buff and it recently switched to the Fury line proc, how do I get it back?",
-            Answer = "By default, we will use the undead proc from levels 26-44 as it is the only proc available.\n" ..
-                "If you would like to continue to use the Undead proc after that, please enable it in the Spells and Abilities tab.",
         },
         ['DoBrells']          = {
             DisplayName = "Do Brells",
@@ -1695,8 +1690,6 @@ local _ClassConfig = {
             Category = "Group",
             Tooltip = "Enable Casting Brells",
             Default = true,
-            FAQ = "Why am I not casting Brells?",
-            Answer = "Make sure you have the [DoBrells] setting enabled.",
         },
         ['AegoSymbol']        = {
             DisplayName = "Aego/Symbol Choice:",
@@ -1710,8 +1703,6 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 3,
-            FAQ = "Why aren't I using Aego and/or Symbol buffs?",
-            Answer = "Please set which buff you would like to use on the Buffs/Debuffs tab.",
         },
         ['DoSalvation']       = {
             DisplayName = "Marr's Salvation",
@@ -1720,8 +1711,6 @@ local _ClassConfig = {
             Category = "Group",
             Tooltip = "Use your group hatred reduction buff AA.",
             Default = false,
-            FAQ = "Why isn't Marr's Salvation being used?",
-            Answer = "Select the option in the Spells and Abilities tab to use this buff, it is not enabled by default.",
         },
         --Healing
         ['TotHealPoint']      = {
@@ -1734,8 +1723,6 @@ local _ClassConfig = {
             Default = 30,
             Min = 1,
             Max = 100,
-            FAQ = "Why am I not healing the target of my target?",
-            Answer = "You will want to adjust [TotHealPoint] to the % HP you have before using Target of Target heals.",
         },
         ['LayHandsPct']       = {
             DisplayName = "Use Lay on Hands",
@@ -1747,8 +1734,6 @@ local _ClassConfig = {
             Default = 35,
             Min = 1,
             Max = 100,
-            FAQ = "Why am I not using Lay on Hands?",
-            Answer = "You will want to adjust [LayHandsPct] to the % HP you have before using Lay on Hands.",
         },
         ['StartBurstToT']     = {
             DisplayName = "HP % for Burst ToT",
@@ -1761,8 +1746,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using Dire Taps on cooldown for more DPS?",
-            Answer = "The default HP% to begin using Dire Taps is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
         ['DoDicho']           = {
             DisplayName = "Cast Dicho",
@@ -1774,8 +1757,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why would someone want to disable Dicho Taps at all?",
-            Answer = "Also a question that I am unsure of the answer to. Drop in to Discord and let me know!",
         },
         ['StartDicho']        = {
             DisplayName = "HP % for Dicho",
@@ -1788,8 +1769,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using Dicho on cooldown for more DPS?",
-            Answer = "The default HP% to begin using Dicho is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
 
         --Hate Tools
@@ -1802,8 +1781,6 @@ local _ClassConfig = {
             Tooltip = "Use AE Taunt AA.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Placeholder question aobout AE taunt",
-            Answer = "Yes.",
         },
         ['AETauntCnt']        = {
             DisplayName = "AE Taunt Count",
@@ -1844,8 +1821,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
-            Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
         },
         ['EmergencyStart']    = {
             DisplayName = "Emergency Start",
@@ -1858,8 +1833,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "My SHD health spikes up and down a lot and abilities aren't being triggered, what gives?",
-            Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
         ['EmergencyLockout']  = {
             DisplayName = "Emergency Only",
@@ -1872,9 +1845,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What rotations are cut during Emergency Lockout?",
-            Answer = "Hate Tools - death will cause a bigger issue with aggro. Defenses - we stop using preemptives and go for the oh*#$#.\n" ..
-                "Debuffs, Weaves and other (non-LifeTap) DPS will also be cut.",
         },
 
         --Equipment
@@ -1886,8 +1856,6 @@ local _ClassConfig = {
             Index = 101,
             Tooltip = "Click your equipped chest.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "What the heck is a chest click?",
-            Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHD's is generally a healing tool (a lifetapping pet).",
         },
         ['DoCharmClick']      = {
             DisplayName = "Do Charm Click",
@@ -1897,8 +1865,6 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Click your charm for Geomantra.",
             Default = false,
-            FAQ = "Why is my Shadow Knight not clicking his charm?",
-            Answer = "Charm clicks won't happen if you are in combat.",
         },
         ['DoCoating']         = {
             DisplayName = "Use Coating",
@@ -1908,8 +1874,6 @@ local _ClassConfig = {
             Index = 103,
             Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
         ['UseBandolier']      = {
             DisplayName = "Dynamic Weapon Swap",
@@ -1920,9 +1884,6 @@ local _ClassConfig = {
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"2Hand\" TO USE THIS FUNCTION.***",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not using Dynamic Weapon Swapping?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['EquipShield']       = {
             DisplayName = "Equip Shield",
@@ -1935,9 +1896,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using a shield?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['Equip2Hand']        = {
             DisplayName = "Equip 2Hand",
@@ -1950,9 +1908,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using a 2Hand?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['NamedShieldLock']   = {
             DisplayName = "Shield on Named",
@@ -1962,7 +1917,7 @@ local _ClassConfig = {
             Index = 104,
             Tooltip = "Keep Shield equipped for Named mobs(must be in SpawnMaster or named.lua)",
             Default = true,
-            FAQ = "Why does my SHD switch to a Shield on puny gray named?",
+            FAQ = "Why does my PAL switch to a Shield on puny gray named?",
             Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
         },
         --ORPHANED PLACEHOLDERS
@@ -1972,9 +1927,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoReverseDS']       = {
             DisplayName = "Orphaned",
@@ -1982,9 +1934,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoBandolier']       = {
             DisplayName = "Orphaned",
@@ -1992,9 +1941,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['FlashHP']           = {
             DisplayName = "Orphaned",
@@ -2002,9 +1948,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
     },
     ['ClassFAQ']          = {

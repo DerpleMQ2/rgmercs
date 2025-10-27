@@ -2192,8 +2192,6 @@ local _ClassConfig = {
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not snaring?",
-            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
         ['SnareCount']        = {
             DisplayName = "Snare Max Mob Count",
@@ -2205,9 +2203,6 @@ local _ClassConfig = {
             Default = 3,
             Min = 1,
             Max = 99,
-            FAQ = "Why is my Shadow Knight Not snaring?",
-            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
-                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
         ['DoTempHP']          = {
             DisplayName = "Use HP Buff",
@@ -2218,8 +2213,6 @@ local _ClassConfig = {
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("TempHP") end,
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "Why do we have the Temp HP Buff always memorized?",
-            Answer = "Temp HP buffs have a very long refresh time after scribing, making them infeasible to use if not gemmed.",
         },
         ['ProcChoice']        = {
             DisplayName = "HP/Mana Proc:",
@@ -2233,9 +2226,6 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 3,
-            FAQ = "I am constantly running out of mana, what can I do to help?",
-            Answer = "During certain level ranges, it may be helpful to use the Mana Proc (Mental) line over the HP proc (Terror) line.\n" ..
-                "This can be adjusted on the Buffs/Debuffs tab.",
         },
         ['OverwriteDLUBuffs'] = {
             DisplayName = "Overwrite DLU Buffs",
@@ -2246,8 +2236,6 @@ local _ClassConfig = {
             Tooltip = "Overwrite DLU with single buffs when they are better than the DLU effect.",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "I have new buffs but I am still using DLU, why?",
-            Answer = "Toggle to Overwrite DLU with single buffs when appropriate from the Buffs/Debuffs tab. This is disabled by default to speed up buffing.",
         },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
@@ -2272,9 +2260,6 @@ local _ClassConfig = {
             Default = 99,
             Min = 1,
             Max = 100,
-            FAQ = "Why is my Shadow Knight not using Life Taps?",
-            Answer = "Make sure you have [DoLifeTap] enabled in your class settings.\n" ..
-                "Double check [StartLifeTap] seetting, this setting will prevent Life Taps from being used if your HP is above [x]%",
         },
         ['DoDireTap']         = {
             DisplayName = "Cast Dire Taps",
@@ -2286,8 +2271,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why would someone want to disable Dire Taps at all?",
-            Answer = "Now that I think about it... I'm not quite sure.",
         },
         ['StartDireTap']      = {
             DisplayName = "HP % for Dire",
@@ -2300,8 +2283,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using Dire Taps on cooldown for more DPS?",
-            Answer = "The default HP% to begin using Dire Taps is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
         ['DoDicho']           = {
             DisplayName = "Cast Dicho Taps",
@@ -2313,8 +2294,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why would someone want to disable Dicho Taps at all?",
-            Answer = "Also a question that I am unsure of the answer to. Drop in to Discord and let me know!",
         },
         ['StartDicho']        = {
             DisplayName = "HP % for Dicho",
@@ -2327,8 +2306,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using Dicho on cooldown for more DPS?",
-            Answer = "The default HP% to begin using Dicho is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
         ['DoACTap']           = {
             DisplayName = "Use AC Tap",
@@ -2340,8 +2317,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my AC Tap?",
-            Answer = "AC Taps have a large period of receiving no updates (between 71 and 99). We will avoid using them after Level 75 until they are updated again.",
         },
         ['DoAtkTap']          = {
             DisplayName = "Use Attack Tap",
@@ -2353,8 +2328,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my Attack Tap?",
-            Answer = "Attack Taps don't receive an update after level 70; by default we will not use them after level 75.",
         },
         ['DoMaxHPTap']        = {
             DisplayName = "Use Max HP Tap",
@@ -2383,8 +2356,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using Leech Touch?",
-            Answer = "You can choose the conditions under which you will use Leech Touch on the Taps tab.",
         },
         ['DoThoughtLeech']    = {
             DisplayName = "Thought Leech Use:",
@@ -2399,8 +2370,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using Thought Leech?",
-            Answer = "You can choose the conditions under which you will use Thought Leech on the Taps tab.",
         },
 
         --DoT Spells
@@ -2413,8 +2382,6 @@ local _ClassConfig = {
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("BondTap") end,
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why do I spend so much mana using these DoTs?",
-            Answer = "Dots have additional settings in the RGMercs Main config, such as the min mana% to use them.",
         },
         ['DoPoisonDot']       = {
             DisplayName = "Use Poison Dot",
@@ -2425,8 +2392,6 @@ local _ClassConfig = {
             ToolTip = function() return Ui.GetDynamicTooltipForSpell("PoisonDot") end,
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why do I use a DoT just before a mob dies?",
-            Answer = "Dots have additional settings in the RGMercs Main config, such as the HP% to stop using them (for both trash and named).",
         },
         ['DoCorruptionDot']   = {
             DisplayName = "Use Corrupt Dot",
@@ -2449,8 +2414,6 @@ local _ClassConfig = {
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("DireDot") end,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why is my Shadow Knight not using Dire Dot?",
-            Answer = "Dire Dot is not enabled by default, you may need to select it.",
         },
 
         -- AE Damage
@@ -2475,8 +2438,6 @@ local _ClassConfig = {
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("AELifeTap") end,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why is my Shadow Knight not using the AE Tap (Insidious) Line?",
-            Answer = "The Insidious AE Hate Life Tap is not enabled by default, you may need to select it.",
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Target Count",
@@ -2533,7 +2494,7 @@ local _ClassConfig = {
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
             FAQ = "Why am I not using my Visage Buff, Voice of ...?",
-            Answer = "If you have the option selected in Buffs/Debuffs, you may not have enough spell gems to keep the spell on your bar with other options.\n" ..
+            Answer = "Even if the Use Hate Buff option is selected, you may not have enough spell gems to keep the spell on your bar with other options.\n" ..
                 "Do to the incredibly long recast time (around 9 minutes), we will not memorize these to use them on the fly.",
         },
         ['DoTerror']          = {
@@ -2549,8 +2510,6 @@ local _ClassConfig = {
             Default = 2,
             Min = 1,
             Max = 3,
-            FAQ = "Why is my Shadow Knight Not using Terror Taunts?",
-            Answer = "By default, terrors won't be used once the \"For Power\" line is available. This can be adjusted on the Hate Tool tab.",
         },
         ['DoForPower']        = {
             DisplayName = "Use \"For Power\"",
@@ -2562,8 +2521,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "I've set the option to always use Terrors, why is For Power still being memorized?",
-            Answer = "You must also disable its use in the Hate Tools Tab (Use For Power)",
         },
         ['AETauntAA']         = {
             DisplayName = "Use AE Taunt AA",
@@ -2591,10 +2548,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using AE Taunt Spells?",
-            Answer = "Make sure you have [AETauntSpell] enabled in your class settings.\n" ..
-                "You will also want to adjust your [AETauntAA] options (Never, Until Explosions (AA Taunts) are available, Always)\n" ..
-                "And set [AETauntCnt] settings to match your current needs.",
         },
         ['AETauntCnt']        = {
             DisplayName = "AE Taunt Count",
@@ -2635,8 +2588,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
-            Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
         },
         ['DefenseStart']      = {
             DisplayName = "Defense Start",
@@ -2649,8 +2600,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "My SHD health spikes up and down a lot and abilities aren't being triggered, what gives?",
-            Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
         ['EmergencyStart']    = {
             DisplayName = "Emergency Start",
@@ -2663,8 +2612,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What rotations are cut during emergencies?",
-            Answer = "Snare, Burn, Combat Weave and Combat rotations are disabled when your health is at emergency levels.\nAdditionally, we will only use non-spell hate tools.",
         },
         ['HPCritical']        = {
             DisplayName = "HP Critical",
@@ -2678,9 +2625,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What rotations are cut when HP % is critical?",
-            Answer =
-            "Hate Tools (including AE) and Leech Effect rotations are cut when HP% is critical.\nAdditionally, reaching the emergency threshold would've also cut the Snare, Burn, Combat Weave and Combat Rotations.",
         },
 
         --Equipment
@@ -2692,8 +2636,6 @@ local _ClassConfig = {
             Index = 101,
             Tooltip = "Click your equipped chest.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "What the heck is a chest click?",
-            Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHD's is generally a healing tool (a lifetapping pet).",
         },
         ['DoCharmClick']      = {
             DisplayName = "Do Charm Click",
@@ -2703,8 +2645,6 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Click your charm for Geomantra.",
             Default = false,
-            FAQ = "Why is my Shadow Knight not clicking his charm?",
-            Answer = "Charm clicks won't happen if you are in combat.",
         },
         ['DoCoating']         = {
             DisplayName = "Use Coating",
@@ -2714,8 +2654,6 @@ local _ClassConfig = {
             Index = 103,
             Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
         ['UseBandolier']      = {
             DisplayName = "Dynamic Weapon Swap",
@@ -2726,9 +2664,6 @@ local _ClassConfig = {
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"2Hand\" TO USE THIS FUNCTION.***",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not using Dynamic Weapon Swapping?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['EquipShield']       = {
             DisplayName = "Equip Shield",
@@ -2741,9 +2676,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using a shield?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['Equip2Hand']        = {
             DisplayName = "Equip 2Hand",
@@ -2756,9 +2688,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight not using a 2Hand?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
         ['NamedShieldLock']   = {
             DisplayName = "Shield on Named",

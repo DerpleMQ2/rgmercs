@@ -906,7 +906,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 2,
             FAQ = "What do the different Modes Do?",
-            Answer = "Tank Mode is for when you are the main tank. DPS Mode is for when you are not the main tank and want to focus on damage.",
+            Answer = "Warriors have a Tank mode and a DPS Mode.",
         },
         ['DoBattleLeap']     = {
             DisplayName = "Do Battle Leap",
@@ -915,8 +915,6 @@ local _ClassConfig = {
             Category = "Direct",
             Tooltip = "Do Battle Leap",
             Default = true,
-            FAQ = "How do I use Battle Leap?",
-            Answer = "Enable [DoBattleLeap] in the settings and you will use Battle Leap.",
         },
         ['DoPress']          = {
             DisplayName = "Do Press the Attack",
@@ -925,8 +923,6 @@ local _ClassConfig = {
             Category = "Stun",
             Tooltip = "Use the Press to Attack stun/push AA.",
             Default = false,
-            FAQ = "Why isn't Press the Attack working?",
-            Answer = "This ability must be turned on in the Abilities tab.",
         },
         ['DoSnare']          = {
             DisplayName = "Use Snares",
@@ -935,8 +931,6 @@ local _ClassConfig = {
             Category = "Snare",
             Tooltip = "Enable casting Snare abilities.",
             Default = true,
-            FAQ = "How do I use Snares?",
-            Answer = "Enable [DoSnare] in the settings and you will use Snares.",
         },
         ['DoVetAA']          = {
             DisplayName = "Use Vet AA",
@@ -1051,8 +1045,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
-            Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
         },
         ['EmergencyStart']   = {
             DisplayName = "Emergency Start",
@@ -1065,8 +1057,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "My WAR health spikes up and down a lot and abilities aren't being triggered, what gives?",
-            Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
         ['EmergencyLockout'] = {
             DisplayName = "Emergency Only",
@@ -1079,9 +1069,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What rotations are cut during Emergency Lockout?",
-            Answer = "Hate Tools - death will cause a bigger issue with aggro. Defenses - we stop using preemptives and go for the oh*#$#.\n" ..
-                "Debuffs, Weaves and other (non-LifeTap) DPS will also be cut.",
         },
 
         --Equipment
@@ -1093,8 +1080,6 @@ local _ClassConfig = {
             Index = 101,
             Tooltip = "Click your equipped chest.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "What the heck is a chest click?",
-            Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The WAR's is generally an absorbe rune for large hits.",
         },
         ['DoCharmClick']     = {
             DisplayName = "Do Charm Click",
@@ -1104,8 +1089,6 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Click your charm for Geomantra.",
             Default = false,
-            FAQ = "Why is my Warrior not clicking his charm?",
-            Answer = "Charm clicks won't happen if you are in combat.",
         },
         ['DoCoating']        = {
             DisplayName = "Use Coating",
@@ -1115,8 +1098,6 @@ local _ClassConfig = {
             Index = 103,
             Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
         ['UseBandolier']     = {
             DisplayName = "Dynamic Weapon Swap",
@@ -1127,9 +1108,6 @@ local _ClassConfig = {
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"DW\" TO USE THIS FUNCTION.***",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why is my Warrior not using Dynamic Weapon Swapping?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"DW\" to use this function.",
         },
         ['EquipShield']      = {
             DisplayName = "Equip Shield",
@@ -1142,9 +1120,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Warrior not using a shield?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"DW\" to use this function.",
         },
         ['EquipDW']          = {
             DisplayName = "Equip DW",
@@ -1157,9 +1132,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Warrior not using DW?",
-            Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
-                "You must also have Bandolier entries named \"Shield\" and \"DW\" to use this function.",
         },
         ['NamedShieldLock']  = {
             DisplayName = "Shield on Named",
@@ -1180,8 +1152,6 @@ local _ClassConfig = {
             Index = 104,
             Tooltip = "Click your Epic Weapon when defenses are triggered.",
             Default = false,
-            FAQ = "How do I use my Epic Weapon?",
-            Answer = "Enable Do Epic to click your Epic Weapon.",
         },
     },
     ['ClassFAQ']        = {

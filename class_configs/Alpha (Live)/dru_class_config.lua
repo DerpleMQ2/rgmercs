@@ -1508,9 +1508,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = true,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoRain']       = {
             DisplayName = "Orphaned",
@@ -1518,9 +1515,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoMoveBuffs']  = {
             DisplayName = "Do Movement Buffs",
@@ -1539,9 +1533,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['NukePct']      = {
             DisplayName = "Orphaned",
@@ -1549,9 +1540,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoChestClick'] = {
             DisplayName = "Do Chest Click",
@@ -1560,8 +1548,6 @@ local _ClassConfig = {
             Category = "Class Config Clickies",
             Tooltip = "Click your chest item",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "Why am I not clicking my chest item?",
-            Answer = "Make sure [DoChestClick] is enabled. If you are in Heal Mode, you may not be clicking your chest item.",
         },
         ['DoDot']        = {
             DisplayName = "Orphaned",
@@ -1569,9 +1555,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoTwinHeal']   = {
             DisplayName = "Cast Twin Heal Nuke",
@@ -1581,8 +1564,6 @@ local _ClassConfig = {
             Tooltip = "Use Twin Heal Nuke Spells",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I have Twincastig AA, can I use it?",
-            Answer = "Yes, you can enable [DoTwinHeal] to use Twin Heal Nuke spells.",
         },
         ['DoHPBuff']     = {
             DisplayName = "Group HP Buff",
@@ -1621,9 +1602,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = true,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoSnare']      = {
             DisplayName = "Use Snares",
@@ -1634,8 +1612,6 @@ local _ClassConfig = {
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not snaring?",
-            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
         ['SnareCount']   = {
             DisplayName = "Snare Max Mob Count",
@@ -1647,9 +1623,6 @@ local _ClassConfig = {
             Default = 3,
             Min = 1,
             Max = 99,
-            FAQ = "Why is my Shadow Knight Not snaring?",
-            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
-                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
         ['DoRoDebuff']   = {
             DisplayName = "Use Ro Debuff",
@@ -1660,8 +1633,6 @@ local _ClassConfig = {
             Tooltip = "Use Ro Debuff",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not snaring?",
-            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
     },
     ['ClassFAQ']          = {
