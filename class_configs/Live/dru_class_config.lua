@@ -1700,10 +1700,6 @@ local _ClassConfig = {
             Tooltip = "if Enabled Use Fire Spells, Disabled Use Ice Spells",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Can I choose between Fire or Ice based Nukes?",
-            Answer = "Yes, you can choose between Fire and Ice based Nukes by toggling [DoFire].\n" ..
-                "When [DoFire] is enabled, we will use Fire based Nukes.\n" ..
-                "When [DoFire] is disabled, we will use Ice based Nukes.",
         },
         ['DoRain']       = {
             DisplayName = "Cast Rain Spells",
@@ -1712,8 +1708,6 @@ local _ClassConfig = {
             Category = "AE",
             Tooltip = "Use Rain Spells",
             Default = true,
-            FAQ = "I like Rain spells, can I use them?",
-            Answer = "Yes, you can enable [DoRain] to use Rain spells.",
         },
         ['DoRunSpeed']   = {
             DisplayName = "Use Movement Buffs",
@@ -1732,9 +1726,6 @@ local _ClassConfig = {
             Category = "Direct",
             Tooltip = "Use Spells",
             Default = true,
-            FAQ = "Why am I not Nuking?",
-            Answer = "Make sure [DoNuke] is enabled. If you are in Heal Mode, you may not be nuking.\n" ..
-                "Also double check [NukePct] to ensure you are nuking at the correct health percentage.",
         },
         ['NukePct']      = {
             DisplayName = "Nuke Pct",
@@ -1745,8 +1736,6 @@ local _ClassConfig = {
             Default = 90,
             Min = 1,
             Max = 100,
-            FAQ = "Why am I nuking at 10% health?",
-            Answer = "Make sure [NukePct] is set to the correct health percentage you want to start nuking at.",
         },
         ['DoSnare']      = {
             DisplayName = "Cast Snares",
@@ -1755,8 +1744,6 @@ local _ClassConfig = {
             Category = "Snare",
             Tooltip = "Enable casting Snare spells.",
             Default = true,
-            FAQ = "Why am I not Snaring?",
-            Answer = "Make sure [DoSnare] is enabled. If you are in Heal Mode, you may not be snaring.",
         },
         ['DoChestClick'] = {
             DisplayName = "Do Chest Click",
@@ -1765,8 +1752,6 @@ local _ClassConfig = {
             Category = "Class Config Clickies",
             Tooltip = "Click your chest item",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "Why am I not clicking my chest item?",
-            Answer = "Make sure [DoChestClick] is enabled. If you are in Heal Mode, you may not be clicking your chest item.",
         },
         ['DoDot']        = {
             DisplayName = "Cast DOTs",
@@ -1775,8 +1760,6 @@ local _ClassConfig = {
             Category = "Over Time",
             Tooltip = "Enable casting Damage Over Time spells.",
             Default = true,
-            FAQ = "Why am I not DOTing?",
-            Answer = "Make sure [DoDot] is enabled. If you are in Heal Mode, you may not be DOTing.",
         },
         ['DoTwinHeal']   = {
             DisplayName = "Cast Twin Heal Nuke",
@@ -1786,8 +1769,6 @@ local _ClassConfig = {
             Tooltip = "Use Twin Heal Nuke Spells",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I have Twincastig AA, can I use it?",
-            Answer = "Yes, you can enable [DoTwinHeal] to use Twin Heal Nuke spells.",
         },
         ['DoHPBuff']     = {
             DisplayName = "Group HP Buff",
@@ -1808,7 +1789,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why isn't my Temp HP Buff being used?",
-            Answer = "You either have [DoTempHP] disabled, or you don't have a Warrior in your group (Other tanks have their own Temp HP Buff).",
+            Answer = "You either have the Temp HP Buff disabled, or you don't have a Warrior in your group (Other tanks have their own Temp HP Buff).",
         },
         ['DoGroupRegen'] = {
             DisplayName = "Group Regen Buff",
@@ -1825,8 +1806,7 @@ local _ClassConfig = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is a current release aimed at official servers.\n\n" ..
-                "  This config should perform well from from start to endgame, but a TLP or emu player may find it to be lacking exact customization for a specific era.\n\n" ..
-                "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
+                "  This config is largely a port from older code, and has seen only minor adjustments. It has been flagged for revamp when we have the chance!\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

@@ -1526,8 +1526,6 @@ local _ClassConfig = {
             Tooltip = "Set to use the Learner's Aura instead of the Mana Regen Aura.",
             Default = false,
             FAQ = "How do I use my Learner's Aura?",
-            Answer = "To use your Learner's Aura, set [DoLearners] to true in your PC's configuration.\n" ..
-                "This will cause your PC to use the Learner's Aura instead of the Mana Regen Aura.",
         },
         ['RuneChoice']         = {
             DisplayName = "Rune Selection:",
@@ -1554,9 +1552,6 @@ local _ClassConfig = {
             Index = 103,
             Tooltip = "Enable casting the Tank Aggro Rune",
             Default = true,
-            FAQ = "Why am I not using the Aggro Rune?",
-            Answer = "The [DoAggroRune] setting determines whether or not your PC will cast the Tank Aggro Rune.\n" ..
-                "If you are not using the Aggro Rune, you may need to Enable the [DoAggroRune] setting.",
         },
         ['DoGroupSpellShield'] = {
             DisplayName = "Do Group Spellshield",
@@ -1567,9 +1562,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting the Group Spell Shield Line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not using Group Spell Shield?",
-            Answer = "The Do Group Spellshield setting determines whether or not your PC will cast the Group Spell Shield Line.\n" ..
-                "If you are not using Group DoT Shield, you may need to Enable the Do Group Spellshield setting.",
         },
         ['DoGroupDotShield']   = {
             DisplayName = "Do Group DoT Shield",
@@ -1580,9 +1572,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting the Group DoT Shield Line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not using Group DoT Shield?",
-            Answer = "The [DoGroupDotShield] setting determines whether or not your PC will cast the Group DoT Shield Line.\n" ..
-                "If you are not using Group DoT Shield, you may need to Enable the [DoGroupDotShield] setting.",
         },
         ['DoGroupAuspice']     = {
             DisplayName = "Do Group Auspice",
@@ -1593,9 +1582,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting the Group Auspice Buff Line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not using Group Auspice Buff?",
-            Answer = "The [DoGroupAuspice] setting determines whether or not your PC will cast the Group Auspice Buff.\n" ..
-                "If you are not using Group Auspice Buff, you may need to Enable the setting.",
         },
         ['DoProcBuff']         = {
             DisplayName = "Do Spellproc Buff",
@@ -1606,8 +1592,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting the spell proc (Mana ... ) line.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I using a spell proc buff on ... class?",
-            Answer = "By default, the spell proc buff will be used on any casters (including tanks/hybrids). You can change this option on the Buffs tab.",
         },
         ['DoNDTBuff']          = {
             DisplayName = "Cast NDT",
@@ -1618,9 +1602,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not using NDT?",
-            Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
-                "Please note that the single target versions are only set to be used on melee.",
         },
 
         --Debuffs
@@ -1632,9 +1613,6 @@ local _ClassConfig = {
             Tooltip = "Cast Tash Spells",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not Tashing?",
-            Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
-                "If you are not Tashing, you may need to Enable the [DoTash] setting.",
         },
         ['DoSlow']             = {
             DisplayName = "Cast Slow",
@@ -1644,9 +1622,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting Slow spells.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not Slowing?",
-            Answer = "The [DoSlow] setting determines whether or not your PC will cast Slow spells.\n" ..
-                "If you are not Slowing, you may need to Enable the [DoSlow] setting.",
         },
         ['DoCripple']          = {
             DisplayName = "Cast Cripple",
@@ -1656,10 +1631,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting Cripple spells.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not Crippling?",
-            Answer = "The [DoCripple] setting determines whether or not your PC will cast Cripple spells.\n" ..
-                "If you are not Crippling, you may need to Enable the [DoCripple] setting.\n" ..
-                "Please note that eventually, Cripple and Slow lines are merged together in the Helix line.",
         },
         ['DoDispel']           = {
             DisplayName = "Do Dispel",
@@ -1669,9 +1640,6 @@ local _ClassConfig = {
             Tooltip = "Enable removing beneficial enemy effects.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not dispelling?",
-            Answer = "The [DoDispel] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
-                "If you are not dispelling, you may need to Enable the [DoDispel] setting.",
         },
 
         --Combat
@@ -1685,8 +1653,6 @@ local _ClassConfig = {
             Min = 1,
             Default = 3,
             Max = 15,
-            FAQ = "Why am I not using AE Abilities?",
-            Answer = "Adjust your AE Count on the Combat Tab.",
         },
         ['DoAEStun']           = {
             DisplayName = "PBAE Stun use:",
@@ -1702,8 +1668,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why am I stunning everything?!??",
-            Answer = "You can choose the conditions under which you will use your PBAE Stun on the Combat tab.",
         },
         ['TwincastMez']        = {
             DisplayName = "TwinCast Mez Usage:",
@@ -1736,8 +1700,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using my emergency abilities?",
-            Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
         ['DoChestClick']       = {
             DisplayName = "Do Chest Click",
@@ -1747,9 +1709,6 @@ local _ClassConfig = {
             Index = 101,
             Tooltip = "Click your equipped chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "Why am I not clicking my chest item?",
-            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
-                "ENC is set to use theirs during burns, so long as the item equipped has a clicky effect.",
         },
 
         --DPS Low Level
@@ -1762,8 +1721,6 @@ local _ClassConfig = {
             Tooltip = "Use your magic nuke in the Default early/midgame DPS rotation.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my magic Nuke?",
-            Answer = "You can enable the magic nuke line in the Spells and Abilities tab.",
         },
         ['DoManaDrain']        = {
             DisplayName = "Mana Drain Nuke",
@@ -1774,8 +1731,6 @@ local _ClassConfig = {
             Tooltip = "Use your mana drain nuke in the Default early/midgame DPS rotation.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "How can I use my mana drain nuke?",
-            Answer = "You can enable the mana drain nuke line in the Spells and Abilities tab.",
         },
         ['DoStrangleDot']      = {
             DisplayName = "Strangle Dot",
@@ -1786,8 +1741,6 @@ local _ClassConfig = {
             Tooltip = "Use your magic damage (Strangle Line) Dot in the Default early/midgame DPS rotation.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I turned Cast DOTS off, why am I still using them?",
-            Answer = "The Modern Era mode does not respect this setting, as DoTs are integral to the DPS rotation.",
         },
         ['DoMindDot']          = {
             DisplayName = "Mind Dot",
@@ -1798,8 +1751,6 @@ local _ClassConfig = {
             Tooltip = "Use your mana drain/magic damage (Mind Line) Dot on Named in the Default early/midgame DPS rotation.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not using my Mind Dot when I have it selected?",
-            Answer = "This Dot is set to be used on named or when you don't already have the recourse active.",
         },
     },
     ['ClassFAQ']        = {

@@ -229,6 +229,9 @@ return {
         -- ['ResistDisc'] = {
         --     "Resistant Discipline",
         -- },
+        ['MinDmgBuff'] = {
+            "Empowering Water I",
+        },
     },
     ['HealRotationOrder'] = {
         { -- configured as a backup healer, will not cast in the mainpoint
@@ -640,6 +643,13 @@ return {
                 end,
             },
             {
+                name = "MinDmgBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
                 name = "ColdResistBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -725,6 +735,7 @@ return {
                 { name = "ArrowHail", },
                 { name = "FocusedHail", },
                 { name = "JoltSpell",   cond = function(self) return Config:GetSetting('DoJoltSpell') end, },
+                { name = "MinDmgBuff", },
                 { name = "MoveBuff",    cond = function(self) return Config:GetSetting('DoMoveBuffs') end, },
             },
         },

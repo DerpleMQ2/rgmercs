@@ -1819,8 +1819,6 @@ local _ClassConfig = {
             Tooltip = "Use Canni AA",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using the Canni AA?",
-            Answer = "Check your HP/Mana percent settings, and, for combat, ensure you have selected the combat option as well.",
         },
         ['AACanniManaPct']    = {
             DisplayName = "AA Canni Mana %",
@@ -1833,8 +1831,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Can you explain Canni Mana Settings?",
-            Answer = "Setting the Mana % setting will use that form of Canni when you are below that mana percent.",
         },
         ['AACanniMinHP']      = {
             DisplayName = "AA Canni HP %",
@@ -1847,8 +1843,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Can you explain Canni HP Settings?",
-            Answer = "Setting the HP % setting will stop you from using the form of Canni if you are below that HP percent.",
         },
         ['DoSpellCanni']      = {
             DisplayName = "Use Spell Canni",
@@ -1860,9 +1854,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why am I still using a Canni spell, now that I have the AA?",
-            Answer =
-            "By default, the Canni spell will be used while the gems are still available to do so, as Canni AA may not be enough at earlier levels. Use Spell Canni can be turned off at any time.",
         },
         ['SpellCanniManaPct'] = {
             DisplayName = "Spell Canni Mana %",
@@ -1875,8 +1866,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why do I wait so long to use my canni spell?",
-            Answer = "Your Spell Canni Mana % governs how low you mana gets before you start using the spell.",
         },
         ['SpellCanniMinHP']   = {
             DisplayName = "Spell Canni HP %",
@@ -1889,8 +1878,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why are Canni HP % settings so high?",
-            Answer = "Default thresholds are conservative to prevent knee-jerk healing and can configured as needed.",
         },
         ['DoCombatCanni']     = {
             DisplayName = "Canni in Combat",
@@ -1901,9 +1888,6 @@ local _ClassConfig = {
             Tooltip = "Use Canni AA and Spells in combat",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "My shaman spends his time in combat doing canni while I prefer him to do xyz other thing, what gives?",
-            Answer =
-            "Canni in Combat can be disabled at your discretion; you could also tune HP or Mana settings for Canni Spell or AA.",
         },
         --Buffs
         ['UseEpic']           = {
@@ -1919,9 +1903,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my SHM using Epic on these trash mobs?",
-            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
-                "This can be adjusted in the Buffs tab.",
         },
         ['DoRunSpeed']        = {
             DisplayName = "Do Run Speed",
@@ -1955,8 +1936,6 @@ local _ClassConfig = {
             Tooltip = "Use Temp HP Buff on Warriors in the group.",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why is the Temp HP Buff only used on Warriors?",
-            Answer = "Mana costs and recast time make this buff only feasible on a Tank; PAL and SHD have their own buff and they don't stack with this one.",
         },
         ['DoAura']            = {
             DisplayName = "Use Aura",
@@ -1967,8 +1946,6 @@ local _ClassConfig = {
             Tooltip = "Use Aura (Pact of Wolf)",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "How do I stop my Aura from turning everything into a Werewolf?",
-            Answer = "You can use /blockspell to safely block the illusion without blocking the buff, instructions on its use are given when typed in-game.",
         },
         ['DoGroupRegen']      = {
             DisplayName = "Group Regen Buff",
@@ -2001,8 +1978,6 @@ local _ClassConfig = {
             Index = 101,
             Tooltip = "Use your Ward of... self-heal ward buff line.",
             Default = true,
-            FAQ = "Why am I not casting Wards?",
-            Answer = "You can set the [DoSelfWard] option to true to enable Ward Type Spells.",
         },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
@@ -2025,8 +2000,6 @@ local _ClassConfig = {
             Tooltip = "Do ST Malo Spells/AAs",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Cast Malo is selected, why am I not using it?",
-            Answer = "Ensure that your Debuff settings in the RGMercs Main config are set properly, as there are options for con colors and named mobs there.",
         },
         ['DoAEMalo']          = {
             DisplayName = "Do AE Malo",
@@ -2037,8 +2010,6 @@ local _ClassConfig = {
             Tooltip = "Do AE Malo Spells/AAs",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "I have Do AE Malo selected, why isn't it being used?",
-            Answer = "The AE Malo Spell comes later in the levels for Shaman than AE Slows, and the AA later than that. Check your level. Also, ensure your count is set properly. ",
         },
         ['DoSTSlow']          = {
             DisplayName = "Do ST Slow",
@@ -2049,9 +2020,6 @@ local _ClassConfig = {
             Tooltip = "Do ST Slow Spells/AAs",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why am I not slowing mobs?",
-            Answer =
-            "Certain low level slow spells are omitted due to the defensive benefit not being worth the mana. Also, check your debuff settings on the RGMercs Main config tabs, as there are options such as the minimum con color to debuff.",
         },
         ['DoAESlow']          = {
             DisplayName = "Do AE Slow",
@@ -2062,8 +2030,6 @@ local _ClassConfig = {
             Tooltip = "Do AE Slow Spells/AAs",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why am I using a single-target slow after the AE Slow Spell?",
-            Answer = "The AE Slow Spell is a lower slow percentage than the ST Version. AA, however, are identical other than number of targets.",
         },
         ['AESlowCount']       = {
             DisplayName = "AE Slow Count",
@@ -2076,8 +2042,6 @@ local _ClassConfig = {
             Default = 2,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "We are fighting more than one mob, why am I not using my AE Slow?",
-            Answer = "AE Slow Count governs the minimum number of targets before the AE Slow is used.",
         },
         ['AEMaloCount']       = {
             DisplayName = "AE Malo Count",
@@ -2090,8 +2054,6 @@ local _ClassConfig = {
             Default = 2,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "We are fighting more than one mob, why am I not using my AE Malo?",
-            Answer = "AE Malo Count governs the minimum number of targets before the AE Malo is used.",
         },
         ['DoDiseaseSlow']     = {
             DisplayName = "Disease Slow",
@@ -2103,9 +2065,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "What is a Disease Slow?",
-            Answer =
-            "During early eras of play, a slow that checked against disease resist was added to slow magic-resistant mobs. If selected, this will be used instead of a magic-based slow until the Turgur's AA becomes available.",
         },
         ['DoLLHPBuff']        = {
             DisplayName = "HP Buff (LowLvl)",
@@ -2116,10 +2075,6 @@ local _ClassConfig = {
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using HP buffs at lower levels?",
-            Answer =
-                "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
-                "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
         },
         ['DoLLAgiBuff']       = {
             DisplayName = "Agility Buff (LowLvl)",
@@ -2130,10 +2085,6 @@ local _ClassConfig = {
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using stat buffs at lower levels?",
-            Answer =
-                "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
-                "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
         },
         ['DoLLStaBuff']       = {
             DisplayName = "Stamina Buff (LowLvl)",
@@ -2144,10 +2095,6 @@ local _ClassConfig = {
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using stat buffs at lower levels?",
-            Answer =
-                "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
-                "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
         },
         ['DoLLStrBuff']       = {
             DisplayName = "Strength Buff (LowLvl)",
@@ -2158,10 +2105,6 @@ local _ClassConfig = {
             Tooltip = "Use Low Level (<= 70) HP Buffs",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using stat buffs at lower levels?",
-            Answer =
-                "They are not enabled by default as they can in many cases be a waste of mana or time to cast in automation.\n" ..
-                "You can select the low level buffs you would like to use on the Buffs (Low Level) tab.",
         },
     },
     ['ClassFAQ']          = {

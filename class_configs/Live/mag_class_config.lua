@@ -1971,8 +1971,6 @@ _ClassConfig      = {
             Tooltip = "Pocket your pet during downtime",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "I have suspend Minion AA, how do I keep a spare pet suspended?",
-            Answer = "You can use the [DoPocketPet] feature to keep a spare pet suspended.",
         },
         ['DoPetArmor']     = {
             DisplayName = "Do Pet Armor",
@@ -1981,8 +1979,6 @@ _ClassConfig      = {
             Category = "Item Summoning",
             Tooltip = "Summon Armor for Pets",
             Default = false,
-            FAQ = "I want to make sure my pet is always armored, how do I do that?",
-            Answer = "You can use the [DoPetArmor] feature to summon pet armor.",
         },
         ['DoPetWeapons']   = {
             DisplayName = "Do Pet Weapons",
@@ -1991,8 +1987,6 @@ _ClassConfig      = {
             Category = "Item Summoning",
             Tooltip = "Summon Weapons for Pets",
             Default = false,
-            FAQ = "I want to make sure my pet is always armed, how do I do that?",
-            Answer = "You can use the [DoPetWeapons] feature to summon pet weapons.",
         },
         ['PetType']        = {
             DisplayName = "Pet Type",
@@ -2005,8 +1999,6 @@ _ClassConfig      = {
             Default = 2,
             Min = 1,
             Max = 4,
-            FAQ = "Can I specify the type of pet I want to use?",
-            Answer = "Yes, you can select the type of pet you want to summon using the [PetType] setting.",
         },
         ['DoPetHeirlooms'] = {
             DisplayName = "Do Pet Heirlooms",
@@ -2015,8 +2007,6 @@ _ClassConfig      = {
             Category = "Item Summoning",
             Tooltip = "Summon Heirlooms for Pets",
             Default = false,
-            FAQ = "I want to make sure my pet is always Heirloomed, how do I do that?",
-            Answer = "You can use the [DoPetHeirlooms] feature to summon pet Heirlooms.",
         },
         ['DoPetHealSpell'] = {
             DisplayName = "Pet Heal Spell",
@@ -2027,9 +2017,6 @@ _ClassConfig      = {
             Tooltip = "Mem and cast your Pet Heal spell. AA Pet Heals are always used in emergencies.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "My Pet Keeps Dying, What Can I Do?",
-            Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
-                "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
         },
         ['PetHealPct']     = {
             DisplayName = "Pet Heal Spell HP%",
@@ -2042,9 +2029,6 @@ _ClassConfig      = {
             Default = 80,
             Min = 1,
             Max = 99,
-            FAQ = "My pet keeps dying, how do I keep it alive?",
-            Answer = "You can set the [PetHealPct] to a lower value to heal your pet sooner.\n" ..
-                "Also make sure that [DoPetHeals] is enabled.",
         },
         ['SelfModRod']     = {
             DisplayName = "Self Mod Rod Item",
@@ -2054,8 +2038,6 @@ _ClassConfig      = {
             Tooltip = "Click the modrod clicky you want to use here",
             Type = "ClickyItem",
             Default = "",
-            FAQ = "Can I specify the mod rod item I want to use?",
-            Answer = "Yes, you can specify the mod rod item you want to use by setting the [SelfModRod] setting.",
         },
         ['SummonModRods']  = {
             DisplayName = "Summon Mod Rods",
@@ -2066,8 +2048,6 @@ _ClassConfig      = {
             Tooltip = "Summon Mod Rods",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Can I summon mod rods for my group?",
-            Answer = "Yes, you can summon mod rods for your group by setting the [SummonModRods] setting.",
         },
         ['GatherManaPct']  = {
             DisplayName = "Gather Mana %",
@@ -2078,8 +2058,6 @@ _ClassConfig      = {
             Default = 70,
             Min = 1,
             Max = 99,
-            FAQ = "How do I adjust when to use Gather Mana?",
-            Answer = "You can adjust when to use Gather Mana by setting the [GatherManaPct] setting.",
         },
         ['DoForce']        = {
             DisplayName = "Do Force",
@@ -2088,8 +2066,6 @@ _ClassConfig      = {
             Category = "Direct",
             Tooltip = "Use Force of Elements AA",
             Default = true,
-            FAQ = "I want to use Force of Elements AA in my rotation, how do I do that?",
-            Answer = "You can use the [DoForce] feature to use the Force of Elements AA in your rotation.",
         },
         ['ElementChoice']  = {
             DisplayName = "Element Choice:",
@@ -2104,8 +2080,6 @@ _ClassConfig      = {
             Min = 1,
             Max = 2,
             RequiresLoadoutChange = true,
-            FAQ = "I'm fighting fire-resistant mobs, how can I use my magic nukes?",
-            Answer = "If you are under level 70, you can swap to magic nukes on the DPS Low Level tab.",
         },
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
@@ -2114,8 +2088,6 @@ _ClassConfig      = {
             Category = "Class Config Clickies",
             Tooltip = "Click your chest item",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "How do I use my chest clicky?",
-            Answer = "You can use the [DoChestClick] feature to click your chest item.",
         },
         ['AISelfDelay']    = {
             DisplayName = "Autoinv Delay (Self)",
@@ -2127,7 +2099,7 @@ _ClassConfig      = {
             Min = 1,
             Max = 250,
             FAQ = "Why do I always have items stuck on the cursor?",
-            Answer = "You can adjust the delay before autoinventory by setting the [AISelfDelay] setting.\n" ..
+            Answer = "You can adjust the delay before autoinventory by adjusting the item summoning delay settings.\n" ..
                 "Increase the delay if you notice items left on cursors regularly.",
 
         },
@@ -2140,9 +2112,6 @@ _ClassConfig      = {
             Default = 150,
             Min = 1,
             Max = 500,
-            FAQ = "Why do I always have items stuck on the cursor?",
-            Answer = "You can adjust the delay before autoinventory by setting the [AIGroupDelay] setting.\n" ..
-                "Increase the delay if you notice items left on cursors regularly.",
         },
         ['DoMalo']         = {
             DisplayName = "Cast Malo",
@@ -2152,8 +2121,6 @@ _ClassConfig      = {
             Tooltip = "Do Malo Spells/AAs",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I want to use Malo in my rotation, how do I do that?",
-            Answer = "You can use the [DoMalo] feature to use Malo in your rotation.",
         },
         ['DoAEMalo']       = {
             DisplayName = "Cast AE Malo",
@@ -2163,8 +2130,6 @@ _ClassConfig      = {
             Tooltip = "Do AE Malo Spells/AAs",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "I want to use AE Malo in my rotation, how do I do that?",
-            Answer = "You can use the [DoAEMalo] feature to use AE Malo in your rotation.",
         },
         ['CombatModRod']   = {
             DisplayName = "Combat Mod Rods",
@@ -2175,9 +2140,6 @@ _ClassConfig      = {
             Tooltip = "Summon Mod Rods in combat if the criteria below are met.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Can i summon mod rods in combat?",
-            Answer = "Yes, you can summon mod rods in combat by setting the [CombatModRod] setting.\n" ..
-                "Otherwise we will only summon them during Downtime.",
         },
         ['GroupManaPct']   = {
             DisplayName = "Combat ModRod %",
@@ -2190,10 +2152,6 @@ _ClassConfig      = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why am I Not summoning Mod Rods?",
-            Answer = "You can adjust the mana percentage to begin summoning Mod Rods in combat by setting the [GroupManaPct] setting.\n" ..
-                "Also Make sure you have the [CombatModRod] setting enabled if you want to resummon them during combat.\n" ..
-                "Finally make sure you have the [SummonModRods] setting enabled.",
         },
         ['GroupManaCt']    = {
             DisplayName = "Combat ModRod Count",
@@ -2206,11 +2164,6 @@ _ClassConfig      = {
             Min = 1,
             Max = 6,
             ConfigType = "Advanced",
-            FAQ = "Why am I not summoning Mod Rods?",
-            Answer =
-                "You can adjust the number of party members that need to be under the above mana percentage to summon Mod Rods in combat by setting the [GroupManaCt] setting.\n" ..
-                "Also Make sure you have the [CombatModRod] setting enabled if you want to resummon them during combat.\n" ..
-                "Finally make sure you have the [SummonModRods] setting enabled.",
         },
     },
     ['ClassFAQ']          = {
@@ -2219,6 +2172,7 @@ _ClassConfig      = {
             Answer = "This class config is a current release aimed at official servers.\n\n" ..
                 "  This config should perform well from from start to endgame, but a TLP or emu player may find it to be lacking exact customization for a specific era.\n\n" ..
                 "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
+                "  Please note that the Tank Pet mode and pet toy summoning are ports from old macro code and have not been heavily tested! \n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

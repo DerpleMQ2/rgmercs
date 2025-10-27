@@ -1239,8 +1239,6 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 2,
-            FAQ = "I want to only use a Rogue Pet for the Backstabs, how do I do that?",
-            Answer = "Set the [PetType] setting to Rog and the Necro will only summon Rogue pets.",
         },
         ['KeepPetMemmed']     = {
             DisplayName = "Always Mem Pet",
@@ -1250,8 +1248,6 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Keep your pet spell memorized (allows combat resummoning).",
             Default = false,
-            FAQ = "Why won't I resummon my pet on combat?",
-            Answer = "Enable the setting to Always Mem your Pet on the Pet Management tab in the class options.",
         },
         ['BattleRez']         = {
             DisplayName = "Battle Rez",
@@ -1261,8 +1257,6 @@ local _ClassConfig = {
             Tooltip = "Do Rezes during combat.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I want to use my Battle Rez, how do I do that?",
-            Answer = "Set the [BattleRez] setting to true and the Necro will use their Battle Rez during combat.",
         },
         ['DeathBloomPercent'] = {
             DisplayName = "Death Bloom %",
@@ -1273,8 +1267,6 @@ local _ClassConfig = {
             Default = 40,
             Min = 1,
             Max = 100,
-            FAQ = "I am using Death Bloom to early or late, how do I adjust it?",
-            Answer = "Set the [DeathBloomPercent] setting to the desired % of mana you want to cast Death Bloom at.",
         },
         ['WakeDeadCorpseCnt'] = {
             DisplayName = "WtD Corpse Count",
@@ -1285,8 +1277,6 @@ local _ClassConfig = {
             Default = 5,
             Min = 1,
             Max = 20,
-            FAQ = "I want to use Wake the Dead when I have X corpses nearby, how do I do that?",
-            Answer = "Set the [WakeDeadCorpseCnt] setting to the desired number of corpses you want to cast Wake the Dead at.",
         },
         ['DoLich']            = {
             DisplayName = "Cast Lich",
@@ -1296,9 +1286,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting Lich spells.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I want to use my Lich spells, how do I do that?",
-            Answer = "Set the [DoLich] setting to true and the Necro will use Lich spells.\n" ..
-                "You will also want to set your [StopLichHP] and [StopLichMana] settings to the desired values so you do not Lich to Death.",
         },
         ['StopLichHP']        = {
             DisplayName = "Stop Lich HP",
@@ -1310,8 +1297,6 @@ local _ClassConfig = {
             Default = 25,
             Min = 1,
             Max = 99,
-            FAQ = "I want to stop Liching at a certain HP %, how do I do that?",
-            Answer = "Set the [StopLichHP] setting to the desired % of HP you want to stop Liching at.",
         },
         ['StopLichMana']      = {
             DisplayName = "Stop Lich Mana",
@@ -1323,8 +1308,6 @@ local _ClassConfig = {
             Default = 100,
             Min = 1,
             Max = 100,
-            FAQ = "I want to stop Liching at a certain Mana %, how do I do that?",
-            Answer = "Set the [StopLichMana] setting to the desired % of Mana you want to stop Liching at.",
         },
         ['StartLichMana']     = {
             DisplayName = "Start Lich Mana",
@@ -1356,8 +1339,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['AggroFeign']        = {
             DisplayName = "Emergency Feign",
@@ -1367,9 +1348,6 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
-            FAQ = "How do I use my Feign Death?",
-            Answer = "Make sure you have [AggroFeign] enabled.\n" ..
-                "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
         },
         ['DoLifeBurn']        = {
             DisplayName = "Orphaned",
@@ -1377,9 +1355,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoUnity']           = {
             DisplayName = "Orphaned",
@@ -1387,9 +1362,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['StopFDPct']         = {
             DisplayName = "Orphaned",
@@ -1397,9 +1369,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['StartFDPct']        = {
             DisplayName = "Orphaned",
@@ -1407,9 +1376,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoSnare']           = {
             DisplayName = "Orphaned",
@@ -1417,9 +1383,6 @@ local _ClassConfig = {
             Category = "Orphaned",
             Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
         },
     },
     ['ClassFAQ']        = {

@@ -717,9 +717,6 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
-            FAQ = "How do I use my Feign Death?",
-            Answer = "Make sure you have [AggroFeign] enabled.\n" ..
-                "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
         },
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
@@ -732,8 +729,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Emergency Mitigation Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
@@ -744,9 +739,6 @@ local _ClassConfig = {
             Tooltip = "Click your chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             ConfigType = "Advanced",
-            FAQ = "What is a Chest Click?",
-            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
-                "MNK is set to use theirs during burns, so long as the item equipped has a clicky effect.",
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
@@ -756,8 +748,6 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
     },
     ['ClassFAQ']        = {
