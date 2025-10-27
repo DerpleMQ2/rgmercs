@@ -1798,7 +1798,6 @@ return {
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Feign Death?",
         },
         ['DoCoating']      = {
             DisplayName = "Use Coating",
@@ -1809,8 +1808,6 @@ return {
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "What is a Coating?",
-            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
@@ -1822,9 +1819,6 @@ return {
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "What is a Chest Click?",
-            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
-                "BST is set to use theirs during burns, so long as the item equipped has a clicky effect.",
         },
         ['DoEpic']         = {
             DisplayName = "Do Epic",
@@ -1835,6 +1829,16 @@ return {
             Tooltip = "Click your Epic Weapon.",
             Default = false,
             RequiresLoadoutChange = true,
+        },
+    },
+    ['ClassFAQ']          = {
+        [1] = {
+            Question = "What is the current status of this class config?",
+            Answer = "This class config is a current release aimed at official servers.\n\n" ..
+                "  This config should perform well from from start to endgame, but a TLP or emu player may find it to be lacking exact customization for a specific era.\n\n" ..
+                "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
+                "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
         },
     },
 }

@@ -1537,8 +1537,6 @@ return {
             Category = "Direct",
             Tooltip = "Use Spells",
             Default = true,
-            FAQ = "Why am I not casting my nukes?",
-            Answer = "Make sure you have the [DoNuke] setting enabled.",
         },
         ['DoUndeadProc'] = {
             DisplayName = "Use Undead Proc",
@@ -1547,9 +1545,6 @@ return {
             Category = "Self",
             Tooltip = "Use Undead proc over Fury proc until Fury is rolled into Divine Protector's Unity (Level 80).",
             Default = false,
-            FAQ = "I was using an undead proc buff and it recently switched to the Fury line proc, how do I get it back?",
-            Answer = "By default, we will use the undead proc from levels 26-44 as it is the only proc available.\n" ..
-                "If you would like to continue to use the Undead proc after that, please enable it in the Spells and Abilities tab.",
         },
         ['FlashHP']      = {
             DisplayName = "Use Shield Flash",
@@ -1560,8 +1555,6 @@ return {
             Default = 35,
             Min = 1,
             Max = 100,
-            FAQ = "Why am I not using Shield Flash?",
-            Answer = "You will want to adjust [FlashHP] to the % HP you have before using Shield Flash.",
         },
         ['TotHealPoint'] = {
             DisplayName = "ToT HealPoint",
@@ -1572,8 +1565,6 @@ return {
             Default = 30,
             Min = 1,
             Max = 100,
-            FAQ = "Why am I not healing the target of my target?",
-            Answer = "You will want to adjust [TotHealPoint] to the % HP you have before using Target of Target heals.",
         },
         ['LayHandsPct']  = {
             DisplayName = "Use Lay on Hands",
@@ -1584,8 +1575,6 @@ return {
             Default = 35,
             Min = 1,
             Max = 100,
-            FAQ = "Why am I not using Lay on Hands?",
-            Answer = "You will want to adjust [LayHandsPct] to the % HP you have before using Lay on Hands.",
         },
         ['DoChestClick'] = {
             DisplayName = "Do Chest Click",
@@ -1594,8 +1583,6 @@ return {
             Category = "Class Config Clickies",
             Tooltip = "Click your chest item",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "Why am I not clicking my chest item?",
-            Answer = "Make sure you have the [DoChestClick] setting enabled.",
         },
         ['DoReverseDS']  = {
             DisplayName = "Do Reverse DS",
@@ -1604,8 +1591,6 @@ return {
             Category = "Self",
             Tooltip = "Cast Reverse DS",
             Default = true,
-            FAQ = "Why am I not casting Reverse DS?",
-            Answer = "Make sure you have the [DoReverseDS] setting enabled.",
         },
         ['DoBrells']     = {
             DisplayName = "Do Brells",
@@ -1614,8 +1599,6 @@ return {
             Category = "Group",
             Tooltip = "Enable Casting Brells",
             Default = true,
-            FAQ = "Why am I not casting Brells?",
-            Answer = "Make sure you have the [DoBrells] setting enabled.",
         },
         ['AegoSymbol']   = {
             DisplayName = "Aego/Symbol Choice:",
@@ -1628,8 +1611,6 @@ return {
             Default = 1,
             Min = 1,
             Max = 3,
-            FAQ = "Why aren't I using Aego and/or Symbol buffs?",
-            Answer = "Please set which buff you would like to use on the Buffs/Debuffs tab.",
         },
         ['DoSalvation']  = {
             DisplayName = "Marr's Salvation",
@@ -1638,8 +1619,6 @@ return {
             Category = "Group",
             Tooltip = "Use your group hatred reduction buff AA.",
             Default = false,
-            FAQ = "Why isn't Marr's Salvation being used?",
-            Answer = "Select the option in the Group Buffs tab to use this buff, it is not enabled by default.",
         },
         ['DoBandolier']  = {
             DisplayName = "Use Bandolier",
@@ -1648,9 +1627,15 @@ return {
             Category = "Bandolier",
             Tooltip = "Enable Swapping of items using the bandolier.",
             Default = false,
-            FAQ = "Why am I not swapping weapons?",
-            Answer = "Make sure you have the [DoBandolier] setting enabled.\n" ..
-                "You will also need to have the bandolier setup in game.",
+        },
+    },
+    ['ClassFAQ']          = {
+        [1] = {
+            Question = "What is the current status of this class config?",
+            Answer = "This class config is a current release aimed at official servers.\n\n" ..
+                "  This config is largely a port from older code, and has seen only minor adjustments. It has been flagged for revamp when we have the chance!\n\n" ..
+                "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
         },
     },
 }

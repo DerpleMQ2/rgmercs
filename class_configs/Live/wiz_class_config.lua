@@ -1347,7 +1347,7 @@ return {
             Min = 1,
             Max = 2,
             FAQ = "What do the different Modes Do?",
-            Answer = "Wizard only has a single mode, but the spells used will adjust based on your level range.",
+            Answer = "Wizard only has a single DPS Mode, but spells or spell elements will change based on level.",
         },
 
         -- Low Level
@@ -1364,8 +1364,6 @@ return {
             Min = 1,
             Max = 3,
             RequiresLoadoutChange = true,
-            FAQ = "WIP?",
-            Answer = "WIP.",
         },
         ['DoRain']               = {
             DisplayName = "Do Rain",
@@ -1404,9 +1402,6 @@ return {
             Tooltip = "Use your Stun Nukes (Stun with DD, not mana efficient).",
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "WIP?",
-            Answer =
-            "WIP.",
         },
 
         --AE Damage
@@ -1431,8 +1426,6 @@ return {
             RequiresLoadoutChange = true,
             Tooltip = "**WILL BREAK MEZ** Use your Frontal AE Spells (Beam Line). **WILL BREAK MEZ**",
             Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['BeamTargetCnt']        = {
             DisplayName = "Beam Tgt Cnt",
@@ -1515,8 +1508,6 @@ return {
             Default = 90,
             Min = 1,
             Max = 100,
-            FAQ = "Can I customize when to use Jolt?",
-            Answer = "Yes, you can set the aggro % at which to use Jolt with the [JoltAggro] setting.",
         },
         ['DoManaBurn']           = {
             DisplayName = "Use Mana Burn AA",
@@ -1526,8 +1517,6 @@ return {
             Index = 104,
             Tooltip = "Enable usage of Mana Burn",
             Default = true,
-            FAQ = "Can I use Mana Burn?",
-            Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
         },
         ['DoSnare']              = {
             DisplayName = "Use Snares",
@@ -1538,8 +1527,6 @@ return {
             Tooltip = "Use Snare Spells.",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight not snaring?",
-            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
         ['SnareCount']           = {
             DisplayName = "Snare Max Mob Count",
@@ -1551,9 +1538,6 @@ return {
             Default = 3,
             Min = 1,
             Max = 99,
-            FAQ = "Why is my Shadow Knight Not snaring?",
-            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
-                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
         ['DoChestClick']         = {
             DisplayName = "Do Chest Click",
@@ -1563,8 +1547,6 @@ return {
             Index = 101,
             Tooltip = "Click your chest item",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "How do I use my chest item Clicky?",
-            Answer = "Enable [DoChestClick] to use your chest item clicky.",
         },
         ['GambitManaPct']        = {
             DisplayName = "Gambit Mana %",
@@ -1577,8 +1559,6 @@ return {
             Default = 80,
             Min = 1,
             Max = 99,
-            FAQ = "How do I use Harvest Spells?",
-            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
         },
         ['HarvestManaPct']       = {
             DisplayName = "Harvest Mana %",
@@ -1591,8 +1571,6 @@ return {
             Default = 85,
             Min = 1,
             Max = 99,
-            FAQ = "How do I use Harvest Spells?",
-            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
         },
         ['CombatHarvestManaPct'] = {
             DisplayName = "Combat Harvest %",
@@ -1605,8 +1583,16 @@ return {
             Default = 60,
             Min = 1,
             Max = 99,
-            FAQ = "How do I use Harvest Spells?",
-            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
+        },
+    },
+    ['ClassFAQ']        = {
+        [1] = {
+            Question = "What is the current status of this class config?",
+            Answer = "This class config is a current release aimed at official servers.\n\n" ..
+                "  This config should perform well from from start to endgame, but a TLP or emu player may find it to be lacking exact customization for a specific era.\n\n" ..
+                "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
+                "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
         },
     },
 }

@@ -1629,9 +1629,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why am I not using the \"correct\" number of Intervention or Contravention spells?",
-            Answer = "Please set your spell preference on the Spells and Abilities tab.\n" ..
-                "Note that there are certain level ranges where additional spells may be loaded to fill available gems.",
         },
         ['DoTwinHeal']        = {
             DisplayName = "Twin Heal Nuke",

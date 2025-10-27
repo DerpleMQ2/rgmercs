@@ -199,11 +199,12 @@ local _ClassConfig = {
             "Cloud of Grummus",
             "Plague of Insects",
         },
-        ["CrippleSpell"] = {   -- needs to be added to spell list and have entries made
-            "Crippling Spasm", -- Level 66
-            "Cripple",         -- Level 53, Starts to become worth it, depending on target
-            "Incapacitate",    -- Level 41, Likely not worth
-            "Listless Power",  -- Level 29, Definitely not worth
+        ["CrippleSpell"] = {    -- needs to be added to spell list and have entries made
+            "Debilitating Rot", -- THF Custom
+            "Crippling Spasm",  -- Level 66
+            "Cripple",          -- Level 53, Starts to become worth it, depending on target
+            "Incapacitate",     -- Level 41, Likely not worth
+            "Listless Power",   -- Level 29, Definitely not worth
         },
         ["MeleeProcBuff"] = {
             "Talisman of the Panther",
