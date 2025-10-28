@@ -279,7 +279,7 @@ _ClassConfig      = {
             -- Preferring group buffs for ease. Included all Single target Now as well
             -- "Circle of Magmaskin",
             -- "Magmaskin",
-            "Circle of Fireskin",
+            --"Circle of Fireskin", -- for some reason the single target version is 1800000000 times better
             "Felx's Fireskin",
             "Felx's Maelstrom of Ro",
             "Felx's FlameShield of Ro",
