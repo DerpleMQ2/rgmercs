@@ -253,15 +253,16 @@ end
 
 -- Initialize SmartLoot integration
 function Module:InitializeSmartLoot()
-	if not Config:GetSetting('UseSmartLoot') then
-		self.useSmartLoot = false
-		return
-	end
+	if not Config:GetSetting('UseSmartLoot') then return end
 
 	-- Check for SmartLoot availability
-	local smartLootScript = mq.TLO.Lua.Script('smartloot')
-	if smartLootScript and smartLootScript.Status() == 'RUNNING' then
-		self.useSmartLoot = true
+
+	if not self.smartLootInitialized then
+		Core.DoCmd('/lua run smartloot')
+		mq.delay("1s", function() return mq.TLO.Lua.Script('smartloot').Status() or "" == "RUNNING" end)
+	end
+
+	if mq.TLO.Lua.Script('smartloot').Status() or "" == "RUNNING" then
 		Logger.log_info("\ay[LOOT]: \agSmartLoot integration enabled, please ensure you have a Main Looter set!")
 		if Config:GetSetting('SLMainLooter') then
 			Core.DoCmd('/sl_mode rgmain')
@@ -269,36 +270,17 @@ function Module:InitializeSmartLoot()
 		end
 		self.smartLootInitialized = true
 	else
-		self.useSmartLoot = false
 		self.smartLootInitialized = false
 	end
 end
 
 -- Check if SmartLoot is available and ready
 function Module:IsSmartLootReady()
-	if not self.useSmartLoot then
-		-- Try to re-initialize if settings allow it
-		if Config:GetSetting('UseSmartLoot') then
-			self:InitializeSmartLoot()
-		end
-		return self.useSmartLoot
-	end
-
-	-- -- Verify SmartLoot is still running (commented cuz mercs gets closed if it isnt)
-	-- local smartLootStatus = mq.TLO.Lua.Script('smartloot')
-	-- if not smartLootStatus or smartLootStatus.Status() ~= 'RUNNING' then
-	-- 	self.useSmartLoot = false
-	-- 	self.smartLootInitialized = false
-	-- 	return false
-	-- end
-
-	-- Ensure SmartLoot mode is set correctly if not already done
-	if not self.smartLootInitialized then
+	if not self.smartLootInitialized and Config:GetSetting('UseSmartLoot') then
 		self:InitializeSmartLoot()
-		self.smartLootInitialized = true
 	end
 
-	return true
+	return self.smartLootInitialized
 end
 
 -- Trigger SmartLoot to process corpses
