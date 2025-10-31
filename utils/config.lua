@@ -2237,6 +2237,18 @@ function Config.ResolveDefaults(defaults, settings)
     return settings, changed
 end
 
+function Config:UnRegisterCategoryToSettingMapping(setting)
+    local category = Config:GetSettingDefaults(setting).Category
+    if self.TempSettings.SettingsCategoryToSettingMapping[category] then
+        for i, v in ipairs(self.TempSettings.SettingsCategoryToSettingMapping[category]) do
+            if v == setting then
+                table.remove(self.TempSettings.SettingsCategoryToSettingMapping[category], i)
+                break
+            end
+        end
+    end
+end
+
 function Config:RegisterCategoryToSettingMapping(setting)
     local category = Config:GetSettingDefaults(setting).Category
     self.TempSettings.SettingsCategoryToSettingMapping[category] = self.TempSettings.SettingsCategoryToSettingMapping[category] or {}
@@ -2299,6 +2311,27 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
     self.TempSettings.lastModuleRegisteredTime = os.time()
 
     Logger.log_debug("\agModule %s - registered settings!", module)
+end
+
+function Config:ClearModuleSettings(module)
+    if not self.moduleSettings[module] then
+        Logger.log_error("\arModule %s is not registered!", module)
+        return
+    end
+
+    local settings = self.moduleSettings[module]
+    for setting, _ in pairs(settings) do
+        self:UnRegisterCategoryToSettingMapping(setting)
+        Config.TempSettings.SettingsLowerToNameCache[setting:lower()] = nil
+        Config.TempSettings.SettingToModuleCache[setting] = nil
+    end
+
+    self.moduleSettings[module] = nil
+    self.moduleTempSettings[module] = nil
+    self.moduleDefaultSettings[module] = nil
+    self.moduleSettingCategories[module] = nil
+
+    Logger.log_debug("\agModule %s - removed all settings!", module)
 end
 
 function Config:RequestPeerConfigs(peer)
