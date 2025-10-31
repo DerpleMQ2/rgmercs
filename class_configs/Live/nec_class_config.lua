@@ -1513,7 +1513,7 @@ local _ClassConfig = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is a current release aimed at official servers.\n\n" ..
-                "  This config is a port from macro code, and has seen only minor adjustments. It has been flagged for revamp when we have the chance!\n\n" ..
+                "  This config is largely a port from older code, and has seen only minor adjustments. It has been flagged for revamp when we have the chance!\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

@@ -279,7 +279,7 @@ _ClassConfig      = {
             -- Preferring group buffs for ease. Included all Single target Now as well
             -- "Circle of Magmaskin",
             -- "Magmaskin",
-            "Circle of Fireskin",
+            --"Circle of Fireskin", -- for some reason the single target version is 1800000000 times better
             "Felx's Fireskin",
             "Felx's Maelstrom of Ro",
             "Felx's FlameShield of Ro",
@@ -1368,6 +1368,7 @@ _ClassConfig      = {
                     return Casting.IHaveBuff(spell)
                 end,
                 cond = function(self, spell, target)
+                    if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffCheck(spell, target) and not Casting.IHaveBuff("Circle of " .. spell.Name())
                 end,
             },
