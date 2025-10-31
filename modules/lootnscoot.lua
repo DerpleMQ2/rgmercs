@@ -59,7 +59,7 @@ Module.DefaultConfig     = {
 		Tooltip = "Hold looting if you are currently meditating.",
 		Default = false,
 	},
-	['LootingTimeout']                         = {
+	['LootingTimeoutLNS']                      = {
 		DisplayName = "Looting Timeout",
 		Group = "General",
 		Header = "Loot(Emu)",
@@ -196,7 +196,7 @@ end
 function Module.DoLooting(combat_state)
 	if not Module.TempSettings.Looting then return end
 
-	local maxWait = Config:GetSetting('LootingTimeout') * 1000
+	local maxWait = Config:GetSetting('LootingTimeoutLNS') * 1000
 	while Module.TempSettings.Looting do
 		if combat_state == "Combat" and not Config:GetSetting('CombatLooting') then
 			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")

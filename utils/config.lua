@@ -1668,6 +1668,7 @@ Config.DefaultConfig               = {
             local newLootModule = Config.Constants.LootModuleTypes[newValue]
             Logger.log_info("\ayLoot Module changed from %s to: \ag%s", oldLootModule or "Unknown", newLootModule or "Unknown")
             Modules:unloadModule(oldLootModule)
+            Config:ClearModuleSettings(oldLootModule)
             if newValue > 1 then
                 local path = string.format("modules." .. newLootModule:lower())
                 Logger.log_info("\ayLoot Module: \ag%s", newLootModule:lower() or "Unknown")

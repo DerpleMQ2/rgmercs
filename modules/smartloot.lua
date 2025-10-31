@@ -40,7 +40,7 @@ Module.DefaultConfig     = {
 		Tooltip = "Set this toon as the main looter for smartloot.",
 		Default = false,
 	},
-	['LootingTimeout']                         = {
+	['LootingTimeoutSL']                       = {
 		DisplayName = "Looting Timeout",
 		Group = "General",
 		Header = "Loot(Emu)",
@@ -322,7 +322,7 @@ function Module:ProcessLooting(combat_state)
 		return
 	end
 
-	local timeoutMs = Config:GetSetting('LootingTimeout') * 1000
+	local timeoutMs = Config:GetSetting('LootingTimeoutSL') * 1000
 	local startTime = self.TempSettings.LootStartTime or mq.gettime()
 
 	-- Hold focus in loot module while SmartLoot is working
@@ -331,7 +331,7 @@ function Module:ProcessLooting(combat_state)
 
 		-- Check for timeout
 		if elapsed > timeoutMs then
-			Logger.log_warn("\ay[LOOT]: \arLooting timeout reached (%d seconds) - continuing", Config:GetSetting('LootingTimeout'))
+			Logger.log_warn("\ay[LOOT]: \arLooting timeout reached (%d seconds) - continuing", Config:GetSetting('LootingTimeoutSL'))
 			self.TempSettings.Looting = false
 			break
 		end
