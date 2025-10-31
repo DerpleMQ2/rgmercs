@@ -1368,6 +1368,7 @@ _ClassConfig      = {
                     return Casting.IHaveBuff(spell)
                 end,
                 cond = function(self, spell, target)
+                    if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffCheck(spell, target) and not Casting.IHaveBuff("Circle of " .. spell.Name())
                 end,
             },
