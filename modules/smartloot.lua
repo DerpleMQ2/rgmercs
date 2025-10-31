@@ -220,8 +220,8 @@ function Module:GetSLTLO()
 	return mq.TLO.SmartLoot
 end
 
-function Module:IsLSLoaded()
-	return mq.TLO.Lua.Script('smartloot').Status() == 'RUNNING'
+function Module:SLRunning()
+	return mq.TLO.Lua.Script('smartloot').Status() or "" == 'RUNNING'
 end
 
 function Module:Render()
@@ -231,7 +231,7 @@ function Module:Render()
 	local statusColor = { 1.0, 0.3, 0.3, 1.0, } -- Red
 
 	if self:IsSmartLootReady() then
-		if self:IsLSLoaded() then
+		if self:SLRunning() then
 			smartLootStatus = string.format("%s (%s)", self:GetSLState(), self:GetSLMode())
 			statusColor = { 0.3, 1.0, 0.3, 1.0, } -- Green
 		else
@@ -244,7 +244,6 @@ function Module:Render()
 	ImGui.NewLine()
 
 	ImGui.Text("This module integrates with SmartLoot for automated looting.")
-	ImGui.Text("SmartLoot must be running separately: /lua run smartloot")
 end
 
 function Module:Pop()
@@ -259,10 +258,10 @@ function Module:InitializeSmartLoot()
 
 	if not self.smartLootInitialized then
 		Core.DoCmd('/lua run smartloot')
-		mq.delay("1s", function() return mq.TLO.Lua.Script('smartloot').Status() or "" == "RUNNING" end)
+		mq.delay("1s", function() return self:SLRunning() end)
 	end
 
-	if mq.TLO.Lua.Script('smartloot').Status() or "" == "RUNNING" then
+	if self:SLRunning() then
 		Logger.log_info("\ay[LOOT]: \agSmartLoot integration enabled, please ensure you have a Main Looter set!")
 		if Config:GetSetting('SLMainLooter') then
 			Core.DoCmd('/sl_mode rgmain')
