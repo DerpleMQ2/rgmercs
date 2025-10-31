@@ -487,12 +487,14 @@ function Combat.FindBestAutoTarget(validateFn)
                 local targetID = tonumber(heartbeat.Data.TargetID)
                 if targetID and type(targetID) == 'number' then
                     assistTarget = mq.TLO.Spawn(targetID)
+                    Logger.log_verbose("\ayFindTarget Check Assist's Target via Actors :: %s (%s)",
+                        assistTarget.CleanName() or "None", targetID)
                 end
             elseif peer then
                 local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
                 if queryResult then
                     assistTarget = mq.TLO.Spawn(queryResult)
-                    Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s (%s)",
+                    Logger.log_verbose("\ayFindTarget Check Assist's Target via DanNet :: %s (%s)",
                         assistTarget.CleanName() or "None", queryResult)
                 end
             else
@@ -500,12 +502,12 @@ function Combat.FindBestAutoTarget(validateFn)
                 if assistSpawn and assistSpawn() then
                     Targeting.SetTarget(assistSpawn.ID(), true)
                     assistTarget = mq.TLO.Me.TargetOfTarget
-                    Logger.log_verbose("\ayFindTargetCheck Assist's Target via TargetOfTarget :: %s ",
+                    Logger.log_verbose("\ayFindTarget Check Assist's Target via TargetOfTarget :: %s ",
                         assistTarget.CleanName() or "None")
                 end
             end
 
-            Logger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", Config.Globals.MainAssist,
+            Logger.log_verbose("FindTarget Assisting %s -- Target Aggressive: %s", Config.Globals.MainAssist,
                 Strings.BoolToColorString(assistTarget and assistTarget.Aggressive() or false))
 
             if assistTarget and assistTarget() and (Targeting.TargetIsType("npc", assistTarget) or Targeting.TargetIsType("npcpet", assistTarget)) then
