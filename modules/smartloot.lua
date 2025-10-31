@@ -51,6 +51,15 @@ Module.DefaultConfig     = {
 		Min = 10,
 		Max = 60,
 	},
+	['PullsYieldForLooting']                   = {
+		DisplayName = "Hold Pulls for Looting",
+		Group = "General",
+		Header = "Loot(Emu)",
+		Category = "SmartLoot",
+		Index = 5,
+		Tooltip = "Do not pull if this character currently has a pending loot decision, or if other peers are still currently looting via SmartLoot.",
+		Default = false,
+	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
 		Type = "Custom",
@@ -69,7 +78,7 @@ Module.CommandHandlers   = {
 			self.TempSettings.LootStartTime = nil
 			Logger.log_info("\\ay[LOOT]: \\agLoot state reset - RGMercs should resume normal operations")
 		end,
-		help = "Reset loot state if stuck waiting",
+		help = "Reset loot state if stuck waiting.",
 	},
 	-- ['slstatus'] = {
 	-- 	handler = function(self, params)
@@ -371,6 +380,8 @@ function Module:GiveTime(combat_state)
 			self:ProcessLooting(combat_state)
 		end
 	end
+
+	Config.Globals.SLPeerLooting = self:GetSLTLO().AnyPeerLooting()
 end
 
 function Module:OnDeath()

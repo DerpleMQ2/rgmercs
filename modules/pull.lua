@@ -1968,6 +1968,12 @@ function Module:GiveTime(combat_state)
         return
     end
 
+    -- Hold pulls if using SmartLoot and we have opted to wait for peers to finish looting
+    if Config.Globals.SLPeerLooting and Config:GetSetting("PullsYieldForLooting", true) then
+        Logger.log_verbose("PULL:GiveTime() Holding pulls to finish processing looting.")
+        return
+    end
+
     Logger.log_verbose("PULL:GiveTime() - Enter")
     self:SetValidPullAbilities()
     self:FixPullerMerc()

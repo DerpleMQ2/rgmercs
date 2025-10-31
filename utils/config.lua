@@ -68,6 +68,7 @@ Config.Globals.Minimized                                 = false
 Config.Globals.LastUsedSpell                             = "None"
 Config.Globals.CorpseConned                              = false
 Config.Globals.RezzedCorpses                             = {}
+Config.Globals.SLPeerLooting                             = false
 
 -- Constants
 Config.Constants                                         = {}
