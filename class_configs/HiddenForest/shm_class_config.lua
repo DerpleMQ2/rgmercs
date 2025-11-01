@@ -708,36 +708,21 @@ local _ClassConfig = {
         },
         ['Slow'] = {
             {
-                name = "Tigir's Insect Swarm",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoAESlow') then return false end
-                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.DetAACheck(aaName) and not Casting.SlowImmuneTarget(target)
-                end,
-            },
-            {
                 name = "AESlowSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoAESlow') end,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoAESlow') or Casting.CanUseAA("Tigir's Insect Swarm") then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.DetSpellCheck(spell) and not Casting.SlowImmuneTarget(target)
                 end,
             },
             {
-                name = "Turgur's Swarm",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoSTSlow') or Config:GetSetting('DoDiseaseSlow') then return false end
-                    return Casting.DetAACheck(aaName) and not Casting.SlowImmuneTarget(target)
-                end,
-            },
-            {
                 name_func = function(self)
                     return Config:GetSetting('DoDiseaseSlow') and "DiseaseSlow" or "SlowSpell"
                 end,
+                load_cond = function(self) return Config:GetSetting('DoSTSlow') end,
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSTSlow') or (not Config:GetSetting('DoDiseaseSlow') and Casting.CanUseAA("Turgur's Swarm")) then return false end
                     return Casting.DetSpellCheck(spell) and not Casting.SlowImmuneTarget(target)
                 end,
             },
