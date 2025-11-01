@@ -205,7 +205,7 @@ local _ClassConfig = {
             "Leech Soul", -- EQM Custom
             "Touch of Inruku",
             "Touch of Innoruuk",
-            --"Touch of Volatis", -- Drain Soul buffed on Lazarus and is superior to this.
+            "Touch of Volatis",
             "Drain Soul",
             "Drain Spirit",
             "Spirit Tap",
@@ -220,7 +220,7 @@ local _ClassConfig = {
             "Leech Soul", -- EQM Custom
             "Touch of Inruku",
             "Touch of Innoruuk",
-            --"Touch of Volatis", -- Drain Soul buffed on Lazarus and is superior to this.
+            "Touch of Volatis",
             "Drain Soul",
             "Drain Spirit",
             "Spirit Tap",
