@@ -1270,7 +1270,7 @@ function Module:DeleteMobFromList(list, idx)
 
     -- if we are pulling start over.
     if Config:GetSetting('DoPull') then
-        Core.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
+        self.TempSettings.PullListUpdated = true
     end
 end
 
