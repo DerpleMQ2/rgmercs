@@ -14,12 +14,7 @@ local Module             = { _version = '1.0', _name = "SmartLoot", _author = 'a
 Module.__index           = Module
 Module.SettingCategories = {}
 Module.SaveRequested     = nil
-
-Module.ModuleLoaded      = false
 Module.TempSettings      = {}
-
-Module.FAQ               = {}
-Module.ClassFAQ          = {}
 
 Module.DefaultConfig     = {
 	['UseSmartLoot']                           = {
@@ -28,8 +23,13 @@ Module.DefaultConfig     = {
 		Header = "Loot(Emu)",
 		Category = "SmartLoot",
 		Index = 1,
-		Tooltip = "Enable SmartLoot integration for automated looting. SmartLoot must be running separately.",
+		Tooltip = "Enable SmartLoot integration for automated looting.",
 		Default = false,
+		OnChange = function(self)
+			if Config:GetSetting('UseSmartLoot') and not Module.smartLootInitialized then
+				Module:InitializeSmartLoot()
+			end
+		end,
 	},
 	['SLMainLooter']                           = {
 		DisplayName = "Set RG Main",
@@ -68,6 +68,13 @@ Module.DefaultConfig     = {
 }
 
 Module.FAQ               = {
+	[1] = {
+		Question = "How can I get help with SmartLoot?",
+		Answer = "  SmartLoot (aka SL, Smart Loot) integration is offered by RGMercs on the basis of convenience'.\n\n" ..
+			"  All SL issues not revolving around that integration should be addressed to the author.\n\n" ..
+			"  The '/sl_help' or '/sl_getstarted' commands may assist you with setup and common issues.",
+		Settings_Used = "",
+	},
 }
 
 Module.CommandHandlers   = {
@@ -132,13 +139,6 @@ end
 function Module:WriteSettings()
 	if not self.SaveRequested then return end
 	mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-	if self.SettingsLoaded then
-		-- Initialize SmartLoot integration if enabled
-		if Config:GetSetting('UseSmartLoot') then
-			self:InitializeSmartLoot()
-		end
-	end
 
 	if self.SaveRequested.doBroadcast == true then
 		Comms.BroadcastUpdate(self._name, "LoadSettings")
@@ -226,25 +226,56 @@ end
 
 function Module:Render()
 	Ui.RenderPopAndSettings(self._name)
+	local red = { 1.0, 0.3, 0.3, 1.0, }
+	local yellow = { 1.0, 1.0, 0.3, 1.0, }
+	local green = { 0.3, 1.0, 0.3, 1.0, }
+
 	-- SmartLoot status display
+	local mode = "Unknown"
 	local smartLootStatus = "Not Running"
-	local statusColor = { 1.0, 0.3, 0.3, 1.0, } -- Red
+	local peerStatus = "Unavailable"
+	local modeColor, statusColor, peerColor = red, red, red
 
 	if self:SLRunning() then
 		if self:SLReady() then
-			smartLootStatus = string.format("%s (%s)", self:GetSLState(), self:GetSLMode())
-			statusColor = { 0.3, 1.0, 0.3, 1.0, } -- Green
+			smartLootStatus = string.format("%s", self:GetSLState())
+			statusColor = green
 		else
 			smartLootStatus = "SmartLoot Not Initialized"
-			statusColor = { 1.0, 1.0, 0.3, 1.0, } -- Yellow
+			statusColor = yellow
+		end
+		if Config.Globals.SLPeerLooting then
+			peerStatus = "Looting"
+			peerColor = yellow
+		else
+			peerStatus = "Idle"
+			peerColor = green
+		end
+		local currentMode = self:GetSLMode()
+		if currentMode == "rgmain" then
+			mode = "RGMain"
+			modeColor = green
+		elseif currentMode == "background" then
+			mode = "Background"
+			modeColor = green
 		end
 	end
 
-	ImGui.TextColored(statusColor[1], statusColor[2], statusColor[3], statusColor[4], "SmartLoot Status: " .. smartLootStatus)
-	ImGui.NewLine()
+	ImGui.Text("Mode:")
+	ImGui.SameLine()
+	ImGui.TextColored(modeColor[1], modeColor[2], modeColor[3], modeColor[4], mode)
 
+	ImGui.Text("Status:")
+	ImGui.SameLine()
+	ImGui.TextColored(statusColor[1], statusColor[2], statusColor[3], statusColor[4], smartLootStatus)
+
+	ImGui.Text("Peers:")
+	ImGui.SameLine()
+	ImGui.TextColored(peerColor[1], peerColor[2], peerColor[3], peerColor[4], peerStatus)
+
+	ImGui.NewLine()
 	ImGui.Text("This module integrates with SmartLoot for automated looting.")
-	ImGui.Text("Please ensure that your SmartLoot is properly configured! Use '/sl_help' or '/sl_getstarted' for more details.")
+	ImGui.Text("Please ensure that SmartLoot is properly configured! Use '/sl_help' or '/sl_getstarted' for more details.")
 end
 
 function Module:Pop()
@@ -257,7 +288,6 @@ function Module:InitializeSmartLoot()
 
 	if not self:SLRunning() then
 		Core.DoCmd('/lua run smartloot')
-		mq.delay("1s", function() return self:SLRunning() end)
 	end
 
 	if self:SLRunning() then
@@ -341,16 +371,11 @@ function Module:ProcessLooting()
 end
 
 function Module:GiveTime()
-	if not Config:GetSetting('UseSmartLoot') then return end
+	if not Config:GetSetting('UseSmartLoot') or not self.smartLootInitialized then return end
 	if not self:GetSLTLO() or not self:GetSLTLO().IsEnabled() then return end
 	if Config.Globals.PauseMain then return end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
-
-	-- Check if we should initiate looting
-	if not self:SLReady() then
-		return
-	end
 
 	-- Check for corpses using SmartLoot
 	if self.TempSettings.Looting or (self:GetSLTLO() and (self:GetSLTLO().HasNewCorpses() and self:GetSLTLO().SafeToLoot())) then
