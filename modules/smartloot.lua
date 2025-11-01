@@ -83,36 +83,10 @@ Module.CommandHandlers   = {
 			Logger.log_info("\\ay[LOOT]: \\agManually resetting loot state")
 			self.TempSettings.Looting = false
 			self.TempSettings.LootStartTime = nil
-			Logger.log_info("\\ay[LOOT]: \\agLoot state reset - RGMercs should resume normal operations")
+			Logger.log_info("\\ay[LOOT]: \\agLoot state reset - RGMercs should resume normal operations.")
 		end,
 		help = "Reset loot state if stuck waiting.",
 	},
-	-- ['slstatus'] = {
-	-- 	handler = function(self, params)
-	-- 		Logger.log_info("\\ay[LOOT]: \\ag=== Loot Module Status ===")
-	-- 		Logger.log_info("\\ay[LOOT]: \\agLooting: %s", tostring(self.TempSettings.Looting))
-	-- 		Logger.log_info("\\ay[LOOT]: \\agSmartLoot Ready: %s", tostring(self:IsSLReady()))
-	-- 		if self.TempSettings.LootStartTime then
-	-- 			local elapsed = (mq.gettime() - self.TempSettings.LootStartTime) / 1000
-	-- 			Logger.log_info("\\ay[LOOT]: \\agElapsed Time: %.1fs", elapsed)
-	-- 		end
-
-	-- 		-- Check SmartLoot status
-	-- 		local success, slState, slMode = pcall(function()
-	-- 			if smartLoot then
-	-- 				return smartLoot.State() or "Unknown", smartLoot.Mode() or "Unknown"
-	-- 			end
-	-- 			return "Unknown", "Unknown"
-	-- 		end)
-
-	-- 		if success then
-	-- 			Logger.log_info("\\ay[LOOT]: \\agSmartLoot State: %s (%s)", slState, slMode)
-	-- 		else
-	-- 			Logger.log_info("\\ay[LOOT]: \\arError reading SmartLoot status")
-	-- 		end
-	-- 	end,
-	-- 	help = "Show current loot module status",
-	-- },
 }
 
 Module.SettingCategories = Set.new({})
@@ -237,7 +211,7 @@ function Module:Render()
 	local modeColor, statusColor, peerColor = red, red, red
 
 	if self:SLRunning() then
-		if self:SLReady() then
+		if self.smartLootInitialized then
 			smartLootStatus = string.format("%s", self:GetSLState())
 			statusColor = green
 		else
@@ -300,15 +274,6 @@ function Module:InitializeSmartLoot()
 	else
 		self.smartLootInitialized = false
 	end
-end
-
--- Check if SmartLoot is available and ready
-function Module:SLReady()
-	if not self.smartLootInitialized and Config:GetSetting('UseSmartLoot') then
-		self:InitializeSmartLoot()
-	end
-
-	return self.smartLootInitialized
 end
 
 -- Trigger SmartLoot to process corpses
