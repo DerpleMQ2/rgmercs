@@ -84,7 +84,7 @@ Module.CommandHandlers   = {
 	-- 	handler = function(self, params)
 	-- 		Logger.log_info("\\ay[LOOT]: \\ag=== Loot Module Status ===")
 	-- 		Logger.log_info("\\ay[LOOT]: \\agLooting: %s", tostring(self.TempSettings.Looting))
-	-- 		Logger.log_info("\\ay[LOOT]: \\agSmartLoot Ready: %s", tostring(self:IsSmartLootReady()))
+	-- 		Logger.log_info("\\ay[LOOT]: \\agSmartLoot Ready: %s", tostring(self:IsSLReady()))
 	-- 		if self.TempSettings.LootStartTime then
 	-- 			local elapsed = (mq.gettime() - self.TempSettings.LootStartTime) / 1000
 	-- 			Logger.log_info("\\ay[LOOT]: \\agElapsed Time: %.1fs", elapsed)
@@ -230,12 +230,12 @@ function Module:Render()
 	local smartLootStatus = "Not Running"
 	local statusColor = { 1.0, 0.3, 0.3, 1.0, } -- Red
 
-	if self:IsSmartLootReady() then
-		if self:SLRunning() then
+	if self:SLRunning() then
+		if self:SLReady() then
 			smartLootStatus = string.format("%s (%s)", self:GetSLState(), self:GetSLMode())
 			statusColor = { 0.3, 1.0, 0.3, 1.0, } -- Green
 		else
-			smartLootStatus = "SmartLoot Not Running"
+			smartLootStatus = "SmartLoot Not Initialized"
 			statusColor = { 1.0, 1.0, 0.3, 1.0, } -- Yellow
 		end
 	end
@@ -254,15 +254,13 @@ end
 function Module:InitializeSmartLoot()
 	if not Config:GetSetting('UseSmartLoot') then return end
 
-	-- Check for SmartLoot availability
-
-	if not self.smartLootInitialized then
+	if not self:SLRunning() then
 		Core.DoCmd('/lua run smartloot')
 		mq.delay("1s", function() return self:SLRunning() end)
 	end
 
 	if self:SLRunning() then
-		Logger.log_info("\ay[LOOT]: \agSmartLoot integration enabled, please ensure you have a Main Looter set!")
+		Logger.log_info("\ay[LOOT]: \agSmartLoot integration enabled, please ensure you have the RGMain Looter set!")
 		if Config:GetSetting('SLMainLooter') then
 			Core.DoCmd('/sl_mode rgmain')
 			Logger.log_info("Loot: Setting this character as the main looter for SmartLoot.")
@@ -274,7 +272,7 @@ function Module:InitializeSmartLoot()
 end
 
 -- Check if SmartLoot is available and ready
-function Module:IsSmartLootReady()
+function Module:SLReady()
 	if not self.smartLootInitialized and Config:GetSetting('UseSmartLoot') then
 		self:InitializeSmartLoot()
 	end
@@ -349,7 +347,7 @@ function Module:GiveTime(combat_state)
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 
 	-- Check if we should initiate looting
-	if not self:IsSmartLootReady() then
+	if not self:SLReady() then
 		return
 	end
 
