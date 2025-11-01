@@ -221,7 +221,7 @@ function Module:GetSLTLO()
 end
 
 function Module:SLRunning()
-	return mq.TLO.Lua.Script('smartloot').Status() or "" == 'RUNNING'
+	return mq.TLO.Lua.Script('smartloot').Status() == 'RUNNING'
 end
 
 function Module:Render()
@@ -244,6 +244,7 @@ function Module:Render()
 	ImGui.NewLine()
 
 	ImGui.Text("This module integrates with SmartLoot for automated looting.")
+	ImGui.Text("Please ensure that your SmartLoot is properly configured! Use '/sl_help' or '/sl_getstarted' for more details.")
 end
 
 function Module:Pop()
@@ -296,7 +297,7 @@ function Module:DoLoot()
 end
 
 -- Wait for SmartLoot to complete with proper focus holding
-function Module:ProcessLooting(combat_state)
+function Module:ProcessLooting()
 	if not self.TempSettings.Looting then
 		return
 	end
@@ -316,7 +317,7 @@ function Module:ProcessLooting(combat_state)
 		end
 
 		-- Check for combat and abort if needed
-		if combat_state == 'Combat' or self:GetSLState() == "Combat Detected" then
+		if self:GetSLState() == "Combat Detected" or Targeting.GetXTHaterCount() > 0 then
 			Logger.log_debug("\ay[LOOT]: \arCombat detected - aborting looting")
 			if mq.TLO.Window("LootWnd").Open() then
 				mq.TLO.Window("LootWnd").DoClose()
@@ -325,13 +326,13 @@ function Module:ProcessLooting(combat_state)
 			break
 		end
 
+		-- Check if SL is finished
 		if self:GetSLState() == "Idle" or self:GetSLState() == "WaitingForInventorySpace" then -- we dont need to check for the TLO because it will close mercs if it isn't there
 			Logger.log_verbose("\ay[LOOT]: \agSmartLoot processing complete (%.1fs elapsed)", elapsed / 1000)
 			self.TempSettings.Looting = false
 			break
 		end
 
-		-- Small delay to not hammer the CPU
 		mq.delay(50)
 		mq.doevents()
 	end
@@ -339,7 +340,7 @@ function Module:ProcessLooting(combat_state)
 	Logger.log_verbose("\ay[LOOT]: \agFinished Processing Loot.")
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
 	if not Config:GetSetting('UseSmartLoot') then return end
 	if not self:GetSLTLO() or not self:GetSLTLO().IsEnabled() then return end
 	if Config.Globals.PauseMain then return end
@@ -356,7 +357,7 @@ function Module:GiveTime(combat_state)
 		if self:DoLoot() then
 			Logger.log_verbose("\ay[LOOT]: \agInitiated SmartLoot processing")
 			-- Process looting immediately
-			self:ProcessLooting(combat_state)
+			self:ProcessLooting()
 		end
 	end
 
