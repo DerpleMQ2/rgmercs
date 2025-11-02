@@ -684,6 +684,7 @@ return {
             {
                 name = "SkinBuff",
                 type = "Spell",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem("MinDmgBuff") end,
                 cond = function(self, spell, target)
                     return Casting.SelfBuffCheck(spell)
                 end,
