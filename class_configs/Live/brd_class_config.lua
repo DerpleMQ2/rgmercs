@@ -681,6 +681,25 @@ local _ClassConfig = {
             Logger.log_debug("getDetSongDuration() Current duration for %s : %d", songSpell, duration)
             return duration
         end,
+        AETargetCheck = function(printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < Config:GetSetting('AETargetCnt') or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
+
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+                    end
+                    return false
+                end
+            end
+
+            return true
+        end,
     },
     ['SpellList']       = { -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
         {
@@ -953,6 +972,16 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     return ((Config:GetSetting('UseBellow') == 3 and mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct')) or (Config:GetSetting('UseBellow') == 2 and Casting.BurnCheck())) and
                         Casting.DetAACheck(aaName)
+                end,
+            },
+            {
+                name = "Vainglorious Shout",
+                type = "AA",
+                load_cond = function(self) return Config:GetSetting('UseShout') > 1 end,
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    return ((Config:GetSetting('UseShout') == 3 and mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct')) or (Config:GetSetting('UseShout') == 2 and Casting.BurnCheck())) and
+                        self.ClassConfig.HelperFunctions.AETargetCheck(true) and Casting.DetAACheck(aaName)
                 end,
             },
             {
@@ -1541,7 +1570,7 @@ local _ClassConfig = {
             Header = "Damage",
             Category = "Direct",
             Index = 101,
-            Tooltip = "Use Boastful Bellow",
+            Tooltip = "When to use Boastful Bellow.",
             Type = "Combo",
             ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
             Default = 3,
@@ -2088,6 +2117,73 @@ local _ClassConfig = {
             Tooltip = "Stringed Instrument to Swap in as needed.",
             Type = "ClickyItem",
             Default = "",
+        },
+
+        --AE Damage
+        ['DoAEDamage']          = {
+            DisplayName = "Do AE Damage",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 101,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['UseShout']            = {
+            DisplayName = "Shout Use:",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 102,
+            Tooltip = "When to use Vainglorious Shout.",
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            FAQ = "Why is my Vainglorious Shout being recast early? My BRD is using it again before the conclusion nuke!",
+            Answer = "Unfortunately, MQ currently reports the buff falling off early; we are examining possible fixes at this time.",
+        },
+        ['AETargetCnt']         = {
+            DisplayName = "AE Target Count",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 103,
+            Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
+            Default = 2,
+            Min = 1,
+            Max = 10,
+        },
+        ['MaxAETargetCnt']      = {
+            DisplayName = "Max AE Targets",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 104,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 5,
+            Min = 2,
+            Max = 30,
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
+            Answer =
+            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
+        },
+        ['SafeAEDamage']        = {
+            DisplayName = "AE Proximity Check",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 105,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
     },
     ['ClassFAQ']        = {
