@@ -167,7 +167,7 @@ Module.DefaultConfig   = {
         Category = "Chase",
         Index = 6,
         Tooltip =
-        "Prioritize staying in range of the Chase Target over any other actions. This will prevent any rotations (heals, buffs, etc) from being processed if we are out of range of the chase target.",
+        "Prioritize staying in range of the Chase Target over any other actions. This will prevent any rotations (heals, buffs, etc, to include bard songs) from being processed if we are out of range of the chase target.",
         Default = false,
         ConfigType = "Advanced",
     },
