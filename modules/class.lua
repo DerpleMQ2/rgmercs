@@ -888,37 +888,41 @@ function Module:LoadConditionPass(entry)
     return not entry.load_cond or Core.SafeCallFunc("CheckLoadCondition", entry.load_cond, self)
 end
 
-function Module:SelfCheckAndRez()
-    -- we are always in zone with ourself, I would hope
-    if not Config:GetSetting('RezInZonePC') then
-        Logger.log_verbose("\atSelfCheckAndRez(): We are configured to only rez out-of-zone PCs, no need to check for our own corpse.")
-        return
-    end
+function Module:SelfCheckAndRez(combat_state)
+    if combat_state == "Downtime" then -- don't try to rez ourselves in combat
+        -- we are always in zone with ourself, I would hope
+        if not Config:GetSetting('RezInZonePC') then
+            Logger.log_verbose("\atSelfCheckAndRez(): We are configured to only rez out-of-zone PCs, no need to check for our own corpse.")
+            return
+        end
 
-    local rezSearch = string.format("pccorpse %s' radius 100 zradius 50", mq.TLO.Me.DisplayName()) -- use ' to prevent partial name matches (foo's corpse vs foobar's corpse)
-    local rezCount = mq.TLO.SpawnCount(rezSearch)()
+        local rezSearch = string.format("pccorpse %s' radius 100 zradius 50", mq.TLO.Me.DisplayName()) -- use ' to prevent partial name matches (foo's corpse vs foobar's corpse)
+        local rezCount = mq.TLO.SpawnCount(rezSearch)()
 
-    for i = 1, rezCount do
-        Logger.log_debug("\atSelfCheckAndRez(): Looking for corpse #%d", i)
-        local rezSpawn = mq.TLO.NearestSpawn(i, rezSearch)
+        for i = 1, rezCount do
+            Logger.log_debug("\atSelfCheckAndRez(): Looking for corpse #%d", i)
+            local rezSpawn = mq.TLO.NearestSpawn(i, rezSearch)
 
-        if rezSpawn() then
-            Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
-            if self.ClassConfig.HelperFunctions and self.ClassConfig.HelperFunctions.DoRez then
-                if Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
-                    Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
-                        rezSpawn.ID() or 0)
-                elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
-                    Core.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
-                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
-                    self:ResetRotationTimer("GroupBuff")
+            if rezSpawn() then
+                Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
+                if self.ClassConfig.HelperFunctions and self.ClassConfig.HelperFunctions.DoRez then
+                    if Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                        Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
+                            rezSpawn.ID() or 0)
+                    elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                        Core.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
+                        self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                        self:ResetRotationTimer("GroupBuff")
+                    end
                 end
             end
         end
+    else
+        Logger.log_verbose("\atSelfCheckAndRez(): Combat detected, we will only rez ourselves in downtime.")
     end
 end
 
-function Module:IGCheckAndRez()
+function Module:IGCheckAndRez(combat_state)
     local rezCount = mq.TLO.SpawnCount(self.Constants.RezSearchGroup)()
 
     for i = 1, rezCount do
@@ -927,7 +931,7 @@ function Module:IGCheckAndRez()
         local corpseName = rezSpawn.CleanName() or "None"
         local ownerName = corpseName:gsub("'s corpse$", "")
 
-        if rezSpawn() then
+        if rezSpawn() and not ownerName == mq.TLO.Me.CleanName() then -- don't try to rez ourselves in the group checks
             if self.ClassConfig.HelperFunctions.DoRez then
                 Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
                 if not Config:GetSetting('RezInZonePC') and mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
@@ -938,16 +942,23 @@ function Module:IGCheckAndRez()
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Logger.log_debug("\atIGCheckAndRez(): Attempting to Res: %s", rezSpawn.CleanName())
-                    Core.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName)
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
-                    self:ResetRotationTimer("GroupBuff")
+                    if Core.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName) then
+                        self:ResetRotationTimer("GroupBuff")
+                        -- make sure we process other healing/etc instead of chain rezzing
+                        if combat_state == "Combat" then
+                            Logger.log_verbose("\atIGCheckAndRez(): Rez successful: %s. Returning to allow for heal checks before we attempt to rez the next corpse.",
+                                rezSpawn.CleanName())
+                            break
+                        end
+                    end
                 end
             end
         end
     end
 end
 
-function Module:OOGCheckAndRez()
+function Module:OOGCheckAndRez(combat_state)
     local rezCount = mq.TLO.SpawnCount(self.Constants.RezSearchOutOfGroup)()
 
     for i = 1, rezCount do
@@ -955,7 +966,8 @@ function Module:OOGCheckAndRez()
         local corpseName = rezSpawn.CleanName() or "None"
         local ownerName = corpseName:gsub("'s corpse$", "")
 
-        if rezSpawn() and (Targeting.IsSafeName("pc", rezSpawn.DisplayName())) then
+        -- don't try to rez in group, we just checked those PCs... we will check them again with IGCheckAndRez next loop.
+        if rezSpawn() and not mq.TLO.Group.Member(ownerName)() and (Targeting.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
                 if not Config:GetSetting('RezInZonePC') and mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but the player appears to be in-zone.", ownerName or "Unknown",
@@ -964,9 +976,16 @@ function Module:OOGCheckAndRez()
                     Logger.log_debug("\atOOGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
-                    Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName)
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
-                    self:ResetRotationTimer("GroupBuff")
+                    if Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName) then
+                        self:ResetRotationTimer("GroupBuff")
+                        -- make sure we process other healing/etc instead of chain rezzing
+                        if combat_state == "Combat" then
+                            Logger.log_verbose("\atOOGCheckAndRez(): Rez successful: %s. Returning to allow for heal checks before we attempt to rez the next corpse.",
+                                rezSpawn.CleanName())
+                            break
+                        end
+                    end
                 end
             end
         end
@@ -1465,12 +1484,12 @@ function Module:GiveTime(combat_state)
     if self:IsRezing() and Config:GetSetting('DoRez') then
         -- Check Rezes
         if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvisForHealing')) then
-            self:IGCheckAndRez()
+            self:IGCheckAndRez(combat_state)
 
-            self:SelfCheckAndRez()
+            self:SelfCheckAndRez(combat_state)
 
             if Config:GetSetting('RezOutside') then
-                self:OOGCheckAndRez()
+                self:OOGCheckAndRez(combat_state)
             end
 
             --clear the table of corpses we've already rezzed if there are no PC corpses nearby
