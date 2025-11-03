@@ -529,6 +529,18 @@ return {
                     return mq.TLO.Me.TotalCounters() > 0
                 end,
             },
+            {
+                name = "Artifact of Razorclaw",
+                type = "Item",
+                load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Razorclaw") end,
+                cond = function(self, _) return mq.TLO.Me.Pet.ID() == 0 end,
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
+            },
         },
         ['Weaves']         = {
             {

@@ -931,7 +931,7 @@ function Module:IGCheckAndRez(combat_state)
         local corpseName = rezSpawn.CleanName() or "None"
         local ownerName = corpseName:gsub("'s corpse$", "")
 
-        if rezSpawn() and not ownerName == mq.TLO.Me.CleanName() then -- don't try to rez ourselves in the group checks
+        if rezSpawn() and ownerName ~= mq.TLO.Me.CleanName() then -- don't try to rez ourselves in the group checks
             if self.ClassConfig.HelperFunctions.DoRez then
                 Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
                 if not Config:GetSetting('RezInZonePC') and mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
