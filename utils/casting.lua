@@ -958,6 +958,8 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
         Core.DoCmd("/autoinv")
     end
 
+    local targetSpawn = mq.TLO.Spawn(targetId)
+
     if spellName then
         local spell = mq.TLO.Spell(spellName)
 
@@ -971,8 +973,6 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
             Logger.log_error("\ayUseSpell(): \arCasting Failed: Somehow I tried to cast a spell I didn't know: %s", spellName)
             return false
         end
-
-        local targetSpawn = mq.TLO.Spawn(targetId)
 
         if (not Config:GetSetting('IgnoreLevelCheck')) and targetSpawn() and Targeting.TargetIsType("pc", targetSpawn) then
             -- check to see if this is too powerful a spell
@@ -1045,6 +1045,13 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
 
         local oldTargetId = mq.TLO.Target.ID()
         if targetId > 0 and targetId ~= oldTargetId then
+            if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
+                Logger.log_debug("\awUseSpell():NOTICE:\ax Turning off autoattack to cast on a PC.")
+                Core.DoCmd("/attack off")
+                mq.delay("2s", function() return not me.Combat() end)
+            end
+
+            Logger.log_debug("\awUseSpell():NOTICE:\ax Swapping target to %s [%d] to use %s", targetSpawn.DisplayName(), targetId, spellName)
             Targeting.SetTarget(targetId, true)
         end
 
@@ -1073,7 +1080,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
         until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
         Config.Globals.LastUsedSpell = spellName
-        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
+        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
             Logger.log_debug("UseSpell(): Retargeting previous target after spell use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1142,7 +1149,14 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
         end
 
         local oldTargetId = mq.TLO.Target.ID()
-        if targetId > 0 and targetId ~= oldTargetId and targetId ~= mq.TLO.Me.ID() then
+        if targetId > 0 and targetId ~= oldTargetId then
+            if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
+                Logger.log_debug("\awUseSong():NOTICE:\ax Turning off autoattack to cast on a PC.")
+                Core.DoCmd("/attack off")
+                mq.delay("2s", function() return not me.Combat() end)
+            end
+
+            Logger.log_debug("\awUseSong():NOTICE:\ax Swapping target to %s [%d] to use %s", targetSpawn.DisplayName(), targetId, songName)
             Targeting.SetTarget(targetId, true)
         end
 
@@ -1220,7 +1234,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             classConfig.HelperFunctions.SwapInst("Weapon")
         end
 
-        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
+        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
             Logger.log_debug("UseSong(): Retargeting previous target after song use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1325,8 +1339,8 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     Casting.ActionPrep()
 
     local oldTargetId = mq.TLO.Target.ID()
-    if targetId > 0 and targetId ~= oldTargetId and targetSpawn() then
-        if me.Combat() and Targeting.TargetIsType("pc", targetSpawn) then
+    if targetId > 0 and targetId ~= oldTargetId then
+        if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
             Logger.log_debug("\awUseAA():NOTICE:\ax Turning off autoattack to cast on a PC.")
             Core.DoCmd("/attack off")
             mq.delay("2s", function() return not me.Combat() end)
@@ -1361,7 +1375,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     else
         Core.DoCmd(cmd)
         mq.delay(5)
-        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
+        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
             Logger.log_debug("UseAA(): Retargeting previous target after AA use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1433,8 +1447,17 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         return false
     end
 
+
+    local targetSpawn = mq.TLO.Spawn(targetId)
     local oldTargetId = mq.TLO.Target.ID()
     if targetId > 0 and targetId ~= oldTargetId and (forceTarget or targetId ~= mq.TLO.Me.ID()) then
+        if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
+            Logger.log_debug("\awUseItem():NOTICE:\ax Turning off autoattack to cast on a PC.")
+            Core.DoCmd("/attack off")
+            mq.delay("2s", function() return not me.Combat() end)
+        end
+
+        Logger.log_debug("\awUseItem():NOTICE:\ax Swapping target to %s [%d] to use %s", targetSpawn.DisplayName(), targetId, itemName)
         Targeting.SetTarget(targetId, true)
     end
 
@@ -1478,7 +1501,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         Core.DoCmd("/autoinv")
     end
 
-    if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
+    if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
         Logger.log_debug("UseItem(): Retargeting previous target after item use.")
         Targeting.SetTarget(oldTargetId, true)
     end
