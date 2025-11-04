@@ -663,7 +663,7 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('DoGroupElixir') end,
                 cond = function(self, spell)
                     if not Config:GetSetting('GroupElixirUptime') then return false end
-                    return spell.RankName.Stacks() and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 6
+                    return spell.RankName.Stacks() and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 6
                 end,
             },
             {

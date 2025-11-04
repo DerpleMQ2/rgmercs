@@ -692,6 +692,17 @@ Config.DefaultConfig               = {
         Default = true,
         ConfigType = "Advanced",
     },
+    ['StopAttackForPCs']     = {
+        DisplayName = "Stop Attack for PCs",
+        Group = "Combat",
+        Header = "Targeting",
+        Category = "Targeting Behavior",
+        Index = 4,
+        Tooltip = "Ensure that auto attack is turned off before targeting a PC to use a spell, song, AA, or item. May be required if PvP is enabled by flag, zone, or server.",
+        Default = false,
+        ConfigType = "Advanced",
+    },
+
     ['ScanNamedPriority']    = {
         DisplayName = "Scan Priority:",
         Group = "Combat",
