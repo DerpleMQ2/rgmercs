@@ -386,6 +386,7 @@ local _ClassConfig = {
         { --Summon pet even when buffs are off on emu
             name = 'PetSummon',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            load_cond = function(self) return Config:GetSetting('DoPet') end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() == 0 and Casting.OkayToPetBuff() and Casting.AmIBuffable()
             end,
@@ -394,6 +395,7 @@ local _ClassConfig = {
             name = 'PetBuff',
             timer = 60,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
+            load_cond = function(self) return Config:GetSetting('DoPet') end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
             end,
@@ -534,7 +536,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SelfDS,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell) and Casting.ReagentCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -586,10 +588,6 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.PetSpell,
                 active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
-                cond = function(self, spell)
-                    if mq.TLO.Me.Pet.ID() ~= 0 or not Config:GetSetting('DoPet') then return false end
-                    return Casting.ReagentCheck(spell)
-                end,
                 post_activate = function(self, spell, success)
                     if success and mq.TLO.Me.Pet.ID() > 0 then
                         mq.delay(50) -- slight delay to prevent chat bug with command issue
