@@ -181,7 +181,7 @@ end
 ---
 --- @return number The ID of the main assist.
 function Core.GetMainAssistId()
-    return Config.Globals.MainAssist:len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).ID() or 0
+    return (Config.Globals.MainAssist or ""):len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist or "")).ID() or 0
 end
 
 --- Retrieves the main assist spawn.

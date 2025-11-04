@@ -487,6 +487,7 @@ local function Main()
         if mq.TLO.Me.Mercenary.State():lower() == "dead" then
             if mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_SuspendButton").Text():lower() == "revive" then
                 mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_SuspendButton").LeftMouseUp()
+                mq.delay(1000, function() return (mq.TLO.Me.Mercenary.State() or "dead"):lower() ~= "dead" end)
             end
         else
             if mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_AssistModeCheckbox").Checked() then

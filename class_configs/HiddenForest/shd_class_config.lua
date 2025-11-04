@@ -676,6 +676,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Shissar Boned Ring (Tier 2)", -- Defensive Discipline
+                type = "Item",
+                cond = function(self, itemName, target)
+                    return Casting.NoDiscActive()
+                end,
+            },
+            {
                 name = "LeechCurse",
                 type = "Disc",
                 tooltip = Tooltips.LeechCurse,

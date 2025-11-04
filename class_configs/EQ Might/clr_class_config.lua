@@ -884,7 +884,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDivineBuff') or not Targeting.TargetIsMA(target) then return false end
-                    return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
+                    return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },

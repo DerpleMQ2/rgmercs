@@ -574,7 +574,6 @@ local _ClassConfig = {
                     return not Config:GetSetting("UseDonorPet") or not mq.TLO.FindItem("=Artifact of Asterion")()
                 end,
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
-                cond = function(self, spell) return Casting.ReagentCheck(spell) end,
                 post_activate = function(self, spell, success)
                     if success and mq.TLO.Me.Pet.ID() > 0 then
                         mq.delay(50) -- slight delay to prevent chat bug with command issue
@@ -656,7 +655,7 @@ local _ClassConfig = {
                 load_cond = function() return Config:GetSetting('DoGroupSpellShield') end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -704,7 +703,7 @@ local _ClassConfig = {
                 load_cond = function() return Config:GetSetting('RuneChoice') == 2 end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             -- {
@@ -722,7 +721,7 @@ local _ClassConfig = {
                 load_cond = function() return Config:GetSetting('RuneChoice') == 1 end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {

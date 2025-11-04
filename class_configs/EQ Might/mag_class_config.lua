@@ -1035,12 +1035,7 @@ _ClassConfig      = {
                 return false
             end
 
-            if mq.TLO.FindItemCount("Malachite")() > 0 then
-                return Casting.UseSpell(resolvedPetSpell.RankName(), mq.TLO.Me.ID(), self.CombatState == "Downtime")
-            else
-                Logger.log_error("\ayYou don't have \agMalachite\ay. And you call yourself a mage?")
-                return false
-            end
+            return Casting.UseSpell(resolvedPetSpell.RankName(), mq.TLO.Me.ID(), self.CombatState == "Downtime")
         end,
         pet_management = function(self)
             if not Config:GetSetting('DoPet') or (Casting.CanUseAA("Suspended Minion") and not Casting.AAReady("Suspended Minion")) then
