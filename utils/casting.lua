@@ -1655,8 +1655,6 @@ function Casting.AutoMed()
     local me = mq.TLO.Me
     if Config:GetSetting('DoMed') == 1 then return end
 
-    if Core.MyClassIs("BRD") and me.Level() > 5 and not Config:GetSetting('BardRespectMedState', true) then return end
-
     if me.Mount.ID() and not mq.TLO.Zone.Indoor() then
         Logger.log_verbose("Sit check returning early due to mount.")
         return

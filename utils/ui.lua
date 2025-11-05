@@ -412,25 +412,25 @@ function Ui.RenderRotationTableKey()
     if ImGui.BeginTable("Rotation_keys", 2, ImGuiTableFlags.Borders) then
         ImGui.TableNextColumn()
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(Icons.FA_SMILE_O .. ": Active")
+        ImGui.Text(Icons.FA_SMILE_O .. ": Effect is Active")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(Icons.MD_CHECK .. ": Will Cast (Conditions Met)")
+        ImGui.Text(Icons.MD_CHECK .. ": Cast Occured (Conditions Met)")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-        ImGui.Text(Icons.FA_EXCLAMATION .. ": Cannot Cast")
+        ImGui.Text(Icons.FA_EXCLAMATION .. ": Didn't Cast (Conditions Not Met)")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
-        ImGui.Text(Icons.MD_CHECK .. ": Will Cast (No Conditions)")
+        ImGui.Text(Icons.MD_CHECK .. ": No Conditions to Check")
 
         ImGui.PopStyleColor()
         ImGui.EndTable()

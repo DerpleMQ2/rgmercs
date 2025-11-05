@@ -430,10 +430,10 @@ Config.DefaultConfig               = {
         Header = "Meditation",
         Category = "Med Rules",
         Index = 1,
-        Tooltip = "Choose if/when to meditate.",
+        Tooltip = "Choose if/when to meditate.\nMay interfere with bard songs (refer to FAQ for 'Bard Meditation').",
         Type = "Combo",
         ComboOptions = { 'Off', 'Out of Combat', 'In and Out of Combat', },
-        Default = 2,
+        Default = Config.Globals.CurLoadedClass == "BRD" and 1 or 2,
         Min = 1,
         Max = 3,
         ConfigType = "Normal",
@@ -445,7 +445,7 @@ Config.DefaultConfig               = {
         Category = "Med Rules",
         Index = 2,
         Tooltip = "Force a stand to end meditation when thresholds are reached.",
-        Default = false,
+        Default = Config.Globals.CurLoadedClass == "BRD",
     },
     ['AfterCombatMedDelay']  = {
         DisplayName = "After Combat Med Delay",
@@ -504,7 +504,7 @@ Config.DefaultConfig               = {
         Tooltip = "Cease attempts to meditate when at or under this HP percentage.",
         Default = 90,
         Min = 1,
-        Max = 99,
+        Max = 100,
         ConfigType = "Advanced",
     },
     ['ManaMedPct']           = {
@@ -528,7 +528,7 @@ Config.DefaultConfig               = {
         Tooltip = "Cease attempts to meditate when at or under this Mana percentage.",
         Default = 90,
         Min = 1,
-        Max = 99,
+        Max = 100,
         ConfigType = "Advanced",
     },
     ['EndMedPct']            = {
@@ -552,7 +552,7 @@ Config.DefaultConfig               = {
         Tooltip = "Cease attempts to meditate when at or under this HP percentage.",
         Default = 90,
         Min = 1,
-        Max = 99,
+        Max = 100,
         ConfigType = "Advanced",
     },
 

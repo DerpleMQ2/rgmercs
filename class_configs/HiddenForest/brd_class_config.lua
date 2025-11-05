@@ -310,13 +310,23 @@ local _ClassConfig = {
     },
     ['RotationOrder']   = {
         {
+            name = 'Enduring Breath',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            load_cond = function(self) return Config:GetSetting('UseEndBreath') and Core.GetResolvedActionMapItem('EndBreathSong') end,
+            cond = function(self, combat_state)
+                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')
+            end,
+        },
+        {
             name = 'Melody',
             state = 1,
             steps = 1,
             doFullRotation = true,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and not (Config:GetSetting('BardRespectMedState') and Config.Globals.InMedState)
+                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and not Config.Globals.InMedState
             end,
         },
         {
@@ -325,7 +335,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and not mq.TLO.Me.Invis() and not (Config:GetSetting('BardRespectMedState') and Config.Globals.InMedState)
+                return combat_state == "Downtime" and not mq.TLO.Me.Invis()
             end,
         },
         {
@@ -563,15 +573,16 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Melody'] = {
+        ['Enduring Breath'] = {
             {
                 name = "EndBreathSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not (Config:GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
+        },
+        ['Melody'] = {
             {
                 name = "AriaSong",
                 type = "Song",
@@ -655,6 +666,7 @@ local _ClassConfig = {
                 name = "Selo's Sonata",
                 type = "AA",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                load_cond = function(self) return Config:GetSetting('UseRunBuff') and Casting.CanUseAA("Selo's Sonata") end,
                 cond = function(self, aaName)
                     if not Config:GetSetting('UseRunBuff') then return false end
                     --refresh slightly before expiry for better uptime
@@ -665,8 +677,9 @@ local _ClassConfig = {
                 name = "RunBuff",
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                load_cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA("Selo's Sonata") end,
                 cond = function(self, songSpell)
-                    if Casting.CanUseAA("Selo's Sonata") or not Config:GetSetting('UseRunBuff') then return false end
+                    if Config.Globals.InMedState then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -680,14 +693,6 @@ local _ClassConfig = {
                 cond = function(self, songSpell)
                     if not Config:GetSetting('UseAura') then return false end
                     return not Casting.AuraActiveByName(songSpell.BaseName())
-                end,
-            },
-            {
-                name = "EndBreathSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    if not (Config:GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
-                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
         },
@@ -848,7 +853,7 @@ local _ClassConfig = {
 
 
         -- Debuffs
-        ['DoSTSlow']            = {
+        ['DoSTSlow']        = {
             DisplayName = "Use Slow (ST)",
             Group = "Abilities",
             Header = "Debuffs",
@@ -858,7 +863,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['DoAESlow']            = {
+        ['DoAESlow']        = {
             DisplayName = "Use Slow (AE)",
             Group = "Abilities",
             Header = "Debuffs",
@@ -868,7 +873,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['DoResistDebuff']      = {
+        ['DoResistDebuff']  = {
             DisplayName = "Use Resist Debuff",
             Group = "Abilities",
             Header = "Debuffs",
@@ -878,7 +883,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['DoDispel']            = {
+        ['DoDispel']        = {
             DisplayName = "Use Dispel",
             Group = "Abilities",
             Header = "Debuffs",
@@ -890,7 +895,7 @@ local _ClassConfig = {
         },
 
         -- Defensive
-        ['UseResist']           = {
+        ['UseResist']       = {
             DisplayName = "Use Resist Buff",
             Group = "Abilities",
             Header = "Buffs",
@@ -904,7 +909,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseSpellAbsorb']      = {
+        ['UseSpellAbsorb']  = {
             DisplayName = "Use Spell Absorb",
             Group = "Abilities",
             Header = "Buffs",
@@ -915,7 +920,7 @@ local _ClassConfig = {
             FAQ = "When is the Spell Damage Absorb/Shield used?",
             Answer = "This song is used during burns.",
         },
-        ['UseFading']           = {
+        ['UseFading']       = {
             DisplayName = "Use Combat Escape",
             Group = "Abilities",
             Header = "Utility",
@@ -928,7 +933,7 @@ local _ClassConfig = {
             Answer = "When Use Combat Escape is enabled, Fading Memories will be used when the Bard has any unwanted aggro.\n" ..
                 "This helps the common issue of bards gaining aggro from singing before a tank has the chance to secure it.",
         },
-        ['EmergencyStart']      = {
+        ['EmergencyStart']  = {
             DisplayName = "Emergency HP%",
             Group = "Abilities",
             Header = "Utility",
@@ -942,7 +947,7 @@ local _ClassConfig = {
         },
 
         -- Healing
-        ['RegenSong']           = {
+        ['RegenSong']       = {
             DisplayName = "Regen Song Choice:",
             Group = "Abilities",
             Header = "Recovery",
@@ -959,7 +964,7 @@ local _ClassConfig = {
             Answer = "At low level, the regen songs are spaced broadly, and wallow back and forth before settling on providing both resources.\n" ..
                 "Endurance is eventually added as well.",
         },
-        ['UseRegen']            = {
+        ['UseRegen']        = {
             DisplayName = "Regen Song Use:",
             Group = "Abilities",
             Header = "Recovery",
@@ -972,7 +977,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
         },
-        ['GroupManaPct']        = {
+        ['GroupManaPct']    = {
             DisplayName = "Group Mana %",
             Group = "Abilities",
             Header = "Recovery",
@@ -984,7 +989,7 @@ local _ClassConfig = {
             Max = 100,
             ConfigType = "Advanced",
         },
-        ['GroupManaCt']         = {
+        ['GroupManaCt']     = {
             DisplayName = "Group Mana Count",
             Group = "Abilities",
             Header = "Recovery",
@@ -996,7 +1001,7 @@ local _ClassConfig = {
             Max = 6,
             ConfigType = "Advanced",
         },
-        ['UseCure']             = {
+        ['UseCure']         = {
             DisplayName = "Cure Ailments",
             Group = "Abilities",
             Header = "Recovery",
@@ -1006,19 +1011,9 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['BardRespectMedState'] = {
-            DisplayName = "Bard: Respect Med Settings",
-            Group = "Movement",
-            Header = "Meditation",
-            Category = "Med Rules",
-            Index = 101,
-            Tooltip = "Allows the bard to meditate.\nPlease note that this comes at the cost of disabling all normal downtime actions while meditating.",
-            Default = false,
-            ConfigType = "Advanced",
-        },
 
         -- Instruments
-        ['SwapInstruments']     = {
+        ['SwapInstruments'] = {
             DisplayName = "Auto Swap Instruments",
             Index = 101,
             Group = "Items",
@@ -1028,7 +1023,7 @@ local _ClassConfig = {
             Default = false,
 
         },
-        ['UseBandolier']        = {
+        ['UseBandolier']    = {
             DisplayName = "Use Bandolier",
             Index = 102,
             Group = "Items",
@@ -1037,7 +1032,7 @@ local _ClassConfig = {
             Tooltip = "Auto swap instruments using bandolier if avail, valid names (wind, drum, brass, string or main), if a bandolier is missing we will direct swap instead.",
             Default = true,
         },
-        ['Offhand']             = {
+        ['Offhand']         = {
             DisplayName = "Offhand",
             Index = 103,
             Group = "Items",
@@ -1048,7 +1043,7 @@ local _ClassConfig = {
 
             Default = "",
         },
-        ['BrassInst']           = {
+        ['BrassInst']       = {
             DisplayName = "Brass Instrument",
             Index = 104,
             Group = "Items",
@@ -1058,7 +1053,7 @@ local _ClassConfig = {
             Type = "ClickyItem",
             Default = "",
         },
-        ['WindInst']            = {
+        ['WindInst']        = {
             DisplayName = "Wind Instrument",
             Index = 105,
             Group = "Items",
@@ -1068,7 +1063,7 @@ local _ClassConfig = {
             Type = "ClickyItem",
             Default = "",
         },
-        ['PercInst']            = {
+        ['PercInst']        = {
             DisplayName = "Percussion Instrument",
             Index = 106,
             Group = "Items",
@@ -1078,7 +1073,7 @@ local _ClassConfig = {
             Type = "ClickyItem",
             Default = "",
         },
-        ['StringedInst']        = {
+        ['StringedInst']    = {
             DisplayName = "Stringed Instrument",
             Index = 107,
             Group = "Items",
@@ -1090,7 +1085,7 @@ local _ClassConfig = {
         },
 
         -- Offensive
-        ['UseAria']             = {
+        ['UseAria']         = {
             DisplayName = "Use Aria",
             Group = "Abilities",
             Header = "Buffs",
@@ -1104,7 +1099,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseMarch']            = {
+        ['UseMarch']        = {
             DisplayName = "Use War March",
             Group = "Abilities",
             Header = "Buffs",
@@ -1118,7 +1113,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseProcSong']         = {
+        ['UseProcSong']     = {
             DisplayName = "Use Group Proc",
             Group = "Abilities",
             Header = "Buffs",
@@ -1132,7 +1127,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseArcane']           = {
+        ['UseArcane']       = {
             DisplayName = "Use Arcane Line",
             Group = "Abilities",
             Header = "Buffs",
@@ -1146,7 +1141,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseEpic']             = {
+        ['UseEpic']         = {
             DisplayName = "Epic Use:",
             Group = "Items",
             Header = "Clickies",
@@ -1159,7 +1154,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
         },
-        ['UseFireDots']         = {
+        ['UseFireDots']     = {
             DisplayName = "Use Fire Dots",
             Group = "Abilities",
             Header = "Damage",
@@ -1169,7 +1164,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['UseIceDots']          = {
+        ['UseIceDots']      = {
             DisplayName = "Use Ice Dots",
             Group = "Abilities",
             Header = "Damage",
@@ -1179,7 +1174,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['UsePoisonDots']       = {
+        ['UsePoisonDots']   = {
             DisplayName = "Use Poison Dots",
             Group = "Abilities",
             Header = "Damage",
@@ -1189,7 +1184,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['UseDiseaseDots']      = {
+        ['UseDiseaseDots']  = {
             DisplayName = "Use Disease Dots",
             Group = "Abilities",
             Header = "Damage",
@@ -1200,7 +1195,7 @@ local _ClassConfig = {
             Default = false,
 
         },
-        ['UseJonthan']          = {
+        ['UseJonthan']      = {
             DisplayName = "Use Jonthan",
             Group = "Abilities",
             Header = "Buffs",
@@ -1215,7 +1210,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
         },
-        ['UseShout']            = {
+        ['UseShout']        = {
             DisplayName = "Use Vain. Shout",
             Group = "Abilities",
             Header = "Damage",
@@ -1226,7 +1221,7 @@ local _ClassConfig = {
         },
 
         -- Song Duration Adjustment
-        ['RefreshDT']           = {
+        ['RefreshDT']       = {
             DisplayName = "Downtime Threshold",
             Group = "Abilities",
             Header = "Common",
@@ -1242,7 +1237,7 @@ local _ClassConfig = {
             Answer = "You may need to adjust your Downtime Threshold value downward at lower levels/song durations.\n" ..
                 "This needs to be carefully tailored towards your song line-up.",
         },
-        ['RefreshCombat']       = {
+        ['RefreshCombat']   = {
             DisplayName = "Combat Threshold",
             Group = "Abilities",
             Header = "Common",
@@ -1266,6 +1261,14 @@ local _ClassConfig = {
                 "  Up until the end of T2 progression, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
                 "  After that, expect performance to degrade somewhat as not all THF custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
+        },
+        [2] = {
+            Question = "How does Bard meditation function?",
+            Answer = "Bards can elect to med using the same settings as other classes. If a bard begins to med, they will stop singing any songs in the Melody rotation.\n\n" ..
+                "  Using the default class configs, the combat rotations will still be used. Thus, there is generally little or no support for in-combat meditation for Bard.\n\n" ..
+                "  The 'Stand When Done' med setting will ensure that a bard begins to sing again as soon as they reach the med stop threshold.\n\n" ..
+                "  Note that the Enduring Breath song, if enabled (and needed), does not respect meditation settings, for the safety of your group.",
             Settings_Used = "",
         },
     },
