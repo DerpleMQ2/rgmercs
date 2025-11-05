@@ -23,24 +23,9 @@ Modules.ModuleOrder = {
 Modules.ModuleList  = {}
 
 ---@return any
-function Modules:load()
-    if (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu" then
-        self.ModuleOrder = {
-            "Class",
-            "Movement",
-            "Clickies",
-            "Pull",
-            "Drag",
-            "Charm",
-            "Mez",
-            "Travel",
-            "Named",
-            "Perf",
-            "Loot",
-            "Contributors",
-            "FAQ",
-            "Debug",
-        }
+function Modules:load(lootModule)
+    if lootModule ~= "None" then
+        table.insert(self.ModuleOrder, lootModule)
     end
     self.ModuleList = {
         Movement     = require("modules.movement").New(),
@@ -51,12 +36,13 @@ function Modules:load()
         Drag         = require("modules.drag").New(),
         Mez          = require("modules.mez").New(),
         Charm        = require("modules.charm").New(),
-        Loot         = (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu" and require("modules.loot").New() or nil,
         Named        = require("modules.named").New(),
         Perf         = require("modules.performance").New(),
         Contributors = require("modules.contributors").New(),
         FAQ          = require("modules.faq").New(),
         Debug        = require("modules.debug").New(),
+        LootNScoot   = lootModule == "LootNScoot" and require("modules.lootnscoot").New() or nil,
+        SmartLoot    = lootModule == "SmartLoot" and require("modules.smartloot").New() or nil,
     }
 end
 
@@ -64,12 +50,22 @@ function Modules:unloadModule(moduleName)
     if self.ModuleList[moduleName] ~= nil then
         self.ModuleList[moduleName]:Shutdown()
         self.ModuleList[moduleName] = nil
+        for i, v in pairs(self.ModuleOrder) do
+            if v == moduleName then
+                table.remove(self.ModuleOrder, i)
+                break
+            end
+        end
+        Logger.log_info("Unload %s", moduleName) -- temp debug text
     end
 end
 
 function Modules:loadModule(moduleName, filePath)
     self:unloadModule(moduleName)
     self.ModuleList[moduleName] = require(filePath).New()
+    table.insert(self.ModuleOrder, moduleName)
+    Logger.log_info("Load %s", moduleName) -- temp debug text
+    Modules:ExecModule(moduleName, "Init")
 end
 
 function Modules:GetModuleList()

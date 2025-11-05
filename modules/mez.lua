@@ -12,8 +12,6 @@ local Strings   = require("utils.strings")
 local Tables    = require("utils.tables")
 local Files     = require("utils.files")
 local Logger    = require("utils.logger")
-local Set       = require("mq.Set")
-local Icons     = require('mq.ICONS')
 
 require('utils.datatypes')
 

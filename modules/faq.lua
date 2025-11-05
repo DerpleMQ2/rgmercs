@@ -1,12 +1,11 @@
 -- Sample FAQ Class Module
 local mq               = require('mq')
 local Config           = require('utils.config')
-local Ui               = require("utils.ui")
+local Core             = require("utils.core")
 local Comms            = require("utils.comms")
 local Logger           = require("utils.logger")
 local Binds            = require("utils.binds")
 local Modules          = require("utils.modules")
-local Set              = require("mq.Set")
 local Strings          = require("utils.strings")
 
 local Module           = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }

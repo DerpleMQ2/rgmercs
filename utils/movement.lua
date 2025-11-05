@@ -2,7 +2,6 @@ local mq                = require('mq')
 local Config            = require('utils.config')
 local Logger            = require("utils.logger")
 local Core              = require("utils.core")
-local Strings           = require("utils.strings")
 
 local Movement          = { _version = '1.0', _name = "Movement", _author = 'Derple', }
 Movement.__index        = Movement
