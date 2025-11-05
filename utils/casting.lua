@@ -1149,7 +1149,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
         end
 
         local oldTargetId = mq.TLO.Target.ID()
-        if targetId > 0 and targetId ~= oldTargetId then
+        if targetId > 0 and targetId ~= oldTargetId and targetId ~= mq.TLO.Me.ID() then
             if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
                 Logger.log_debug("\awUseSong():NOTICE:\ax Turning off autoattack to cast on a PC.")
                 Core.DoCmd("/attack off")
