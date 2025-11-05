@@ -778,13 +778,23 @@ local _ClassConfig = {
     },
     ['RotationOrder']   = {
         {
+            name = 'Enduring Breath',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            load_cond = function(self) return Config:GetSetting('UseEndBreath') and Core.GetResolvedActionMapItem('EndBreathSong') end,
+            cond = function(self, combat_state)
+                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')
+            end,
+        },
+        {
             name = 'Melody',
             state = 1,
             steps = 1,
             doFullRotation = true,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and not (Config:GetSetting('BardRespectMedState') and Config.Globals.InMedState)
+                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and not Config.Globals.InMedState
             end,
         },
         {
@@ -793,7 +803,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and not mq.TLO.Me.Invis() and not (Config:GetSetting('BardRespectMedState') and Config.Globals.InMedState)
+                return combat_state == "Downtime" and not mq.TLO.Me.Invis()
             end,
         },
         {
@@ -1100,16 +1110,16 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Melody'] = {
+        ['Enduring Breath'] = {
             {
                 name = "EndBreathSong",
                 type = "Song",
-                load_cond = function(self) return Core.GetResolvedActionMapItem('EndBreathSong') and Config:GetSetting('UseEndBreath') end,
                 cond = function(self, songSpell)
-                    if not mq.TLO.Me.FeetWet() and not mq.TLO.Zone.ShortName() == 'thegrey' then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
+        },
+        ['Melody'] = {
             {
                 name = "AriaSong",
                 type = "Song",
@@ -1272,22 +1282,24 @@ local _ClassConfig = {
         },
         ['Downtime'] = {
             {
-                name = "RunBuffSong",
-                type = "Song",
-                targetId = function(self) return { mq.TLO.Me.ID(), } end,
-                load_cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA('Selo\'s Sonata') end,
-                cond = function(self, songSpell)
-                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
-                end,
-            },
-            {
                 name = "Selo's Sonata",
                 type = "AA",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
-                load_cond = function(self) return Config:GetSetting('UseRunBuff') end,
+                load_cond = function(self) return Config:GetSetting('UseRunBuff') and Casting.CanUseAA("Selo's Sonata") end,
                 cond = function(self, aaName)
-                    --refreshes slightly before expiry for better uptime
+                    if not Config:GetSetting('UseRunBuff') then return false end
+                    --refresh slightly before expiry for better uptime
                     return (mq.TLO.Me.Buff(mq.TLO.AltAbility(aaName).Spell.Trigger(1)).Duration.TotalSeconds() or 0) < 30
+                end,
+            },
+            {
+                name = "RunBuff",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                load_cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA("Selo's Sonata") end,
+                cond = function(self, songSpell)
+                    if Config.Globals.InMedState then return false end
+                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
@@ -1320,15 +1332,6 @@ local _ClassConfig = {
                 end,
                 cond = function(self, songSpell)
                     return not Casting.AuraActiveByName(songSpell.BaseName())
-                end,
-            },
-            {
-                name = "EndBreathSong",
-                type = "Song",
-                load_cond = function(self) return Core.GetResolvedActionMapItem('EndBreathSong') and Config:GetSetting('UseEndBreath') end,
-                cond = function(self, songSpell)
-                    if not mq.TLO.Me.FeetWet() and not mq.TLO.Zone.ShortName() == 'thegrey' then return false end
-                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
         },
@@ -1399,7 +1402,7 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig']   = {
-        ['Mode']                = {
+        ['Mode']            = {
             DisplayName = "Mode",
             Type = "Custom",
             RequiresLoadoutChange = true,
@@ -1410,20 +1413,8 @@ local _ClassConfig = {
             Answer = "Bard currently only has one mode.",
         },
 
-        --Movement
-        ['BardRespectMedState'] = {
-            DisplayName = "Respect Med Settings",
-            Group = "Movement",
-            Header = "Meditation",
-            Category = "Med Rules",
-            Index = 101,
-            Tooltip = "Allows the bard to meditate.\nPlease note that this comes at the cost of disabling all normal downtime actions while meditating.",
-            Default = false,
-            ConfigType = "Advanced",
-        },
-
         --Abilities
-        ['SelfManaPct']         = {
+        ['SelfManaPct']     = {
             DisplayName = "Self Min Mana %",
             Group = "Abilities",
             Header = "Common",
@@ -1438,7 +1429,7 @@ local _ClassConfig = {
             Answer = "Insults take a lot of mana, but we can control that amount with the Self Min Mana %.\n" ..
                 "Try adjusting this to the minimum amount of mana you want to keep in reserve. Note that burns will ignore this setting.",
         },
-        ['SelfEndPct']          = {
+        ['SelfEndPct']      = {
             DisplayName = "Self Min End %",
             Group = "Abilities",
             Header = "Common",
@@ -1455,7 +1446,7 @@ local _ClassConfig = {
         },
 
         --Debuffs
-        ['DoSTSlow']            = {
+        ['DoSTSlow']        = {
             DisplayName = "Use Slow (ST)",
             Group = "Abilities",
             Header = "Debuffs",
@@ -1465,7 +1456,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['DoAESlow']            = {
+        ['DoAESlow']        = {
             DisplayName = "Use Slow (AE)",
             Group = "Abilities",
             Header = "Debuffs",
@@ -1475,7 +1466,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['DoDispel']            = {
+        ['DoDispel']        = {
             DisplayName = "Use Dispel",
             Group = "Abilities",
             Header = "Debuffs",
@@ -1487,7 +1478,7 @@ local _ClassConfig = {
         },
 
         --Other Recovery
-        ['RegenSong']           = {
+        ['RegenSong']       = {
             DisplayName = "Regen Song Choice:",
             Group = "Abilities",
             Header = "Recovery",
@@ -1504,7 +1495,7 @@ local _ClassConfig = {
             Answer = "At low level, the regen songs are spaced broadly, and wallow back and forth before settling on providing both resources.\n" ..
                 "Endurance is eventually added as well.",
         },
-        ['UseRegen']            = {
+        ['UseRegen']        = {
             DisplayName = "Regen Song Use:",
             Group = "Abilities",
             Header = "Recovery",
@@ -1517,7 +1508,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
         },
-        ['UseCrescendo']        = {
+        ['UseCrescendo']    = {
             DisplayName = "Crescendo Delayed Heal",
             Group = "Abilities",
             Header = "Recovery",
@@ -1527,7 +1518,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
         },
-        ['GroupManaPct']        = {
+        ['GroupManaPct']    = {
             DisplayName = "Group Mana %",
             Group = "Abilities",
             Header = "Recovery",
@@ -1540,7 +1531,7 @@ local _ClassConfig = {
             Max = 100,
             ConfigType = "Advanced",
         },
-        ['GroupManaCt']         = {
+        ['GroupManaCt']     = {
             DisplayName = "Group Mana Count",
             Group = "Abilities",
             Header = "Recovery",
@@ -1553,7 +1544,7 @@ local _ClassConfig = {
             ConfigType = "Advanced",
         },
         -- Curing
-        ['UseCure']             = {
+        ['UseCure']         = {
             DisplayName = "Cure Ailments",
             Group = "Abilities",
             Header = "Recovery",
@@ -1564,7 +1555,7 @@ local _ClassConfig = {
             Default = false,
         },
         -- Direct
-        ['UseBellow']           = {
+        ['UseBellow']       = {
             DisplayName = "Use Bellow:",
             Group = "Abilities",
             Header = "Damage",
@@ -1581,7 +1572,7 @@ local _ClassConfig = {
             FAQ = "Why is my Boastful Bellow being recast early? My BRD is using it again before the conclusion nuke!",
             Answer = "Unfortunately, MQ currently reports the buff falling off early; we are examining possible fixes at this time.",
         },
-        ['UseInsult']           = {
+        ['UseInsult']       = {
             DisplayName = "Insults to Use:",
             Group = "Abilities",
             Header = "Damage",
@@ -1595,7 +1586,7 @@ local _ClassConfig = {
             Max = 3,
             RequiresLoadoutChange = true,
         },
-        ['UseLLInsult']         = {
+        ['UseLLInsult']     = {
             DisplayName = "Use Low-Level Insults",
             Group = "Abilities",
             Header = "Damage",
@@ -1606,7 +1597,7 @@ local _ClassConfig = {
             Default = false,
         },
         -- Over Time
-        ['UseFireDots']         = {
+        ['UseFireDots']     = {
             DisplayName = "Use Fire Dots",
             Group = "Abilities",
             Header = "Damage",
@@ -1616,7 +1607,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['UseIceDots']          = {
+        ['UseIceDots']      = {
             DisplayName = "Use Ice Dots",
             Group = "Abilities",
             Header = "Damage",
@@ -1626,7 +1617,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['UsePoisonDots']       = {
+        ['UsePoisonDots']   = {
             DisplayName = "Use Poison Dots",
             Group = "Abilities",
             Header = "Damage",
@@ -1636,7 +1627,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['UseDiseaseDots']      = {
+        ['UseDiseaseDots']  = {
             DisplayName = "Use Disease Dots",
             Group = "Abilities",
             Header = "Damage",
@@ -1647,7 +1638,7 @@ local _ClassConfig = {
             Default = false,
         },
         -- Under the Hood
-        ['RefreshDT']           = {
+        ['RefreshDT']       = {
             DisplayName = "Downtime Threshold",
             Group = "Abilities",
             Header = "Common",
@@ -1663,7 +1654,7 @@ local _ClassConfig = {
             Answer = "You may need to adjust your Downtime Threshold value downward at lower levels/song durations.\n" ..
                 "This needs to be carefully tailored towards your song line-up.",
         },
-        ['RefreshCombat']       = {
+        ['RefreshCombat']   = {
             DisplayName = "Combat Threshold",
             Group = "Abilities",
             Header = "Common",
@@ -1680,7 +1671,7 @@ local _ClassConfig = {
                 "This needs to be carefully tailored towards your song line-up.",
         },
         -- Self
-        ['UseAmp']              = {
+        ['UseAmp']          = {
             DisplayName = "Use Amp",
             Group = "Abilities",
             Header = "Buffs",
@@ -1694,7 +1685,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseJonthan']          = {
+        ['UseJonthan']      = {
             DisplayName = "Use Jonthan",
             Group = "Abilities",
             Header = "Buffs",
@@ -1709,7 +1700,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
         },
-        ['UseAlliance']         = {
+        ['UseAlliance']     = {
             DisplayName = "Use Alliance",
             Group = "Abilities",
             Header = "Buffs",
@@ -1720,7 +1711,7 @@ local _ClassConfig = {
             Default = false,
             ConfigType = "Advanced",
         },
-        ['DoVetAA']             = {
+        ['DoVetAA']         = {
             DisplayName = "Use Vet AA",
             Group = "Abilities",
             Header = "Buffs",
@@ -1732,7 +1723,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
         },
         --Group
-        ['UseRunBuff']          = {
+        ['UseRunBuff']      = {
             DisplayName = "Use RunSpeed Buff",
             Group = "Abilities",
             Header = "Buffs",
@@ -1742,7 +1733,7 @@ local _ClassConfig = {
             Default = true,
             RequiresLoadoutChange = true,
         },
-        ['UseEndBreath']        = {
+        ['UseEndBreath']    = {
             DisplayName = "Use Enduring Breath",
             Group = "Abilities",
             Header = "Buffs",
@@ -1753,7 +1744,7 @@ local _ClassConfig = {
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
         },
-        ['UseAura']             = {
+        ['UseAura']         = {
             DisplayName = "Use Bard Aura",
             Group = "Abilities",
             Header = "Buffs",
@@ -1770,7 +1761,7 @@ local _ClassConfig = {
             Answer = "While certain parts of each will not stack, auras add some buffs not present in the song.\n" ..
                 "This makes the auras and songs worth using together, and the answer is nearly always to use the DPS Aura.",
         },
-        ['UseFierceEye']        = {
+        ['UseFierceEye']    = {
             DisplayName = "Fierce Eye Use:",
             Group = "Abilities",
             Header = "Buffs",
@@ -1785,7 +1776,7 @@ local _ClassConfig = {
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
         },
-        ['UseAria']             = {
+        ['UseAria']         = {
             DisplayName = "Use Aria",
             Group = "Abilities",
             Header = "Buffs",
@@ -1799,7 +1790,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['LLAria']              = {
+        ['LLAria']          = {
             DisplayName = "Pre-Aria Choice:",
             Group = "Abilities",
             Header = "Buffs",
@@ -1813,7 +1804,7 @@ local _ClassConfig = {
             Max = 3,
             RequiresLoadoutChange = true,
         },
-        ['UseMarch']            = {
+        ['UseMarch']        = {
             DisplayName = "Use War March",
             Group = "Abilities",
             Header = "Buffs",
@@ -1827,7 +1818,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseArcane']           = {
+        ['UseArcane']       = {
             DisplayName = "Use Arcane Line",
             Group = "Abilities",
             Header = "Buffs",
@@ -1841,7 +1832,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseSuffering']        = {
+        ['UseSuffering']    = {
             DisplayName = "Use Suffering Line",
             Group = "Abilities",
             Header = "Buffs",
@@ -1855,7 +1846,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseDicho']            = {
+        ['UseDicho']        = {
             DisplayName = "Psalm (Dicho) Use:",
             Group = "Abilities",
             Header = "Buffs",
@@ -1874,7 +1865,7 @@ local _ClassConfig = {
                 "Since QuickTime is set to be used on burns and may last after the burns, aligning Dicho with it allows a smoother song rotation and allows some use even after a Burn was triggered.\n" ..
                 "Dicho settings can be adjusted in the DPS - Group tab.",
         },
-        ['UseSpiteful']         = {
+        ['UseSpiteful']     = {
             DisplayName = "Use Spiteful",
             Group = "Abilities",
             Header = "Buffs",
@@ -1888,7 +1879,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseSpry']             = {
+        ['UseSpry']         = {
             DisplayName = "Use Spry",
             Group = "Abilities",
             Header = "Buffs",
@@ -1902,7 +1893,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseResist']           = {
+        ['UseResist']       = {
             DisplayName = "Use DS/Resist Psalm",
             Group = "Abilities",
             Header = "Buffs",
@@ -1916,7 +1907,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseReckless']         = {
+        ['UseReckless']     = {
             DisplayName = "Use Reckless",
             Group = "Abilities",
             Header = "Buffs",
@@ -1930,7 +1921,7 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseAccelerando']      = {
+        ['UseAccelerando']  = {
             DisplayName = "Use Accelerando",
             Group = "Abilities",
             Header = "Buffs",
@@ -1945,7 +1936,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
         },
-        ['UseFireBuff']         = {
+        ['UseFireBuff']     = {
             DisplayName = "Use Fire Spell Buff",
             Group = "Abilities",
             Header = "Buffs",
@@ -1960,7 +1951,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
         },
-        ['UseColdBuff']         = {
+        ['UseColdBuff']     = {
             DisplayName = "Use Cold Spell Buff",
             Group = "Abilities",
             Header = "Buffs",
@@ -1975,7 +1966,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
         },
-        ['UseDotBuff']          = {
+        ['UseDotBuff']      = {
             DisplayName = "Use Fire/Magic DoT Buff",
             Group = "Abilities",
             Header = "Buffs",
@@ -1992,7 +1983,7 @@ local _ClassConfig = {
         },
 
         -- Clickies
-        ['UseEpic']             = {
+        ['UseEpic']         = {
             DisplayName = "Epic Use:",
             Group = "Items",
             Header = "Clickies",
@@ -2007,7 +1998,7 @@ local _ClassConfig = {
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
         },
-        ['DoChestClick']        = {
+        ['DoChestClick']    = {
             DisplayName = "Chest Click",
             Group = "Items",
             Header = "Clickies",
@@ -2020,7 +2011,7 @@ local _ClassConfig = {
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
                 "BRD is set to use theirs during burns, so long as the item equipped has a clicky effect.",
         },
-        ['DoCoating']           = {
+        ['DoCoating']       = {
             DisplayName = "Use Coating",
             Group = "Items",
             Header = "Clickies",
@@ -2034,7 +2025,7 @@ local _ClassConfig = {
         },
 
         --Emergency
-        ['EmergencyStart']      = {
+        ['EmergencyStart']  = {
             DisplayName = "Emergency HP%",
             Group = "Abilities",
             Header = "Utility",
@@ -2046,7 +2037,7 @@ local _ClassConfig = {
             Max = 100,
             ConfigType = "Advanced",
         },
-        ['UseFading']           = {
+        ['UseFading']       = {
             DisplayName = "Use Combat Escape",
             Group = "Abilities",
             Header = "Utility",
@@ -2059,7 +2050,7 @@ local _ClassConfig = {
         },
 
         --Instruments--
-        ['SwapInstruments']     = {
+        ['SwapInstruments'] = {
             DisplayName = "Auto Swap Instruments",
             Index = 101,
             Group = "Items",
@@ -2068,7 +2059,7 @@ local _ClassConfig = {
             Tooltip = "Auto swap instruments for songs",
             Default = false,
         },
-        ['Offhand']             = {
+        ['Offhand']         = {
             DisplayName = "Offhand",
             Index = 102,
             Group = "Items",
@@ -2078,7 +2069,7 @@ local _ClassConfig = {
             Type = "ClickyItem",
             Default = "",
         },
-        ['BrassInst']           = {
+        ['BrassInst']       = {
             DisplayName = "Brass Instrument",
             Index = 103,
             Group = "Items",
@@ -2088,7 +2079,7 @@ local _ClassConfig = {
             Type = "ClickyItem",
             Default = "",
         },
-        ['WindInst']            = {
+        ['WindInst']        = {
             DisplayName = "Wind Instrument",
             Index = 104,
             Group = "Items",
@@ -2098,7 +2089,7 @@ local _ClassConfig = {
             Type = "ClickyItem",
             Default = "",
         },
-        ['PercInst']            = {
+        ['PercInst']        = {
             DisplayName = "Percussion Instrument",
             Index = 105,
             Group = "Items",
@@ -2108,7 +2099,7 @@ local _ClassConfig = {
             Type = "ClickyItem",
             Default = "",
         },
-        ['StringedInst']        = {
+        ['StringedInst']    = {
             DisplayName = "Stringed Instrument",
             Index = 106,
             Group = "Items",
@@ -2120,7 +2111,7 @@ local _ClassConfig = {
         },
 
         --AE Damage
-        ['DoAEDamage']          = {
+        ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
             Group = "Abilities",
             Header = "Damage",
@@ -2131,7 +2122,7 @@ local _ClassConfig = {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['UseShout']            = {
+        ['UseShout']        = {
             DisplayName = "Shout Use:",
             Group = "Abilities",
             Header = "Damage",
@@ -2146,7 +2137,7 @@ local _ClassConfig = {
             FAQ = "Why is my Vainglorious Shout being recast early? My BRD is using it again before the conclusion nuke!",
             Answer = "Unfortunately, MQ currently reports the buff falling off early; we are examining possible fixes at this time.",
         },
-        ['AETargetCnt']         = {
+        ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
             Group = "Abilities",
             Header = "Damage",
@@ -2157,7 +2148,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 10,
         },
-        ['MaxAETargetCnt']      = {
+        ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
             Group = "Abilities",
             Header = "Damage",
@@ -2172,7 +2163,7 @@ local _ClassConfig = {
             Answer =
             "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
         },
-        ['SafeAEDamage']        = {
+        ['SafeAEDamage']    = {
             DisplayName = "AE Proximity Check",
             Group = "Abilities",
             Header = "Damage",
@@ -2193,6 +2184,14 @@ local _ClassConfig = {
                 "  This config should perform well from from start to endgame, but a TLP or emu player may find it to be lacking exact customization for a specific era.\n\n" ..
                 "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
+        },
+        [2] = {
+            Question = "How does Bard meditation function?",
+            Answer = "Bards can elect to med using the same settings as other classes. If a bard begins to med, they will stop singing any songs in the Melody rotation.\n\n" ..
+                "  Using the default class configs, the combat rotations will still be used. Thus, there is generally little or no support for in-combat meditation for Bard.\n\n" ..
+                "  The 'Stand When Done' med setting will ensure that a bard begins to sing again as soon as they reach the med stop threshold.\n\n" ..
+                "  Note that the Enduring Breath song, if enabled (and needed), does not respect meditation settings, for the safety of your group.",
             Settings_Used = "",
         },
     },
