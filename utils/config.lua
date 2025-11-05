@@ -1684,6 +1684,7 @@ Config.DefaultConfig               = {
                 local path = string.format("modules." .. newLootModule:lower())
                 Logger.log_info("\ayLoot Module: \ag%s", newLootModule:lower() or "Unknown")
                 Modules:loadModule(newLootModule, path)
+                Config:UpdateCommandHandlers()
             end
         end,
     },
