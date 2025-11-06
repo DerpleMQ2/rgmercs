@@ -185,11 +185,10 @@ local _ClassConfig = {
         ['InsultSong'] = {
             --Bard Timers alternate between 6 and 3 every expansion. (Update: TOB has thrown this on its head)
             --We have to manage selection so we don't have insultsong2 using the same timer.
-            --To circumvent issues with f2p accounts, for now, Sogran's is prioritized over Nord's. The code to distinguish this is excessive IMO.
             "Yaran's Disdain",  -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
-            --"Nord's Disdain",       -- 118 nopush, timer 6, NoS
-            "Sogran's Insult",  -- 117 push, timer 6, ToL
+            "Nord's Disdain",   -- 118 nopush, timer 6, NoS
+            -- "Sogran's Insult",  -- 117 push, timer 6, ToL
             "Yelinak's Insult", -- 115 nopush, timer 3
             --"Omorden's Insult",     -- 112 push, timer 3
             "Sathir's Insult",  -- 110 nopush, timer 6
@@ -209,8 +208,8 @@ local _ClassConfig = {
         ['InsultSong2'] = {
             "Yaran's Disdain",  -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
-            --"Nord's Disdain",       -- 118 nopush, timer 6, NoS
-            "Sogran's Insult",  -- 117 push, timer 6, ToL
+            "Nord's Disdain",   -- 118 nopush, timer 6, NoS
+            -- "Sogran's Insult",  -- 117 push, timer 6, ToL
             "Yelinak's Insult", -- 115 nopush, timer 3
             --"Omorden's Insult",     -- 112 push, timer 3
             "Sathir's Insult",  -- 110 nopush, timer 6
