@@ -67,6 +67,10 @@ local _ClassConfig = {
         ['HealingDisc'] = { --EQM Custom, 2m duration, 5m reuse, 500 hp/tick regen
             "Healing Determination Discipline",
         },
+        ['Claw'] = {
+            "Panther Claw",
+            "Leopard Claw",
+        },
     },
     ['HelperFunctions'] = {
         --function to make sure we don't have non-hostiles in range before we use AE damage
@@ -293,6 +297,10 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     return Casting.DetAACheck(aaName, target)
                 end,
+            },
+            {
+                name = "Claw",
+                type = "Disc",
             },
             {
                 name = "Fang",

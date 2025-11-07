@@ -1157,6 +1157,7 @@ _ClassConfig      = {
             {
                 name = "Fortify Companion",
                 type = "AA",
+                active_cond = function(self, aaName) return mq.TLO.Me.PetBuff(aaName)() ~= nil end,
                 cond = function(self, aaName)
                     return Casting.PetBuffAACheck(aaName)
                 end,

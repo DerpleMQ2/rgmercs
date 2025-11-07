@@ -36,7 +36,6 @@ local Tooltips     = {
     AETaunt             = "Spell Line: PBAE Hate Increase + Taunt",
     PoisonDot           = "Spell Line: Poison Dot",
     SpearNuke           = "Spell Line: Instacast Disease Nuke",
-    AESpearNuke         = "Spell Line: Instacast Directional Disease Nuke",
     BondTap             = "Spell Line: LifeTap DOT",
     DireTap             = "Spell Line: LifeTap",
     LifeTap             = "Spell Line: LifeTap",
@@ -286,7 +285,6 @@ local _ClassConfig = {
             "Disease Cloud",
         },
         ['HateBuff'] = {         --9 minute reuse makes these somewhat ridiculous to gem on the fly.
-            "Voice of Innoruuk", -- Level 70, 15% hate, 150pt DS (slot 9), 15% decrease DS Mit (VoT AA is still better for tanking at 24%, but they stack. DS smexy)
             "Voice of Thule",    -- level 60, 12% hate
             "Voice of Terris",   -- level 55, 10% hate
             "Voice of Death",    -- level 50, 6% hate
@@ -563,22 +561,34 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Voice of Thule",
+                type = "AA",
+                tooltip = Tooltips.HateBuff,
+                load_cond = function(self) return Casting.CanUseAA("Voice of Thule") and Config:GetSetting('DoHateBuff') end,
+                active_cond = function(self, aaName) return Casting.IHaveBuff(mq.TLO.Me.AltAbility(aaName).Spell.ID()) end,
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
                 name = "HateBuff",
                 type = "Spell",
                 tooltip = Tooltips.HateBuff,
+                load_cond = function(self) return not Casting.CanUseAA("Voice of Thule") and Config:GetSetting('DoHateBuff') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoHateBuff') or not Casting.CastReady(spell) then return false end
+                    if not Casting.CastReady(spell) then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Emergency Visage Cancel",
+                desc = "Removes VoD at Critical HP",
                 type = "CustomFunc",
+                load_cond = function(self) Casting.CanUseAA("Visage of Death") end,
+                cond = function(self) return Config:GetSetting('HPCritical') and mq.TLO.Me.Buff("Visage of Death")() end,
                 custom_func = function(self)
-                    if Config:GetSetting('HPCritical') and mq.TLO.Me.Buff("Visage of Death")() then
-                        Core.DoCmd("/removebuff \"Visage of Death\"")
-                    end
+                    Core.DoCmd("/removebuff \"Visage of Death\"")
                 end,
             },
         },
@@ -609,6 +619,7 @@ local _ClassConfig = {
             {
                 name = "Fortify Companion",
                 type = "AA",
+                active_cond = function(self, aaName) return mq.TLO.Me.PetBuff(aaName)() ~= nil end,
                 cond = function(self, aaName)
                     return Casting.PetBuffAACheck(aaName)
                 end,
@@ -662,11 +673,12 @@ local _ClassConfig = {
             },
             {
                 name = "Emergency Visage Cancel",
+                desc = "Removes VoD at Critical HP",
                 type = "CustomFunc",
+                load_cond = function(self) Casting.CanUseAA("Visage of Death") end,
+                cond = function(self) return Config:GetSetting('HPCritical') and mq.TLO.Me.Buff("Visage of Death")() end,
                 custom_func = function(self)
-                    if Config:GetSetting('HPCritical') and mq.TLO.Me.Buff("Visage of Death")() then
-                        Core.DoCmd("/removebuff \"Visage of Death\"")
-                    end
+                    Core.DoCmd("/removebuff \"Visage of Death\"")
                 end,
             },
         },
@@ -975,7 +987,7 @@ local _ClassConfig = {
                 { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') end, },
                 { name = "Skin", },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
@@ -1196,20 +1208,6 @@ local _ClassConfig = {
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
-        },
-        ['DoAESpearNuke']   = {
-            DisplayName = "Use AE Spear",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 102,
-            Tooltip = function() return Ui.GetDynamicTooltipForSpell("AESpearNuke") end,
-            Default = false,
-            RequiresLoadoutChange = true,
-            ConfigType = "Advanced",
-            FAQ = "Why am I still using a lower-level spear spell?",
-            Answer =
-            "The three best Spears on Laz have been converted to AE spells. Enable Use AE Spear for these spells to be memorized.\nAE Damage must also be enabled for them to be used.",
         },
         ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
