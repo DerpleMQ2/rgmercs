@@ -28,8 +28,8 @@ local _ClassConfig = {
             -- Find the map for each cure spell we need, given availability of groupheal, groupcure. fallback to curespell
             -- Curse is convoluted: If Keepmemmed, always use cure, if not, use groupheal if available and fallback to cure
             local neededCures = {
-                ['Poison'] = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CurePoison", }),
-                ['Disease'] = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CureDisease", }),
+                ['Poison'] = Casting.GetFirstMapItem({ groupHeal, "PureBlood", "CurePoison", }),
+                ['Disease'] = Casting.GetFirstMapItem({ groupHeal, "PureBlood", "CureDisease", }),
                 ['Curse'] = not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse',
                 -- ['Corruption'] = -- Project Lazarus does not currently have any Corruption Cures.
             }

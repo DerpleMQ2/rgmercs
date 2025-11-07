@@ -21,17 +21,11 @@ local _ClassConfig = {
             --(re)initialize the table for loadout changes
             self.TempSettings.CureSpells = {}
 
-            -- Choose whether we should be trying to resolve the groupheal based on our settings and whether it cures at its level
-            local ghealSpell = Core.GetResolvedActionMapItem('GroupHeal')
-            local groupHeal = (Config:GetSetting('GroupHealAsCure') and (ghealSpell and ghealSpell.Level() or 0) >= 70) and "GroupHeal"
-
-            -- Find the map for each cure spell we need, given availability of groupheal, groupcure. fallback to curespell
-            -- Curse is convoluted: If Keepmemmed, always use cure, if not, use groupheal if available and fallback to cure
             local neededCures = {
-                ['Poison'] = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CurePoison", }),
-                ['Disease'] = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CureDisease", }),
-                ['Curse'] = not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse',
-                -- ['Corruption'] = -- Project Lazarus does not currently have any Corruption Cures.
+                ['Poison'] = "CurePoison",
+                ['Disease'] = "CureDisease",
+                ['Curse'] = "CureCurse",
+                ['Corruption'] = "CureCorrupt",
             }
 
             -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
@@ -107,14 +101,10 @@ local _ClassConfig = {
             "Light Healing",
             "Minor Healing",
         },
-        ['GroupHeal'] = { -- Laz specific, some taken from cleric, some custom
-            "Word of Reconstitution",
-            -- "Moonshadow", -- The above spell is superior and both level 70
-            "Word of Redemption",
-            "Word of Restoration",
-            "Word of Vigor",
-            "Word of Healing",
-            "Word of Health",
+        ['GroupHeal'] = {
+            "Moonshadow",
+            "Lunarglow",
+            "Lunargleam",
         },
         ['ATKDebuff'] = { -- ATK Debuff
             "Sun's Corona",
@@ -289,28 +279,28 @@ local _ClassConfig = {
             'Reanimation',    --emu only
         },
         ['CurePoison'] = {
-            --"Eradicate Poison",
+            "Eradicate Poison",
             "Counteract Poison",
             "Cure Poison",
         },
         ['CureDisease'] = {
-            --"Eradicate Disease",
+            "Eradicate Disease",
             "Counteract Disease",
             "Cure Disease",
         },
         ['CureCurse'] = {
-            --"Eradicate Curse",
+            "Eradicate Curse",
             "Remove Greater Curse",
             "Remove Curse",
             "Remove Lesser Curse",
             "Remove Minor Curse",
         },
-        ['PureBlood'] = {
-            "Pure Blood",
+        ['CureCorrupt'] = {
+            "Cure Corruption",
         },
-        ['TwinHealNuke'] = {
-            "Sunburst Blessing", -- Laz custom, description wrong, target mob
-        },
+        -- ['PureBlood'] = {
+        --     "Pure Blood",
+        -- },
         ['PBAEMagic'] = {
             "Earth Shiver",
             "Castastrophe",
@@ -404,14 +394,6 @@ local _ClassConfig = {
             },
         },
         ['MainHealPoint'] = {
-            {
-                name = "Elixir",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting('DoElixir') end,
-                cond = function(self, spell, target)
-                    return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
             {
                 name = "HealSpell",
                 type = "Spell",
@@ -581,14 +563,6 @@ local _ClassConfig = {
                 load_cond = function() return Config:GetSetting('DoStunNuke') end,
                 cond = function(self, spell, target)
                     return Casting.HaveManaToNuke() and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
-                end,
-            },
-            { -- in-game description is incorrect, mob must be targeted.
-                name = "TwinHealNuke",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting('DoTwinHealNuke') end,
-                cond = function(self, spell, target)
-                    return Casting.OkayToNuke() and not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -918,37 +892,16 @@ local _ClassConfig = {
             spells = {
                 { name = "HealSpell", },
                 { name = "GroupHeal", },
-                { name = "Elixir",      cond = function(self) return Config:GetSetting('DoElixir') end, },
-                { name = "SnareSpell",  cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Entrap") end, },
+                { name = "SnareSpell",     cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Entrap") end, },
                 { name = "ReptileBuff", },
-                { name = "ATKDebuff",   cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
-                { name = "FireDebuff",  cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
-                { name = "ColdDebuff",  cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                {
-                    name = "PureBlood",
-                    cond = function(self)
-                        return (Config:GetSetting('KeepDiseaseMemmed') or Config:GetSetting('KeepPoisonMemmed')) and
-                            not Casting.CanUseAA("Radiant Cure")
-                    end,
-                },
-                {
-                    name = "CurePoison",
-                    cond = function(self)
-                        return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepPoisonMemmed') and
-                            not Casting.CanUseAA("Radiant Cure")
-                    end,
-                },
-                {
-                    name = "CureDisease",
-                    cond = function(self)
-                        return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepDiseaseMemmed') and
-                            not Casting.CanUseAA("Radiant Cure")
-                    end,
-                },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
+                { name = "ATKDebuff",      cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
+                { name = "FireDebuff",     cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
+                { name = "ColdDebuff",     cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
+                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
+                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
+                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
                 { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
                 { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
                 { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
                 { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
                 { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
@@ -957,9 +910,8 @@ local _ClassConfig = {
                 { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
                 { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
                 -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "PureBlood",      cond = function(self) return Config:GetSetting('KeepPoisonMemmed') or Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CurePoison",     cond = function(self) return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepDiseaseMemmed') end, },
+                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
+                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL to take up extra slots
                 { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
@@ -1204,16 +1156,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
         },
-        ['DoTwinHealNuke']    = {
-            DisplayName = "Twinheal Nuke",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "Direct",
-            Index = 104,
-            Tooltip = "Use your twinheal nuke (fire damage with a twinheal buff effect).",
-            RequiresLoadoutChange = true,
-            Default = true,
-        },
         ['DoFlameLickDot']    = {
             DisplayName = "Fire Debuff Dot",
             Group = "Abilities",
@@ -1343,19 +1285,6 @@ local _ClassConfig = {
         },
 
         -- Utility
-        ['DoElixir']          = {
-            DisplayName = "Use Elixir",
-            Group = "Abilities",
-            Header = "Recovery",
-            Category = "General Healing",
-            Index = 101,
-            Tooltip = "Use the Elixir Line (Yes, druids get Elixirs on Laz).",
-            RequiresLoadoutChange = true,
-            Default = true,
-            ConfigType = "Advanced",
-            FAQ = "Why isn't my druid using the elixir line?",
-            Answer = "Since the elixirs druids get are slighly behind clerics of equal level, we will bypass their use if your target is already in \"BigHeal\" range.",
-        },
         ['KeepPoisonMemmed']  = {
             DisplayName = "Mem Cure Poison",
             Group = "Abilities",
@@ -1390,17 +1319,6 @@ local _ClassConfig = {
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
             RequiresLoadoutChange = true,
             Default = false,
-            ConfigType = "Advanced",
-        },
-        ['GroupHealAsCure']   = {
-            DisplayName = "Use Group Heal to Cure",
-            Group = "Abilities",
-            Header = "Recovery",
-            Category = "Curing",
-            Index = 104,
-            Tooltip = "If Word of Reconstitution is available, use this to cure instead of individual cure spells. \n" ..
-                "Please note that we will prioritize Remove Greater Curse if you have selected to keep it memmed as above (due to the counter disparity).",
-            Default = true,
             ConfigType = "Advanced",
         },
         ['DoArcanumWeave']    = {

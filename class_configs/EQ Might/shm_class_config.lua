@@ -23,17 +23,11 @@ local _ClassConfig = {
             --(re)initialize the table for loadout changes
             self.TempSettings.CureSpells = {}
 
-            -- Choose whether we should be trying to resolve the groupheal based on our settings and whether it cures at its level
-            local ghealSpell = Core.GetResolvedActionMapItem('GroupHeal')
-            local groupHeal = (Config:GetSetting('GroupHealAsCure') and (ghealSpell and ghealSpell.Level() or 0) >= 70) and "GroupHeal"
-
-            -- Find the map for each cure spell we need, given availability of groupheal, groupcure. fallback to curespell
-            -- Curse is convoluted: If Keepmemmed, always use cure, if not, use groupheal if available and fallback to cure
             local neededCures = {
-                ['Poison'] = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CurePoison", }),
-                ['Disease'] = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CureDisease", }),
-                ['Curse'] = not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse',
-                -- ['Corruption'] = -- Project Lazarus does not currently have any Corruption Cures.
+                ['Poison'] = "CurePoison",
+                ['Disease'] = "CureDisease",
+                ['Curse'] = "CureCurse",
+                ['Corruption'] = "CureCorrupt",
             }
 
             -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
@@ -243,31 +237,18 @@ local _ClassConfig = {
             "Light Healing",
             "Minor Healing",
         },
-        ['GroupHeal'] = { -- Laz specific, some taken from cleric, some custom
-            "Word of Reconstitution",
-            "Word of Redemption",
-            "Word of Restoration",
-            "Word of Vigor",
-            "Word of Healing",
-            "Word of Health",
-        },
         ["GroupRenewalHoT"] = {
-            --This seems entirely not worth using since they were given direct group heals
             "Ghost of Renewal",
         },
         ['SnareHot'] = {
-            "Transcendent Torpor",
             "Torpor",
             "Stoicism",
         },
-        ["SingleHot"] = { -- some elixirs given to shm/dru on laz
+        ["SingleHot"] = {
             "Spiritual Serenity",
             "Breath of Trushar",
             "Quiescence",
-            -- "Celestial Elixir" -- Quiescence same level and better
-            "Celestial Healing",
-            "Celestial Health",
-            "Celestial Remedy",
+            "Spiritual Rejuvenation",
         },
         ["CanniSpell"] = {
             -- Convert Health to Mana - Level  23 -
@@ -278,10 +259,6 @@ local _ClassConfig = {
             "Cannibalize III",
             "Cannibalize II",
             "Cannibalize",
-        },
-        ["TwinHealNuke"] = {
-            -- Nuke the MA Not the assist target - Levels 70
-            "Frostfall Boon",
         },
         ["PoisonNuke"] = {
             -- Poison Nuke LVL34 +
@@ -368,14 +345,15 @@ local _ClassConfig = {
             "Remove Lesser Curse",
             "Remove Minor Curse",
         },
-        ['GroupCure'] = {
-            "Blood of Nadox",
-        },
-        ["GroupRegenBuff"] = {
+        -- ['GroupCure'] = {
+        --     "Blood of Nadox",
+        -- },
+        ["RegenBuff"] = {
             "Talisman of Perseverance",
-            "Regrowth of Dar Khura", -- Level 56
-        },
-        ["SingleRegenBuff"] = {
+            "Spirit of Perseverance",
+            "Blessing of Replenishment", -- 63
+            "Replenishment",
+            "Regrowth of Dar Khura",     -- Level 56
             "Regrowth",
             "Chloroplast",
             "Regeneration", -- Level 22
@@ -450,12 +428,12 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Fabled Blue Band of the Oak",
-                type = "Item",
+                name = "GroupRenewalHoT",
+                type = "Spell",
             },
             {
-                name = "GroupHeal",
-                type = "Spell",
+                name = "Fabled Blue Band of the Oak",
+                type = "Item",
             },
         },
         ["BigHealPoint"] = {
@@ -822,14 +800,6 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
                 end,
             },
-            { -- in-game description is incorrect, mob must be targeted.
-                name = "TwinHealNuke",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting('DoTwinHealNuke') end,
-                cond = function(self, spell, target)
-                    return Casting.OkayToNuke(true) and not Casting.IHaveBuff("Twincast")
-                end,
-            },
             {
                 name = "ColdNuke",
                 type = "Spell",
@@ -912,6 +882,7 @@ local _ClassConfig = {
             {
                 name = "Fortify Companion",
                 type = "AA",
+                active_cond = function(self, aaName) return mq.TLO.Me.PetBuff(aaName)() ~= nil end,
                 cond = function(self, aaName)
                     return Casting.PetBuffAACheck(aaName)
                 end,
@@ -1002,21 +973,13 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "GroupRegenBuff",
+                name = "RegenBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRegenBuff') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoRegenBuff') then return false end
+                    if (spell.TargetType() or ""):lower() ~= "group v2" and not (Targeting.TargetIsATank(target) or Targeting.TargetIsMyself(target)) then return false end
                     return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-            {
-                name = "SingleRegenBuff",
-                type = "Spell",
-                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoRegenBuff') or Core.GetResolvedActionMapItem('GroupRegenBuff') then return false end --We don't need this once we can use the group version
-                    return (Targeting.TargetIsATank(target) or Targeting.TargetIsMyself(target)) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1112,38 +1075,19 @@ local _ClassConfig = {
             cond = function(self) return Core.IsModeActive("Heal") end,
             spells = {          -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
                 { name = "HealSpell", },
-                { name = "SingleHot", cond = function(self) return Config:GetSetting('DoSingleHot') end, },
-                { name = "SnareHot",  cond = function(self) return Config:GetSetting('DoSnareHot') end, },
-                { name = "GroupHeal", },
-                {
-                    name = "GroupCure",
-                    cond = function(self)
-                        return (Config:GetSetting('KeepDiseaseMemmed') or Config:GetSetting('KeepPoisonMemmed')) and
-                            not Casting.CanUseAA("Radiant Cure")
-                    end,
-                },
-                {
-                    name = "CurePoison",
-                    cond = function(self)
-                        return not Core.GetResolvedActionMapItem('GroupCure') and Config:GetSetting('KeepPoisonMemmed') and
-                            not Casting.CanUseAA("Radiant Cure")
-                    end,
-                },
-                {
-                    name = "CureDisease",
-                    cond = function(self)
-                        return not Core.GetResolvedActionMapItem('GroupCure') and Config:GetSetting('KeepDiseaseMemmed') and
-                            not Casting.CanUseAA("Radiant Cure")
-                    end,
-                },
-                { name = "CureCurse",   cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                { name = "SlowSpell",   cond = function(self) return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow') end, },
-                { name = "AESlowSpell", cond = function(self) return not Casting.CanUseAA("Tigir's Insect Swarm") and Config:GetSetting('DoAESlow') end, },
-                { name = "DiseaseSlow", cond = function(self) return Config:GetSetting('DoSTSlow') and Config:GetSetting('DoDiseaseSlow') end, },
-                { name = "MaloSpell",   cond = function(self) return not Casting.CanUseAA("Malosinete") and Config:GetSetting('DoSTMalo') end, },
-                { name = "AEMaloSpell", cond = function(self) return Config:GetSetting('DoAEMalo') end, },
-                { name = "PutridDecay", cond = function(self) return Config:GetSetting('DoPutrid') end, },
-                { name = "CanniSpell",  cond = function(self) return Config:GetSetting('DoSpellCanni') end, },
+                { name = "GroupRenewalHoT", },
+                { name = "SingleHot",       cond = function(self) return Config:GetSetting('DoSingleHot') end, },
+                { name = "SnareHot",        cond = function(self) return Config:GetSetting('DoSnareHot') end, },
+                { name = "CurePoison",      cond = function(self) return Config:GetSetting('KeepPoisonMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
+                { name = "CureDisease",     cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
+                { name = "CureCurse",       cond = function(self) return Config:GetSetting('KeepCurseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
+                { name = "SlowSpell",       cond = function(self) return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow') end, },
+                { name = "AESlowSpell",     cond = function(self) return not Casting.CanUseAA("Tigir's Insect Swarm") and Config:GetSetting('DoAESlow') end, },
+                { name = "DiseaseSlow",     cond = function(self) return Config:GetSetting('DoSTSlow') and Config:GetSetting('DoDiseaseSlow') end, },
+                { name = "MaloSpell",       cond = function(self) return not Casting.CanUseAA("Malosinete") and Config:GetSetting('DoSTMalo') end, },
+                { name = "AEMaloSpell",     cond = function(self) return Config:GetSetting('DoAEMalo') end, },
+                { name = "PutridDecay",     cond = function(self) return Config:GetSetting('DoPutrid') end, },
+                { name = "CanniSpell",      cond = function(self) return Config:GetSetting('DoSpellCanni') end, },
                 {
                     name = "MeleeProcBuff",
                     cond = function(self)
@@ -1152,17 +1096,14 @@ local _ClassConfig = {
                 },
                 { name = "SlowProcBuff", },
                 { name = "LowLvlAtkBuff", },
-                { name = "SingleRegenBuff", cond = function(self) return not Core.GetResolvedActionMapItem('GroupRegenBuff') and Config:GetSetting('DoRegenBuff') end, },
-                { name = "TwinHealNuke",    cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "ColdNuke",        cond = function(self) return Config:GetSetting('DoColdNuke') end, },
-                { name = "PoisonNuke",      cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
-                { name = "GroupCure",       cond = function(self) return Config:GetSetting('KeepPoisonMemmed') or Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CurePoison",      cond = function(self) return not Core.GetResolvedActionMapItem('GroupCure') and Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",     cond = function(self) return not Core.GetResolvedActionMapItem('GroupCure') and Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",       cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                { name = "CurseDot",        cond = function(self) return Config:GetSetting('DoCurseDot') end, },
-                { name = "SaryrnDot",       cond = function(self) return Config:GetSetting('DoSaryrnDot') end, },
-                { name = "UltorDot",        cond = function(self) return Config:GetSetting('DoUltorDot') end, },
+                { name = "ColdNuke",      cond = function(self) return Config:GetSetting('DoColdNuke') end, },
+                { name = "PoisonNuke",    cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
+                { name = "CurePoison",    cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
+                { name = "CureDisease",   cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
+                { name = "CureCurse",     cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
+                { name = "CurseDot",      cond = function(self) return Config:GetSetting('DoCurseDot') end, },
+                { name = "SaryrnDot",     cond = function(self) return Config:GetSetting('DoSaryrnDot') end, },
+                { name = "UltorDot",      cond = function(self) return Config:GetSetting('DoUltorDot') end, },
             },
         },
         {
@@ -1170,29 +1111,27 @@ local _ClassConfig = {
             cond = function(self) return Core.IsModeActive("Hybrid") end,
             spells = {
                 { name = "HealSpell", },
-                { name = "SlowSpell",     cond = function(self) return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow') end, },
-                { name = "AESlowSpell",   cond = function(self) return not Casting.CanUseAA("Tigir's Insect Swarm") and Config:GetSetting('DoAESlow') end, },
-                { name = "DiseaseSlow",   cond = function(self) return Config:GetSetting('DoSTSlow') and Config:GetSetting('DoDiseaseSlow') end, },
-                { name = "MaloSpell",     cond = function(self) return not Casting.CanUseAA("Malosinete") and Config:GetSetting('DoSTMalo') end, },
-                { name = "AEMaloSpell",   cond = function(self) return Config:GetSetting('DoAEMalo') end, },
-                { name = "PutridDecay",   cond = function(self) return Config:GetSetting('DoPutrid') end, },
-                { name = "CanniSpell",    cond = function(self) return Config:GetSetting('DoSpellCanni') end, },
+                { name = "SlowSpell",       cond = function(self) return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow') end, },
+                { name = "AESlowSpell",     cond = function(self) return not Casting.CanUseAA("Tigir's Insect Swarm") and Config:GetSetting('DoAESlow') end, },
+                { name = "DiseaseSlow",     cond = function(self) return Config:GetSetting('DoSTSlow') and Config:GetSetting('DoDiseaseSlow') end, },
+                { name = "MaloSpell",       cond = function(self) return not Casting.CanUseAA("Malosinete") and Config:GetSetting('DoSTMalo') end, },
+                { name = "AEMaloSpell",     cond = function(self) return Config:GetSetting('DoAEMalo') end, },
+                { name = "PutridDecay",     cond = function(self) return Config:GetSetting('DoPutrid') end, },
+                { name = "CanniSpell",      cond = function(self) return Config:GetSetting('DoSpellCanni') end, },
                 { name = "MeleeProcBuff", },
                 { name = "SlowProcBuff", },
                 { name = "LowLvlAtkBuff", },
-                { name = "ColdNuke",      cond = function(self) return Config:GetSetting('DoColdNuke') end, },
-                { name = "PoisonNuke",    cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
-                { name = "CurseDot",      cond = function(self) return Config:GetSetting('DoCurseDot') end, },
-                { name = "SaryrnDot",     cond = function(self) return Config:GetSetting('DoSaryrnDot') end, },
-                { name = "UltorDot",      cond = function(self) return Config:GetSetting('DoUltorDot') end, },
-                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "SingleHot",     cond = function(self) return Config:GetSetting('DoSingleHot') end, },
-                { name = "SnareHot",      cond = function(self) return Config:GetSetting('DoSnareHot') end, },
-                { name = "GroupHeal", },
-                { name = "GroupCure",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') or Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CurePoison",    cond = function(self) return not Core.GetResolvedActionMapItem('GroupCure') and Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",   cond = function(self) return not Core.GetResolvedActionMapItem('GroupCure') and Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",     cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
+                { name = "ColdNuke",        cond = function(self) return Config:GetSetting('DoColdNuke') end, },
+                { name = "PoisonNuke",      cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
+                { name = "CurseDot",        cond = function(self) return Config:GetSetting('DoCurseDot') end, },
+                { name = "SaryrnDot",       cond = function(self) return Config:GetSetting('DoSaryrnDot') end, },
+                { name = "UltorDot",        cond = function(self) return Config:GetSetting('DoUltorDot') end, },
+                { name = "SingleHot",       cond = function(self) return Config:GetSetting('DoSingleHot') end, },
+                { name = "SnareHot",        cond = function(self) return Config:GetSetting('DoSnareHot') end, },
+                { name = "GroupRenewalHoT", },
+                { name = "CurePoison",      cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
+                { name = "CureDisease",     cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
+                { name = "CureCurse",       cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
             },
         },
     },
@@ -1255,16 +1194,6 @@ local _ClassConfig = {
             Category = "Direct",
             Index = 102,
             Tooltip = "Use your single-target poison nukes.",
-            RequiresLoadoutChange = true,
-            Default = true,
-        },
-        ['DoTwinHealNuke']    = {
-            DisplayName = "Twinheal Nuke",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "Direct",
-            Index = 103,
-            Tooltip = "Use your twinheal nuke (cold damage with a twinheal buff effect).",
             RequiresLoadoutChange = true,
             Default = true,
         },
@@ -1365,17 +1294,6 @@ local _ClassConfig = {
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
             RequiresLoadoutChange = true,
             Default = false,
-            ConfigType = "Advanced",
-        },
-        ['GroupHealAsCure']   = {
-            DisplayName = "Use Group Heal to Cure",
-            Group = "Abilities",
-            Header = "Recovery",
-            Category = "Curing",
-            Index = 104,
-            Tooltip = "If Word of Reconstitution is available, use this to cure instead of individual cure spells. \n" ..
-                "Please note that we will prioritize Remove Greater Curse if you have selected to keep it memmed as above (due to the counter disparity).",
-            Default = true,
             ConfigType = "Advanced",
         },
 
@@ -1505,7 +1423,7 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Group",
             Index = 103,
-            Tooltip = "Use your Regen buff (single target will be used until the group version is available).",
+            Tooltip = "Use your Regen buff (best of single or group versions).",
             Default = true,
             FAQ = "Why am I spamming my Group Regen buff?",
             Answer = "Certain Shaman and Druid group regen buffs report cross-stacking. You should deselect the option on one of the PCs if they are grouped together.",

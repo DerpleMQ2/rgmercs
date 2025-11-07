@@ -664,7 +664,7 @@ end
 --- @param aaName string The name of the AA ability to check.
 --- @return boolean Returns true if the AA ability can be used, false otherwise.
 function Casting.CanUseAA(aaName)
-    local haveAbility = mq.TLO.Me.AltAbility(aaName)()
+    local haveAbility = mq.TLO.Me.AltAbility(aaName)() ~= nil
     local levelCheck = haveAbility and (Config.Globals.CurServer == "EQ Might" or mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level())
     local rankCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).Rank() > 0
     Logger.log_super_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, Strings.BoolToColorString(haveAbility),

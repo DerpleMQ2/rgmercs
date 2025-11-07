@@ -507,14 +507,6 @@ return {
                 end,
             },
             {
-                name = "Imbued Rune of Piety",
-                type = "Item",
-                load_cond = function(self) return mq.TLO.FindItem("=Imbued Rune of Piety")() and Config:GetSetting('WaveHealUse') == 2 end,
-                cond = function(self, spell, target)
-                    return Targeting.GroupedWithTarget(target)
-                end,
-            },
-            {
                 name = "WaveHeal",
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoWaveHeal') < 3 and Config:GetSetting('WaveHealUse') == 2 end,
@@ -909,6 +901,14 @@ return {
         },
         ['ToTHeals'] = {
             {
+                name = "SelfHeal",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    -- may be better to drop the main heal point to a desired range if not using this for other spells
+                    return Targeting.MainHealsNeeded(mq.TLO.Me)
+                end,
+            },
+            {
                 name = "LightHeal",
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoLightHeal') < 3 end,
@@ -937,11 +937,6 @@ return {
                     return Targeting.TargetNotStunned() and (Core.IsTanking() or not Casting.StunImmuneTarget(target))
                 end,
             },
-            -- {
-            --     name = "TwinHealNuke",
-            --     type = "Spell",
-            --     load_cond = function(self) return Config:GetSetting('DoTwinHealNuke') end,
-            -- },
             {
                 name = "StunTimer5",
                 type = "Spell",
@@ -979,7 +974,7 @@ return {
                 end,
             },
             {
-                namefunc = function(self) return Casting.GetFirstAA({ "Hand of Disruption", "Divine Stun", }) end,
+                name_func = function(self) return Casting.GetFirstAA({ "Hand of Disruption", "Divine Stun", }) end,
                 type = "AA",
                 cond = function(self, aaName, target)
                     return not Core.IsTanking() or not Casting.CanUseAA("Force of Disruption")

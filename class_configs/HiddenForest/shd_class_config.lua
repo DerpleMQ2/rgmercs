@@ -585,11 +585,12 @@ local _ClassConfig = {
             },
             {
                 name = "Emergency Visage Cancel",
+                desc = "Removes VoD at Critical HP",
                 type = "CustomFunc",
+                load_cond = function(self) Casting.CanUseAA("Visage of Death") end,
+                cond = function(self) return Config:GetSetting('HPCritical') and mq.TLO.Me.Buff("Visage of Death")() end,
                 custom_func = function(self)
-                    if Config:GetSetting('HPCritical') and mq.TLO.Me.Buff("Visage of Death")() then
-                        Core.DoCmd("/removebuff \"Visage of Death\"")
-                    end
+                    Core.DoCmd("/removebuff \"Visage of Death\"")
                 end,
             },
             {
@@ -640,18 +641,11 @@ local _ClassConfig = {
             {
                 name = "Fortify Companion",
                 type = "AA",
+                active_cond = function(self, aaName) return mq.TLO.Me.PetBuff(aaName)() ~= nil end,
                 cond = function(self, aaName)
                     return Casting.PetBuffAACheck(aaName)
                 end,
             },
-            {
-                name = "Crystalized Soul Gem", -- This isn't a typo
-                type = "Item",
-                cond = function(self, itemName)
-                    return Casting.PetBuffItemCheck(itemName)
-                end,
-            },
-
         },
         ['EmergencyDefenses'] = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
@@ -700,11 +694,12 @@ local _ClassConfig = {
             },
             {
                 name = "Emergency Visage Cancel",
+                desc = "Removes VoD at Critical HP",
                 type = "CustomFunc",
+                load_cond = function(self) Casting.CanUseAA("Visage of Death") end,
+                cond = function(self) return Config:GetSetting('HPCritical') and mq.TLO.Me.Buff("Visage of Death")() end,
                 custom_func = function(self)
-                    if Config:GetSetting('HPCritical') and mq.TLO.Me.Buff("Visage of Death")() then
-                        Core.DoCmd("/removebuff \"Visage of Death\"")
-                    end
+                    Core.DoCmd("/removebuff \"Visage of Death\"")
                 end,
             },
         },
