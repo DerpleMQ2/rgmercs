@@ -650,11 +650,11 @@ function Module:Render()
                 ImGui.Indent()
                 ImGui.Text("Combat State: %s", self.CombatState)
                 ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
-                Ui.RenderRotationTableKey()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
                     self:RenderRotationWithToggle(r, self.TempSettings.RotationTable)
                 end
+                Ui.RenderRotationTableKey()
                 ImGui.Unindent()
             end
         end
@@ -662,11 +662,11 @@ function Module:Render()
         if not self.TempSettings.ResolvingActions and #self.TempSettings.HealRotationStates > 0 then
             if ImGui.CollapsingHeader("Healing Rotations") then
                 ImGui.Indent()
-                Ui.RenderRotationTableKey()
 
                 for _, r in pairs(self.TempSettings.HealRotationStates) do
                     self:RenderRotationWithToggle(r, self.TempSettings.HealRotationTable)
                 end
+                Ui.RenderRotationTableKey()
                 ImGui.Unindent()
             end
         end
@@ -1596,6 +1596,7 @@ function Module:GiveTime(combat_state)
                     "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
                     Strings.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
                     Strings.FormatTime((r.timer or 1) - (os.clock() - self.TempSettings.RotationTimers[r.name])))
+                if r.timer then r.lastCondCheck = false end --update rotation UI when rotation doesn't fire due to timer check
             end
         end
     end
