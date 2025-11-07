@@ -181,6 +181,17 @@ Module.DefaultConfig   = {
         Default = false,
         ConfigType = "Advanced",
     },
+    ['UseActorNav']                            = {
+        DisplayName = "Use Actor Nav",
+        Group = "Movement",
+        Header = "Following",
+        Category = "Chase",
+        Index = 8,
+        Tooltip =
+        "Use location data reported directly by RGMercs from the chase target to conduct chase checks and navigation if needed. May be useful if you notice PCs trying to chase your target to a stale location.",
+        Default = false,
+        ConfigType = "Advanced",
+    },
     -- Camp
     ['AutoCampRadius']                         = {
         DisplayName = "Camp Radius",
@@ -702,54 +713,71 @@ function Module:GiveTime(combat_state)
     end
 
     if Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') then
-        local chaseSpawn = mq.TLO.Spawn("pc =" .. Config:GetSetting('ChaseTarget'))
+        local chaseTarg = Config:GetSetting('ChaseTarget')
+        local chaseSpawn = mq.TLO.Spawn("pc =" .. chaseTarg)
+        local chaseId = chaseSpawn.ID()
 
-        if not chaseSpawn or chaseSpawn.Dead() or not chaseSpawn.ID() then
-            Logger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...",
-                Config:GetSetting('ChaseTarget'))
+        if not chaseSpawn or chaseSpawn.Dead() or not chaseId then
+            Logger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone.", chaseTarg)
             return
         end
 
         if mq.TLO.Me.Dead() then return end
-        if not chaseSpawn or not chaseSpawn() or (chaseSpawn.Distance() or 0) < Config:GetSetting('ChaseDistance') then return end
 
-        local Nav = mq.TLO.Navigation
+        -- determine if chase is needed
+        local chaseDist = Config:GetSetting('ChaseDistance')
+        local stopDist = Config:GetSetting('ChaseStopDistance')
+        local chaseSpawnDist = chaseSpawn.Distance() or 0
+        local navPathString = string.format("id %d", chaseId)
+        local useLocNav = false
 
-        -- Use MQ2Nav with moveto as a failover if we have a mesh. We'll use a nav
-        -- command if the mesh is loaded and we have a path. If we don't have a path
-        -- we'll use a moveto. This will hopefully get us over spots of the mesh that
-        -- are missing with minimal issues.
-        if Nav.MeshLoaded() then
-            if not Nav.Active() then
-                if Nav.PathExists("id " .. chaseSpawn.ID())() then
-                    local navCmd = string.format("/squelch /nav id %d log=critical dist=%d lineofsight=%s", chaseSpawn.ID(),
-                        Config:GetSetting('ChaseStopDistance'), Config:GetSetting('RequireLoS') and "on" or "off")
-                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", Config:GetSetting('ChaseTarget'), navCmd)
-                    self:RunCmd(navCmd)
-
-                    mq.delay("3s", function() return mq.TLO.Navigation.Active() end)
-
-                    if not Nav.Active() and (chaseSpawn.Distance() or 0) > Config:GetSetting('ChaseDistance') then
-                        Logger.log_verbose("\awNOTICE:\ax Nav might have failed.")
-                        --self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), Config:GetSetting('ChaseDistance'))
-                    end
-                else
-                    -- Assuming no line of site problems.
-                    -- Moveto underwater style until 20 units away
-                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s Has no nav path, trying /moveto", Config:GetSetting('ChaseTarget'))
-                    self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), Config:GetSetting('ChaseDistance'))
+        if Config:GetSetting('UseActorNav') then
+            local heartbeat = Config:GetPeerHeartbeatByName(chaseTarg)
+            local data = heartbeat and heartbeat.Data
+            if data and data.X and data.Y and data.Z then
+                local peerLoc = string.format("%d, %d, %d", data.Y, data.X, data.Z)
+                chaseSpawnDist = math.floor(mq.TLO.Math.Distance(peerLoc)()) -- math.distance returns 0 on invalid string
+                -- Algar note: Emu server code seems to give constant updates up to 300, and periodic updates up to 600. Over 600, stops updating. Tested on EQMight 11/2025
+                if chaseSpawnDist > 300 then
+                    useLocNav = true
+                    navPathString = string.format("loc %d %d %d", data.Y, data.X, data.Z)
                 end
+            else
+                Logger.log_verbose("\awNOTICE:\ax Chase Target \am%s\ax has no valid actor data, falling back to spawn checks.", chaseTarg)
             end
-        elseif (chaseSpawn.Distance() or 0) > Config:GetSetting('ChaseDistance') and (chaseSpawn.Distance() or 999) < 400 then
-            -- If we don't have a mesh we're using afollow as legacy RG behavior.
-            Logger.log_debug("\awNOTICE:\ax Chase Target %s but no nav mesh - using afollow instead", Config:GetSetting('ChaseTarget'))
-            self:RunCmd("/squelch /afollow spawn %d", chaseSpawn.ID())
-            self:RunCmd("/squelch /afollow %d", Config:GetSetting('ChaseDistance'))
+        end
 
-            mq.delay("2s")
+        -- Use MQ2Nav to navigate if able:
+        -- -- If we are using actor nav, and the chase target is far enough away, nav to the loc, as spawn checks aren't reliable
+        -- -- Otherwise, if the mesh is loaded, we will nav to the spawn to take advantage of MQ2Nav spawn tracking, and fallback to a moveto if no path exists
+        -- -- Finally, if there is no mesh loaded, we will fall back on afollow if the target is close enough
+        if chaseSpawnDist > chaseDist then
+            local Nav = mq.TLO.Navigation
+            if Nav.MeshLoaded() then
+                if not Nav.Active() or useLocNav then -- if naving to a location, update that to the most recent location in case the target is moving
+                    local requireLoS = Config:GetSetting('RequireLoS') and "on" or "off"
 
-            if chaseSpawn.Distance() < Config:GetSetting('ChaseDistance') then
-                self:RunCmd("/squelch /afollow off")
+                    if Nav.PathExists(navPathString)() then
+                        local navCmd = string.format("/squelch /nav %s log=critical dist=%d lineofsight=%s", navPathString, stopDist, requireLoS)
+                        Logger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - naving :: %s", chaseTarg, navCmd)
+                        self:RunCmd(navCmd)
+                        mq.delay("1s", function() return mq.TLO.Navigation.Active() end)
+                    else
+                        -- Assuming no line of site problems.
+                        Logger.log_verbose("\awNOTICE:\ax Chase Target %s Has no nav path, trying /moveto", chaseTarg)
+                        self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseId, Config:GetSetting('ChaseDistance'))
+                    end
+                end
+            elseif chaseSpawnDist < 400 then -- Algarnote I left this alone, legacy code, not sure if this value is signifigant or arbitrary
+                Logger.log_warning("\awWARNING:\ax Chase Target %s but no nav mesh - using afollow instead", chaseTarg)
+                self:RunCmd("/squelch /afollow spawn %d", chaseId)
+                self:RunCmd("/squelch /afollow %d", chaseDist)
+
+                mq.delay("2s")
+
+                if (chaseSpawn.Distance() or 0) < stopDist then
+                    self:RunCmd("/squelch /afollow off")
+                end
             end
         end
     end
