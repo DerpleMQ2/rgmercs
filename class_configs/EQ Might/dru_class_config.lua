@@ -78,7 +78,7 @@ local _ClassConfig = {
             "Staff of Everliving Brambles",
         },
         ['BlueBand'] = {
-            "Ancient Blue Band of the Oak",
+            "Ancient Frozen Blue Band",
             "Fabled Blue Band of the Oak",
             "Blue Band of the Oak",
         },
