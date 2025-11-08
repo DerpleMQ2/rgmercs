@@ -351,7 +351,7 @@ end
 
 function Module:RenderCmdRow(cmd, usage, desc)
 	ImGui.TableNextColumn()
-	ImGui.TextColored(IM_COL32(255, 100, 70, 255), cmd)
+	ImGui.TextColored(IM_COL32(255, 180, 70, 255), cmd)
 	ImGui.TableNextColumn()
 	ImGui.TextColored(IM_COL32(120, 200, 255, 255), usage)
 	ImGui.TableNextColumn()
