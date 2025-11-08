@@ -83,7 +83,7 @@ return {
             "Oathbound Breastplate",
         },
         ['BlueBand'] = {
-            "Ancient Blue Band of the Oak",
+            "Ancient Frozen Blue Band",
             "Fabled Blue Band of the Oak",
             "Blue Band of the Oak",
         },
