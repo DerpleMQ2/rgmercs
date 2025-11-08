@@ -438,7 +438,7 @@ Module.LogicBlocks                      = {
             return true
         end,
         cond_targets = { "Auto Target", },
-        tooltip = "Only use if your aggro on the auto target is above/below this percent.",
+        tooltip = "Only use if your aggro on the RGMercs combat auto target is above/below this percent.",
         render_header_text = function(self, cond)
             return string.format("Auto Target aggro is between %d%% and %d%%", cond.args[1] or 0, cond.args[2] or 100)
         end,
@@ -474,7 +474,7 @@ Module.LogicBlocks                      = {
             return true
         end,
         cond_targets = { "Auto Target", },
-        tooltip = "Only use if the secondary aggro on the auto target is above/below this percent.",
+        tooltip = "Only use if the secondary aggro on the RGMercs combat auto target is above/below this percent.",
         render_header_text = function(self, cond)
             return string.format("Auto Target secondary aggro is between %d%% and %d%%", cond.args[1] or 0, cond.args[2] or 100)
         end,
@@ -541,7 +541,7 @@ Module.LogicBlocks                      = {
                 return isNamed
             end
         end,
-        tooltip = "Only use when RGMercs or SpawnMaster has (not) identified a mob as Named. (Optional Negate)",
+        tooltip = "Only use when RGMercs or SpawnMaster has (not) identified the RGMercs combat auto target as Named. (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("Auto Target is %s", cond.args[1] and "not Named" or "Named")
         end,
@@ -593,7 +593,7 @@ Module.LogicBlocks                      = {
     },
 
     {
-        name = "Auto Target Has Effect",
+        name = "The RGMercs Auto Target Has Effect",
         cond = function(self, target, effect, negate)
             local hasEffect = Casting.TargetHasBuff(effect, target)
             if negate then
@@ -602,7 +602,7 @@ Module.LogicBlocks                      = {
                 return hasEffect
             end
         end,
-        tooltip = "Only use when this effect is (not) present on the RGMercs AutoTarget. (Optional Negate)",
+        tooltip = "Only use when this effect is (not) present on the RGMercs combat auto target. (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("RGMercs Auto Target %s Effect: '%s'", cond.args[2] and "doen't have" or "has", cond.args[1] or "None")
         end,
@@ -1024,6 +1024,7 @@ function Module:RenderConditionTargetCombo(cond, condIdx)
             self:SaveSettings(false)
         end
         ImGui.EndTable()
+        Ui.Tooltip("Target Types\nSelf - This PC\nPet - This PC's pet\nMain Assist - The current RGMercs Main Assist\nAuto Target - The current RGMercs Combat Auto Target")
     end
 end
 
@@ -1050,6 +1051,7 @@ function Module:RenderClickyTargetCombo(clicky, clickyIdx)
             self:SaveSettings(false)
         end
         ImGui.EndTable()
+        Ui.Tooltip("Target Types\nSelf - This PC\nPet - This PC's pet\nMain Assist - The current RGMercs Main Assist\nAuto Target - The current RGMercs Combat Auto Target")
     end
 end
 
