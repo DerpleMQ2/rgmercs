@@ -558,7 +558,7 @@ end
 function Targeting.IsTempPet(spawn)
     if not spawn() then return false end
     local surname = spawn.Surname()
-    return surname and (surname:find("'s Pet", 1, true) or surname:find("Doppelganger", 1, true))
+    return surname and (surname:find("'s Pet", 1, true) or surname:find("`s Pet", 1, true) or surname:find("Doppelganger", 1, true))
 end
 
 return Targeting
