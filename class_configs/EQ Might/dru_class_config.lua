@@ -77,6 +77,11 @@ local _ClassConfig = {
             "Staff of Living Brambles",
             "Staff of Everliving Brambles",
         },
+        ['BlueBand'] = {
+            "Ancient Blue Band of the Oak",
+            "Fabled Blue Band of the Oak",
+            "Blue Band of the Oak",
+        },
     },
     ['AbilitySets']       = {
         ['HealingAura'] = {
@@ -385,7 +390,7 @@ local _ClassConfig = {
         },
         ['GroupHealPoint'] = {
             {
-                name = "Fabled Blue Band of the Oak",
+                name = "BlueBand",
                 type = "Item",
             },
             {

@@ -82,6 +82,11 @@ return {
             "Dawnseeker's Chestpiece of the Defender",
             "Oathbound Breastplate",
         },
+        ['BlueBand'] = {
+            "Ancient Blue Band of the Oak",
+            "Fabled Blue Band of the Oak",
+            "Blue Band of the Oak",
+        },
     },
     ['AbilitySets']       = {
         ["WardProc"] = {
@@ -438,7 +443,7 @@ return {
                 end,
             },
             {
-                name = "Fabled Blue Band of the Oak",
+                name = "BlueBand",
                 type = "Item",
             },
             {

@@ -79,6 +79,11 @@ local _ClassConfig = {
             "Crafted Talisman of Fates",
             "Blessed Spiritstaff of the Heyokah",
         },
+        ['BlueBand'] = {
+            "Ancient Blue Band of the Oak",
+            "Fabled Blue Band of the Oak",
+            "Blue Band of the Oak",
+        },
     },
     ['AbilitySets']       = {
         ["GroupFocusSpell"] = {
@@ -432,7 +437,7 @@ local _ClassConfig = {
                 type = "Spell",
             },
             {
-                name = "Fabled Blue Band of the Oak",
+                name = "BlueBand",
                 type = "Item",
             },
         },
