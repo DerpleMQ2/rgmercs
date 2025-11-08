@@ -349,6 +349,31 @@ function Module:FaqFind(question)
 	self.TempSettings.Search = ''
 end
 
+function Module:RenderCmdRow(cmd, usage, desc)
+	ImGui.TableNextColumn()
+	ImGui.TextColored(IM_COL32(255, 255, 255, 255), cmd)
+	ImGui.TableNextColumn()
+	ImGui.TextColored(IM_COL32(255, 255, 255, 255), usage)
+	ImGui.TableNextColumn()
+	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1.0, 1.0, 1.0, 1))
+	ImGui.TextWrapped(desc)
+	ImGui.PopStyleColor()
+	ImGui.Spacing()
+end
+
+function Module:RenderFAQRow(q, a)
+	ImGui.TableNextRow()
+	ImGui.TableNextColumn()
+	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1.0, 1.0, 1.0, 1))
+	ImGui.TextWrapped(q)
+	ImGui.PopStyleColor()
+	ImGui.TableNextColumn()
+	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1.0, 1.0, 1.0, 1))
+	ImGui.TextWrapped(a)
+	ImGui.PopStyleColor()
+	ImGui.Spacing()
+end
+
 function Module:RenderConfig(search)
 	ImGui.Spacing()
 	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1, 1, 0, 1))
@@ -382,13 +407,7 @@ function Module:RenderConfig(search)
 				for cmd, data in pairs(Binds.Handlers) do
 					if cmd ~= "help" then
 						if self:MatchSearch(data.usage, data.about, cmd) then
-							ImGui.TableNextColumn()
-							ImGui.Text(cmd)
-							ImGui.TableNextColumn()
-							ImGui.Text(data.usage)
-							ImGui.TableNextColumn()
-							ImGui.TextWrapped(data.about)
-							ImGui.Spacing()
+							self:RenderCmdRow(cmd, data.usage, data.about)
 						end
 					end
 				end
@@ -399,13 +418,7 @@ function Module:RenderConfig(search)
 					if info.CommandHandlers then
 						for cmd, data in pairs(info.CommandHandlers or {}) do
 							if self:MatchSearch(data.usage, data.about, cmd, module) then
-								ImGui.TableNextColumn()
-								ImGui.Text(cmd)
-								ImGui.TableNextColumn()
-								ImGui.Text(data.usage)
-								ImGui.TableNextColumn()
-								ImGui.TextWrapped(data.about)
-								ImGui.Spacing()
+								self:RenderCmdRow(cmd, data.usage, data.about)
 							end
 						end
 					end
@@ -424,16 +437,11 @@ function Module:RenderConfig(search)
 				ImGui.TableSetupScrollFreeze(0, 1)
 				ImGui.TableHeadersRow()
 				if questions ~= nil then
-					for module, info in pairs(questions or {}) do
+					for _, info in pairs(questions or {}) do
 						if info.FAQ then
 							for _, data in pairs(info.FAQ or {}) do
 								if self:MatchSearch(data.Question, data.Answer) then
-									ImGui.TableNextRow()
-									ImGui.TableNextColumn()
-									ImGui.TextWrapped(data.Question)
-									ImGui.TableNextColumn()
-									ImGui.TextWrapped(data.Answer)
-									ImGui.Spacing()
+									self:RenderFAQRow(data.Question, data.Answer)
 								end
 							end
 						end
@@ -441,27 +449,17 @@ function Module:RenderConfig(search)
 				end
 				configFaq.Config = Config:GetFAQ()
 				if configFaq ~= nil then
-					for k, v in pairs(configFaq.Config or {}) do
+					for _, v in pairs(configFaq.Config or {}) do
 						if self:MatchSearch(v.Question, v.Answer) then
-							ImGui.TableNextRow()
-							ImGui.TableNextColumn()
-							ImGui.TextWrapped(v.Question)
-							ImGui.TableNextColumn()
-							ImGui.TextWrapped(v.Answer)
-							ImGui.Spacing()
+							self:RenderFAQRow(v.Question, v.Answer)
 						end
 					end
 				end
 				local classFaq = Modules:ExecModule("Class", "GetClassFAQ")
 				if classFaq ~= nil then
-					for k, v in pairs(classFaq.FAQ) do
+					for _, v in pairs(classFaq.FAQ) do
 						if self:MatchSearch(v.Question, v.Answer) then
-							ImGui.TableNextRow()
-							ImGui.TableNextColumn()
-							ImGui.TextWrapped(v.Question)
-							ImGui.TableNextColumn()
-							ImGui.TextWrapped(v.Answer)
-							ImGui.Spacing()
+							self:RenderFAQRow(v.Question, v.Answer)
 						end
 					end
 				end
