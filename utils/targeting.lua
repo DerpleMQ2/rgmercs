@@ -9,7 +9,6 @@ local Set                   = require('mq.set')
 
 local Targeting             = { _version = '1.0', _name = "Targeting", _author = 'Derple', }
 Targeting.__index           = Targeting
-Targeting.ForceCombat       = false
 Targeting.ForceNamed        = false
 Targeting.ForceBurnTargetID = 0
 Targeting.SafeTargetCache   = {}
@@ -35,7 +34,7 @@ function Targeting.SetTarget(targetId, ignoreBuffPopulation)
         mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
         mq.delay(maxWaitBuffs, function() return ignoreBuffPopulation or (mq.TLO.Target() and mq.TLO.Target.BuffsPopulated()) end)
     end
-    Logger.log_debug("SetTarget(): Set Target to: %d (buffsPopulated: %s)", targetId, Strings.BoolToColorString(mq.TLO.Target.BuffsPopulated()))
+    Logger.log_debug("SetTarget(): Set Target to: %d (buffsPopulated: %s)", targetId, Strings.BoolToColorString(mq.TLO.Target.BuffsPopulated() ~= nil))
 end
 
 --- Retrieves the current auto-target.
@@ -49,13 +48,14 @@ end
 ---
 --- This function is used to clear any selected target in the game.
 function Targeting.ClearTarget()
-    Logger.log_debug("Clearing Target")
     if Config:GetSetting('DoAutoTarget') then
+        Logger.log_debug("Clearing Target")
         Config.Globals.AutoTargetID = 0
+        Config.Globals.ForceCombatID = 0
         if Config.Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Config.Globals.ForceTargetID) then Config.Globals.ForceTargetID = 0 end
         if mq.TLO.Stick.Status():lower() == "on" then Movement:DoStickCmd("off") end
         Core.DoCmd("/target clear")
-        if mq.TLO.Me.XTarget(1).TargetType() ~= "Auto Hater" then Core.DoCmd("/xtarget set 1 autohater") end
+        if mq.TLO.Me.XTarget(1).TargetType() ~= "Auto Hater" then Targeting.ResetXTSlot(1) end
     end
 end
 
@@ -226,7 +226,7 @@ function Targeting.GetHighestAggroPct()
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Config.Globals.ForceCombatID) then
             if xtSpawn.PctAggro() > highestPct then highestPct = xtSpawn.PctAggro() end
         end
     end
@@ -248,7 +248,7 @@ function Targeting.IHaveAggro(pct)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Config.Globals.ForceCombatID) then
             if xtSpawn.PctAggro() >= pct then return true end
         end
     end
@@ -266,7 +266,7 @@ function Targeting.GetXTHaterIDs(printDebug)
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs() or 0)) > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or Targeting.ForceCombat) then
+        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs() or 0)) > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Config.Globals.ForceCombatID) then
             if printDebug then
                 Logger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
             end
@@ -352,6 +352,8 @@ end
 --- Resets the specified XT slot.
 --- @param slot number The slot number to reset.
 function Targeting.ResetXTSlot(slot)
+    Core.DoCmd("/xtarget set %d ET", slot)
+    mq.delay(200, function() return (mq.TLO.Me.XTarget(slot).TargetType():lower() or "empty target") == "empty target" end)
     Core.DoCmd("/xtarget set %d autohater", slot)
 end
 
