@@ -87,6 +87,11 @@ local _ClassConfig = {
             "Harmony of the Soul",
             "Aegis of Superior Divinity",
         },
+        ['BlueBand'] = {
+            "Ancient Blue Band of the Oak",
+            "Fabled Blue Band of the Oak",
+            "Blue Band of the Oak",
+        },
     },
     ['AbilitySets']       = {
         -- ['WardSelfBuff'] = {
@@ -431,7 +436,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Fabled Blue Band of the Oak",
+                name = "BlueBand",
                 type = "Item",
             },
             {
