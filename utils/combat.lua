@@ -608,13 +608,12 @@ function Combat.OkToEngagePreValidateId(targetId)
             return true
         else
             local distanceCheck = Targeting.GetTargetDistance(target) < Config:GetSetting('AssistRange')
-            local assistHPCheck = Targeting.GetTargetPctHPs(target) <= Config:GetSetting('AutoAssistAt')
             local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() or target.ID() == Config.Globals.ForceCombatID
 
-            Logger.log_verbose("OkToEngagePrevalidate check for %s(ID: %d) - DistanceCheck(%s), AssistHPCheck(%s), HostileCheck(%s)", targetName, targetId,
-                Strings.BoolToColorString(distanceCheck), Strings.BoolToColorString(assistHPCheck), Strings.BoolToColorString(hostileCheck))
+            Logger.log_verbose("OkToEngagePrevalidate check for %s(ID: %d) - DistanceCheck(%s), HostileCheck(%s)", targetName, targetId,
+                Strings.BoolToColorString(distanceCheck), Strings.BoolToColorString(hostileCheck))
 
-            return distanceCheck and assistHPCheck and hostileCheck
+            return distanceCheck and hostileCheck
         end
     end
 

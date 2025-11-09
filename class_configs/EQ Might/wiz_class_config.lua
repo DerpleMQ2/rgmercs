@@ -387,16 +387,6 @@ return {
                 return combat_state == "Combat"
             end,
         },
-        {
-            name = 'ArcanumWeave',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and not mq.TLO.Me.Buff("Focus of Arcanum")()
-            end,
-        },
     },
     ['Rotations']       = {
         ['Burn'] = {
@@ -726,29 +716,6 @@ return {
                 load_cond = function(self) return not Casting.CanUseAA("Harvest of Druzzil") end,
                 cond = function(self, spell)
                     return Casting.CastReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
-                end,
-            },
-        },
-        ['ArcanumWeave'] = {
-            {
-                name = "Empowered Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Enlightened Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Acute Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
         },
@@ -1094,16 +1061,6 @@ return {
             Default = 60,
             Min = 1,
             Max = 99,
-        },
-        ['DoArcanumWeave']       = {
-            DisplayName = "Weave Arcanums",
-            Group = "Abilities",
-            Header = "Buffs",
-            Category = "Self",
-            Index = 101,
-            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
-            RequiresLoadoutChange = true, --this setting is used as a load condition
-            Default = true,
         },
     },
     ['ClassFAQ']        = {

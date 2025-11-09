@@ -25,7 +25,7 @@ end
 function Targeting.SetTarget(targetId, ignoreBuffPopulation)
     if targetId == 0 then return end
 
-    local maxWaitBuffs = ((mq.TLO.EverQuest.Ping() * 20) + 500)
+    local maxWaitBuffs = ((mq.TLO.EverQuest.Ping() * 2) + 500)
 
     if targetId == mq.TLO.Target.ID() then return end
     Logger.log_debug("SetTarget(): Setting Target: %d (buffPopWait: %d)", targetId, ignoreBuffPopulation and 0 or maxWaitBuffs)

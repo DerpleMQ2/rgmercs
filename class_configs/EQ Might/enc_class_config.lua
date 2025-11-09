@@ -69,10 +69,10 @@ local _ClassConfig = {
         ['MezBuff'] = {
             "Ward of Bedazzlement",
         },
-        ['NdtTankBuff'] = {
+        ['TankIllusionBuff'] = {
             "Boon of the Brute",
         },
-        ['NdtBuff'] = {
+        ['IllusionBuff'] = {
             "Boon of the Sanguinarch",
             "Boon of the Vampire",
             "Night's Dark Terror",
@@ -423,16 +423,6 @@ local _ClassConfig = {
                 return combat_state == "Combat"
             end,
         },
-        {
-            name = 'ArcanumWeave',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and not mq.TLO.Me.Buff("Focus of Arcanum")()
-            end,
-        },
     },
     ['HelperFunctions'] = { --used to autoinventory our crystals after summon. Crystal is a group-wide spell on Laz.
         StashCrystal = function(aaName)
@@ -646,7 +636,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoHateBuff') end,
                 cond = function(self, spell, target)
-                    if not Targeting.TargetIsMA(target) then return false end
+                    if not Targeting.TargetIsATank(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -660,22 +650,22 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "NdtTankBuff",
+                name = "TankIllusionBuff",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('DoNDTBuff') end,
+                load_cond = function() return Config:GetSetting('DoTankIllusionBuff') end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if not Targeting.TargetIsATank() then return false end
+                    if not Targeting.TargetIsATank(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
-                name = "NdtBuff",
+                name = "IllusionBuff",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('DoNDTBuff') end,
+                load_cond = function() return Config:GetSetting('DoIllusionBuff') end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if Targeting.TargetIsATank() and Core.GetResolvedActionMapItem('NdtTankBuff') then return false end
+                    if Config:GetSetting('DoTankIllusionBuff') and Targeting.TargetIsATank(target) and Core.GetResolvedActionMapItem('TankIllusionBuff') then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1051,29 +1041,6 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['ArcanumWeave'] = {
-            {
-                name = "Empowered Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Enlightened Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Acute Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-        },
     },
     ['SpellList']       = { -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
         {
@@ -1088,8 +1055,8 @@ local _ClassConfig = {
                 { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCrippleSpell') end, },
                 { name = "SpinStunSpell",    cond = function(self) return Config:GetSetting('DoSpinStun') > 1 end, },
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
-                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
-                { name = "NdtTankBuff",      cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "IllusionBuff",     cond = function(self) return Config:GetSetting('DoIllusionBuff') end, },
+                { name = "TankIllusionBuff", cond = function(self) return Config:GetSetting('DoTankIllusionBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
                 { name = "Dispel",           cond = function(self) return Config:GetSetting('DoDispel') end, },
                 { name = "ColoredNuke",      cond = function(self) return Config:GetSetting('DoColored') end, },
@@ -1193,35 +1160,35 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
         },
-        ['DoNDTBuff']          = {
-            DisplayName = "Cast NDT",
+        ['DoIllusionBuff']     = {
+            DisplayName = "Cast Illusion Buff",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
             Index = 105,
-            Tooltip = "Enable casting your Melee Proc Buff (Night's Dark Terror Line) on melee.",
+            Tooltip = "Enable casting your Illusion Proc Buff (NDT and EQM customs).",
             RequiresLoadoutChange = true,
             Default = true,
+        },
+        ['DoTankIllusionBuff'] = {
+            DisplayName = "Cast Tank Illusion Buff",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 106,
+            Tooltip = "Enable casting your Tank Illusion Proc Buff (e.g Boon of the Brute).",
+            RequiresLoadoutChange = true,
+            Default = false,
         },
         ['DoHateBuff']         = {
             DisplayName = "Do Hate Visage",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 106,
+            Index = 107,
             Tooltip = "Use your hatred visage buff on your tank.",
             RequiresLoadoutChange = true,
             Default = false,
-        },
-        ['DoArcanumWeave']     = {
-            DisplayName = "Weave Arcanums",
-            Group = "Abilities",
-            Header = "Buffs",
-            Category = "Self",
-            Index = 107,
-            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
-            RequiresLoadoutChange = true, --this setting is used as a load condition
-            Default = true,
         },
 
         --Debuffs

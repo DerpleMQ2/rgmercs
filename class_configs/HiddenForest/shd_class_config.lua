@@ -994,8 +994,8 @@ local _ClassConfig = {
                 tooltip = Tooltips.PowerTapAC,
                 load_cond = function(self) return Config:GetSetting('DoACTap') end,
                 cond = function(self, spell, target)
-                    local triggerSpell = spell() and spell.Trigger()
-                    return triggerSpell and not Casting.IHaveBuff(triggerSpell)
+                    local triggerSpell = spell() and spell.RankName.Trigger()
+                    return triggerSpell and not mq.TLO.Me.Buff(triggerSpell)
                 end,
             },
             {
@@ -1004,8 +1004,8 @@ local _ClassConfig = {
                 tooltip = Tooltips.PowerTapAtk,
                 load_cond = function(self) return Config:GetSetting('DoAtkTap') end,
                 cond = function(self, spell, target)
-                    local triggerSpell = spell() and spell.Trigger()
-                    return triggerSpell and not Casting.IHaveBuff(triggerSpell)
+                    local triggerSpell = spell() and spell.RankName.Trigger()
+                    return triggerSpell and not mq.TLO.Me.Buff(triggerSpell)
                 end,
             },
             {
