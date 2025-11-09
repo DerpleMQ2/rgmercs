@@ -240,7 +240,7 @@ function Rotation.TestConditionForEntry(caller, resolvedActionMap, entry, target
         local logInfo = string.format(
             "check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay)", entry.name or "NoName",
             (type(condArg) == 'userdata' and condArg() or condArg) or "None", condTarg.CleanName() or "None")
-        pass = Core.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg)
+        pass = not entry.cond or Core.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg)
 
         --temp suppress of error messaging while we evaluate.
         -- if type(pass) ~= "boolean" then
@@ -319,49 +319,37 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
 
                 Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
                 lastStepIdx = idx
-                if entry.cond then
-                    local start = string.format("%.03f", mq.gettime() / 1000)
-                    local pass = Rotation.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
-                    local stop = string.format("%.03f", mq.gettime() / 1000)
-                    entry.lastCondTimeSpent = stop - start
-                    Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: TestConditionsForEntry() => %s", start_step, steps,
-                        idx, Strings.BoolToColorString(pass))
+                local start = string.format("%.03f", mq.gettime() / 1000)
+                local pass = Rotation.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
+                local stop = string.format("%.03f", mq.gettime() / 1000)
+                entry.lastCondTimeSpent = stop - start
+                Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: TestConditionsForEntry() => %s", start_step, steps,
+                    idx, Strings.BoolToColorString(pass))
 
-                    if pass == true then
-                        local rStart = string.format("%.03f", mq.gettime() / 1000)
-                        local res = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
-                        local rStop = string.format("%.03f", mq.gettime() / 1000)
-                        entry.lastExecTimeSpent = rStop - rStart
-                        Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: ExecEntry() => %s", start_step, steps,
-                            idx, Strings.BoolToColorString(res))
-                        if res == true then
-                            anySuccess = true
-                            stepsThisTime = stepsThisTime + 1
-
-                            if steps > 0 and stepsThisTime >= steps then
-                                break
-                            end
-
-                            if Config.Globals.PauseMain then
-                                break
-                            end
-                        end
-                    else
-                        Logger.log_verbose("\aoFailed Condition RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
-                    end
-                else
-                    local start = string.format("%.03f", mq.gettime() / 1000)
+                if pass == true then
+                    local rStart = string.format("%.03f", mq.gettime() / 1000)
                     local res = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
-                    local stop = string.format("%.03f", mq.gettime() / 1000)
-                    entry.lastExecTimeSpent = stop - start
+                    local rStop = string.format("%.03f", mq.gettime() / 1000)
+                    entry.lastExecTimeSpent = rStop - rStart
+                    Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: ExecEntry() => %s", start_step, steps,
+                        idx, Strings.BoolToColorString(res))
                     if res == true then
+                        anySuccess = true
                         stepsThisTime = stepsThisTime + 1
 
                         if steps > 0 and stepsThisTime >= steps then
                             break
                         end
+
+                        if Config.Globals.PauseMain then
+                            break
+                        end
                     end
+                else
+                    Logger.log_verbose("\aoFailed Condition RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
                 end
+
+
                 local tStop = string.format("%.03f", mq.gettime() / 1000)
                 entry.lastTotalTimeSpent = tStop - tStart
             end

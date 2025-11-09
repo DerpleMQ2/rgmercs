@@ -409,30 +409,37 @@ end
 --- This function is responsible for displaying the key for the rotation table.
 --- It does not take any parameters and does not return any value.
 function Ui.RenderRotationTableKey()
-    if ImGui.BeginTable("Rotation_keys", 2, ImGuiTableFlags.Borders) then
+    ImGui.Text("On the previous check, the...")
+    if ImGui.BeginTable("Rotation_table_key", 2, ImGuiTableFlags.Borders) then
+        ImGui.TableNextColumn()
+        ImGui.Text(Icons.MD_CHECK .. ": Rotation Processed (Conditions Met)")
+
+        ImGui.TableNextColumn()
+        ImGui.Text(Icons.MD_CLOSE .. ": Rotation was Skipped (Conditions Not Met)")
+
         ImGui.TableNextColumn()
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(Icons.FA_SMILE_O .. ": Effect is Active")
+        ImGui.Text(Icons.FA_SMILE_O .. ": Entry Effect was Active")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(Icons.MD_CHECK .. ": Cast Occured (Conditions Met)")
+        ImGui.Text(Icons.MD_CHECK .. ": Entry Conditions Passed")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-        ImGui.Text(Icons.FA_EXCLAMATION .. ": Didn't Cast (Conditions Not Met)")
+        ImGui.Text(Icons.FA_EXCLAMATION .. ": Entry Conditions Failed")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
-        ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
-        ImGui.Text(Icons.MD_CHECK .. ": No Conditions to Check")
+        ImGui.Text(Icons.MD_INFO_OUTLINE .. " Special Note on Conditions " .. Icons.MD_INFO_OUTLINE)
+        Ui.Tooltip("The icons above are only updated when the checks are made, and will display the previous results until they are checked again.\n" ..
+            "Note that in addition to special entry conditions, some other checks occur that could prevent an action from being used, such as movement, control effects, mana costs, etc.")
 
-        ImGui.PopStyleColor()
         ImGui.EndTable()
     end
 end
@@ -458,7 +465,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
         ImGui.TableSetupColumn('Enable', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed, 250.0)
-        ImGui.TableSetupColumn('Resolved Action', ImGuiTableColumnFlags.WidthStretch, 250.0)
+        ImGui.TableSetupColumn(string.format("Resolved Action " .. Icons.MD_INFO_OUTLINE), ImGuiTableColumnFlags.WidthStretch, 250.0)
 
         if showDebugTiming then
             ImGui.TableSetupColumn('Timing', ImGuiTableColumnFlags.WidthStretch, 250.0)
@@ -466,6 +473,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
 
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
+        Ui.Tooltip("Click a resolved action to inspect the spell/item/AA effect.")
 
         for idx, entry in ipairs(rotationTable or {}) do
             ImGui.TableNextColumn()
@@ -486,26 +494,21 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                 enabledRotationEntries[entry.name] == nil and true or enabledRotationEntries[entry.name])
             if changed then enabledRotationEntriesChanged = true end
             ImGui.TableNextColumn()
-            if entry.cond then
-                local pass, active = false, false
+            local pass, active = false, false
 
-                if entry.lastRun then
-                    pass, active = entry.lastRun.pass, entry.lastRun.active
-                end
+            if entry.lastRun then
+                pass, active = entry.lastRun.pass, entry.lastRun.active
+            end
 
-                if active == true then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-                    ImGui.Text(Icons.FA_SMILE_O)
-                elseif pass == true then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-                    ImGui.Text(Icons.MD_CHECK)
-                else
-                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-                    ImGui.Text(Icons.FA_EXCLAMATION)
-                end
-            else
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
+            if active == true then
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+                ImGui.Text(Icons.FA_SMILE_O)
+            elseif pass == true then
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
                 ImGui.Text(Icons.MD_CHECK)
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+                ImGui.Text(Icons.FA_EXCLAMATION)
             end
             ImGui.PopStyleColor()
             if entry.tooltip then
@@ -513,60 +516,124 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             end
 
             ImGui.TableNextColumn()
+            if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
+            ImGui.TableNextColumn()
             local mappedAction = resolvedActionMap[entry.name]
             if mappedAction then
-                if type(mappedAction) == "string" then
-                    if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
-                    ImGui.TableNextColumn()
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.2, 0.6, 1.0, 1.0)
-                    ImGui.Text(mappedAction)
-                    ImGui.PopStyleColor()
-                else
-                    if entry.type:lower() == "spell" then
-                        if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
-                        ImGui.TableNextColumn()
-                        ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.2, 1.0, 1.0)
-                        local _, clicked = ImGui.Selectable(mappedAction.RankName())
-                        if clicked then
-                            mappedAction.Inspect()
+                if entry.type:lower() == "spell" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.75, 0.25, 0.75, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                    local rankSpell = mappedAction.RankName
+                    local _, clicked = ImGui.Selectable(rankSpell())
+                    if clicked then
+                        rankSpell.Inspect()
+                    end
+                    ImGui.PopStyleColor(2)
+                    Ui.Tooltip(string.format("Spell: %s (click to inspect)", rankSpell() or "Unknown"))
+                elseif entry.type:lower() == "song" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.6, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                    local rankSpell = mappedAction.RankName
+                    local _, clicked = ImGui.Selectable(rankSpell())
+                    if clicked then
+                        rankSpell.Inspect()
+                    end
+                    ImGui.PopStyleColor(2)
+                    Ui.Tooltip(string.format("Song: %s (click to inspect)", rankSpell() or "Unknown"))
+                elseif entry.type:lower() == "disc" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.3, 1.0, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                    local rankSpell = mappedAction.RankName
+                    local _, clicked = ImGui.Selectable(rankSpell())
+                    if clicked then
+                        rankSpell.Inspect()
+                    end
+                    ImGui.PopStyleColor(2)
+                    Ui.Tooltip(string.format("Disc: %s (click to inspect)", rankSpell() or "Unknown"))
+                elseif type(mappedAction) == "string" and entry.type:lower() == "item" then
+                    local item = mq.TLO.FindItem("=" .. mappedAction)
+                    if item() and item.Clicky() then
+                        ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.9, 0.1, 1.0)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                        local _, clicked = ImGui.Selectable(mappedAction)
+                        local clickySpell = item.Clicky.Spell
+                        if clickySpell() and clicked then
+                            clickySpell.Inspect()
                         end
-                        ImGui.PopStyleColor()
+                        ImGui.PopStyleColor(2)
+                        Ui.Tooltip(string.format("Clicky Spell: %s (click to inspect)", clickySpell.Name() or "Unknown"))
                     else
-                        if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
-                        ImGui.TableNextColumn()
-                        ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.2, 1.0, 1.0)
-                        ImGui.Text(mappedAction.Name() or "None")
+                        ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.8, 1.0)
+                        ImGui.Text(mappedAction)
                         ImGui.PopStyleColor()
                     end
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.8, 1.0)
+                    ImGui.Text(mappedAction.Name() or mappedAction)
+                    ImGui.PopStyleColor()
                 end
             else
-                if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
-                ImGui.TableNextColumn()
                 if entry.type:lower() == "customfunc" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.9, .05, 1.0)
-                    ImGui.Text("<<Custom Func>>")
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.7, 0.7, .05, 1.0)
+                    ImGui.Text(entry.desc or "Custom Function")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "spell" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.05, .05, 0.9)
-                    ImGui.Text("<Missing Spell>")
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                    ImGui.Text("No Spell Detected")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "song" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.05, .05, 0.9)
-                    ImGui.Text("<Missing Spell>")
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                    ImGui.Text("No Song Detected")
+                    ImGui.PopStyleColor()
+                elseif entry.type:lower() == "disc" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                    ImGui.Text("No Disc Detected")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "ability" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.65, .65, 1.0)
-                    ImGui.Text(entry.name)
-                    ImGui.PopStyleColor()
+                    local abilTrained = mq.TLO.Me.Ability(entry.name)()
+                    if abilTrained then
+                        ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.5, 0.5, 1.0)
+                        ImGui.Text(entry.name)
+                        ImGui.PopStyleColor()
+                    else
+                        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                        ImGui.Text("No Ability Detected")
+                        ImGui.PopStyleColor()
+                    end
                 elseif entry.type:lower() == "aa" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.65, 0.65, 1.0, 1.0)
-                    ImGui.Text(entry.name)
-                    ImGui.PopStyleColor()
+                    local aaPurchased = mq.TLO.Me.AltAbility(entry.name)() ~= nil
+                    if aaPurchased then
+                        ImGui.PushStyleColor(ImGuiCol.Text, 0.45, 0.45, 1.0, 1.0)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                        local _, clicked = ImGui.Selectable(entry.name)
+                        local aaSpell = mq.TLO.Me.AltAbility(entry.name).Spell
+                        if aaSpell() and clicked then
+                            aaSpell.Inspect()
+                        end
+                        ImGui.PopStyleColor(2)
+                        Ui.Tooltip(string.format("AA Spell: %s (click to inspect)", aaSpell.Name() or "Unknown"))
+                    else
+                        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                        ImGui.Text("No AA Detected")
+                        ImGui.PopStyleColor()
+                    end
                 elseif entry.type:lower() == "item" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.05, .05, 0.9)
-                    local item = mq.TLO.FindItem(entry.name)
-                    ImGui.Text(item and item() and item.Clicky() and ("Clicky: " .. item.Clicky()) or entry.name)
-                    ImGui.PopStyleColor()
+                    local item = mq.TLO.FindItem("=" .. entry.name)
+                    if item() and item.Clicky() then
+                        ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.9, 0.1, 1.0)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                        local _, clicked = ImGui.Selectable(entry.name)
+                        local clickySpell = item.Clicky.Spell
+                        if clickySpell() and clicked then
+                            clickySpell.Inspect()
+                        end
+                        ImGui.PopStyleColor(2)
+                        Ui.Tooltip(string.format("Clicky Spell: %s (click to inspect)", clickySpell.Name() or "Unknown"))
+                    else
+                        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                        ImGui.Text("No Item Detected")
+                        ImGui.PopStyleColor()
+                    end
                 else
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.8, 1.0)
                     ImGui.Text(entry.name)
