@@ -201,6 +201,11 @@ function Core.GetMainAssistPctHPs()
         return groupMember.PctHPs() or 100
     end
 
+    local raidMember = mq.TLO.Raid.Member(Config.Globals.MainAssist)
+    if raidMember and raidMember() then
+        return raidMember.PctHPs() or 100
+    end
+
     local heartbeat = Config:GetPeerHeartbeatByName(Config.Globals.MainAssist)
     if heartbeat and heartbeat.Data and heartbeat.Data.HPs then
         local hpPct = tonumber(heartbeat.Data.HPs)

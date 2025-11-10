@@ -186,7 +186,8 @@ local function CreateHeartBeat()
     heartbeatCoroutine = coroutine.create(function()
         while (1) do
             Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or curState,
-                Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
+                Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config.Globals.ForceCombatID,
+                Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
             coroutine.yield()
         end
     end)
@@ -306,6 +307,7 @@ local function Main()
             notifyZoning = false
             Config.Globals.ForceTargetID = 0
             Config.Globals.AutoTargetID = 0
+            Config.Globals.ForceCombatID = 0
         end
         mq.delay(100)
         Config.Globals.CurZoneId = mq.TLO.Zone.ID()
@@ -407,22 +409,15 @@ local function Main()
         -- This will find a valid target and set it to : Config.Globals.AutoTargetID
         Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
     end
-    if Combat.OkToEngage(Config.Globals.AutoTargetID) then
-        Combat.EngageTarget(Config.Globals.AutoTargetID)
-    else
-        if Targeting.GetXTHaterCount(true) > 0 and Targeting.GetTargetID() ~= (Config:GetSetting('DoPull') and Config.Globals.LastPulledID or 0) and not Core.IsMezzing() and not Core.IsCharming() and not (Core.IAmMA() and Targeting.IsSpawnXTHater(mq.TLO.Target.ID())) then
-            Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
-            Targeting.ClearTarget()
-        end
-    end
+
     -- Handles state for when we're in combat
-    if Combat.DoCombatActions() then
-        -- IsHealing or IsMezzing should re-determine their target as this point because they may
-        -- have switched off to mez or heal after the initial find target check and the target
-        -- may have changed by this point.
-        if not Config:GetSetting('PriorityHealing') then
-            if Combat.FindBestAutoTargetCheck() and (not Core.IsHealing() or not Core.IsMezzing() or not Core.IsCharming()) then
-                Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
+    if curState == "Combat" then
+        if not Config:GetSetting('PriorityHealing') and Combat.OkToEngage(Config.Globals.AutoTargetID) then
+            Combat.EngageTarget(Config.Globals.AutoTargetID)
+        else
+            if (Targeting.GetXTHaterCount(true) > 0 or mq.TLO.Me.Combat()) and Targeting.GetTargetID() ~= (Config:GetSetting('DoPull') and Config.Globals.LastPulledID or 0) and not (Core.IAmMA() and Targeting.IsSpawnXTHater(mq.TLO.Target.ID())) then
+                Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat! %s", Targeting.IsSpawnXTHater(mq.TLO.Target.ID()))
+                Targeting.ClearTarget()
             end
         end
 

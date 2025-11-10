@@ -48,6 +48,7 @@ Config.Globals.MainAssist                                = ""
 Config.Globals.ScriptDir                                 = ""
 Config.Globals.AutoTargetID                              = 0
 Config.Globals.ForceTargetID                             = 0
+Config.Globals.ForceCombatID                             = 0
 Config.Globals.LastPulledID                              = 0
 Config.Globals.SubmodulesLoaded                          = false
 Config.Globals.PauseMain                                 = false
@@ -188,6 +189,16 @@ Config.FAQ                         = {
             "Positioning:\nFace Target In Combat (Mercs will still assume you are facing properly for abilities that require it!)\n\n" ..
             "Mercs will still manage the action, and we should return to the target you had if needed after a heal, buff, item use, etc. You can pause mercs to take full control." ..
             "These settings and interactions have been recently adjusted, and feedback is requested if you see something not quite right!",
+        Settings_Used = "",
+    },
+    [3] = {
+        Question = "How do I force auto combat on a target that isn't aggressive or isn't hostile?",
+        Answer = "This is accomplished with the /rgl forcecombat <id?> command:\n\n" ..
+            "The command accepts a target ID, and will fall back to your current target's ID if one is not supplied.\n\n" ..
+            "When commanded, the MA will add the target to the first XT slot and immediately force target.\n\n" ..
+            "The force combat state will be broadcasted to peers via actors, and will allow the target to check as valid even when the 'Target Non-Aggressives' setting is disabled." ..
+            " Actors may need to be configured in MQ if all peers are not on the same PC. As an alternative, the setting above can be enabled temporarily.\n\n" ..
+            "Only one Force Combat target can be directed at a time, and the state will be cleared automatically. It can be cleared manually with the /rgl forcecombatclear command.",
         Settings_Used = "",
     },
 }
@@ -408,17 +419,6 @@ Config.DefaultConfig               = {
         Category = "Misc",
         Index = 1,
         Tooltip = "Instantly release to spawn point when you die.",
-        Default = false,
-        ConfigType = "Advanced",
-    },
-    ['ForceKillPet']         = { --Algarnote: I don't like this setting, I think I've fixed the issues... consider removal or a more elegant solution
-        DisplayName = "Force Kill Pet",
-        Group = "General",
-        Header = "Misc",
-        Category = "Misc",
-        Index = 2,
-        Tooltip =
-        "Force kill a peer's pet if found on xtarget after other means of correction have failed. Failsafe for buggy xtargeting on Emu servers. Please report if you need to use this setting!",
         Default = false,
         ConfigType = "Advanced",
     },
@@ -693,12 +693,23 @@ Config.DefaultConfig               = {
         Default = true,
         ConfigType = "Advanced",
     },
+    ['TargetNonAggressives'] = {
+        DisplayName = "Target Non-Aggressives",
+        Group = "Combat",
+        Header = "Targeting",
+        Category = "Targeting Behavior",
+        Index = 4,
+        Tooltip =
+        "Allow targeting of NPCs that are not aggressive (hostile) if they are targeted by our MA.\nNote: If combat has been forced on the target (by the MA via the forcecombat command), the target will also be allowed.",
+        Default = false,
+        ConfigType = "Advanced",
+    },
     ['StopAttackForPCs']     = {
         DisplayName = "Stop Attack for PCs",
         Group = "Combat",
         Header = "Targeting",
         Category = "Targeting Behavior",
-        Index = 4,
+        Index = 5,
         Tooltip = "Ensure that auto attack is turned off before targeting a PC to use a spell, song, AA, or item. May be required if PvP is enabled by flag, zone, or server.",
         Default = false,
         ConfigType = "Advanced",

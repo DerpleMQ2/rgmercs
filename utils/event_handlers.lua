@@ -16,7 +16,7 @@ local ClassLoader = require('utils.classloader')
 mq.event("CantSee", "You cannot see your target.", function()
     if Config.Globals.BackOffFlag then return end
     if Config.Globals.PauseMain then return end
-    if not Config:GetSetting('HandleCantSeeTarget') then
+    if not Config:GetSetting('HandleCantSeeTarget') or Targeting.GetXTHaterCount() == 0 then
         return
     end
     local target = mq.TLO.Target
@@ -70,7 +70,7 @@ end)
 -- [ TOO CLOSE HANDLERS] --
 
 mq.event("TooClose", "Your target is too close to use a ranged weapon!", function()
-    if not Config:GetSetting('HandleTooClose') then
+    if not Config:GetSetting('HandleTooClose') or Targeting.GetXTHaterCount() == 0 then
         Logger.log_debug("TooCloseHandler: Event Detected, but HandleTooClose is not enabled.")
         return
     end
@@ -119,7 +119,7 @@ end)
 -- [ TOO FAR HANDLERS ] --
 
 local function tooFarHandler()
-    if not Config:GetSetting('HandleTooFar') then
+    if not Config:GetSetting('HandleTooFar') or Targeting.GetXTHaterCount() == 0 then
         return
     end
     Logger.log_debug("tooFarHandler()")

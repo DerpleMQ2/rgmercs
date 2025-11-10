@@ -1660,61 +1660,61 @@ function Module:GetPullableSpawns()
         if not spawn() or spawn.ID() == 0 then return false end
         if not spawn.Targetable() then return false end
         if spawn.Type() ~= "NPC" and spawn.Type() ~= "NPCPET" then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
+            Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
                 spawn.Type())
             return false
         end
 
         if spawn.Master.Type() == 'PC' then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
+            Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
             return false
         end
 
         if Targeting.IsTempPet(spawn) then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Temp or Swarm Pet -- Skipping", spawn.CleanName(), spawn.ID())
+            Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aois Temp or Swarm Pet -- Skipping", spawn.CleanName(), spawn.ID())
             return false
         end
 
         if self:IsPullMode("Chain") then
             if Targeting.IsSpawnXTHater(spawn.ID()) then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
+                Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
                 return false
             end
         end
 
         if self:HaveList("PullAllowList") then
             if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
+                Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
                 return false
             end
         elseif self:HaveList("PullDenyList") then
             if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
+                Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
                 return false
             end
         end
 
         for _, ignoredMob in ipairs(self.TempSettings.PullIgnoreTargets) do
             if spawn.ID() == ignoredMob.ID() then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Ignore List!", spawn.CleanName(), spawn.ID())
+                Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \ar -> Found in Ignore List!", spawn.CleanName(), spawn.ID())
                 return false
             end
         end
 
         if spawn.FeetWet() and not Config:GetSetting('PullMobsInWater') then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water", spawn.CleanName(), spawn.ID())
+            Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \agIgnoring mob in water", spawn.CleanName(), spawn.ID())
             return false
         end
 
         -- Level Checks
         if Config:GetSetting('UsePullLevels') then
             if spawn.Level() < Config:GetSetting('PullMinLevel') then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
+                Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
                     spawn.Level())
                 return false
             end
             if spawn.Level() > Config:GetSetting('PullMaxLevel') then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
+                Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
                     spawn.Level())
                 return false
             end
@@ -1722,7 +1722,7 @@ function Module:GetPullableSpawns()
             -- check cons.
             local conLevel = Config.Constants.ConColorsNameToId[spawn.ConColor()]
             if conLevel > Config:GetSetting('PullMaxCon') or conLevel < Config:GetSetting('PullMinCon') then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
+                Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
                     spawn.CleanName(), spawn.ID(),
                     Config:GetSetting('PullMinCon'),
                     Config:GetSetting('PullMaxCon'), conLevel, spawn.ConColor())
@@ -1731,7 +1731,7 @@ function Module:GetPullableSpawns()
             -- check max level difference
             local maxLvl = mq.TLO.Me.Level() + Config:GetSetting('MaxLevelDiff')
             if spawn.Level() > maxLvl then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to max level difference. Max Level = %d, Mob = %d",
+                Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw)  - Ignoring mob due to max level difference. Max Level = %d, Mob = %d",
                     spawn.CleanName(), spawn.ID(), maxLvl, spawn.Level())
                 return false
             end
@@ -1749,7 +1749,7 @@ function Module:GetPullableSpawns()
 
         -- do distance checks.
         if math.abs(spawn.Z() - checkZ) > Config:GetSetting('PullZRadius') then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
+            Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
                 math.abs(spawn.Z() - checkZ),
                 Config:GetSetting('PullZRadius'))
             return false
@@ -1758,7 +1758,7 @@ function Module:GetPullableSpawns()
         local distSqr = Math.GetDistanceSquared(spawn.X(), spawn.Y(), checkX, checkY)
 
         if distSqr > pullRadiusSqr then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoDistance too far - distSq(%d) > pullRadiusSq(%d)",
+            Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aoDistance too far - distSq(%d) > pullRadiusSq(%d)",
                 spawn.CleanName(), spawn.ID(), distSqr,
                 pullRadiusSqr)
             return false
@@ -1775,18 +1775,18 @@ function Module:GetPullableSpawns()
         end
 
         if not canPath or navDist > maxPathRange then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
+            Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
                 spawn.ID(), navDist, Strings.BoolToColorString(canPath))
             return false
         end
 
         if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
+            Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
                 spawn.CleanName(), spawn.ID())
             return false
         end
 
-        Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
+        Logger.log_debug("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
 
         metaDataCache[spawn.ID()] = { distance = navDist, }
 
@@ -1814,7 +1814,7 @@ function Module:FindTarget()
 
     if #pullTargets > 0 then
         local pullTarget = pullTargets[1]
-        Logger.log_info("\atPULL::FindTarget \agPulling %s [%d] with Distance: %d", pullTarget.CleanName(), pullTarget.ID(), metaData[pullTarget.ID()].distance)
+        Logger.log_info("\atPULL::FindPullTarget \agPulling %s [%d] with Distance: %d", pullTarget.CleanName(), pullTarget.ID(), metaData[pullTarget.ID()].distance)
         return pullTarget.ID()
     end
 

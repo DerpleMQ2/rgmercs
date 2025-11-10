@@ -91,26 +91,31 @@ Binds.Handlers    = {
         end,
     },
     ['forcecombat'] = {
-        usage = "/rgl forcecombat",
-        about = "Will force combat to be enabled on your XTarget[1]. If you have no XTarget[1] it will use your current target.",
-        handler = function()
-            Targeting.ForceCombat = not Targeting.ForceCombat
-            Logger.log_info("\awForced Combat: %s", Strings.BoolToColorString(Targeting.ForceCombat))
-
-            if Targeting.ForceCombat then
-                if mq.TLO.Target.ID() == 0 or (mq.TLO.Target.Type() or "none"):lower() ~= "npc" then
-                    Logger.log_info("\awForced Combat: Requires a target - Disabling...")
-                    Targeting.ForceCombat = false
-                    return
+        usage = "/rgl forcecombat <id?>",
+        about =
+        "Will force targeting and combat on a (potentially non-hostile) entity. If no ID is supplied, it will use your current target. See associated FAQ entry.",
+        handler = function(targetId)
+            targetId = targetId and tonumber(targetId) or mq.TLO.Target.ID()
+            if targetId > 0 then
+                if mq.TLO.Target.ID() ~= targetId then
+                    Targeting.SetTarget(targetId, true)
                 end
                 Core.DoCmd("/xtarget set 1 currenttarget")
-                mq.delay("5s", function() return mq.TLO.Me.XTarget(1).ID() == mq.TLO.Target.ID() end)
+                mq.delay("2s", function() return mq.TLO.Me.XTarget(1).ID() == mq.TLO.Target.ID() end)
                 Logger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
+                Config.Globals.ForceCombatID = targetId
+                Config.Globals.ForceTargetID = targetId
             else
-                Targeting.ResetXTSlot(1)
-                Targeting.ForceNamed = false
-                Core.DoCmd("/attack off")
+                Logger.log_info("\awForced Combat requires a valid supplied ID or target!")
             end
+        end,
+    },
+    ['forcecombatclear'] = {
+        usage = "/rgl forcecombatclear",
+        about = "Will cancel the current forced combat and reset the first XT slot if needed.",
+        handler = function()
+            Logger.log_info("\awDisabling forced combat against %s(id:%d)!", mq.TLO.Spawn(Config.Globals.ForceCombatID).CleanName() or "Unknown", Config.Globals.ForceCombatID)
+            Targeting.ClearTarget()
         end,
     },
     ['forcetarget'] = {

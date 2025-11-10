@@ -57,31 +57,32 @@ function Comms.SendMessage(peer, module, event, data)
     Logger.log_debug("Sent Message: %s to:  %s event: %s", event, peer, Strings.TableToString(data or {}, 512))
 end
 
-function Comms.SendHeartbeat(assist, curState, curAutoTarget, chase)
+function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, chase)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()
     Comms.BroadcastMessage("RGMercs", "Heartbeat", {
-        From       = Comms.GetPeerName(),
-        Zone       = mq.TLO.Zone.Name(),
-        X          = mq.TLO.Me.X(),
-        Y          = mq.TLO.Me.Y(),
-        Z          = mq.TLO.Me.Z(),
-        Poison     = tostring(mq.TLO.Me.Poisoned.ID()),
-        Disease    = tostring(mq.TLO.Me.Diseased.ID()),
-        Curse      = tostring(mq.TLO.Me.Cursed.ID()),
+        From          = Comms.GetPeerName(),
+        Zone          = mq.TLO.Zone.Name(),
+        X             = mq.TLO.Me.X(),
+        Y             = mq.TLO.Me.Y(),
+        Z             = mq.TLO.Me.Z(),
+        Poison        = tostring(mq.TLO.Me.Poisoned.ID()),
+        Disease       = tostring(mq.TLO.Me.Diseased.ID()),
+        Curse         = tostring(mq.TLO.Me.Cursed.ID()),
         ---@diagnostic disable-next-line: undefined-field
-        Mezzed     = tostring(mq.TLO.Me.Mezzed.ID()),
-        Corruption = tostring(mq.TLO.Me.Diseased.ID()),
-        Stunned    = mq.TLO.Me.Stunned(),
-        HPs        = mq.TLO.Me.PctHPs(),
-        Mana       = mq.TLO.Me.PctMana(),
-        Endurance  = mq.TLO.Me.PctEndurance(),
-        Target     = mq.TLO.Target.DisplayName() or "None",
-        TargetID   = mq.TLO.Target.ID() or 0,
-        AutoTarget = curAutoTarget,
-        Assist     = assist,
-        State      = curState,
-        Chase      = chase,
+        Mezzed        = tostring(mq.TLO.Me.Mezzed.ID()),
+        Corruption    = tostring(mq.TLO.Me.Diseased.ID()),
+        Stunned       = mq.TLO.Me.Stunned(),
+        HPs           = mq.TLO.Me.PctHPs(),
+        Mana          = mq.TLO.Me.PctMana(),
+        Endurance     = mq.TLO.Me.PctEndurance(),
+        Target        = mq.TLO.Target.DisplayName() or "None",
+        TargetID      = mq.TLO.Target.ID() or 0,
+        ForceCombatID = forceCombatId,
+        AutoTarget    = curAutoTarget,
+        Assist        = assist,
+        State         = curState,
+        Chase         = chase,
     })
 end
 
