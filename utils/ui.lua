@@ -459,23 +459,31 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
     local showDebugTiming = Config:GetSetting('ShowDebugTiming')
 
     if ImGui.BeginTable("Rotation_" .. name, showDebugTiming and 7 or 6, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn(rotationState > 0 and 'Cur' or '-', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Enable', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed, 250.0)
-        ImGui.TableSetupColumn(string.format("Resolved Action " .. Icons.MD_INFO_OUTLINE), ImGuiTableColumnFlags.WidthStretch, 250.0)
+        --- Column 3: header will be manually drawn
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 250.0);
 
         if showDebugTiming then
             ImGui.TableSetupColumn('Timing', ImGuiTableColumnFlags.WidthStretch, 250.0)
         end
 
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
-        Ui.Tooltip("Click a resolved action to inspect the spell/item/AA effect.")
+
+        -- Manually draw header cell content for Resolved Action Column
+        if ImGui.TableSetColumnIndex(5) then
+            ImGui.SameLine()
+            ImGui.Text("Resolved Action ")
+            ImGui.SameLine()
+            ImGui.Text(Icons.MD_INFO_OUTLINE)
+            Ui.Tooltip("Click a resolved action to inspect the spell/item/AA effect.")
+        end
 
         for idx, entry in ipairs(rotationTable or {}) do
+            ImGui.TableNextRow()
             ImGui.TableNextColumn()
             ImGui.Text(tostring(idx))
             if rotationState > 0 then
