@@ -424,16 +424,6 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'ArcanumWeave',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and not mq.TLO.Me.Buff("Focus of Arcanum")()
-            end,
-        },
-        {
             name = 'PetHealing',
             state = 1,
             steps = 1,
@@ -788,29 +778,6 @@ local _ClassConfig = {
                 name = "PetHealSpell",
                 type = "Spell",
                 load_cond = function(self) Config:GetSetting('DoPetHealSpell') end,
-            },
-        },
-        ['ArcanumWeave']    = {
-            {
-                name = "Empowered Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Enlightened Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Acute Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
             },
         },
         ['Downtime']        = {
@@ -1254,17 +1221,6 @@ local _ClassConfig = {
             Index = 101,
             Tooltip = "Use your Necrotic Pustules spell on the (non-SHD) MA.",
             RequiresLoadoutChange = true,
-            Default = true,
-            ConfigType = "Advanced",
-        },
-        ['DoArcanumWeave']    = {
-            DisplayName = "Weave Arcanums",
-            Group = "Abilities",
-            Header = "Buffs",
-            Category = "Self",
-            Index = 105,
-            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
-            RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
             ConfigType = "Advanced",
         },

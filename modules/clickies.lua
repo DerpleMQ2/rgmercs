@@ -402,7 +402,6 @@ Module.LogicBlocks                      = {
         cond = function(self, target, hp, cnt)
             return (mq.TLO.Group.Injured(hp)() or 0) >= cnt
         end,
-        cond_targets = { 'Self', },
         tooltip = "Only use if [Count] group members are below [X] HP%.",
         render_header_text = function(self, cond)
             return string.format("%d group members are <= %d%% HP", cond.args[1] or 0, cond.args[2] or 100)

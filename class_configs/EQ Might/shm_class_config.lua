@@ -594,17 +594,6 @@ local _ClassConfig = {
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
-        {
-            name = 'ArcanumWeave',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and not mq.TLO.Me.Buff("Focus of Arcanum")() and
-                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
-            end,
-        },
 
     },
     ['Rotations']         = {
@@ -1046,29 +1035,6 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['ArcanumWeave'] = {
-            {
-                name = "Empowered Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Enlightened Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Acute Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-        },
     },
     -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
     -- Conditions are not limited to modes. Virtually any helper function or TLO can be used. Example: Level-based lists.
@@ -1442,16 +1408,6 @@ local _ClassConfig = {
             Tooltip = "Do Haste Spells/AAs",
             Default = true,
             ConfigType = "Advanced",
-        },
-        ['DoArcanumWeave']    = {
-            DisplayName = "Weave Arcanums",
-            Group = "Abilities",
-            Header = "Buffs",
-            Category = "Self",
-            Index = 101,
-            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
-            RequiresLoadoutChange = true, --this setting is used as a load condition
-            Default = true,
         },
 
         -- Debuffs
