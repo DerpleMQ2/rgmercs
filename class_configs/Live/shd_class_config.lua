@@ -853,8 +853,8 @@ local _ClassConfig = {
             load_cond = function() return Core.IsTanking() end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.NoDiscActive() and mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or
-                    Targeting.IsNamed(Targeting.GetAutoTarget()) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true)
+                return combat_state == "Combat" and (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Targeting.IsNamed(Targeting.GetAutoTarget()) or
+                    self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
             end,
         },
         { -- Leech Effect (Epic, OoW BP, Coating) maintenance
@@ -959,9 +959,9 @@ local _ClassConfig = {
                 name = "Horror",
                 type = "Spell",
                 tooltip = Tooltips.Horror,
+                load_cond = function(self) return Config:GetSetting('ProcChoice') == 1 end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if Config:GetSetting('ProcChoice') ~= 1 then return false end
                     return self.ClassConfig.HelperFunctions.SingleBuffCheck() and Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -969,9 +969,9 @@ local _ClassConfig = {
                 name = "Mental",
                 type = "Spell",
                 tooltip = Tooltips.Horror,
+                load_cond = function(self) return Config:GetSetting('ProcChoice') == 2 end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if Config:GetSetting('ProcChoice') ~= 2 then return false end
                     return self.ClassConfig.HelperFunctions.SingleBuffCheck() and Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -1232,6 +1232,7 @@ local _ClassConfig = {
                 name = "Terror",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
+                load_cond = function(self) return Config:GetSetting('DoTerror') == 3 or (Config:GetSetting('DoTerror') == 2 and not Core.GetResolvedActionMapItem('ForPower')) end,
                 cond = function(self, spell, target)
                     if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
                     ---@diagnostic disable-next-line: undefined-field
@@ -1242,6 +1243,7 @@ local _ClassConfig = {
                 name = "Terror2",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
+                load_cond = function(self) return Config:GetSetting('DoTerror') == 3 or (Config:GetSetting('DoTerror') == 2 and not Core.GetResolvedActionMapItem('ForPower')) end,
                 cond = function(self, spell, target)
                     if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
                     ---@diagnostic disable-next-line: undefined-field
@@ -1339,24 +1341,27 @@ local _ClassConfig = {
                 name = "SpiteStrike",
                 type = "Disc",
                 tooltip = Tooltips.SpikeStrike,
+                load_cond = function(self) return not Core.IsTanking() end,
                 cond = function(self, discSpell)
-                    return not Core.IsTanking() and Casting.NoDiscActive()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
                 name = "UnholyAura",
                 type = "Disc",
                 tooltip = Tooltips.UnholyAura,
+                load_cond = function(self) return not Core.IsTanking() end,
                 cond = function(self, discSpell)
-                    return not Core.IsTanking() and Casting.NoDiscActive()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
                 name = "InfluenceDisc",
                 type = "Disc",
                 tooltip = Tooltips.InfluenceDisc,
+                load_cond = function(self) return not Core.IsTanking() end,
                 cond = function(self, discSpell)
-                    return not Core.IsTanking() and Casting.NoDiscActive()
+                    return Casting.NoDiscActive()
                 end,
             },
         },
@@ -1365,6 +1370,7 @@ local _ClassConfig = {
                 name = "Encroaching Darkness",
                 tooltip = Tooltips.EncroachingDarkness,
                 type = "AA",
+                load_cond = function(self) return Casting.CanUseAA("Encroaching Darkness") end,
                 cond = function(self, aaName, target)
                     return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
@@ -1373,8 +1379,8 @@ local _ClassConfig = {
                 name = "SnareDot",
                 type = "Spell",
                 tooltip = Tooltips.SnareDot,
+                load_cond = function(self) return not Casting.CanUseAA("Encroaching Darkness") end,
                 cond = function(self, spell, target)
-                    if Casting.CanUseAA("Encroaching Darkness") then return false end
                     return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
@@ -1591,8 +1597,8 @@ local _ClassConfig = {
                 name = "BondTap",
                 type = "Spell",
                 tooltip = Tooltips.BondTap,
+                load_cond = function(self) return Config:GetSetting('DoBondTap') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoBondTap') then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -1608,8 +1614,8 @@ local _ClassConfig = {
                 name = "PoisonDot",
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
+                load_cond = function(self) return Config:GetSetting('DoPoisonDot') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoPoisonDot') then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -1617,8 +1623,8 @@ local _ClassConfig = {
                 name = "CorruptionDot",
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
+                load_cond = function(self) return Config:GetSetting('DoCorruptionDot') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoCorruptionDot') then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -1626,8 +1632,8 @@ local _ClassConfig = {
                 name = "DireDot",
                 type = "Spell",
                 tooltip = Tooltips.DireDot,
+                load_cond = function(self) return Config:GetSetting('DoDireDot') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDireDot') then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -1643,8 +1649,8 @@ local _ClassConfig = {
                 name = "PowerTapAC",
                 type = "Spell",
                 tooltip = Tooltips.PowerTapAC,
+                load_cond = function(self) return Config:GetSetting('DoACTap') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoACTap') or not spell or not spell() then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -1652,8 +1658,8 @@ local _ClassConfig = {
                 name = "PowerTapAtk",
                 type = "Spell",
                 tooltip = Tooltips.PowerTapAtk,
+                load_cond = function(self) return Config:GetSetting('DoAtkTap') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAtkTap') or not spell or not spell() then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -1661,8 +1667,8 @@ local _ClassConfig = {
                 name = "MaxHPTap",
                 type = "Spell",
                 tooltip = Tooltips.MaxHPTap,
+                load_cond = function(self) return Config:GetSetting('DoMaxHPTap') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoMaxHPTap') or not spell or not spell() then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -2132,6 +2138,18 @@ local _ClassConfig = {
             end,
         },
         {
+            id = 'Terror2',
+            Type = "Spell",
+            DisplayName = function() return Core.GetResolvedActionMapItem('Terror2').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('Terror2').RankName.Name() or "" end,
+            AbilityRange = 200,
+            cond = function(self)
+                local resolvedSpell = Core.GetResolvedActionMapItem('Terror2')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
             id = 'ForPower',
             Type = "Spell",
             DisplayName = function() return Core.GetResolvedActionMapItem('ForPower').RankName.Name() or "" end,
@@ -2226,6 +2244,7 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 3,
+            RequiresLoadoutChange = true,
         },
         ['OverwriteDLUBuffs'] = {
             DisplayName = "Overwrite DLU Buffs",
