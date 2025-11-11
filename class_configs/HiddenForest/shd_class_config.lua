@@ -506,9 +506,9 @@ local _ClassConfig = {
                 name = "Horror",
                 type = "Spell",
                 tooltip = Tooltips.Horror,
+                load_cond = function(self) return Config:GetSetting('ProcChoice') == 1 end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if Config:GetSetting('ProcChoice') ~= 1 then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -516,9 +516,9 @@ local _ClassConfig = {
                 name = "Mental",
                 type = "Spell",
                 tooltip = Tooltips.Horror,
+                load_cond = function(self) return Config:GetSetting('ProcChoice') == 2 end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if Config:GetSetting('ProcChoice') ~= 2 then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -681,7 +681,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.LeechCurse,
                 cond = function(self)
-                    return Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -737,17 +737,13 @@ local _ClassConfig = {
                 name = "Terror",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
-                cond = function(self, spell, target)
-                    return Config:GetSetting('DoTerror')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoTerror') end,
             },
             {
                 name = "Terror2",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
-                cond = function(self, spell, target)
-                    return Config:GetSetting('DoTerror')
-                end,
+                load_cond = function(self) return Config:GetSetting('DoTerror') end,
             },
         },
         ['AEHateTools'] = {
@@ -779,8 +775,9 @@ local _ClassConfig = {
                 name = "UnholyAura",
                 type = "Disc",
                 tooltip = Tooltips.UnholyAura,
+                load_cond = function(self) return not Core.IsTanking() end,
                 cond = function(self)
-                    return not Core.IsTanking() and Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -818,23 +815,12 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Terror",
-                type = "Spell",
-                tooltip = Tooltips.Terror,
-                cond = function(self, spell, target)
-                    if not Core.IsTanking() or not Config:GetSetting('DoTerror') then return false end
-                    return Targeting.IsNamed(target) and (Casting.CanUseAA("Cascading Theft of Defense") and not Casting.IHaveBuff("Cascading Theft of Defense"))
-                end,
-            },
-            {
                 name = "Skin",
                 type = "Spell",
                 tooltip = Tooltips.Skin,
                 cond = function(self, spell, target)
                     if not Core.IsTanking() or not Targeting.IsNamed(target) then return false end
                     return Casting.SelfBuffCheck(spell)
-                        --laz specific deconflict
-                        and not Casting.IHaveBuff("Necrotic Pustules")
                 end,
             },
         },
@@ -843,6 +829,7 @@ local _ClassConfig = {
                 name = "Encroaching Darkness",
                 tooltip = Tooltips.EncroachingDarkness,
                 type = "AA",
+                load_cond = function(self) return Casting.CanUseAA("Encroaching Darkness") end,
                 cond = function(self, aaName, target)
                     return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
@@ -851,8 +838,8 @@ local _ClassConfig = {
                 name = "SnareDot",
                 type = "Spell",
                 tooltip = Tooltips.SnareDot,
+                load_cond = function(self) return not Casting.CanUseAA("Encroaching Darkness") end,
                 cond = function(self, spell, target)
-                    if Casting.CanUseAA("Encroaching Darkness") then return false end
                     return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
@@ -871,7 +858,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Mantle,
                 cond = function(self, discSpell, target)
                     if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -936,9 +923,10 @@ local _ClassConfig = {
                 name = "BondTap",
                 type = "Spell",
                 tooltip = Tooltips.BondTap,
+                load_cond = function(self) return Config:GetSetting('DoBondTap') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoBondTap') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
-                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    return Casting.HaveManaToDot() and Casting.SelfBuffCheck(spell) -- use for recourse --Casting.DotSpellCheck(spell)
                 end,
             },
             {
@@ -960,8 +948,9 @@ local _ClassConfig = {
                 name = "PoisonDot",
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
+                load_cond = function(self) return Config:GetSetting('DoPoisonDot') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoPoisonDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -969,8 +958,9 @@ local _ClassConfig = {
                 name = "DireDot",
                 type = "Spell",
                 tooltip = Tooltips.DireDot,
+                load_cond = function(self) return Config:GetSetting('DoDireDot') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDireDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -994,8 +984,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.PowerTapAC,
                 load_cond = function(self) return Config:GetSetting('DoACTap') end,
                 cond = function(self, spell, target)
-                    local triggerSpell = spell() and spell.RankName.Trigger()
-                    return triggerSpell and not mq.TLO.Me.Buff(triggerSpell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1004,8 +993,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.PowerTapAtk,
                 load_cond = function(self) return Config:GetSetting('DoAtkTap') end,
                 cond = function(self, spell, target)
-                    local triggerSpell = spell() and spell.RankName.Trigger()
-                    return triggerSpell and not mq.TLO.Me.Buff(triggerSpell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1038,7 +1026,7 @@ local _ClassConfig = {
                 type = "CustomFunc",
                 cond = function()
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
-                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc() ~= "Deflection Discipline" and not mq.TLO.Me.Song("Rampart")() and
+                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc() ~= "Deflection Discipline" and
                         not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("2Hand") end,
@@ -1101,6 +1089,18 @@ local _ClassConfig = {
             AbilityRange = 200,
             cond = function(self)
                 local resolvedSpell = Core.GetResolvedActionMapItem('Terror')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
+            id = 'Terror2',
+            Type = "Spell",
+            DisplayName = function() return Core.GetResolvedActionMapItem('Terror2').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('Terror2').RankName.Name() or "" end,
+            AbilityRange = 200,
+            cond = function(self)
+                local resolvedSpell = Core.GetResolvedActionMapItem('Terror2')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
@@ -1179,6 +1179,7 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 3,
+            RequiresLoadoutChange = true,
         },
         ['DoVisage']        = {
             DisplayName = "Use Visage of Death",
@@ -1382,6 +1383,7 @@ local _ClassConfig = {
             Tooltip = "Use Terror line taunts (the number memorized is based on your other selected options).",
             Default = true,
             ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
         ['AETauntAA']       = {
             DisplayName = "Use AE Taunt AA",

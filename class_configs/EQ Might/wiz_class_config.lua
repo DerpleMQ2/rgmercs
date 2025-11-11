@@ -25,7 +25,6 @@ return {
             "Staff of Phenomenal Power",
             "Staff of Prismatic Power",
         },
-
         ['OoW_Chest'] = {
             "Academic's Robe of the Arcanists",
             "Spelldeviser's Cloth Robe",
