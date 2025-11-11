@@ -610,6 +610,12 @@ end
 function Module:IsValidMezTarget(mobId)
     local spawn = mq.TLO.Spawn(mobId)
 
+    if Targeting.IsTempPet(spawn) then
+        Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d as it is a temp PC pet.",
+            spawn.ID(), spawn.CleanName(), spawn.Level())
+        return false
+    end
+
     -- Is the mob ID in our mez immune list? If so, skip.
     if self:IsMezImmune(mobId) then
         Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d as it is in our immune list.",
