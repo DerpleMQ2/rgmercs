@@ -902,6 +902,13 @@ local _ClassConfig = {
                 tooltip = Tooltips.ViciousBiteOfChaos,
             },
             {
+                name = "Companion's Blessing",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return (mq.TLO.Me.Pet.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
+                end,
+            },
+            {
                 name = "PowerTapAC",
                 type = "Spell",
                 tooltip = Tooltips.PowerTapAC,
