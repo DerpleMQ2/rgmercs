@@ -16,7 +16,7 @@ local ClassLoader = require('utils.classloader')
 mq.event("CantSee", "You cannot see your target.", function()
     if Config.Globals.BackOffFlag then return end
     if Config.Globals.PauseMain then return end
-    if not Config:GetSetting('HandleCantSeeTarget') or Targeting.GetXTHaterCount() == 0 then
+    if not Config:GetSetting('HandleCantSeeTarget') then
         return
     end
     local target = mq.TLO.Target
@@ -30,7 +30,7 @@ mq.event("CantSee", "You cannot see your target.", function()
         Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
-        if mq.TLO.Me.Moving() then return end
+        if mq.TLO.Me.Moving() or Targeting.GetXTHaterCount() == 0 then return end
 
         local classConfig = Modules:ExecModule("Class", "GetClassConfig")
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
@@ -70,7 +70,7 @@ end)
 -- [ TOO CLOSE HANDLERS] --
 
 mq.event("TooClose", "Your target is too close to use a ranged weapon!", function()
-    if not Config:GetSetting('HandleTooClose') or Targeting.GetXTHaterCount() == 0 then
+    if not Config:GetSetting('HandleTooClose') then
         Logger.log_debug("TooCloseHandler: Event Detected, but HandleTooClose is not enabled.")
         return
     end
@@ -100,8 +100,8 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
         end
     end
 
-    -- Only do non-pull code if autoengage is on
-    if Config:GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() then
+    -- Only do non-pull code if autoengage is on and we are in combat
+    if Config:GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() and Targeting.GetXTHaterCount() > 0 then
         if not Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
             Logger.log_debug("TooCloseHandler: Pull State not detected, using Combat Nav.")
             local classConfig = Modules:ExecModule("Class", "GetClassConfig")
@@ -119,7 +119,7 @@ end)
 -- [ TOO FAR HANDLERS ] --
 
 local function tooFarHandler()
-    if not Config:GetSetting('HandleTooFar') or Targeting.GetXTHaterCount() == 0 then
+    if not Config:GetSetting('HandleTooFar') then
         return
     end
     Logger.log_debug("tooFarHandler()")
@@ -139,7 +139,7 @@ local function tooFarHandler()
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         local classConfig = Modules:ExecModule("Class", "GetClassConfig")
-        if mq.TLO.Me.Moving() then return end
+        if mq.TLO.Me.Moving() or Targeting.GetXTHaterCount() == 0 then return end
 
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
             Core.SafeCallFunc("Custom Nav", classConfig.HelperFunctions.combatNav)

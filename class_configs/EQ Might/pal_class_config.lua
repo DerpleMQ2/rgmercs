@@ -266,7 +266,7 @@ return {
             'Reconstitution',
             'Reanimation',
         },
-        ['PBAEStun'] = {                -- does damage
+        ['PBAEStun'] = {                -- timer 6
             "Ancient Command of Might", -- EQM Custom
             "Ancient: Force of Might",  -- EQM Custom
         },
@@ -321,12 +321,10 @@ return {
                 { name = "WaveHeal2",       cond = function(self) return Config:GetSetting('DoWaveHeal') == 2 end, },
                 { name = "SelfHeal", },
                 { name = "Cleansing",       cond = function(self) return Config:GetSetting('DoCleansing') < 3 end, },
-                -- { name = "TwinHealNuke",    cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
                 { name = "SereneStun",      cond = function(self) return Config:GetSetting('DoSereneStun') end, },
                 { name = "StunTimer4",      cond = function(self) return Core.IsTanking() end, },
                 { name = "StunTimer5",      cond = function(self) return Core.IsTanking() end, },
                 { name = "PBAEStun",        cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
-                -- { name = "AEStun",          cond = function(self) return Config:GetSetting('DoAEStun') end, },
                 { name = "CureCurse",       cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 { name = "PurityCure",      cond = function(self) return Config:GetSetting('KeepPurityMemmed') end, },
                 { name = "UndeadNuke",      cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
@@ -832,23 +830,8 @@ return {
                     return Config:GetSetting('DoAEDamage')
                 end,
             },
-            -- {
-            --     name = "AEStun",
-            --     type = "Spell",
-            --     cond = function(self, spell, target)
-            --         return Config:GetSetting('DoAEDamage') or spell.Name() ~= "The Sacred Word" -- Sacred Word does damage
-            --     end,
-            -- },
         },
         ['AECombat'] = {
-            -- {
-            --     name = "AEStun",
-            --     type = "Spell",
-            --     cond = function(self, spell, target)
-            --         return Core.IsTanking() or Config:GetSetting('AEStunUse') == 3 or Core.GetMainAssistPctHPs() < Config:GetSetting('EmergencyStart')
-            --     end,
-
-            -- },
             {
                 name = "PBAEStun",
                 type = "Spell",
@@ -1083,15 +1066,6 @@ return {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        -- ['DoAEStun']          = {
-        --     DisplayName = "Do AE Stun",
-        --     Group = "Abilities",
-        --     Header = "Debuff",
-        --     Category = "Stun",
-        --     Index = 102,
-        --     Tooltip = "Use your Targeted AE Stun (Stun Command or Sacred Word) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
-        --     Default = true,
-        -- },
         ['DoPBAEStun']        = {
             DisplayName = "Do PBAE Stun",
             Group = "Abilities",

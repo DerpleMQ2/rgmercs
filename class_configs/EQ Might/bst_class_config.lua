@@ -198,6 +198,9 @@ return {
             "Minionskin",
             "Lesser Minionskin",
         },
+        ['Rake'] = {
+            "Rake",
+        },
     },
     ['HealRotationOrder'] = {
         { -- configured as a backup healer, will not cast in the mainpoint
@@ -444,10 +447,6 @@ return {
                 end,
             },
             {
-                name = "Minion's Memento",
-                type = "Item",
-            },
-            {
                 name_func = function() return Casting.CanUseAA("Replenish Companion") and "Replenish Companion" or "Mend Companion" end,
                 type = "AA",
             },
@@ -558,6 +557,10 @@ return {
             {
                 name = "Feral Swipe",
                 type = "AA",
+            },
+            {
+                name = "Rake",
+                type = "Disc",
             },
             {
                 name = "Kick",
