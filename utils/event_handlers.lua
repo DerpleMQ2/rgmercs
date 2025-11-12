@@ -9,16 +9,15 @@ local Comms       = require("utils.comms")
 local Logger      = require("utils.logger")
 local Movement    = require("utils.movement")
 local ClassLoader = require('utils.classloader')
+local Strings     = require("utils.strings")
 
 
 -- [ CANT SEE HANDLERS ] --
 
 mq.event("CantSee", "You cannot see your target.", function()
+    Logger.log_debug("CantSee: Event Detected")
     if Config.Globals.BackOffFlag then return end
     if Config.Globals.PauseMain then return end
-    if not Config:GetSetting('HandleCantSeeTarget') then
-        return
-    end
     local target = mq.TLO.Target
     if mq.TLO.Stick.Active() then
         Movement:DoStickCmd("off")
@@ -26,40 +25,46 @@ mq.event("CantSee", "You cannot see your target.", function()
     end
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-        Logger.log_debug("\ayWe are in Pull_State PULLING and Cannot see our target!")
+        Logger.log_debug("CantSee: \ayWe are in Pull_State PULLING and Cannot see our target!")
         Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
-        if mq.TLO.Me.Moving() or Targeting.GetXTHaterCount() == 0 then return end
+        if Config:GetSetting('HandleCantSeeTarget') then
+            local haterCount = Targeting.GetXTHaterCount()
+            if Config:GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() or haterCount > 0 then
+                local classConfig = Modules:ExecModule("Class", "GetClassConfig")
+                if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
+                    Logger.log_debug("CantSee: \ayWe are in COMBAT and Cannot see our target - using custom combatNav!")
+                    Core.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, true)
+                else
+                    Logger.log_debug("CantSee: \ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
+                    if Combat.OkToEngage(target.ID() or 0) then
+                        Core.DoCmd("/squelch /face fast")
+                        if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then
+                            Logger.log_debug("CantSee: Can't See target (%s [%d]). Moving back 10.", target.CleanName() or "", target.ID() or 0)
+                            Movement:DoStickCmd("10 moveback uw")
+                            -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
+                            mq.delay(100, function() return mq.TLO.Stick.Active() end)
+                            mq.delay(500, function() return not mq.TLO.Me.Moving() end)
+                            Movement:DoStickCmd("off")
+                            Movement:ClearLastStickTimer()
+                        else
+                            local desiredDistance = (target.MaxRangeTo() or 0) * 0.7
+                            if not Config:GetSetting('DoMelee') then
+                                desiredDistance = Targeting.GetTargetDistance() * .95
+                            end
 
-        local classConfig = Modules:ExecModule("Class", "GetClassConfig")
-        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
-            Logger.log_debug("\ayWe are in COMBAT and Cannot see our target - using custom combatNav!")
-            Core.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, true)
-        else
-            Logger.log_debug("\ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
-            if Config:GetSetting('DoAutoEngage') then
-                if Combat.OkToEngage(target.ID() or 0) then
-                    Core.DoCmd("/squelch /face fast")
-                    if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then
-                        Logger.log_debug("Can't See target (%s [%d]). Moving back 10.", target.CleanName() or "", target.ID() or 0)
-                        Movement:DoStickCmd("10 moveback uw")
-                        -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
-                        mq.delay(100, function() return mq.TLO.Stick.Active() end)
-                        mq.delay(500, function() return not mq.TLO.Me.Moving() end)
-                        Movement:DoStickCmd("off")
-                        Movement:ClearLastStickTimer()
-                    else
-                        local desiredDistance = (target.MaxRangeTo() or 0) * 0.7
-                        if not Config:GetSetting('DoMelee') then
-                            desiredDistance = Targeting.GetTargetDistance() * .95
+                            Logger.log_debug("CantSee: Can't See target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID(), desiredDistance)
+                            Movement:NavInCombat(target.ID(), desiredDistance, false)
                         end
-
-                        Logger.log_debug("Can't See target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID(), desiredDistance)
-                        Movement:NavInCombat(target.ID(), desiredDistance, false)
                     end
                 end
+            else
+                Logger.log_debug("CantSee event detected, but checks failed: AutoEngage(%s), Moving(%s), HaterCount > 0(%s)",
+                    Strings.BoolToColorString(Config:GetSetting('DoAutoEngage')), Strings.BoolToColorString(mq.TLO.Me.Moving()), Strings.BoolToColorString(haterCount > 0))
             end
+        else
+            Logger.log_debug("CantSee event detected, but HandleCantSeeTarget is not enabled.")
         end
     end
     mq.flushevents("CantSee")
@@ -70,17 +75,13 @@ end)
 -- [ TOO CLOSE HANDLERS] --
 
 mq.event("TooClose", "Your target is too close to use a ranged weapon!", function()
-    if not Config:GetSetting('HandleTooClose') then
-        Logger.log_debug("TooCloseHandler: Event Detected, but HandleTooClose is not enabled.")
-        return
-    end
-    Logger.log_debug("TooCloseHandler: Event Detected.")
+    Logger.log_debug("TooClose: Event Detected")
     -- Check if we're in the middle of a pull and use a backup.
     if Config:GetSetting('DoPull') and Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-        Logger.log_debug("TooCloseHandler: Pull Mode Detected.")
+        Logger.log_debug("TooClose: Pull Mode Detected.")
         local discSpell = mq.TLO.Spell("Throw Stone")
         if Casting.DiscReady(discSpell) then
-            Logger.log_debug("TooCloseHandler: Attempting to Throw Stone.")
+            Logger.log_debug("TooClose: Attempting to Throw Stone.")
             Casting.UseDisc(discSpell, mq.TLO.Target.ID())
         else
             if Casting.AbilityReady("Taunt") then
@@ -88,29 +89,35 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
                 Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Taunt")
-                Logger.log_debug("TooCloseHandler: Attempting to Taunt.")
+                Logger.log_debug("TooClose: Attempting to Taunt.")
             end
             if Casting.AbilityReady("Kick") then
                 Logger.log_debug("TooCloseHandler: Naving to target to use Kick.")
                 Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Kick")
-                Logger.log_debug("TooCloseHandler: Attempting to Kick.")
+                Logger.log_debug("TooClose: Attempting to Kick.")
             end
         end
-    end
-
-    -- Only do non-pull code if autoengage is on and we are in combat
-    if Config:GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() and Targeting.GetXTHaterCount() > 0 then
-        if not Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-            Logger.log_debug("TooCloseHandler: Pull State not detected, using Combat Nav.")
-            local classConfig = Modules:ExecModule("Class", "GetClassConfig")
-            if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
-                Core.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, false)
+    else
+        if Config:GetSetting('HandleTooClose') then
+            local haterCount = Targeting.GetXTHaterCount()
+            if Config:GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() and haterCount > 0 then
+                Logger.log_debug("TooCloseHandler: Pull State not detected, using Combat Nav.")
+                local classConfig = Modules:ExecModule("Class", "GetClassConfig")
+                if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
+                    Core.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, false)
+                else
+                    Logger.log_debug("TooClose event detected, but we don't have class-specific combat nav for ranged combat!")
+                end
+            else
+                Logger.log_debug("TooClose event detected, but checks failed: AutoEngage(%s), Moving(%s), HaterCount > 0(%s)",
+                    Strings.BoolToColorString(Config:GetSetting('DoAutoEngage')), Strings.BoolToColorString(mq.TLO.Me.Moving()), Strings.BoolToColorString(haterCount > 0))
             end
+        else
+            Logger.log_debug("TooClose event detected, but HandleTooClose is not enabled.")
         end
     end
-
     mq.flushevents("TooClose")
 end)
 
@@ -119,10 +126,7 @@ end)
 -- [ TOO FAR HANDLERS ] --
 
 local function tooFarHandler()
-    if not Config:GetSetting('HandleTooFar') then
-        return
-    end
-    Logger.log_debug("tooFarHandler()")
+    Logger.log_debug("TooFar: Event Detected")
     if Config.Globals.BackOffFlag then return end
     if Config.Globals.PauseMain then return end
     if mq.TLO.Stick.Active() then
@@ -132,38 +136,46 @@ local function tooFarHandler()
     local target = mq.TLO.Target
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-        Logger.log_debug("\ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
+        Logger.log_debug("TooFar: \ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
             Targeting.GetTargetCleanName(),
             Targeting.GetTargetDistance())
         Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.7)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
-        local classConfig = Modules:ExecModule("Class", "GetClassConfig")
-        if mq.TLO.Me.Moving() or Targeting.GetXTHaterCount() == 0 then return end
+        if Config:GetSetting('HandleTooFar') then
+            local classConfig = Modules:ExecModule("Class", "GetClassConfig")
+            local haterCount = Targeting.GetXTHaterCount()
+            if Config:GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() and haterCount > 0 then
+                if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
+                    Core.SafeCallFunc("Custom Nav", classConfig.HelperFunctions.combatNav)
+                elseif Config:GetSetting('DoMelee') then
+                    Logger.log_debug("TooFar: \ayWe are in COMBAT and too far from our target!")
+                    if Config:GetSetting('DoAutoEngage') and Combat.OkToEngage(target.ID() or 0) then
+                        Core.DoCmd("/squelch /face fast")
 
-        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
-            Core.SafeCallFunc("Custom Nav", classConfig.HelperFunctions.combatNav)
-        elseif Config:GetSetting('DoMelee') then
-            Logger.log_debug("\ayWe are in COMBAT and too far from our target!")
-            if Config:GetSetting('DoAutoEngage') then
-                if Combat.OkToEngage(target.ID() or 0) then
-                    Core.DoCmd("/squelch /face fast")
-
-                    if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then --not sure if this is necessary or still happening since we changed distance to use 3D.
-                        Logger.log_debug("Too Far from Target (%s [%d]). Possible flyer detected. Moving back 10.", target.CleanName() or "", target.ID() or 0)
-                        Movement:DoStickCmd("10 moveback uw")
-                        -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
-                        mq.delay(100, function() return mq.TLO.Stick.Active() end)
-                        mq.delay(500, function() return not mq.TLO.Me.Moving() end)
-                        Movement:DoStickCmd("off")
-                        Movement:ClearLastStickTimer()
+                        if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then --not sure if this is necessary or still happening since we changed distance to use 3D.
+                            Logger.log_debug("TooFar: Too Far from Target (%s [%d]). Possible flyer detected. Moving back 10.", target.CleanName() or "", target.ID() or 0)
+                            Movement:DoStickCmd("10 moveback uw")
+                            -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
+                            mq.delay(100, function() return mq.TLO.Stick.Active() end)
+                            mq.delay(500, function() return not mq.TLO.Me.Moving() end)
+                            Movement:DoStickCmd("off")
+                            Movement:ClearLastStickTimer()
+                        else
+                            Logger.log_debug("TooFar: Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
+                                (target.MaxRangeTo() or 0) * 0.7)
+                            Movement:NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.7, false)
+                        end
                     else
-                        Logger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
-                            (target.MaxRangeTo() or 0) * 0.7)
-                        Movement:NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.7, false)
+                        Logger.log_debug("TooFar event detected, but we are not ok to engage or autoengage is disabled.")
                     end
                 end
+            else
+                Logger.log_debug("TooFar event detected, but checks failed: AutoEngage(%s), Moving(%s), HaterCount > 0(%s)",
+                    Strings.BoolToColorString(Config:GetSetting('DoAutoEngage')), Strings.BoolToColorString(mq.TLO.Me.Moving()), Strings.BoolToColorString(haterCount > 0))
             end
+        else
+            Logger.log_debug("TooFar event detected, but HandleTooFar is not enabled.")
         end
     end
 end

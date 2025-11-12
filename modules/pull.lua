@@ -2271,7 +2271,6 @@ function Module:GiveTime(combat_state)
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on pet pull to finish...")
                     Combat.PetAttack(self.TempSettings.PullID, false)
-                    mq.doevents()
                     if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
@@ -2280,6 +2279,7 @@ function Module:GiveTime(combat_state)
                         break
                     end
                     mq.delay(10)
+                    mq.doevents()
                 end
 
                 Core.SetPetHold()
@@ -2297,7 +2297,6 @@ function Module:GiveTime(combat_state)
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on face pull to finish...")
-                    mq.doevents()
 
                     Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
 
@@ -2310,6 +2309,7 @@ function Module:GiveTime(combat_state)
                         break
                     end
                     mq.delay(10)
+                    mq.doevents()
                 end
             elseif Config:GetSetting('PullAbility') == PullAbilityIDToName.Ranged then -- Ranged pull
                 -- Make sure we're looking straight ahead at our mob and delay
@@ -2329,7 +2329,6 @@ function Module:GiveTime(combat_state)
                     end
 
                     Core.DoCmd("/ranged %d", self.TempSettings.PullID)
-                    mq.doevents()
                     if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
@@ -2338,6 +2337,7 @@ function Module:GiveTime(combat_state)
                         break
                     end
                     mq.delay(10)
+                    mq.doevents()
                 end
             elseif Config:GetSetting('PullAbility') == PullAbilityIDToName.AutoAttack then -- Auto Attack pull
                 -- Make sure we're looking straight ahead at our mob and delay
@@ -2357,7 +2357,6 @@ function Module:GiveTime(combat_state)
                         mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
-                    mq.doevents()
                     if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
@@ -2366,14 +2365,13 @@ function Module:GiveTime(combat_state)
                         break
                     end
                     mq.delay(10)
+                    mq.doevents()
                 end
             else -- AA/Spell/Ability pull
-                mq.delay(5)
                 self.TempSettings.PullAttemptStarted = os.clock()
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on ability pull to finish...%s", Strings.BoolToColorString(successFn()))
-                    Targeting.SetTarget(self.TempSettings.PullID)
-                    mq.doevents()
+                    Targeting.SetTarget(self.TempSettings.PullID, true)
 
                     if mq.TLO.Target.FeetWet() ~= mq.TLO.Me.FeetWet() then
                         Logger.log_debug("\ar ALERT: Feet wet mismatch - Moving around\ax")
@@ -2395,11 +2393,11 @@ function Module:GiveTime(combat_state)
                     elseif pullAbility.Type:lower() == "spell" then
                         local abilityName = pullAbility.AbilityName
                         if type(abilityName) == 'function' then abilityName = abilityName() end
-                        Casting.UseSpell(abilityName, self.TempSettings.PullID, false, false)
+                        Casting.UseSpell(abilityName, self.TempSettings.PullID, false, false, 0)
                     elseif pullAbility.Type:lower() == "aa" then
                         local aaName = pullAbility.AbilityName
                         if type(aaName) == 'function' then aaName = aaName() end
-                        Casting.UseAA(aaName, self.TempSettings.PullID)
+                        Casting.UseAA(aaName, self.TempSettings.PullID, false, 0)
                     elseif pullAbility.Type:lower() == "item" then
                         local itemName = pullAbility.ItemName
                         if type(itemName) == 'function' then itemName = itemName() end
@@ -2418,7 +2416,9 @@ function Module:GiveTime(combat_state)
                     if self:CheckForAbort(self.TempSettings.PullID) then
                         break
                     end
+
                     mq.delay(10)
+                    mq.doevents()
                 end
             end
         end
