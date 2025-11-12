@@ -1858,6 +1858,11 @@ function Module:CheckForAbort(pullID, bNavigating)
             return true
         end
 
+        if not mq.TLO.Navigation.PathExists("id " .. pullID)() then
+            Logger.log_debug("\ar ALERT: Aborting mob no longer reachable on mesh \ax")
+            return true
+        end
+
         if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
             Logger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targeting is enabled! \ax")
             return true
