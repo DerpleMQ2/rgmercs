@@ -320,6 +320,12 @@ local _ClassConfig = {
             "Minionskin",
             "Lesser Minionskin",
         },
+        ['KoadicRune'] = {
+            "Koadic's Guard IV",
+            "Koadic's Guard III",
+            "Koadic's Guard II",
+            "Koadic's Guard I",
+        },
     },
     ['RotationOrder']   = {
         {
@@ -686,6 +692,15 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not Targeting.TargetIsACaster(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "KoadicRune",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target)
+                    if not Targeting.TargetIsATank(target) then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1068,6 +1083,7 @@ local _ClassConfig = {
                 { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
                 { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
                 { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "KoadicRune", },
             },
         },
     },

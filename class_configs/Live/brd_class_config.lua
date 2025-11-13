@@ -10,7 +10,7 @@ local ItemManager  = require('utils.item_manager')
 
 local Tooltips     = {
     Epic            = 'Item: Casts Epic Weapon Ability',
-    BardRunBuff     = "Song Line: Movement Speed Modifier",
+    RunBuffSong     = "Song Line: Movement Speed Modifier",
     AriaSong        = "Song Line: Spell Damage Focus / Haste v3 Modifier",
     WarMarchSong    = "Song Line: Melee Haste / DS / STR/ATK Increase",
     SufferingSong   = "Song Line: Melee Proc With Damage and Agro Reduction",
@@ -1292,7 +1292,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "RunBuff",
+                name = "RunBuffSong",
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 load_cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA("Selo's Sonata") end,
