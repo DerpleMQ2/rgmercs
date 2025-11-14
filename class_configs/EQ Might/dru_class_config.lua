@@ -156,6 +156,7 @@ local _ClassConfig = {
             "Flame Lick",
         },
         ['StunNuke'] = {
+            "Gale of the Stormborn",
             "Stormwatch",
             "Storm's Fury",
             -- "Breath of Karana", -- Only cast outdoors
@@ -240,6 +241,7 @@ local _ClassConfig = {
             "Regeneration",
         },
         ['AtkBuff'] = {        --Hit Damage/STR Buff
+            "Mammoth's Strength",
             "Lion's Strength", -- 5% Hit Damage
             "Nature's Might",  -- STR Buff
             "Girdle of Karana",
@@ -336,6 +338,10 @@ local _ClassConfig = {
             "Greater Minionskin",
             "Minionskin",
             "Lesser Minionskin",
+        },
+        ['ColdSlow'] = {
+            "Permafrost Grip",
+            "Ancient: Permafrost Veil",
         },
     },
     ['HealRotationOrder'] = {
@@ -439,6 +445,16 @@ local _ClassConfig = {
             end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and Core.OkayToNotHeal() and Casting.OkayToBuff()
+            end,
+        },
+        {
+            name = 'Slow',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoSlow') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
@@ -640,6 +656,15 @@ local _ClassConfig = {
             {
                 name = "Shattered Gnoll Slayer",
                 type = "Item",
+            },
+        },
+        ['Slow'] = {
+            {
+                name = "ColdSlow",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and not Casting.SlowImmuneTarget(target)
+                end,
             },
         },
         ['Debuff'] = {
@@ -1096,6 +1121,16 @@ local _ClassConfig = {
             Default = false,
             RequiresLoadoutChange = true,
         },
+        ['DoSlow']            = {
+            DisplayName = "Cast Cold Slow",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Slow",
+            Index = 101,
+            Tooltip = "Enable casting the cold-based Slow spells.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
 
         --Damage
         ['DoFireNuke']        = {
@@ -1308,8 +1343,8 @@ local _ClassConfig = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

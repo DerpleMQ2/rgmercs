@@ -76,8 +76,6 @@ local _ClassConfig = {
     ['AbilitySets']     = {
         -- TO DO: Added Dirgle of Metala/Snare line
         -- bellow of chaos 66 dd nuke??
-        -- one bard band --- this spell does not exist
-        -- vulka's chant of lightning - not available as a spell, fuku glyph only
         ['RunBuff'] = {
             "Selo's Accelerating Chorus",
             "Selo's Accelerando",
@@ -86,6 +84,7 @@ local _ClassConfig = {
             "Tarew's Aquatic Ayre", --Level 16
         },
         ['AriaSong'] = {
+            "Aria of the Harmoniarch", -- 70 EQM
             "Ancient: Call of Power",
             "Eriki's Psalm of Power",
             "Yelhun's Mystic Call",
@@ -104,6 +103,7 @@ local _ClassConfig = {
             "Aura of Insight",
         },
         ['GroupRegenSong'] = {
+            "Erollisi's Cantata",            -- 70 EQM
             "Cantata of Life",               -- 67
             "Wind of Marr",                  -- 62
             "Cantata of Replenishment",      -- 55
@@ -186,6 +186,7 @@ local _ClassConfig = {
             "Psalm of Veeshan",
         },
         ['MezSong'] = {
+            "Aelfric's Last Lullaby",
             "Vulka's Lullaby",
             "Creeping Dreams",
             "Luvwen's Lullaby",
@@ -202,12 +203,14 @@ local _ClassConfig = {
             "Wave of Morell",
         },
         ['Jonthan'] = {
+            "Jonthan's Mightful Caretaker",
             "Jonthan's Inspiration",
             "Jonthan's Provocation",
             "Jonthan's Whistling Warsong",
         },
         ['CalmSong'] = {
             -- CalmSong - Level Range 8+ --Included for manual use with /rgl usemap
+            "Whispersong of Veshma",
             "Luvwen's Aria of Serenity", -- Level 66
             "Silent Song of Quellious",  -- Level 61
             "Kelin's Lugubrious Lament", -- Level 8 (Max Mob Level of 60)
@@ -1263,8 +1266,8 @@ local _ClassConfig = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 65, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 65, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

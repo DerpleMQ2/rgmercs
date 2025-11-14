@@ -9,18 +9,18 @@ local DanNet      = require('lib.dannet.helpers')
 local Logger      = require("utils.logger")
 
 _ClassConfig      = {
-    _version              = "1.2 - EQ Might (WIP)",
-    _author               = "Derple, Morisato, Algar",
-    ['ModeChecks']        = {
+    _version            = "1.2 - EQ Might (WIP)",
+    _author             = "Derple, Morisato, Algar",
+    ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("PetTank") end,
         IsRezing = function() return mq.TLO.FindItem("Legendary Staff of Forbidden Rites")() end,
     },
-    ['Modes']             = {
+    ['Modes']           = {
         'DPS',
         'PetTank',
         'PBAE',
     },
-    ['OnModeChange']      = function(self, mode)
+    ['OnModeChange']    = function(self, mode)
         if mode == "PetTank" then
             Core.DoCmd("/pet taunt on")
             Core.DoCmd("/pet resume on")
@@ -35,124 +35,28 @@ _ClassConfig      = {
             if Config:GetSetting('AutoAssistAt') == 100 then
                 Config:SetSetting('AutoAssistAt', 98)
             end
-            Config:SetSetting('WaitOnGlobalCooldown', false)
             Config:SetSetting('StayOnTarget', true)
         end
     end,
-    ['ItemSets']          = {
+    ['ItemSets']        = {
         ['Epic'] = {
             "Focus of Primal Elements",
             "Staff of Elemental Essence",
         },
     },
-    ['AbilitySets']       = {
+    ['AbilitySets']     = {
         --- Nukes
         ['SwarmPet'] = {
-            -- Swarm Pet* >= LVL 70
-            -- "Ravening Servant",
-            -- "Roiling Servant",
-            -- "Riotous Servant",
-            -- "Reckless Servant",
-            -- "Remorseless Servant",
-            -- "Relentless Servant",
-            -- "Ruthless Servant",
-            -- "Ruinous Servant",
-            -- "Rumbling Servant",
-            -- "Rancorous Servant",
-            -- "Rampaging Servant",
             "Raging Servant",
             "Restrained Raging Servant",
             "Rage of Zomm",
         },
-        ['SpearNuke'] = {
-            -- Spear Nuke* >= LVL 70
-            "Spear of Ro",
-        },
-        ['ChaoticNuke'] = {
-            -- Chaotic Nuke with Beneficial Effect >= LVL69
-            -- "Fickle Inferno",
-            "Fickle Fire",
-        },
-        -- ['FireNuke'] = {
-        --     -- Fire Nuke 1 <= LVL <= 70
-        --     "Cremating Sands",
-        --     "Ravaging Sands",
-        --     "Incinerating Sands",
-        --     "Crash of Sand",
-        --     "Blistering Sands",
-        --     "Searing Sands",
-        --     "Broiling Sands",
-        --     "Blast of Sand",
-        --     "Burning Sands",
-        --     "Burst of Sand",
-        --     "Strike of Sand",
-        --     "Torrid Sands",
-        --     "Scorching Sands",
-        --     "Scalding Sands",
-        --     "Sun Vortex",
-        --     "Star Strike", -- Changed to another spell on Lazarus
-        --     "Ancient: Nova Strike",
-        --     "Burning Sand",
-        --     "Shock of Fiery Blades",
-        --     "Char",
-        --     "Blaze",
-        --     "Shock of Flame",
-        --     "Burn",
-        --     "Burst of Flame",
+        -- ['ChaoticNuke'] = {
+        --     -- Chaotic Nuke with Beneficial Effect >= LVL69
+        --     "Fickle Fire",
         -- },
-        -- ['FireBoltNuke'] = {
-        --     -- Fire Bolt Nukes
-        --     "Bolt of Molten Dacite",
-        --     "Bolt of Molten Olivine",
-        --     "Bolt of Molten Komatiite",
-        --     "Bolt of Skyfire",
-        --     "Bolt of Molten Shieldstone",
-        --     "Bolt of Molten Magma",
-        --     "Bolt of Molten Steel",
-        --     "Bolt of Rhyolite",
-        --     "Bolt of Molten Scoria",
-        --     "Bolt of Molten Dross",
-        --     "Bolt of Molten Slag",
-        --     "Bolt of Jerikor",
-        --     "Firebolt of Tallon",
-        --     "Seeking Flame of Seukor",
-        --     "Scars of Sigil",
-        --     "Lava Bolt",
-        --     "Cinder Bolt",
-        --     "Bolt of Flame",
-        --     "Flame Bolt",
-        -- },
-        -- ['MagicNuke'] = {
-        --     -- Nuke 1 <= LVL <= 69
-        --     "Shock of Memorial Steel",
-        --     "Shock of Carbide Steel",
-        --     "Shock of Burning Steel",
-        --     "Shock of Arcronite Steel",
-        --     "Shock of Darksteel",
-        --     "Shock of Blistersteel",
-        --     "Shock of Argathian Steel",
-        --     "Shock of Ethereal Steel",
-        --     "Shock of Discordant Steel",
-        --     "Shock of Cineral Steel",
-        --     "Shock of Silvered Steel",
-        --     "Blade Strike",
-        --     "Rock of Taelosia",
-        --     "Black Steel",
-        --     "Shock of Steel",
-        --     "Shock of Swords",
-        --     "Shock of Spikes",
-        --     "Shock of Blades",
-        -- },
-        -- ['MagicBolt'] = {
-        --     -- Magic Bolt Nukes
-        --     "Voidstone Bolt",
-        --     "Luclinite Bolt",
-        --     "Komatiite Bolt",
-        --     "Korascian Bolt",
-        --     "Meteoric Bolt",
-        --     "Iron Bolt",
-        -- },
-        ['FireDD'] = { --Mix of Fire Nukes and Bolts appropriate for use at lower levels.
+        ['FireDD'] = { -- Mix of Fire Nukes and Bolts appropriate for use at lower levels.
+            "Burning Earth",
             "Burning Sand",
             "Scars of Sigil",
             "Lava Bolt",
@@ -164,6 +68,8 @@ _ClassConfig      = {
             "Burst of Flame",
         },
         ['BigFireDD'] = { -- Longer cast time bolts we can use when mobs are at higher health.
+            "Bolt of Molten Slag",
+            "Spear of Ro",
             "Bolt of Jerikor",
             "Ancient: Chaos Vortex",
             "Firebolt of Tallon",
@@ -178,101 +84,8 @@ _ClassConfig      = {
             "Shock of Spikes",
             "Shock of Blades",
         },
-        ['TwinCast'] = {
-            "Twincast",
-        },
-        ['BeamNuke'] = {
-            -- Beam Frontal AOE Spell*
-            "Beam of Molten Dacite",
-            "Beam of Molten Olivine",
-            "Beam of Molten Komatiite",
-            "Beam of Molten Rhyolite",
-            "Beam of Molten Shieldstone",
-            "Beam of Brimstone",
-            "Beam of Molten Steel",
-            "Beam of Rhyolite",
-            "Beam of Molten Scoria",
-            "Beam of Molten Dross",
-            "Beam of Molten Slag",
-        },
-        ['RainNuke'] = {
-            --- Rain AOE Spell*
-            "Rain of Molten Dacite",
-            "Rain of Molten Olivine",
-            "Rain of Molten Komatiite",
-            "Rain of Molten Rhyolite",
-            "Coronal Rain",
-            "Rain of Blistersteel",
-            "Rain of Molten Steel",
-            "Rain of Rhyolite",
-            "Rain of Molten Scoria",
-            "Rain of Molten Dross",
-            "Rain of Molten Slag",
-            "Rain of Jerikor",
-            "Sun Storm",
-            "Sirocco",
-            "Rain of Lava",
-            "Rain of Fire",
-        },
-        ['MagicRainNuke'] = {
-            -- Magic Rain
-            "rain of Kukris",
-            "Rain of Falchions",
-            "Rain of Blades",
-            "Rain of Spikes",
-            "Rain Of Swords",
-            "ManaStorm",
-            "Maelstrom of Electricity",
-            "Maelstrom of Thunder",
-        },
-        ['VolleyNuke'] = {
-            -- Volley Nuke - Pet buff*
-            "Fusillade of Many",
-            "Barrage of Many",
-            "Shockwave of Many",
-            "Volley of Many",
-            "Storm of Many",
-            "Salvo of Many",
-            "Strike of Many",
-            "Clash of Many",
-            "Jolt of Many",
-            "Shock of Many",
-        },
-        ['SummonedNuke'] = {
-            -- Unnatural Nukes >70
-            "Dismantle the Unnatural",
-            "Unmend the Unnatural",
-            "Obliterate the Unnatural",
-            "Repudiate the Unnatural",
-            "Eradicate the Unnatural",
-            "Exterminate the Unnatural",
-            "Abolish the Divergent",
-            "Annihilate the Divergent",
-            "Annihilate the Anomalous",
-            "Annihilate the Aberrant",
-            "Annihilate the Unnatural",
-        },
-        ['MaloNuke'] = {
-            -- Shock/Malo Combo Line
-            "Memorial Steel Malosinera",
-            "Carbide Malosinetra",
-            "Blistersteel Malosenia",
-            "Darksteel Malosenete",
-            "Arcronite Malosinata",
-            "Burning Malosinara",
-        },
         --- Buffs
         ['SelfShield'] = {
-            "Shield of Memories",
-            "Shield of Shadow",
-            "Shield of Restless Ice",
-            "Shield of Scales",
-            "Shield of the Pellarus",
-            "Shield of the Dauntless",
-            "Shield of Bronze",
-            "Shield of Dreams",
-            "Shield of the Void",
-            "Prime Guard",
             "Prime Shielding",
             "Elemental Aura",
             "Shield of Maelin",
@@ -287,25 +100,12 @@ _ClassConfig      = {
         },
         ['ShortDurDmgShield'] = {
             -- Use at the start of the DPS loop
-            "Boiling Skin",
-            "Scorching Skin",
-            "Burning Skin",
-            "Blistering Skin",
-            "Coronal Skin",
-            "Infernal Skin",
-            "Molten Skin",
-            "Blazing Skin",
-            "Torrid Skin",
-            "Brimstoneskin",
-            "Searing Skin",
-            "Scorching Skin",
             "Ancient: Veil of Pyrilonus",
             "Pyrilen Skin",
         },
         ['LongDurDmgShield'] = {
             -- Preferring group buffs for ease. Included all Single target Now as well
-            -- "Circle of Magmaskin",
-            -- "Magmaskin",
+            -- "Magmaskin", Single target vs group (convenience), minimal difference
             "Circle of Fireskin",
             "Fireskin",
             "Maelstrom of Ro",
@@ -320,132 +120,22 @@ _ClassConfig      = {
             "Shield of Fire",
         },
         ['ManaRegenBuff'] = {
-            -- LVL58 (Transon's Phantasmal Protection) and up to avoid reagent usage
-            "Courageous Guardian",
-            "Relentless Guardian",
-            "Restless Guardian",
-            "Burning Guardian",
-            "Praetorian Guardian",
-            "Phantasmal Guardian",
-            "Splendrous Guardian",
-            "Cognitive Guardian",
-            "Empyrean Guardian",
-            "Eidolic Guardian",
-            "Phantasmal Warden",
             "Phantom Shield",
             "Xegony's Phantasmal Guard",
             "Transon's Phantasmal Protection",
-        },
-        ['AllianceBuff'] = {
-            "Firebound Conjunction",
-            "Firebound Coalition",
-            "Firebound Covenant",
-            "Firebound Alliance",
-        },
-        ['SurgeDS1'] = {
-            -- ShortDuration DS (Slot 4)
-            "Surge of Shadow",
-            "Surge of Arcanum",
-            "Surge of Shadowflares",
-            "Surge of Thaumacretion",
-        },
-        ['SurgeDS2'] = {
-            -- ShortDuration DS (Slot 4)
-            "Surge of Shadow",
-            "Surge of Arcanum",
-            "Surge of Shadowflares",
-            "Surge of Thaumacretion",
         },
         ['PetAura'] = {
             -- Mage Pet Aura
             "Rathe's Strength",
             "Earthen Strength",
         },
-        --not used
-        --[[ ['SingleDS'] = {
-            -- Single target Dmg Shields For Pets
-            "Forgefire Coat",
-            "Emberweave Coat",
-            "Igneous Coat",
-            "Inferno Coat",
-            "Flameweave Coat",
-            "Flameskin",
-            "Embercoat",
-            "Dreamfire Coat",
-            "Brimstoneskin",
-            "Lavaskin",
-            "Magmaskin",
-            "Fireskin",
-            "FlameShield of Ro",
-            "Cadeau of Flame",
-            "Shield of Lava",
-            "Barrier of Combustion",
-            "Inferno Shield",
-            "Shield of Flame",
-            "Shield of Fire",
-        },]] --
         ['FireShroud'] = {
             -- Defensive Proc 3-6m Buff
-            "Igneous Veil",
-            "Volcanic Veil",
-            "Exothermic Veil",
-            "Skyfire Veil",
-            "Magmatic Veil",
-            "Molten Veil",
-            "Burning Veil",
-            "Burning Pyroshroud",
-            "Burning Brimbody",
             "Burning Aura",
         },
-        ['PetBodyGuard'] = {
-            "ValorForged Bodyguard",
-            "Ophiolite Bodyguard",
-            "Pyroxenite Bodyguard",
-            "Rhyolitic Bodyguard",
-            "Shieldstone Bodyguard",
-            "Groundswell Bodyguard",
-            "Steelbound Bodyguard",
-            "Tellurian Bodyguard",
-            "Hulking Bodyguard",
-        },
-        ['GatherMana'] = {
-            "Gather Zeal",
-            "Gather Vigor",
-            "Gather Potency",
-            "Gather Capability",
-            "Gather Magnitude",
-            "Gather Capacity",
-            "Gather Potential",
-        },
         -- Pet Spells Pets & Spells Affecting them
-        ['MeleeGuard  '] = {
-            "Shield of Inescapability",
-            "Shield of Inevitability",
-            "Shield of Destiny",
-            "Shield of Order",
-            "Shield of Consequence",
-            "Shield of Fate",
-        },
-        ['DichoSpell'] = {
-            -- Dicho Spell*
-            "Ecliptic Companion",
-            "Composite Companion",
-            "Dissident Companion",
-            "Dichotomic Companion",
-        },
         ['PetHealSpell'] = {
             -- Pet Heal*
-            "Renewal of Shoru",
-            "Renewal of Iilivina ",
-            "Renewal of Evreth",
-            "Renewal of Ioulin",
-            "Renewal of Calix",
-            "Renewal of Hererra",
-            "Renewal of Sirqo",
-            "Renewal of Volark",
-            "Renewal of Cadwin",
-            "Revival of Aenro",
-            "Renewal of Aenda",
             "Renewal of Jerikor",
             "Renewal of Lucifer", -- EQM Custom
             "Planar Renewal",
@@ -455,60 +145,12 @@ _ClassConfig      = {
             "Renew Summoning",
             "Renew Elements",
         },
-        ['PetPromisedSpell'] = {
-            ---Pet Promised*
-            "Promised Reconstitution",
-            "Promised Relief",
-            "Promised Healing",
-            "Promised Alleviation",
-            "Promised Invigoration",
-            "Promised Amelioration",
-            "Promised Amendment",
-            "Promised Wardmending",
-            "Promised Rejuvenation",
-            "Promised Recovery",
-        },
-        ['PetStanceSpell'] = {
-            ---Pet Stance*
-            "Omphacite Stance",
-            "Kanoite Stance",
-            "Pyroxene Stance",
-            "Rhyolite Stance",
-            "Shieldstone Stance",
-            "Groundswell Stance",
-            "Steelstance",
-            "Tellurian Stance",
-            "Earthen Stance",
-            "Grounded Stance",
-            "Granite Stance",
-        },
         ['PetManaConv'] = {
-            "Valiant Symbiosis",
-            "Relentless Symbiosis",
-            "Restless Symbiosis",
-            "Burning Symbiosis",
-            "Dark Symbiosis",
-            "Phantasmal Symbiosis",
-            "Arcane Symbiosis",
-            "Spectral Symbiosis",
-            "Ethereal Symbiosis",
-            "Prime Symbiosis",
-            "Elemental Symbiosis",
             "Elemental Simulacrum",
             "Elemental Siphon",
             "Elemental Draw",
         },
         ['PetHaste'] = {
-            "Burnout XVI",
-            "Burnout XV",
-            "Burnout XIV",
-            "Burnout XIII",
-            "Burnout XII",
-            "Burnout XI",
-            "Burnout XI",
-            "Burnout IX",
-            "Burnout VIII",
-            "Burnout VII",
             "Burnout VI",
             "Elemental Fury",
             "Burnout V",
@@ -519,32 +161,11 @@ _ClassConfig      = {
             "Burnout",
         },
         ['PetIceFlame'] = {
-            "IceFlame Palisade",
-            "Iceflame Barricade ",
-            "Iceflame Rampart",
-            "Iceflame Keep",
-            "Iceflame Armaments",
-            "Iceflame Eminence",
-            "Iceflame Armor",
-            "Iceflame Ward",
-            "Iceflame Efflux",
-            "Iceflame Tenement",
-            "Iceflame Body",
             "Iceflame Guard",
         },
         ['EarthPetSpell'] = {
-            "Recruitment of Earth",
-            "Conscription of Earth",
-            "Manifestation of Earth",
-            "Embodiment of Earth",
-            "Convocation of Earth",
-            "Shard of Earth",
-            "Facet of Earth",
-            "Construct of Earth",
-            "Aspect of Earth",
-            "Core of Earth",
-            "Essence of Earth",
             "Child of Earth",
+            "Rathe's Son",
             "Greater Vocaration: Earth",
             "Vocarate: Earth",
             "Greater Conjuration: Earth",
@@ -561,17 +182,6 @@ _ClassConfig      = {
         },
         ['WaterPetSpell'] = {
             ----- Water Pet*
-            "Recruitment of Water",
-            "Conscription of Water",
-            "Manifestation of Water",
-            "Embodiment of Water",
-            "Convocation of Water",
-            "Shard of Water",
-            "Facet of Water",
-            "Construct of Water",
-            "Aspect of Water",
-            "Core of Water",
-            "Essence of Water",
             "Child of Water",
             "Servant of Marr",
             "Greater Vocaration: Water",
@@ -589,17 +199,7 @@ _ClassConfig      = {
             "Elementalkin: Water",
         },
         ['AirPetSpell'] = {
-            ----- Air Pet*
-            "Recruitment of Air",
-            "Conscription of Air",
-            "Manifestation of Air",
-            "Embodiment of Air",
-            "Convocation of Air",
-            "Shard of Air",
-            "Facet of Air",
-            "Construct of Air",
-            "Aspect of Air",
-            "Core of Air",
+            ----- Air Pet
             "Essence of Air",
             "Child of Wind",
             "Ward of Xegony",
@@ -618,17 +218,6 @@ _ClassConfig      = {
             "Elementalkin: Air",
         },
         ['FirePetSpell'] = {
-            "Recruitment of Fire",
-            "Conscription of Fire",
-            "Manifestation of Fire",
-            "Embodiment of Fire",
-            "Convocation of Fire",
-            "Shard of Fire",
-            "Facet of Fire",
-            "Construct of Fire",
-            "Aspect of Fire",
-            "Core of Fire",
-            "Essence of Fire",
             "Child of Fire",
             "Child of Ro",
             "Greater Vocaration: Fire",
@@ -647,76 +236,12 @@ _ClassConfig      = {
         },
         ['AegisBuff'] = {
             ---Pet Aegis Shield Buff (Short Duration)*
-            "Aegis of Valorforged",
-            "Auspice of Valia",
-            "Aegis of Rumblecrush",
-            "Auspice of Kildrukaun",
-            "Aegis of Orfur",
-            "Auspice of Esianti",
-            "Aegis of Zeklor",
-            "Aegis of Japac",
-            "Auspice of Eternity",
-            "Aegis of Nefori",
-            "Auspice of Shadows",
-            "Aegis of Kildrukaun",
-            "Aegis of Calliav",
             "Bulwark of Calliav",
             "Protection of Calliav",
             "Guard of Calliav",
             "Ward of Calliav",
         },
-        ['PetManaNuke'] = {
-            --- PetManaNuke
-            "Thaumatize Pet",
-        },
         -- - Summoned item Spells
-        ['PetArmorSummon'] = {
-            -- >=LVL71
-            "Grant The Alloy's Plate",
-            "Grant the Centien's Plate",
-            "Grant Ocoenydd's Plate",
-            "Grant Wirn's Plate",
-            "Grant Thassis' Plate",
-            "Grant Frightforged Plate",
-            "Grant Manaforged Plate",
-            "Grant Spectral Plate",
-            "Summon Plate of the Prime",
-            "Summon Plate of the Elements",
-        },
-        ['PetWeaponSummon'] = {
-            "Grant Goliath's Armaments",
-            "Grant Shak Dathor's Armaments",
-            "Grant Yalrek's Armaments",
-            "Grant Wirn's Armaments",
-            "Grant Thassis' Armaments",
-            "Grant Frightforged Armaments",
-            "Grant Manaforged Armaments",
-            "Grant Spectral Armaments",
-            "Summon Ethereal Armaments",
-            "Summon Prime Armaments",
-            "Summon Elemental Armaments",
-        },
-        ['PetHeirloomSummon'] = {
-            "Grant Ankexfen's Heirlooms",
-            "Grant the Diabo's Heirlooms",
-            "Summon Nastel's Heirlooms",
-            "Summon Zabella's Heirlooms",
-            "Grant Enibik's Heirlooms",
-            "Grant Atleris' Heirlooms",
-            "Grant Nint's Heirlooms",
-            "Grant Calix's Heirlooms",
-            "Grant Ioulin's Heirlooms",
-            "Grant Crystasia's Heirlooms",
-        },
-        ['IceOrbSummon'] = {
-            "Grant Frostbound Paradox",
-            "Grant Icebound Paradox",
-            "Grant Frostrift Paradox",
-            "Grant Glacial Paradox",
-            "Summon Frigid Paradox",
-            "Summon Gelid Paradox",
-            "Summon Wintry Paradox",
-        },
         ['FireOrbSummon'] = {
             -- "Summon Molten Komatiite Orb",
             -- "Summon Firebound Orb",
@@ -724,59 +249,13 @@ _ClassConfig      = {
             "Summon: Molten Orb",
             "Summon: Lava Orb",
         },
-        ['EarthPetItemSummon'] = {
-            "Summon Valorous Servant",
-            "Summon Forbearing Servant",
-            "Summon Imperative Servant",
-            "Summon Insurgent Servant",
-            "Summon Mutinous Servant",
-            "Summon Imperious Servant",
-            "Summon Exigent Servant",
-        },
-        ['FirePetItemSummon'] = {
-            "Summon Valorous Minion",
-            "Summon Forbearing Minion",
-            "Summon Imperative Minion",
-            "Summon Insurgent Minion",
-            "Summon Mutinous Minion",
-            "Summon Imperious Minion",
-            "Summon Exigent Minion",
-        },
         ['ManaRodSummon'] = {
             --- ManaRodSummon - Focuses on group mana rod summon for ease. _
-            --  - no TOL spell?
-            "Mass Dark Transvergence",
-            "Mass Dark Transvergence",
-            "Mass Arcane Transvergence",
-            "Mass Spectral Transvergence",
-            "Mass Ethereal Transvergence",
-            "Mass Prime Transvergence",
-            "Mass Elemental Transvergence",
             "Mass Mystical Transvergence",
             "Modulating Rod",
         },
-        ['SelfManaRodSummon'] = {
-            ---, - Focuses on self mana rod summon separate from other timers. >95
-            "Rod of Courageous Modulation",
-            "Sickle of Umbral Modulation",
-            "Wand of Frozen Modulation",
-            "Wand of Burning Modulation",
-            "Wand of Dark Modulation",
-            "Wand of Phantasmal Modulation",
-        },
         -- - Debuffs
         ['MaloDebuff'] = {
-            -- line < LVL 75 @ LVL75 use the AA
-            "Malosinera",
-            "Malosinetra",
-            "Malosinara",
-            "Malosinata",
-            "Malosenete",
-            "Malosenia",
-            "Maloseneta",
-            "Malosene",
-            "Malosenea",
-            "Malosinatia",
             "Malosinise",
             "Malosinia",
             "Mala",
@@ -789,22 +268,13 @@ _ClassConfig      = {
             "Call of the Hero",
         },
         ['GroupCotH'] = {
-            "Call of the Heroes",
-        },
-        ['Bladegusts'] = {
-            "Burning Bladegusts",
+            "Call of the Harbinger",
         },
         ['PBAE2'] = {
             "Scintillation",
         },
         ['PBAE1'] = {
             "Wind of the Desert",
-        },
-        ['Myriad'] = {
-            "Shock of Myriad Minions",
-        },
-        ['FranticDS'] = {
-            "Frantic Flames",
         },
         ['Minionskin'] = { --EQM Custom: HP/Regen/mitigation (May need to block druid HP buff line on pet)
             "Major Minionskin",
@@ -816,11 +286,8 @@ _ClassConfig      = {
             "Summon Orb",
         },
     },
-    ['HealRotationOrder'] = {
-
-    },
-    ['RotationOrder']     = { -- TODO: Add emergency rotation, shared health, etc
-        {                     --Summon pet even when buffs are off on emu
+    ['RotationOrder']   = { -- TODO: Add emergency rotation, shared health, etc
+        {                   --Summon pet even when buffs are off on emu
             name = 'PetSummon',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
@@ -865,7 +332,7 @@ _ClassConfig      = {
             name = 'Malo',
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('DoMalo') or Config:GetSetting('DoAEMalo') end,
+            load_cond = function() return Config:GetSetting('DoMalo') end, -- or Config:GetSetting('DoAEMalo') end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -905,20 +372,9 @@ _ClassConfig      = {
             end,
         },
         {
-            name = 'DPS(70)',
+            name = 'DPS',
             state = 1,
             steps = 1,
-            load_cond = function(self) return not Core.IsModeActive("PetTank") and self:GetResolvedActionMapItem('SpearNuke') end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and Targeting.AggroCheckOkay()
-            end,
-        },
-        {
-            name = 'DPS(1-69)',
-            state = 1,
-            steps = 1,
-            load_cond = function(self) return not Core.IsModeActive("PetTank") and not self:GetResolvedActionMapItem('SpearNuke') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Targeting.AggroCheckOkay()
@@ -976,7 +432,7 @@ _ClassConfig      = {
         },
     },
     -- Really the meat of this class.
-    ['HelperFunctions']   = {
+    ['HelperFunctions'] = {
         DeleteEpicOrb = function(self)
             if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
                 Core.DoCmd("/autoinventory")
@@ -1144,7 +600,7 @@ _ClassConfig      = {
             return true
         end,
     },
-    ['Rotations']         = {
+    ['Rotations']       = {
         ['PetSummon'] = {
             {
                 name = "Artifact of Asterion",
@@ -1230,10 +686,6 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "Minion's Memento",
-                type = "Item",
-            },
-            {
                 name_func = function() return Casting.CanUseAA("Replenish Companion") and "Replenish Companion" or "Mend Companion" end,
                 type = "AA",
             },
@@ -1278,27 +730,6 @@ _ClassConfig      = {
                 cond = function(self, spell)
                     if not spell or not spell() then return false end
                     return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "Second Wind Ward",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.PetBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Host in the Shell",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.PetBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Aegis of Kildrukaun",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.PetBuffAACheck(aaName)
                 end,
             },
             {
@@ -1356,13 +787,8 @@ _ClassConfig      = {
                 type = "AA",
             },
             {
-                name = "Fundament: Second Spire of the Elements",
+                name_func = function() return Casting.CanUseAA("Fire Core") and "Fire Core" or "Heart of Flames" end,
                 type = "AA",
-            },
-            {
-                name = "Heart of Flames",
-                type = "AA",
-                load_cond = function() return not Casting.CanUseAA("Fire Core") end,
             },
             {
                 name = "Focus of Arcanum",
@@ -1370,33 +796,8 @@ _ClassConfig      = {
                 cond = function(self, aaName, target) return Targeting.IsNamed(target) end,
             },
             {
-                name = "Improved Twincast",
-                type = "AA",
-                cond = function(self)
-                    return not mq.TLO.Me.Buff("Twincast")()
-                end,
-            },
-            {
-                name = "Forsaken Conjurer's Shoes",
-                type = "Item",
-                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Conjurer's Shoes")() end,
-            },
-            {
                 name = "Servant of Ro",
                 type = "AA",
-            },
-            {
-                name = "FranticDS",
-                type = "CustomFunc",
-                load_cond = function(self) return Config:GetSetting('DoFranticDS') end,
-                cond = function(self, spell, target)
-                    local shieldSpell = Core.GetResolvedActionMapItem("FranticDS")
-                    return Casting.CastReady(shieldSpell)
-                end,
-                custom_func = function(self)
-                    local shieldSpell = Core.GetResolvedActionMapItem("FranticDS")
-                    Casting.UseSpell(shieldSpell.RankName(), Core.GetMainAssistId(), false, false, 0)
-                end,
             },
         },
         ['DPS PET'] = {
@@ -1414,29 +815,6 @@ _ClassConfig      = {
                     end
 
                     return false
-                end,
-            },
-            {
-                name = "PetStanceSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and self.TempSettings.OowRobeBase ~= nil and Core.IsModeActive("PetTank") and
-                        Casting.PetBuffCheck(spell) and mq.TLO.Me.Pet.PctHPs() <= 95 and
-                        (mq.TLO.Me.PetBuff(mq.TLO.Spell(self.TempSettings.OowRobeBase).RankName.Base(1)() or "").ID()) or 0 == 0
-                end,
-            },
-            {
-                name = "SurgeDS1",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.PetBuffCheck(spell)
-                end,
-            },
-            {
-                name = "SurgeDS2",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
@@ -1462,13 +840,6 @@ _ClassConfig      = {
                     if mq.TLO.Me.Pet.ID() == 0 then return false end
                     local pet = mq.TLO.Me.Pet
                     return not pet.Combat() and (pet.Distance3D() or 0) > 200
-                end,
-            },
-            {
-                name = "Force of Elements",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.AggroCheckOkay()
                 end,
             },
             {
@@ -1503,56 +874,7 @@ _ClassConfig      = {
                 end,
             },
         },
-        ['DPS(70)'] = {
-            {
-                name = "SwarmPet",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting('DoSwarmPet') > 1 end,
-                cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and not (Config:GetSetting('DoSwarmPet') == 2 and not Targeting.IsNamed(target))
-                end,
-            },
-            {
-                name = "Bladegusts",
-                type = "Spell",
-            },
-            {
-                name = "ChaoticNuke",
-                type = "Spell",
-            },
-            {
-                name = "Myriad",
-                type = "Spell",
-            },
-            {
-                name = "SpearNuke",
-                type = "Spell",
-            },
-            {
-                name = "Turn Summoned",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.TargetBodyIs(target, "Undead Pet")
-                end,
-            },
-            {
-                name = "Dagger of Evil Summons",
-                type = "Item",
-            },
-            {
-                name = "Artifact of Asterion",
-                type = "Item",
-                load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Asterion")() end,
-                cond = function(self, _) return mq.TLO.Me.Pet.ID() == 0 end,
-                post_activate = function(self, spell, success)
-                    if success and mq.TLO.Me.Pet.ID() > 0 then
-                        mq.delay(50) -- slight delay to prevent chat bug with command issue
-                        self:SetPetHold()
-                    end
-                end,
-            },
-        },
-        ['DPS(1-69)'] = {
+        ['DPS'] = {
             {
                 name = "SwarmPet",
                 type = "Spell",
@@ -1590,14 +912,6 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "Bladegusts",
-                type = "Spell",
-            },
-            {
-                name = "ChaoticNuke",
-                type = "Spell",
-            },
-            {
                 name = "Artifact of Asterion",
                 type = "Item",
                 load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Asterion")() end,
@@ -1611,14 +925,6 @@ _ClassConfig      = {
             },
         },
         ['Malo'] = {
-            {
-                name = "Wind of Malosinete",
-                type = "AA",
-                load_cond = function() return Config:GetSetting('DoAEMalo') end,
-                cond = function(self, aaName)
-                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.DetAACheck(aaName)
-                end,
-            },
             {
                 name = "Malosinete",
                 type = "AA",
@@ -1644,6 +950,7 @@ _ClassConfig      = {
                     return Casting.IHaveBuff(spell)
                 end,
                 cond = function(self, spell, target)
+                    if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffCheck(spell, target) and not Casting.IHaveBuff("Circle of " .. spell.Name())
                 end,
             },
@@ -1680,13 +987,6 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "Fire Core",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1768,15 +1068,13 @@ _ClassConfig      = {
             },
         },
     },
-    ['SpellList']         = {
+    ['SpellList']       = {
         {
-            name = "Low Level", --This name is abitrary, it is simply what shows up in the UI when this spell list is loaded.
-            cond = function(self) return mq.TLO.Me.Level() < 70 end,
-            spells = {          -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
+            name = "Default", --This name is abitrary, it is simply what shows up in the UI when this spell list is loaded.
+            spells = {        -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
                 { name = "FireDD", },
                 { name = "BigFireDD", },
                 { name = "MagicDD", },
-                { name = "Bladegusts", },
                 { name = "SwarmPet", },
                 { name = "EpicPetOrb",       cond = function(self) return Config:GetSetting('UseEpicPet') and not mq.TLO.FindItem("=Ornate Orb of Mastery")() end, },
                 { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
@@ -1791,30 +1089,8 @@ _ClassConfig      = {
                 { name = "LongDurDmgShield", },
             },
         },
-        {
-            name = "Level 70", --This name is abitrary, it is simply what shows up in the UI when this spell list is loaded.
-            cond = function(self) return mq.TLO.Me.Level() >= 70 end,
-            spells = {         -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
-                { name = "SpearNuke", },
-                { name = "ChaoticNuke", },
-                { name = "SwarmPet", },
-                { name = "Bladegusts", },
-                { name = "Myriad", },
-                { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
-                { name = "PBAE2",            cond = function(self) return Core.IsModeActive("PBAE") end, },
-                { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
-                { name = "PetHealSpell",     cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
-                { name = "FireOrbSummon", },
-                { name = "FranticDS",        cond = function(self) return Config:GetSetting('DoFranticDS') end, },
-                { name = "GroupCotH", },
-                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
-                { name = "FireShroud", },
-                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
-                { name = "LongDurDmgShield", },
-            },
-        },
     },
-    ['DefaultConfig']     = {
+    ['DefaultConfig']   = {
         ['Mode']           = {
             DisplayName = "Mode",
             Category = "Combat",
@@ -1859,24 +1135,24 @@ _ClassConfig      = {
             RequiresLoadoutChange = true, -- this is a load condition
             Default = true,
         },
-        ['DoPetArmor']     = {
-            DisplayName = "Do Pet Armor",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Index = 101,
-            Tooltip = "Summon Armor for Pets",
-            Default = false,
-        },
-        ['DoPetWeapons']   = {
-            DisplayName = "Do Pet Weapons",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Index = 102,
-            Tooltip = "Summon Weapons for Pets",
-            Default = false,
-        },
+        -- ['DoPetArmor']     = {
+        --     DisplayName = "Do Pet Armor",
+        --     Group = "Items",
+        --     Header = "Item Summoning",
+        --     Category = "Item Summoning",
+        --     Index = 101,
+        --     Tooltip = "Summon Armor for Pets",
+        --     Default = false,
+        -- },
+        -- ['DoPetWeapons']   = {
+        --     DisplayName = "Do Pet Weapons",
+        --     Group = "Items",
+        --     Header = "Item Summoning",
+        --     Category = "Item Summoning",
+        --     Index = 102,
+        --     Tooltip = "Summon Weapons for Pets",
+        --     Default = false,
+        -- },
         ['PetType']        = {
             DisplayName = "Pet Type",
             Group = "Abilities",
@@ -1890,15 +1166,15 @@ _ClassConfig      = {
             Min = 1,
             Max = 4,
         },
-        ['DoPetHeirlooms'] = {
-            DisplayName = "Do Pet Heirlooms",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Index = 103,
-            Tooltip = "Summon Heirlooms for Pets",
-            Default = false,
-        },
+        -- ['DoPetHeirlooms'] = {
+        --     DisplayName = "Do Pet Heirlooms",
+        --     Group = "Items",
+        --     Header = "Item Summoning",
+        --     Category = "Item Summoning",
+        --     Index = 103,
+        --     Tooltip = "Summon Heirlooms for Pets",
+        --     Default = false,
+        -- },
         ['DoPetHealSpell'] = {
             DisplayName = "Pet Heal Spell",
             Group = "Abilities",
@@ -1959,16 +1235,6 @@ _ClassConfig      = {
             Max = 3,
             RequiresLoadoutChange = true,
         },
-        ['DoFranticDS']    = {
-            DisplayName = "Frantic Flames",
-            Group = "Abilities",
-            Header = "Buffs",
-            Category = "Group",
-            Index = 102,
-            Tooltip = "Use Frantic Flames during burns.",
-            RequiresLoadoutChange = true, --this setting is used as a load condition
-            Default = true,
-        },
         ['AISelfDelay']    = {
             DisplayName = "Autoinv Delay (Self)",
             Group = "Items",
@@ -2001,28 +1267,28 @@ _ClassConfig      = {
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
         },
-        ['DoAEMalo']       = {
-            DisplayName = "Cast AE Malo",
-            Group = "Abilities",
-            Header = "Debuffs",
-            Category = "Resist",
-            Index = 102,
-            Tooltip = "Do AE Malo Spells/AAs",
-            RequiresLoadoutChange = true, --this setting is used as a load condition
-            Default = false,
-        },
-        ['AEMaloCount']    = {
-            DisplayName = "AE Malo Count",
-            Group = "Abilities",
-            Header = "Debuffs",
-            Category = "Resist",
-            Index = 103,
-            Tooltip = "Number of XT Haters before we use AE Malo.",
-            Min = 1,
-            Default = 2,
-            Max = 30,
-            ConfigType = "Advanced",
-        },
+        -- ['DoAEMalo']       = {
+        --     DisplayName = "Cast AE Malo",
+        --     Group = "Abilities",
+        --     Header = "Debuffs",
+        --     Category = "Resist",
+        --     Index = 102,
+        --     Tooltip = "Do AE Malo Spells/AAs",
+        --     RequiresLoadoutChange = true, --this setting is used as a load condition
+        --     Default = false,
+        -- },
+        -- ['AEMaloCount']    = {
+        --     DisplayName = "AE Malo Count",
+        --     Group = "Abilities",
+        --     Header = "Debuffs",
+        --     Category = "Resist",
+        --     Index = 103,
+        --     Tooltip = "Number of XT Haters before we use AE Malo.",
+        --     Min = 1,
+        --     Default = 2,
+        --     Max = 30,
+        --     ConfigType = "Advanced",
+        -- },
         ['CombatModRod']   = {
             DisplayName = "Combat Mod Rods",
             Group = "Items",
@@ -2111,12 +1377,12 @@ _ClassConfig      = {
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
     },
-    ['ClassFAQ']          = {
+    ['ClassFAQ']        = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
