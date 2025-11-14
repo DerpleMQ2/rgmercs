@@ -21,10 +21,6 @@ return {
         },
     },
     ['AbilitySets']     = {
-        ['EndRegen'] = {
-            "Third Wind",
-            --"Second Wind",
-        },
         ['BerAura'] = {
             "Aura of Rage",
             "Bloodlust Aura",
@@ -53,6 +49,7 @@ return {
             "War Cry of Dravel",
             "Battle Cry of the Mastruq",
             "Ancient: Cry of Chaos",
+            "Ancient: Cry of Sullon",
         },
         ['GroupCrit'] = {
             "Cry Havoc",
@@ -69,6 +66,7 @@ return {
             "Head Strike",
         },
         ['SnareStrike'] = {
+            "Tendon Cleave",
             "Crippling Strike",
             "Leg Slice",
             "Leg Cut",
@@ -76,6 +74,11 @@ return {
         },
         ['DmgModProc'] = {
             "Unpredictable Rage Discipline",
+        },
+        ['HealingDisc'] = { --EQM Custom, 2m duration, 5m reuse, hp regen
+            "Rejuvenating Will Discipline",
+            "Healing Determination Discipline",
+            "Healing Will Discipline",
         },
     },
     ['RotationOrder']   = {
@@ -143,13 +146,6 @@ return {
     ['Rotations']       = {
         ['Buffs'] = {
             {
-                name = "EndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() <= 15 and mq.TLO.Me.Combat()
-                end,
-            },
-            {
                 name = "BerAura",
                 type = "Disc",
                 cond = function(self, discSpell)
@@ -177,6 +173,14 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     return Targeting.IHaveAggro(100)
+                end,
+            },
+            {
+                name = "HealingDisc",
+                type = "Disc",
+                load_cond = function(self) return Config:GetSetting('DoHealingDisc') end,
+                cond = function(self, discName)
+                    return mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart')
                 end,
             },
         },
@@ -425,6 +429,16 @@ return {
             Max = 100,
             ConfigType = "Advanced",
         },
+        ['DoHealingDisc']  = {
+            DisplayName = "Do Healing Disc",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 102,
+            Tooltip = "Use the EQM Custom 'Healing Will/Determination' Disc to heal yourself in emergencies.",
+            Default = false,
+            ConfigType = "Advanced",
+        },
 
         --AE Damage
         ['DoAEDamage']     = {
@@ -496,8 +510,8 @@ return {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 65, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 65, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 65, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

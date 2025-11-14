@@ -23,10 +23,6 @@ local _ClassConfig = {
         },
     },
     ['AbilitySets']     = {
-        ['EndRegen'] = {
-            "Third Wind",
-            --"Second Wind",
-        },
         ['MonkAura'] = {
             "Master's Aura",
             "Disciple's Aura",
@@ -44,7 +40,6 @@ local _ClassConfig = {
             "Stonestance Discipline",
         },
         ['FistDisc'] = {
-            "Scaledfist Discipline",
             "Ashenhand Discipline",
             "Thunderkick Discipline",
         },
@@ -52,11 +47,11 @@ local _ClassConfig = {
             "Heel of Kai",
             "Heel of Kanji",
         },
-        ['Speed'] = {
+        ['Focus'] = {
+            "Last Mile Focus Discipline",
             "Speed Focus Discipline",
         },
         ['Palm'] = {
-            "Crystalpalm Discipline",
             "Hundred Fists Discipline",
             "Innerflame Discipline",
         },
@@ -64,8 +59,10 @@ local _ClassConfig = {
         --     "Dreamwalk Discipline",
         --     "Resistant Discipline",
         -- },
-        ['HealingDisc'] = { --EQM Custom, 2m duration, 5m reuse, 500 hp/tick regen
+        ['HealingDisc'] = { --EQM Custom, 2m duration, 5m reuse, hp regen
+            "Rejuvenating Will Discipline",
             "Healing Determination Discipline",
+            "Healing Will Discipline",
         },
         ['Claw'] = {
             "Panther Claw",
@@ -199,6 +196,7 @@ local _ClassConfig = {
             {
                 name = "HealingDisc",
                 type = "Disc",
+                load_cond = function(self) return Config:GetSetting('DoHealingDisc') end,
                 cond = function(self, discName)
                     return mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart')
                 end,
@@ -214,11 +212,7 @@ local _ClassConfig = {
         },
         ['Burn'] = {
             {
-                name = "Fundament: Third Spire of the Sensei",
-                type = "AA",
-            },
-            {
-                name = "Zan Fi's Thunderous Whistle", --overwrites infusion of thunder
+                name = "Zan Fi's Whistle",
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName)
@@ -230,13 +224,6 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     if not Config:GetSetting("DoAEDamage") then return false end
                     return self.ClassConfig.HelperFunctions.AETargetCheck()
-                end,
-            },
-            {
-                name = "Silent Strikes",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and (mq.TLO.Me.PctAggro() or 0) > 60
                 end,
             },
             {
@@ -262,31 +249,16 @@ local _ClassConfig = {
                 type = "Disc",
             },
             {
-                name = "Speed",
+                name = "Focus",
                 type = "Disc",
             },
         },
         ['CombatBuff'] = {
             {
-                name = "EndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 15
-                end,
-            },
-            {
                 name = "FistsOfWu",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.SelfBuffCheck(discSpell)
-                end,
-            },
-            {
-                name = "Infusion of Thunder",
-                type = "AA",
-                cond = function(self, aaName)
-                    if mq.TLO.Me.Buff("Zan Fi's Thunderous Whistle")() then return false end
-                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
         },
@@ -423,13 +395,23 @@ local _ClassConfig = {
             Max = 100,
             ConfigType = "Advanced",
         },
+        ['DoHealingDisc']   = {
+            DisplayName = "Do Healing Disc",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 102,
+            Tooltip = "Use the EQM Custom 'Healing Will/Determination' Disc to heal yourself in emergencies.",
+            Default = false,
+            ConfigType = "Advanced",
+        },
     },
     ['ClassFAQ']        = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

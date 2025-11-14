@@ -121,7 +121,6 @@ local _ClassConfig = {
             "Desperate Renewal",
         },
         ['GroupHeal'] = {
-            -----Group Heals No Cure Slot 5
             "Word of Health",
             "Word of Healing",
             "Word of Vigor",
@@ -193,9 +192,6 @@ local _ClassConfig = {
             --Divine Buffs REQUIRES extra spell slot because of the 90s recast
             "Death Pact",
             "Divine Intervention",
-        },
-        ['TwinHealNuke'] = {
-            "Vigilant Condemnation",
         },
         ['RezSpell'] = {
             "Spiritual Awakening",
@@ -283,8 +279,7 @@ local _ClassConfig = {
             "Ward Undead",
         },
         ['MagicNuke'] = {
-            "Chromastrike", --Laz specific
-            -- "Calamity", -- Chroma is better
+            "Chromastrike",
             "Reproach",
             "Order",
             "Condemnation",
@@ -699,14 +694,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "TwinHealNuke",
-                type = "Spell",
-                load_cond = function(self) return Config:GetSetting('DoTwinHeal') end,
-                cond = function(self, spell)
-                    return not mq.TLO.Me.Buff("Twincast")()
-                end,
-            },
-            {
                 name = "StunTimer6",
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoTimer6Stun') end,
@@ -918,7 +905,6 @@ local _ClassConfig = {
                 { name = "DivineBuff",    cond = function(self) return Config:GetSetting('DoDivineBuff') end, },
                 { name = "YaulpSpell",    cond = function(self) return Config:GetSetting('DoYaulp') and not Casting.CanUseAA("Yaulp") end, },
                 { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
-                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },
                 { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoTimer6Stun') end, },
                 { name = "StunTimer4",    cond = function(self) return Config:GetSetting('DoTimer4Stun') end, },
                 { name = "LowLevelStun",  cond = function(self) return mq.TLO.Me.Level() < 59 end, },
@@ -1007,17 +993,6 @@ local _ClassConfig = {
         },
 
         --Combat
-        ['DoTwinHeal']        = {
-            DisplayName = "Twin Heal Nuke",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "Direct",
-            Index = 101,
-            Tooltip = "Use Twin Heal Nuke Spells",
-            RequiresLoadoutChange = true,
-            Default = true,
-            ConfigType = "Advanced",
-        },
         ['DoTimer6Stun']      = {
             DisplayName = "Timer 6 Stun",
             Group = "Abilities",
@@ -1304,8 +1279,8 @@ local _ClassConfig = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

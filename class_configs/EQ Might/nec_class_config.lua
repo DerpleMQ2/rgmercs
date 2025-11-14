@@ -767,10 +767,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Minion's Memento",
-                type = "Item",
-            },
-            {
                 name_func = function() return Casting.CanUseAA("Replenish Companion") and "Replenish Companion" or "Mend Companion" end,
                 type = "AA",
             },
@@ -1009,7 +1005,6 @@ local _ClassConfig = {
             Category = "Healing Thresholds",
             Index = 101,
             Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
-
             Default = 60,
             Min = 1,
             Max = 99,

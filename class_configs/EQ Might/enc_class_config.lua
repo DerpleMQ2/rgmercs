@@ -27,7 +27,6 @@ local _ClassConfig = {
     },
     ['AbilitySets']     = {
         --Commented any currently unused spell lines
-        --Laz spells to look into: Echoing Madness
         ['TwincastAura'] = {
             "Twincast Aura",
         },
@@ -55,6 +54,7 @@ local _ClassConfig = {
             "Quickness",
         },
         ['ManaRegen'] = {
+            "Ancient: Blessing of Clairvoyance",
             "Voice of Clairvoyance",
             "Clairvoyance",
             "Voice of Quellious",
@@ -79,6 +79,7 @@ local _ClassConfig = {
             "Boon of the Garou",
         },
         ['SelfHPBuff'] = {
+            "Sorcerous Shield",
             "Mystic Shield",
             "Shield of Maelin",
             "Shield of the Arcane",
@@ -91,10 +92,12 @@ local _ClassConfig = {
             "Minor Shielding",
         },
         ['SelfRune1'] = {
+            "Draconic Rune",
             "Ethereal Rune",
             "Arcane Rune",
         },
         ['SingleRune'] = {
+            "Rune of Ellowind",
             "Rune of Salik",
             "Rune of Zebuxoruk",
             "Rune V",
@@ -150,7 +153,7 @@ local _ClassConfig = {
             "Charm",
         },
         ['CrippleSpell'] = {
-            -- "Synaptic Seizure", -- In resources but not available
+            "Fractured Consciousness",
             "Synapsis Spasm",
             "Cripple",
             "Incapacitate",
@@ -257,7 +260,9 @@ local _ClassConfig = {
         --     "Wonderment",
         -- },
         ['MezSpell'] = {
+            "Perplexing Flash",
             "Euphoria",
+            "Echoing Madness",
             "Felicity",
             "Bliss",
             "Sleep",
@@ -281,6 +286,7 @@ local _ClassConfig = {
         --     "Mind Wipe",
         -- },
         -- ['CalmSpell'] = {
+        -- "Quiet Mind",
         --     "Placate",
         --     "Pacification",
         --     "Pacify",
@@ -308,9 +314,9 @@ local _ClassConfig = {
         ['HasteManaCombo'] = {
             "Unified Alacrity",
         },
-        ['ColoredNuke'] = {
-            "Colored Chaos",
-        },
+        -- ['ColoredNuke'] = {
+        --     "Colored Chaos",
+        -- },
         ['Chromaburst'] = {
             "Chromaburst",
         },
@@ -325,6 +331,9 @@ local _ClassConfig = {
             "Koadic's Guard III",
             "Koadic's Guard II",
             "Koadic's Guard I",
+        },
+        ['PetHealSpell'] = {
+            "Renewal of Lucifer",
         },
     },
     ['RotationOrder']   = {
@@ -410,6 +419,7 @@ local _ClassConfig = {
                 return combat_state == "Combat"
             end,
         },
+
         {
             name = 'Burn',
             state = 1,
@@ -429,6 +439,14 @@ local _ClassConfig = {
                 return combat_state == "Combat"
             end,
         },
+        {
+            name = 'PetHealing',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
+            cond = function(self, target) return (mq.TLO.Me.Pet.PctHPs() or 100) < Config:GetSetting('PetHealPct') end,
+        },
     },
     ['HelperFunctions'] = { --used to autoinventory our crystals after summon. Crystal is a group-wide spell on Laz.
         StashCrystal = function(aaName)
@@ -447,7 +465,7 @@ local _ClassConfig = {
         end,
     },
     ['Rotations']       = {
-        ['Downtime'] = {
+        ['Downtime']      = {
             {
                 name = "Eldritch Rune",
                 type = "AA",
@@ -550,7 +568,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['PetSummon'] = {
+        ['PetSummon']     = {
             {
                 name = "Artifact of Asterion",
                 type = "Item",
@@ -578,7 +596,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['PetBuff'] = {
+        ['PetBuff']       = {
             {
                 name = "SingleHasteBuff",
                 type = "Spell",
@@ -608,7 +626,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['GroupBuff'] = {
+        ['GroupBuff']     = {
             {
                 name = "HasteManaCombo",
                 type = "Spell",
@@ -820,7 +838,21 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Emergency'] = {
+        ['PetHealing']    = {
+            {
+                name = "Companion's Blessing",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return (mq.TLO.Me.Pet.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
+                end,
+            },
+            {
+                name = "PetHealSpell",
+                type = "Spell",
+                load_cond = function(self) Config:GetSetting('DoPetHealSpell') end,
+            },
+        },
+        ['Emergency']     = {
             {
                 name = "Self Stasis",
                 type = "AA",
@@ -885,7 +917,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Dispel'] = {
+        ['Dispel']        = {
             {
                 name = "Dispel",
                 type = "Spell",
@@ -895,20 +927,12 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['DPS'] = {
+        ['DPS']           = {
             { -- This triggers two nukes so we cast it whether the dot is up or not. Treat is as a nuke.
                 name = "MindDot",
                 type = "Spell",
                 load_cond = function() return Config:GetSetting("DoMindDot") end,
                 cond = function(self, spell, target)
-                    return Casting.OkayToNuke()
-                end,
-            },
-            {
-                name = "ColoredNuke",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting("DoNuke") end,
-                cond = function(self)
                     return Casting.OkayToNuke()
                 end,
             },
@@ -946,7 +970,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Burn'] = {
+        ['Burn']          = {
             {
                 name = "Illusions of Grandeur",
                 type = "AA",
@@ -1012,7 +1036,7 @@ local _ClassConfig = {
                 type = "AA",
             },
         },
-        ['Tash'] = {
+        ['Tash']          = {
             {
                 name = "Bite of Tashani",
                 type = "AA",
@@ -1029,7 +1053,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Slow'] = {
+        ['Slow']          = {
             {
                 name = "Enveloping Helix",
                 type = "AA",
@@ -1074,11 +1098,11 @@ local _ClassConfig = {
                 { name = "TankIllusionBuff", cond = function(self) return Config:GetSetting('DoTankIllusionBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
                 { name = "Dispel",           cond = function(self) return Config:GetSetting('DoDispel') end, },
-                { name = "ColoredNuke",      cond = function(self) return Config:GetSetting('DoColored') end, },
                 { name = "Chromaburst",      cond = function(self) return Config:GetSetting('DoChroma') end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') end, },
                 { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') end, },
+                { name = "PetHealSpell",     cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "HateBuff",         cond = function(self) return Config:GetSetting('DoHateBuff') end, },
                 { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
                 { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
@@ -1451,13 +1475,34 @@ local _ClassConfig = {
             RequiresLoadoutChange = true, -- this is a load condition
             Default = true,
         },
+        ['DoPetHealSpell']     = {
+            DisplayName = "Pet Heal Spell",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 101,
+            Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.",
+            Default = false,
+            RequiresLoadoutChange = true,
+        },
+        ['PetHealPct']         = {
+            DisplayName = "Pet Heal Spell HP%",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Healing Thresholds",
+            Index = 101,
+            Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
+            Default = 60,
+            Min = 1,
+            Max = 99,
+        },
     },
     ['ClassFAQ']        = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

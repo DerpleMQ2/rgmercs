@@ -28,8 +28,7 @@ return {
     ['AbilitySets']       = { --TODO/Under Consideration: Add AoE Roar line, add rotation entry (tie it to Do AoE setting), swap in instead of lance 2, especially since the last lance2 is level 112
         ['SwarmPet'] = {
             -- Swarm Pet
-            "Reptilian Venom",
-            "Amphibious Toxin",
+            "Bestial Empathy",
         },
         ['Icelance1'] = {
             -- Lance 1 Timer 7 Ice Nuke Fast Cast
@@ -62,6 +61,7 @@ return {
             "Scorpion Venom",     -- Level 61
             "Turepta Blood",      -- Level 65
             "Chimera Blood",      -- Level 66
+            "Diregriffon's Bite", -- 70 EQM
         },
         ['SlowSpell'] = {
             -- Slow Spell
@@ -92,7 +92,7 @@ return {
             "Sha's Restoration",       -- Level 55
             "Healing of Sorsha",       -- Level 61
             "Healing of Mikkily",      -- Level 66
-            "Renewal of Lucifer",      -- EQM Custom
+            "Healing of Uluanes",      -- 70 EQM Custom
         },
         ['PetSpell'] = {
             "Spirit of Sharik",    -- Level 8
@@ -149,13 +149,13 @@ return {
             "Spiritual Purity",
             "Spiritual Dominion",
             "Spiritual Ascendance",
-            "Spiritual Rejuvenation",
         },
         ['PetBlockSpell'] = {
             "Ward of Calliav",       -- Level 49
             "Guard of Calliav",      -- Level 58
             "Protection of Calliav", -- Level 64
             "Feral Guard",           -- Level 69
+            "Mammoth-Hide Guard",    -- Level 70 EQM
         },
         ['AvatarSpell'] = {
             -- Str Stam Dex Buff
@@ -168,6 +168,7 @@ return {
             "Talisman of Altuna",
             "Talisman of Kragg",
             "Focus of Alladnu",
+            "Focus of Amilan", -- EQM Group
         },
         ['AtkHPBuff'] = {
             "Spiritual Vitality",
@@ -189,9 +190,9 @@ return {
         ['ProtDisc'] = {
             "Protective Spirit Discipline",
         },
-        ['VigorBuff'] = {
-            "Feral Vigor",
-        },
+        -- ['VigorBuff'] = {
+        --     "Feral Vigor",
+        -- },
         ['Minionskin'] = { --EQM Custom: HP/Regen/mitigation (May need to block druid HP buff line on pet)
             "Major Minionskin",
             "Greater Minionskin",
@@ -303,17 +304,6 @@ return {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck()
-            end,
-        },
-        {
-            name = 'Vigor',
-            timer = 10,
-            load_cond = function() return Core.GetResolvedActionMapItem("VigorBuff") end,
-            targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
-            cond = function(self, combat_state)
-                local downtime = combat_state == "Downtime" and Casting.OkayToBuff()
-                local burning = combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
-                return downtime or burning
             end,
         },
         {
@@ -757,15 +747,6 @@ return {
                 return not mq.TLO.Me.Pet.Buff(spell.Name() or "None")()
             end,
         },
-        ['Vigor'] = {
-            {
-                name = "VigorBuff",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-        },
     },
     ['SpellList']         = { -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
         {
@@ -781,7 +762,6 @@ return {
                 { name = "EndemicDot",    cond = function(self) return Config:GetSetting('DoDot') end, },
                 { name = "SwarmPet", },
                 { name = "AtkBuff", },
-                { name = "VigorBuff", },
                 { name = "PetGrowl", },
                 { name = "PetBlockSpell", },
                 { name = "PetSpell",      cond = function(self) return Config:GetSetting('KeepPetMemmed') end, },
@@ -1061,8 +1041,8 @@ return {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
