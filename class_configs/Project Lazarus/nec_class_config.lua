@@ -921,7 +921,7 @@ local _ClassConfig = {
                 { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "CharmSpell",   cond = function(self) return Config:GetSetting('CharmOn') end, },
                 { name = "ScentDebuff",  cond = function(self) return Config:GetSetting('ScentDebuffUse') == 2 and not Casting.CanUseAA("Scent of Terris") end, },
-                { name = "ScentDebuff",  cond = function(self) return Config:GetSetting('ScentDebuffUse') == 3 end, },
+                { name = "ScentDebuff2", cond = function(self) return Config:GetSetting('ScentDebuffUse') == 3 end, },
                 { name = "PoisonNuke", },
                 { name = "PoisonDotDD", },
                 { name = "FireDot", },

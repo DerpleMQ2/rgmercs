@@ -68,9 +68,14 @@ local _ClassConfig = {
             "Blightbringer's Tunic of the Grave",
             "Deathcaller's Robe",
         },
+        ['DeathDagger'] = {
+            "Legendary Dagger of Death",
+            "Dagger of Death",
+        },
     },
     ['AbilitySets']     = {
         ['SelfHPBuff'] = {
+            "Shield of Darkness",
             "Shadow Guard",
             "Shield of Maelin",
             "Shield of the Arcane",
@@ -101,6 +106,8 @@ local _ClassConfig = {
             "Dominate Undead",
         },
         ['LifeTap'] = {
+            "Drink of Vitae",
+            "Drain Life",
             "Ancient: Touch of Orshilak",
             "Soulspike",
             "Touch of Mujaki",
@@ -115,18 +122,20 @@ local _ClassConfig = {
             "Lifespike",
             "Lifetap",
         },
-        -- ['DurationTap'] = {
-        --     "Fang of Death",
-        --     "Night's Beckon",
-        --     "Saryrn's Kiss",
-        --     "Vexing Replenishment",
-        --     "Auspice",
-        --     "Bond of Death",
-        --     "Vampiric Curse",
-        --     "Shadow Compact",
-        --     "Leech",
-        -- },
+        ['DurationTap'] = {
+            "Ancient: Chiasa's Kiss",
+            -- "Fang of Death",
+            -- "Night's Beckon",
+            -- "Saryrn's Kiss",
+            -- "Vexing Replenishment",
+            -- "Auspice",
+            -- "Bond of Death",
+            -- "Vampiric Curse",
+            -- "Shadow Compact",
+            -- "Leech",
+        },
         ['PoisonNuke'] = {
+            "Venin",
             "Call for Blood",
             "Acikin",
             "Neurotoxin",
@@ -146,24 +155,31 @@ local _ClassConfig = {
             "Boil Blood",
             "Heat Blood",
         },
-        ['FireDot2'] = { -- because of dots that trigger other dots on laz, this is the only second fire dot feasible for use
+        ['FireDot2'] = {
             "Pyre of Mori",
+            "Night Fire",
+            "Funeral Pyre of Kelador",
+        },
+        ['FireDot3'] = {
+            "Night Fire",
+            "Funeral Pyre of Kelador",
         },
         -- ['SplurtDot'] = {
-        --     "Splort",
         --     "Splurt",
         -- },
         ['CurseDot'] = {
-            "Ancient: Curse of Mori",
-            "Dark Nightmare",
+            "Ancient: Curse of Mori", -- Timer 5
+            "Dark Nightmare",         -- Timer 4
             "Horror",
             "Imprecation",
             "Dark Soul",
         },
-        ['CurseDot2'] = { -- because of dots that trigger other dots on laz, this is the only second curse dot feasible for use
+        ['CurseDot2'] = {
             "Dark Nightmare",
+            "Horror",
         },
         ['PlagueDot'] = {
+            "Sevaran's Rot",
             "Chaos Plague",
             "Dark Plague",
             "Cessation of Cor",
@@ -177,9 +193,6 @@ local _ClassConfig = {
         --     "Infectious Cloud",
         --     "Disease Cloud",
         -- },
-        ['PoisonDotDD'] = {
-            "Venom of Anguish",
-        },
         ['PoisonDot'] = {
             "Chaos Venom",
             "Blood of Thule",
@@ -208,8 +221,7 @@ local _ClassConfig = {
             "Scent of Midnight",
         },
         ['LichSpell'] = {
-            "Ancient: Allure of Extinction",
-            -- "Dark Possession", -- Listed in spell file, does not appear to be in game?
+            "Dark Possession",
             "Grave Pact",
             "Ancient: Seduction of Chaos",
             "Seduction of Saryrn",
@@ -265,6 +277,7 @@ local _ClassConfig = {
             "Ward Undead",
         },
         ['OrbNuke'] = {
+            "Umbra Orb",
             "Shadow Orb",
             "Soul Orb",
         },
@@ -280,9 +293,6 @@ local _ClassConfig = {
             "Touch of Death",
             "Renew Bones",
             "Mend Bones",
-        },
-        ['Pustules'] = {
-            "Necrotic Pustules",
         },
         -- ['GroupLeech'] = {
         --     "Night Stalker",
@@ -330,17 +340,6 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
-            end,
-        },
-        {
-            name = 'Pustules',
-            timer = 10,
-            load_cond = function() return Config:GetSetting('DoPustules') end,
-            targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
-            cond = function(self, combat_state)
-                local downtime = combat_state == "Downtime" and Casting.OkayToBuff()
-                local burning = combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
-                return downtime or burning
             end,
         },
         {
@@ -443,10 +442,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Embalmer's Carapace",
-                type = "AA",
-            },
-            {
                 name = "Harm Shield",
                 type = "AA",
                 cond = function(self, aaName)
@@ -509,18 +504,6 @@ local _ClassConfig = {
         },
         ['CombatBuff']      = {
             {
-                name = "Death Bloom",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('DeathBloomPercent') and mq.TLO.Me.PctHPs() > 50
-                end,
-            },
-            {
-                name = "Reluctant Benevolence",
-                type = "AA",
-                cond = function(self, aaName) return not mq.TLO.Me.Song(aaName)() end,
-            },
-            {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
@@ -565,14 +548,6 @@ local _ClassConfig = {
         },
         ['DPS(MobHighHP)']  = {
             {
-                name = "PoisonDotDD",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if Targeting.IsNamed(target) then return false end
-                    return Casting.DotSpellCheck(spell, target)
-                end,
-            },
-            {
                 name = "FireDot",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -601,14 +576,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "PoisonDotDD",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Targeting.IsNamed(target) then return false end
-                    return Casting.DotSpellCheck(spell, target)
-                end,
-            },
-            {
                 name = "FireDot2",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -623,17 +590,15 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Scythe of the Shadowed Soul",
-                type = "Item",
-                load_cond = function(self) return mq.TLO.FindItem("=Scythe of the Shadowed Soul")() end,
-                cond = function(self, itemName, target)
-                    return Casting.DotItemCheck(itemName, target)
+                name = "FireDot3",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DotSpellCheck(spell, target)
                 end,
             },
             {
-                name = "Dagger of Death",
+                name = "DeathDagger",
                 type = "Item",
-                load_cond = function(self) return mq.TLO.FindItem("=Dagger of Death")() end,
                 cond = function(self, itemName, target)
                     return Casting.DotItemCheck(itemName, target)
                 end,
@@ -653,7 +618,7 @@ local _ClassConfig = {
                 load_cond = function() return Config:GetSetting('DoOrbNuke') end,
                 cond = function(self, spell, target)
                     local orbItem = spell() and spell.Trigger.Base(1)()
-                    return orbItem ~= nil and (mq.TLO.FindItemCount(orbItem)() or 0) < 101
+                    return orbItem ~= nil and (mq.TLO.FindItemCount(orbItem)() or 0) < 40
                 end,
             },
             {
@@ -708,32 +673,6 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Rise of Bones",
-                type = "AA",
-            },
-            {
-                name = "Graverobber's Icon",
-                type = "Item",
-            },
-            {
-                name = "Frenzy of the Dead",
-                type = "AA",
-            },
-            {
-                name = "Improved Twincast",
-                type = "AA",
-                cond = function(self)
-                    return not mq.TLO.Me.Buff("Twincast")()
-                end,
-            },
-            { -- Spire, the SpireChoice setting will determine which ability is displayed/used.
-                name_func = function(self)
-                    local spireAbil = string.format("Fundament: %s Spire of Necromancy", Config.Constants.SpireChoices[Config:GetSetting('SpireChoice') or 4])
-                    return Casting.CanUseAA(spireAbil) and spireAbil or "Spire Not Purchased/Selected"
-                end,
-                type = "AA",
-            },
-            {
                 name = "Silent Casting",
                 type = "AA",
             },
@@ -748,13 +687,6 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('DoLifeBurn') end,
                 cond = function(self, aaName, target)
                     return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() <= 25
-                end,
-            },
-            {
-                name = "Forceful Rejuvenation",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
         },
@@ -788,12 +720,6 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
-            },
-            {
-                name = "Reluctant Benevolence",
-                type = "AA",
-                active_cond = function(self, aaName) return Casting.IHaveBuff(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
-                cond = function(self, aaName) return not mq.TLO.Me.Song(aaName)() end,
             },
             {
                 name = "LichSpell",
@@ -870,26 +796,10 @@ local _ClassConfig = {
                 cond = function(self, spell) return Casting.PetBuffCheck(spell) end,
             },
             {
-                name = "Aegis of Kildrukaun",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.PetBuffAACheck(aaName)
-                end,
-            },
-            {
                 name = "Minionskin",
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.PetBuffCheck(spell)
-                end,
-            },
-        },
-        ['Pustules']        = {
-            {
-                name = "Pustules",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Targeting.TargetClassIs({ "PAL", "WAR", }, target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },
@@ -932,18 +842,18 @@ local _ClassConfig = {
             spells = {
                 { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "CharmSpell",   cond = function(self) return Config:GetSetting('CharmOn') end, },
-                { name = "ScentDebuff",  cond = function(self) return Config:GetSetting('ScentDebuffUse') == 2 and not Casting.CanUseAA("Scent of Terris") end, },
-                { name = "ScentDebuff",  cond = function(self) return Config:GetSetting('ScentDebuffUse') == 3 end, },
+                { name = "ScentDebuff",  cond = function(self) return Config:GetSetting('ScentDebuffUse') == 2 and not self.ClassConfig.HelperFunctions.GetScentItem end, },
+                { name = "ScentDebuff2", cond = function(self) return Config:GetSetting('ScentDebuffUse') == 3 end, },
                 { name = "PoisonNuke", },
-                { name = "PoisonDotDD", },
                 { name = "FireDot", },
-                { name = "FireDot2",     cond = function(self) return mq.TLO.Me.Book("Dread Pyre")() end, },
+                { name = "FireDot2", },
+                { name = "FireDot3", },
                 { name = "CurseDot", },
-                { name = "CurseDot2",    cond = function(self) return mq.TLO.Me.Book("Ancient: Curse of Mori")() end, },
+                { name = "CurseDot2", },
                 { name = "PoisonDot", },
+                { name = "DurationTap", },
                 { name = "PlagueDot", },
                 { name = "LichSpell",    cond = function(self) return Config:GetSetting('DoLich') end, },
-                { name = "Pustules",     cond = function(self) return Config:GetSetting('DoPustules') end, },
                 { name = "OrbNuke",      cond = function(self) return Config:GetSetting('DoOrbNuke') end, },
                 { name = "LifeTap",      cond = function(self) return Config:GetSetting('DoLifetap') end, },
                 { name = "UndeadNuke",   cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
@@ -1196,29 +1106,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
         },
-        ['DeathBloomPercent'] = {
-            DisplayName = "Death Bloom %",
-            Group = "Abilities",
-            Header = "Recovery",
-            Category = "Other Recovery",
-            Index = 101,
-            Tooltip = "Use Death Bloom when your mana has dropped to this percentage.",
-            Default = 40,
-            Min = 1,
-            Max = 100,
-            ConfigType = "Advanced",
-        },
-        ['DoPustules']        = {
-            DisplayName = "Use Pustules",
-            Group = "Abilities",
-            Header = "Buffs",
-            Category = "Group",
-            Index = 101,
-            Tooltip = "Use your Necrotic Pustules spell on the (non-SHD) MA.",
-            RequiresLoadoutChange = true,
-            Default = true,
-            ConfigType = "Advanced",
-        },
         ['DoOrbNuke']         = {
             DisplayName = "Summon Orbs",
             Group = "Abilities",
@@ -1234,8 +1121,8 @@ local _ClassConfig = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
