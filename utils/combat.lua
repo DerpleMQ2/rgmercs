@@ -514,7 +514,7 @@ function Combat.FindBestAutoTarget(validateFn)
     Logger.log_verbose("FindAutoTarget(): FoundTargetID(%d), myTargetId(%d)", Config.Globals.AutoTargetID or 0,
         mq.TLO.Target.ID())
 
-    if Config:GetSetting('DoAutoTarget') and not Config:GetSetting("PriorityHealing") then -- don't adjust target if autotargeting is off or we won't engae
+    if Config:GetSetting('DoAutoTarget') then
         local autoTargetId = Config.Globals.AutoTargetID
         if autoTargetId > 0 and (targetValidated or (validateFn and validateFn(autoTargetId))) then
             if mq.TLO.Target.ID() ~= autoTargetId then
