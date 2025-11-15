@@ -457,7 +457,7 @@ local function Main()
         end
     end
 
-    if Config:GetSetting('DoModRod') then
+    if Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Anytime" or (Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Combat" and curState == "Combat") then
         Casting.ClickModRod()
     end
 

@@ -82,6 +82,7 @@ Config.Constants.RGTank                                  = Set.new({ "WAR", "PAL
 Config.Constants.RGPetClass                              = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
 Config.Constants.RGNotMezzedAnims                        = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
 Config.Constants.ModRods                                 = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
+Config.Constants.ModRodUse                               = { "Never", "Combat", "Anytime", }
 Config.Constants.SpellBookSlots                          = 1120
 Config.Constants.CastCompleted                           = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
 
@@ -557,15 +558,18 @@ Config.DefaultConfig               = {
     },
 
     -- Clickies(Pre-Configured)
-    ['DoModRod']             = {
-        DisplayName = "Do Mod Rod",
+    ['ModRodUse']            = {
+        DisplayName = "Mod Rod Use:",
         Group = "Items",
         Header = "Clickies",
         Category = "General Clickies",
         Index = 1,
-        Tooltip = "Use available Mod Rods (Laz: Azure Crystals) when we have less that the Mod Rod Mana % setting.",
-        Default = true,
-        ConfigType = "Advanced",
+        Tooltip = "Use available Mod Rods or Azure Crystals when we have less that the Mod Rod Mana % setting.",
+        Type = "Combo",
+        ComboOptions = Config.Constants.ModRodUse,
+        Default = 2,
+        Min = 1,
+        Max = 3,
     },
     ['ModRodManaPct']        = {
         DisplayName = "Mod Rod Mana %",

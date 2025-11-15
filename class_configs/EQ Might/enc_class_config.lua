@@ -1440,7 +1440,7 @@ local _ClassConfig = {
             Header = "Item Summoning",
             Category = "Item Summoning",
             Index = 101,
-            Tooltip = "Summon Azure Mind Crystals (Mana Restore) for the group.",
+            Tooltip = "Summon Azure Mind Crystals (Mana Restore) for yourself.",
             RequiresLoadoutChange = true, -- this is a load condition
             Default = true,
         },
@@ -1450,7 +1450,7 @@ local _ClassConfig = {
             Header = "Item Summoning",
             Category = "Item Summoning",
             Index = 102,
-            Tooltip = "Summon Sanguine Mind Crystals (Health Restore) for the group.",
+            Tooltip = "Summon Sanguine Mind Crystals (Health Restore) for yourself.",
             RequiresLoadoutChange = true, -- this is a load condition
             Default = true,
         },
