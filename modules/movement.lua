@@ -682,8 +682,8 @@ function Module:GiveTime(combat_state)
         self:DoCombatCampCheck()
     end
 
-    if Casting.OkayToBuff() and not Config:GetSetting('PriorityHealing') then
-        if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and Config:GetSetting('MaintainCampfire') > 1 then
+    if Config:GetSetting('MaintainCampfire') > 1 and Casting.OkayToBuff() then
+        if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId then
             --Logger.log_debug("Doing campfire maintainance")
             self:Campfire()
         end
