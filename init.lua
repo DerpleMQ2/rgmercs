@@ -412,11 +412,15 @@ local function Main()
 
     -- Handles state for when we're in combat
     if curState == "Combat" then
-        if not Config:GetSetting('PriorityHealing') and Combat.OkToEngage(Config.Globals.AutoTargetID) then
+        local engageOkay = Combat.OkToEngage(Config.Globals.AutoTargetID)
+        local priorityHealing = Config:GetSetting('PriorityHealing')
+
+        if not priorityHealing and engageOkay then
             Combat.EngageTarget(Config.Globals.AutoTargetID)
         else
             if (Targeting.GetXTHaterCount(true) > 0 or mq.TLO.Me.Combat()) and Targeting.GetTargetID() ~= (Config:GetSetting('DoPull') and Config.Globals.LastPulledID or 0) and not (Core.IAmMA() and Targeting.IsSpawnXTHater(mq.TLO.Target.ID())) then
-                Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat! %s", Targeting.IsSpawnXTHater(mq.TLO.Target.ID()))
+                Logger.log_debug("\ayClearing Target! Engage checks failed and we are in combat! OkToEngage(%s), PriorityHealing(%s)", Strings.BoolToColorString(engageOkay),
+                    Strings.BoolToColorString(priorityHealing))
                 Targeting.ClearTarget()
             end
         end
