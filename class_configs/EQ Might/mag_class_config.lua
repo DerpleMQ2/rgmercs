@@ -855,6 +855,13 @@ _ClassConfig      = {
                     return false
                 end,
             },
+            {
+                name = "Arcane Whisper",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
+                end,
+            },
         },
         ['DPS(PBAE)'] = {
             {

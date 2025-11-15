@@ -654,7 +654,7 @@ function Combat.OkToEngage(autoTargetId)
 
     if not Config.Globals.BackOffFlag then
         if Core.IAmMA() then
-            Logger.log_verbose("OkToEngagePrevalidate check for %s(ID: %d) - I am MA, proceeding!", targetName, targetId)
+            Logger.log_verbose("OkToEngage check for %s(ID: %d) - I am MA, proceeding!", targetName, targetId)
             return true
         else
             local distanceCheck = Targeting.GetTargetDistance() < Config:GetSetting('AssistRange')
@@ -662,7 +662,7 @@ function Combat.OkToEngage(autoTargetId)
             local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() or target.ID() == Config.Globals.ForceCombatID
             local targetingCheck = Targeting.GetTargetID() == autoTargetId
 
-            Logger.log_verbose("OkToEngage check for %s(ID: %d) - DistanceCheck(%s), AssistHPCheck(%s), HostileCheck(%s)", targetName, targetId,
+            Logger.log_verbose("OkToEngage check for %s(ID: %d) - DistanceCheck(%s), AssistHPCheck(%s), HostileCheck(%s), TargetCheck(%s)", targetName, targetId,
                 Strings.BoolToColorString(distanceCheck), Strings.BoolToColorString(assistHPCheck), Strings.BoolToColorString(hostileCheck),
                 Strings.BoolToColorString(targetingCheck))
 
