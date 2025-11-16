@@ -82,6 +82,12 @@ local _ClassConfig = {
             "Fabled Blue Band of the Oak",
             "Blue Band of the Oak",
         },
+        ['Timer2HealItem'] = {
+            "Legendary Kelp-Covered Hammer",
+            "Legendary Aged Dragon Spine Staff",
+            "Kelp-Covered Hammer",
+            "Aged Dragon Spine Staff",
+        },
     },
     ['AbilitySets']       = {
         ['HealingAura'] = {
@@ -382,11 +388,7 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Kelp-Covered Hammer",
-                type = "Item",
-            },
-            {
-                name = "Legendary Aged Dragon Spine Staff",
+                name = "Timer2HealItem",
                 type = "Item",
             },
             { --Let's make the mainheal autocrit since we have nothing better

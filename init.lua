@@ -410,17 +410,17 @@ local function Main()
         Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
     end
 
+    if Combat.OkToEngage(Config.Globals.AutoTargetID) then
+        Combat.EngageTarget(Config.Globals.AutoTargetID)
+    else
+        if (Targeting.GetXTHaterCount(true) > 0 or mq.TLO.Me.Combat()) and Targeting.GetTargetID() ~= (Config:GetSetting('DoPull') and Config.Globals.LastPulledID or 0) and not (Core.IAmMA() and Targeting.IsSpawnXTHater(mq.TLO.Target.ID())) then
+            Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
+            Targeting.ClearTarget()
+        end
+    end
+
     -- Handles state for when we're in combat
     if curState == "Combat" then
-        if Combat.OkToEngage(Config.Globals.AutoTargetID) then
-            Combat.EngageTarget(Config.Globals.AutoTargetID)
-        else
-            if (Targeting.GetXTHaterCount(true) > 0 or mq.TLO.Me.Combat()) and Targeting.GetTargetID() ~= (Config:GetSetting('DoPull') and Config.Globals.LastPulledID or 0) and not (Core.IAmMA() and Targeting.IsSpawnXTHater(mq.TLO.Target.ID())) then
-                Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
-                Targeting.ClearTarget()
-            end
-        end
-
         if ((os.clock() - Config.Globals.LastPetCmd) > 2) then
             Config.Globals.LastPetCmd = os.clock()
             if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then

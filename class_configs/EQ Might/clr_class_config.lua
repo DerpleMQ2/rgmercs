@@ -92,6 +92,12 @@ local _ClassConfig = {
             "Fabled Blue Band of the Oak",
             "Blue Band of the Oak",
         },
+        ['Timer2HealItem'] = {
+            "Legendary Weighted Hammer of Conviction",
+            "Legendary Aged Shissar Apothic Staff",
+            "Weighted Hammer of Conviction",
+            "Aged Shissar Apothic Staff",
+        },
     },
     ['AbilitySets']       = {
         -- ['WardSelfBuff'] = {
@@ -471,11 +477,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Legendary Aged Shissar Apothic Staff",
-                type = "Item",
-            },
-            {
-                name = "Weighted Hammer of Conviction",
+                name = "Timer2HealItem",
                 type = "Item",
             },
             { --This entry is for RemedyHeal until we learn a Renewal

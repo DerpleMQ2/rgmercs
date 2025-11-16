@@ -587,7 +587,15 @@ function Combat.OkToEngagePreValidateId(targetId)
     local target = mq.TLO.Spawn(targetId)
     local targetName = target.CleanName() or "Unknown"
 
-    if not target() or target.Dead() then return false end
+    if not target() then
+        Logger.log_verbose("\ayOkToEngagePrevalidate check - No Target Spawn --> Not Engaging")
+        return false
+    end
+
+    if target.Dead() then
+        Logger.log_verbose("\ayOkToEngagePrevalidate check for %s(ID: %d) - Target Spawn Dead --> Not Engaging", targetName, targetId)
+        return false
+    end
 
     local pcCheck = Targeting.TargetIsType("pc", target) or (Targeting.TargetIsType("pet", target) and Targeting.TargetIsType("pc", target.Master))
     local mercCheck = Targeting.TargetIsType("mercenary", target)
@@ -631,7 +639,20 @@ function Combat.OkToEngage(autoTargetId)
     local targetId = target.ID()
 
 
-    if not target() or target.Dead() then return false end
+    if not target() then
+        Logger.log_verbose("\ayOkToEngage check - No Target --> Not Engaging")
+        return false
+    end
+
+    if Targeting.GetTargetID() ~= autoTargetId then
+        Logger.log_verbose("\ayOkToEngage check for %s(ID: %d) - Target isn't the Auto Target, can't perform checks--> Not Engaging", targetName, targetId)
+        return false
+    end
+
+    if target.Dead() then
+        Logger.log_verbose("\ayOkToEngage check for %s(ID: %d) - Target Dead --> Not Engaging", targetName, targetId)
+        return false
+    end
 
     local pcCheck = Targeting.TargetIsType("pc", target) or (Targeting.TargetIsType("pet", target) and Targeting.TargetIsType("pc", target.Master))
     local mercCheck = Targeting.TargetIsType("mercenary", target)
@@ -660,13 +681,11 @@ function Combat.OkToEngage(autoTargetId)
             local distanceCheck = Targeting.GetTargetDistance() < Config:GetSetting('AssistRange')
             local assistHPCheck = Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt')
             local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() or target.ID() == Config.Globals.ForceCombatID
-            local targetingCheck = Targeting.GetTargetID() == autoTargetId
 
-            Logger.log_verbose("OkToEngage check for %s(ID: %d) - DistanceCheck(%s), AssistHPCheck(%s), HostileCheck(%s), TargetCheck(%s)", targetName, targetId,
-                Strings.BoolToColorString(distanceCheck), Strings.BoolToColorString(assistHPCheck), Strings.BoolToColorString(hostileCheck),
-                Strings.BoolToColorString(targetingCheck))
+            Logger.log_verbose("OkToEngage check for %s(ID: %d) - DistanceCheck(%s), AssistHPCheck(%s), HostileCheck(%s)", targetName, targetId,
+                Strings.BoolToColorString(distanceCheck), Strings.BoolToColorString(assistHPCheck), Strings.BoolToColorString(hostileCheck))
 
-            return distanceCheck and assistHPCheck and hostileCheck and targetingCheck
+            return distanceCheck and assistHPCheck and hostileCheck
         end
     end
 
