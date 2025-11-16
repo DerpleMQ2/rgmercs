@@ -1117,7 +1117,7 @@ local _ClassConfig = {
             Header = "Recovery",
             Category = "Curing",
             Index = 103,
-            Tooltip = "Memorize remove curese spell when possible (depending on other selected options). \n" ..
+            Tooltip = "Memorize remove curse spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
             RequiresLoadoutChange = true,
             Default = false,

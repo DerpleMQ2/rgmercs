@@ -32,7 +32,7 @@ return {
                 ['Poison'] = 'PurityCure',
                 ['Disease'] = 'PurityCure',
                 ['Curse'] = not Config:GetSetting('KeepCurseMemmed') and ('PurityCure' or 'CureCurse') or 'CureCurse',
-                -- ['Corruption'] = -- Project Lazarus does not currently have any Corruption Cures.
+                ['Corruption'] = "CureCorrupt",
             }
 
             -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
@@ -231,6 +231,9 @@ return {
             "Crusader's Purity",
             "Crusader's Touch",
         },
+        ['CureCorrupt'] = {
+            "Cure Corruption",
+        },
         ["HealReceivedAura"] = {
             -- Aura Buffs
             "Blessed Aura",
@@ -251,7 +254,7 @@ return {
             "Remove Lesser Curse",
             "Remove Curse",
             "Remove Greater Curse",
-            "Eradicate Cures",
+            "Eradicate Curse",
         },
         ["ForgeDisc"] = {
             "Hallowforge Discipline",
@@ -327,6 +330,7 @@ return {
                 { name = "PBAEStun",        cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
                 { name = "CureCurse",       cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 { name = "PurityCure",      cond = function(self) return Config:GetSetting('KeepPurityMemmed') end, },
+                { name = "CureCorrupt",     cond = function(self) return Config:GetSetting('KeepCorruptMemmed') end, },
                 { name = "UndeadNuke",      cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "QuickUndeadNuke", cond = function(self) return Config:GetSetting('DoQuickUndeadNuke') end, },
                 { name = "WardProc", },
@@ -1377,6 +1381,18 @@ return {
             RequiresLoadoutChange = true,
             Default = false,
         },
+        ['KeepCorruptMemmed'] = {
+            DisplayName = "Mem Cure Corruption",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
+            Index = 103,
+            Tooltip = "Memorize cure corruption spell when possible (depending on other selected options). \n" ..
+                "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
+            RequiresLoadoutChange = true,
+            Default = false,
+            ConfigType = "Advanced",
+        },
 
         --Combat
         -- ['DoTwinHealNuke']    = {
@@ -1508,8 +1524,8 @@ return {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

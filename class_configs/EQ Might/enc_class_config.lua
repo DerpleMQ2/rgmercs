@@ -390,6 +390,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Cripple',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoCripple') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Casting.OkayToDebuff()
+            end,
+        },
+        {
             name = 'Dispel',
             state = 1,
             steps = 1,
@@ -997,28 +1007,6 @@ local _ClassConfig = {
                 name = "Chromatic Haze",
                 type = "AA",
             },
-            {
-                name = "Fundament: Third Spire of Enchantment",
-                type = "AA",
-                cond = function(self) return not Casting.IHaveBuff("Illusions of Grandeur") end,
-            },
-            {
-                name = "Crippling Aurora",
-                type = "AA",
-                load_cond = function() return Config:GetSetting("DoCrippleAA") end,
-                cond = function(self, aaName, target)
-                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AECount') or
-                        (not Config:GetSetting('DoCrippleSpell') and Targeting.IsNamed(target) and Casting.DetSpellAACheck(aaName))
-                end,
-            },
-            {
-                name = "CrippleSpell",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting("DoCrippleSpell") end,
-                cond = function(self, spell, target)
-                    return Targeting.IsNamed(target) and Casting.DetSpellCheck(spell)
-                end,
-            },
             -- { --Temporarily commented out due to high prevalance of xtarget bugs with this pet. will revisit.
             --     name = "Phantasmal Opponent",
             --     type = "AA",
@@ -1050,6 +1038,15 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.DetSpellCheck(spell) and (not Casting.TargetHasBuff("Bite of Tashani") or Targeting.IsNamed(target))
+                end,
+            },
+        },
+        ['Cripple']       = {
+            {
+                name = "CrippleSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
         },
@@ -1091,7 +1088,7 @@ local _ClassConfig = {
                 { name = "CharmSpell",       cond = function(self) return Config:GetSetting('CharmOn') end, },
                 { name = "TashSpell",        cond = function(self) return Config:GetSetting('DoTash') end, },
                 { name = "SlowSpell",        cond = function(self) return Config:GetSetting('DoSlow') and not Casting.CanUseAA("Dreary Deeds") end, },
-                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCrippleSpell') end, },
+                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCripple') end, },
                 { name = "SpinStunSpell",    cond = function(self) return Config:GetSetting('DoSpinStun') > 1 end, },
                 { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
                 { name = "IllusionBuff",     cond = function(self) return Config:GetSetting('DoIllusionBuff') end, },
@@ -1252,25 +1249,15 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
         },
-        ['DoCrippleSpell']     = {
-            DisplayName = "Cast Cripple Spell",
+        ['DoCripple']          = {
+            DisplayName = "Cast Cripple",
             Group = "Abilities",
             Header = "Debuffs",
             Category = "Misc Debuffs",
-            Index = 101,
+            Index = 102,
             Tooltip = "Enable casting Cripple spells.",
             RequiresLoadoutChange = true,
-            Default = true,
-        },
-        ['DoCrippleAA']        = {
-            DisplayName = "Use AE Cripple AA",
-            Group = "Abilities",
-            Header = "Debuffs",
-            Index = 102,
-            Category = "Misc Debuffs",
-            Tooltip = "Enable casting Crippling Aurora when we meet the AE threshold, or on a named if we don't have the spell above selected.",
-            RequiresLoadoutChange = true,
-            Default = true,
+            Default = false,
         },
         ['DoDispel']           = {
             DisplayName = "Do Dispel",
