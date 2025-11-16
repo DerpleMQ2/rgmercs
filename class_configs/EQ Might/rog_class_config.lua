@@ -17,7 +17,6 @@ return {
     },
     ['ItemSets']        = {
         ['OoW_Chest'] = {
-            "Whisperer's Ascendant Tunic of Shadows",
             "Whispering Tunic of Shadows",
             "Darkraider's Vest",
         },
@@ -28,8 +27,7 @@ return {
     },
     ['AbilitySets']     = {
         ["ThiefBuff"] = {
-            "Brigand's Gaze", -- Level 70
-            "Thief's Eyes",   -- Level 65
+            "Thief's Eyes", -- Level 65
         },
         ["Kinesthetics"] = {
             "Kinesthetics Discipline", -- Level 57
@@ -53,16 +51,6 @@ return {
             "Thief's Vengeance",     -- Level 52
             "Sneak Attack",          -- Level 20
         },
-        ["FellStrike"] = {
-            "Assault", -- Level 70 on Laz
-        },
-        ["Pinpoint"] = {
-            "Pinpoint Vulnerability", -- Level 69 on Laz
-        },
-        ['EndRegen'] = {
-            "Third Wind",
-            --"Second Wind",
-        },
         ["CADisc"] = {
             "Counterattack Discipline",
         },
@@ -71,6 +59,11 @@ return {
         },
         ['Precision'] = {
             "Deadly Precision Discipline",
+        },
+        ['HealingDisc'] = { --EQM Custom, 2m duration, 5m reuse, hp regen
+            "Rejuvenating Will Discipline",
+            "Healing Determination Discipline",
+            "Healing Will Discipline",
         },
     },
     ['RotationOrder']   = {
@@ -143,17 +136,6 @@ return {
             {
                 name = "Rogue's Fury",
                 type = "AA",
-            },
-            {
-                name = "Fundament: Second Spire of the Rake",
-                type = "AA",
-            },
-            {
-                name = "Pinpoint",
-                type = "Disc",
-                cond = function(self, discSpell, target)
-                    return Casting.DetSpellCheck(discSpell, target)
-                end,
             },
             {
                 name = "Dirty Fighting",
@@ -235,10 +217,6 @@ return {
                 end,
             },
             {
-                name = "FellStrike",
-                type = "Disc",
-            },
-            {
                 name = "Twisted Shank",
                 type = "AA",
             },
@@ -249,15 +227,13 @@ return {
                     return Casting.SelfBuffItemCheck(Config:GetSetting('PoisonName'))
                 end,
             },
-            {
-                name = "EndRegen",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 15
-                end,
-            },
         },
         ['Emergency'] = {
+            {
+                name = "HealingDisc",
+                type = "Disc",
+                load_cond = function(self) return Config:GetSetting('DoHealingDisc') end,
+            },
             {
                 name = "Tumble",
                 type = "AA",
@@ -504,12 +480,22 @@ return {
             Max = 100,
             ConfigType = "Advanced",
         },
+        ['DoHealingDisc']   = {
+            DisplayName = "Do Healing Disc",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 102,
+            Tooltip = "Use the EQM Custom 'Healing Will/Determination' Disc to heal yourself in emergencies.",
+            Default = false,
+            ConfigType = "Advanced",
+        },
         ['HideAggro']       = {
             DisplayName = "Hide Aggro%",
             Group = "Abilities",
             Header = "Damage",
             Category = "AE",
-            Index = 102,
+            Index = 103,
             Tooltip = "Your Aggro % before we will attempt to Hide from our current target.",
             Default = 90,
             Min = 1,
@@ -535,8 +521,8 @@ return {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 65, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 65, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 65, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

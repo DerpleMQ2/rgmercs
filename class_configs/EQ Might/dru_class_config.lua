@@ -393,6 +393,10 @@ local _ClassConfig = {
                 name = "Nature's Blessing",
                 type = "AA",
             },
+            { --if we hit this we need spells back ASAP
+                name = "Forceful Rejuvenation",
+                type = "AA",
+            },
         },
         ['GroupHealPoint'] = {
             {
@@ -894,9 +898,10 @@ local _ClassConfig = {
                 { name = "ATKDebuff",      cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
                 { name = "FireDebuff",     cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
                 { name = "ColdDebuff",     cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
+                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
+                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
+                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
+                { name = "CureCorrupt",    cond = function(self) return Config:GetSetting('KeepCorruptMemmed') end, },
                 { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
                 { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
                 { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
@@ -907,9 +912,6 @@ local _ClassConfig = {
                 { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
                 { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
                 -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL to take up extra slots
                 { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
                 { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
@@ -1322,7 +1324,19 @@ local _ClassConfig = {
             Header = "Recovery",
             Category = "Curing",
             Index = 103,
-            Tooltip = "Memorize remove curese spell when possible (depending on other selected options). \n" ..
+            Tooltip = "Memorize remove curse spell when possible (depending on other selected options). \n" ..
+                "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
+            RequiresLoadoutChange = true,
+            Default = false,
+            ConfigType = "Advanced",
+        },
+        ['KeepCorruptMemmed'] = {
+            DisplayName = "Mem Cure Corruption",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
+            Index = 104,
+            Tooltip = "Memorize cure corruption spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
             RequiresLoadoutChange = true,
             Default = false,

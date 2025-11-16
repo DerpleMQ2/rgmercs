@@ -33,7 +33,7 @@ local _ClassConfig = {
                 ['Poison'] = not Config:GetSetting('KeepPoisonMemmed') and (groupHeal or 'CurePoison') or 'CurePoison',
                 ['Disease'] = not Config:GetSetting('KeepDiseaseMemmed') and (groupHeal or 'CureDisease') or 'CureDisease',
                 ['Curse'] = not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse',
-                -- ['Corruption'] = -- Project Lazarus does not currently have any Corruption Cures.
+                ['Corruption'] = "CureCorrupt",
             }
 
             -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
@@ -248,6 +248,9 @@ local _ClassConfig = {
             "Remove Curse",
             "Remove Lesser Curse",
             "Remove Minor Curse",
+        },
+        ['CureCorrupt'] = {
+            "Cure Corruption",
         },
         ['YaulpSpell'] = {
             "Yaulp VII",
@@ -902,6 +905,7 @@ local _ClassConfig = {
                 { name = "CurePoison",    cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
                 { name = "CureDisease",   cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",     cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
+                { name = "CureCorrupt",   cond = function(self) return Config:GetSetting('KeepCorruptMemmed') end, },
                 { name = "DivineBuff",    cond = function(self) return Config:GetSetting('DoDivineBuff') end, },
                 { name = "YaulpSpell",    cond = function(self) return Config:GetSetting('DoYaulp') and not Casting.CanUseAA("Yaulp") end, },
                 { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
@@ -1146,7 +1150,19 @@ local _ClassConfig = {
             Header = "Recovery",
             Category = "Curing",
             Index = 103,
-            Tooltip = "Memorize remove curese spell when possible (depending on other selected options). \n" ..
+            Tooltip = "Memorize remove curse spell when possible (depending on other selected options). \n" ..
+                "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
+            RequiresLoadoutChange = true,
+            Default = false,
+            ConfigType = "Advanced",
+        },
+        ['KeepCorruptMemmed'] = {
+            DisplayName = "Mem Cure Corruption",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
+            Index = 104,
+            Tooltip = "Memorize cure corruption spell when possible (depending on other selected options). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
             RequiresLoadoutChange = true,
             Default = false,

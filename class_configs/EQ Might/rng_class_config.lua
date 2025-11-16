@@ -97,7 +97,7 @@ return {
             "Burning Arrow",
         },
         ["DDProc"] = {
-            "Call of Lightning", --Double damage against humanoids on Laz
+            "Call of Lightning",
             "Cry of Thunder",
             "Call of Ice",
             "Call of Fire",
@@ -117,18 +117,12 @@ return {
         ['ArrowHail'] = {         -- DirAE multihit archery attack
             "Hail of Arrows",
         },
-        ['FocusedHail'] = { -- ST multihit archery attack
-            "Focused Hail of Arrows",
-        },
         ['Dispel'] = {
+            "Nature's Entropy",
             "Nature's Balance",
             "Annul Magic",
             "Nullify Magic",
             "Cancel Magic",
-        },
-        ['Heartshot'] = {
-            "Heartslit",
-            "Heartshot",
         },
         ['RegenBuff'] = {
             "Hunter's Vigor",
@@ -151,6 +145,7 @@ return {
             "Riftwind's Protection",
         },
         ['HealSpell'] = {
+            "Sunderock Springwater",
             "Sylvan Water",
             "Sylvan Light",
             "Chloroblast",
@@ -161,6 +156,7 @@ return {
             "Salve",
         },
         ['SwarmDot'] = {
+            "Cloud of Wasps",
             "Locust Swarm",
             "Drifting Death",
             "Fire Swarm",
@@ -168,22 +164,16 @@ return {
             "Swarm of Pain",
             "Stinging Swarm",
         },
-        ['Snapkick'] = { -- 2-hit kick attack
-            "Jolting Snapkicks",
-        },
-        ['Bullseye'] = {
-            "Bullseye Discipline",
+        ['Trueshot'] = {
             "Trueshot Discipline",
         },
         ['ShieldDS'] = { -- ST Slot 1 DS
+            "Shield of Needles",
             "Shield of Briar",
             "Shield of Thorns",
             "Shield of Spikes",
             "Shield of Brambles",
             "Shield of Thistles",
-        },
-        ['FlameSnap'] = {
-            "Flame Snap",
         },
         ['NatureProc'] = { -- ST Hade reduction defensive proc buff
             "Nature Veil",
@@ -222,6 +212,9 @@ return {
         ['JoltSpell'] = {
             "Cinder Jolt",
             "Jolt",
+        },
+        ['WrathDisc'] = {
+            "Warder's Wrath",
         },
         -- ['JoltProcBuff'] = {
         --     "Jolting Blades",
@@ -398,10 +391,6 @@ return {
                 type = "AA",
             },
             {
-                name = "Fundament: Third Spire of the Pathfinder",
-                type = "AA",
-            },
-            {
                 name = "Group Guardian of the Forest",
                 type = "AA",
                 cond = function(self, aaName, target)
@@ -434,16 +423,26 @@ return {
                 end,
             },
             {
+                name = "Pack Hunt",
+                type = "AA",
+            },
+            {
                 name = "OoW_Chest",
                 type = "Item",
             },
             {
-                name = "Poison Arrows",
-                type = "AA",
+                name = "Trueshot",
+                type = "Disc",
+                cond = function(self, aaName, target)
+                    return not Config:GetSetting('DoMelee')
+                end,
             },
             {
-                name = "Bullseye",
+                name = "WrathDisc",
                 type = "Disc",
+                cond = function(self, aaName, target)
+                    return Config:GetSetting('DoMelee')
+                end,
             },
             {
                 name_func = function(self) return Config:GetSetting('ArrowBuffChoice') == 1 and "Scout's Mastery of Fire" or "Scout's Mastery of Ice" end,
@@ -453,7 +452,6 @@ return {
                 name_func = function(self) return Config:GetSetting('ArrowBuffChoice') == 1 and "Flaming Arrows" or "Frost Arrows" end,
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if mq.TLO.Me.Buff("Poison Arrows")() then return false end
                     return Casting.SelfBuffAACheck(aaName)
                 end,
             },
@@ -526,19 +524,11 @@ return {
                 end,
             },
             {
-                name = "Cold Snap",
-                type = "AA",
-            },
-            {
                 name = "FireNukeT4",
                 type = "Spell",
             },
             {
                 name = "FireNukeT1",
-                type = "Spell",
-            },
-            {
-                name = "FlameSnap",
                 type = "Spell",
             },
             {
@@ -557,26 +547,11 @@ return {
                     return self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
-            {
-                name = "FocusedHail",
-                type = "Spell",
-            },
-            {
-                name = "Heartshot",
-                type = "Spell",
-            },
         },
         ['Weaves']     = {
             {
                 name = "Kick",
                 type = "Ability",
-            },
-            {
-                name = "Snapkick",
-                type = "Disc",
-                cond = function(self, discName, target)
-                    return mq.TLO.Me.PctEndurance() >= Config:GetSetting("ManaToNuke")
-                end,
             },
         },
         ['GroupBuff']  = {
@@ -719,7 +694,6 @@ return {
                 { name = "FireNukeT4", },
                 { name = "ColdNukeT2", },
                 { name = "ColdNukeT3", },
-                { name = "FlameSnap", },
                 { name = "Heartshot", },
                 { name = "ArrowHail", },
                 { name = "FocusedHail", },
@@ -829,8 +803,7 @@ return {
             Header = "Buffs",
             Category = "Self",
             Index = 101,
-            Tooltip = "Choose which element you would like to focus on with Arrow buffs and Scout's Mastery\n" ..
-                "We will use Poison Arrows during burns and switch back to this element (as able) afterwards.",
+            Tooltip = "Choose which element you would like to focus on with Arrow buffs and Scout's Mastery",
             Type = "Combo",
             ComboOptions = { 'Fire', 'Cold', },
             Default = 1,
@@ -992,8 +965,8 @@ return {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 65, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

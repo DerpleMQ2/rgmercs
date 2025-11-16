@@ -25,9 +25,6 @@ return {
             "Aura of Rage",
             "Bloodlust Aura",
         },
-        ['FrenzyDisc'] = {
-            "Overpowering Frenzy",
-        },
         ['VolleyDisc'] = {
             "Rage Volley",
             "Destroyer's Volley",
@@ -53,11 +50,6 @@ return {
         },
         ['GroupCrit'] = {
             "Cry Havoc",
-        },
-        ['Scream'] = { -- Stun, Throwing/Archery Dmg taken debuff
-            "Bloodcurdling Scream",
-            "Bewildering Scream",
-            "Unsettling Scream",
         },
         ['StunStrike'] = {
             "Mind Strike",
@@ -229,7 +221,7 @@ return {
                 type = "AA",
             },
             {
-                name = "Fundament: Third Spire of Savagery",
+                name = "Cry of Battle",
                 type = "AA",
             },
             {
@@ -256,10 +248,6 @@ return {
                 name = "Reckless Abandon",
                 type = "AA",
             },
-            {
-                name = "Battered Smuggler's Barrel",
-                type = "Item",
-            },
         },
         ['DPS'] = {
             {
@@ -278,29 +266,6 @@ return {
                     return not Casting.IHaveBuff("Battle Leap Warcry") and not Casting.IHaveBuff("Group Bestial Alignment")
                         ---@diagnostic disable-next-line: undefined-field --Defs are not updated with HeadWet
                         and not mq.TLO.Me.HeadWet() --Stops Leap from launching us above the water's surface
-                end,
-            },
-            {
-                name = "Rampage",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting("DoAEDamage") or Config:GetSetting('UseRampage') == 1 then return false end
-                    return (Config:GetSetting('UseRampage') == 3 or (Config:GetSetting('UseRampage') == 2 and Casting.BurnCheck())) and
-                        self.ClassConfig.HelperFunctions.AETargetCheck(true)
-                end,
-            },
-            {
-                name = "Scream",
-                type = "Disc",
-                cond = function(self, discSpell, target)
-                    return Casting.DetSpellCheck(discSpell, target)
-                end,
-            },
-            {
-                name = "FrenzyDisc",
-                type = "Disc",
-                cond = function(self, discSpell, target)
-                    return Casting.DetSpellCheck(discSpell, target)
                 end,
             },
             {
@@ -490,20 +455,6 @@ return {
             Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
-        },
-        ['UseRampage']     = {
-            DisplayName = "Rampage Use:",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 105,
-            Tooltip = "Use Rampage 1-Never 2-Burns 3-Always",
-            Type = "Combo",
-            ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
-            Default = 3,
-            Min = 1,
-            Max = 3,
-            ConfigType = "Advanced",
         },
     },
     ['ClassFAQ']        = {
