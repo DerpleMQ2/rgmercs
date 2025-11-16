@@ -84,6 +84,12 @@ local _ClassConfig = {
             "Fabled Blue Band of the Oak",
             "Blue Band of the Oak",
         },
+        ['Timer2HealItem'] = {
+            "Legendary Zun'Muram's Spear of Doom",
+            "Legendary Aged Hammer of the Dragonborn",
+            "Zun'Muram's Spear of Doom",
+            "Aged Hammer of the Dragonborn",
+        },
     },
     ['AbilitySets']       = {
         ["GroupFocusSpell"] = {
@@ -483,11 +489,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Legendary Aged Hammer of the Dragonborn",
-                type = "Item",
-            },
-            {
-                name = "Zun'Muram's Spear of Doom",
+                name = "Timer2HealItem",
                 type = "Item",
             },
             {
