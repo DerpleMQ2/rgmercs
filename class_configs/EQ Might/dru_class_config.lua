@@ -731,7 +731,7 @@ local _ClassConfig = {
                 type = "AA",
                 load_cond = function() return Config:GetSetting('DoMoveBuffs') end,
                 cond = function(self, aaName, target)
-                    return Casting.GroupBuffAACheck(aaName)
+                    return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
             {

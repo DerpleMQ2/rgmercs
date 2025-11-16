@@ -876,6 +876,14 @@ local _ClassConfig = {
         },
         ['Downtime']    = {
             {
+                name = "Communion of the Cheetah",
+                type = "AA",
+                load_cond = function() return Config:GetSetting('DoRunSpeed') end,
+                cond = function(self, aaName, target)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
                 name = "Cannibalization",
                 type = "AA",
                 cond = function(self, aaName)
@@ -926,6 +934,14 @@ local _ClassConfig = {
             },
         },
         ['GroupBuff']   = {
+            {
+                name = "Communion of the Cheetah",
+                type = "AA",
+                load_cond = function() return Config:GetSetting('DoRunSpeed') and Casting.CanUseAA("Communion of the Cheetah") end,
+                cond = function(self, aaName, target)
+                    return Casting.GroupBuffAACheck(aaName, target)
+                end,
+            },
             {
                 name = "SlowProcBuff",
                 type = "Spell",
@@ -996,14 +1012,6 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if (spell.TargetType() or ""):lower() ~= "group v2" and not (Targeting.TargetIsATank(target) or Targeting.TargetIsMyself(target)) then return false end
                     return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-            {
-                name = "Communion of the Cheetah",
-                type = "AA",
-                load_cond = function() return Config:GetSetting('DoRunSpeed') and Casting.CanUseAA("Communion of the Cheetah") end,
-                cond = function(self, aaName, target)
-                    return Casting.GroupBuffAACheck(aaName)
                 end,
             },
             {
