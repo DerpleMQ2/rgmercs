@@ -1093,7 +1093,7 @@ _ClassConfig      = {
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                load_cond = function(self) Config:GetSetting('DoPetHealSpell') end,
+                load_cond = function(self) return Config:GetSetting('DoPetHealSpell') end,
             },
         },
         ['PetBuff'] = {
