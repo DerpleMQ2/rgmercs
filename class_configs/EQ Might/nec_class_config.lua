@@ -636,7 +636,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoLifetap') end,
                 cond = function(self, spell, target)
-                    return Casting.OkayToNuke()
+                    return Casting.OkayToNuke() and Targeting.LightHealsNeeded(mq.TLO.Me)
                 end,
             },
             {

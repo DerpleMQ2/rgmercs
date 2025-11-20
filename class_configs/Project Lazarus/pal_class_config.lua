@@ -199,14 +199,14 @@ return {
         },
         ["LightHeal"] = {
             -- ToT Light Heal
-            "Light of Life",  -- Level 52
+            -- "Light of Life",  -- Level 52 -- Currently ST heal, not a ToT
             "Light of Nife",  -- Level 63
             "Light of Order", -- Level 65
             "Light of Piety", -- Level 68
         },
         ["LightHeal2"] = {
             -- ToT Light Heal
-            "Light of Life",  -- Level 52
+            -- "Light of Life",  -- Level 52
             "Light of Nife",  -- Level 63
             "Light of Order", -- Level 65
             "Light of Piety", -- Level 68
