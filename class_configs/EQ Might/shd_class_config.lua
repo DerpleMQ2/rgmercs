@@ -229,6 +229,21 @@ local _ClassConfig = {
             "Lifespike",
             "Lifetap", -- Level 8
         },
+        ['LifeTap3'] = {
+            "Touch of the Devourer",
+            "Leech Soul", -- EQM Custom
+            "Touch of Inruku",
+            "Touch of Innoruuk",
+            "Touch of Volatis",
+            "Drain Soul",
+            "Drain Spirit",
+            "Spirit Tap",
+            "Siphon Life",
+            "Life Leech",
+            "Lifedraw",
+            "Lifespike",
+            "Lifetap", -- Level 8
+        },
         -- ['TouchTap'] = {
         --     "Touch of Draygun",
         -- },
@@ -248,6 +263,15 @@ local _ClassConfig = {
             "Terror of Vergalid", -- EQM added
         },
         ['Terror2'] = {
+            "Terror of Darkness",
+            "Terror of Shadows",
+            "Terror of Death",
+            "Terror of Terris",
+            "Terror of Thule",
+            "Terror of Discord",
+            "Terror of Vergalid", -- EQM added
+        },
+        ['Terror3'] = {
             "Terror of Darkness",
             "Terror of Shadows",
             "Terror of Death",
@@ -695,12 +719,27 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 load_cond = function(self) return Config:GetSetting('DoTerror') end,
+                cond = function(self, spell, target)
+                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                end,
             },
             {
                 name = "Terror2",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 load_cond = function(self) return Config:GetSetting('DoTerror') end,
+                cond = function(self, spell, target)
+                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                end,
+            },
+            {
+                name = "Terror3",
+                type = "Spell",
+                tooltip = Tooltips.Terror,
+                load_cond = function(self) return Config:GetSetting('DoTerror') end,
+                cond = function(self, spell, target)
+                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                end,
             },
         },
         ['AEHateTools'] = {
@@ -851,6 +890,15 @@ local _ClassConfig = {
                     return Casting.HaveManaToNuke() and myHP <= Config:GetSetting('StartLifeTap') or myHP <= Config:GetSetting('EmergencyStart')
                 end,
             },
+            {
+                name = "LifeTap3",
+                type = "Spell",
+                tooltip = Tooltips.LifeTap,
+                cond = function(self, spell)
+                    local myHP = mq.TLO.Me.PctHPs()
+                    return Casting.HaveManaToNuke() and myHP <= Config:GetSetting('StartLifeTap') or myHP <= Config:GetSetting('EmergencyStart')
+                end,
+            },
         },
         ['Combat'] = {
             {
@@ -989,6 +1037,9 @@ local _ClassConfig = {
                 { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
+                { name = "Terror3",     cond = function(self) return Config:GetSetting('DoTerror') end, },
+                { name = "LifeTap3", },
+                { name = "SelfDS", },
             },
         },
     },
@@ -1043,6 +1094,18 @@ local _ClassConfig = {
         },
         {
             id = 'LifeTap2',
+            Type = "Spell",
+            DisplayName = function() return Core.GetResolvedActionMapItem('LifeTap2').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('LifeTap2').RankName.Name() or "" end,
+            AbilityRange = 200,
+            cond = function(self)
+                local resolvedSpell = Core.GetResolvedActionMapItem('LifeTap2')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
+            id = 'LifeTap3',
             Type = "Spell",
             DisplayName = function() return Core.GetResolvedActionMapItem('LifeTap2').RankName.Name() or "" end,
             AbilityName = function() return Core.GetResolvedActionMapItem('LifeTap2').RankName.Name() or "" end,
