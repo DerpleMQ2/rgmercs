@@ -391,6 +391,11 @@ local _ClassConfig = {
                 name = "Timer2HealItem",
                 type = "Item",
             },
+            {
+                name = "Mask of the Ancients",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Mask of the Ancients")() end,
+            },
             { --Let's make the mainheal autocrit since we have nothing better
                 name = "Nature's Blessing",
                 type = "AA",
@@ -411,6 +416,21 @@ local _ClassConfig = {
             },
         },
         ['MainHealPoint'] = {
+            { -- keep this for big heals, unless we are critically low on mana
+                name = "Timer2HealItem",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    return mq.TLO.Me.PctMana() < 10
+                end,
+            },
+            { -- keep this for big heals, unless we are critically low on mana
+                name = "Mask of the Ancients",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Mask of the Ancients")() end,
+                cond = function(self, itemName, target)
+                    return mq.TLO.Me.PctMana() < 10
+                end,
+            },
             {
                 name = "HealSpell",
                 type = "Spell",

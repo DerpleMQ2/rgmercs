@@ -480,6 +480,11 @@ local _ClassConfig = {
                 name = "Timer2HealItem",
                 type = "Item",
             },
+            { -- keep this for big heals, unless we are critically low on mana
+                name = "Braided Kirin Mane",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Braided Kirin Mane")() end,
+            },
             { --This entry is for RemedyHeal until we learn a Renewal
                 name_func = function(self)
                     return Casting.GetFirstMapItem({ "Renewal", "RemedyHeal", })
@@ -510,6 +515,21 @@ local _ClassConfig = {
             },
         },
         ['MainHeal'] = {
+            { -- keep this for big heals, unless we are critically low on mana
+                name = "Timer2HealItem",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    return mq.TLO.Me.PctMana() < 10
+                end,
+            },
+            { -- keep this for big heals, unless we are critically low on mana
+                name = "Braided Kirin Mane",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Braided Kirin Mane")() end,
+                cond = function(self, itemName, target)
+                    return mq.TLO.Me.PctMana() < 10
+                end,
+            },
             {
                 name = "SingleElixir",
                 type = "Spell",

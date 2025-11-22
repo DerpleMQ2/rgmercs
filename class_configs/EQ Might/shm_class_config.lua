@@ -493,6 +493,11 @@ local _ClassConfig = {
                 type = "Item",
             },
             {
+                name = "Mark of the Brood Warden",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Mark of the Brood Warden")() end,
+            },
+            {
                 name = "Union of Spirits",
                 type = "AA",
             },
@@ -502,6 +507,21 @@ local _ClassConfig = {
             },
         },
         ["MainHealPoint"] = {
+            { -- keep this for big heals, unless we are critically low on mana
+                name = "Timer2HealItem",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    return mq.TLO.Me.PctMana() < 10
+                end,
+            },
+            { -- keep this for big heals, unless we are critically low on mana
+                name = "Mark of the Brood Warden",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Mark of the Brood Warden")() end,
+                cond = function(self, itemName, target)
+                    return mq.TLO.Me.PctMana() < 10
+                end,
+            },
             {
                 name = "SingleHot",
                 type = "Spell",

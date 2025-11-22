@@ -315,6 +315,11 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
+                name = "Bladed Fang Mantle",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Bladed Fang Mantle")() end,
+            },
+            {
                 name = "AddHate",
                 type = "Disc",
                 cond = function(self, discSpell)
