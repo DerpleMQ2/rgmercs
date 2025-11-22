@@ -272,6 +272,7 @@ return {
         ['PBAEStun'] = {                -- timer 6
             "Ancient Command of Might", -- EQM Custom
             "Ancient: Force of Might",  -- EQM Custom
+            "Word of Might",            -- EQM Custom
         },
         -- ['AEStun'] = {                  --Targeted AE
         --     "Stun Command",             -- no damage
@@ -445,6 +446,11 @@ return {
                 end,
             },
             {
+                name = "Mantle of the Wyrmguard",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Mantle of the Wyrmguard")() end,
+            },
+            {
                 name = "BlueBand",
                 type = "Item",
             },
@@ -483,6 +489,14 @@ return {
                 end,
             },
             {
+                name = "Mantle of the Wyrmguard",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Mantle of the Wyrmguard")() and Config:GetSetting('WaveHealUse') == 1 end,
+                cond = function(self, itemName, target)
+                    return Targeting.GroupedWithTarget(target)
+                end,
+            },
+            {
                 name = "WaveHeal",
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoWaveHeal') < 3 and Config:GetSetting('WaveHealUse') == 1 end,
@@ -511,6 +525,14 @@ return {
                 load_cond = function() return Config:GetSetting('DoCleansing') == 1 end,
                 cond = function(self, spell, target)
                     return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "Mantle of the Wyrmguard",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Mantle of the Wyrmguard")() and Config:GetSetting('WaveHealUse') == 2 end,
+                cond = function(self, itemName, target)
+                    return Targeting.GroupedWithTarget(target)
                 end,
             },
             {
