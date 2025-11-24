@@ -416,7 +416,7 @@ return {
             name = 'GroupHeal',
             state = 1,
             steps = 1,
-            cond = function(self, target) Targeting.GroupHealsNeeded() end,
+            cond = function(self, target) return Targeting.GroupHealsNeeded() end,
         },
         {
             name = 'BigHeal',
