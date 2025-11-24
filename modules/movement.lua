@@ -740,7 +740,7 @@ function Module:GiveTime(combat_state)
                     self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), Config:GetSetting('ChaseDistance'))
                 end
             end
-        elseif chaseSpawn.Distance() > Config:GetSetting('ChaseDistance') and chaseSpawn.Distance() < 400 then
+        elseif (chaseSpawn.Distance() or 0) > Config:GetSetting('ChaseDistance') and (chaseSpawn.Distance() or 999) < 400 then
             -- If we don't have a mesh we're using afollow as legacy RG behavior.
             Logger.log_debug("\awNOTICE:\ax Chase Target %s but no nav mesh - using afollow instead", Config:GetSetting('ChaseTarget'))
             self:RunCmd("/squelch /afollow spawn %d", chaseSpawn.ID())
