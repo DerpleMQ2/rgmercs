@@ -705,17 +705,17 @@ local _ClassConfig = {
             },
             {
                 name = "Artifact of Mana Strike",
-                type = "Spell",
+                type = "Item",
                 load_cond = function() return Config:GetSetting('DoProcBuff') and mq.TLO.FindItem("=Artifact of Mana Strike")() end,
                 cond = function(self, itemName, target)
                     if not Targeting.TargetIsACaster(target) then return false end
-                    return Casting.CastReady(itemName) and Casting.GroupBuffCheck(itemName, target)
+                    return Casting.GroupBuffItemCheck(itemName, target)
                 end,
             },
             {
                 name = "SpellProcBuff",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('DoProcBuff') end,
+                load_cond = function() return Config:GetSetting('DoProcBuff') and not mq.TLO.FindItem("=Artifact of Mana Strike")() end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
                     if not Targeting.TargetIsACaster(target) then return false end

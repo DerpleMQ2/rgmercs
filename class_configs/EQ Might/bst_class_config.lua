@@ -579,11 +579,20 @@ return {
                 end,
             },
             {
+                name = "Artifact of Irionu",
+                type = "Item",
+                load_cond = function() return mq.TLO.Me.Level() >= 67 and mq.TLO.FindItem("=Artifact of Irionu")() end,
+                cond = function(self, itemName, target)
+                    return Casting.GroupBuffItemCheck(itemName, target)
+                end,
+            },
+            {
                 name = "AtkBuff",
                 type = "Spell",
+                load_cond = function() return mq.TLO.Me.Level() < 67 or not mq.TLO.FindItem("=Artifact of Irionu")() end,
                 cond = function(self, spell, target)
                     -- Make sure this is gemmed due to long refresh, and only use the single target versions on classes that need it.
-                    if ((spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target)) or not Casting.CastReady(spell) then return false end
+                    if not Targeting.TargetIsAMelee(target) or not Casting.CastReady(spell) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -753,18 +762,19 @@ return {
             name = "Default Mode",
             -- cond = function(self) return true end, --Code kept here for illustration, if there is no condition to check, this line is not required
             spells = {
-                { name = "HealSpell",     cond = function(self) return Config:GetSetting('DoHeals') end, },
-                { name = "PetHealSpell",  cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
-                { name = "SlowSpell",     cond = function(self) return Config:GetSetting('DoSlow') end, },
+                { name = "HealSpell",    cond = function(self) return Config:GetSetting('DoHeals') end, },
+                { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
+                { name = "SlowSpell",    cond = function(self) return Config:GetSetting('DoSlow') end, },
                 { name = "Icelance1", },
                 { name = "Icelance2", },
-                { name = "BloodDot",      cond = function(self) return Config:GetSetting('DoDot') end, },
-                { name = "EndemicDot",    cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "BloodDot",     cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "EndemicDot",   cond = function(self) return Config:GetSetting('DoDot') end, },
                 { name = "SwarmPet", },
-                { name = "AtkBuff", },
+                { name = "AtkBuff", cond = function(self) return mq.TLO.Me.Level() < 67 or not mq.TLO.FindItem("=Artifact of Irionu")() end,
+                },
                 { name = "PetGrowl", },
                 { name = "PetBlockSpell", },
-                { name = "PetSpell",      cond = function(self) return Config:GetSetting('KeepPetMemmed') end, },
+                { name = "PetSpell",      cond = function(self) return Config:GetSetting('KeepPetMemmed') and not mq.TLO.FindItem("=Artifact of Razorclaw")() end, },
                 --filler
                 { name = "PetHaste", },
                 { name = "PetDamageProc", },
