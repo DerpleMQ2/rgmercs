@@ -164,7 +164,7 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('AggroFeign') end,
                 cond = function(self, aaName, target)
                     return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 99)
-                        and not Core.IAmMA
+                        and not Core.IAmMA()
                 end,
             },
             {
@@ -172,7 +172,7 @@ local _ClassConfig = {
                 type = "Ability",
                 load_cond = function(self) return Config:GetSetting('AggroFeign') end,
                 cond = function(self, abilityName)
-                    return Targeting.IHaveAggro(80) and not Core.IAmMA
+                    return Targeting.IHaveAggro(80) and not Core.IAmMA()
                 end,
             },
             {
