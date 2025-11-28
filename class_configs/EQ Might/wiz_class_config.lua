@@ -11,7 +11,7 @@ local Core      = require("utils.core")
 local Logger    = require("utils.logger")
 
 return {
-    _version            = "2.0 - EQ Might (WIP)",
+    _version            = "2.1 - EQ Might (WIP)",
     _author             = "Derple, Algar",
     ['Modes']           = {
         'DPS',
@@ -31,20 +31,15 @@ return {
         },
     },
     ['AbilitySets']     = {
-        ['IceClaw'] = {
-            "Claw of Vox",
-            "Claw of Frost",
-        },
-        ['FireEtherealNuke'] = {
-            "Ether Flame",
-        },
-        ['ChaosNuke'] = {
-            "Chaos Flame",
-        },
+        -- ['IceClaw'] = {
+        --     "Claw of Vox",
+        --     "Claw of Frost",
+        -- },
         ['WildNuke'] = {
-            "Wildmagic Burst",
+            "Wildmagic Strike",
         },
         ['FireNuke'] = {
+            "Chaos Flame",
             "Spark of Fire",
             "Draught of Ro",
             "Draught of Fire",
@@ -55,7 +50,8 @@ return {
             "Shock of Fire",
         },
         ['BigFireNuke'] = { -- Level 51-70, Long Cast, Heavy Damage
-            -- "Ancient: Core Fire", --Ether Flame beats this soundly at the same level
+            "Ether Flame",
+            "Ancient: Core Fire",
             "Corona Flare", --67 on EQM
             "Ancient: Strike of Chaos",
             "White Fire",
@@ -64,7 +60,7 @@ return {
             "Sunstrike",
         },
         ['IceNuke'] = {
-            -- "Ancient: Spear of Gelaqua" -- Commented for now, because of the recast... considering, need to playtest.
+            "Ancient: Spear of Gelaqua",
             "Spark of Ice",
             "Black Ice",
             "Draught of E`ci",
@@ -90,14 +86,14 @@ return {
             "Garrison's Mighty Mana Shock",
             "Shock of Lightning",
         },
-        ['BigMagicNuke'] = { -- Level 60-68, High Cast Time/Damage
+        ['BigMagicNuke'] = { -- Level 60-70, High Cast Time/Damage
+            "Mana Weave",
             "Thundaka",
             "Shock of Magic",
             "Agnarr's Thunder",
             "Elnerick's Electrical Rending",
         },
         ['StunSpell'] = {
-            "Telakemara",
             "Telekara",
             "Telaka",
             "Telekin",
@@ -106,6 +102,7 @@ return {
             "Tishan's Clash",
         },
         ['SelfHPBuff'] = {
+            "Shield of the Crystalwing",
             "Ether Shield",
             "Shield of Maelin",
             "Shield of the Arcane",
@@ -124,6 +121,7 @@ return {
             "Minor Familiar",
         },
         ['SelfRune1'] = {
+            "Ether Ward",
             "Ether Skin",
             "Force Shield",
         },
@@ -132,17 +130,15 @@ return {
             "Nullify Magic",
             "Cancel Magic",
         },
-        ['TwincastSpell'] = {
-            "Twincast",
-        },
-        ['RootSpell'] = {
-            "Greater Fetter",
-            "Fetter",
-            "Paralyzing Earth",
-            "Immobilize",
-            "Instill",
-            "Root",
-        },
+        -- ['RootSpell'] = {
+        -- "Iceblock",
+        --     "Greater Fetter",
+        --     "Fetter",
+        --     "Paralyzing Earth",
+        --     "Immobilize",
+        --     "Instill",
+        --     "Root",
+        -- },
         ['SnareSpell'] = {
             "Atol's Spectral Shackles",
             "Bonds of Force",
@@ -155,11 +151,13 @@ return {
             "Harvest",
         },
         ['JoltSpell'] = {
+            "Concussive Blast",
             "Ancient: Greater Concussion",
             "Concussion",
         },
         -- Lure Spells
         -- ['IceLureNuke'] = {
+        -- "RimeLure",
         --     "Icebane",
         --     "Lure of Ice",
         --     "Lure of Frost",
@@ -197,6 +195,7 @@ return {
             "Icestrike",
         },
         ['FireRain'] = {
+            "Tears of the Betrayed",
             "Tears of the Sun",
             "Tears of Ro",
             "Tears of Solusek",
@@ -223,13 +222,14 @@ return {
         ['MagicJyll'] = {
             "Jyll's Static Pulse", -- Level 53
         },
-        ['ManaWeave'] = {
-            "Mana Weave",
-        },
         ['SwarmPet'] = {
             -- "Solist's Frozen Sword", -- Bugged, does not attack on Laz/Emu
             "Flaming Sword of Xuzl", --homework
         },
+        -- ['SpellWard'] = {
+        --     "Bulwark of Calrena",
+        --     "Defense of Calrena",
+        -- },
     },
     ['HelperFunctions'] = {
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
@@ -307,10 +307,10 @@ return {
             end,
         },
         {
-            name = 'DPS(Level70)',
+            name = 'WildNuke',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 101 and mq.TLO.Me.Level() > 69 end,
+            load_cond = function() return Config:GetSetting('DoWildNuke') and Core.GetResolvedActionMapItem('WildNuke') end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -322,10 +322,11 @@ return {
             name = 'DPS(Fire)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 70 and Config:GetSetting('ElementChoice') == 1 end,
+            load_cond = function() return Config:GetSetting('ElementChoice') == 1 or Config:GetSetting('KeepFireMemmed') end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
+                if not Config:GetSetting('ElementChoice') == 1 then return false end
                 return combat_state == "Combat" and
                     not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
@@ -334,10 +335,11 @@ return {
             name = 'DPS(Ice)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 70 and Config:GetSetting('ElementChoice') == 2 end,
+            load_cond = function() return Config:GetSetting('ElementChoice') == 2 or Config:GetSetting('KeepIceMemmed') end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
+                if not Config:GetSetting('ElementChoice') == 2 then return false end
                 return combat_state == "Combat" and
                     not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
@@ -346,10 +348,11 @@ return {
             name = 'DPS(Magic)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 70 and Config:GetSetting('ElementChoice') == 3 end,
+            load_cond = function() return Config:GetSetting('ElementChoice') == 2 or Config:GetSetting('KeepMagicMemmed') end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
+                if not Config:GetSetting('ElementChoice') == 3 then return false end
                 return combat_state == "Combat" and
                     not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
@@ -367,10 +370,10 @@ return {
             end,
         },
         {
-            name = 'Force of Will',
+            name = 'Weaves',
             state = 1,
             steps = 1,
-            load_cond = function() return Casting.CanUseAA("Force of Will") end,
+            load_cond = function() return Casting.CanUseAA("Force of Will") or Casting.CanUseAA("Lower Element") end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
@@ -392,9 +395,6 @@ return {
             {
                 name = "Epic",
                 type = "Item",
-                cond = function(self)
-                    return not mq.TLO.Me.Buff("Twincast")()
-                end,
             },
             {
                 name = "OoW_Chest",
@@ -404,25 +404,12 @@ return {
                 name = "Focus of Arcanum",
                 type = "AA",
             },
-            {
-                name = "Fundament: Second Spire of Arcanum",
-                type = "AA",
-            },
-            {
-                name = "Fury of Ro",
-                type = "AA",
-            },
-            {
-                name = "Forsaken Sorceror's Shoes",
-                type = "Item",
-                load_cond = function(self) return mq.TLO.FindItem("=Forsaken Sorceror's Shoes")() end,
-            },
-            {
-                name = "Improved Twincast",
-                type = "AA",
-                cond = function(self)
-                    return not mq.TLO.Me.Buff("Twincast")()
+            { --Familiar AA, will use the correct element, and fallback to improved
+                name_func = function(self)
+                    local furyBuff = { "Fury of Ro", "Fury of Eci", "Fury of Druzzil", }
+                    return furyBuff[Config:GetSetting('ElementChoice')] or "Unknown Error"
                 end,
+                type = "AA",
             },
             { --Crit Chance AA, will use the first(best) one found
                 name_func = function(self)
@@ -451,6 +438,13 @@ return {
                 name = "Call of Xuzl",
                 type = "AA",
             },
+            {
+                name = "Ward of Destruction",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Config:GetSetting('DoAEDamage')
+                end,
+            },
         },
         ['Aggro Management'] =
         {
@@ -469,23 +463,8 @@ return {
                 end,
             },
             {
-                name = "A Hole in Space",
-                type = "AA",
-                cond = function(self)
-                    return Targeting.IHaveAggro(100)
-                end,
-            },
-            {
-                name = "Concussive Intuition",
-                type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
-                end,
-            },
-            {
                 name = "JoltSpell",
                 type = "Spell",
-                load_cond = function(self) return not Casting.CanUseAA("Concussive Intuition") end,
                 cond = function(self)
                     return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
@@ -536,41 +515,38 @@ return {
                 end,
             },
         },
-        ['Force of Will'] = {
+        ['Weaves'] = {
+            {
+                name = "Lower Element",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.DetAACheck(aaName)
+                end,
+            },
             {
                 name = "Force of Will",
                 type = "AA",
             },
         },
-        ['DPS(Level70)'] = {
-            {
-                name = "ManaWeave",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return not Casting.IHaveBuff("Weave of Power")
-                end,
-            },
-            {
-                name = "ChaosNuke",
-                type = "Spell",
-            },
+        ['WildNuke'] = {
             {
                 name = "WildNuke",
-                type = "Spell",
-            },
-            {
-                name = "Scepter of Incantations",
-                type = "Item",
-            },
-            {
-                name = "FireEtherealNuke",
                 type = "Spell",
             },
         },
         ['DPS(Fire)'] = {
             {
+                name = "Pyromancy",
+                type = "AA",
+                load_condtion = function(self) return Casting.CanUseAA("Pyromancy") end,
+                cond = function(self, aaName)
+                    return not mq.TLO.Me.Buff(aaName)()
+                end,
+            },
+            {
                 name = "FireRain",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRain') end,
                 cond = function(self, spell, target)
                     if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
                     return Targeting.AggroCheckOkay()
@@ -593,8 +569,17 @@ return {
         },
         ['DPS(Ice)'] = {
             {
+                name = "Cryomancy",
+                type = "AA",
+                load_condtion = function(self) return Casting.CanUseAA("Cryomancy") end,
+                cond = function(self, aaName)
+                    return not mq.TLO.Me.Buff(aaName)()
+                end,
+            },
+            {
                 name = "IceRain",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRain') end,
                 cond = function(self, spell, target)
                     if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
                     return Targeting.AggroCheckOkay()
@@ -616,6 +601,14 @@ return {
             },
         },
         ['DPS(Magic)'] = {
+            {
+                name = "Acromancy",
+                type = "AA",
+                load_condtion = function(self) return Casting.CanUseAA("Acromancy") end,
+                cond = function(self, aaName)
+                    return not mq.TLO.Me.Buff(aaName)()
+                end,
+            },
             {
                 name = "BigMagicNuke",
                 type = "Spell",
@@ -682,20 +675,28 @@ return {
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
-            { --Familiar AA, will use the first(best) one found
+            { --Familiar AA, will use the correct element, and fallback to improved
                 name_func = function(self)
-                    return Casting.GetFirstAA({ "Kerafyrm's Prismatic Familiar", "Ro's Flaming Familiar", "Improved Familiar", })
+                    local familiars = { "Ro's Flaming Familiar", "E'ci's Icy Familiar", "Druzzil's Mystical Familiar", }
+                    local currentFam = familiars[Config:GetSetting('ElementChoice')] or "Unknown Error"
+                    return Casting.CanUseAA(currentFam) and currentFam or "Improved Familiar"
                 end,
                 type = "AA",
                 active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
+                pre_activate = function(self, aaName) -- remove the old familiar in case of stacking issues when switching elements
+                    if not mq.TLO.Me.Buff(aaName)() and mq.TLO.Me.Buff("Familiar")() then
+                        mq.TLO.Me.Buff("Familiar").Remove()
+                    end
+                end,
                 cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
+                    if not Casting.CanUseAA(aaName) then return false end
+                    return not mq.TLO.Me.Buff(aaName)()
                 end,
             },
             {
                 name = "FamiliarBuff",
                 type = "Spell",
-                load_cond = function(self) return not Casting.CanUseAA("Improved Familiar") end,
+                load_cond = function(self) return not Casting.CanUseAA("Improved Familiar") and not Casting.CanUseAA("Ro's Flaming Familiar") end, --in case someone skipped improved
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return Casting.SelfBuffCheck(spell)
@@ -719,157 +720,30 @@ return {
             },
         },
     },
-    ['Spells']          = {
+    ['SpellList']       = { -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
         {
-            gem = 1,
+            name = "Default Mode",
+            -- cond = function(self) return true end, --Code kept here for illustration, if there is no condition to check, this line is not required
             spells = {
-                { name = "ManaWeave", },
-                { name = "FireNuke",  cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
-                { name = "IceNuke",   cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
-                { name = "MagicNuke", cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
-
-            },
-        },
-        {
-            gem = 2,
-            spells = {
-                { name = "FireEtherealNuke", },
-                { name = "BigFireNuke",      cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
-                { name = "BigIceNuke",       cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
-                { name = "BigMagicNuke",     cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
-            },
-        },
-        {
-            gem = 3,
-            spells = {
-                { name = "WildNuke", },
+                { name = "FireNuke",     cond = function() return Config:GetSetting('ElementChoice') == 1 or Config:GetSetting('KeepFireMemmed') end, },
+                { name = "BigFireNuke",  cond = function() return Config:GetSetting('ElementChoice') == 1 or Config:GetSetting('KeepFireMemmed') end, },
+                { name = "IceNuke",      cond = function() return Config:GetSetting('ElementChoice') == 2 or Config:GetSetting('KeepIceMemmed') end, },
+                { name = "BigIceNuke",   cond = function() return Config:GetSetting('ElementChoice') == 2 or Config:GetSetting('KeepIceMemmed') end, },
+                { name = "MagicNuke",    cond = function() return Config:GetSetting('ElementChoice') == 3 or Config:GetSetting('KeepMagicMemmed') end, },
+                { name = "BigMagicNuke", cond = function() return Config:GetSetting('ElementChoice') == 3 or Config:GetSetting('KeepMagicMemmed') end, },
+                { name = "WildNuke",     cond = function() return Config:GetSetting('DoWildNuke') end, },
                 { name = "FireRain",     cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 1 end, },
                 { name = "IceRain",      cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 2 end, },
                 { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
                 { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "EvacSpell",    cond = function() return Config:GetSetting('KeepEvacMemmed') end, },
                 { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", },
-            },
-        },
-        {
-            gem = 4,
-            spells = {
-                { name = "ChaosNuke", },
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", },
-            },
-        },
-        {
-            gem = 5,
-            spells = {
+                { name = "JoltSpell", },
                 { name = "PBTimer4",     cond = function() return Core.IsModeActive('PBAE') end, },
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", },
-            },
-        },
-        {
-            gem = 6,
-            spells = {
                 { name = "FireJyll",     cond = function() return Core.IsModeActive('PBAE') end, },
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", },
-            },
-        },
-        {
-            gem = 7,
-            spells = {
                 { name = "IceJyll",      cond = function() return Core.IsModeActive('PBAE') end, },
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", },
-
-
-            },
-        },
-        {
-            gem = 8,
-            spells = {
                 { name = "MagicJyll",    cond = function() return Core.IsModeActive('PBAE') end, },
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
                 { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", },
-            },
-        },
-        {
-            gem = 9,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", }, },
-        },
-        {
-            gem = 10,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", },
-
-            },
-        },
-        {
-            gem = 11,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
-                { name = "SelfHPBuff", },
-            },
-        },
-        {
-            gem = 12,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "HarvestSpell", cond = function() return not Casting.CanUseAA("Harvest of Druzzil") end, },
-                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
-                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell",    cond = function() return not Casting.CanUseAA("Concussive Intuition") end, },
-                { name = "SelfRune1", },
-                { name = "EvacSpell",    cond = function() return not Casting.CanUseAA("Exodus") end, },
                 { name = "SelfHPBuff", },
             },
         },
@@ -895,20 +769,55 @@ return {
             Header = "Damage",
             Category = "Direct",
             Index = 101,
-            Tooltip = "Choose an element to focus on.",
+            Tooltip = "Choose which element-specific nukes and buffs will be used. See FAQ for more details.",
             Type = "Combo",
             ComboOptions = { 'Fire', 'Ice', 'Magic', },
             Default = 1,
             Min = 1,
             Max = 3,
             RequiresLoadoutChange = true,
+            FAQ = "How do I select to use multiple elements in combat?",
+            Answer =
+                "   The 'Element Choice' setting determines which element you will use in combat. To avoid conflicts with the Familiar, 'Fury' and '-mancy' AA buffs, the default class config will focus on a single element at a time.\n\n" ..
+                "   The choice can be changed in combat (used in conjuction with the 'Keep X Memmed' settings), but we will not rescribe spells in combat, and Fury/Familiars will not be updated in the rotation until after combat is over.\n\n" ..
+                "   PBAE spells, if enabled, will use any available element, due to the nature of their recast timers.",
+        },
+        ['KeepFireMemmed']       = {
+            DisplayName = "Keep Fire Memmed",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 102,
+            Tooltip = "Regardless of our current element selection, keep fire spells memorized so that we can switch elements in combat without changing our loadout.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
+        ['KeepIceMemmed']        = {
+            DisplayName = "Keep Ice Memmed",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 103,
+            Tooltip = "Regardless of our current element selection, keep ice spells memorized so that we can switch elements in combat without changing our loadout.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
+        ['KeepMagicMemmed']      = {
+            DisplayName = "Keep Magic Memmed",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 103,
+            Tooltip = "Regardless of our current element selection, keep magic spells memorized so that we can switch elements in combat without changing our loadout.",
+            RequiresLoadoutChange = true,
+            Default = false,
         },
         ['DoManaBurn']           = {
             DisplayName = "Use Mana Burn AA",
             Group = "Abilities",
             Header = "Damage",
             Category = "Direct",
-            Index = 102,
+            Index = 104,
             Tooltip = "Enable usage of the Mana Burn series of AA.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -918,7 +827,7 @@ return {
             Group = "Abilities",
             Header = "Damage",
             Category = "Direct",
-            Index = 103,
+            Index = 105,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
             Tooltip = "**WILL BREAK MEZ** Use your selected element's Rain Spell as a single-target nuke. **WILL BREAK MEZ***",
@@ -932,7 +841,7 @@ return {
             Group = "Abilities",
             Header = "Damage",
             Category = "Direct",
-            Index = 104,
+            Index = 106,
             ConfigType = "Advanced",
             Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25'). Used to avoid harming the caster.",
             Default = 30,
@@ -1061,13 +970,23 @@ return {
             Min = 1,
             Max = 99,
         },
+        ['KeepEvacMemmed']       = {
+            DisplayName = "Memorize Evac",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 101,
+            Tooltip = "Keep (Lesser) Evacuate memorized.",
+            Default = false,
+            RequiresLoadoutChange = true,
+        },
     },
     ['ClassFAQ']        = {
         [1] = {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 66, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 66, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
