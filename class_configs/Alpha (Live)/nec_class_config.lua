@@ -1303,11 +1303,11 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Self",
-            Tooltip = "Cancel Lich at Mana Pct [x]",
+            Tooltip = "Cancel your Lich spell when your mana has increased to this percentage. (Selecting 101 will disable canceling lich based on mana percent.)",
             RequiresLoadoutChange = false,
             Default = 100,
             Min = 1,
-            Max = 100,
+            Max = 101,
         },
         ['StartLichMana']     = {
             DisplayName = "Start Lich Mana",

@@ -1268,7 +1268,7 @@ function Casting.UseDisc(discSpell, targetId)
 
             if Casting.IsActiveDisc(discSpell.RankName.Name()) then
                 if me.ActiveDisc.ID() then
-                    Logger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(),
+                    Logger.log_debug("canceling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(),
                         me.ActiveDisc.Name())
                     Core.DoCmd("/stopdisc")
                     mq.delay(20, function() return not me.ActiveDisc() end)

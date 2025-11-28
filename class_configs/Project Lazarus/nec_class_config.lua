@@ -1170,11 +1170,11 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 104,
-            Tooltip = "Cancel your Lich spell when your mana has increased to this percentage.",
+            Tooltip = "Cancel your Lich spell when your mana has increased to this percentage. (Selecting 101 will disable canceling lich based on mana percent.)",
             RequiresLoadoutChange = false,
             Default = 100,
             Min = 1,
-            Max = 100,
+            Max = 101,
         },
         ['DeathBloomPercent'] = {
             DisplayName = "Death Bloom %",

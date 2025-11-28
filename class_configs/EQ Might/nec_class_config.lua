@@ -569,6 +569,24 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Artifact of the Dread Pyre",
+                type = "Item",
+                load_cond = function() return mq.TLO.Me.Level() >= 68 and mq.TLO.Me.Level() < 70 and mq.TLO.FindItem("=Artifact of the Dread Pyre")() end,
+                cond = function(self, itemName, target)
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    return Casting.DotItemCheck(itemName, target)
+                end,
+            },
+            {
+                name = "Trinket of Suffocation",
+                type = "Item",
+                load_cond = function() return mq.TLO.Me.Level() >= 68 and mq.TLO.FindItem("=Trinket of Suffocation")() end,
+                cond = function(self, itemName, target)
+                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    return Casting.DotItemCheck(itemName, target)
+                end,
+            },
+            {
                 name = "PlagueDot",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -584,6 +602,13 @@ local _ClassConfig = {
             },
             {
                 name = "CurseDot2",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "DurationTap",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.DotSpellCheck(spell, target)
@@ -1101,11 +1126,11 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Self",
             Index = 104,
-            Tooltip = "Cancel your Lich spell when your mana has increased to this percentage.",
+            Tooltip = "Cancel your Lich spell when your mana has increased to this percentage. (Selecting 101 will disable canceling lich based on mana percent.)",
             RequiresLoadoutChange = false,
             Default = 100,
             Min = 1,
-            Max = 100,
+            Max = 101,
         },
         ['DoOrbNuke']         = {
             DisplayName = "Summon Orbs",

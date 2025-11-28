@@ -1351,8 +1351,6 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 2,
-            FAQ = "I want to only use a Rogue Pet for the Backstabs, how do I do that?",
-            Answer = "Set the [PetType] setting to Rog and the Necro will only summon Rogue pets.",
         },
         ['BattleRez']         = {
             DisplayName = "Battle Rez",
@@ -1362,8 +1360,6 @@ local _ClassConfig = {
             Tooltip = "Do Rezes during combat.",
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "I want to use my Battle Rez, how do I do that?",
-            Answer = "Set the [BattleRez] setting to true and the Necro will use their Battle Rez during combat.",
         },
         ['DoLifeBurn']        = {
             DisplayName = "Use Life Burn",
@@ -1372,8 +1368,6 @@ local _ClassConfig = {
             Category = "Direct",
             Tooltip = "Use Life Burn AA if your aggro is below 25%.",
             Default = true,
-            FAQ = "I want to use my Life Burn AA, how do I do that?",
-            Answer = "Set the [DoLifeBurn] setting to true and the Necro will use Life Burn AA if their aggro is below 25%.",
         },
         ['DoUnity']           = {
             DisplayName = "Cast Unity",
@@ -1383,8 +1377,6 @@ local _ClassConfig = {
             Tooltip = "Enable casting Mortifiers Unity.",
             Default = true,
             Index = 101,
-            FAQ = "I want to use my Unity AA, how do I do that?",
-            Answer = "Set the [DoUnity] setting to true and the Necro will use Mortifiers Unity when it is available.",
         },
         ['DeathBloomPercent'] = {
             DisplayName = "Death Bloom %",
@@ -1395,8 +1387,6 @@ local _ClassConfig = {
             Default = 40,
             Min = 1,
             Max = 100,
-            FAQ = "I am using Death Bloom to early or late, how do I adjust it?",
-            Answer = "Set the [DeathBloomPercent] setting to the desired % of mana you want to cast Death Bloom at.",
         },
         ['DoSnare']           = {
             DisplayName = "Use Snares",
@@ -1407,8 +1397,6 @@ local _ClassConfig = {
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Necromancer not snaring?",
-            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
         ['SnareCount']        = {
             DisplayName = "Snare Max Mob Count",
@@ -1420,9 +1408,6 @@ local _ClassConfig = {
             Default = 3,
             Min = 1,
             Max = 99,
-            FAQ = "Why is my Shadow Knight Not snaring?",
-            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
-                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
         ['StartFDPct']        = {
             DisplayName = "FD Aggro Pct",
@@ -1433,8 +1418,6 @@ local _ClassConfig = {
             Default = 90,
             Min = 1,
             Max = 99,
-            FAQ = "How do I manage my aggro with Feign Death?",
-            Answer = "Set the [StartFDPct] setting to the desired % of aggro you want to FD at.",
         },
         ['StopFDPct']         = {
             DisplayName = "Stand Aggro Pct",
@@ -1445,8 +1428,6 @@ local _ClassConfig = {
             Default = 80,
             Min = 1,
             Max = 99,
-            FAQ = "How do I manage my aggro with Feign Death?",
-            Answer = "Set the [StopFDPct] setting to the desired % of aggro you want to Stand up from FD at.",
         },
         ['WakeDeadCorpseCnt'] = {
             DisplayName = "WtD Corpse Count",
@@ -1457,8 +1438,6 @@ local _ClassConfig = {
             Default = 5,
             Min = 1,
             Max = 20,
-            FAQ = "I want to use Wake the Dead when I have X corpses nearby, how do I do that?",
-            Answer = "Set the [WakeDeadCorpseCnt] setting to the desired number of corpses you want to cast Wake the Dead at.",
         },
         ['DoLich']            = {
             DisplayName = "Cast Lich",
@@ -1469,8 +1448,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             FAQ = "I want to use my Lich spells, how do I do that?",
-            Answer = "Set the [DoLich] setting to true and the Necro will use Lich spells.\n" ..
-                "You will also want to set your [StopLichHP] and [StopLichMana] settings to the desired values so you do not Lich to Death.",
         },
         ['StopLichHP']        = {
             DisplayName = "Stop Lich HP",
@@ -1482,21 +1459,17 @@ local _ClassConfig = {
             Default = 25,
             Min = 1,
             Max = 99,
-            FAQ = "I want to stop Liching at a certain HP %, how do I do that?",
-            Answer = "Set the [StopLichHP] setting to the desired % of HP you want to stop Liching at.",
         },
         ['StopLichMana']      = {
             DisplayName = "Stop Lich Mana",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Self",
-            Tooltip = "Cancel Lich at Mana Pct [x]",
+            Tooltip = "Cancel your Lich spell when your mana has increased to this percentage. (Selecting 101 will disable canceling lich based on mana percent.)",
             RequiresLoadoutChange = false,
             Default = 100,
             Min = 1,
-            Max = 100,
-            FAQ = "I want to stop Liching at a certain Mana %, how do I do that?",
-            Answer = "Set the [StopLichMana] setting to the desired % of Mana you want to stop Liching at.",
+            Max = 101,
         },
         ['DoScentDebuff']     = {
             DisplayName = "Use Scent Debuff",
@@ -1506,8 +1479,6 @@ local _ClassConfig = {
             Tooltip = "Use your Scent debuff spells or AA.",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = false,
-            FAQ = "Why am I not using a Scent debuff?",
-            Answer = "You can enable Scent use on the Spells and Abilities tab.",
         },
     },
     ['ClassFAQ']        = {

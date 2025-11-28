@@ -267,9 +267,9 @@ _ClassConfig      = {
         ['SingleCotH'] = {
             "Call of the Hero",
         },
-        ['GroupCotH'] = {
-            "Call of the Harbinger",
-        },
+        -- ['GroupCotH'] = {
+        --     "Call of the Harbinger", -- does not appear to be added
+        -- },
         ['PBAE2'] = {
             "Scintillation",
         },
@@ -1089,8 +1089,8 @@ _ClassConfig      = {
                 { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
                 { name = "PetHealSpell",     cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "FireOrbSummon", },
-                { name = "GroupCotH", },
-                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
+                -- { name = "GroupCotH", },
+                { name = "SingleCotH", },
                 { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "FireShroud", },
                 { name = "LongDurDmgShield", },
