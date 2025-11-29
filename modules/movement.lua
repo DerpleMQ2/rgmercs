@@ -181,6 +181,17 @@ Module.DefaultConfig   = {
         Default = false,
         ConfigType = "Advanced",
     },
+    ['ChaseDesyncFallback']                    = {
+        DisplayName = "Fallback on Desync",
+        Group = "Movement",
+        Header = "Following",
+        Category = "Chase",
+        Index = 8,
+        Tooltip =
+        "EMU servers: Use peer communication to verify chase target distance. If a desync is detected, nav to the last peer-reported location.\nThis may prevent chasing a 'ghost' target due to a PC location reporting issue with the server.",
+        Default = true,
+        ConfigType = "Advanced",
+    },
     -- Camp
     ['AutoCampRadius']                         = {
         DisplayName = "Camp Radius",
@@ -702,18 +713,24 @@ function Module:GiveTime(combat_state)
     end
 
     if Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') then
-        local chaseSpawn = mq.TLO.Spawn("pc =" .. Config:GetSetting('ChaseTarget'))
+        local chaseTarg = Config:GetSetting('ChaseTarget')
+        local chaseSpawn = mq.TLO.Spawn("pc =" .. chaseTarg)
+        local chaseId = chaseSpawn.ID()
 
-        if not chaseSpawn or chaseSpawn.Dead() or not chaseSpawn.ID() then
+        if not chaseSpawn or chaseSpawn.Dead() or not chaseId then
             Logger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...",
-                Config:GetSetting('ChaseTarget'))
+                chaseTarg)
             return
         end
 
         if mq.TLO.Me.Dead() then return end
-        if not chaseSpawn or not chaseSpawn() or (chaseSpawn.Distance() or 0) < Config:GetSetting('ChaseDistance') then return end
+
+        if not chaseSpawn or not chaseSpawn() then return end
 
         local Nav = mq.TLO.Navigation
+        local chaseDist = Config:GetSetting('ChaseDistance')
+        local chaseSpawnDist = chaseSpawn.Distance() or 0
+        local chaseNeeded = chaseSpawnDist > chaseDist
 
         -- Use MQ2Nav with moveto as a failover if we have a mesh. We'll use a nav
         -- command if the mesh is loaded and we have a path. If we don't have a path
@@ -721,34 +738,70 @@ function Module:GiveTime(combat_state)
         -- are missing with minimal issues.
         if Nav.MeshLoaded() then
             if not Nav.Active() then
-                if Nav.PathExists("id " .. chaseSpawn.ID())() then
-                    local navCmd = string.format("/squelch /nav id %d log=critical dist=%d lineofsight=%s", chaseSpawn.ID(),
-                        Config:GetSetting('ChaseStopDistance'), Config:GetSetting('RequireLoS') and "on" or "off")
-                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", Config:GetSetting('ChaseTarget'), navCmd)
+                local peerLocDistance = 0
+                local serverDistance = 0
+                local peerNavString = ""
+                local targetDesync = false
+                local stopDist = Config:GetSetting('ChaseStopDistance')
+                local requireLoS = Config:GetSetting('RequireLoS') and "on" or "off"
+
+                if Core.OnEMU() and Config:GetSetting('ChaseDesyncFallback') then
+                    local heartbeat = Config:GetPeerHeartbeatByName(chaseTarg)
+                    local data = heartbeat and heartbeat.Data
+                    if data and data.Y and data.X and data.Z then
+                        local peerLoc = string.format("%d, %d, %d", data.Y, data.X, data.Z)
+                        peerLocDistance = math.floor(mq.TLO.Math.Distance(peerLoc)() or 0)
+                        peerNavString = string.format("locxyz %d %d %d", data.X, data.Y, data.Z)
+                    end
+                    serverDistance = math.floor(Targeting.GetTargetDistance(chaseSpawn))
+                    --500 seems to be around the distance desyncs can start to occur. Will adjust this value later if I find otherwise.
+                    targetDesync = (peerLocDistance - serverDistance) > 500
+                end
+
+                if not targetDesync and not chaseNeeded then return end
+
+                if targetDesync and Nav.PathExists(peerNavString)() then
+                    local navCmd = string.format("/squelch /nav %s log=critical dist=%d lineofsight=%s", peerNavString, stopDist, requireLoS)
+                    local warningMessage = string.format(
+                        "Chase Target %s: Desync Detected! Peer-reported distance: %s, Server-reported Distance, %s. Executing location-based nav to last known chase target location.",
+                        chaseTarg, peerLocDistance, serverDistance)
+                    Logger.log_warning(warningMessage)
+                    Comms.PrintGroupMessage(warningMessage)
                     self:RunCmd(navCmd)
 
                     mq.delay("3s", function() return mq.TLO.Navigation.Active() end)
 
-                    if not Nav.Active() and (chaseSpawn.Distance() or 0) > Config:GetSetting('ChaseDistance') then
+                    if not Nav.Active() and chaseNeeded then
+                        Logger.log_verbose("\awNOTICE:\ax Nav might have failed.")
+                        --self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), Config:GetSetting('ChaseDistance'))
+                    end
+                elseif Nav.PathExists("id " .. chaseId)() then
+                    local navCmd = string.format("/squelch /nav id %d log=critical dist=%d lineofsight=%s", chaseId, stopDist, requireLoS)
+                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", chaseTarg, navCmd)
+                    self:RunCmd(navCmd)
+
+                    mq.delay("3s", function() return mq.TLO.Navigation.Active() end)
+
+                    if not Nav.Active() and chaseNeeded then
                         Logger.log_verbose("\awNOTICE:\ax Nav might have failed.")
                         --self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), Config:GetSetting('ChaseDistance'))
                     end
                 else
                     -- Assuming no line of site problems.
                     -- Moveto underwater style until 20 units away
-                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s Has no nav path, trying /moveto", Config:GetSetting('ChaseTarget'))
-                    self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), Config:GetSetting('ChaseDistance'))
+                    Logger.log_verbose("\awNOTICE:\ax Chase Target %s Has no nav path, trying /moveto", chaseTarg)
+                    self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseId, Config:GetSetting('ChaseDistance'))
                 end
             end
-        elseif (chaseSpawn.Distance() or 0) > Config:GetSetting('ChaseDistance') and (chaseSpawn.Distance() or 999) < 400 then
+        elseif chaseNeeded and chaseSpawnDist < 400 then
             -- If we don't have a mesh we're using afollow as legacy RG behavior.
-            Logger.log_debug("\awNOTICE:\ax Chase Target %s but no nav mesh - using afollow instead", Config:GetSetting('ChaseTarget'))
-            self:RunCmd("/squelch /afollow spawn %d", chaseSpawn.ID())
+            Logger.log_warning("\awWARNING:\ax Chase Target %s but no nav mesh - using afollow instead", chaseTarg)
+            self:RunCmd("/squelch /afollow spawn %d", chaseId)
             self:RunCmd("/squelch /afollow %d", Config:GetSetting('ChaseDistance'))
 
             mq.delay("2s")
 
-            if chaseSpawn.Distance() < Config:GetSetting('ChaseDistance') then
+            if chaseSpawnDist < chaseDist then
                 self:RunCmd("/squelch /afollow off")
             end
         end
