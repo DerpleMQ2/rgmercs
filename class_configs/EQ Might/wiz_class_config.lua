@@ -326,7 +326,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('ElementChoice') == 1 then return false end
+                if Config:GetSetting('ElementChoice') ~= 1 then return false end
                 return combat_state == "Combat" and
                     not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
@@ -339,7 +339,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('ElementChoice') == 2 then return false end
+                if Config:GetSetting('ElementChoice') ~= 2 then return false end
                 return combat_state == "Combat" and
                     not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
@@ -348,11 +348,11 @@ return {
             name = 'DPS(Magic)',
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('ElementChoice') == 2 or Config:GetSetting('KeepMagicMemmed') end,
+            load_cond = function() return Config:GetSetting('ElementChoice') == 3 or Config:GetSetting('KeepMagicMemmed') end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('ElementChoice') == 3 then return false end
+                if Config:GetSetting('ElementChoice') ~= 3 then return false end
                 return combat_state == "Combat" and
                     not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
@@ -438,13 +438,13 @@ return {
                 name = "Call of Xuzl",
                 type = "AA",
             },
-            {
-                name = "Ward of Destruction",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Config:GetSetting('DoAEDamage')
-                end,
-            },
+            -- { -- temporarily commented, can lead to serious xtarg issues
+            --     name = "Ward of Destruction",
+            --     type = "AA",
+            --     cond = function(self, aaName, target)
+            --         return Config:GetSetting('DoAEDamage')
+            --     end,
+            -- },
         },
         ['Aggro Management'] =
         {
