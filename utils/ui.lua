@@ -7,6 +7,7 @@ local Comms         = require("utils.comms")
 local Targeting     = require("utils.targeting")
 local Icons         = require('mq.ICONS')
 local Strings       = require("utils.strings")
+local ClassLoader   = require('utils.classloader')
 
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
 local ICON_SIZE     = 20
@@ -131,25 +132,16 @@ function Ui.RenderConfigSelector()
         if changed then
             Config:SetSetting('ClassConfigDir', Config.Globals.ClassConfigDirs[newConfigDir])
             Config:SaveSettings()
-            Config:ClearAllModuleSettings()
-            Config:LoadSettings()
-            Modules:ExecAll("LoadSettings")
+            ClassLoader.reloadConfig()
         end
         Ui.Tooltip(
-            "Select your current server/environment.\nLive: Official EQ Servers (Live, Test, TLP).\nProject Lazurus: Laz-specific (Live may be better suited for other emu servers).\nAlpha, Beta: Configs in testing. Often preferred, with some caveats (see forum sticky).\nCustom: Copies of the above configs that you have edited yourself.")
+            "Select your current server/environment.\nLive: Official EQ Servers (Live, Test, TLP).\nProject Lazarus, EQ Might, Hidden Forest: Supported EMU servers.\nAlpha, Beta: Configs in testing. Often preferred, with some caveats (see forum sticky).\nCustom: Copies of the above configs that you have edited yourself.")
 
         ImGui.SameLine()
-        if ImGui.SmallButton(Icons.FA_REFRESH) then
+        if ImGui.SmallButton(Icons.FA_REFRESH .. " Refresh List") then
             Core.ScanConfigDirs()
         end
         Ui.Tooltip("Refreshes the class config directory list.")
-
-        ImGui.SameLine()
-        if ImGui.SmallButton('Create Custom Config') then
-            Modules:ExecModule("Class", "WriteCustomConfig")
-        end
-        Ui.Tooltip("Places a copy of the currently loaded class config in the MQ config directory for customization.\nWill back up the existing custom configuration.")
-        ImGui.NewLine()
     end
 end
 
