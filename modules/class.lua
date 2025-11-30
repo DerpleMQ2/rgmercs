@@ -601,13 +601,30 @@ function Module:Render()
             Config:SetSetting('Mode', newMode)
             self:RescanLoadout()
         end
-        ImGui.SameLine()
-        if ImGui.SmallButton("Rescan Loadout") then
+
+        Ui.RenderConfigSelector()
+
+        ImGui.SeparatorText("Config Actions")
+        --ImGui.Text("Actions:")
+        if ImGui.SmallButton(Icons.FA_EYE .. " Rescan Loadout") then
             self:RescanLoadout()
             Logger.log_info("\awManual loadout scan initiated.")
         end
+        Ui.Tooltip(
+            "Rescans settings to update memorized spells and rotations. May be needed if multiple settings are changed in rapid succession or when activatable AA are purchased.")
 
-        Ui.RenderConfigSelector()
+        ImGui.SameLine()
+        if ImGui.SmallButton(Icons.FA_REFRESH .. " Reload Current Config") then
+            ClassLoader.reloadConfig()
+            Logger.log_info("\awReloading your current config.")
+        end
+        Ui.Tooltip("Reload the current config from file without restarting RGMercs. Handy for those editing configs out-of-game on the fly.")
+
+        ImGui.SameLine()
+        if ImGui.SmallButton(Icons.FA_PENCIL .. " Create Custom Config") then
+            Modules:ExecModule("Class", "WriteCustomConfig")
+        end
+        Ui.Tooltip("Places a copy of the currently loaded class config in the MQ config directory for customization.\nWill back up the existing custom configuration.")
 
         ImGui.Separator()
 

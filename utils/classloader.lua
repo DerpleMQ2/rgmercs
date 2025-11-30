@@ -9,10 +9,26 @@ local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple
 
 function ClassLoader.getClassConfigFileName(class)
     local baseConfigDir = Config.Globals.ScriptDir .. "/class_configs"
-
     local classConfigDir = Config:GetSetting('ClassConfigDir') -- now defaults to current server
-    local configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
     local useCustomConfig = (classConfigDir:find("Custom: ") ~= nil)
+
+    -- temp fix to patch incorrect initial config dir settings due to a previous bug
+    if Core.OnEMU() and not useCustomConfig then
+        local defaultConfig
+        for _, server in ipairs(Config.Globals.ClassConfigDirs) do
+            if server == classConfigDir then
+                defaultConfig = true
+                break
+            end
+        end
+        if not defaultConfig then
+            Config:SetSetting('ClassConfigDir', "Live")
+            Config:SaveSettings()
+            classConfigDir = "Live"
+        end
+    end
+
+    local configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
 
     if useCustomConfig then
         classConfigDir = classConfigDir:sub(9) -- remove "Custom:"
@@ -32,11 +48,8 @@ end
 
 function ClassLoader.getFallbackClassConfigFolder()
     if Core.OnEMU() then
-        local supportedServers = { "Project Lazarus", "HiddenForest", "EQ Might", }
-        for _, serverName in ipairs(supportedServers) do
-            if Config.Globals.CurServer:lower() == serverName:lower() then
-                return serverName
-            end
+        if Config.Constants.SupportedEmuServers:contains(Config.Globals.CurServer) then
+            return Config.Globals.CurServer
         end
     end
     return "Live"
@@ -139,9 +152,14 @@ end
 function ClassLoader.changeLoadedClass()
     Config.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
     Logger.log_info("\ayPersona class swap detected! \awLoading settings for \ag%s.", mq.TLO.Me.Class())
+    ClassLoader.reloadConfig()
+end
+
+function ClassLoader.reloadConfig()
+    Config:ClearAllModuleSettings()
     Config:LoadSettings()
     Core.ScanConfigDirs()
-    Modules:ExecAll("Init")
+    Modules:ExecAll("LoadSettings")
     Config:UpdateCommandHandlers()
 end
 

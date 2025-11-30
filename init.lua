@@ -90,7 +90,7 @@ local function RGMercsGUI()
 
     ImGui.SetNextWindowSize(ImVec2(500, 600), ImGuiCond.FirstUseEver)
 
-    if openGUI and Alive() then
+    if openGUI and Alive() and Config:SettingsLoaded() then
         if initPctComplete < 100 then
             LoaderUI:RenderLoader(initPctComplete, initMsg)
         else

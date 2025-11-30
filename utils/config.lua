@@ -73,6 +73,7 @@ Config.Globals.SLPeerLooting                             = false
 
 -- Constants
 Config.Constants                                         = {}
+Config.Constants.SupportedEmuServers                     = Set.new({ "Project Lazarus", "HiddenForest", "EQ Might", })
 Config.Constants.LootModuleTypes                         = { 'None', 'LootNScoot', 'SmartLoot', }
 Config.Constants.RGCasters                               = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
     "SHM", "WIZ", })
@@ -210,7 +211,7 @@ Config.DefaultConfig               = {
     ['ClassConfigDir']       = {
         DisplayName = "Class Config Dir",
         Type = "Custom",
-        Default = Config.Globals.BuildType:lower() ~= "emu" and "Live" or Config.Globals.CurServer,
+        Default = (Config.Globals.BuildType:lower() == "emu" and Config.Constants.SupportedEmuServers:contains(Config.Globals.CurServer)) and Config.Globals.CurServer or "Live",
     },
     ['UseAssistList']        = {
         DisplayName = "Assist Outside of Group",
