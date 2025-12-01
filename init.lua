@@ -1,3 +1,9 @@
+-- rgmercs
+-- Copyright (C) 2025 Derple (derple@ntsj.com)
+-- SPDX-License-Identifier: GPL-3.0-or-later
+-- This file is part of rgmercs. See the `LICENSE` file in the repository root for license terms.
+-- For the full license text, see https://www.gnu.org/licenses/gpl-3.0.txt
+
 local mq         = require('mq')
 local ImGui      = require('ImGui')
 

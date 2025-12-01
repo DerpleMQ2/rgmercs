@@ -1,0 +1,13 @@
+-- rgmercs: recommended file header
+-- Copyright (C) 2025 Derple (derple@ntsj.com)
+-- SPDX-License-Identifier: GPL-3.0-or-later
+--
+-- Example header to place at the top of source files:
+--
+--   -- rgmercs
+--   -- Copyright (C) 2025 Derple (derple@ntsj.com)
+--   -- SPDX-License-Identifier: GPL-3.0-or-later
+--   -- See the LICENSE file in the project root for the full license text.
+--
+-- You can include the SPDX line as a single short identifier to help
+-- automated tooling detect the license.
