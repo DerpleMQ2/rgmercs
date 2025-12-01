@@ -116,7 +116,7 @@ function Combat.EngageTarget(autoTargetId)
                     if mq.TLO.Navigation.Active() then
                         Core.DoCmd("/nav stop log=off")
                     end
-                    if mq.TLO.Stick.Status():lower() == "off" then
+                    if mq.TLO.Stick.Status():lower() == "off" or (mq.TLO.Stick.StickTarget() or autoTargetId) ~= autoTargetId then
                         Movement:DoStick(autoTargetId)
                     end
                 end
