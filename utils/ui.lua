@@ -453,7 +453,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
     if ImGui.BeginTable("Rotation_" .. name, showDebugTiming and 7 or 6, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn(rotationState > 0 and 'Cur' or '-', ImGuiTableColumnFlags.WidthFixed, 20.0)
-        ImGui.TableSetupColumn('Enable', ImGuiTableColumnFlags.WidthFixed, 20.0)
+        ImGui.TableSetupColumn('Enable', ImGuiTableColumnFlags.WidthFixed, 30.0)
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed, 250.0)
         --- Column 3: header will be manually drawn
