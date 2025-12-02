@@ -3,14 +3,23 @@ local Config    = require('utils.config')
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
 local Logger    = require("utils.logger")
+local Core      = require("utils.core")
 
 return {
-    _version            = "2.0 - EQ Might (WIP)",
+    _version            = "2.1 - EQ Might",
     _author             = "Algar, Derple",
+    ['ModeChecks']      = {
+        IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
+    },
     ['Modes']           = {
         'DPS',
     },
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Vengeful Taelosian Blood Axe",
             "Raging Taelosian Alloy Axe",
@@ -291,6 +300,17 @@ return {
         },
     },
     ['HelperFunctions'] = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         AETargetCheck = function(printDebug)
             local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
             local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()

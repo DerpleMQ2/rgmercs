@@ -6,7 +6,7 @@ local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
-    _version            = "2.0 - EQ Might (WIP)",
+    _version            = "2.1 - EQ Might",
     _author             = "Algar, Derple",
     ['Modes']           = {
         'DPS',
@@ -14,6 +14,7 @@ local _ClassConfig = {
     ['ModeChecks']      = {
         CanCharm   = function() return true end,
         IsCharming = function() return (Config:GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
+        IsRezing   = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['Themes']          = {
         ['DPS'] = {
@@ -60,6 +61,11 @@ local _ClassConfig = {
         },
     },
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Deathwhisper",
             "Soulwhisper",
@@ -830,6 +836,17 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         CancelLich = function(self)
             -- detspa means detremental spell affect
             -- spa is positive spell affect

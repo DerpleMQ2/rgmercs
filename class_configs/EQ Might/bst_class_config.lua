@@ -7,15 +7,21 @@ local Casting   = require("utils.casting")
 local Logger    = require("utils.logger")
 
 return {
-    _version              = "1.5 - EQ Might (WIP)",
+    _version              = "1.6 - EQ Might",
     _author               = "Derple, Algar",
     ['Modes']             = {
         'DPS',
     },
     ['ModeChecks']        = {
         IsHealing = function() return Config:GetSetting('DoHeals') end,
+        IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['ItemSets']          = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Savage Lord's Totem",             -- Epic    -- Epic 1.5
             "Spiritcaller Totem of the Feral", -- Epic    -- Epic 2.0
@@ -326,6 +332,17 @@ return {
         },
     },
     ['HelperFunctions']   = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         DmgModActive = function(self) --Song active by name will check both Bestial Alignments (Self and Group)
             local disc = self.ResolvedActionMap['DmgModDisc']
             return Casting.IHaveBuff("Bestial Alignment") or (disc and disc() and Casting.IHaveBuff(disc.Name()))

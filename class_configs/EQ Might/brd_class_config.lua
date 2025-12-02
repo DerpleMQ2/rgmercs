@@ -39,7 +39,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version            = "3.1 - EQ Might (WIP)",
+    _version            = "3.2 - EQ Might",
     _author             = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
     ['Modes']           = { --other modes to reorder spell priorities may be added back in at a later date.
         'General',
@@ -51,6 +51,7 @@ local _ClassConfig = {
         IsMezzing  = function() return Config:GetSetting('MezOn') end,
         IsCuring   = function() return Config:GetSetting('UseCure') end,
         IsCharming = function() return Config:GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 end,
+        IsRezing   = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
@@ -68,6 +69,11 @@ local _ClassConfig = {
         end,
     },
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Blade of Vesagran",
             "Prismatic Dragon Blade",
@@ -230,6 +236,17 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         SwapInst = function(type)
             if not Config:GetSetting('SwapInstruments') then return end
             Logger.log_verbose("\ayBard SwapInst(): Swapping to Instrument Type: %s", type)

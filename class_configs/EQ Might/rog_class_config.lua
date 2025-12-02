@@ -7,15 +7,20 @@ local Strings   = require("utils.strings")
 local Logger    = require("utils.logger")
 
 return {
-    _version            = "2.1 - EQ Might (WIP)",
+    _version            = "2.2 - EQ Might",
     _author             = "Derple, Algar, mackal",
     ['ModeChecks']      = {
-        IsRezing = function() return mq.TLO.FindItem("Legendary Staff of Forbidden Rites")() end,
+        IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['Modes']           = {
         'DPS',
     },
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['OoW_Chest'] = {
             "Whispering Tunic of Shadows",
             "Darkraider's Vest",
@@ -308,9 +313,11 @@ return {
     },
     ['HelperFunctions'] = {
         DoRez = function(self, corpseId)
-            if mq.TLO.Me.ItemReady("Legendary Staff of Forbidden Rites")() then
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
                 if Casting.OkayToRez(corpseId) then
-                    return Casting.UseItem("Legendary Staff of Forbidden Rites", corpseId)
+                    return Casting.UseItem(rezStaff, corpseId)
                 end
             end
 

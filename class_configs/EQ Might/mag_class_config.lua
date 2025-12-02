@@ -9,11 +9,11 @@ local DanNet      = require('lib.dannet.helpers')
 local Logger      = require("utils.logger")
 
 _ClassConfig      = {
-    _version            = "1.2 - EQ Might (WIP)",
+    _version            = "1.3 - EQ Might",
     _author             = "Derple, Morisato, Algar",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("PetTank") end,
-        IsRezing = function() return mq.TLO.FindItem("Legendary Staff of Forbidden Rites")() end,
+        IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['Modes']           = {
         'DPS',
@@ -39,6 +39,11 @@ _ClassConfig      = {
         end
     end,
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Focus of Primal Elements",
             "Staff of Elemental Essence",
@@ -433,6 +438,16 @@ _ClassConfig      = {
     },
     -- Really the meat of this class.
     ['HelperFunctions'] = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         DeleteEpicOrb = function(self)
             if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
                 Core.DoCmd("/autoinventory")
@@ -454,15 +469,6 @@ _ClassConfig      = {
                 end
             end
             Logger.log_warning("Warning: Mage pet orb not destroyed! An error or conflict has occured.")
-        end,
-        DoRez = function(self, corpseId)
-            if mq.TLO.Me.ItemReady("Legendary Staff of Forbidden Rites")() then
-                if Casting.OkayToRez(corpseId) then
-                    return Casting.UseItem("Legendary Staff of Forbidden Rites", corpseId)
-                end
-            end
-
-            return false
         end,
         user_tu_spell = function(self, aaName)
             local shroudSpell = self.ResolvedActionMap['ShroudSpell']

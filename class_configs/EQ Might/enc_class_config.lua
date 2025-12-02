@@ -8,18 +8,24 @@ local DanNet       = require('lib.dannet.helpers')
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
-    _version            = "1.4 - EQ Might (WIP)",
+    _version            = "1.5 - EQ Might",
     _author             = "Derple, Grimmier, Algar, Robban",
     ['ModeChecks']      = {
         CanMez     = function() return true end,
         CanCharm   = function() return true end,
         IsCharming = function() return Config:GetSetting('CharmOn') end,
         IsMezzing  = function() return Config:GetSetting('MezOn') end,
+        IsRezing   = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['Modes']           = {
         'Default',
     },
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Staff of Eternal Eloquence",
             "Oculus of Persuasion",
@@ -459,6 +465,17 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = { --used to autoinventory our crystals after summon. Crystal is a group-wide spell on Laz.
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         StashCrystal = function(aaName)
             mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Me.AltAbility(aaName).Spell.Base(1)() end)
 
