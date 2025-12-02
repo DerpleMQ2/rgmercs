@@ -6,12 +6,20 @@ local Logger       = require("utils.logger")
 local Core         = require("utils.core")
 
 local _ClassConfig = {
-    _version            = "2.1 - EQ Might (WIP)",
+    _version            = "2.2 - EQ Might",
     _author             = "Algar, Derple",
+    ['ModeChecks']      = {
+        IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
+    },
     ['Modes']           = {
         'DPS',
     },
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Transcended Fistwraps of Immortality",
             "Fistwraps of Celestial Discipline",
@@ -70,6 +78,17 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         --function to make sure we don't have non-hostiles in range before we use AE damage
         AETargetCheck = function(printDebug)
             local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()

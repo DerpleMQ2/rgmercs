@@ -75,10 +75,11 @@ local Tooltips     = {
 
 local _ClassConfig = {
     -- Added AEBlades line for AE taunt, return spears to ST
-    _version            = "2.5 - EQ Might (WIP)",
+    _version            = "2.6 - EQ Might",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
+        IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['Modes']           = {
         'Tank',
@@ -106,6 +107,11 @@ local _ClassConfig = {
         },
     },
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Innoruuk's Dark Blessing",
             "Innoruuk's Voice",
@@ -331,6 +337,17 @@ local _ClassConfig = {
         -- pact of decay ... is this a lich? level 69
     },
     ['HelperFunctions'] = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         --function to determine if we should AE taunt and optionally, if it is safe to do so
         AETauntCheck = function(printDebug)
             local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()

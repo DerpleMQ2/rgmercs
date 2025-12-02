@@ -7,7 +7,7 @@ local Casting      = require("utils.casting")
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
-    _version              = "3.0 - EQ Might (WIP)",
+    _version              = "3.1 - EQ Might",
     _author               = "Algar, Derple",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
@@ -75,6 +75,11 @@ local _ClassConfig = {
         end,
     },
     ['ItemSets']          = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Crafted Talisman of Fates",
             "Blessed Spiritstaff of the Heyokah",
@@ -387,22 +392,24 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions']   = {
-        DoRez         = function(self, corpseId, ownerName)
+        DoRez = function(self, corpseId, ownerName)
             local rezAction = false
             local rezSpell = Core.GetResolvedActionMapItem('RezSpell')
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+            local staffReady = mq.TLO.Me.ItemReady(rezStaff)()
             local okayToRez = Casting.OkayToRez(corpseId)
             local combatState = mq.TLO.Me.CombatState():lower() or "unknown"
 
             if combatState == "combat" and Config:GetSetting('DoBattleRez') and Core.OkayToNotHeal() then
-                if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
-                    rezAction = okayToRez and Casting.UseItem("Staff of Forbidden Rites", corpseId)
+                if staffReady then
+                    rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
                 elseif Casting.AAReady("Call of the Wild") and not mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
                     rezAction = okayToRez and Casting.UseAA("Call of the Wild", corpseId, true, 1)
                 end
+            elseif combatState ~= "combat" and staffReady then
+                rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
             elseif combatState == "active" or combatState == "resting" then
-                if Casting.AAReady("Rejuvenation of Spirit") then
-                    rezAction = okayToRez and Casting.UseAA("Rejuvenation of Spirit", corpseId, true, 1)
-                elseif not Casting.CanUseAA("Rejuvenation of Spirit") and Casting.SpellReady(rezSpell, true) then
+                if Casting.SpellReady(rezSpell, true) then
                     rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)
                 end
             end

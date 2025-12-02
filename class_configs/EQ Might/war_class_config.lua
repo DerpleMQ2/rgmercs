@@ -9,16 +9,22 @@ local Set          = require('mq.set')
 
 local _ClassConfig = {
     -- Added Mayhem line for AE taunt
-    _version            = "3.0 - EQ Might (WIP)",
+    _version            = "3.1 - EQ Might",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
+        IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['Modes']           = {
         'Tank',
         'DPS',
     },
     ['ItemSets']        = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Kreljnok's Sword of Eternal Power",
             "Champion's Sword of Eternal Power",
@@ -92,6 +98,17 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         --function to determine if we should AE taunt and optionally, if it is safe to do so
         AETauntCheck = function(printDebug)
             local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()

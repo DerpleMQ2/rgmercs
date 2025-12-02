@@ -8,7 +8,7 @@ local DanNet       = require('lib.dannet.helpers')
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
-    _version              = "2.2 - EQ Might (WIP)",
+    _version              = "2.3 - EQ Might",
     _author               = "Algar, Derple, Robban",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
@@ -83,6 +83,11 @@ local _ClassConfig = {
         end,
     },
     ['ItemSets']          = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Harmony of the Soul",
             "Aegis of Superior Divinity",
@@ -325,6 +330,8 @@ local _ClassConfig = {
         DoRez = function(self, corpseId)
             local rezAction = false
             local rezSpell = self.ResolvedActionMap['RezSpell']
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+            local staffReady = mq.TLO.Me.ItemReady(rezStaff)()
             local okayToRez = Casting.OkayToRez(corpseId)
             local combatState = mq.TLO.Me.CombatState():lower() or "unknown"
 
@@ -335,17 +342,26 @@ local _ClassConfig = {
             end
 
             if combatState == "combat" and Config:GetSetting('DoBattleRez') and Core.OkayToNotHeal() then
-                if Casting.AAReady("Blessing of Resurrection") then
+                -- legendary staff only has a 1.5s cast, use it first in combat
+                if rezStaff == "Legendary Fabled Staff of Forbidden Rites" and staffReady then
+                    rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
+                elseif Casting.AAReady("Blessing of Resurrection") then
                     rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
-                elseif mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
+                elseif staffReady then -- the lower 2 staves still cast faster or as fast as water sprinkler
+                    rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
+                elseif mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
                     rezAction = okayToRez and Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 end
-            else
+            elseif combatState ~= "combat" then
                 if Casting.AAReady("Blessing of Resurrection") then
                     rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
-                end
-                if not Casting.CanUseAA("Blessing of Resurrection") and Casting.SpellReady(rezSpell, true) then
-                    rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)
+                elseif staffReady then
+                    rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
+                elseif not Casting.CanUseAA("Blessing of Resurrection") and combatState == "active" or combatState == "resting" then
+                    -- ^ if we have BoR, just wait for it, rather than taking the time to memorize a spell
+                    if Casting.SpellReady(rezSpell, true) then
+                        rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)
+                    end
                 end
             end
 

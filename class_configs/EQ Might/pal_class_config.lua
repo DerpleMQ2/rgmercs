@@ -8,14 +8,13 @@ local Logger      = require("utils.logger")
 local Set         = require('mq.set')
 
 return {
-    _version              = "2.0 - EQ Might (WIP)",
+    _version              = "2.1 - EQ Might",
     _author               = "Derple, Algar",
     ['ModeChecks']        = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
         IsHealing = function() return true end,
         IsCuring = function() return Config:GetSetting('DoCureAA') or Config:GetSetting('DoCureSpells') end,
-        IsRezing = function() return (Config:GetSetting('DoBattleRez') and not Core.IsTanking()) or Targeting.GetXTHaterCount() == 0 end,
-        --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
+        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Tank',
@@ -74,6 +73,11 @@ return {
         end,
     },
     ['ItemSets']          = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Nightbane, Sword of the Valiant",
             "Redemption",
@@ -339,16 +343,28 @@ return {
         },
     },
     ['HelperFunctions']   = {
-        --Did not include Staff of Forbidden Rites, GoR refresh is very fast and rez is 96%
         DoRez = function(self, corpseId)
             local rezAction = false
             local rezSpell = Core.GetResolvedActionMapItem('RezSpell')
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+            local staffReady = mq.TLO.Me.ItemReady(rezStaff)()
             local okayToRez = Casting.OkayToRez(corpseId)
+            local combatState = mq.TLO.Me.CombatState():lower() or "unknown"
 
-            if (Config:GetSetting('DoBattleRez') or mq.TLO.Me.CombatState():lower() ~= "combat") and Casting.AAReady("Gift of Resurrection") then
-                rezAction = okayToRez and Casting.UseAA("Gift of Resurrection", corpseId, true, 1)
-            elseif not Casting.CanUseAA("Gift of Resurrection") and mq.TLO.Me.CombatState():lower() ~= "combat" and Casting.SpellReady(rezSpell, true) then
-                rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)
+
+            if combatState == "combat" and Config:GetSetting('DoBattleRez') then
+                --prioritize GoR because its instant cast
+                if Casting.AAReady("Gift of Resurrection") then
+                    rezAction = okayToRez and Casting.UseAA("Gift of Resurrection", corpseId, true, 1)
+                elseif staffReady then
+                    rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
+                end
+            elseif combatState ~= "combat" and staffReady then
+                rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
+            elseif combatState == "active" or combatState == "resting" then
+                if Casting.SpellReady(rezSpell, true) then
+                    rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)
+                end
             end
 
             return rezAction

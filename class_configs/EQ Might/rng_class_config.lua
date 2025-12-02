@@ -8,10 +8,11 @@ local Movement  = require("utils.movement")
 local Strings   = require("utils.strings")
 
 return {
-    _version              = "2.0 - EQ Might (WIP)",
+    _version              = "2.1 - EQ Might",
     _author               = "Algar",
     ['ModeChecks']        = {
         IsHealing = function() return Config:GetSetting('DoHeals') end,
+        IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0) end,
     },
     ['Modes']             = {
         'DPS',
@@ -38,6 +39,11 @@ return {
         },
     },
     ['ItemSets']          = {
+        ['RezStaff'] = {
+            "Legendary Fabled Staff of Forbidden Rites",
+            "Fabled Staff of Forbidden Rites",
+            "Legendary Staff of Forbidden Rites",
+        },
         ['Epic'] = {
             "Aurora, the Heartwood Blade",
             "Heartwood Blade",
@@ -320,6 +326,17 @@ return {
         },
     },
     ['HelperFunctions']   = {
+        DoRez = function(self, corpseId)
+            local rezStaff = self.ResolvedActionMap['RezStaff']
+
+            if mq.TLO.Me.ItemReady(rezStaff)() then
+                if Casting.OkayToRez(corpseId) then
+                    return Casting.UseItem(rezStaff, corpseId)
+                end
+            end
+
+            return false
+        end,
         combatNav = function(forceMove)
             if not Config:GetSetting('DoMelee') then
                 if not mq.TLO.Me.AutoFire() then
