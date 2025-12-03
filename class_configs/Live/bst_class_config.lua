@@ -29,24 +29,25 @@ return {
             "Blood Drinker's Coating",
         },
     },
-    ['AbilitySets']       = { --TODO/Under Consideration: Add AoE Roar line, add rotation entry (tie it to Do AoE setting), swap in instead of lance 2, especially since the last lance2 is level 112
+    ['AbilitySets']       = {       --TODO/Under Consideration: Add AoE Roar line, add rotation entry (tie it to Do AoE setting), swap in instead of lance 2, especially since the last lance2 is level 112
         ['SwarmPet'] = {
-            -- Swarm Pet
-            "Bestial Empathy",    -- Level 68
-            "Bark at the Moon",   -- Level 75
-            "Howl at the Moon",   -- Level 80
-            "Yowl at the Moon",   -- Level 85
-            "Shout at the Moon",  -- Level 90
-            "Scream at the Moon", -- Level 95
-            "Yell at the Moon",   -- Level 100
-            "Cry at the Moon",    -- Level 105
-            "Roar at the Moon",   -- Level 110
-            "Bay at the Moon",    -- Level 115
-            "Bellow at the Moon", -- Level 120
-            "Shriek at the Moon", -- Level 125
+            "Bark at the Moon XII", -- Level 130
+            "Bestial Empathy",      -- Level 68
+            "Bark at the Moon",     -- Level 75
+            "Howl at the Moon",     -- Level 80
+            "Yowl at the Moon",     -- Level 85
+            "Shout at the Moon",    -- Level 90
+            "Scream at the Moon",   -- Level 95
+            "Yell at the Moon",     -- Level 100
+            "Cry at the Moon",      -- Level 105
+            "Roar at the Moon",     -- Level 110
+            "Bay at the Moon",      -- Level 115
+            "Bellow at the Moon",   -- Level 120
+            "Shriek at the Moon",   -- Level 125
         },
         ['Feralgia'] = {
             -- Swarm Pet and Growl combination
+            "Grimclaw's Feralgia",   -- Level 130
             "Haergen's Feralgia",    -- Level 85
             "Tuzil's Feralgia",      -- Level 90
             "Yahnoa's Feralgia",     -- Level 95
@@ -59,6 +60,7 @@ return {
         },
         ['FrozenPoi'] = {
             -- Cold/Poison Nuke Fast Cast
+            "Frozen Venom X",    -- Level 128
             "Frozen Venom",      -- Level 84
             "Frozen Venin",      -- Level 89
             "Frozen Cyanin",     -- Level 94
@@ -71,17 +73,19 @@ return {
         },
         ['Maelstrom'] = {
             -- Cold/Poison/Disease Nuke Fast Cast
-            "Kron's Maelstrom",      -- Level 90
-            "Bale's Maelstrom",      -- Level 95
-            "Nak's Maelstrom",       -- Level 100
-            "Visoracius' Maelstrom", -- Level 105
-            "Beramos' Maelstrom",    -- Level 110
-            "Vkjen's Maelstrom",     -- Level 115
-            "Va Xakra's Maelstrom",  -- Level 120
-            "Rimeclaw's Maelstrom",  -- Level 125
+            "Tallongast's Maelstrom", -- Level 130
+            "Kron's Maelstrom",       -- Level 90
+            "Bale's Maelstrom",       -- Level 95
+            "Nak's Maelstrom",        -- Level 100
+            "Visoracius' Maelstrom",  -- Level 105
+            "Beramos' Maelstrom",     -- Level 110
+            "Vkjen's Maelstrom",      -- Level 115
+            "Va Xakra's Maelstrom",   -- Level 120
+            "Rimeclaw's Maelstrom",   -- Level 125
         },
         ['PoiBite'] = {
             -- Poison Nuke Fast Cast
+            "Khrosik's Bite",       -- Level 129
             "Bite of the Empress",  -- Level 73
             "Bite of the Borrower", -- Level 78
             "Bite of the Vitrik",   -- Level 83
@@ -96,6 +100,7 @@ return {
         },
         ['Icelance1'] = {
             -- Lance 1 Timer 7 Ice Nuke Fast Cast
+            "Frigid Lance XII",      -- Level 128 - Timer 7
             "Blast of Frost",        -- Level 12 - Timer 7
             "Frost Shard",           -- Level 47 - Timer 7
             "Blizzard Blast",        -- Level 59 - Timer ???
@@ -123,17 +128,18 @@ return {
         },
         ['AERoar'] = {
             -- PBAE Roar Timer 11 Ice Nuke Fast Cast
-            "Glacial Roar",   -- Level 89 - Timer 11
-            "Frostrift Roar", -- Level 94 - Timer 11
-            "Kromrif Roar",   -- Level 99 - Timer 11
-            "Kromtus Roar",   -- Level 104 - Timer 11
-            "Frostbite Roar", -- Level 109 - Timer 11
-            "Restless Roar",  -- Level 114 - Timer 11
-            "Polar Roar",     -- Level 119 - Timer 11
-            "Hoarfrost Roar", -- Level 124 - Timer 11
+            "Glacial Roar IX", -- Level 129
+            "Glacial Roar",    -- Level 89 - Timer 11
+            "Frostrift Roar",  -- Level 94 - Timer 11
+            "Kromrif Roar",    -- Level 99 - Timer 11
+            "Kromtus Roar",    -- Level 104 - Timer 11
+            "Frostbite Roar",  -- Level 109 - Timer 11
+            "Restless Roar",   -- Level 114 - Timer 11
+            "Polar Roar",      -- Level 119 - Timer 11
+            "Hoarfrost Roar",  -- Level 124 - Timer 11
         },
         ['EndemicDot'] = {
-            -- Disease DoT Instant Cast
+            "Tsetsian Endemic XII",  -- Level 127
             "Sicken",                -- Level 14
             "Malaria",               -- Level 40
             "Plague",                -- Level 65
@@ -151,7 +157,7 @@ return {
             "Fevered Endemic",       -- Level 122
         },
         ['BloodDot'] = {
-            -- Poison DoT Instant Cast
+            "Spiter Blood",        -- Level 127
             "Tainted Breath",      -- Level 19
             "Envenomed Breath",    -- Level 35
             "Venom of the Snake",  -- Level 52
@@ -171,13 +177,13 @@ return {
             "Forgebound Blood",    -- Level 121
         },
         ['ColdDot'] = {
-            -- Cold DoT Instant Cast
-            "Edoth's Chill",     -- Level 99
-            "Kirchen's Chill",   -- Level 104
-            "Ekron's Chill",     -- Level 109
-            "Endaroky's Chill",  -- Level 114
-            "Sylra Fris' Chill", -- Level 119
-            "Lazam's Chill",     -- Level 124
+            "Shar`Drahn's Chill", -- Level 130
+            "Edoth's Chill",      -- Level 99
+            "Kirchen's Chill",    -- Level 104
+            "Ekron's Chill",      -- Level 109
+            "Endaroky's Chill",   -- Level 114
+            "Sylra Fris' Chill",  -- Level 119
+            "Lazam's Chill",      -- Level 124
 
         },
         ['SlowSpell'] = {
@@ -198,6 +204,7 @@ return {
             "Reciprocal Fury", -- Level 121
         },
         ['HealSpell'] = {
+            "Lydora's Mending",    -- Level 127
             "Salve",               -- Level 1
             "Minor Healing",       -- Level 6
             "Light Healing",       -- Level 18
@@ -220,6 +227,7 @@ return {
             "Thornhost's Mending", -- Level 122
         },
         ['PetHealSpell'] = {
+            "Salve of Lydora",         -- Level 126
             "Sharik's Replenishing",   -- Level 9
             "Keshuval's Rejuvenation", -- Level 15
             "Herikol's Soothing",      -- Level 27
@@ -242,6 +250,7 @@ return {
             "Salve of Homer",          -- Level 121
         },
         ['PetSpell'] = {
+            "Spirit of Orvain",     -- Level 128
             "Spirit of Sharik",     -- Level 8
             "Spirit of Khaliz",     -- Level 15
             "Spirit of Keshuval",   -- Level 21
@@ -270,6 +279,7 @@ return {
         },
         ['PetGroupEndRegenProc'] = {
             --Pet Group End Regen Proc*
+            "Fatiguing Bite VI", -- Level 128
             "Fatiguing Bite",
             "Exhausting Bite",
             "Depleting Bite",
@@ -277,6 +287,7 @@ return {
             "Sapping Bite",
         },
         ['PetSpellGuard'] = {
+            "Spellbreaker's Guard XI", -- Level 130
             "Spellbreaker's Guard",
             "Spellbreaker's Bulwark",
             "Spellbreaker's Aegis",
@@ -297,7 +308,7 @@ return {
             "Deadlock Jaws",
         },
         ['PetOffenseBuff'] = {
-            --Pet DPS buff*
+            "Pack Leader's Aggression", -- Level 126
             "Neivr's Aggression",
             "Mea's Aggression",
             "Plakt's Aggression",
@@ -308,7 +319,7 @@ return {
             "Magna's Aggression",
         },
         ['PetDefenseBuff'] = {
-            --Pet Tanking buff*
+            "Pack Leader's Protection", -- Level 126
             "Neivr's Protection",
             "Mea's Protection",
             "Plakt's Protection",
@@ -320,6 +331,7 @@ return {
         },
         ['PetHaste'] = {
             --Pet Haste*
+            "Warder's Unity VI", -- Level 129, combines haste and damage proc
             "Yekan's Quickening",
             "Bond of The Wild",
             "Omakin's Alacrity",
@@ -338,7 +350,7 @@ return {
             "Insatiable Voracity",
         },
         ['PetGrowl'] = {
-            --Pet Growl Buff* 69-115
+            "Growl of the Panther XIV", -- Level 129
             "Growl of the Panther",
             "Growl of the Puma",
             "Growl of the Jaguar",
@@ -362,6 +374,7 @@ return {
             "Friendly Pet",
         },
         ['PetDamageProc'] = {
+            "Spirit of Irdrath", -- Level 129
             "Spirit of Shoru",
             "Spirit of Lightning",
             "Spirit of the Blizzard",
@@ -390,6 +403,7 @@ return {
         },
         ['UnityBuff'] = {
             -- --Combined ManaRegenBuff and AtkHPBuff
+            "Feralist's Unity VII", -- Level 130
             "Spiritual Unity",
             "Stormblood's Unity",
             "Feralist's Unity",
@@ -415,7 +429,7 @@ return {
             "Spirit of Tala'Tak",
         },
         ['ManaRegenBuff'] = {
-            --Mana/Hp/End Regen Buff*
+            "Spiritual Enlightenment XVII", -- Level 128
             "Spiritual Light",
             "Spiritual Radiance",
             "Spiritual Purity",
@@ -470,7 +484,7 @@ return {
             "Auspice of Usira",      -- Level 122
         },
         ['PetHotSpell'] = {
-            -- Pet Hot Spell
+            "Lydora's Melioration",  -- Level 127
             "Minax's Mending",       -- Level 82
             "Wilap's Mending",       -- Level 87
             "Yurv's Mending",        -- Level 92
@@ -481,7 +495,7 @@ return {
             "Cissela's Melioration", -- Level 117
         },
         ['PetPromisedSpell'] = {
-            -- Pet Promised
+            "Promised Mending XII",    -- Level 128
             "Promised Mending",        -- Level 73
             "Promised Recovery",       -- Level 78
             "Promised Rejuvenation",   -- Level 83
@@ -502,7 +516,7 @@ return {
             "Dire Bite",
         },
         ['FocusSpell'] = {
-            -- Single target Talismans ( Like Focus)
+            "Focus of Aramna", -- Level 126
             "Inner Fire",
             "Talisman of Tnarg",
             "Talisman of Altuna",
@@ -522,7 +536,7 @@ return {
             "Focus of Skull Crusher",
         },
         ['AtkHPBuff'] = {
-            -- Group Attack+ Hp Buff
+            "Spiritual Vigor XV", -- Level 127
             "Spiritual Vigor",
             "Spiritual Vitality",
             "Spiritual Vim",
@@ -555,6 +569,7 @@ return {
             "Shared Merciless Ferocity", -- Level 100
         },
         ['EndRegenDisc'] = {
+            "Hiatus V", -- Level 126
             "Respite",
             "Reprieve",
             "Rest",
@@ -566,6 +581,7 @@ return {
         },
         ['Maul'] = {
             -- Maul Disc - This is Used with Beastlord Synergy Buffs
+            "Harrow XII", -- Level 129
             "Rake",
             "Harrow",
             "Foray",
@@ -583,7 +599,7 @@ return {
             "Focused Clamor of Claws",
         },
         ['BestialBuffDisc'] = {
-            --Bestial Buff*
+            "Bestial Vivisection VI", -- Level 126
             "Bestial Vivisection",
             "Bestial Rending",
             "Bestial Evulsing",
@@ -591,6 +607,7 @@ return {
             "Bestial Fierceness",
         },
         ['AEClaws'] = {
+            "Flurry of Claws IX", -- Level 127
             "Flurry of Claws",
             "Tumult of Claws",
             "Clamor of Claws",
