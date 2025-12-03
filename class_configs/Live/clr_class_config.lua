@@ -90,7 +90,8 @@ local _ClassConfig = {
         },
     },
     ['AbilitySets']       = {
-        ['WardBuff'] = { -- Level 97+
+        ['WardBuff'] = {          -- Level 97+
+            "Ward of Virtue VII", -- 127
             "Ward of Certitude",
             "Ward of Surety",
             "Ward of Assurance",
@@ -99,6 +100,7 @@ local _ClassConfig = {
             "Ward of Commitment",
         },
         ['HealingLight'] = {
+            "Eminent Light", -- Level 128
             "Minor Healing",
             "Light Healing",
             "Healing",
@@ -123,8 +125,9 @@ local _ClassConfig = {
             "Fervent Light",
             "Avowed Light",
         },
-        ['RemedyHeal'] = { -- Not great until 96/RoF (Graceful)
+        ['RemedyHeal'] = {     -- Not great until 96/RoF (Graceful)
             -- "Remedy", No place to slot this, Ethereal used as a fallback at some level ranges
+            "Holy Remedy XIV", -- 126
             "Ethereal Remedy",
             "Supernal Remedy",
             "Pious Remedy",
@@ -141,6 +144,7 @@ local _ClassConfig = {
             "Avowed Remedy",
         },
         ['RemedyHeal2'] = {
+            "Holy Remedy XIV", -- 126
             "Graceful Remedy",
             "Spiritual Remedy",
             "Merciful Remedy",
@@ -148,7 +152,8 @@ local _ClassConfig = {
             "Guileless Remedy",
             "Avowed Remedy",
         },
-        ['Renewal'] = { -- Level 70 +, large heal, slower cast
+        ['Renewal'] = {               -- Level 70 +, large heal, slower cast
+            "Desperate Renewal XIII", -- 130
             "Desperate Renewal",
             "Frantic Renewal",
             "Frenetic Renewal",
@@ -191,7 +196,8 @@ local _ClassConfig = {
             "Ecliptic Blessing",
             "Reciprocal Blessing",
         },
-        ['GroupFastHeal'] = { -- Level 98
+        ['GroupFastHeal'] = {        -- Level 98
+            "Syllable of Wellbeing", -- 128
             "Syllable of Acceptance",
             "Syllable of Convalescence",
             "Syllable of Mending",
@@ -200,6 +206,7 @@ local _ClassConfig = {
             "Syllable of Renewal",
         },
         ['GroupHealCure'] = {
+            "Word of Replenishment", -- 129
             "Word of Restoration",   -- Poi/Dis
             "Word of Replenishment", -- Poi/Dis/Curse
             "Word of Vivification",
@@ -216,6 +223,7 @@ local _ClassConfig = {
         },
         ['GroupHealNoCure'] = {
             -----Group Heals No Cure Slot 5
+            "Word of Wellbeing", -- 126
             "Word of Health",
             "Word of Healing",
             "Word of Vigor",
@@ -235,6 +243,7 @@ local _ClassConfig = {
         },
         ['HealNuke'] = {
             -- Heal Tank and Nuke Tanks Target -- Intervention Lines
+            "Eminent Intervention", -- Level 128
             "Holy Intervention",
             "Celestial Intervention",
             "Elysian Intervention",
@@ -247,6 +256,7 @@ local _ClassConfig = {
         },
         ['HealNuke2'] = {
             -- Heal Tank and Nuke Tanks Target -- Intervention Lines
+            "Eminent Intervention", -- Level 128
             "Holy Intervention",
             "Celestial Intervention",
             "Elysian Intervention",
@@ -259,6 +269,7 @@ local _ClassConfig = {
         },
         ['HealNuke3'] = {
             -- Heal Tank and Nuke Tanks Target -- Intervention Lines
+            "Eminent Intervention", -- Level 128
             "Holy Intervention",
             "Celestial Intervention",
             "Elysian Intervention",
@@ -271,6 +282,7 @@ local _ClassConfig = {
         },
         ['NukeHeal'] = {
             -- Nuke Target and Heal Tank -  Dps Heals
+            "Eminent Contravention", -- 130
             "Holy Contravention",
             "Celestial Contravention",
             "Elysian Contravention",
@@ -283,6 +295,7 @@ local _ClassConfig = {
         },
         ['NukeHeal2'] = {
             -- Nuke Target and Heal Tank -  Dps Heals
+            "Eminent Contravention", -- 130
             "Holy Contravention",
             "Celestial Contravention",
             "Elysian Contravention",
@@ -295,6 +308,7 @@ local _ClassConfig = {
         },
         ['NukeHeal3'] = {
             -- Nuke Target and Heal Tank -  Dps Heals
+            "Eminent Contravention", -- 130
             "Holy Contravention",
             "Celestial Contravention",
             "Elysian Contravention",
@@ -319,6 +333,7 @@ local _ClassConfig = {
         },
         ['SelfHPBuff'] = {
             --Self Buff for Mana Regen and armor
+            "Armor of the Eminent", -- 130
             "Armor of Protection",
             "Blessed Armor of the Risen",
             "Ancient: High Priest's Bulwark",
@@ -346,6 +361,7 @@ local _ClassConfig = {
         },
         ['AegoBuff'] = {
             ----Use HP Type one until Temperance at 40... Group Buff at 45 (Blessing of Temperance)
+            "Mercenary's Hand of Aegolism XV", -- Level 130
             "Courage",
             "Center",
             "Daring",
@@ -387,6 +403,7 @@ local _ClassConfig = {
         },
         ['ShiningBuff'] = {
             --Tank Buff Traditionally Shining Series of Buffs
+            "Shining Rampart IX",
             "Shining Rampart",
             "Shining Armor",
             "Shining Bastion",
@@ -405,7 +422,7 @@ local _ClassConfig = {
             "Ward of Vie",
         },
         ['GroupVieBuff'] = {
-            ----Group Vie Buff
+            "Rallied Ward of Vie", -- 128
             "Rallied Aegis of Vie",
             "Rallied Shield of Vie",
             "Rallied Palladium of Vie",
@@ -456,6 +473,7 @@ local _ClassConfig = {
         },
         ['DivineBuff'] = {
             --Divine Buffs REQUIRES extra spell slot because of the 90s recast
+            "Divine Interstition", -- 127
             "Death Pact",
             "Divine Intervention",
             "Divine Intercession",
@@ -467,6 +485,7 @@ local _ClassConfig = {
             "Divine Interference",
         },
         ['TwinHealNuke'] = {
+            "Unyielding Denunciation", -- 129
             "Glorious Denunciation",
             "Glorious Censure",
             "Glorious Admonition",
@@ -496,6 +515,7 @@ local _ClassConfig = {
         },
         ['ClutchHeal'] = {
             -- 11th-17th Rejuv Spell Line Clutch Heals Require Life below 35-45% to cast
+            "Twentieth Dictum", -- 127
             "Eleventh-Hour",
             "Twelfth Night",
             "Thirteenth Salve",
@@ -516,6 +536,7 @@ local _ClassConfig = {
             "Hand of Avowed Infusion",
         },
         ['SingleElixir'] = {
+            "Eminent Elixir",   -- 127
             "Celestial Remedy", -- Level 19
             "Celestial Health",
             "Celestial Healing",
@@ -530,7 +551,8 @@ local _ClassConfig = {
         },
         ['GroupElixir'] = {
             -- Group Hot Line - Elixirs No Cure
-            "Ethereal Elixir", -- Level 59
+            "Elixir of Absolution", -- 130
+            "Ethereal Elixir",      -- Level 59
             "Elixir of Divinity",
             "Elixir of Redemption",
             "Elixir of Atonement",
@@ -546,6 +568,7 @@ local _ClassConfig = {
         },
         ['GroupAcquittal'] = {
             -- Group Hot Line Cure + Hot 99+
+            "Eminent Acquittal", -- 129
             "Cleansing Acquittal",
             "Ardent Acquittal",
             "Merciful Acquittal",
@@ -617,9 +640,10 @@ local _ClassConfig = {
             "Yaulp VI",
             "Yaulp VII",
             "Yaulp VIII",
-            "Yaulp IX",    -- Level 76, AA starts at 75 with Yaulp IX
+            "Yaulp IX",           -- Level 76, AA starts at 75 with Yaulp IX
         },
-        ['StunTimer6'] = { -- Timer 6 Stun, Fast Cast, Level 63+ (with ToT Heal 88+)
+        ['StunTimer6'] = {        -- Timer 6 Stun, Fast Cast, Level 63+ (with ToT Heal 88+)
+            "Sound of Vehemence", -- 128
             "Sound of Heroism",
             "Sound of Providence",
             "Sound of Rebuke",
@@ -641,7 +665,8 @@ local _ClassConfig = {
         ['LowLevelStun'] = { --Adding a second stun at low levels
             "Stun",
         },
-        ['UndeadNuke'] = { -- Level 4+
+        ['UndeadNuke'] = {        -- Level 4+
+            "Expunge the Undead", -- Level 129
             "Banish the Undead",
             "Extirpate the Undead",
             "Obliterate the Undead",
@@ -660,7 +685,7 @@ local _ClassConfig = {
             "Ward Undead",
         },
         ['MagicNuke'] = {
-            -- Basic Nuke
+            "Veto", -- 127
             "Strike",
             "Furor",
             "Smite",
@@ -682,6 +707,7 @@ local _ClassConfig = {
             "Decree",
         },
         ['HammerPet'] = {
+            "Hammer of Emminence", -- 127
             "Unswerving Hammer of Faith",
             "Unswerving Hammer of Retribution",
             "Unflinching Hammer of Zeal",

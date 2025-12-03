@@ -105,7 +105,7 @@ local _ClassConfig = {
             "Tarew's Aquatic Ayre", --Level 16
         },
         ['AriaSong'] = {
-            -- MainAriaSong - Level Ranges 45 - 111
+            "Severyn's Aria",
             "Aria of Tenisbre", -- 125
             "Aria of Pli Xin Liako",
             "Aria of Margidor",
@@ -133,7 +133,7 @@ local _ClassConfig = {
             "Rizlona's Embers",          -- spell damage only, level 45
         },
         ['SufferingSong'] = {
-            -- SufferingSong - Level Range 89 - 114
+            "Sorrowful Song of Suffering IX",
             "Kanghammer's Song of Suffering", -- 125
             "Shojralen's Song of Suffering",
             "Omorden's Song of Suffering",
@@ -144,7 +144,7 @@ local _ClassConfig = {
             "Noira's Song of Suffering",
         },
         ['SprySonataSong'] = {
-            -- SprySonataSong - Level Range 77 - 118
+            "Boberstler's Spry Sonata",
             "Dhakka's Spry Sonata",
             "Xetheg's Spry Sonata",
             "Kellek's Spry Sonata",
@@ -156,6 +156,7 @@ local _ClassConfig = {
         },
         ['CrescendoSong'] = {
             -- CrescendoSong - Level Range 75 - 114
+            "Alliana's Lively Crescendo",
             "Regar's Lively Crescendo", -- 125
             "Zelinstein's Lively Crescendo",
             "Zburator's Lively Crescendo",
@@ -169,7 +170,7 @@ local _ClassConfig = {
             "Veshma's Lively Crescendo",
         },
         ['ArcaneSong'] = {
-            -- ArcaneSong - Level Range 70 - 115
+            "Arcane Aria XII",
             "Arcane Rhythm", -- 125
             "Arcane Harmony",
             "Arcane Symphony",
@@ -185,6 +186,7 @@ local _ClassConfig = {
         ['InsultSong'] = {
             --Bard Timers alternate between 6 and 3 every expansion. (Update: TOB has thrown this on its head)
             --We have to manage selection so we don't have insultsong2 using the same timer.
+            --"Cutting Insult X", -- 127 push, timer 6
             "Yaran's Disdain",  -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
             "Nord's Disdain",   -- 118 nopush, timer 6, NoS
@@ -206,6 +208,7 @@ local _ClassConfig = {
             -- "Brusco's Boastful Bellow", --12,
         },
         ['InsultSong2'] = {
+            -- "Cutting Insult X", -- 127 push, timer 6
             "Yaran's Disdain",  -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
             "Nord's Disdain",   -- 118 nopush, timer 6, NoS
@@ -237,7 +240,7 @@ local _ClassConfig = {
             "Dichotomic Psalm",
         },
         ['BardDPSAura'] = {
-            -- BardDPSAura - Level Ranges 55 - 125
+            "Aura of Kenburk",
             "Aura of Tenisbre", -- 125
             "Aura of Pli Xin Liako",
             "Aura of Margidor",
@@ -252,6 +255,7 @@ local _ClassConfig = {
             "Aura of Insight",
         },
         ['BardRegenAura'] = {
+            "Aura of Quellious",
             "Aura of Shalowain",
             "Aura of Shei Vinitras",
             "Aura of Vhal`Sera",
@@ -264,6 +268,7 @@ local _ClassConfig = {
         },
         ['GroupRegenSong'] = {
             --Note level 77 pulse only offers a heal% buff and is not included here.
+            "Pulse of Quellious",
             "Pulse of August", -- 125
             "Pulse of Nikolas",
             "Pulse of Vhal`Sera",
@@ -284,7 +289,7 @@ local _ClassConfig = {
             "Hymn of Restoration",           -- 7, hp only
         },
         ['AreaRegenSong'] = {
-            -- ChorusRegenSong - Level Range 58 - 113
+            "Chorus of Quellious",
             "Chorus of Shalowain",     -- 123
             "Chorus of Shei Vinitras", -- 118
             "Chorus of Vhal`Sera",     -- 113
@@ -302,7 +307,7 @@ local _ClassConfig = {
             "Chorus of Replenishment", -- 58
         },
         ['WarMarchSong'] = {
-            -- WarMarchSong Level Range 10 - 114
+            "War March of the Burning Host",
             "War March of Nokk", -- 125
             "War March of Centien Xi Va Xakra",
             "War March of Radiwol",
@@ -351,7 +356,7 @@ local _ClassConfig = {
             "Largo's Melodic Binding",
         },
         ['AccelerandoSong'] = {
-            -- AccelerandoSong - Level Range 88 - 113 **
+            "Alleviating Accelerando VIII",
             "Appeasing Accelerando", -- 125
             "Satisfying Accelerando",
             "Placating Accelerando",
@@ -363,6 +368,7 @@ local _ClassConfig = {
         },
         ['SpitefulSong'] = {
             -- SpitefulSong - Level Range 90 -
+            "Matriarch's Spiteful Lyric",
             "Tatalros' Spiteful Lyric", -- 125
             "Von Deek's Spiteful Lyric",
             "Omorden's Spiteful Lyric",
@@ -373,7 +379,7 @@ local _ClassConfig = {
             "Lyrin's Spiteful Lyric",
         },
         ['RecklessSong'] = {
-            -- RecklessSong - Level Range 93 - 113 **
+            "Onkrin's Reckless Renewal",
             "Grayleaf's Reckless Renewal", -- 125
             "Kai's Reckless Renewal",
             "Reivaj's Reckless Renewal",
@@ -384,6 +390,7 @@ local _ClassConfig = {
         },
         ['ColdBuffSong'] = {
             -- ColdBuffSong - Level Range 72 - 112 **
+            "Fatesong of the Polar Vortex",
             "Fatesong of Zoraxmen", -- 125
             "Fatesong of Lucca",
             "Fatesong of Radiwol",
@@ -398,6 +405,7 @@ local _ClassConfig = {
         },
         ['DotBuffSong'] = {
             -- Fire & Magic Dots song
+            "Danfol's Psalm of Potency",
             "Tatalros' Psalm of Potency", -- 125
             "Fyrthek Fior's Psalm of Potency",
             "Velketor's Psalm of Potency",
@@ -410,6 +418,7 @@ local _ClassConfig = {
             "Erradien's Psalm of Potency",
         },
         ['FireDotSong'] = {
+            "Severyn's Chant of Flame",
             "Kindleheart's Chant of Flame", -- 125
             "Shak Dathor's Chant of Flame",
             "Sontalak's Chant of Flame",
@@ -430,7 +439,7 @@ local _ClassConfig = {
             "Fufil's Curtailing Chant",
         },
         ['IceDotSong'] = {
-            -- Ice Dot
+            "Tsikut's Chant of Frost",
             "Swarn's Chant of Frost",
             "Sylra Fris' Chant of Frost",
             "Yelinak's Chant of Frost",
@@ -451,7 +460,7 @@ local _ClassConfig = {
             "Fufil's Curtailing Chant",
         },
         ['PoisonDotSong'] = {
-            -- DotSongs - Level Range 30 - 115
+            "Khrosik's Chant of Poison",
             "Marsin's Chant of Poison",
             "Cruor's Chant of Poison",
             "Malvus's Chant of Poison",
@@ -472,7 +481,7 @@ local _ClassConfig = {
             "Fufil's Curtailing Chant",
         },
         ['DiseaseDotSong'] = {
-            -- DotSongs - Level Range 30 - 115
+            "Pustim's Chant of Disease",
             "Goremand's Chant of Disease", -- 125
             "Coagulus' Chant of Disease",
             "Zlexak's Chant of Disease",
@@ -507,6 +516,7 @@ local _ClassConfig = {
             "Coalition of Sticks and Stones",
         },
         ['CharmSong'] = {
+            "Voice of Keftlik",
             "Voice of Suja", -- 125
             "Voice of the Diabo",
             "Omiyad's Demand",
@@ -546,6 +556,7 @@ local _ClassConfig = {
         },
         ['ResistSong'] = {
             -- Resists Song
+            "Psalm of Veeshan VII",
             "Psalm of Cooling",
             "Psalm of Purity",
             "Psalm of Warmth",
@@ -557,7 +568,7 @@ local _ClassConfig = {
             "Psalm of the Pious",
         },
         ['MezSong'] = {
-            -- MezSong - Level Range 15 - 114
+            "Slumber of Keftlik	",
             "Slumber of Suja", -- 125
             "Slumber of the Diabo",
             -- [] = "Lullaby of Nightfall",
@@ -593,6 +604,7 @@ local _ClassConfig = {
         },
         ['MezAESong'] = {
             -- MezAESong - Level Range 85 - 115 **
+            "Wave of Slumber X",
             "Wave of Stupor", -- 125
             "Wave of Nocturn",
             "Wave of Sleep",
@@ -611,6 +623,7 @@ local _ClassConfig = {
         },
         ['CalmSong'] = {
             -- CalmSong - Level Range 8+ --Included for manual use with /rgl usemap
+            "Silence of the Vortex",     -- Level 126
             "Kelin's Lugubrious Lament", -- Level 8 (Max Mob Level of 60)
             "Silent Song of Quellious",  -- Level 61
             "Luvwen's Aria of Serenity", -- Level 66

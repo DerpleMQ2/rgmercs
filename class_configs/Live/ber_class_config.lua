@@ -28,6 +28,7 @@ return {
     },
     ['AbilitySets']     = {
         ['EndRegen'] = {
+            "Hiatus V", -- 126
             "Second Wind",
             "Third Wind",
             "Fourth Wind",
@@ -52,6 +53,7 @@ return {
             "Reciprocal Rage",
         },
         ['Dfrenzy'] = {
+            "Obliterating Frenzy III", -- 127
             "Eviscerating Frenzy",
             "Oppressing Frenzy",
             "Overpowering Frenzy",
@@ -63,6 +65,7 @@ return {
             "Vindicating Frenzy",
         },
         ['Bfrenzy'] = {
+            "Augmented Frenzy VII", -- 129
             "Torrid Frenzy",
             "Steel Frenzy",
             "Augmented Frenzy",
@@ -81,6 +84,7 @@ return {
             "Bolstered Frenzy",
         },
         ['Dvolley'] = {
+            "Obliterating Volley", -- 130
             "Rage Volley",
             "Destroyer's Volley",
             "Annihilator's Volley",
@@ -96,6 +100,7 @@ return {
             "Eviscerating Volley",
         },
         ['Daxethrow'] = {
+            "Obliterating Axe Throw", -- 128
             "Maiming Axe Throw",
             "Vigorous Axe Throw",
             "Energetic Axe Throw",
@@ -107,6 +112,7 @@ return {
             "Rending Axe Throw",
         },
         ['Daxeof'] = {
+            "Axe of Trung", -- 130
             "Axe of Rallos",
             "Axe of Graster",
             "Axe of Illdaera",
@@ -129,6 +135,7 @@ return {
 
         },
         ['CheapShot'] = {
+            "Slap in the Face IX", -- 128
             "Slap in the Face",
             "Kick in the Teeth",
             "Punch in The Throat",
@@ -146,6 +153,7 @@ return {
             "Arcscale",
         },
         ['AEVicious'] = {
+            "Vicous Spiral VII", -- 127
             "Vicious Spiral",
             "Vicious Cyclone",
             "Vicious Cycle",
@@ -153,6 +161,7 @@ return {
             "Vicious Whirl",
         },
         ['FrenzyBoost'] = {
+            "Augmented Frenzy VII", -- 129
             "Augmented Frenzy",
             "Amplified Frenzy",
             "Bolstered Frenzy",
@@ -161,6 +170,7 @@ return {
             "Heightened Frenzy",
         },
         ['RageStrike'] = {
+            "Festering Rage VII", -- 127
             "Roiling Rage",
             "Festering Rage",
             "Bubbling Rage",
@@ -169,6 +179,7 @@ return {
             "Frothing Rage",
         },
         ['SharedBuff'] = {
+            "Shared Bloodlust X", -- 130
             "Shared Barbarism",
             "Shared Bloodlust",
             "Shared Brutality",
@@ -212,6 +223,7 @@ return {
             "Cry Carnage",
         },
         ['Tendon'] = {
+            "Tendon Cleave", -- 126
             "Tendon Slice",
             "Tendon Shred",
             "Tendon Cleave",
@@ -237,9 +249,9 @@ return {
             "Desperate Frenzy",
             "Blinding Frenzy",
             "Restless Frenzy",
-
         },
         ['RetaliationDodge'] = {
+            "Anticipatory Retaliation", -- 129
             "Preemptive Retaliation",
             "Primed Retaliation",
             "Premature Retaltion",
@@ -249,6 +261,7 @@ return {
             "Early Retaliation",
         },
         ['TempleStun'] = {
+            "Temple Strike XVI", -- 128
             "Temple Shatter",
             "Temple Bash",
             "Temple Blow",
@@ -262,6 +275,7 @@ return {
             "Temple Strike",
         },
         ['JarringStrike'] = {
+            "Jarring Strike XVI", -- 129
             "Jarring Crash",
             "Jarring Strike",
             "Jarring Smash",
@@ -359,6 +373,7 @@ return {
                         "Axe of The Vindicator",
                         "Axe of the Conqueror",
                         "Axe of the Eviscerator",
+                        "Axe of the Obliterator",
                     }
 
                     if not self.TempSettings.CachedAxeMap then
