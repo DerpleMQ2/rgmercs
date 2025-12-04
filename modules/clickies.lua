@@ -413,6 +413,67 @@ Module.LogicBlocks                      = {
     },
 
     {
+        name = "I Have Effect",
+        cond = function(self, target, effect, negate)
+            local hasEffect = Casting.IHaveBuff(effect)
+            if negate then
+                return not hasEffect
+            else
+                return hasEffect
+            end
+        end,
+        tooltip = "Only use when you (do not) have this buff or song effect on you. (Optional Negate)",
+        render_header_text = function(self, cond)
+            return string.format("You %s Effect '%s'", cond.args[2] and "don't have" or "have", cond.args[1] or "None")
+        end,
+        cond_targets = { "Self", },
+        args = {
+            { name = "Effect", type = "string",  default = "", },
+            { name = "Negate", type = "boolean", default = false, },
+        },
+    },
+
+    {
+        name = "I Have A Pet",
+        cond = function(self, _, negate)
+            if negate then
+                return not mq.TLO.Me.Pet.ID() > 0
+            else
+                return mq.TLO.Me.Pet.ID() > 0
+            end
+        end,
+        tooltip = "Only use this when I have a pet. (Optional Negate)",
+        render_header_text = function(self, cond)
+            return string.format("You %s a pet.", cond.args[1] and "don't have" or "have")
+        end,
+        cond_targets = { "Self", },
+        args = {
+            { name = "Negate", type = "boolean", default = false, },
+        },
+    },
+
+    {
+        name = "My Pet Has Effect",
+        cond = function(self, target, effect, negate)
+            local hasEffect = not Casting.PetBuffCheck(mq.TLO.Spell(effect)) -- this will return false if the pet has it
+            if negate then
+                return not hasEffect
+            else
+                return hasEffect
+            end
+        end,
+        tooltip = "Only use when this effect is (not) present on your pet. (Optional Negate)",
+        render_header_text = function(self, cond)
+            return string.format("Your Pet %s Effect '%s'", cond.args[2] and "doesn't have" or "has", cond.args[1] or "None")
+        end,
+        cond_targets = { "Pet", },
+        args = {
+            { name = "Effect", type = "string",  default = "", },
+            { name = "Negate", type = "boolean", default = false, },
+        },
+    },
+
+    {
         name = "Target Aggro Percent",
         cond = function(self, target, aboveAggro, belowAggro)
             if not target or not target() then
@@ -531,7 +592,7 @@ Module.LogicBlocks                      = {
     },
 
     {
-        name = "Target Is Named",
+        name = "The RGMercs Auto Target Is Named",
         cond = function(self, target, negate)
             local isNamed = Targeting.IsNamed(Targeting.GetAutoTarget())
             if negate then
@@ -550,62 +611,16 @@ Module.LogicBlocks                      = {
     },
 
     {
-        name = "I Have Effect",
-        cond = function(self, target, effect, negate)
-            local hasEffect = Casting.IHaveBuff(effect)
-            if negate then
-                return not hasEffect
-            else
-                return hasEffect
-            end
-        end,
-        tooltip = "Only use when you (do not) have this buff or song effect on you. (Optional Negate)",
-        render_header_text = function(self, cond)
-            return string.format("You %s Effect '%s'", cond.args[2] and "don't have" or "have", cond.args[1] or "None")
-        end,
-        cond_targets = { "Self", },
-        args = {
-            { name = "Effect", type = "string",  default = "", },
-            { name = "Negate", type = "boolean", default = false, },
-        },
-    },
-
-    {
-        name = "My Pet Has Effect",
-        cond = function(self, target, effect, negate)
-            local hasEffect = not Casting.PetBuffCheck(mq.TLO.Spell(effect)) -- this will return false if the pet has it
-            if negate then
-                return not hasEffect
-            else
-                return hasEffect
-            end
-        end,
-        tooltip = "Only use when this effect is (not) present on your pet. (Optional Negate)",
-        render_header_text = function(self, cond)
-            return string.format("Your Pet %s Effect '%s'", cond.args[2] and "doesn't have" or "has", cond.args[1] or "None")
-        end,
-        cond_targets = { "Pet", },
-        args = {
-            { name = "Effect", type = "string",  default = "", },
-            { name = "Negate", type = "boolean", default = false, },
-        },
-    },
-
-    {
         name = "The RGMercs Auto Target Has Effect",
         cond = function(self, target, effect, negate)
             local hasEffect = Casting.TargetHasBuff(effect, target)
-            if negate then
-                return not hasEffect
-            else
-                return hasEffect
-            end
+
+            return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and (negate and not hasEffect or hasEffect)
         end,
         tooltip = "Only use when this effect is (not) present on the RGMercs combat auto target. (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("RGMercs Auto Target %s Effect: '%s'", cond.args[2] and "doen't have" or "has", cond.args[1] or "None")
         end,
-        cond_targets = { "Auto Target", },
         args = {
             { name = "Effect", type = "string",  default = "", },
             { name = "Negate", type = "boolean", default = false, },
@@ -613,22 +628,14 @@ Module.LogicBlocks                      = {
     },
 
     {
-        name = "I Have A Pet",
-        cond = function(self, _, negate)
-            if negate then
-                return not mq.TLO.Me.Pet.ID() > 0
-            else
-                return mq.TLO.Me.Pet.ID() > 0
-            end
+        name = "The RGMercs Auto Target Has Any Beneficial Effect",
+        cond = function(self, target)
+            return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Target.Beneficial() ~= nil
         end,
-        tooltip = "Only use this when I have a pet. (Optional Negate)",
+        tooltip = "Only use when a beneficial effect is present on the RGMercs combat auto target. (Generally used for dispel clickies.)",
         render_header_text = function(self, cond)
-            return string.format("You %s a pet.", cond.args[1] and "don't have" or "have")
+            return string.format("RGMercs Auto Target has a beneficial effect.")
         end,
-        cond_targets = { "Self", },
-        args = {
-            { name = "Negate", type = "boolean", default = false, },
-        },
     },
 
     {
