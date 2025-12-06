@@ -113,6 +113,7 @@ local _ClassConfig = {
             "Legendary Staff of Forbidden Rites",
         },
         ['Epic'] = {
+            "Innoruuk's Dark Wrath", -- 2.1, EQM custom
             "Innoruuk's Dark Blessing",
             "Innoruuk's Voice",
         },

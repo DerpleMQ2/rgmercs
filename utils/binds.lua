@@ -298,7 +298,7 @@ Binds.Handlers    = {
     },
     ['pauseall'] = {
         usage = "/rgl pauseall",
-        about = "Pauses the RGMercs Main Loop for every groupmember.",
+        about = "Pauses the RGMercs Main Loop for every client running RGMercs.",
         handler = function()
             Config.Globals.PauseMain = true
             Core.DoCmd("/squelch /dge /rgl pause")
@@ -314,7 +314,7 @@ Binds.Handlers    = {
     },
     ['unpauseall'] = {
         usage = "/rgl unpauseall",
-        about = "Unpauses the RGMercs Main Loop for every groupmember.",
+        about = "Unpauses the RGMercs Main Loop for every client running RGMercs.",
         handler = function()
             Config.Globals.PauseMain = false
             Core.DoCmd("/squelch /dge /rgl unpause")

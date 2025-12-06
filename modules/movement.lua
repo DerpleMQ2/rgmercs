@@ -120,12 +120,12 @@ Module.DefaultConfig   = {
         Default = false,
     },
     ['RunMovePaused']                          = {
-        DisplayName = "Chase While Paused",
+        DisplayName = "Chase or Camp While Paused",
         Group = "Movement",
         Header = "Following",
         Category = "Chase",
         Index = 2,
-        Tooltip = "Continue to follow your Chase target, even if RGMercs is paused.",
+        Tooltip = "Continue to follow your chase target or return to camp, even if RGMercs is paused.",
         Default = true,
     },
     ['ChaseDistance']                          = {
