@@ -93,9 +93,15 @@ local _ClassConfig = {
             "Aegis of Superior Divinity",
         },
         ['BlueBand'] = {
+            "Legendary Ancient Frozen Blue Band",
             "Ancient Frozen Blue Band",
             "Fabled Blue Band of the Oak",
             "Blue Band of the Oak",
+        },
+        ['VampiricBlueBand'] = {
+            "Mythical Ancient Vampiric Blue Band",
+            "Legendary Ancient Vampiric Blue Band",
+            "Ancient Vampiric Blue Band",
         },
         ['Timer2HealItem'] = {
             "Legendary Weighted Hammer of Conviction",
@@ -456,8 +462,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "VampiricBlueBand",
+                type = "Item",
+                load_cond = function(self) return Core.GetResolvedActionMapItem("VampiricBlueBand") and mq.TLO.Me.Level() >= 68 end,
+            },
+            {
                 name = "BlueBand",
                 type = "Item",
+                load_cond = function(self) return Core.GetResolvedActionMapItem("BlueBand") and (mq.TLO.Me.Level() < 68 or not Core.GetResolvedActionMapItem("VampiricBlueBand")) end,
             },
             {
                 name = "GroupHeal",
