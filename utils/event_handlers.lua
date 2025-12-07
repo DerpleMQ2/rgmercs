@@ -232,6 +232,13 @@ mq.event('New Discipline', "You have learned a new discipline!", function()
     mq.flushevents("New Discipline")
 end)
 
+mq.event('Level Up', "You have gained a level! Welcome to level#*#", function()
+    -- we may have spells scribed for the new level already on EQ Might, where deleveling is a standard part of play
+    if Config.Globals.CurServer == "EQ Might" then
+        Modules:ExecModule("Class", "RescanLoadout")
+    end
+end)
+
 -- [ CAST RESULT HANDLERS ] --
 mq.event('Success1', "You begin casting#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)

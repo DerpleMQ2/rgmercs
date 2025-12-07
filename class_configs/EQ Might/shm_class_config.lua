@@ -85,9 +85,15 @@ local _ClassConfig = {
             "Blessed Spiritstaff of the Heyokah",
         },
         ['BlueBand'] = {
+            "Legendary Ancient Frozen Blue Band",
             "Ancient Frozen Blue Band",
             "Fabled Blue Band of the Oak",
             "Blue Band of the Oak",
+        },
+        ['VampiricBlueBand'] = {
+            "Mythical Ancient Vampiric Blue Band",
+            "Legendary Ancient Vampiric Blue Band",
+            "Ancient Vampiric Blue Band",
         },
         ['Timer2HealItem'] = {
             "Legendary Zun'Muram's Spear of Doom",
@@ -470,13 +476,27 @@ local _ClassConfig = {
                     return Targeting.BigHealsNeeded(target)
                 end,
             },
-            {
+            { -- use the blue band first if someone is lower health, don't load this if we don't have any blue band
                 name = "GroupRenewalHoT",
                 type = "Spell",
+                load_cond = function(self) return Core.GetResolvedActionMapItem("VampiricBlueBand") or Core.GetResolvedActionMapItem("BlueBand") end,
+                cond = function(self, spell, target)
+                    return not Targeting.BigHealsNeeded(target)
+                end,
+            },
+            {
+                name = "VampiricBlueBand",
+                type = "Item",
+                load_cond = function(self) return Core.GetResolvedActionMapItem("VampiricBlueBand") and mq.TLO.Me.Level() >= 68 end,
             },
             {
                 name = "BlueBand",
                 type = "Item",
+                load_cond = function(self) return Core.GetResolvedActionMapItem("BlueBand") and (mq.TLO.Me.Level() < 68 or not Core.GetResolvedActionMapItem("VampiricBlueBand")) end,
+            },
+            { -- use this regardless of health setting if the blue band isn't ready
+                name = "GroupRenewalHoT",
+                type = "Spell",
             },
         },
         ["BigHealPoint"] = {

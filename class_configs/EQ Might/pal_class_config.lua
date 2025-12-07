@@ -87,9 +87,15 @@ return {
             "Oathbound Breastplate",
         },
         ['BlueBand'] = {
+            "Legendary Ancient Frozen Blue Band",
             "Ancient Frozen Blue Band",
             "Fabled Blue Band of the Oak",
             "Blue Band of the Oak",
+        },
+        ['VampiricBlueBand'] = {
+            "Mythical Ancient Vampiric Blue Band",
+            "Legendary Ancient Vampiric Blue Band",
+            "Ancient Vampiric Blue Band",
         },
     },
     ['AbilitySets']       = {
@@ -462,6 +468,11 @@ return {
                 end,
             },
             {
+                name = "VampiricBlueBand",
+                type = "Item",
+                load_cond = function(self) return Core.GetResolvedActionMapItem("VampiricBlueBand") and mq.TLO.Me.Level() >= 68 end,
+            },
+            {
                 name = "Mantle of the Wyrmguard",
                 type = "Item",
                 load_cond = function(self) return mq.TLO.FindItem("=Mantle of the Wyrmguard")() end,
@@ -469,6 +480,7 @@ return {
             {
                 name = "BlueBand",
                 type = "Item",
+                load_cond = function(self) return Core.GetResolvedActionMapItem("BlueBand") and (mq.TLO.Me.Level() < 68 or not Core.GetResolvedActionMapItem("VampiricBlueBand")) end,
             },
             {
                 name = "WaveHeal",
