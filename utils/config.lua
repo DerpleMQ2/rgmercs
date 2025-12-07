@@ -1651,14 +1651,14 @@ Config.DefaultConfig               = {
         Max = 50,
     },
     -- Cross client comms
-    ['PeerTimeout']          = {
-        DisplayName = "Peer Timeout",
+    ['ActorPeerTimeout']     = {
+        DisplayName = "Actor Peer Timeout",
         Group = "General",
         Header = "Interface",
         Category = "Interface",
         Index = 9,
         Tooltip = "Time in seconds to wait before considering a peer disconnected.",
-        Default = 30,
+        Default = 45,
         Min = 10,
         Max = 120,
     },
@@ -2453,8 +2453,8 @@ end
 
 function Config:ValidatePeers()
     for peer, heartbeat in pairs(Config.TempSettings.PeersHeartbeats) do
-        if os.time() - heartbeat.LastHeartbeat > Config:GetSetting("PeerTimeout") then
-            Logger.log_info("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
+        if os.time() - heartbeat.LastHeartbeat > Config:GetSetting("ActorPeerTimeout") then
+            Logger.log_debug("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
             Config.TempSettings.Peers:remove(peer)
             Config.TempSettings.PeersHeartbeats[peer] = nil
             if self.currentPeer == peer then
