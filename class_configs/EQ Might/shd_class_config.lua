@@ -74,7 +74,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    -- Added AEBlades line for AE taunt, return spears to ST
+    -- Added BladeDisc line for AE taunt, return spears to ST
     _version            = "2.6 - EQ Might",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
@@ -322,7 +322,7 @@ local _ClassConfig = {
             "Voice of Shadows",  -- level 46, 4% hate
             "Voice of Darkness", -- level 39, 2% hate
         },
-        ['AEBlades'] = {
+        ['BladeDisc'] = {
             "Whirlwind Blade",
             "Mayhem Blade",
         },
@@ -458,8 +458,11 @@ local _ClassConfig = {
             steps = 1,
             doFullRotation = true,
             load_cond = function()
-                return Core.IsTanking() and
-                    (Core.GetResolvedActionMapItem('AEBlades') or (Config:GetSetting('AETauntSpell') and Core.GetResolvedActionMapItem('AETaunt')) or (Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))))
+                if not Core.IsTanking() then return false end
+                local bladeDisc = Config:GetSetting('BladeDiscUse') > 1 and Core.GetResolvedActionMapItem('BladeDisc')
+                local hateAA = Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))
+                local tauntSpell = Config:GetSetting('AETauntSpell') and Core.GetResolvedActionMapItem('AETaunt')
+                return bladeDisc or hateAA or tauntSpell
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -777,7 +780,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ExplosionOfSpite,
             },
             {
-                name = "AEBlades",
+                name = "BladeDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Config:GetSetting('DoAEDamage')
@@ -935,6 +938,14 @@ local _ClassConfig = {
                 tooltip = Tooltips.SpearNuke,
                 cond = function(self, spell, target)
                     return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "BladeDisc",
+                type = "Disc",
+                load_cond = function(self) return Config:GetSetting('BladeDiscUse') == 3 and Core.GetResolvedActionMapItem('BladeDisc') end,
+                cond = function(self, discSpell)
+                    return Config:GetSetting('DoAEDamage') and mq.TLO.Me.PctEndurance() >= Config:GetSetting("ManaToNuke") -- save endurance for emergency discs
                 end,
             },
             {
@@ -1311,6 +1322,20 @@ local _ClassConfig = {
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['BladeDiscUse']    = {
+            DisplayName = "Blade Disc Use:",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 102,
+            Tooltip = "When to use your AE Blade Disc Line (DPS mode will not attempt to regain hate).",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Disabled', 'Only To Regain Hate', 'Whenever Possible', },
+            Default = 2,
+            Min = 1,
+            Max = 3,
         },
         ['AETargetCnt']     = {
             DisplayName = "AE Target Count",

@@ -1136,7 +1136,8 @@ Config.DefaultConfig               = {
         Header = "Damage",
         Category = "Direct",
         Index = 1,
-        Tooltip = "Minimum % Mana in order to continue to cast nukes. Please note that some default configs (MAG, WIZ) only check this setting for particular spells.",
+        Tooltip =
+        "Minimum % Mana in order to continue to cast nukes.\n\nThis setting is largely aimed at hybrids or healers maintaining a mana reserve. Some default configs (MAG, WIZ) may not always respect this setting.",
         Default = 30,
         Min = 1,
         Max = 100,
@@ -1149,7 +1150,8 @@ Config.DefaultConfig               = {
         Header = "Damage",
         Category = "Over Time",
         Index = 1,
-        Tooltip = "Minimum % Mana in order to continue to cast dots.",
+        Tooltip =
+        "Minimum % Mana in order to continue to cast dots.\n\nThis setting is largely aimed at hybrids or healers maintaining a mana reserve. Some default configs (NEC) may not always respect this setting.",
         Default = 30,
         Min = 1,
         Max = 100,
