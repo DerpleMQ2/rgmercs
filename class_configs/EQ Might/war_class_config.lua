@@ -47,7 +47,7 @@ local _ClassConfig = {
         ['GroupACBuff'] = { -- Has Commanding Voice (Dodge Buff) baked in
             "Field Armorer",
         },
-        ['AEBlades'] = {
+        ['BladeDisc'] = {
             "Vortex Blade",
             "Cyclone Blade",
             "Whirlwind Blade",
@@ -214,8 +214,11 @@ local _ClassConfig = {
             timer = 1, -- Don't check this more often than once a second to avoid blowing every ability at once (aggro takes time to update)
             doFullRotation = true,
             load_cond = function()
-                return Core.IsTanking() and Config:GetSetting('DoAETaunt') and
-                    (Casting.CanUseAA("Area Taunt") or Core.GetResolvedActionMapItem("Epic") or Core.GetResolvedActionMapItem("AEBlades"))
+                if not Core.IsTanking() then return false end
+                local bladeDisc = Config:GetSetting('BladeDiscUse') > 1 and Core.GetResolvedActionMapItem('BladeDisc')
+                local hateAA = Config:GetSetting('AETauntAA') and Casting.CanUseAA("Area Taunt")
+                local epic = Config:GetSetting('DoEpic') and Core.GetResolvedActionMapItem("Epic")
+                return bladeDisc or hateAA or epic
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -357,12 +360,11 @@ local _ClassConfig = {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    if not Config:GetSetting('DoEpic') then return false end
                     return Config:GetSetting('DoAEDamage')
                 end,
             },
             {
-                name = "AEBlades",
+                name = "BladeDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Config:GetSetting('DoAEDamage')
@@ -557,6 +559,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "BladeDisc",
+                type = "Disc",
+                load_cond = function(self) return Config:GetSetting('BladeDiscUse') == 3 and Core.GetResolvedActionMapItem('BladeDisc') end,
+                cond = function(self, discSpell)
+                    return Config:GetSetting('DoAEDamage') and mq.TLO.Me.PctEndurance() >= Config:GetSetting("ManaToNuke") -- save endurance for emergency discs
+                end,
+            },
+            {
                 name = "Knee Strike",
                 type = "AA",
             },
@@ -659,12 +669,26 @@ local _ClassConfig = {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
+        ['BladeDiscUse']    = {
+            DisplayName = "Blade Disc Use:",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 102,
+            Tooltip = "When to use your AE Blade Disc Line (DPS mode will not attempt to regain hate).",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Disabled', 'Only To Regain Hate', 'Whenever Possible', },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+        },
         ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
             Group = "Abilities",
             Header = "Damage",
             Category = "AE",
-            Index = 102,
+            Index = 103,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
             Min = 1,
@@ -675,7 +699,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Damage",
             Category = "AE",
-            Index = 103,
+            Index = 104,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
             Default = 5,
@@ -690,7 +714,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Damage",
             Category = "AE",
-            Index = 104,
+            Index = 105,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Proximity Check?",
@@ -703,7 +727,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Damage",
             Category = "AE",
-            Index = 105,
+            Index = 106,
             Tooltip = "Use Rampage 1-Never 2-Burns 3-Always",
             Type = "Combo",
             ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
@@ -714,14 +738,15 @@ local _ClassConfig = {
         },
 
         --Hate Tools
-        ['DoAETaunt']       = {
-            DisplayName = "Do AE Taunts",
+        ['AETauntAA']       = {
+            DisplayName = "Use AE Taunt AA",
             Group = "Abilities",
             Header = "Tanking",
             Category = "Hate Tools",
             Index = 101,
-            Tooltip = "Use AE hatred Discs and AA (see FAQ for specifics).",
-            Default = false,
+            Tooltip = "Use the Area Taunt AA.",
+            Default = true,
+            ConfigType = "Advanced",
         },
         ['AETauntCnt']      = {
             DisplayName = "AE Taunt Count",
@@ -742,7 +767,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Tanking",
             Category = "Hate Tools",
-            Index = 103,
+            Index = 104,
             Tooltip =
             "*THIS IS NOT A CHECK FOR MEZ SETTING* Check to ensure there aren't neutral mobs in range we could aggro if AE taunts are used. May result in non-use due to false positives.",
             Default = false,

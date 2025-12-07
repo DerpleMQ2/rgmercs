@@ -284,10 +284,6 @@ return {
             "Ancient: Force of Might",  -- EQM Custom
             "Word of Might",            -- EQM Custom
         },
-        -- ['AEStun'] = {                  --Targeted AE
-        --     "Stun Command",             -- no damage
-        --     "Sacred Word",              -- does damage
-        -- },
         ['BlockDisc'] = {
             "Deflection Discipline",
         },
@@ -309,7 +305,7 @@ return {
             "Shield of Words",
             "Armor of Faith",
         },
-        ['AEBlades'] = {
+        ['BladeDisc'] = {
             "Whirlwind Blade",
             "Mayhem Blade",
         },
@@ -338,7 +334,7 @@ return {
                 { name = "SereneStun",      cond = function(self) return Config:GetSetting('DoSereneStun') end, },
                 { name = "StunTimer4",      cond = function(self) return Core.IsTanking() end, },
                 { name = "StunTimer5",      cond = function(self) return Core.IsTanking() end, },
-                { name = "PBAEStun",        cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
+                { name = "PBAEStun",        cond = function(self) return Config:GetSetting('AEStunUse') > 1 end, },
                 { name = "CureCurse",       cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 { name = "PurityCure",      cond = function(self) return Config:GetSetting('KeepPurityMemmed') end, },
                 { name = "CureCorrupt",     cond = function(self) return Config:GetSetting('KeepCorruptMemmed') end, },
@@ -622,9 +618,11 @@ return {
             steps = 1,
             doFullRotation = true,
             load_cond = function()
-                local hateSpell = Config:GetSetting('DoPBAEStun') and Core.GetResolvedActionMapItem('PBAEStun')
+                if not Core.IsTanking() then return false end
                 local hateAA = Config:GetSetting('AETauntAA') and Casting.CanUseAA("Beacon of the Righteous")
-                return Core.IsTanking() and (Core.GetResolvedActionMapItem('AEBlades') or hateSpell or hateAA)
+                local bladeDisc = Config:GetSetting('BladeDiscUse') > 1 and Core.GetResolvedActionMapItem('BladeDisc')
+                local pbaeSpell = Config:GetSetting('AEStunUse') > 1 and Core.GetResolvedActionMapItem('PBAEStun')
+                return bladeDisc or hateAA or pbaeSpell
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -682,14 +680,14 @@ return {
                 return combat_state == "Combat" and Casting.BurnCheck() and Core.OkayToNotHeal()
             end,
         },
-        { --Stun and damage enemies per your settings
+        { --Stun or damage enemies per your settings
             name = 'AECombat',
             state = 1,
             steps = 1,
             load_cond = function()
-                -- local aeSpell = Config:GetSetting('DoAEStun') and Core.GetResolvedActionMapItem('AEStun')
-                local pbaeSpell = Config:GetSetting('DoPBAEStun') and Core.GetResolvedActionMapItem('PBAEStun')
-                return (Core.IsTanking() or Config:GetSetting('AEStunUse') > 1) and pbaeSpell
+                local bladeDisc = Config:GetSetting('BladeDiscUse') == 3 and Core.GetResolvedActionMapItem('BladeDisc')
+                local pbaeSpell = Config:GetSetting('AEStunUse') == 3 and Core.GetResolvedActionMapItem('PBAEStun')
+                return bladeDisc or pbaeSpell
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -866,7 +864,7 @@ return {
         },
         ['AEHateTools'] = {
             {
-                name = "AEBlades",
+                name = "BladeDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Config:GetSetting('DoAEDamage')
@@ -890,8 +888,17 @@ return {
                 name = "PBAEStun",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('AEStunUse') == 3 and Core.GetResolvedActionMapItem('PBAEStun') end,
                 cond = function(self, spell, target)
-                    return Core.IsTanking() or Config:GetSetting('AEStunUse') == 3 or Core.GetMainAssistPctHPs() < Config:GetSetting('EmergencyStart')
+                    return mq.TLO.Me.PctEndurance() >= Config:GetSetting("ManaToNuke") -- save mana for emergency healing
+                end,
+            },
+            {
+                name = "BladeDisc",
+                type = "Disc",
+                load_cond = function(self) return Config:GetSetting('BladeDiscUse') == 3 and Core.GetResolvedActionMapItem('BladeDisc') end,
+                cond = function(self, discSpell, target)
+                    return mq.TLO.Me.PctEndurance() >= Config:GetSetting("ManaToNuke") -- save endurance for emergency discs
                 end,
             },
         },
@@ -1120,26 +1127,31 @@ return {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['DoPBAEStun']        = {
-            DisplayName = "Do PBAE Stun",
+        ['AEStunUse']         = {
+            DisplayName = "AEStun Spell Use:",
             Group = "Abilities",
             Header = "Debuff",
             Category = "Stun",
             Index = 103,
-            Tooltip = "Use your PBAE Stun (The Silent Command) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
-            Default = true,
-        },
-        ['AEStunUse']         = {
-            DisplayName = "AEStun Use(DPS Mode):",
-            Group = "Abilities",
-            Header = "Debuff",
-            Category = "Stun",
-            Index = 104,
-            Tooltip = "When to use your AE Stun Lines in DPS Mode.",
+            Tooltip = "When to use your AE Stun Spell Line (DPS mode will not attempt to regain hate).",
             RequiresLoadoutChange = true,
             Type = "Combo",
-            ComboOptions = { 'Never', 'At low MA health', 'Whenever Possible', },
-            Default = 1,
+            ComboOptions = { 'Disabled', 'Only To Regain Hate', 'Whenever Possible', },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+        },
+        ['BladeDiscUse']      = {
+            DisplayName = "Blade Disc Use:",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "AE",
+            Index = 102,
+            Tooltip = "When to use your AE Blade Disc Line (DPS mode will not attempt to regain hate).",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Disabled', 'Only To Regain Hate', 'Whenever Possible', },
+            Default = 2,
             Min = 1,
             Max = 3,
         },
