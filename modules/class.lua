@@ -1200,7 +1200,7 @@ function Module:CheckActorForCures(peer, targetId)
         for _, data in ipairs(checks) do
             local effectId = heartbeat.Data[data.type] or "null"
 
-            Logger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
+            Logger.log_verbose("\ay[Cures] CheckActorForCures %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
 
             if effectId and effectId:lower() ~= "nil" and effectId:lower() ~= "null" and effectId ~= "0" then
                 if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
@@ -1334,40 +1334,39 @@ function Module:RunCureRotation(combat_state)
         --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
         if cureTargetID > 0 then
             if cureTargetID == mq.TLO.Me.ID() then
-                Logger.log_super_verbose("[Cures] Peer is myself, skipping.")
+                Logger.log_super_verbose("[Cures - Actors] Peer is myself, skipping.")
             elseif (cureTarget.Distance() or 999) < 150 then
                 handled = self:CheckActorForCures(peer, cureTargetID)
             else
-                Logger.log_verbose("\ao[Cures] %s is \arNOT\ao in range", peer or "Unknown")
+                Logger.log_verbose("\ao[Cures - Actors] %s is \arNOT\ao in range", peer or "Unknown")
             end
         else
-            Logger.log_verbose("\ao[Cures] No valid ID for %s, \arNOT\ao in zone", peer or "Unknown")
+            Logger.log_verbose("\ao[Cures - Actors] No valid ID for %s, \arNOT\ao in zone", peer or "Unknown")
         end
 
-        Logger.log_verbose("\ay[Cures] CheckActorForCures %s :: Handled = %s", peer, tostring(handled))
+        Logger.log_verbose("\ay[Cures - Actors] %s :: Handled = %s", peer, tostring(handled))
 
         if handled then
-            handledPeers:add(char)
+            handledPeers:add(char:lower())
         end
     end
 
     for i = 1, dannetPeers do
-        local peer = DanNet.getPeer(i)
-        if not handledPeers:contains(peer) then
-            if peer and peer:len() > 0 then
-                local startindex = string.find(peer, "_")
-                if startindex then
-                    peer = string.sub(peer, startindex + 1)
-                end
+        ---@diagnostic disable-next-line: redundant-parameter
+        local peer = mq.TLO.DanNet.Peers(i)()
+        local startindex = string.find(peer, "_")
+        if startindex then
+            peer = string.sub(peer, startindex + 1)
+        end
+        if peer and peer:len() > 0 and peer:lower() ~= mq.TLO.Me.Name():lower() then
+            if not handledPeers:contains(peer:lower()) then
                 local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
                 local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
 
                 --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
                 if cureTargetID > 0 then
-                    if cureTargetID == mq.TLO.Me.ID() then
-                        Logger.log_super_verbose("[Cures] Peer is myself, skipping.")
-                    elseif (cureTarget.Distance() or 999) < 150 then
-                        Logger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
+                    if (cureTarget.Distance() or 999) < 150 then
+                        Logger.log_verbose("\ag[Cures - DanNet] %s is in range - checking for curables", peer)
 
                         local newCoroutine = coroutine.create(function()
                             self:CheckPeerForCures(peer, cureTargetID)
@@ -1376,13 +1375,13 @@ function Module:RunCureRotation(combat_state)
                         if newCoroutine then
                             table.insert(self.TempSettings.CureCoroutines, newCoroutine)
                         else
-                            Logger.log_error("\ar[Cures] Failed to create coroutine for %s", peer)
+                            Logger.log_error("\ar[Cures - DanNet] Failed to create coroutine for %s", peer)
                         end
                     else
-                        Logger.log_verbose("\ao[Cures] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
+                        Logger.log_verbose("\ao[Cures - DanNet] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
                     end
                 else
-                    Logger.log_verbose("\ao[Cures] %d::No valid ID for %s, \arNOT\ao in zone", i, peer or "Unknown")
+                    Logger.log_verbose("\ao[Cures - DanNet] %d::No valid ID for %s, \arNOT\ao in zone", i, peer or "Unknown")
                 end
             end
         end

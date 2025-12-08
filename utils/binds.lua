@@ -351,7 +351,7 @@ Binds.Handlers    = {
 
             for i = 1, peerCount do
                 ---@diagnostic disable-next-line: redundant-parameter
-                local peer = DanNet.getPeer(i)
+                local peer = mq.TLO.DanNet.Peers(i)()
                 if peer and peer:len() > 0 then
                     local radians = i * angle_step
                     local xMove = math.cos(radians) * (i + radius)
