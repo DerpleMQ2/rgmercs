@@ -1354,12 +1354,13 @@ function Module:RunCureRotation(combat_state)
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet.Peers(i)()
-        local startindex = string.find(peer, "_")
-        if startindex then
-            peer = string.sub(peer, startindex + 1)
-        end
-        if peer and peer:len() > 0 and peer:lower() ~= mq.TLO.Me.Name():lower() then
-            if not handledPeers:contains(peer:lower()) then
+        if peer and peer:len() > 0 then
+            local startindex = string.find(peer, "_")
+            if startindex then
+                peer = string.sub(peer, startindex + 1)
+            end
+            peer = peer:lower()
+            if peer ~= mq.TLO.Me.Name():lower() and not handledPeers:contains(peer) then
                 local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
                 local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
 
