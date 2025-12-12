@@ -25,7 +25,6 @@ local _ClassConfig = {
             "Fistwraps of Celestial Discipline",
         },
         ['OoW_Chest'] = {
-            "Fiercehand's Ascendant Shroud of the Focused",
             "Fiercehand Shroud of the Focused",
             "Stillmind Tunic",
         },

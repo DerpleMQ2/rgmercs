@@ -48,6 +48,10 @@ _ClassConfig      = {
             "Focus of Primal Elements",
             "Staff of Elemental Essence",
         },
+        ['OoW_Chest'] = {
+            "Glyphwielder's Vest of the Summoner",
+            "Runemaster's Robe",
+        },
     },
     ['AbilitySets']     = {
         --- Nukes
@@ -805,24 +809,12 @@ _ClassConfig      = {
                 name = "Servant of Ro",
                 type = "AA",
             },
+            {
+                name = "OoW_Chest",
+                type = "Item",
+            },
         },
         ['DPS PET'] = {
-            {
-                name = "OowRobeName",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    if not Core.IsModeActive("PetTank") then return end
-                    local oowItems = { 'Glyphwielder\'s Tunic of the Summoner', 'Runemaster\'s Robe', }
-                    for _, item in ipairs(oowItems) do
-                        if mq.TLO.FindItemCount(item)() == 1 then
-                            self.TempSettings.OowRobeBase = item
-                            return Casting.UseItem(item, mq.TLO.Me.ID())
-                        end
-                    end
-
-                    return false
-                end,
-            },
             {
                 name = "ShortDurDmgShield",
                 type = "Spell",

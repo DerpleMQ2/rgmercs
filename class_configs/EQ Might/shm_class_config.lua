@@ -101,6 +101,10 @@ local _ClassConfig = {
             "Zun'Muram's Spear of Doom",
             "Aged Hammer of the Dragonborn",
         },
+        ['OoW_Chest'] = {
+            "Ritualchanter's Tunic of the Ancestors",
+            "Spiritkin Tunic",
+        },
     },
     ['AbilitySets']       = {
         ["GroupFocusSpell"] = {
@@ -741,6 +745,10 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     return Config:GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
             },
             {
                 name = "Spear of Fate",

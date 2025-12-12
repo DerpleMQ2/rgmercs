@@ -30,6 +30,10 @@ local _ClassConfig = {
             "Staff of Eternal Eloquence",
             "Oculus of Persuasion",
         },
+        ['OoW_Chest'] = {
+            "Mindreaver's Vest of Coercion",
+            "Charmweaver's Robe",
+        },
     },
     ['AbilitySets']     = {
         --Commented any currently unused spell lines
@@ -1048,6 +1052,10 @@ local _ClassConfig = {
             {
                 name = "Silent Casting",
                 type = "AA",
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
             },
         },
         ['Tash']          = {

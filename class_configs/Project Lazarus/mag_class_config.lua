@@ -42,6 +42,10 @@ _ClassConfig      = {
             "Focus of Primal Elements",
             "Staff of Elemental Essence",
         },
+        ['OoW_Chest'] = {
+            "Glyphwielder's Vest of the Summoner",
+            "Runemaster's Robe",
+        },
     },
     ['AbilitySets']       = {
         --- Nukes
@@ -462,20 +466,6 @@ _ClassConfig      = {
             "Promised Wardmending",
             "Promised Rejuvenation",
             "Promised Recovery",
-        },
-        ['PetStanceSpell'] = {
-            ---Pet Stance*
-            "Omphacite Stance",
-            "Kanoite Stance",
-            "Pyroxene Stance",
-            "Rhyolite Stance",
-            "Shieldstone Stance",
-            "Groundswell Stance",
-            "Steelstance",
-            "Tellurian Stance",
-            "Earthen Stance",
-            "Grounded Stance",
-            "Granite Stance",
         },
         ['PetManaConv'] = {
             "Valiant Symbiosis",
@@ -1315,33 +1305,13 @@ _ClassConfig      = {
                     Casting.UseSpell(shieldSpell.RankName(), Core.GetMainAssistId(), false, false, 0)
                 end,
             },
+            {
+                name = "OoW_Chest",
+                type = "Item",
+            },
         },
         ['DPS PET'] = {
-            {
-                name = "OowRobeName",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    if not Core.IsModeActive("PetTank") then return end
-                    local oowItems = { 'Glyphwielder\'s Tunic of the Summoner', 'Runemaster\'s Robe', }
-                    for _, item in ipairs(oowItems) do
-                        if mq.TLO.FindItemCount(item)() == 1 then
-                            self.TempSettings.OowRobeBase = item
-                            return Casting.UseItem(item, mq.TLO.Me.ID())
-                        end
-                    end
 
-                    return false
-                end,
-            },
-            {
-                name = "PetStanceSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and self.TempSettings.OowRobeBase ~= nil and Core.IsModeActive("PetTank") and
-                        Casting.PetBuffCheck(spell) and mq.TLO.Me.Pet.PctHPs() <= 95 and
-                        (mq.TLO.Me.PetBuff(mq.TLO.Spell(self.TempSettings.OowRobeBase).RankName.Base(1)() or "").ID()) or 0 == 0
-                end,
-            },
             {
                 name = "SurgeDS1",
                 type = "Spell",

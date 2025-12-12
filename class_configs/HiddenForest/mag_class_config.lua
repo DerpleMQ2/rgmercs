@@ -20,6 +20,10 @@ _ClassConfig      = {
             "Focus of Primal Elements",
             "Staff of Elemental Essence",
         },
+        ['OoW_Chest'] = {
+            "Glyphwielder's Vest of the Summoner",
+            "Runemaster's Robe",
+        },
     },
     ['AbilitySets']       = {
         --- Nukes
@@ -429,20 +433,6 @@ _ClassConfig      = {
             "Promised Wardmending",
             "Promised Rejuvenation",
             "Promised Recovery",
-        },
-        ['PetStanceSpell'] = {
-            ---Pet Stance*
-            "Omphacite Stance",
-            "Kanoite Stance",
-            "Pyroxene Stance",
-            "Rhyolite Stance",
-            "Shieldstone Stance",
-            "Groundswell Stance",
-            "Steelstance",
-            "Tellurian Stance",
-            "Earthen Stance",
-            "Grounded Stance",
-            "Granite Stance",
         },
         ['PetManaConv'] = {
             "Valiant Symbiosis",
@@ -1242,6 +1232,10 @@ _ClassConfig      = {
                     local shieldSpell = Core.GetResolvedActionMapItem("FranticDS")
                     Casting.UseSpell(shieldSpell.RankName(), Core.GetMainAssistId(), false, false, 0)
                 end,
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
             },
         },
         ['Weaves'] = {
