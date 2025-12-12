@@ -83,6 +83,10 @@ local _ClassConfig = {
             "Staff of Living Brambles",
             "Staff of Everliving Brambles",
         },
+        ['OoW_Chest'] = {
+            "Everspring Jerkin of Tangled Briars",
+            "Greenvale Jerkin",
+        },
     },
     ['AbilitySets']       = {
         ['HealingAura'] = {
@@ -636,6 +640,10 @@ local _ClassConfig = {
             {
                 name = "Nature's Fury",
                 type = "AA",
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
             },
             {
                 name = "Spirit of the Wood",

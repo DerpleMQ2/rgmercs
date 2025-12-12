@@ -109,6 +109,10 @@ local _ClassConfig = {
             "Weighted Hammer of Conviction",
             "Aged Shissar Apothic Staff",
         },
+        ['OoW_Chest'] = {
+            "Faithbringer's Breastplate of Conviction",
+            "Sanctified Chestguard",
+        },
     },
     ['AbilitySets']       = {
         -- ['WardSelfBuff'] = {
@@ -683,8 +687,8 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Spire of the Vicar",
-                type = "AA",
+                name = "OoW_Chest",
+                type = "Item",
             },
             {
                 name = "Divine Avatar",

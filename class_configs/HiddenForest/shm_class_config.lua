@@ -85,6 +85,10 @@ local _ClassConfig = {
             "Crafted Talisman of Fates",
             "Blessed Spiritstaff of the Heyokah",
         },
+        ['OoW_Chest'] = {
+            "Ritualchanter's Tunic of the Ancestors",
+            "Spiritkin Tunic",
+        },
     },
     ['AbilitySets']       = {
         ["GroupFocusSpell"] = {
@@ -666,6 +670,10 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     return Config:GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
             },
             {
                 name = "Spear of Fate",

@@ -87,6 +87,10 @@ local _ClassConfig = {
             "Harmony of the Soul",
             "Aegis of Superior Divinity",
         },
+        ['OoW_Chest'] = {
+            "Faithbringer's Breastplate of Conviction",
+            "Sanctified Chestguard",
+        },
     },
     ['AbilitySets']       = {
         -- ['WardSelfBuff'] = {
@@ -613,9 +617,16 @@ local _ClassConfig = {
                 name = "Healing Frenzy",
                 type = "AA",
             },
-            {
-                name = "Spire of the Vicar",
+            { -- Spire, the SpireChoice setting will determine which ability is displayed/used.
+                name_func = function(self)
+                    local spireAbil = string.format("Fundament: %s Spire of Divinity", Config.Constants.SpireChoices[Config:GetSetting('SpireChoice') or 4])
+                    return Casting.CanUseAA(spireAbil) and spireAbil or "Spire Not Purchased/Selected"
+                end,
                 type = "AA",
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
             },
             {
                 name = "Divine Avatar",
@@ -970,6 +981,22 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
+        },
+        ['SpireChoice']       = {
+            DisplayName = "Spire Choice:",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 106,
+            Tooltip = "Choose which Fundament you would like to use during burns:\n" ..
+                "First Spire: Self Damage and Mitigation Buff.\n" ..
+                "Second Spire: Healing Power Buff to Self.\n" ..
+                "Third Spire: Group Mitigation Buff.",
+            Type = "Combo",
+            ComboOptions = Config.Constants.SpireChoices,
+            Default = 3,
+            Min = 1,
+            Max = #Config.Constants.SpireChoices,
         },
 
         --Combat

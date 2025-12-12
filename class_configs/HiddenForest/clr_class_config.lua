@@ -86,6 +86,10 @@ local _ClassConfig = {
         ['Epic'] = {
             "Ancient Shield of the Divine (Tier 1)",
         },
+        ['OoW_Chest'] = {
+            "Faithbringer's Breastplate of Conviction",
+            "Sanctified Chestguard",
+        },
     },
     ['AbilitySets']       = {
         -- ['WardSelfBuff'] = {
@@ -620,8 +624,8 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Spire of the Vicar",
-                type = "AA",
+                name = "OoW_Chest",
+                type = "Item",
             },
             {
                 name = "Divine Avatar",

@@ -417,6 +417,10 @@ local _ClassConfig = {
                 type = "Disc",
             },
             {
+                name = "OoW_Chest",
+                type = "Item",
+            },
+            {
                 name = "Dance of Blades",
                 type = "AA",
             },
