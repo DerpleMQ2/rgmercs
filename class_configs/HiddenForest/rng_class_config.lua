@@ -401,7 +401,7 @@ return {
                 type = "AA",
             },
             {
-                name = "Fundament: Third Spire of the Pathfinder",
+                name = "Fundament: Third Spire of the Pathfinders",
                 type = "AA",
             },
             {
