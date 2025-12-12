@@ -156,6 +156,7 @@ local _ClassConfig = {
         end,
         DefenseBuffCheck = function(self)
             local standDisc = Core.GetResolvedActionMapItem('StandDisc')
+            if not standDisc then return false end
             if standDisc() and mq.TLO.Me.ActiveDisc.Name() == standDisc.RankName() then return false end
             local defBuff = { "Guardian's Boon", "Guardian's Bravery", "Warlord's Bravery", }
             for _, buffName in ipairs(defBuff) do
