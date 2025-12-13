@@ -714,7 +714,9 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoLLStun') end,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target) and not Casting.StunImmuneTarget(target)
+                    local targetLevel = Targeting.GetAutoTargetLevel()
+                    if targetLevel == 0 or targetLevel > 55 then return false end
+                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             {
@@ -899,7 +901,7 @@ local _ClassConfig = {
                 { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },
                 { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, },
-                { name = "LowLevelStun",  cond = function(self) return mq.TLO.Me.Level() < 59 end, },
+                { name = "LowLevelStun",  cond = function(self) return Config:GetSetting('DoLLStun') and mq.TLO.Me.Level() < 59 end, },
                 { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
                 { name = "PBAEStun",      cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
                 { name = "PBAENuke",      cond = function(self) return Config:GetSetting('DoPBAENuke') end, },

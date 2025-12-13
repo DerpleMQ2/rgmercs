@@ -1335,6 +1335,8 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoLLStun') and mq.TLO.Me.Level() < 59 end,
                 cond = function(self, spell, target)
+                    local targetLevel = Targeting.GetAutoTargetLevel()
+                    if targetLevel == 0 or targetLevel > 55 then return false end
                     return Targeting.TargetNotStunned() and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff() and not Casting.StunImmuneTarget(target)
                 end,
             },
