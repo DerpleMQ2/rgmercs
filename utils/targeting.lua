@@ -141,6 +141,15 @@ function Targeting.GetAutoTargetPctHPs()
     return autoTarget.PctHPs() or 0
 end
 
+--- Retrieves the level of the autotarget spawn.
+---
+--- @return number The level of the autotarget spawn
+function Targeting.GetAutoTargetLevel()
+    local autoTarget = Targeting.GetAutoTarget()
+    if not autoTarget or not autoTarget() then return 0 end
+    return autoTarget.Level() or 0
+end
+
 --- Checks if the specified target is dead.
 --- @param target MQTarget The name or identifier of the target to check.
 --- @return boolean Returns true if the target is dead, false otherwise.

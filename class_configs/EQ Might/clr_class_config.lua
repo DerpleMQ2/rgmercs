@@ -282,11 +282,11 @@ local _ClassConfig = {
             "Sound of Divinity", -- works up to level 70
             "Sound of Might",
             --Filler before this
-            "Tarnation",   -- Timer 4, up to Level 65
-            "Force",       -- No Timer #, up to Level 58
-            "Holy Might",  -- No Timer #, up to Level 55
+            "Tarnation",  -- Timer 4, up to Level 65
+            "Force",      -- No Timer #, up to Level 58
+            "Holy Might", -- No Timer #, up to Level 55
         },
-        ['StunTimer4'] = { -- EQM Custom (I think?)
+        ['StunTimer4'] = {
             "Shock of Wonder",
         },
         ['LowLevelStun'] = { --Adding a second stun at low levels
@@ -771,6 +771,8 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoLLStun') end,
                 cond = function(self, spell, target)
+                    local targetLevel = Targeting.GetAutoTargetLevel()
+                    if targetLevel == 0 or targetLevel > 55 then return false end
                     return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
@@ -965,7 +967,7 @@ local _ClassConfig = {
                 { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoTimer6Stun') end, },
                 { name = "StunTimer4",    cond = function(self) return Config:GetSetting('DoTimer4Stun') end, },
-                { name = "LowLevelStun",  cond = function(self) return mq.TLO.Me.Level() < 59 end, },
+                { name = "LowLevelStun",  cond = function(self) return Config:GetSetting('DoLLStun') and mq.TLO.Me.Level() < 59 end, },
                 { name = "QuickNuke",     cond = function(self) return Config:GetSetting('DoQuickNuke') end, },
                 { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
                 { name = "PBAEStun",      cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
@@ -1067,7 +1069,7 @@ local _ClassConfig = {
             Header = "Debuffs",
             Category = "Stun",
             Index = 102,
-            Tooltip = "Use the Timer 4 Stun (Shock of Wonder, EQM Custom).",
+            Tooltip = "Use the Timer 4 Stun (Shock of Wonder).",
             RequiresLoadoutChange = true,
             Default = true,
         },
