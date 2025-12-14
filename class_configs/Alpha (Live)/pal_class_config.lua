@@ -32,7 +32,7 @@ local _ClassConfig = {
                 ['Poison'] = 'PurityCure',
                 ['Disease'] = 'PurityCure',
                 ['Curse'] = Casting.GetFirstMapItem({ "PurityCure", "CureCurse", }),
-                -- ['Corruption'] = -- todo, homework
+                ['Corruption'] = 'CureCorrupt',
             }
 
             -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
@@ -86,6 +86,7 @@ local _ClassConfig = {
     ['AbilitySets']       = {
         ["CrushTimer6"] = {
             -- Timer 6 - Crush (with damage)
+            "Crush of Eminence",     -- Level 129
             "Crush of Compunction",  -- Level 85
             "Crush of Repentance",   -- Level 90
             "Crush of Tides",        -- Level 95
@@ -97,7 +98,7 @@ local _ClassConfig = {
             "Crush of the Heroic",   -- Level 124
         },
         ["CrushTimer5"] = {
-            -- Timer 5 - Crush
+            "Crush of the Crying Seas X", -- Level 127
             "Crush of the Crying Seas",   -- Level 82
             "Crush of Marr",              -- Level 87
             "Crush of Oseka",             -- Level 92
@@ -110,6 +111,7 @@ local _ClassConfig = {
         },
         ["HealNuke"] = {
             -- Timer 7 - HealNuke
+            "Brilliant Expurgation",  -- Level 130
             "Glorious Vindication",   -- Level 85
             "Glorious Exoneration",   -- Level 90
             "Glorious Exculpation",   -- Level 95
@@ -121,6 +123,7 @@ local _ClassConfig = {
             "Brilliant Denouncement", -- Level 125
         },
         ["TempHP"] = {
+            "Unyielding Stance",
             "Steely Stance",
             "Stubborn Stance",
             "Stoic Stance",
@@ -133,6 +136,7 @@ local _ClassConfig = {
         },
         ["Preservation"] = {
             -- Timer 12 - Preservation
+            "Preservation of Quellious",    -- Level 130
             "Ward of Tunare",               -- Level 70
             "Sustenance of Tunare",         -- Level 80
             "Preservation of Tunare",       -- Level 85
@@ -146,6 +150,7 @@ local _ClassConfig = {
         },
         ["Lowaggronuke"] = {
             --- Nuke Heal Target - Censure
+            "Denouncement IX",
             "Denouncement",
             "Reprimand",
             "Ostracize",
@@ -165,6 +170,7 @@ local _ClassConfig = {
         },
         ["DebuffNuke"] = {
             -- Undead DebuffNuke
+            "Committal",    -- Level 126
             "Last Rites",   -- Level 68 - Timer 7
             "Burial Rites", -- Level 71 - Timer 7
             "Benediction",  -- Level 76
@@ -180,6 +186,7 @@ local _ClassConfig = {
         },
         ["Healproc"] = {
             --- Proc Buff Heal target of Target => LVL 97
+            "Rejuvenating Steel VII",
             "Restoring Steel",
             "Regenerating Steel",
             "Rejuvenating Steel",
@@ -188,7 +195,7 @@ local _ClassConfig = {
             "Renewing Steel",
         },
         ["FuryProc"] = {
-            --- Fury Proc Strike
+            "Eminent Fury",   -- Level 130
             "Divine Might",   -- Level 45, 65pt
             "Pious Might",    -- Level 63, 150pt
             "Holy Order",     -- Level 65, 180pt
@@ -211,6 +218,7 @@ local _ClassConfig = {
             "Silvered Fury",      -- Level 67, 390pt
         },
         ["Aurora"] = {
+            "Aurora of Sunlight XI",
             "Aurora of Dawning",
             "Aurora of Dawnlight",
             "Aurora of Daybreak",
@@ -223,6 +231,7 @@ local _ClassConfig = {
         },
         ["StunTimer5"] = {
             -- Timer 5 - Hate Stun
+            "Force of Akera XV",          -- Level 130
             "Desist",                     -- Level 13 - Not Timer 5, use for TLP Low Level Stun
             "Stun",                       -- Level 28
             "Force of Akera",             -- Level 53
@@ -242,6 +251,7 @@ local _ClassConfig = {
         },
         ["StunTimer4"] = {
             -- Timer 4 - Hate Stun
+            "Eminent Force",   -- Level 126
             "Cease",           -- Level 7 - Not Timer 4, use for TLP Low Level Stun
             "Force of Akilae", -- Level 62
             "Force of Piety",  -- Level 66
@@ -259,6 +269,7 @@ local _ClassConfig = {
         },
         ["HealStun"] = {
             --- Heal Stuns T3 12s recast
+            "Force of Eminence",   -- Level 129
             "Force of the Avowed", --Level 124
             "Force of Generosity",
             "Force of Reverence",
@@ -268,6 +279,7 @@ local _ClassConfig = {
         },
         ["HealWard"] = {
             --- Healing ward Heals Target of target and wards self. Divination based heal/ward
+            "Protective Confession X",
             "Protective Acceptance",
             "Protective Revelation",
             "Protective Confession",
@@ -280,6 +292,7 @@ local _ClassConfig = {
         },
         ["Aego"] = {
             --- Pally Aegolism
+            "Hand of Austerity XVII",        -- Level 127 - Group
             "Austerity",                     -- Level 55
             "Blessing of Austerity",         -- Level 58 - Group
             "Guidance",                      -- Level 65
@@ -304,6 +317,7 @@ local _ClassConfig = {
             "Hand of the Fernshade Keeper",  -- Level 125 - Group
         },
         ["Brells"] = {
+            "Brell's Mountainous Barrior XVI",
             "Brell's Tenacious Barrier",
             "Brell's Loamy Ward",
             "Brell's Tellurian Rampart",
@@ -321,7 +335,7 @@ local _ClassConfig = {
             "Brell's Unbreakable Palisade",
         },
         ["Splashcure"] = {
-            ---, Spells
+            "Splash of Eminence",
             "Splash of Heroism",
             "Splash of Repentance",
             "Splash of Sanctification",
@@ -342,6 +356,7 @@ local _ClassConfig = {
         },
         ["Affirmation"] = {
             --- Improved Super Taunt - Gets you Aggro for X seconds and reduces other Haters generation.
+            "Unquestioned Affirmation",
             "Unconditional Affirmation",
             "Unending Affirmation",
             "Unrelenting Affirmation",
@@ -350,16 +365,9 @@ local _ClassConfig = {
             "Unflinching Affirmation",
             "Unyielding Affirmation",
         },
-        ["Doctrine"] = {
-            --- Undead DD
-            "Doctrine of Abrogation",
-            "Doctrine of Rescission",
-            "Doctrine of Exculpation",
-            "Doctrine of Abolishment",
-            "Doctrine of Repudiation",
-        },
         ["WaveHeal"] = {
             --- Group Wave heal 39-124
+            "Wave of Inspiriation",
             "Wave of Regret",
             "Wave of Bereavement",
             "Wave of Propitiation",
@@ -380,6 +388,7 @@ local _ClassConfig = {
         },
         ["WaveHeal2"] = {
             --- Group Wave heal 39-115
+            "Wave of Inspiriation",
             "Wave of Bereavement",
             "Wave of Propitiation",
             "Wave of Expiation",
@@ -398,6 +407,7 @@ local _ClassConfig = {
             "Wave of Life",
         },
         ["SelfHeal"] = {
+            "Penitence IX",
             "Penitence",
             "Contrition",
             "Sorrow",
@@ -407,8 +417,8 @@ local _ClassConfig = {
             "Culpability",
             "Angst",
         },
-        ["Reverseds"] = {
-            --- Reverse DS
+        ["ReverseDS"] = {
+            "Mark of Sharash",
             "Mark of the Saint",
             "Mark of the Crusader",
             "Mark of the Pious",
@@ -441,6 +451,7 @@ local _ClassConfig = {
         },
         ["BurstHeal"] = {
             --- Burst Heal - heals target or Target of target 73-115
+            "Burst of Sunlight XII",
             "Burst of Sunlight",
             "Burst of Morrow",
             "Burst of Dawnlight",
@@ -455,6 +466,7 @@ local _ClassConfig = {
         },
         ["ArmorSelfBuff"] = {
             --- Self Buff Armor Line Ac/Hp/Mana regen
+            "Armor of Unyielding Faith",  -- Level 128
             "Aura of the Crusader",       -- Level 64
             "Armor of the Champion",      -- Level 69
             "Armor of Unrelenting Faith", -- Level 73
@@ -470,7 +482,7 @@ local _ClassConfig = {
             "Armor of Heroic Faith",      -- Level 118
         },
         ["RighteousStrike"] = {
-            --- Righteous Strikes Line
+            "Righteous Indignation VIII",
             "Righteous Antipathy",
             "Righteous Fury",
             "Righteous Indignation",
@@ -502,6 +514,7 @@ local _ClassConfig = {
         },
         ["LessonStun"] = {
             --- Lesson Stun - Timer 6
+            "Lesson of Penitence XV",         -- Level 127
             "Quellious' Word of Tranquility", -- Level 54
             "Quellious' Word of Serenity",    -- Level 64
             "Serene Command",                 -- Level 68
@@ -519,6 +532,7 @@ local _ClassConfig = {
         },
         ["Audacity"] = {
             -- Hate magic Debuff Over time
+            "Impassioned Audacity",
             "Fanatical Audacity",
             "Ardent Audacity,",
             "Fervent Audacity,",
@@ -536,7 +550,7 @@ local _ClassConfig = {
             "Superior Healing", -- Level 48
         },
         ["TotLightHeal"] = {
-            -- ToT Light Heal
+            "Eminent Light",   -- Level 127
             "Light of Life",   -- Level 52
             "Light of Nife",   -- Level 63
             "Light of Order",  -- Level 65
@@ -566,8 +580,9 @@ local _ClassConfig = {
             "Calm",
             "Lull",
         },
-        ["Toucheal"] = {
-            --- Touch Heal Line LVL61 - LVL115
+        ["TouchHeal"] = {
+            --- Touch Heal Line LVL61
+            "Eminent Touch",
             "Touch of Nife",
             "Touch of Piety",
             "Sacred Touch",
@@ -592,6 +607,7 @@ local _ClassConfig = {
         },
         ["PurityCure"] = {
             --- Purity Cure Poison/Diease Cure Half Power to curse
+            "Mastery: Balanced Purity",
             "Balanced Purity",
             "Devoted Purity",
             "Earnest Purity",
@@ -607,8 +623,12 @@ local _ClassConfig = {
             "Remove Curse",
             "Remove Greater Curse",
         },
+        ['CureCorrupt'] = {
+            "Mastery: Consecrate",
+        },
         ["ForHonor"] = {
             --- Challenge Taunt Over time Debuff
+            "Duel for Honor",
             "Challenge for Honor",
             "Trial For Honor",
             "Charge for Honor",
@@ -637,6 +657,8 @@ local _ClassConfig = {
         },
         ["AntiUndeadNuke"] = {
             -- Undead Nuke
+            "Doctrine of Revocation",  -- Level 128
+            "Doctrine of Repudiation", -- Level 121
             "Ward Undead",             -- Level 14
             "Expulse Undead",          -- Level 30
             "Dismiss Undead",          -- Level 46
@@ -678,6 +700,7 @@ local _ClassConfig = {
         },
         ['CombatEndRegen'] = {
             --Timer 13, can be used in combat.
+            "Hiatus V",
             "Hiatus", --Level 106
             "Relax",
             "Night's Calming",
@@ -685,6 +708,7 @@ local _ClassConfig = {
         },
         ["MeleeMit"] = {
             -- Withstand Combat Line of Defense - Update to format once tested
+            "Impede",
             "Withstand",
             "Defy",
             "Renounce",
@@ -697,6 +721,7 @@ local _ClassConfig = {
         },
         ["ArmorDisc"] = {
             --- Armor Timer 11
+            "Armor of Eminence",
             "Armor of Avowal",
             "Armor of the Forthright",
             "Armor of Sincerity",
@@ -720,6 +745,7 @@ local _ClassConfig = {
         },
         ["Mantle"] = {
             ---Mantle Line of Discipline Timer 5 defensive burn
+            "Mantle of Eminence",
             "Supernal Mantle",
             "Mantle of the Sapphire Cohort",
             "Kar`Zok Mantle",
@@ -735,7 +761,7 @@ local _ClassConfig = {
             "Guard of Piety",
         },
         ["Guardian"] = {
-            -- Holy Guardian Discipline
+            "Holy Guardian Discipline IV",
             "Revered Guardian Discipline",
             "Blessed Guardian Discipline",
             "Holy Guardian Discipline",
