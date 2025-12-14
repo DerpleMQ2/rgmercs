@@ -34,6 +34,7 @@ local _ClassConfig = {
         },
         ['CombatEndRegen'] = {
             --Timer 13, can be used in combat.
+            "Hiatus V",
             "Hiatus", --Level 106
             "Relax",
             "Night's Calming",
@@ -69,6 +70,7 @@ local _ClassConfig = {
             "Uncia's Fang",
         },
         ['Fists'] = {
+            "Wheel of Fists XII",
             "Buffeting of Fists",
             "Wheel of Fists",
             "Whorl of Fists",
@@ -120,6 +122,7 @@ local _ClassConfig = {
             "Heron Stance",
         },
         ['Synergy'] = {
+            "Lifewalker's Synergy",
             "Fatewalker's Synergy",  -- LS 125
             "Bloodwalker's Synergy", -- TOL 120
             "Calanin's Synergy",
@@ -167,6 +170,7 @@ local _ClassConfig = {
             "Shaded Step",
         },
         ['RejectDeath'] = {
+            "Delay Death XI",
             "Repeal Death",
             "Delay Death",
             "Defer Death",
@@ -210,6 +214,7 @@ local _ClassConfig = {
             "Terrorpalm Discipline",
         },
         ['Poise'] = {
+            "Eagles's Symmetry",
             "Dragon's Poise",
             "Tiger's Poise",
             "Eagle's Poise",

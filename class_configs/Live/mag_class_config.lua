@@ -46,6 +46,7 @@ _ClassConfig      = {
         --- Nukes
         ['SwarmPet'] = {
             -- Swarm Pet* >= LVL 70
+            "Raging Servant XIII",
             "Ravening Servant",
             "Roiling Servant",
             "Riotous Servant",
@@ -62,6 +63,7 @@ _ClassConfig      = {
         },
         ['SpearNuke'] = {
             -- Spear Nuke* >= LVL 70
+            "Spear of Ro X",
             "Spear of Molten Dacite",
             "Spear of Molten Luclinite",
             "Spear of Molten Komatiite",
@@ -74,6 +76,7 @@ _ClassConfig      = {
         },
         ['ChaoticNuke'] = {
             -- Chaotic Nuke with Beneficial Effect >= LVL69
+            "Chaotic Fire VI",
             "Chaotic Magma",
             "Chaotic Calamity",
             "Chaotic Pyroclasm",
@@ -89,6 +92,7 @@ _ClassConfig      = {
         },
         -- ['FireNuke'] = {
         --     -- Fire Nuke 1 <= LVL <= 70
+        --     "Burning Sands XIV",
         --     "Cremating Sands",
         --     "Ravaging Sands",
         --     "Incinerating Sands",
@@ -115,7 +119,7 @@ _ClassConfig      = {
         --     "Burst of Flame",
         -- },
         -- ['FireBoltNuke'] = {
-        --     -- Fire Bolt Nukes
+        --     "Bolt of Flame XVIII",
         --     "Bolt of Molten Dacite",
         --     "Bolt of Molten Olivine",
         --     "Bolt of Molten Komatiite",
@@ -138,6 +142,7 @@ _ClassConfig      = {
         -- },
         -- ['MagicNuke'] = {
         --     -- Nuke 1 <= LVL <= 69
+        --     "Shock of Blades XIX",
         --     "Shock of Memorial Steel",
         --     "Shock of Carbide Steel",
         --     "Shock of Burning Steel",
@@ -196,6 +201,7 @@ _ClassConfig      = {
         },
         ['BeamNuke'] = {
             -- Beam Frontal AOE Spell*
+            "Beam of Molten Slag XII",
             "Beam of Molten Dacite",
             "Beam of Molten Olivine",
             "Beam of Molten Komatiite",
@@ -210,6 +216,7 @@ _ClassConfig      = {
         },
         ['RainNuke'] = {
             --- Rain AOE Spell*
+            "Rain of Fire XVI",
             "Rain of Molten Dacite",
             "Rain of Molten Olivine",
             "Rain of Molten Komatiite",
@@ -228,8 +235,8 @@ _ClassConfig      = {
             "Rain of Fire",
         },
         ['MagicRainNuke'] = {
-            -- Magic Rain
-            "rain of Kukris",
+            "Rain of Blades XVII",
+            "Rain of Kukris",
             "Rain of Falchions",
             "Rain of Blades",
             "Rain of Spikes",
@@ -240,6 +247,7 @@ _ClassConfig      = {
         },
         ['VolleyNuke'] = {
             -- Volley Nuke - Pet buff*
+            "Shock of Many XI",
             "Fusillade of Many",
             "Barrage of Many",
             "Shockwave of Many",
@@ -253,6 +261,7 @@ _ClassConfig      = {
         },
         ['SummonedNuke'] = {
             -- Unnatural Nukes >70
+            "Expunge the Unnatural",
             "Dismantle the Unnatural",
             "Unmend the Unnatural",
             "Obliterate the Unnatural",
@@ -267,6 +276,7 @@ _ClassConfig      = {
         },
         ['MaloNuke'] = {
             -- Shock/Malo Combo Line
+            "Shock of Malaise VII",
             "Memorial Steel Malosinera",
             "Carbide Malosinetra",
             "Blistersteel Malosenia",
@@ -276,6 +286,7 @@ _ClassConfig      = {
         },
         --- Buffs
         ['SelfShield'] = {
+            "Shielding XXIII",
             "Shield of Memories",
             "Shield of Shadow",
             "Shield of Restless Ice",
@@ -300,6 +311,7 @@ _ClassConfig      = {
         },
         ['ShortDurDmgShield'] = {
             -- Use at the start of the DPS loop
+            "Searing Skin XI",
             "Boiling Skin",
             "Scorching Skin",
             "Burning Skin",
@@ -317,6 +329,7 @@ _ClassConfig      = {
         },
         ['LongDurDmgShield'] = {
             -- Preferring group buffs for ease. Included all Single target Now as well.
+            "Circle of Fireskin XVI",
             "Circle of Forgefire Coat",
             "Forgefire Coat",
             "Circle of Emberweave Coat",
@@ -354,6 +367,7 @@ _ClassConfig      = {
         },
         ['ManaRegenBuff'] = {
             -- LVL58 (Transon's Phantasmal Protection) and up to avoid reagent usage
+            "Eidolic Guardian XVII",
             "Courageous Guardian",
             "Relentless Guardian",
             "Restless Guardian",
@@ -419,6 +433,7 @@ _ClassConfig      = {
         },]] --
         ['FireShroud'] = {
             -- Defensive Proc 3-6m Buff
+            "Burning Veil X",
             "Igneous Veil",
             "Volcanic Veil",
             "Exothermic Veil",
@@ -431,6 +446,7 @@ _ClassConfig      = {
             "Burning Aura",
         },
         ['PetBodyGuard'] = {
+            "Hulking Bodyguard X",
             "ValorForged Bodyguard",
             "Ophiolite Bodyguard",
             "Pyroxenite Bodyguard",
@@ -442,6 +458,7 @@ _ClassConfig      = {
             "Hulking Bodyguard",
         },
         ['GatherMana'] = {
+            "Gather Potential VIII",
             "Gather Zeal",
             "Gather Vigor",
             "Gather Potency",
@@ -452,6 +469,7 @@ _ClassConfig      = {
         },
         -- Pet Spells Pets & Spells Affecting them
         ['MeleeGuard  '] = {
+            "Shield of Fate VII",
             "Shield of Inescapability",
             "Shield of Inevitability",
             "Shield of Destiny",
@@ -469,6 +487,7 @@ _ClassConfig      = {
         },
         ['PetHealSpell'] = {
             -- Pet Heal*
+            "Renewal of Magmath",
             "Renewal of Shoru",
             "Renewal of Iilivina ",
             "Renewal of Evreth",
@@ -490,6 +509,7 @@ _ClassConfig      = {
         },
         ['PetPromisedSpell'] = {
             ---Pet Promised*
+            "Promised Mending XII",
             "Promised Reconstitution",
             "Promised Relief",
             "Promised Healing",
@@ -532,6 +552,7 @@ _ClassConfig      = {
             "Elemental Draw",
         },
         ['PetHaste'] = {
+            "Burnout XVII",
             "Burnout XVI",
             "Burnout XV",
             "Burnout XIV",
@@ -552,6 +573,7 @@ _ClassConfig      = {
             "Burnout",
         },
         ['PetIceFlame'] = {
+            "Iceflame Guard XII",
             "IceFlame Palisade",
             "Iceflame Barricade ",
             "Iceflame Rampart",
@@ -566,6 +588,7 @@ _ClassConfig      = {
             "Iceflame Guard",
         },
         ['EarthPetSpell'] = {
+            "Earth Elemental XXVI",
             "Recruitment of Earth",
             "Conscription of Earth",
             "Manifestation of Earth",
@@ -593,7 +616,7 @@ _ClassConfig      = {
             "Elementalkin: Earth",
         },
         ['WaterPetSpell'] = {
-            ----- Water Pet*
+            "Water Elemental XXVI",
             "Recruitment of Water",
             "Conscription of Water",
             "Manifestation of Water",
@@ -622,7 +645,7 @@ _ClassConfig      = {
             "Elementalkin: Water",
         },
         ['AirPetSpell'] = {
-            ----- Air Pet*
+            "Air Elemental XXVI",
             "Recruitment of Air",
             "Conscription of Air",
             "Manifestation of Air",
@@ -651,6 +674,7 @@ _ClassConfig      = {
             "Elementalkin: Air",
         },
         ['FirePetSpell'] = {
+            "Fire Elemental XXVI",
             "Recruitment of Fire",
             "Conscription of Fire",
             "Manifestation of Fire",
@@ -706,6 +730,7 @@ _ClassConfig      = {
         -- - Summoned item Spells
         ['PetArmorSummon'] = {
             -- >=LVL71
+            "Grant Arcane Plate",
             "Grant The Alloy's Plate",
             "Grant the Centien's Plate",
             "Grant Ocoenydd's Plate",
@@ -718,6 +743,7 @@ _ClassConfig      = {
             "Summon Plate of the Elements",
         },
         ['PetWeaponSummon'] = {
+            "Grant Arcane Armaments",
             "Grant Goliath's Armaments",
             "Grant Shak Dathor's Armaments",
             "Grant Yalrek's Armaments",
@@ -731,6 +757,7 @@ _ClassConfig      = {
             "Summon Elemental Armaments",
         },
         ['PetHeirloomSummon'] = {
+            "Grant Arcane Heirlooms",
             "Grant Ankexfen's Heirlooms",
             "Grant the Diabo's Heirlooms",
             "Summon Nastel's Heirlooms",
@@ -760,6 +787,7 @@ _ClassConfig      = {
             "Summon: Lava Orb",
         },
         ['EarthPetItemSummon'] = {
+            "Summon Arcane Servant",
             "Summon Valorous Servant",
             "Summon Forbearing Servant",
             "Summon Imperative Servant",
@@ -769,6 +797,7 @@ _ClassConfig      = {
             "Summon Exigent Servant",
         },
         ['FirePetItemSummon'] = {
+            "Summon Arcane Minion",
             "Summon Valorous Minion",
             "Summon Forbearing Minion",
             "Summon Imperative Minion",
@@ -790,6 +819,7 @@ _ClassConfig      = {
         },
         ['SelfManaRodSummon'] = {
             ---, - Focuses on self mana rod summon separate from other timers. >95
+            "Rod of Shattered Modulation",
             "Rod of Courageous Modulation",
             "Sickle of Umbral Modulation",
             "Wand of Frozen Modulation",
@@ -800,6 +830,7 @@ _ClassConfig      = {
         -- - Debuffs
         ['MaloDebuff'] = {
             -- line < LVL 75 @ LVL75 use the AA
+            "Malaise XVI",
             "Malosinera",
             "Malosinetra",
             "Malosinara",

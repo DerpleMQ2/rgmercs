@@ -33,6 +33,7 @@ local _ClassConfig = {
     },
     ['AbilitySets']     = {
         ['StandDisc'] = {
+            "Final Stand Discipline VI",
             "Climactic Stand",
             "Resolute Stand",
             "Ultimate Stand Discipline",
@@ -62,6 +63,7 @@ local _ClassConfig = {
             "Shield Split",
         },
         ['GroupACBuff'] = {
+            "Field Armorer X",
             "Field Bulwark",
             "Full Moon's Champion",
             "Paragon Champion",
@@ -76,6 +78,7 @@ local _ClassConfig = {
             "Commanding Voice",
         },
         ['DefenseACBuff'] = {
+            "Bracing Defense X",
             "Vigorous Defense",
             "Primal Defense",
             "Courageous Defense",
@@ -119,6 +122,7 @@ local _ClassConfig = {
             "Harmonious Precision",
         },
         ['AEBlades'] = {
+            "Cyclone Blades XIV",
             "Tempest Blades",
             "Dragonstrike Blades",
             "Stormstrike Blades",
@@ -134,6 +138,7 @@ local _ClassConfig = {
             "Spiraling Blades",
         },
         ['AddHate1'] = {
+            "Bazu Roar X",
             "Mortimus' Roar",
             "Namdrows' Roar",
             "Kragek's Roar",
@@ -152,6 +157,7 @@ local _ClassConfig = {
             "Provoke",
         },
         ['AddHate2'] = {
+            "Harassing Shout VII",
             "Distressing Shout",
             "Twilight Shout",
             "Oppressing Shout",
@@ -160,6 +166,7 @@ local _ClassConfig = {
             "Harassing Shout",
         },
         ['AbsorbTaunt'] = {
+            "Provoke XIX",
             "Infuriate",
             "Bristle",
             "Aggravate",
@@ -174,6 +181,7 @@ local _ClassConfig = {
             "Mock",
         },
         ['StrikeDisc'] = {
+            "Opportunistic Strike IX",
             "Decisive Strike",
             "Precision Strike",
             "Cunning Strike",
@@ -184,6 +192,7 @@ local _ClassConfig = {
             "Exploitive Strike",
         },
         ['EndRegen'] = {
+            "Hiatus V",
             "Convalesce",
             "Night's Calming",
             "Hiatus",
@@ -200,6 +209,7 @@ local _ClassConfig = {
             "Myrmidon's Aura",
         },
         ['Attention'] = {
+            "Unquestioned Attention",
             "Unending Attention",
             "Unyielding Attention",
             "Unflinching Attention",
@@ -217,6 +227,7 @@ local _ClassConfig = {
             "Brightfeld's Onslaught Discipline",
         },
         ['RuneShield'] = {
+            "Warrior's Auspice VII",
             "Warrior's Auspice",
             "Warrior's Bulwark",
             "Warrior's Bastion",
