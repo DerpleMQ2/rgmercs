@@ -24,6 +24,8 @@ Module.namesLoaded     = false
 Module.LastNamedCheck  = 0
 
 Module.DefNamed        = Nameds or {}
+Module.EQMightNamed    = { "Fabled", "Ultrafabled", "Timeless", }
+
 
 Module.DefaultConfig   = {
     ['NamedTable'] = {
@@ -284,6 +286,15 @@ end
 --- @return boolean True if the spawn is named, false otherwise.
 function Module:IsNamed(spawn)
     if not spawn() then return false end
+
+    if Config.Globals.CurServer == "EQ Might" then
+        for _, name in ipairs(self.EQMightNamed) do
+            if (spawn.CleanName() or ""):find(name) then
+                return true
+            end
+        end
+    end
+
     self:RefreshNamedCache()
 
     if self.NamedList[spawn.Name()] or self.NamedList[spawn.CleanName()] then return true end
