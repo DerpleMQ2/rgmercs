@@ -81,6 +81,7 @@ local _ClassConfig = {
     },
     ['AbilitySets']     = {
         ['SelfHPBuff'] = {
+            "Shielding XXIII",
             "Shield of Memories",
             "Shield of Shadow",
             "Shield of Restless Ice",
@@ -103,6 +104,7 @@ local _ClassConfig = {
             "Lesser Shielding",
         },
         ['SelfRune1'] = {
+            "Wraithskin XIII",
             "Golemskin",
             "Carrion Skin",
             "Frozen Skin",
@@ -116,6 +118,7 @@ local _ClassConfig = {
             "Wraithskin",
         },
         ['SelfSpellShield1'] = {
+            "Shield of Fate VII",
             "Shield of Inescapability",
             "Shield of Inevitability",
             "Shield of Destiny",
@@ -146,6 +149,7 @@ local _ClassConfig = {
         },
         ['SwarmPet'] = {
             ---SwarmPet >= LVL85
+            "Call Raging Skeleton X",
             "Call Ravening Skeleton",
             "Call Roiling Skeleton",
             "Call Riotous Skeleton",
@@ -167,15 +171,11 @@ local _ClassConfig = {
         },
         ['HealthTaps'] = {
             ---HealthTaps >= LVL1
-
+            "Drain Essence XXIII",
             "Extort Essence",
-
             "Maraud Essence",
-
             "Draw Essence",
-
             "Consume Essence",
-
             "Hemorrhage Essence",
             "Plunder Essence",
             "Bleed Essence",
@@ -198,19 +198,16 @@ local _ClassConfig = {
         },
         ['SoulTaps'] = {
             ---HealthTaps >= LVL1
+            "Soulrip VII",
             "Soullash",
-
             "Soulflay",
-
             "Soulgouge",
-
             "Soulsiphon",
-
             "Soulrend",
-
         },
         ['DurationTap'] = {
             ---DurationTap >= LVL29
+            "Sharosh's Grasp",
             "Helmsbane's Grasp",
             "The Protector's Grasp",
             "Tserrina's Grasp",
@@ -231,6 +228,7 @@ local _ClassConfig = {
         },
         ['GroupLeech'] = {
             ---GroupLeech >= LVL9
+            "Dark Leech VIII",
             "Ghastly Leech",
             "Twilight Leech",
             "Frozen Leech",
@@ -240,6 +238,7 @@ local _ClassConfig = {
         },
         ['ManaDrain'] = {
             --Mana Drain with Group Mana Recourse
+            "Mind Wrack XIV",
             "Mind Disintegrate",
             "Mind Atrophy",
             "Mind Erosion",
@@ -256,6 +255,7 @@ local _ClassConfig = {
         },
         ['PoisonNuke1'] = {
             ---PoisonNuke >=LVL21
+            "Schisming Venin",
             "Necrotizing Venin",
             "Embalming Venin",
             "Searing Venin",
@@ -275,6 +275,7 @@ local _ClassConfig = {
         },
         ['PoisonNuke2'] = {
             ---PoisonNuke2  >=LVL 75 (DD Increase chance)
+            "Call for Blood XIII",
             "Decree for Blood",
             "Proclamation for Blood",
             "Assert for Blood",
@@ -286,9 +287,11 @@ local _ClassConfig = {
             "Exigency for Blood",
             "Supplication of Blood",
             "Demand for Blood",
+            "Call for Blood",
         },
         ['FireNuke'] = {
             ---Fire Nuke, undead conversion and short stun, 90+
+            "Ignite Bones XIII", -- Level 130
             "Immolate Bones",    -- Level 125
             "Cremate Bones",     -- Level 120
             "Char Bones",        -- Level 115
@@ -300,6 +303,7 @@ local _ClassConfig = {
         },
         ['FireDot1'] = {
             ---FireDot1 >= LVL80
+            "Searing Shadow XI",
             "Raging Shadow",
             "Scalding Shadow",
             "Broiling Shadow",
@@ -313,6 +317,7 @@ local _ClassConfig = {
         },
         ['FireDot2'] = {
             ---FireDot2 >= LVL10
+            "Dread Pyre XIII",
             "Pyre of Illandrin",
             "Pyre of Va Xakra",
             "Pyre of Klraggek",
@@ -334,6 +339,7 @@ local _ClassConfig = {
         },
         ['FireDot2_2'] = {
             ---FireDot2 >= LVL10
+            "Dread Pyre XIII",
             "Pyre of Illandrin",
             "Pyre of Va Xakra",
             "Pyre of Klraggek",
@@ -355,6 +361,7 @@ local _ClassConfig = {
         },
         ['FireDot3'] = {
             ---FireDot3 >= LVL88 (QuickDOT)
+            "Marith's Flashblaze",
             "Arcanaforged's Flashblaze",
             "Thall Va Kelun's Flashblaze",
             "Otatomik's Flashblaze",
@@ -366,6 +373,7 @@ local _ClassConfig = {
         },
         ['FireDot4'] = {
             ---FireDot4 >= LVL73 DOT
+            "Pyre of Mori XIX",
             "Pyre of the Abandoned",
             "Pyre of the Neglected",
             "Pyre of the Wretched",
@@ -380,6 +388,7 @@ local _ClassConfig = {
         },
         ['Magic1'] = {
             ---Magic1 >= LVL51 SlowDot
+            "Necrotizing Wounds VIII",
             "Putrefying Wounds",
             "Infected Wounds",
             "Septic Wounds",
@@ -394,6 +403,7 @@ local _ClassConfig = {
         },
         ['Magic2'] = {
             ---Magic2 >=LVL67 DOT
+            "Horror XV",
             "Extermination",
             "Extinction",
             "Oblivion",
@@ -411,6 +421,7 @@ local _ClassConfig = {
         },
         ['Magic2_2'] = {
             ---Magic2 >=LVL67 DOT
+            "Horror XV",
             "Extermination",
             "Extinction",
             "Oblivion",
@@ -428,6 +439,7 @@ local _ClassConfig = {
         },
         ['Magic3'] = {
             ---Magic3 >=LVL87 QuickDot
+            "Xirrim's Swift Deconstruction",
             "Blevak's Swift Deconstruction",
             "Xetheg's Swift Deconstruction",
             "Lexelan's Swift Deconstruction",
@@ -445,6 +457,7 @@ local _ClassConfig = {
         },
         ['Disease1'] = {
             ---Decay Line of Disease Spells >=LVL56 Slow DOT
+            "Pustim's Decay",
             "Goremand's Decay",
             "Fleshrot's Decay",
             "Danvid's Decay",
@@ -462,9 +475,8 @@ local _ClassConfig = {
         },
         ['Disease2'] = {
             ---Grip Line of Disease Spells =LVL1 HAS DEBUFF
-
+            "Grip of Pustim",
             "Grip of Quietus",
-
             "Grip of Zorglim",
             "Grip of Kraz",
             "Grip of Jabaum",
@@ -489,6 +501,7 @@ local _ClassConfig = {
         },
         ['Disease3'] = {
             ---Sickness Life of Disease Spells >=LVL89 QuickDOT
+            "Wremms's Swift Sickness",
             "Ogna's Swift Sickness",
             "Diabo Tatrua's Swift Sickness",
             "Lairsaf's Swift Sickness",
@@ -500,6 +513,7 @@ local _ClassConfig = {
         },
         ['Poison1'] = {
             ---Poison1 >= LVL86 (QuickDOT)
+            "Lherre's Swift Venom",
             "Dotal's Swift Venom",
             "Xenacious' Swift Venom",
             "Vilefang's Swift Venom",
@@ -511,6 +525,7 @@ local _ClassConfig = {
         },
         ['Poison2'] = {
             ---Poison2 >=LVL1 (DOT)
+            "Silkwhisper Venom",
             "Luggald Venom",
             "Hemorrhagic Venom",
             "Crystal Crawler Venom",
@@ -530,6 +545,7 @@ local _ClassConfig = {
         },
         ['Poison2_2'] = {
             ---Poison2 >=LVL1 (DOT)
+            "Silkwhisper Venom",
             "Luggald Venom",
             "Hemorrhagic Venom",
             "Crystal Crawler Venom",
@@ -549,6 +565,7 @@ local _ClassConfig = {
         },
         ['Poison3'] = {
             ---Poison3 >= LVL79 DOT
+            "Khrosik's Pallid Haze",
             "Uncia's Pallid Haze",
             "Zelnithak's Pallid Haze",
             "Dracnia's Pallid Haze",
@@ -563,6 +580,7 @@ local _ClassConfig = {
         },
         ['Corruption1'] = {
             ---Corruption1 >= LVL77
+            "Putrefaction XI",
             "Deterioration",
             "Decomposition",
             "Miasma",
@@ -593,6 +611,7 @@ local _ClassConfig = {
         },
         ['SnareDot'] = {
             -- LVL4 -> <= LVL70
+            "Clinging Darkness XIX",
             "Afflicted Darkness",
             "Harrowing Darkness",
             "Tormenting Darkness",
@@ -615,6 +634,7 @@ local _ClassConfig = {
         },
         ['ScentDebuff'] = {
             -- line needed till >= LVL10 <= LVL85
+            "Scent of Dusk XIII",
             "Scent of The Realm",
             "Scent of The Grave",
             "Scent of Mortality",
@@ -633,6 +653,7 @@ local _ClassConfig = {
         },
         ['LichSpell'] = {
             -- LichForm Spell
+            "Otherside XX",
             "Realmside",
             "Lunaside",
             "Gloomside",
@@ -655,7 +676,7 @@ local _ClassConfig = {
             "Dark Pact",
         },
         ['BestowBuff'] = {
-            -- Bestow Line
+            "Bestow Undeath X",
             "Bestow Ruin",
             "Bestow Rot",
             "Bestow Dread",
@@ -667,7 +688,7 @@ local _ClassConfig = {
             "Bestow Undeath",
         },
         ['PetSpellRog'] = {
-            ---Pet Spells Rogue * Var Name:, string outer
+            "Dark Assassin XVI",
             "Merciless Assassin",
             "Unrelenting Assassin",
             "Restless Assassin",
@@ -686,7 +707,7 @@ local _ClassConfig = {
             "Minion of Shadows",
         },
         ['PetSpellWar'] = {
-            ---Pet Spells Warrior
+            "Rasivimun's Shade",
             "Margator's Shade",
             "Luclin's Conqueror",
             "Tserrina's Shade",
@@ -715,19 +736,20 @@ local _ClassConfig = {
             "Cavorting Bones",
         },
         ['PetBuff'] = {
-            ---Pet Buff Spell * Var Name:, string outer
+            "Necrotize Ally X",
             "Instill Ally",
             "Inspire Ally",
             "Incite Ally",
             "Infuse Ally",
             "Imbue Ally",
-            -- "Sanction Ally",
-            -- "Empower Ally",
-            -- "Energize Ally",
-            -- "Necrotize Ally",
+            --The below spells deal PBAE damage on fade and should not be casually used (later spells drop this effect)
+            --"Sanction Ally",
+            --"Empower Ally",
+            --"Energize Ally",
+            --"Necrotize Ally",
         },
         ['PetHaste'] = {
-            ---Pet Haste Spell * Var Name:, string outer
+            "Sigil of Death XV",
             "Sigil of Putrefaction",
             "Sigil of Undeath",
             "Sigil of Decay",

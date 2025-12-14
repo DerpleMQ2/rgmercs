@@ -285,11 +285,11 @@ end
 --- @param spawn MQSpawn The spawn object to check.
 --- @return boolean True if the spawn is named, false otherwise.
 function Module:IsNamed(spawn)
-    if not spawn() then return false end
+    if not spawn or not spawn() then return false end
 
     if Config.Globals.CurServer == "EQ Might" then
         for _, name in ipairs(self.EQMightNamed) do
-            if (spawn.CleanName() or ""):find(name) then
+            if spawn and spawn() and (spawn.CleanName() or ""):find(name) then
                 return true
             end
         end
