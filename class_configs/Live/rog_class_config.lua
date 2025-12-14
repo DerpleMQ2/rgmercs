@@ -40,6 +40,7 @@ return {
             "Shadow-Hunter's Dagger", -- Level 102
         },
         ["Slice"] = {                 --Timer 1
+            "Bleed X",                -- Level 128
             "Carve",                  -- Level 123
             "Lance",                  -- Level 118
             "Slash",                  -- Level 113
@@ -70,6 +71,7 @@ return {
             "Frenzied Stabbing Discipline", -- Level 70
         },
         ["Ambush"] = {
+            "Ambush XI",       -- Level 126
             "Bamboozle",       -- Level 121
             "Ambuscade",       -- Level 116
             "Bushwhack",       -- Level 111
@@ -99,6 +101,7 @@ return {
             "Sneak Attack",          -- Level 20
         },
         ["PoisonBlade"] = {
+            "Toxic Blade VIII",  -- Level 128
             "Venomous Blade",    -- Level 123
             "Netherbian Blade",  -- Level 118
             "Drachnid Blade",    -- Level 113
@@ -108,6 +111,7 @@ return {
             "Toxic Blade",       -- Level 93
         },
         ["FellStrike"] = {
+            "Assault X",    -- Level 130
             "Mayhem",       -- Level 125
             "Shadowstrike", -- Level 120
             "Blitzstrike",  -- Level 115
@@ -148,10 +152,11 @@ return {
         },
         ['CombatEndRegen'] = {
             --Timer 13, can be used in combat.
-            "Hiatus", --Level 106
-            "Relax",
-            "Night's Calming",
+            "Hiatus V", --Level 126
             "Convalesce",
+            "Night's Calming",
+            "Relax",
+            "Hiatus", --Level 106
         },
         ["CADisc"] = {
             "Counterattack Discipline",
@@ -162,6 +167,7 @@ return {
             "Razor's Edge Discipline",  -- Level 92
         },
         ["AspDisc"] = {
+            "Visapehn Discipline",   -- Level 129
             "Crinotoxin Discipline", -- Level 124
             "Exotoxin Discipline",   -- Level 119
             "Chelicerae Discipline", -- Level 114
@@ -170,12 +176,14 @@ return {
             "Aspbleeder Discipline", -- Level 99
         },
         ["AimDisc"] = {
-            "Baleful Aim Discipline", --  Level 116
-            "Lethal Aim Discipline",  --  Level 108
-            "Fatal Aim Discipline",   --  Level 98
-            "Deadly Aim Discipline",  --  Level 68
+            "Fatal Aim Discipline IV", --  Level 130
+            "Baleful Aim Discipline",  --  Level 116
+            "Lethal Aim Discipline",   --  Level 108
+            "Fatal Aim Discipline",    --  Level 98
+            "Deadly Aim Discipline",   --  Level 68
         },
         ["MarkDisc"] = {
+            "Easy Mark X",       -- Level 126
             "Unsuspecting Mark", -- Level 121
             "Foolish Mark",      -- Level 116
             "Naive Mark",        -- Level 111
@@ -186,27 +194,29 @@ return {
             "Easy Mark",         -- Level 86
         },
         ["Jugular"] = {
-            "Jugular Slash",    -- Level 77
-            "Jugular Slice",    -- Level 82
-            "Jugular Sever",    -- Level 87
-            "Jugular Gash",     -- Level 92
-            "Jugular Lacerate", -- Level 97
-            "Jugular Hack",     -- Level 102
-            "Jugular Strike",   -- Level 107
-            "Jugular Cut",      -- Level 112
-            "Jugular Rend",     -- Level 117
+            "Jugular Slash XI", -- Level 127
             "Jugular Hew",      -- Level 122
+            "Jugular Rend",     -- Level 117
+            "Jugular Cut",      -- Level 112
+            "Jugular Strike",   -- Level 107
+            "Jugular Hack",     -- Level 102
+            "Jugular Lacerate", -- Level 97
+            "Jugular Gash",     -- Level 92
+            "Jugular Sever",    -- Level 87
+            "Jugular Slice",    -- Level 82
+            "Jugular Slash",    -- Level 77
         },
         ["Phantom"] = {
             "Phantom Assassin", -- Level 100
         },
         ["SecretBlade"] = {
-            "Veiled Blade",     -- Level 124
-            "Obfuscated Blade", -- Level 119
-            "Cloaked Blade",    -- Level 114
-            "Secret Blade",     -- Level 109
-            "Hidden Blade",     -- Level 104
-            "Holdout Blade",    -- Level 99
+            "Holdout Blade VII", -- Level 129
+            "Veiled Blade",      -- Level 124
+            "Obfuscated Blade",  -- Level 119
+            "Cloaked Blade",     -- Level 114
+            "Secret Blade",      -- Level 109
+            "Hidden Blade",      -- Level 104
+            "Holdout Blade",     -- Level 99
         },
         ["DichoSpell"] = {
             "Reciprocal Weapons", -- Level 121
@@ -226,6 +236,7 @@ return {
             "Knifeplay Discipline", -- Level 98, Timer 16
         },
         ["HateDebuff"] = {          --Timer 11, Aggro reduction and Aggro modifier for current target
+            "Misdirection IX",      -- Level 129
             "Trickery",             -- Level 124
             "Beguile",              -- Level 119
             "Cozen",                -- Level 114
