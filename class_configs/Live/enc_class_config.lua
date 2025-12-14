@@ -30,6 +30,7 @@ local _ClassConfig = {
             "Twincast Aura",
         },
         ['SpellProcAura'] = {
+            "Mana Recursion Aura XI",
             "Mana Ripple Aura",
             "Mana Radix Aura",
             "Mana Replication Aura",
@@ -49,6 +50,7 @@ local _ClassConfig = {
             "Learner's Aura",
         },
         ['HasteBuff'] = {
+            "Hastening of Elluria",
             "Hastening of Margator",
             "Hastening of Jharin",
             "Hastening of Cekenar",
@@ -82,6 +84,7 @@ local _ClassConfig = {
             "Quickness",
         },
         ['ManaRegen'] = {
+            "Voice of Clairvoyance XVIII",
             "Voice of Preordination",
             "Voice of Perception",
             "Voice of Sagacity",
@@ -115,6 +118,7 @@ local _ClassConfig = {
             "Breeze",
         },
         ['MezBuff'] = {
+            "Ward of Bedazzlement XII",
             "Ward of the Stupefier",
             "Ward of the Beguiler",
             "Ward of the Deviser",
@@ -136,6 +140,7 @@ local _ClassConfig = {
             "Boon of the Garou",
         },
         ['SelfHPBuff'] = {
+            "Shielding XXIII",
             "Shield of Memories",
             "Shield of Shadow",
             "Shield of Restless Ice",
@@ -159,6 +164,7 @@ local _ClassConfig = {
             "Minor Shielding",
         },
         ['SelfRune1'] = {
+            "Arcane Rune XIII",
             "Esoteric Rune",
             "Marvel's Rune",
             "Deviser's Rune",
@@ -174,6 +180,7 @@ local _ClassConfig = {
             "Arcane Rune",
         },
         ['SelfRune2'] = {
+            "Polychromatic Rune XII",
             "Polyradiant Rune",
             "Polyluminous Rune",
             "Polycascading Rune",
@@ -187,11 +194,13 @@ local _ClassConfig = {
             "Polychromatic Rune",
         },
         ['UnityRune'] = {
+            "Enticer's Unity IX",
             "Esoteric Unity",
             "Deviser's Unity",
             "Marvel's Unity",
         },
         ['SingleRune'] = {
+            "Rune XIX",
             "Rune of Zoraxmen",
             "Rune of Tearc",
             "Rune of Kildrukaun",
@@ -212,6 +221,7 @@ local _ClassConfig = {
             "Rune I",
         },
         ['GroupRune'] = {
+            "Rune of the Vortex",
             "Gloaming Rune",
             "Eclipsed Rune",
             "Crepuscular Rune",
@@ -227,6 +237,7 @@ local _ClassConfig = {
             "Rune of the Scale",
         },
         ['AggroRune'] = {
+            "Horrifying Rune VIII",
             "Disquieting Rune",
             "Ghastly Rune",
             "Horrendous Rune",
@@ -258,6 +269,8 @@ local _ClassConfig = {
             "Ward of Alendar",
         },
         ['GroupSpellShield'] = {
+            "Legion of Feish",
+            "Legion of Boberstler",
             "Legion of Ogna",
             "Legion of Liako",
             "Legion of Kildrukaun",
@@ -287,6 +300,7 @@ local _ClassConfig = {
             "Legion of the Keeper",
         },
         ['SingleMeleeShield'] = {
+            "Umbral Auspice VII",
             "Gloaming Auspice",
             "Eclipsed Auspice",
             "Crepuscular Auspice",
@@ -295,6 +309,7 @@ local _ClassConfig = {
             "Umbral Auspice",
         },
         ['SelfGuardShield'] = {
+            "Shield of Fate VII",
             "Shield of Inevitability",
             "Shield of Inescapability",
             "Shield of Destiny",
@@ -310,6 +325,7 @@ local _ClassConfig = {
             "Stupefier's Auspice",
         },
         ['SpellProcBuff'] = {
+            "Mana Recursion XI",
             "Mana Reproduction",
             "Mana Rebirth",
             "Mana Replication",
@@ -331,6 +347,7 @@ local _ClassConfig = {
             "Chromatic Alliance",
         },
         ['TwinCastMez'] = {
+            "Chaotic Enticement X",
             "Chaotic Deception",
             "Chaotic Delusion",
             "Chaotic Bewildering",
@@ -342,6 +359,7 @@ local _ClassConfig = {
             "Chaotic Conundrum",
         },
         ['PBAEStunSpell'] = {
+            "Color Flux XVIII",
             "Color Calibration",
             "Color Conflagration",
             "Color Cascade",
@@ -361,6 +379,7 @@ local _ClassConfig = {
             "Color Flux",
         },
         ['TargetAEStun'] = {
+            "Remote Color Flux XVIII",
             "Remote Color Calibration",
             "Remote Color Conflagration",
             "Remote Color Cascade",
@@ -370,6 +389,7 @@ local _ClassConfig = {
             "Remote Color Convergence",
         },
         ['SingleStunSpell1'] = {
+            "Dizzying Helix XII",
             "Dizzying Spindle",
             "Dizzying Vortex",
             "Dizzying Coil",
@@ -386,6 +406,8 @@ local _ClassConfig = {
             "Whirl till you hurl",
         },
         ['CharmSpell'] = {
+            "Enticer's Command XV",
+            "Charm XVII",
             "Stupefier's Demand",
             "Esoteric Command",
             "Marvel's Demand",
@@ -454,6 +476,7 @@ local _ClassConfig = {
             "Taper Enchantment",
         },
         ['TashSpell'] = {
+            "Tashan XVII",
             "Roar of Tashan",
             "Edict of Tashan",
             "Proclamation of Tashan",
@@ -497,6 +520,7 @@ local _ClassConfig = {
         },
         ['StrangleDot'] = {
             ---DoT 1 -- >=LVL1
+            "Strangle XVII",
             "Asphyxiating Grasp",
             "Throttling Grip",
             "Pulmonary Grip",
@@ -519,6 +543,7 @@ local _ClassConfig = {
         },
         ['MindDot'] = {
             -- DoT 2 --  >= LVL70
+            "Mind Shatter XV",
             "Mind Whirl",
             "Mind Vortex",
             "Mind Coil",
@@ -545,6 +570,7 @@ local _ClassConfig = {
         },
         ['MagicNuke'] = {
             --- Nuke 1 -- >= LVL7
+            "Mindblade IX",
             "Mindrend",
             "Mindreap",
             "Mindrift",
@@ -575,6 +601,7 @@ local _ClassConfig = {
         },
         ['RuneNuke'] = {
             --- RUNE - Nuke Fast >=LVL86
+            "Chromatic Jab IX",
             "Chromatic Spike",
             "Chromatic Flare",
             "Chromatic Stab",
@@ -586,6 +613,7 @@ local _ClassConfig = {
         },
         ['ManaTapNuke'] = {
             --- Mana Drain Nuke - Fast -- >=LVL96
+            "Mental Appropriation VII",
             "Psychological Appropriation",
             "Ideological Appropriation",
             "Psychic Appropriation",
@@ -617,6 +645,7 @@ local _ClassConfig = {
             "Inhibiting Helix",
         },
         ['PetSpell'] = {
+            "Arkahn's Animation",
             "Flariton's Animation",
             "Constance's Animation",
             "Omica's Animation",
@@ -646,6 +675,7 @@ local _ClassConfig = {
         },
         ['PetBuffSpell'] = {
             ---Pet Buff Spell * Var Name: PetBuffSpell string outer
+            "Empowered Minion IV",
             "Speed of Margator",
             "Speed of Vallon",
             "Visions of Grandeur",
@@ -662,7 +692,7 @@ local _ClassConfig = {
             --- Speed of the Brood won't take effect properly on pets. Unless u Purchase the AA
         },
         ['MezAESpell'] = {
-            ---AE Mez * Var Name:,string outer
+            "Mesmerizing Wave XV",
             "Neutralizing Wave",
             "Perplexing Wave",
             "Deadening Wave",
@@ -687,6 +717,7 @@ local _ClassConfig = {
             "Slackening Glance",
         },
         ['MezPBAESpell'] = {
+            "Docility XII",
             "Neutralize",
             "Perplex",
             "Bafflement",
@@ -703,6 +734,7 @@ local _ClassConfig = {
             "Wonderment",
         },
         ['MezSpell'] = {
+            "Mesmerize XX",
             "Flummox",
             "Addle",
             "Deceive",
@@ -749,6 +781,7 @@ local _ClassConfig = {
         },
         ['CalmSpell'] = {
             ---Calm Spell -- >= LVL1
+            "Quiet Mind XIII",
             "Docile Mind",
             "Still Mind",
             "Serene Mind",
