@@ -92,13 +92,15 @@ local _ClassConfig = {
         },
         ['IceAura'] = {
             -- Spell Series >= 88LVL Minimum -- Only Heroic Aura that will be used
+            "Frostfell Aura IX",
+            "Coldburst Aura",
+            "Nightchill Aura",
             "Icerend Aura",
             "Frostreave Aura",
             "Frostweave Aura",
             "Frostone Aura",
             "Frostcloak Aura",
             "Frostfell Aura",
-            "Nightchill Aura",
         },
         ['HealingAura'] = {
             -- Healing Aura >= 55
@@ -107,6 +109,7 @@ local _ClassConfig = {
         },
         ['SingleTgtCure'] = {
             -- Single Target Multi-Cure >= 84
+            "Mastery: Sanctified Blood",
             "Expurgated Blood",
             "Unblemished Blood",
             "Cleansed Blood",
@@ -117,13 +120,15 @@ local _ClassConfig = {
         },
         ['GroupCure'] = {
             -- Group Multi-Cure >=91
+            "Mastery: Nightwhisper's Breeze",
+            "Nightwhisper's Breeze",
             "Wildtender's Breeze",
             "Copsetender's Breeze",
             "Bosquetender's Breeze",
             "Fawnwalker's Breeze",
-            "Nightwhisper's Breeze",
         },
         ['CureCorrupt'] = {
+            "Mastery: Chant of the Zelniak",
             "Chant of the Zelniak",
             "Chant of the Wulthan",
             "Chant of the Kromtus",
@@ -137,6 +142,9 @@ local _ClassConfig = {
         },
         ['QuickHealSurge'] = {
             -- Main Quick heal >=75
+            "Adrenaline Surge XII",
+            "Adrenaline Fury",
+            "Adrenaline Spate",
             "Adrenaline Deluge",
             "Adrenaline Barrage",
             "Adrenaline Torrent",
@@ -150,6 +158,9 @@ local _ClassConfig = {
         },
         ['QuickHeal'] = {
             -- Backup Quick heal >= LVL90
+            "Rejuvilation IX",
+            "Resuscitation",
+            "Sootheseance",
             "Rejuvenescence",
             "Revitalization",
             "Resurgence",
@@ -158,34 +169,10 @@ local _ClassConfig = {
             "Rejuvilation",
             "Sootheseance",
         },
-        ['LongHeal1'] = {
+        ['LongHeal'] = {
             -- Long Heal >= 1 -- skipped 10s cast heals.
-            "Clotavida",
-            "Viridavida",
-            "Curavida",
-            "Panavida",
-            "Sterivida",
-            "Sanavida",
-            "Benevida",
-            "Granvida",
-            "Puravida",
-            "Pure Life",
-            "Chlorotrope",
-            "Sylvan Infusion",
-            "Nature's Infusion",
-            "Nature's Touch",
-            "Chloroblast",
-            "Forest's Renewal",
-            "Superior Healing",
-            "Nature's Renewal",
-            "Healing Water",
-            "Greater Healing",
-            "Healing",
-            "Light Healing",
-            "Minor Healing",
-        },
-        ['LongHeal2'] = {
-            -- Long Heal >= 1 -- skipped 10s cast heals.
+            "Puravida XI",
+            "Vivavida",
             "Clotavida",
             "Viridavida",
             "Curavida",
@@ -212,6 +199,9 @@ local _ClassConfig = {
         },
         ['QuickGroupHeal'] = {
             -- Quick Group heal >= LVL78
+            "Survival of the Fittest XI",
+            "Survival of the Heroic",
+            "Survival of the Unrelenting",
             "Survival of the Favored",
             "Survival of the Auspicious",
             "Survival of the Serendipitous",
@@ -224,6 +214,9 @@ local _ClassConfig = {
         },
         ['LongGroupHeal'] = {
             -- Long Group heal >= LVL 70
+            "Lunamend",
+            "Lunacea",
+            "Lunarush",
             "Lunalesce",
             "Lunasalve",
             "Lunasoothe",
@@ -238,6 +231,8 @@ local _ClassConfig = {
         },
         ['PromHeal'] = {
             -- Promised Heals Line Druid
+            "Promised Reknit X",
+            "Promised Regrowth",
             "Promised Reknit",
             "Promised Replenishment",
             "Promised Revitalization",
@@ -249,6 +244,9 @@ local _ClassConfig = {
         },
         ['FrostDebuff'] = {
             -- Frost Debuff Series -- >= 74LVL -- On Bar
+            "Gelid Frost XI",
+            "Mythic Frost",
+            "Primal Frost",
             "Restless Frost",
             "Glistening Frost",
             "Moonbright Frost",
@@ -258,10 +256,12 @@ local _ClassConfig = {
             "Blanched Frost",
             "Gelid Frost",
             "Hoar Frost",
-            "Primal Frost",
         },
         ['RoDebuff'] = {
             -- Ro Debuff Series -- >= 37LVL -- AA Starts at LVL (Single Target) -- On Bar Until AA
+            "Grasp of Ro IX",
+            "Clench of Ro",
+            "Cinch of Ro",
             "Clasp of Ro",
             "Cowl of Ro",
             "Crush of Ro",
@@ -274,18 +274,22 @@ local _ClassConfig = {
             "Ro's Smoldering Disjunction",
             "Fixation of Ro",
             "Ro's Fiery Sundering",
-            "Cinch of Ro",
         },
         ['RoDebuffAE'] = {
             -- Ro AE Debuff Series -- >= 97LVL -- AA Starts at LVL
+            "Pillar of Ro VII",
+            "Visage of Ro",
+            "Scrutiny of Ro",
             "Glare of Ro",
             "Gaze of Ro",
             "Column of Ro",
             "Pillar of Ro",
-            "Scrutiny of Ro",
         },
         ['IceBreathDebuff'] = {
             -- Ice Breath Series >= 63LVL -- On Bar
+            "Glacier Breath XIV",
+            "Algid Breath",
+            "Twilight Breath",
             "Icerend Breath",
             "Frostreave Breath",
             "Blizzard Breath",
@@ -297,10 +301,10 @@ local _ClassConfig = {
             "Icefall Breath",
             "Glacier Breath",
             "E`ci's Frosty Breath",
-            "Twilight Breath",
         },
         ['SkinDebuff'] = {
             -- Skin Debuff Series >= 73LVL -- On Bar
+            "Skin to Lichen",
             "Skin to Sumac",
             "Skin to Seedlings",
             "Skin to Foliage",
@@ -308,10 +312,12 @@ local _ClassConfig = {
             "Skin to Flora",
             "Skin to Mulch",
             "Skin to Vines",
-            "Skin to Lichen",
         },
         ['ReptileCombatInnate'] = {
             -- Reptile Combat Innate >= 68LVL -- On Bar
+            "Skin of the Reptile XII",
+            "Chitin of the Reptile",
+            "Bulwark of the Reptile",
             "Defense of the Reptile",
             "Guard of the Reptile",
             "Pellicle of the Reptile",
@@ -321,10 +327,10 @@ local _ClassConfig = {
             "Carapace of the Reptile",
             "Scales of the Reptile",
             "Skin of the Reptile",
-            "Bulwark of the Reptile",
         },
         ['NaturesWrathDot'] = {
             -- Natures Wrath DOT Line >= 75LVL -- On Bar
+            "Nature's Blazing Wrath XII",
             "Nature's Fervid Wrath",
             "Nature's Blistering Wrath",
             "Nature's Fiery Wrath",
@@ -335,9 +341,11 @@ local _ClassConfig = {
             "Nature's Burning Wrath",
             "Nature's Blazing Wrath",
             "Nature's Sweltering Wrath",
+            "Nature's Boiling Wrath",
         },
         ['HordeDot'] = {
-            -- Horde Dots >= 10LVL -- On Bar
+            "Horde of Spitewasps",
+            "Horde of Hotaria",
             "Horde of Duskwigs",
             "Horde of Hyperboreads",
             "Horde of Polybiads",
@@ -358,6 +366,8 @@ local _ClassConfig = {
         },
         ['SunDot'] = {
             -- SUN Dot Line >= 49LVL -- On Bar
+            "Sunscorch XII",
+            "Sunscald",
             "Sunpyre",
             "Sunshock",
             "Sunflame",
@@ -373,32 +383,20 @@ local _ClassConfig = {
             "Vengeance of Nature",
             "Vengeance of the Wild",
         },
-        ['SunMoonDot'] = {
-            --, Line >= 1 LVL
+        ['MoonbeamDot'] = {
+            "Gelid Moonbeam IX",
+            "Mythical Moonbeam",
+            "Onyx Moonbeam",
             "Opaline Moonbeam",
-            "Erupting Sunray",
             "Pearlescent Moonbeam",
-            "Overwhelming Sunray",
             "Argent Moonbeam",
-            "Consuming Sunray",
             "Frigid Moonbeam",
-            "Incinerating Sunray",
             "Algid Moonbeam",
-            "Blazing Sunray",
             "Gelid Moonbeam",
-            "Scorching Sunray",
-            "Withering Sunray",
-            "Torrid Sunray",
-            "Blistering Sunray",
-            "Immolation of the Sun",
-            "Sylvan Embers",
-            "Immolation of Ro",
-            "Breath of Ro",
-            "Immolate",
-            "Flame Lick",
         },
         ['SunrayDot'] = {
-            -- Sunray Line >= 1 LVL
+            "Blistering Sunray XII",
+            "Searing Sunray",
             "Tenebrous Sunray",
             "Erupting Sunray",
             "Overwhelming Sunray",
@@ -416,18 +414,10 @@ local _ClassConfig = {
             "Immolate",
             "Flame Lick",
         },
-        ['MoonBeamDot'] = {
-            -- MoonBeam Dot
-            "Gelid Moonbeam",
-            "Algid Moonbeam",
-            "Frigid Moonbeam",
-            "Argent Moonbeam",
-            "Pearlescent Moonbeam",
-            "Opaline Moonbeam",
-            "Onyx Moonbeam",
-        },
         ['RemoteMoonDD'] = {
             -- Remote Moon DD >= 99LVL
+            "Remote Moonfire VII",
+            "Remote Moonshiver",
             "Remote Moonchill",
             "Remote Moonrake",
             "Remote Moonflash",
@@ -436,6 +426,8 @@ local _ClassConfig = {
         },
         ['RemoteSunDD'] = {
             -- Remote Sun DD >= 83LVL
+            "Remote Sunflare X",
+            "Remote Sunscorch",
             "Remote Sunbolt",
             "Remote Sunshock",
             "Remote Sunblaze",
@@ -447,12 +439,33 @@ local _ClassConfig = {
         },
         ['RoarDD'] = {
             -- Roar DD >= 93LVL
+            "Katabatic Roar VIII",
+            "Tempest Roar",
             "Bloody Roar",
             "Typhonic Roar",
             "Cyclonic Roar",
             "Anabatic Roar",
             "Katabatic Roar",
             "Roar of Kolos",
+        },
+        ['QuickRoarDD'] = {
+            -- Quick Cast Roar Series -- will be replaced by roar at lvl 93
+            "Shattering of the Stormborn",
+            "Revelry of the Stormborn",
+            "Bedlam of the Sotrmborn",
+            "Maelstrom of the Stormborn",
+            "Thunderbolt of the Stormborn",
+            "Typhoon of the Stormborn",
+            "Whirlwind of the Stormborn",
+            "Cyclone of the Stormborn",
+            "Shear of the Stormborn",
+            "Squall of the Stormborn",
+            "Tempest of the Stormborn",
+            "Gale of the Stormborn",
+            "Stormwatch",
+            "Storm's Fury",
+            "Dustdevil",
+            "Fury of Air",
         },
         ['StunDD'] = {
             -- Quick Cast Roar Series -- will be replaced by roar at lvl 93
@@ -480,6 +493,8 @@ local _ClassConfig = {
         },
         ['WinterFireDD'] = {
             -- Winters Fire DD Line >= 73LVL -- Using for Low level Fire DD as well
+            "Winder's Wildflame XII",
+            "Winder's Wildgale",
             "Winter's Wildbrume",
             "Winter's Wildshock",
             "Winter's Wildblaze",
@@ -541,7 +556,8 @@ local _ClassConfig = {
             "Twincast",
         },
         ['TwinHealNuke'] = {
-            -- Druid Twincast
+            "Sundew Blessing X",
+            "Sunbliss Blessing",
             "Sundew Blessing",
             "Sunrise Blessing",
             "Sunbreeze Blessing",
@@ -552,7 +568,7 @@ local _ClassConfig = {
             "Sunwarmth Blessing",
         },
         ['IceNuke'] = {
-            --Ice Nuke
+            "Rime Crystals XII",
             "Ice",
             "Frost",
             "Moonfire",
@@ -568,8 +584,10 @@ local _ClassConfig = {
             "Frostreave Crystals",
             "Icerend Crystals",
             "Moonwhisper Crystals",
+            "Coldbite Crystals",
         },
         ['IceRainNuke'] = {
+            "Cascade of Hail XVIII",
             "Cascade of Hail",
             "Pogonip",
             "Avalanche",
@@ -585,6 +603,8 @@ local _ClassConfig = {
             "Plummeting Hail",
             "Plunging Hail",
             "Tempestuous Hail",
+            "Howling Hail",
+            "Unrelenting Hail",
         },
         ['ShroomPet'] = {
             --Druid Mushroom DOT Pet Line >= 84LVL --used for mana savings
@@ -605,6 +625,8 @@ local _ClassConfig = {
         },
         ['SelfShield'] = {
             -- Self Shield Buff
+            "Brackenbriar Coat",
+            "Bramblespike Coat",
             "Shadespine Coat",
             "Icebriar Coat",
             "Daggerspike Coat",
@@ -626,6 +648,8 @@ local _ClassConfig = {
         },
         ['SelfManaRegen'] = {
             -- Self mana Regen Buff
+            "Mask of the Grovetender",
+            "Mask of the Ferntender",
             "Mask of the Dusksage Tender",
             "Mask of the Arbor Tender",
             "Mask of the Wildtender",
@@ -637,11 +661,12 @@ local _ClassConfig = {
             "Mask of the Shadowcat",
             "Mask of the Wild",
             "Mask of the Forest",
-            "Mask of the Hunter",
             "Mask of the Stalker",
+            "Mask of the Hunter",
         },
         ['HPTypeOneGroup'] = {
-            -- Opaline Group Health
+            "Grovewood Blessing",
+            "Emberquartz Blessing",
             "Luclinite Blessing",
             "Opaline Blessing",
             "Arcronite Blessing",
@@ -664,6 +689,8 @@ local _ClassConfig = {
         },
         ['TempHPBuff'] = {
             -- Temp Health -- Focus on Tank
+            "Wild Growth X",
+            "Overwhelming Growth",
             "Fervent Growth",
             "Frenzied Growth",
             "Savage Growth",
@@ -675,6 +702,8 @@ local _ClassConfig = {
         },
         ['GroupRegenBuff'] = {
             -- Group Regen BuffAll Have Long Duration HP Regen Buffs. Not Short term Heal.
+            "Talisman of Perseverance XV",
+            "Talisman of the Unforgettable",
             "Talisman of the Tenacious",
             "Talisman of the Enduring",
             "Talisman of the Unwavering",
@@ -684,6 +713,7 @@ local _ClassConfig = {
             "Talisman of the Relentless",
             "Talisman of the Resolute",
             "Talisman of the Stalwart",
+            "Talisman of Perseverance",
             "Pack Regeneration",
             "Pack Chloroplast",
             "Regrowth of the Grove",
@@ -703,6 +733,7 @@ local _ClassConfig = {
         },
         ['GroupDmgShield'] = {
             -- Group Damage Shield -- Focus on the tank
+            "Legacy of Brackenbriars",
             "Legacy of Icebriars",
             "Legacy of Daggerspikes",
             "Legacy of Daggerspurs",
@@ -762,9 +793,33 @@ local _ClassConfig = {
             "Nourishing Growth",
             "Sustaining Growth",
             "Bolstered Growth",
+            "Emboldened Growth",
         },
         ['PetSpell'] = {
             "Nature Walker's Behest",
+        },
+        ['CharmSpell'] = {
+            -- Charm Spells >= 14
+            "Beast's Beckoning XVIII",
+            "Beast's Bestowing",
+            "Beast's Bellowing",
+            "Beast's Beckoning",
+            "Beast's Beseeching",
+            "Beast's Bidding",
+            "Beast's Bespelling",
+            "Beast's Behest",
+            "Beast's Beguiling",
+            "Beast's Befriending",
+            "Beast's Bewitching",
+            "Beast's Beckoning",
+            "Nature's Beckon",
+            "Command of Tunare",
+            "Tunare's Request",
+            "Call of Karana",
+            "Allure of the Wild",
+            "Beguile Animals",
+            "Charm Animals",
+            "Befriend Animal",
         },
     },
     ['HealRotationOrder'] = {
@@ -856,7 +911,7 @@ local _ClassConfig = {
                 type = "Spell",
             },
             {
-                name = "LongHeal1",
+                name = "LongHeal",
                 type = "Spell",
             },
         },
@@ -1336,7 +1391,7 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
-                { name = "LongHeal1", },
+                { name = "LongHeal", },
             },
         },
         {
