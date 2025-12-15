@@ -295,6 +295,7 @@ local _ClassConfig = {
             "Heartspike",
         },
         ["CalledShotsArrow"] = {
+            "Called Shots IX",
             "Called Shots",
             "Announced Shots",
             "Forecasted Shots",
@@ -305,6 +306,7 @@ local _ClassConfig = {
             "Inevitable Shots",
         },
         ["FocusedArrows"] = {
+            "Focused Hail of Arrows XII",
             "Focused Frenzy of Arrows",
             "Focused Storm of Arrows",
             "Focused Tempest of Arrows",
@@ -323,6 +325,7 @@ local _ClassConfig = {
             "Reciprocal Fusillade",
         },
         ["SummerNuke"] = {
+            "Summer's Dew XII",
             "Summer's Deluge",
             "Summer's Torrent",
             "Summer's Viridity",
@@ -335,6 +338,7 @@ local _ClassConfig = {
             "Summer's Sleet",
         },
         ["SwarmDot"] = {
+            "Spitestinger Swarm",
             "Stinging Swarm",
             "Swarm of Pain",
             "Drones of Doom",
@@ -354,6 +358,7 @@ local _ClassConfig = {
             "Hotaria Swarm",
         },
         ["ShortSwarmDot"] = {
+            "Swarm of Spitemidges",
             "Swarm of Fernflies",
             "Swarm of Bloodflies",
             "Swarm of Hyperboreads",
@@ -369,6 +374,7 @@ local _ClassConfig = {
             "Wildstalker's Unity",
         },
         ["Protectionbuff"] = {
+            "Protection of the Grove",
             "Force of Nature",
             "Warder's Protection",
             "Protection of the Wild",
@@ -384,6 +390,8 @@ local _ClassConfig = {
             "Protection of the Valley",
         },
         ["ShoutBuff"] = {
+            "Shout of the Grovestalker",
+            "Shout of the Fernstalker",
             "Shout of the Predator",
             "Shout of the Bosquestalker",
             "Shout of the Copsestalker",
@@ -392,6 +400,7 @@ local _ClassConfig = {
             "Shout of the Dusksage Stalker",
         },
         ["AgroBuff"] = {
+            "Devastating Blades XII",
             "Devastating Blades",
             "Devastating Edges",
             "Devastating Slashes",
@@ -414,6 +423,7 @@ local _ClassConfig = {
             "Jolting Luclinite",
         },
         ["AggroKick"] = {
+            "Enraging Kicks XII",
             "Enraging Roundhouse Kicks",
             "Enraging Axe Kicks",
             "Enraging Wheel Kicks",
@@ -433,6 +443,7 @@ local _ClassConfig = {
             "Vociferous Blades",
         },
         ["Eyes"] = {
+            "Eyes of the Grove",
             "Hawk Eye",
             "Falcon Eye",
             "Eagle Eye",
@@ -449,6 +460,7 @@ local _ClassConfig = {
             "Eyes of the Phoenix",
         },
         ["GroupStrengthBuff"] = {
+            "Strength of the Grovestalker",
             "Nature's Precision",
             "Strength of Nature",
             "Strength of Tunare",
@@ -462,10 +474,9 @@ local _ClassConfig = {
             "Strength of the Copsestalker",
             "Strength of the Wildstalker",
             "Strength of the Arbor Stalker",
-            "Shout of the Dusksage Stalker",
-            "Shout of the Fernstalker",
         },
         ["GroupPredatorBuff"] = {
+            "Call of the Predator XVI",
             "Mark of the Predator",
             "Call of the Predator",
             "Spirit of the Predator",
@@ -490,6 +501,7 @@ local _ClassConfig = {
             "Fernstalker's Enrichment",
         },
         ["Rathe"] = {
+            "Cloak of Underbrush",
             "Cloak of Needlespikes",
             "Cloak of Bloodbarbs",
             "Cloak of Rimespurs",
@@ -512,6 +524,7 @@ local _ClassConfig = {
             "Pureshot Discipline",
         },
         ["MeleeDisc"] = {
+            "Grovestalker's Discipline",
             "Fernstalker's Discipline",
             "Dusksage Stalker's Discipline",
             "Bosquestalker's Discipline",
@@ -531,6 +544,7 @@ local _ClassConfig = {
             "Ashcloud Boon",
         },
         ["Firenuke"] = {
+            "Volcanic Ash XVIII",
             "Flame Lick",
             "Burst of Fire",
             "Ignite",
@@ -563,6 +577,7 @@ local _ClassConfig = {
             "Windblast Boon",
         },
         ["Icenuke"] = {
+            "Frozen Wind XVIII",
             "Gelid Wind",
             "Coagulated Wind",
             "Restless Wind",
@@ -590,6 +605,7 @@ local _ClassConfig = {
             "Heartruin",
         },
         ["EndRegenDisc"] = {
+            "Hiatus V",
             "Second Wind",
             "Third Wind",
             "Fourth Wind",
@@ -603,6 +619,7 @@ local _ClassConfig = {
             "Convalesce",
         },
         ["Coat"] = {
+            "Underbrush Coat",
             "Thistlecoat",
             "Barbcoat",
             "Bramblecoat",
@@ -614,16 +631,17 @@ local _ClassConfig = {
             "Quillcoat",
             "Burrcoat",
             "Spurcoat",
-            "Nettlespear",
-            "Needlebarb",
-            "Rimespur",
-            "Moonthorn",
-            "Needlespike",
+            "Nettlespear Coat",
+            "Needlebarb Coat",
+            "Rimespur Coat",
+            "Moonthorn Coat",
+            "Needlespike Coat",
         },
         ["Mask"] = {
             "Mask of the Stalker",
         },
         ["Hunt"] = {
+            "Consumed by the Hunt X",
             "Engulfed by the Hunt",
             "Steeled by the Hunt",
             "Provoked by the Hunt",
@@ -635,6 +653,7 @@ local _ClassConfig = {
             "Consumed by the Hunt",
         },
         ["Heal"] = {
+            "Lifespring",
             "Elizerain Spring",
             "Darkflow Spring",
             "Meltwater Spring",
@@ -656,6 +675,7 @@ local _ClassConfig = {
             "Salve",
         },
         ["Fastheal"] = { -- 30s recast. ToT
+            "Desperate Deluge IX",
             "Desperate Quenching",
             "Desperate Geyser",
             "Desperate Meltwater",
@@ -666,13 +686,16 @@ local _ClassConfig = {
             "Desperate Deluge", -- lvl 89
         },
         ["Totheal"] = {
-            "Desperate Quenching",
-            "Desperate Geyser",
+            "Lifespring",
+            "Elizerain Spring",
             "Darkflow Spring",
-            "Desperate Meltwater",
             "Meltwater Spring", -- lvl 111
+            "Wellspring",
+            "Cloundfont",
+            "Cloudburst",
         },
         ["RegenSpells"] = {
+            "Grovestalker's Vigor",
             "Fernstalker's Vigor",
             "Dusksage Stalker's Vigor",
             "Arbor Stalker's Vigor",
@@ -700,6 +723,7 @@ local _ClassConfig = {
             "Firefist",
         },
         ["DsBuff"] = {
+            "Shield of Underbrush",
             "Shield of Thistles",
             "Shield of Brambles",
             "Shield of Spikes",
@@ -743,6 +767,7 @@ local _ClassConfig = {
             "Feet Like Cat",
         },
         ["Cloak"] = {
+            "Ro's Burning Cloak VI",
             "Shalowain's Crucible Cloak",
             "Luclin's Darkfire Cloak",
             "Outrider's Ever-Burning Cloak",
@@ -760,6 +785,7 @@ local _ClassConfig = {
             "Nature Veil",
         },
         ["JoltingKicks"] = {
+            "Jolting Kicks XII",
             "Jolting Frontkicks",
             "Jolting Hook Kicks",
             "Jolting Crescent Kicks",
@@ -771,6 +797,7 @@ local _ClassConfig = {
             "Jolting Drop Kicks",
         },
         ["AEBlades"] = {
+            "Storm of Blades VII",
             "Storm of Blades",
             "Squall Of Blades",
             "Gale of Blades",
@@ -815,26 +842,14 @@ local _ClassConfig = {
     -- These will run in order and exit after the first valid spell to cast
     ['HealRotationOrder'] = {
         {
-            name  = 'LowLevelHealPoint', -- Fastheal
-            state = 1,
-            steps = 1,
-            cond  = function(self, target) return mq.TLO.Me.Level() <= 89 and Targeting.TargetIsMA(target) and Targeting.MainHealsNeeded(target) end,
-        },
-        {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return Targeting.TargetIsMA(target) and Targeting.MainHealsNeeded(target) end,
-        },
-        {
-            name = 'GroupHealPoint', -- TotHeal
-            state = 1,
-            steps = 1,
-            cond = function(self, target) return mq.TLO.Group() and Targeting.GroupHealsNeeded() end,
+            cond = function(self, target) return Targeting.MainHealsNeeded(target) end,
         },
     },
     ['HealRotations']     = {
-        ["LowLevelHealPoint"] = {
+        ["MainHealPoint"] = {
             {
                 name = "Fastheal",
                 type = "Spell",
@@ -842,9 +857,6 @@ local _ClassConfig = {
                     return Config:GetSetting('DoHeals')
                 end,
             },
-
-        },
-        ["MainHealPoint"] = {
             {
                 name = "Heal",
                 type = "Spell",
@@ -1536,10 +1548,10 @@ local _ClassConfig = {
         },
     },
     ['Spells']            = {
-        { -- Spell Gem 1 Is For Our Heal gem from 3 and Changes over to fast heal @ 89.
+        {
             gem = 1,
             spells = {
-                { name = "Fastheal", cond = function(self) return mq.TLO.Me.Level() <= 89 end, },
+                { name = "Fastheal", },
                 { name = "Heal", },
             },
         },
