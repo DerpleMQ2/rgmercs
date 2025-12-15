@@ -91,6 +91,7 @@ local _ClassConfig = {
     ['AbilitySets']       = {
         ["GroupFocusSpell"] = {
             -- Focus Spell - Group Spells will be used on everyone
+            "Talisman of Unity X",        -- Level 130 - Group
             "Khura's Focusing",           -- Level 60 - Group
             "Focus of the Seventh",       -- Level 65 - Group
             "Talisman of Wunshi",         -- Level 70 - Group
@@ -129,7 +130,8 @@ local _ClassConfig = {
             "Quickness",
         },
         ["TempHPBuff"] = {
-            -- Growth Buff 111 -> 81
+            -- Growth Buff 81+
+            "Wild Growth X",
             "Overwhelming Growth",
             "Fervent Growth",
             "Frenzied Growth",
@@ -210,6 +212,7 @@ local _ClassConfig = {
         },
         ["MaloSpell"] = {
             -- AA Starts at LVL 75
+            "Malaise XVI",
             "Malosinera",
             "Malosinetra",
             "Malosinise",
@@ -252,6 +255,7 @@ local _ClassConfig = {
         },
         ["WardBuff"] = {
             -- Self Heal Ward Spells
+            "Ward of Resurgence XI",
             "Ward of Heroic Deeds",
             "Ward of Recuperation",
             "Ward of Remediation",
@@ -273,6 +277,7 @@ local _ClassConfig = {
         ["MeleeProcBuff"] = {
             -- Melee Proc Buff - Level 50 - 111
             -- To be used when the Shaman does not have Dicho
+            "Talisman of the Panther XVI",
             "Talisman of the Manul",
             "Talisman of the Kerran",
             "Talisman of the Lioness",
@@ -292,6 +297,7 @@ local _ClassConfig = {
         },
         ["SlowProcBuff"] = {
             -- Slow Proc Buff for MA - Level 68 - 122
+            "Lassitude XIII",
             "Moroseness",
             "Melancholy",
             "Ennui",
@@ -308,6 +314,7 @@ local _ClassConfig = {
         ["PackSelfBuff"] = {
             -- Pack Self Buff - Level 90 - 115
             --- Ignoring the LVL 85 Call the Pack buff due to the decrease in mana per tick.
+            "Pack of Dire Wolves",
             "Pack of Ancestral Beasts",
             "Pack of Lunar Wolves",
             "Pack of The Black Fang",
@@ -326,6 +333,7 @@ local _ClassConfig = {
             'Incarnate Anew', -- Level 59
         },
         ["RecklessHeal1"] = {
+            "Reckless Mending VIII",
             "Reckless Reinvigoration",
             "Reckless Resurgence",
             "Reckless Renewal",
@@ -353,6 +361,7 @@ local _ClassConfig = {
         },
         ["RecklessHeal2"] = {
             --worthless to mem two mendings because they don't have a recast time, keep Qirik's for when we don't have enough Reckless.
+            "Reckless Mending VIII",
             "Reckless Reinvigoration",
             "Reckless Resurgence",
             "Reckless Renewal",
@@ -365,6 +374,7 @@ local _ClassConfig = {
         },
         ["RecklessHeal3"] = {
             --fallback just in case we have some other DPS stuff disabled, but 3 reckless is overkill for automation
+            "Reckless Mending VIII",
             "Reckless Reinvigoration",
             "Reckless Resurgence",
             "Reckless Renewal",
@@ -384,6 +394,7 @@ local _ClassConfig = {
         },
         ["RecourseHeal"] = {
             --- RecourseHeal Level 87+
+            "Baratu's Recourse",
             "Grayleaf's Recourse",
             "Rowain's Recourse",
             "Zrelik's Recourse",
@@ -395,6 +406,7 @@ local _ClassConfig = {
         },
         ["InterventionHeal"] = {
             -- Intervention Heal 78+
+            "Ancestral Intervention XI",
             "Immortal Intervention",
             "Primordial Intervention",
             "Prehistoric Intervention",
@@ -409,6 +421,7 @@ local _ClassConfig = {
         ["GroupRenewalHoT"] = {
             -- Prior to 70 Breath of Trushar, single HoTs will be used including the
             --- the Torpor/Stoicism line. LVL 44 is the lowest level.
+            "Ghost of Renewal XIII",
             "Reverie of Renewal",
             "Spirit of Renewal",
             "Spectre of Renewal",
@@ -428,7 +441,8 @@ local _ClassConfig = {
             "Stoicism",
         },
         ["CanniSpell"] = {
-            -- Convert Health to Mana - Level  23 - 124
+            -- Convert Health to Mana - Level  23+
+            "Ancestral Bargain XIV",
             "Traumatic Exchange",
             "Hoary Agreement",
             "Ancient Bargain",
@@ -449,6 +463,7 @@ local _ClassConfig = {
             "Cannibalize",
         },
         ["CureSpell"] = {
+            "Mastery: Blood of Mayong",
             "Blood of Mayong",
             "Blood of Tevik",
             "Blood of Rivans",
@@ -459,6 +474,7 @@ local _ClassConfig = {
             "Blood of Nadox",
         },
         ['CureCorrupt'] = {
+            "Mastery: Chant of the Zelniak",
             "Chant of the Zelniak",
             "Chant of the Wulthan",
             "Chant of the Kromtus",
@@ -472,6 +488,7 @@ local _ClassConfig = {
         },
         ["TwinHealNuke"] = {
             -- Nuke the MA Not the assist target - Levels 85+
+            "Frost Gift X",
             "Gelid Gift",
             "Polar Gift",
             "Wintry Gift",
@@ -484,6 +501,7 @@ local _ClassConfig = {
         },
         ["PoisonNuke"] = {
             -- Poison Nuke LVL34 +
+            "Tserik's Spear of Venom",
             "Red Eye's Spear of Venom",
             "Fleshrot's Spear of Venom",
             "Narandi's Spear of Venom",
@@ -504,6 +522,7 @@ local _ClassConfig = {
         },
         ["FastPoisonNuke"] = {
             -- Fast Poison Nuke LVL73+
+            "Tserik's Bite",
             "Oka's Bite",
             "Ander's Bite",
             "Direfang's Bite",
@@ -518,6 +537,7 @@ local _ClassConfig = {
         },
         ["IceNuke"] = {
             --- IceNuke - Level 4+
+            "Frost Rift XX",
             "Ice Barrage",
             "Heavy Sleet",
             "Ice Salvo",
@@ -560,6 +580,7 @@ local _ClassConfig = {
         },
         ["MaloDot"] = {
             -- Malo Dot Stacking: Yubai's Affliction - LongDot(96s) Level 99+
+            "Torrentclaw's Malosinera",
             "Svartmane's Malosinara",
             "Rirwech's Malosinata",
             "Livio's Malosenia",
@@ -569,6 +590,7 @@ local _ClassConfig = {
         },
         ["CurseDot1"] = {
             -- Curse Dot 1 Stacking: Curse - Long Dot(30s) - Level 34+
+            "Curse XVII",
             "Malediction",
             "Obeah",
             "Evil Eye",
@@ -588,6 +610,7 @@ local _ClassConfig = {
         },
         ["CurseDot2"] = {
             ---, Stacking: Enalam's Curse - Long Dot(54s) - 100+
+            "Maniadry's Curse",
             "Lenrel's Curse",
             "Marlek's Curse",
             "Erogo's Curse",
@@ -597,6 +620,7 @@ local _ClassConfig = {
         },
         ["SaryrnDot"] = {
             -- Stacking: Blood of Saryrn - Long Dot(42s) - Level 8+
+            "Blood of Torrentclaw",
             "Caustic Blood",
             "Desperate Vampyre Blood",
             "Restless Blood",
@@ -618,6 +642,7 @@ local _ClassConfig = {
         },
         ["UltorDot"] = {
             ---, Stacking: Breath of Ultor - Long Dot(84s) - Level 4+
+            "Breath of Pustim",
             "Breath of the Hotariton",
             "Breath of the Tegi",
             "Breath of Bledrek",
@@ -638,6 +663,7 @@ local _ClassConfig = {
         },
         ["AfflictionDot"] = {
             ---, Stacking: Yubai's Affliction - Long Dot(96s) - Level 9+, used on named only for hybrid
+            "Torrentclaw's Affliction",
             "Krizad's Affliction",
             "Brightfeld's Affliction",
             "Svartmane's Affliction",
@@ -647,7 +673,7 @@ local _ClassConfig = {
             "Yubai's Affliction",
         },
         ["NectarDot"] = { --almost never worth casting in a group, not currently gemmed.
-            --- Nectar Dot Line
+            "Nectar of Pain XIII",
             "Nectar of Obscurity",
             "Nectar of Pain",
             "Nectar of Agony",
@@ -663,6 +689,7 @@ local _ClassConfig = {
         },
         ["PetSpell"] = {
             -- Pet Spell - 32+
+            "Aramna's Faithful",
             "Suja's Faithful",
             "Diabo Sivuela's Faithful",
             "Grondo's Faithful",
@@ -684,6 +711,7 @@ local _ClassConfig = {
         },
         ["PetBuffSpell"] = {
             ---Pet Buff Spell - 50+
+            "Spirit Bolstering V",
             "Spirit Augmentation",
             "Spirit Reinforcement",
             "Spirit Bracing",
@@ -708,6 +736,7 @@ local _ClassConfig = {
             "Remove Minor Curse",   -- Level 9
         },
         ["GroupRegenBuff"] = {      --Does not stack with Dicho Regen
+            "Talisman of Perseverance XV",
             "Talisman of the Unforgettable",
             "Talisman of the Tenacious",
             "Talisman of the Enduring",
