@@ -121,6 +121,7 @@ local _ClassConfig = {
     },
     ['AbilitySets']     = {
         ['Mantle'] = {
+            "Waxwork Mantle",
             "Ichor Guard", -- Level 56, Timer 5
             "Soul Guard",
             "Soul Shield",
@@ -159,12 +160,14 @@ local _ClassConfig = {
         },
         ['CombatEndRegen'] = {
             --Timer 13, can be used in combat.
+            "Hiatus V",
             "Hiatus", --Level 106
             "Relax",
             "Night's Calming",
             "Convalesce",
         },
         ['Blade'] = {
+            "Gouging Blade VIII",
             "Incapacitating Blade",
             "Grisly Blade",
             "Gouging Blade",
@@ -174,6 +177,7 @@ local _ClassConfig = {
             "Rending Blade",
         },
         ['Crimson'] = {
+            "Crimson Blade VIII",
             "Crimson Blade",
             "Scarlet Blade",
             "Carmine Blade",
@@ -183,6 +187,7 @@ local _ClassConfig = {
             "Incarnadine Blade",
         },
         ['MeleeMit'] = {
+            "Impede",
             -- "Withstand", -- Level 83, extreme endurance problems until 86 when we have Respite and Bard Regen Song gives endurance
             "Defy",
             "Renounce",
@@ -198,12 +203,14 @@ local _ClassConfig = {
         ['UnholyAura'] = { 'Unholy Aura Discipline', },
 
         ['Guardian'] = {
+            "Unholy Guardian Discipline IV",
             "Corrupted Guardian Discipline",
             "Cursed Guardian Discipline",
             "Unholy Guardian Discipline",
         },
 
         ['PetSpell'] = {
+            "Minion of Telthel",
             "Leering Corpse",
             "Bone Walk",
             "Convoke Shadow",
@@ -226,6 +233,7 @@ local _ClassConfig = {
             "Minion of Fandrel",
         },
         ['PetHaste'] = {
+            "Gift of Telthel",
             "Gift of Fandrel",
             "Gift of Itzal",
             "Gift of Drendar",
@@ -241,6 +249,7 @@ local _ClassConfig = {
             "Strengthen Death",
         },
         ['Shroud'] = { --Some Shrouds listed under the Horror Line as HP/Mana Proc Choice was shroud vs. mental in buff slot 1 at lower levels.
+            "Shroud of Elonik",
             "Shroud of the Nightborn",
             "Shroud of the Gloomborn",
             "Shroud of the Blightborn",
@@ -253,34 +262,37 @@ local _ClassConfig = {
             "Shroud of Zelinstein",
             "Shroud of Rimeclaw",
         },
-        ['Horror'] = {             -- HP Tap Proc
-            "Shroud of Death",     -- Level 55
-            "Shroud of Chaos",     -- Level 63
-            "Black Shroud",        -- Level 65
-            "Shroud of Discord",   -- Level 67 -- Buff Slot 1 <
-            "Marrowthirst Horror", -- Level 71 -- Buff Slot 2 >
-            "Soulthirst Horror",   -- Level 76
-            "Mindshear Horror",    -- Level 81
-            "Amygdalan Horror",    -- Level 86
-            "Sholothian Horror",   -- Level 91
-            "Grelleth's Horror",   -- Level 96
-            "Vizat's Horror",      -- Level 101
-            "Tylix's Horror",      -- Level 106
-            "Cadcane's Horror",    -- Level 111
-            "Brightfeld's Horror", -- Level 116
-            "Mortimus' Horror",    -- Level 121
+        ['Horror'] = {                -- HP Tap Proc
+            "Husk Devourer's Horror", -- Level 126
+            "Shroud of Death",        -- Level 55
+            "Shroud of Chaos",        -- Level 63
+            "Black Shroud",           -- Level 65
+            "Shroud of Discord",      -- Level 67 -- Buff Slot 1 <
+            "Marrowthirst Horror",    -- Level 71 -- Buff Slot 2 >
+            "Soulthirst Horror",      -- Level 76
+            "Mindshear Horror",       -- Level 81
+            "Amygdalan Horror",       -- Level 86
+            "Sholothian Horror",      -- Level 91
+            "Grelleth's Horror",      -- Level 96
+            "Vizat's Horror",         -- Level 101
+            "Tylix's Horror",         -- Level 106
+            "Cadcane's Horror",       -- Level 111
+            "Brightfeld's Horror",    -- Level 116
+            "Mortimus' Horror",       -- Level 121
         },
-        ['Mental'] = {             -- Mana Tap Proc
-            "Mental Retchedness",  -- Level 121
-            "Mental Anguish",      -- Level 116
-            "Mental Torment",      -- Level 111
-            "Mental Fright",       -- Level 106
-            "Mental Dread",        -- Level 101
-            "Mental Terror",       -- Level 96 --Buff Slot 2 <
-            "Mental Horror",       -- Level 65 --Buff Slot 1 >
-            "Mental Corruption",   -- Level 52
+        ['Mental'] = {                -- Mana Tap Proc
+            "Mental Horror VIII",     -- Level 126
+            "Mental Retchedness",     -- Level 121
+            "Mental Anguish",         -- Level 116
+            "Mental Torment",         -- Level 111
+            "Mental Fright",          -- Level 106
+            "Mental Dread",           -- Level 101
+            "Mental Terror",          -- Level 96 --Buff Slot 2 <
+            "Mental Horror",          -- Level 65 --Buff Slot 1 >
+            "Mental Corruption",      -- Level 52
         },
         ['Skin'] = {
+            "Spitetangle's Skin",
             "Decrepit Skin", -- Level 70
             "Umbral Skin",
             "Malarian Skin",
@@ -294,6 +306,7 @@ local _ClassConfig = {
             "Krizad's Skin",
         },
         ['SelfDS'] = {
+            "Banshee Skin VIII",
             "Banshee Aura",
             "Banshee Skin",
             "Ghoul Skin",
@@ -304,6 +317,7 @@ local _ClassConfig = {
             "Goblin Skin",
         },
         ['Demeanor'] = {
+            "Ruthless Demeanor",
             "Remorseless Demeanor",
             "Impenitent Demeanor",
         },
@@ -315,6 +329,7 @@ local _ClassConfig = {
             "Paradoxical Disruption",
         },
         ['CloakHP'] = {
+            "Drape of Spite",
             "Cloak of the Akheva",
             "Cloak of Luclin",
             "Cloak of Discord",
@@ -331,6 +346,7 @@ local _ClassConfig = {
             "Drape of the Ankexfen",
         },
         ['Covenant'] = {
+            "Telthel's Convenant",
             "Grim Covenant",
             "Venril's Covenant",
             "Gixblat's Covenant",
@@ -343,6 +359,7 @@ local _ClassConfig = {
             "Kar's Covenant",
         },
         ['CallAtk'] = {
+            "Call of Darkness X",
             "Call of Darkness",
             "Call of Dusk",
             "Call of Shadow",
@@ -353,6 +370,7 @@ local _ClassConfig = {
             "Call of Blight",
         },
         ['AETaunt'] = {
+            "Dread Gaze XIII",
             "Dread Gaze", -- Level 69
             "Vilify",
             "Revile",
@@ -366,6 +384,7 @@ local _ClassConfig = {
             "Animus",
         },
         ['PoisonDot'] = {
+            "Blood of Lherre",
             "Blood of Pain", -- Level 41
             "Blood of Hate",
             "Blood of Discord",
@@ -383,6 +402,7 @@ local _ClassConfig = {
             "Blood of Shoru",
         },
         ['CorruptionDot'] = {
+            "Insidious Blight IX",
             "Vitriolic Blight",
             "Unscrupulous Blight",
             "Nefarious Blight",
@@ -393,6 +413,7 @@ local _ClassConfig = {
             "Insidious Blight", -- Level 89
         },
         ['SpearNuke'] = {
+            "Spear of Wremm",
             "Spike of Disease", -- Level 1
             "Spear of Disease",
             "Spear of Pain",
@@ -413,6 +434,7 @@ local _ClassConfig = {
             "Spear of Lazam",
         },
         ['BondTap'] = {
+            "Bond of the Devourer",
             "Bond of Tatalros",
             "Bond of Bynn",
             "Bond of Vulak",
@@ -429,6 +451,7 @@ local _ClassConfig = {
             "Vampiric Curse", -- Level 57
         },
         ['DireTap'] = {
+            "Dire Implication X",
             "Dire Implication", -- Level 85
             "Dire Accusation",
             "Dire Allegation",
@@ -440,6 +463,7 @@ local _ClassConfig = {
             "Dire Rebuke",
         },
         ['LifeTap'] = {
+            "Touch of Bonesplinter",
             "Touch of Flariton",
             "Touch of Txiki",
             "Touch of Drendar",
@@ -466,6 +490,7 @@ local _ClassConfig = {
             "Lifetap",   -- Level 8
         },
         ['LifeTap2'] = {
+            "Touch of Bonesplinter",
             "Touch of Flariton",
             "Touch of Txiki",
             "Touch of Drendar",
@@ -492,6 +517,7 @@ local _ClassConfig = {
             "Lifetap",    -- Level 8
         },
         ['AELifeTap'] = { --Lifetap/Hate up to 30 targets, level 98+
+            "Insidious Deflection VII",
             "Insidious Repudiation",
             "Insidious Renunciation",
             "Insidious Rejection",
@@ -500,6 +526,7 @@ local _ClassConfig = {
             "Insidious Deflection",
         },
         ['MaxHPTap'] = {
+            "Rending of Ulnaa",
             "Touch of Mortimus",
             "Touch of Namdrows",
             "Touch of Zlandicar",
@@ -514,6 +541,7 @@ local _ClassConfig = {
             "Touch of Draygun", -- Level 69
         },
         ['BiteTap'] = {
+            "Wremm's Bite",
             "Zevfeer's Bite", -- Level 62
             "Inruku's Bite",
             "Ancient: Bite of Muram",
@@ -530,6 +558,7 @@ local _ClassConfig = {
             "Charka's Bite",
         },
         ['ForPower'] = {
+            "Duel for Power",
             "Challenge for Power", -- Level 72
             "Trial for Power",
             "Charge for Power",
@@ -543,6 +572,7 @@ local _ClassConfig = {
             "Petition for Power", -- LS - 122
         },
         ['Terror'] = {
+            "Terror of Telthel",
             "Terror of Darkness", -- Level 33
             "Terror of Shadows",  -- Level 42
             "Terror of Death",
@@ -562,6 +592,7 @@ local _ClassConfig = {
             "Terror of Tarantis",
         },
         ['Terror2'] = {
+            "Terror of Telthel",
             "Terror of Darkness",
             "Terror of Shadows",
             "Terror of Death",
@@ -581,6 +612,7 @@ local _ClassConfig = {
             "Terror of Tarantis",
         },
         ['TempHP'] = {
+            "Unyielding Stance",
             "Unwavering Stance",
             "Adamant Stance",
             "Stormwall Stance",
@@ -599,6 +631,7 @@ local _ClassConfig = {
             "Reciprocal Fang",
         },
         ['PowerTapAC'] = {
+            "Torrent of Pain IX",
             "Torrent of Desolation",
             "Torrent of Melancholy",
             "Torrent of Anguish",
@@ -620,6 +653,7 @@ local _ClassConfig = {
             "Scream of Hate",
         },
         ['SnareDot'] = {
+            "Festering Darkness XI",
             "Clinging Darkness", -- Level 11
             "Engulfing Darkness",
             "Dooming Darkness",
@@ -635,6 +669,7 @@ local _ClassConfig = {
             "Vitriolic Darkness",
         },
         ['Acrimony'] = {
+            "Unquestioned Acrimony",
             "Undivided Acrimony",
             "Unbroken Acrimony",
             "Unflinching Acrimony",
@@ -655,6 +690,7 @@ local _ClassConfig = {
             "Reflexive Retribution",
         },
         ['DireDot'] = {
+            "Dire Constriction XI",
             "Dire Constriction", -- Level 85
             "Dire Restriction",
             "Dire Stenosis",
