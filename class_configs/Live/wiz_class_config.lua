@@ -42,6 +42,7 @@ return {
             "Dichotomic Fire",
         },
         ['IceClaw'] = {
+            "Claw of Tsikut",
             "Claw of the Void",
             "Claw of Gozzrem",
             "Claw of Travenro",
@@ -56,6 +57,7 @@ return {
             "Claw of Ankexfen",
         },
         ['FireClaw'] = {
+            "Claw of Ashenback",
             "Claw of Ingot",
             "Claw of the Duskflame",
             "Claw of Sontalak",
@@ -67,6 +69,7 @@ return {
             "Malediction of Havoc",
         },
         ['MagicClaw'] = {
+            "Claw of Windshear",
             "Claw of Itzal",
             "Claw of Feshlak",
             "Claw of Ellarr",
@@ -75,6 +78,7 @@ return {
             "Claw of the Battleforged",
         },
         ['CloudburstNuke'] = {
+            "Cloudburst Strike XII",
             "Cloudburst Lightningstrike",
             "Cloudburst Joltstrike",
             "Cloudburst Stormbolt",
@@ -88,6 +92,7 @@ return {
             "Cloudburst Strike",
         },
         ['FuseNuke'] = {
+            "Ethereal Weave VII",
             "Ethereal Twist",
             "Ethereal Confluence",
             "Ethereal Braid",
@@ -96,6 +101,7 @@ return {
             "Ethereal Plait",
         },
         ['FireEtherealNuke'] = {
+            "Ether Fire XIII",
             "Ethereal Immolation",
             "Ethereal Ignition",
             "Ethereal Brand",
@@ -110,6 +116,7 @@ return {
             "Ether Flame",
         },
         ['IceEtherealNuke'] = {
+            "Ethereal Ice XI",
             "Lunar Ice Comet",
             "Restless Ice Comet",
             "Ethereal Icefloe",
@@ -122,6 +129,7 @@ return {
             "Ethereal Freeze",
         },
         ['MagicEtherealNuke'] = {
+            "Ethereal Barrage VIII",
             "Ethereal Mortar",
             "Ethereal Blast",
             "Ethereal Volley",
@@ -131,6 +139,7 @@ return {
             "Ethereal Blitz",
         },
         ['ChaosNuke'] = {
+            "Chaos Flame XIII",
             "Chaos Inferno",
             "Chaos Burn",
             "Chaos Scintillation",
@@ -169,6 +178,7 @@ return {
             "Fire Vortex",
         },
         ['WildNuke'] = {
+            "Wildmagic Strike XII",
             "Wildspell Strike",
             "Wildflame Strike",
             "Wildscorch Strike",
@@ -182,6 +192,7 @@ return {
             "Wildmagic Strike",
         },
         ['WildNuke2'] = {
+            "Wildmagic Strike XII",
             "Wildspell Strike",
             "Wildflame Strike",
             "Wildscorch Strike",
@@ -195,6 +206,7 @@ return {
             "Wildmagic Strike",
         },
         ['FireNuke'] = {
+            "Teknaz's Fire",
             "Kindleheart's Fire",
             "The Diabo's Fire",
             "Dagarn's Fire",
@@ -226,6 +238,7 @@ return {
             "Sunstrike",
         },
         ['IceNuke'] = {
+            "Glacial Cascade XII",
             "Glacial Ice Cascade",
             "Tundra Ice Cascade",
             "Restless Ice Cascade",
@@ -254,6 +267,7 @@ return {
             "Ice Spear of Solist",         --13s T2
         },
         ['MagicNuke'] = {
+            "Lightning Helix XII",
             "Lightning Cyclone",
             "Lightning Maelstrom",
             "Lightning Roar",
@@ -280,6 +294,7 @@ return {
             "Elnerick's Electrical Rending",
         },
         ['StunSpell'] = {
+            "Telaka XIX",
             "Teladaka",
             "Teladaja",
             "Telajaga",
@@ -299,6 +314,7 @@ return {
             "Tishan's Clash",
         },
         ['SelfHPBuff'] = {
+            "Shielding XXIII",
             "Shield of Memories",
             "Shield of Shadow",
             "Shield of Restless Ice",
@@ -322,6 +338,7 @@ return {
             "Minor Shielding",
         },
         ['SelfSpellShield1'] = {
+            "Shield of Fate VII",
             "Shield of Inescapability",
             "Shield of Inevitability",
             "Shield of Destiny",
@@ -336,6 +353,7 @@ return {
             "Minor Familiar",
         },
         ['SelfRune1'] = {
+            "Aegis of Feish",
             "Aegis of Remembrance",
             "Aegis of the Umbra",
             "Aegis of the Crystalwing",
@@ -399,6 +417,7 @@ return {
             "Lesser Evacuate",
         },
         ['HarvestSpell'] = {
+            "Harvest XIII",
             "Contemplative Harvest",
             "Shadow Harvest",
             "Quiet Harvest",
@@ -413,6 +432,7 @@ return {
             "Harvest",
         },
         ['JoltSpell'] = {
+            "Mindfreeze X",
             "Spinalfreeze",
             "Cerebrumfreeze",
             "Neurofreeze",
@@ -469,6 +489,7 @@ return {
             "Permeating Ether",
         },
         ['StunMagicNuke'] = {
+            "Leap of Lightning XIV",
             "Leap of Stormjolts",
             "Leap of Stormbolts",
             "Leap of Static Sparks",
@@ -490,6 +511,7 @@ return {
         -- Rain Spells Listed here are used Primarily for TLP Mode.
         -- Magic Rain - Only have 3 of them so Not Sustainable.
         ['IceRain'] = {
+            "Frost Storm XVII",
             "Icestrike",
             "Frost Storm",
             "Tears of Prexus",
@@ -508,6 +530,7 @@ return {
             "Rimeclaw Torrent",
         },
         ['FireRain'] = {
+            "Tears of Ashbark",
             "Firestorm",
             "Lava Storm",
             "Tears of Solusek",
@@ -526,6 +549,7 @@ return {
             "Tears of the Rescued",
         },
         ['FireLureRain'] = {
+            "Volcanic Eruption XIV",
             "Volcanic Burst",
             "Tears of Arlyxir",
             "Meteor Storm",
@@ -541,6 +565,7 @@ return {
             "Volcanic Barrage",
         },
         ['SnapNuke'] = {  -- T2 Ice ~8.5s recast (shared with Cloudburst)
+            "Cold Snap XII",
             "Frostblast", -- Level 123
             "Chillblast",
             "Coldburst",
@@ -554,6 +579,7 @@ return {
             "Cold Snap",      -- Level 73
         },
         ['AEBeam'] = {        -- T2 Frontal Fire AE
+            "Coronoa Beam X",
             "Cremating Beam", -- Level 121
             "Vaporizing Beam",
             "Scorching Beam",
@@ -565,6 +591,7 @@ return {
             "Beam of Solteris", -- Level 72
         },
         ['PBFlame'] = {         -- T4 PB Fire AE
+            "Ring of Fire XI",
             "Gyre of Flame",    -- Level 122
             "Coil of Flame",
             "Loop of Flame",
