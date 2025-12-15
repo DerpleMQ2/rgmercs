@@ -29,6 +29,7 @@ local Tooltips     = {
     AmpSong        = "Song Line: Increase Singing Skill",
     DispelSong     = "Song Line: Dispel a Benefical Effect",
     ResistSong     = "Song Line: Damage Shield / Group Resist Increase",
+    MitigationSong = "Song Line: Group Melee/Spell Damage Mitigation",
     MezSong        = "Song Line: Single Target Mez",
     MezAESong      = "Song Line: PBAE Mez",
     Bellow         = "AA: DD + Resist Debuff that leads to a much larger DD upon expiry",
@@ -192,7 +193,6 @@ local _ClassConfig = {
             "Druzzil's Disillusionment",
         },
         ['ResistSong'] = {
-            "Verse of Veeshan",
             "Psalm of Veeshan",
         },
         ['MezSong'] = {
@@ -232,11 +232,13 @@ local _ClassConfig = {
             "Storm Blade",
             "Song of the Storm",
         },
-        ['SpellAbsorbSong'] = {
-            "Echoes of the Past",
-        },
         ['ResistDebuff'] = {
+            "Ancient: Chaos Chant", -- EQM: -15 all resists
             "Harmony of Sound",
+        },
+        ['MitigationSong'] = {
+            "Verse of Vesagran",
+            "Verse of Huell",
         },
     },
     ['HelperFunctions'] = {
@@ -452,14 +454,6 @@ local _ClassConfig = {
                 name = "A Tune Stuck In Your Head",
                 type = "AA",
             },
-            {
-                name = "SpellAbsorbSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    if not Casting.CastReady(songSpell) then return false end
-                    return Config:GetSetting('UseSpellAbsorb')
-                end,
-            },
         },
         ['Debuff'] = {
             {
@@ -512,6 +506,11 @@ local _ClassConfig = {
                     if Config:GetSetting('UseEpic') == 1 then return false end
                     return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
+                pre_activate = function(self) --Epic is MGB capable on EQM
+                    if Casting.AAReady("Mass Group Buff") and Targeting.IsNamed(Targeting.GetAutoTarget()) then
+                        Casting.UseAA("Mass Group Buff", Config.Globals.AutoTargetID)
+                    end
+                end,
             },
             {
                 name = "Boastful Bellow",
@@ -520,13 +519,6 @@ local _ClassConfig = {
             {
                 name = "Selo's Kick",
                 type = "AA",
-            },
-            {
-                name = "Vainglorious Shout",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Config:GetSetting("UseShout")
-                end,
             },
             {
                 name = "Kick",
@@ -651,6 +643,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "MitigationSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    if Config:GetSetting('UseMitigation') == 1 then return false end
+                    return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseMitigation") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
+                end,
+            },
+            {
                 name = "ArcaneSong",
                 type = "Song",
                 cond = function(self, songSpell)
@@ -755,34 +755,34 @@ local _ClassConfig = {
             -- cond = function(self) return true end, --Code kept here for illustration, if there is no condition to check, this line is not required
             spells = {
                 --role and critical functions
-                { name = "MezAESong",       cond = function(self) return Config:GetSetting('DoAEMez') end, },
-                { name = "MezSong",         cond = function(self) return Config:GetSetting('DoSTMez') end, },
-                { name = "CharmSong",       cond = function(self) return Config:GetSetting('CharmOn') end, },
-                { name = "SlowSong",        cond = function(self) return Config:GetSetting('DoSTSlow') end, },
-                { name = "AESlowSong",      cond = function(self) return Config:GetSetting('DoAESlow') end, },
-                { name = "DispelSong",      cond = function(self) return Config:GetSetting('DoDispel') end, },
-                { name = "ResistDebuff",    cond = function(self) return Config:GetSetting('DoResistDebuff') end, },
-                { name = "CureSong",        cond = function(self) return Config:GetSetting('UseCure') end, },
-                { name = "RunBuff",         cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA("Selo's Sonata") end, },
-                { name = "EndBreathSong",   cond = function(self) return Config:GetSetting('UseEndBreath') end, },
+                { name = "MezAESong",      cond = function(self) return Config:GetSetting('DoAEMez') end, },
+                { name = "MezSong",        cond = function(self) return Config:GetSetting('DoSTMez') end, },
+                { name = "CharmSong",      cond = function(self) return Config:GetSetting('CharmOn') end, },
+                { name = "SlowSong",       cond = function(self) return Config:GetSetting('DoSTSlow') end, },
+                { name = "AESlowSong",     cond = function(self) return Config:GetSetting('DoAESlow') end, },
+                { name = "DispelSong",     cond = function(self) return Config:GetSetting('DoDispel') end, },
+                { name = "ResistDebuff",   cond = function(self) return Config:GetSetting('DoResistDebuff') end, },
+                { name = "CureSong",       cond = function(self) return Config:GetSetting('UseCure') end, },
+                { name = "RunBuff",        cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA("Selo's Sonata") end, },
+                { name = "EndBreathSong",  cond = function(self) return Config:GetSetting('UseEndBreath') end, },
                 -- major group buffs
-                { name = "AriaSong",        cond = function(self) return Config:GetSetting('UseAria') > 1 end, },
-                { name = "WarMarchSong",    cond = function(self) return Config:GetSetting('UseMarch') > 1 end, },
-                { name = "ProcSong",        cond = function(self) return Config:GetSetting('UseProcSong') > 1 end, },
-                { name = "ArcaneSong",      cond = function(self) return Config:GetSetting('UseArcane') > 1 end, },
-                { name = "ResistSong",      cond = function(self) return Config:GetSetting('UseResist') > 1 end, },
-                { name = "SpellAbsorbSong", cond = function(self) return Config:GetSetting('UseSpellAbsorb') end, },
-                { name = "GroupRegenSong",  cond = function(self) return Config:GetSetting('RegenSong') == 2 end, },
-                { name = "AreaRegenSong",   cond = function(self) return Config:GetSetting('RegenSong') == 3 end, },
+                { name = "AriaSong",       cond = function(self) return Config:GetSetting('UseAria') > 1 end, },
+                { name = "WarMarchSong",   cond = function(self) return Config:GetSetting('UseMarch') > 1 end, },
+                { name = "ProcSong",       cond = function(self) return Config:GetSetting('UseProcSong') > 1 end, },
+                { name = "ArcaneSong",     cond = function(self) return Config:GetSetting('UseArcane') > 1 end, },
+                { name = "ResistSong",     cond = function(self) return Config:GetSetting('UseResist') > 1 end, },
+                { name = "MitigationSong", cond = function(self) return Config:GetSetting('UseMitigation') > 1 end, },
+                { name = "GroupRegenSong", cond = function(self) return Config:GetSetting('RegenSong') == 2 end, },
+                { name = "AreaRegenSong",  cond = function(self) return Config:GetSetting('RegenSong') == 3 end, },
                 -- personal dps
-                { name = "AmpSong",         cond = function(self) return Config:GetSetting('UseAmp') > 1 end, },
-                { name = "Jonthan",         cond = function(self) return Config:GetSetting('UseJonthan') > 1 end, },
-                { name = "FireDotSong",     cond = function(self) return Config:GetSetting('UseFireDots') end, },
-                { name = "IceDotSong",      cond = function(self) return Config:GetSetting('UseIceDots') end, },
-                { name = "PoisonDotSong",   cond = function(self) return Config:GetSetting('UsePoisonDots') end, },
-                { name = "DiseaseDotSong",  cond = function(self) return Config:GetSetting('UseDiseaseDots') end, },
+                { name = "AmpSong",        cond = function(self) return Config:GetSetting('UseAmp') > 1 end, },
+                { name = "Jonthan",        cond = function(self) return Config:GetSetting('UseJonthan') > 1 end, },
+                { name = "FireDotSong",    cond = function(self) return Config:GetSetting('UseFireDots') end, },
+                { name = "IceDotSong",     cond = function(self) return Config:GetSetting('UseIceDots') end, },
+                { name = "PoisonDotSong",  cond = function(self) return Config:GetSetting('UsePoisonDots') end, },
+                { name = "DiseaseDotSong", cond = function(self) return Config:GetSetting('UseDiseaseDots') end, },
                 -- filler
-                { name = "CalmSong",        cond = function(self) return true end, }, -- condition not needed, for uniformity
+                { name = "CalmSong",       cond = function(self) return true end, }, -- condition not needed, for uniformity
             },
         },
     },
@@ -905,7 +905,7 @@ local _ClassConfig = {
             Header = "Debuffs",
             Category = "Resist",
             Index = 101,
-            Tooltip = "Use the Harmony of Sound Resist Debuff.",
+            Tooltip = "Use the Ancient: Chaos Chant or Harmony of Sound Resist Debuff.",
             RequiresLoadoutChange = true,
             Default = false,
         },
@@ -935,16 +935,19 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
         },
-        ['UseSpellAbsorb']  = {
-            DisplayName = "Use Spell Absorb",
+        ['UseMitigation']   = {
+            DisplayName = "Use Mitigation Song",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
             Index = 105,
-            Default = true,
+            Tooltip = Tooltips.MitigationSong,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
+            Default = 1,
+            Min = 1,
+            Max = 4,
             RequiresLoadoutChange = true,
-            FAQ = "When is the Spell Damage Absorb/Shield used?",
-            Answer = "This song is used during burns.",
         },
         ['UseFading']       = {
             DisplayName = "Use Combat Escape",
@@ -1236,15 +1239,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
         },
-        ['UseShout']        = {
-            DisplayName = "Use Vain. Shout",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 101,
-            Tooltip = "Use Vainglorious Shout (Conal DD/Resist Debuff) ***WILL BREAK MEZ***",
-            Default = false,
-        },
 
         -- Song Duration Adjustment
         ['RefreshDT']       = {
@@ -1255,7 +1249,7 @@ local _ClassConfig = {
             Index = 101,
             Tooltip =
             "The duration threshold for refreshing a buff song outside of combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.",
-            Default = 12,
+            Default = 7,
             Min = 0,
             Max = 30,
             ConfigType = "Advanced",
@@ -1271,7 +1265,7 @@ local _ClassConfig = {
             Index = 102,
             Tooltip =
             "The duration threshold for refreshing a buff song in combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.",
-            Default = 6,
+            Default = 4,
             Min = 0,
             Max = 30,
             ConfigType = "Advanced",
