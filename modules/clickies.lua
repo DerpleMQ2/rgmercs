@@ -808,6 +808,9 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
+    -- Force any pending saves.
+    self:WriteSettings()
+
     Logger.log_debug("Clickies Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
@@ -1327,10 +1330,10 @@ function Module:ValidateClickies()
     for idx = #clickies, 1, -1 do
         local clicky = clickies[idx]
 
-        for idx = #clicky.conditions, 1, -1 do
-            local condition = clicky.conditions[idx]
+        for cond_idx = #clicky.conditions, 1, -1 do
+            local condition = clicky.conditions[cond_idx]
             if condition.Delete then
-                table.remove(clicky.conditions, idx)
+                table.remove(clicky.conditions, cond_idx)
                 clickiesChanged = true
             end
         end
