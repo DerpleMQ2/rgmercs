@@ -1125,7 +1125,12 @@ function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
                     local settingName = cond.args[argIdx - 1] or ""
                     local settingInfo = Config:GetSettingDefaults(settingName)
 
-                    self:RenderClickyOption(type(settingInfo.Default), cond, condIdx, argIdx, clickyIdx)
+                    if settingInfo then
+                        self:RenderClickyOption(type(settingInfo.Default), cond, condIdx, argIdx, clickyIdx)
+                    else
+                        ImGui.TextDisabled("Unable to retrieve setting info for '%s'.", settingName)
+                    end
+
 
                     if changed then
                         self:SaveSettings(false)
