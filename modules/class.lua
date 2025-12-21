@@ -448,7 +448,6 @@ function Module:GetResolvedActionMapItem(item)
 end
 
 function Module:RescanLoadout()
-    Config:ClearAllTempSettings()
     self.TempSettings.NewCombatMode = true
 end
 

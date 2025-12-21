@@ -231,8 +231,7 @@ local _ClassConfig = {
         },
         ["MeleeProcBuff"] = {
             "Talisman of the Panther",
-            -- Below Level 70 This is a single target buff and will be keyed off of the MA
-            -- "Spirit of the Panther",
+            -- "Spirit of the Panther", -- keep using leopard group clicky until we get talisman
             --"Talisman of the Leopard", -- EQ Might Custom, but item only currently
             -- "Spirit of the Leopard",
             "Talisman of the Jaguar", -- EQ Might Custom, Level 61
@@ -240,6 +239,7 @@ local _ClassConfig = {
             "Spirit of the Puma",
         },
         ["SlowProcBuff"] = {
+            "Lassitude",
             "Lingering Sloth",
         },
         ['RezSpell'] = {
@@ -260,6 +260,7 @@ local _ClassConfig = {
             "Minor Healing",
         },
         ["GroupRenewalHoT"] = {
+            "Ancient: Ghost of Vitality",
             "Ghost of Renewal",
         },
         ['SnareHot'] = {
