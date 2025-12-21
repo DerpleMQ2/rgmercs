@@ -912,6 +912,7 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
         enabled, changed = Ui.RenderOptionToggle("##EnableDrawn" .. tostring(clickyIdx), "", enabled, true)
         if changed then
             clickies[clickyIdx].enabled = enabled
+            Config:SetSetting('Clickies', clickies)
             self:SaveSettings(false)
         end
     end
@@ -921,6 +922,7 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
         ImGui.PushID("##_small_btn_up_clicky_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
         if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
             clickies[clickyIdx], clickies[clickyIdx - 1] = clickies[clickyIdx - 1], clickies[clickyIdx]
+            Config:SetSetting('Clickies', clickies)
             self:SaveSettings(false)
         end
         ImGui.PopID()
@@ -934,6 +936,7 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
         ImGui.PushID("##_small_btn_dn_clicky_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
         if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
             clickies[clickyIdx], clickies[clickyIdx + 1] = clickies[clickyIdx + 1], clickies[clickyIdx]
+            Config:SetSetting('Clickies', clickies)
             self:SaveSettings(false)
         end
         ImGui.PopID()
@@ -964,6 +967,7 @@ function Module:RenderConditionControls(clickyIdx, idx, conditionsTable, headerP
     else
         if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
             conditionsTable[idx], conditionsTable[idx - 1] = conditionsTable[idx - 1], conditionsTable[idx]
+            Config:SetSetting('Clickies', Config:GetSetting('Clickies'))
             self:SaveSettings(false)
         end
     end
@@ -975,6 +979,7 @@ function Module:RenderConditionControls(clickyIdx, idx, conditionsTable, headerP
     else
         if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
             conditionsTable[idx], conditionsTable[idx + 1] = conditionsTable[idx + 1], conditionsTable[idx]
+            Config:SetSetting('Clickies', Config:GetSetting('Clickies'))
             self:SaveSettings(false)
         end
     end
@@ -1009,6 +1014,7 @@ function Module:RenderConditionTypesCombo(cond, condIdx)
             for argIdx, arg in ipairs(self:GetLogicBlockArgsByType(cond.type) or {}) do
                 cond.args[argIdx] = arg.default
             end
+            Config:SetSetting('Clickies', Config:GetSetting('Clickies'))
             self:SaveSettings(false)
         end
         ImGui.EndTable()
@@ -1030,6 +1036,7 @@ function Module:RenderConditionTargetCombo(cond, condIdx)
             #condBlock.cond_targets)
         if changed then
             cond.target = condBlock.cond_targets[selectedNum] or "Self"
+            Config:SetSetting('Clickies', Config:GetSetting('Clickies'))
             self:SaveSettings(false)
         end
         ImGui.EndTable()
@@ -1057,6 +1064,7 @@ function Module:RenderClickyTargetCombo(clicky, clickyIdx)
             #targetTypes)
         if changed then
             clicky.target = targetTypes[selectedNum] or "Self"
+            Config:SetSetting('Clickies', Config:GetSetting('Clickies'))
             self:SaveSettings(false)
         end
         ImGui.EndTable()
@@ -1076,6 +1084,7 @@ function Module:RenderClickyCombatStateCombo(clicky, clickyIdx)
             #self.CombatStates)
         if changed then
             clicky.combat_state = self.CombatStates[selectedNum] or "Any"
+            Config:SetSetting('Clickies', Config:GetSetting('Clickies'))
             self:SaveSettings(false)
         end
         ImGui.EndTable()
@@ -1104,6 +1113,7 @@ function Module:RenderClickyOption(type, cond, condIdx, argIdx, clickyIdx)
             Core.SafeCallFunc("On Changed Callback", self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).on_changed, self, cond.args[argIdx], cond)
         end
 
+        Config:SetSetting('Clickies', Config:GetSetting('Clickies'))
         self:SaveSettings(false)
     end
 end
@@ -1119,8 +1129,6 @@ function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
             ImGui.TableNextColumn()
 
             if self:GetLogicBlockArgByTypeAndIndex(cond.type, argIdx).type == "setting_value" then
-                local changed = false
-
                 -- the arg before this must be a valid setting for this to work.
                 if argIdx == 1 or not Config:HaveSetting(cond.args[argIdx - 1]) then
                     ImGui.TextDisabled("Please select a valid setting in the previous argument.")
@@ -1132,11 +1140,6 @@ function Module:RenderConditionArgs(cond, condIdx, clickyIdx)
                         self:RenderClickyOption(type(settingInfo.Default), cond, condIdx, argIdx, clickyIdx)
                     else
                         ImGui.TextDisabled("Unable to retrieve setting info for '%s'.", settingName)
-                    end
-
-
-                    if changed then
-                        self:SaveSettings(false)
                     end
                 end
             else
@@ -1198,6 +1201,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                 combat_state = 'Any',
                 conditions = {},
             })
+            Config:SetSetting('Clickies', clickies)
             self:SaveSettings(false)
         end
     end
@@ -1230,8 +1234,10 @@ function Module:RenderClickiesWithConditions(type, clickies)
                     ImGui.PushID("##clicky_conditions_btn_" .. clickyIdx)
                     if ImGui.SmallButton(Icons.FA_PLUS .. " Add Condition") then
                         table.insert(clicky.conditions, { type = 'None', args = {}, target = 'Self', })
+                        Config:SetSetting('Clickies', clickies)
                         self:SaveSettings(false)
                     end
+                    Config:GetSetting('Clickies')
                     ImGui.PopID()
                     ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
 
@@ -1345,6 +1351,8 @@ function Module:ValidateClickies()
     end
 
     if clickiesChanged then
+        -- update the actual settings since we just mutated the temp reference above.
+        Config:SetSetting('Clickies', clickies)
         self:SaveSettings(false)
     end
 end
@@ -1353,10 +1361,13 @@ function Module:InsertDefaultClickies()
     -- Live/Test use "Live". Emu servers use server-specific.
     local serverType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or Config.Globals.CurServer
     local defaultClickyList = self.DefaultServerClickies[serverType]
+    local clickes = Config:GetSetting('Clickies') or {}
+
     if defaultClickyList then
         for _, defaultClicky in ipairs(defaultClickyList) do
-            table.insert(Config:GetSetting('Clickies'), defaultClicky)
+            table.insert(clickes, defaultClicky)
         end
+        Config:SetSetting('Clickies', clickes)
         self:SaveSettings(false)
     end
 end
