@@ -422,6 +422,11 @@ function OptionsUI:RenderCategorySettings(category)
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
                         end
+                        local text_height = ImGui.GetTextLineHeightWithSpacing()
+                        local row_height  = ImGui.GetFrameHeightWithSpacing()
+
+                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ((row_height - text_height) / 2))
+
                         ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PopStyleColor(1)
