@@ -148,9 +148,15 @@ function OptionsUI:OpenAndHighlightModule(module)
     Config:OpenOptionsUIAndHighlightModule(module)
 end
 
-function OptionsUI:OpenAndSetSearchFilter(filterText)
+--- Short description: <Describe what this function/module does>
+---@param filterText string The text to filter on
+---@param selectGroup string? The group to select after applying the filter
+function OptionsUI:OpenAndSetSearchFilter(filterText, selectGroup)
     Config:SetSetting('EnableOptionsUI', true)
     self:SetSearchFilter(filterText)
+    if selectGroup then
+        self.selectedGroup = selectGroup
+    end
 end
 
 function OptionsUI:SetSearchFilter(filterText)
@@ -577,6 +583,17 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
 
             if ImGui.BeginTable('configmenu##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                 ImGui.TableNextColumn()
+                local selectedGroupVisible = false
+                for _, group in ipairs(self.FilteredGroups) do
+                    if group.Name == self.selectedGroup then
+                        selectedGroupVisible = true
+                        break
+                    end
+                end
+                if not selectedGroupVisible and #self.FilteredGroups > 0 then
+                    self.selectedGroup = self.FilteredGroups[1].Name
+                end
+
                 for _, group in ipairs(self.FilteredGroups) do
                     if group.IconImage then
                         self:RenderGroupPanelWithImage(group)
