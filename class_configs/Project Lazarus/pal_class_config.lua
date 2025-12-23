@@ -1142,6 +1142,7 @@ return {
             Index = 102,
             Tooltip = "Use your Targeted AE Stun (Stun Command or Sacred Word) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
             Default = true,
+            RequiresLoadoutChange = true,
         },
         ['DoPBAEStun']        = {
             DisplayName = "Do PBAE Stun",
@@ -1151,6 +1152,7 @@ return {
             Index = 103,
             Tooltip = "Use your PBAE Stun (The Silent Command) as needed to maintain AE aggro (tank mode) or help with control (dps mode).",
             Default = true,
+            RequiresLoadoutChange = true,
         },
         ['AEStunUse']         = {
             DisplayName = "AEStun Use(DPS Mode):",
@@ -1514,6 +1516,7 @@ return {
             Index = 101,
             Tooltip = "Use the Valorous Rage AA during burns.",
             Default = false,
+            RequiresLoadoutChange = true,
         },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
@@ -1541,6 +1544,7 @@ return {
             Default = 1,
             Min = 1,
             Max = 4,
+            RequiresLoadoutChange = true,
         },
         ['DoACBuff']          = {
             DisplayName = "Use AC Buff",
@@ -1554,6 +1558,7 @@ return {
                 "You have Symbol selected and don't have another Type One Buff.\n" ..
                 "Leaving this on in other cases is not likely to cause issue, but may cause unnecessary buff checking.",
             Default = false,
+            RequiresLoadoutChange = true,
         },
         ['DoBrells']          = {
             DisplayName = "Do Brells",
@@ -1563,6 +1568,7 @@ return {
             Index = 103,
             Tooltip = "Enable Casting Brells",
             Default = true,
+            RequiresLoadoutChange = true,
         },
         ['DoWardProc']        = {
             DisplayName = "Do Ward Proc",
@@ -1572,6 +1578,7 @@ return {
             Index = 103,
             Tooltip = "Use your Ward of Tunare defensive proc buff.",
             Default = true,
+            RequiresLoadoutChange = true,
         },
         ['DoSalvation']       = {
             DisplayName = "Marr's Salvation",
@@ -1581,6 +1588,7 @@ return {
             Index = 104,
             Tooltip = "Use your group hatred reduction buff AA.",
             Default = true,
+            RequiresLoadoutChange = true,
         },
         ['ProcChoice']        = {
             DisplayName = "Proc Buff Choice:",
