@@ -154,14 +154,16 @@ end
 function OptionsUI:OpenAndSetSearchFilter(filterText, selectGroup)
     Config:SetSetting('EnableOptionsUI', true)
     self:SetSearchFilter(filterText)
-    if selectGroup then
-        self.selectedGroup = selectGroup
-    end
+    self:SetSelectedGroup(selectGroup)
 end
 
 function OptionsUI:SetSearchFilter(filterText)
     self.configFilter = filterText or ""
     self:ApplySearchFilter()
+end
+
+function OptionsUI:SetSelectedGroup(group)
+    self.selectedGroup = group or self.selectedGroup
 end
 
 function OptionsUI:ApplySearchFilter()
@@ -290,7 +292,7 @@ end
 
 function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     if ImGui.Selectable(" ##" .. groupLabel, self.selectedGroup == groupName) then
-        self.selectedGroup = groupName
+        self:SetSelectedGroup(groupName)
     end
     ImGui.SameLine()
     ImGui.Text(groupLabel)
@@ -310,7 +312,7 @@ function OptionsUI:RenderGroupPanelWithImage(group)
     end
 
     if pressed then
-        self.selectedGroup = group.Name
+        self:SetSelectedGroup(group.Name)
     end
 
     local draw_list = ImGui.GetWindowDrawList()
@@ -591,7 +593,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
                     end
                 end
                 if not selectedGroupVisible and #self.FilteredGroups > 0 then
-                    self.selectedGroup = self.FilteredGroups[1].Name
+                    self:SetSelectedGroup(self.FilteredGroups[1].Name)
                 end
 
                 for _, group in ipairs(self.FilteredGroups) do
