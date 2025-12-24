@@ -139,6 +139,7 @@ function Module:Exec(scriptText)
     locals.Rotation    = setmetatable({}, { __index = require('utils.rotation'), })
     locals.Strings     = setmetatable({}, { __index = require('utils.strings'), })
     locals.Tables      = setmetatable({}, { __index = require('utils.tables'), })
+    locals.ConfigShare = setmetatable({}, { __index = require('utils.rg_config_share'), })
     locals.Set         = setmetatable({}, { __index = require('mq.set'), })
 
 
