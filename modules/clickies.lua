@@ -1280,7 +1280,17 @@ function Module:RenderClickiesWithConditions(type, clickies)
                     for condIdx, cond in ipairs(clicky.conditions or {}) do
                         if self:GetLogicBlockByType(cond.type) then
                             local headerPos = ImGui.GetCursorPosVec()
+
+                            if clicky.conditionsCache and clicky.conditionsCache[condIdx] == true then
+                                ImGui.PushStyleColor(ImGuiCol.Text, 0.2, 0.8, 0.2, 1.0)
+                            elseif clicky.conditionsCache and clicky.conditionsCache[condIdx] == false then
+                                ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.2, 0.2, 1.0)
+                            else
+                                ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.2, 1.0)
+                            end
+
                             if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
+                                ImGui.PopStyleColor(1)
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
 
                                 self:RenderConditionTypesCombo(cond, condIdx)
@@ -1296,6 +1306,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 ImGui.Unindent()
                                 ImGui.TreePop()
                             else
+                                ImGui.PopStyleColor(1)
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
                             end
 
@@ -1422,6 +1433,7 @@ function Module:GiveTime(combat_state)
             if clicky.combat_state == "Any" or clicky.combat_state == combat_state then
                 local target = mq.TLO.Me
                 local allConditionsMet = true
+                local conditionsCache = {}
                 for _, cond in ipairs(clicky.conditions or {}) do
                     local condBlock = self:GetLogicBlockByType(cond.type)
                     if condBlock then
@@ -1442,12 +1454,16 @@ function Module:GiveTime(combat_state)
                         if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
                             Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \arFailed!")
                             allConditionsMet = false
+                            table.insert(conditionsCache, false)
                             break
                         else
                             Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \agSuccess!")
+                            table.insert(conditionsCache, true)
                         end
                     end
                 end
+
+                clicky.conditionsCache = conditionsCache
 
                 if allConditionsMet then
                     self.TempSettings.ClickyState[clicky.itemName] = self.TempSettings.ClickyState[clicky.itemName] or {}
