@@ -454,7 +454,7 @@ Module.LogicBlocks                      = {
 
     {
         name = "My Pet Has Effect",
-        cond = function(self, target, effect, negate)
+        cond = function(self, _, effect, negate)
             local hasEffect = not Casting.PetBuffCheck(mq.TLO.Spell(effect)) -- this will return false if the pet has it
             if negate then
                 return not hasEffect
@@ -469,6 +469,38 @@ Module.LogicBlocks                      = {
         cond_targets = { "Pet", },
         args = {
             { name = "Effect", type = "string",  default = "", },
+            { name = "Negate", type = "boolean", default = false, },
+        },
+    },
+
+    {
+        name = "My Pet Has a Primary Equiped",
+        cond = function(self, _, negate)
+            local primaryEquiped = mq.TLO.Me.Pet.Primary() > 0
+            return ((not negate and primaryEquiped) or (negate and not primaryEquiped))
+        end,
+        tooltip = "Only use when this when your pet has (doesn't have) a primary weapon equiped.",
+        render_header_text = function(self, cond)
+            return string.format("Your Pet %s a Primary weapon equiped.", cond.args[1] and "doesn't have" or "has")
+        end,
+        cond_targets = { "Pet", },
+        args = {
+            { name = "Negate", type = "boolean", default = false, },
+        },
+    },
+
+    {
+        name = "My Pet Has a Secondary Equiped",
+        cond = function(self, _, negate)
+            local secondaryEquiped = mq.TLO.Me.Pet.Secondary() > 0
+            return ((not negate and secondaryEquiped) or (negate and not secondaryEquiped))
+        end,
+        tooltip = "Only use when this when your pet has (doesn't have) a secondary item equiped.",
+        render_header_text = function(self, cond)
+            return string.format("Your Pet %s a Secondary weapon equiped.", cond.args[1] and "doesn't have" or "has")
+        end,
+        cond_targets = { "Pet", },
+        args = {
             { name = "Negate", type = "boolean", default = false, },
         },
     },
