@@ -90,7 +90,22 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
             { Name = 'Item Summoning', Categories = { "Item Summoning", }, },
             { Name = 'Bandolier',      Categories = { "Bandolier", }, },
             { Name = 'Instruments',    Categories = { "Instruments", }, },
-            { Name = 'Clickies',       Categories = { "General Clickies", "Class Config Clickies", "User Clickies", }, },
+            {
+                Name = 'Clickies',
+                Categories = { "General Clickies", "Class Config Clickies", "User Clickies", },
+                RenderCategories = {
+                    {
+                        Header = "Manage Clickies",
+
+                        Render = function(self)
+                            return Modules:ExecModule("Clickies", "RenderConfig", self.configFilter)
+                        end,
+                        Search = function(self)
+                            return Modules:ExecModule("Clickies", "HaveSearchMatches", self.configFilter)
+                        end,
+                    },
+                },
+            },
         },
     },
     {
@@ -181,7 +196,7 @@ function OptionsUI:ApplySearchFilter()
     -- precalc all known categories so we can add ones that as missing.
     for _, group in ipairs(self.Groups) do
         for _, header in ipairs(group.Headers) do
-            for _, category in ipairs(header.Categories) do
+            for _, category in ipairs(header.Categories or {}) do
                 knownCategories:add(category)
                 if header.CatchAll then
                     catchAllHeader = header
@@ -219,8 +234,9 @@ function OptionsUI:ApplySearchFilter()
             local headerMatches = headerLower:find(filter, 1, true) ~= nil
             local highlightHeader = false
             local newCategories = {}
+            local newRenderCategories = {}
 
-            for _, category in ipairs(header.Categories) do
+            for _, category in ipairs(header.Categories or {}) do
                 local categoryLower = category:lower()
 
                 local categoryMatches = categoryLower:find(filter, 1, true) ~= nil
@@ -268,8 +284,19 @@ function OptionsUI:ApplySearchFilter()
                 end
             end
 
-            if #newCategories > 0 then
-                table.insert(newGroup.Headers, { Name = header.Name, Categories = newCategories, highlighted = highlightHeader, })
+            for _, renderCategory in ipairs(header.RenderCategories or {}) do
+                local categoryMatches = true
+                if renderCategory.Search then
+                    categoryMatches = renderCategory.Search(filter)
+                end
+
+                if categoryMatches then
+                    table.insert(newRenderCategories, renderCategory)
+                end
+            end
+
+            if #newCategories > 0 or #newRenderCategories > 0 then
+                table.insert(newGroup.Headers, { Name = header.Name, Categories = newCategories, RenderCategories = newRenderCategories, highlighted = highlightHeader, })
             end
         end
 
@@ -370,7 +397,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
                 if header.highlighted then
                     ImGui.PopStyleColor(1)
                 end
-                for _, category in ipairs(header.Categories) do
+                for _, category in ipairs(header.Categories or {}) do
                     if #Config:PeerGetAllSettingsForCategory(self.selectedCharacter, category) > 0 then
                         -- only draw the seperator if the category name is different from the heading
                         if header.Name ~= category then
@@ -378,6 +405,19 @@ function OptionsUI:RenderOptionsPanel(groupName)
                         end
                         -- Render options for this category
                         self:RenderCategorySettings(category)
+                    end
+                end
+
+                -- only draw these for the local character for now.
+                if self.selectedCharacter == Comms.GetPeerName() then
+                    for _, RenderCategory in ipairs(header.RenderCategories or {}) do
+                        if RenderCategory.Header then
+                            self:RenderCategorySeperator(RenderCategory.Header)
+                        end
+
+                        if RenderCategory.Render then
+                            RenderCategory.Render(self)
+                        end
                     end
                 end
             else

@@ -1225,6 +1225,8 @@ function Module:RenderClickiesWithConditions(type, clickies)
     if not mq.TLO.Cursor() then
         ImGui.BeginDisabled(true)
     end
+    local filterApplied = #clickies ~= #Config:GetSetting('Clickies')
+
     if ImGui.SmallButton(mq.TLO.Cursor.Name() and string.format("%s Add %s to %s", Icons.FA_PLUS, mq.TLO.Cursor.Name() or "N/A", type) or "Pickup an Item To Add") then
         if mq.TLO.Cursor() then
             table.insert(clickies, {
@@ -1250,7 +1252,10 @@ function Module:RenderClickiesWithConditions(type, clickies)
             if clicky.itemName:len() > 0 then
                 local headerScreenPos = ImGui.GetCursorScreenPosVec()
                 local headerCursorPos = ImGui.GetCursorPosVec()
+
+                ImGui.BeginDisabled(filterApplied)
                 self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, true)
+                ImGui.EndDisabled()
 
                 ImGui.PushID("##clicky_header_" .. clickyIdx)
                 if ImGui.CollapsingHeader("             " .. clicky.itemName) then
@@ -1310,7 +1315,10 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
                             end
 
+                            -- only render configs if we are not filtered
+                            ImGui.BeginDisabled(filterApplied)
                             self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions, headerPos)
+                            ImGui.EndDisabled()
                         end
                     end
 
@@ -1324,7 +1332,9 @@ function Module:RenderClickiesWithConditions(type, clickies)
                     ImGui.Unindent()
                 end
 
+                ImGui.BeginDisabled(filterApplied)
                 self:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, false)
+                ImGui.EndDisabled()
 
                 ImGui.PopID()
             end
@@ -1361,6 +1371,47 @@ function Module:RenderClickyData(clicky, clickyIdx)
         ImGui.EndTable()
     end
     ImGui.Separator()
+end
+
+function Module:GetMatchingClickies(searchFilter)
+    local clickies = Config:GetSetting('Clickies')
+
+    if not searchFilter or searchFilter:len() == 0 then
+        return clickies or {}
+    end
+
+    local matchingClickies = {}
+    local searchLower = searchFilter:lower()
+    for _, clicky in ipairs(clickies or {}) do
+        if clicky.itemName:lower():find(searchLower) then
+            table.insert(matchingClickies, clicky)
+        else
+            for _, cond in ipairs(clicky.conditions or {}) do
+                if cond.type:lower():find(searchLower) then
+                    table.insert(matchingClickies, clicky)
+                    break
+                end
+                for _, arg in ipairs(cond.args or {}) do
+                    if tostring(arg):lower():find(searchLower) then
+                        table.insert(matchingClickies, clicky)
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    return matchingClickies
+end
+
+function Module:HaveSearchMatches(searchFilter)
+    local matchingClickies = self:GetMatchingClickies(searchFilter)
+    return #matchingClickies > 0
+end
+
+function Module:RenderConfig(searchFilter)
+    local clickiesToRender = self:GetMatchingClickies(searchFilter)
+    self:RenderClickiesWithConditions("Clickies", clickiesToRender)
 end
 
 function Module:Render()
