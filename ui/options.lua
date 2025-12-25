@@ -97,11 +97,11 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
                     {
                         Header = "Manage Clickies",
 
-                        Render = function(self)
-                            return Modules:ExecModule("Clickies", "RenderConfig", self.configFilter)
+                        Render = function(searchFilter)
+                            return Modules:ExecModule("Clickies", "RenderConfig", searchFilter)
                         end,
-                        Search = function(self)
-                            return Modules:ExecModule("Clickies", "HaveSearchMatches", self.configFilter)
+                        Search = function(searchFilter)
+                            return Modules:ExecModule("Clickies", "HaveSearchMatches", searchFilter)
                         end,
                     },
                 },
@@ -416,7 +416,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
                         end
 
                         if RenderCategory.Render then
-                            RenderCategory.Render(self)
+                            RenderCategory.Render(self.configFilter)
                         end
                     end
                 end
