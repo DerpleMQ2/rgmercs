@@ -361,7 +361,7 @@ local _ClassConfig = {
         },
         ['AegoBuff'] = {
             ----Use HP Type one until Temperance at 40... Group Buff at 45 (Blessing of Temperance)
-            "Mercenary's Hand of Aegolism XV", -- Level 130
+            "Unified Hand of Aegolism XV", -- Level 130
             "Courage",
             "Center",
             "Daring",
@@ -413,7 +413,7 @@ local _ClassConfig = {
             "Shining Fortitude",
             "Shining Steel",
         },
-        ['SingleVieBuff'] = { -- Level 20-73
+        ['SingleVieBuff'] = { -- Level 20-73 We don't use this once we have the group version
             "Aegis of Vie",
             "Panoply of Vie",
             "Bulwark of Vie",
@@ -422,7 +422,7 @@ local _ClassConfig = {
             "Ward of Vie",
         },
         ['GroupVieBuff'] = {
-            "Rallied Ward of Vie", -- 128
+            "Rallied Bulwark of Vie", -- 130
             "Rallied Aegis of Vie",
             "Rallied Shield of Vie",
             "Rallied Palladium of Vie",
