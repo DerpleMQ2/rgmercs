@@ -1713,6 +1713,15 @@ Config.DefaultConfig               = {
         Tooltip = "Show the experimental Options UI window",
         Default = false,
     },
+    ['EnableAFUI']           = {
+        DisplayName = "Enable Very Special UI",
+        Type = "Custom",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Tooltip = "???",
+        Default = false,
+    },
 }
 
 Config.CommandHandlers             = {}

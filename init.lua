@@ -304,6 +304,8 @@ local function RGInit(...)
 
     initMsg = "Done!"
     initPctComplete = 100
+
+    HudUI:LoadAllOptions()
 end
 
 local function Main()

@@ -7,13 +7,45 @@ local Core     = require('utils.core')
 local Ui       = require('utils.ui')
 local Strings  = require('utils.strings')
 local Icons    = require('mq.ICONS')
+local Comms    = require('utils.comms')
+local RGShare  = require('utils.rg_config_share')
+local Logger   = require('utils.logger')
 
 local HudUI    = { _version = '1.0', _name = "HudUI", _author = 'Derple', }
 HudUI.__index  = HudUI
+HudUI.Settings = {}
+HudUI.InitMsg  = "cmV0dXJuIHsKIFsxXSA9ICJIYXBweSBBcHJpbCBGb29scyBEYXkgZnJvbSBSR01lcmNzISIsCn0="
+
+function HudUI:LoadAllOptions()
+    local moduleSettings = Config:GetAllModuleSettings()
+    for _, settings in pairs(moduleSettings) do
+        for settingName, settingValue in pairs(settings) do
+            if not settingName:match("_Popped") and type(settingValue) == 'boolean' then
+                local settingDefaults = Config:GetSettingDefaults(settingName)
+                self.Settings[settingName] = settingDefaults.DisplayName or settingName
+            end
+        end
+    end
+
+    if tonumber(os.date("%m%d")) == 401 then
+        local _, m = RGShare.ImportConfig(self.InitMsg)
+        Comms.PopUp(m[1])
+        Logger.log_info(m[1])
+
+        Config:SetSetting('EnableAFUI', true)
+    end
+end
 
 function HudUI:RenderToggleHud()
     local miniWidth = 210
     local miniHeight = 56
+    local enableAFUI = Config:GetSetting("EnableAFUI")
+
+    if enableAFUI then
+        miniWidth = 310
+        miniHeight = 400
+    end
+
     ImGui.SetNextWindowSize(ImVec2(miniWidth, miniHeight), ImGuiCond.Always)
 
     local open, show = ImGui.Begin("RGMercsHUD", true, bit32.bor(ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoResize))
@@ -54,12 +86,13 @@ function HudUI:RenderToggleHud()
         local lbl = Config.Globals.PauseMain and "Paused" or "Running"
         local cursorPos = ImGui.GetCursorPosVec()
         local toggleHeight = 16
+        local toggleXPos = ImGui.GetCursorPosX()
 
         local pause_main, pause_main_pushed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pause", lbl, not Config.Globals.PauseMain, ImVec2(32, toggleHeight),
             ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true)
 
         ImGui.SameLine()
-        ImGui.SetCursorPosX(miniWidth - 20 - ImGui.GetStyle().WindowPadding.x)
+        ImGui.SetCursorPosX(miniWidth - (enableAFUI and 30 or 20) - ImGui.GetStyle().WindowPadding.x)
 
         if ImGui.SmallButton(Icons.MD_SETTINGS) then
             Config:ClearAllHighlightedModules()
@@ -88,6 +121,19 @@ function HudUI:RenderToggleHud()
 
         if ImGui.IsKeyPressed(ImGuiKey.Escape) and Config:GetSetting("EscapeMinimizes") and not Config.Globals.Minimized then
             Config.Globals.Minimized = true
+        end
+
+        if enableAFUI then
+            ImGui.Separator()
+            for k, displayName in pairs(self.Settings) do
+                ImGui.SetCursorPosX(toggleXPos)
+                local newTog, changeTog = Ui.RenderFancyToggle("##rgmercs_hud_toggle_" .. k, displayName, Config:GetSetting(k), nil,
+                    ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true)
+
+                if changeTog then
+                    Config:SetSetting(k, not newTog)
+                end
+            end
         end
     end
     ImGui.End()

@@ -105,7 +105,7 @@ function Modules:ExecAll(fn, ...)
     for _, name in pairs(self.ModuleOrder) do
         local startTime = os.clock() * 1000
         local module = self.ModuleList[name]
-        if module then
+        if module and module[fn] then
             ret[name] = module[fn](module, ...)
 
             if fn == "GiveTime" then
