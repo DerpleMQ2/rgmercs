@@ -12,7 +12,6 @@ local Casting      = require('utils.casting')
 local Modules      = require('utils.modules')
 local Movement     = require('utils.movement')
 local ConsoleUI    = require('ui.console')
-local GitCommit    = require('extras.version')
 
 local StandardUI   = { _version = '1.0', _name = "StandardUI", _author = 'Derple', }
 StandardUI.__index = StandardUI
@@ -132,19 +131,18 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
 
         if shouldDrawGUI then
             local imgDisplayed = Casting.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
-            ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
+            local afConfig = Config:GetSetting('EnableAFUI')
+            ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60), afConfig and ImVec2(0.0, 1.0) or ImVec2(0.0, 0.0), afConfig and ImVec2(1.0, 0.0) or ImVec2(1.0, 1.0))
             ImGui.SameLine()
             local titlePos = ImGui.GetCursorPosVec()
-
-            ImGui.Text(string.format("RGMercs %s [%s]",
+            Ui.RenderText("RGMercs %s [%s]",
                 Config._version,
                 GitCommit.commitId or "None"
-            ))
-
+            )
             titlePos = ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing())
             ImGui.SetCursorPos(titlePos)
 
-            ImGui.Text(string.format("Class Config: "))
+            Ui.RenderText("Class Config: ")
             ImGui.SameLine()
 
             local version = Modules:ExecModule("Class", "GetVersionString")
@@ -162,9 +160,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             titlePos = ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing())
             ImGui.SetCursorPos(titlePos)
 
-            ImGui.Text(string.format("Author(s): %s",
-                Modules:ExecModule("Class", "GetAuthorString"))
-            )
+            Ui.RenderText("Author(s): %s", Modules:ExecModule("Class", "GetAuthorString"))
 
             self:RenderWindowControls()
 

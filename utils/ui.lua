@@ -1048,6 +1048,15 @@ function Ui.RenderPopAndSettings(moduleName)
     end
 end
 
+function Ui.RenderText(text, ...)
+    local formattedText = string.format(text, ...)
+    local afConfig = Config:GetSetting('EnableAFUI')
+    if afConfig then
+        formattedText = formattedText:reverse()
+    end
+    ImGui.Text(formattedText)
+end
+
 function Ui.RenderHyperText(text, normalColor, highlightColor, callback)
     local startingPos = ImGui.GetCursorPosVec()
     local version = Modules:ExecModule("Class", "GetVersionString")
@@ -1055,6 +1064,10 @@ function Ui.RenderHyperText(text, normalColor, highlightColor, callback)
         if callback then
             callback()
         end
+    end
+    local afConfig = Config:GetSetting('EnableAFUI')
+    if afConfig then
+        text = text:reverse()
     end
     ImGui.SetCursorPos(startingPos)
     ImGui.TextColored(ImGui.IsItemHovered() and highlightColor or normalColor, text)
