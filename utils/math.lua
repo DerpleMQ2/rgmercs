@@ -23,4 +23,13 @@ function Math.GetDistanceSquared(x1, y1, x2, y2)
     return ((x2 or 0) - (x1 or 0)) ^ 2 + ((y2 or 0) - (y1 or 0)) ^ 2
 end
 
+function Math.Rotate(angle, x, y)
+    local cos_a = math.cos(angle)
+    local sin_a = math.sin(angle)
+
+    return
+        x * cos_a - y * sin_a,
+        x * sin_a + y * cos_a
+end
+
 return Math

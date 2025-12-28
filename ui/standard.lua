@@ -131,8 +131,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
 
         if shouldDrawGUI then
             local imgDisplayed = Casting.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
-            local afConfig = Config:GetSetting('EnableAFUI')
-            ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60), afConfig and ImVec2(0.0, 1.0) or ImVec2(0.0, 0.0), afConfig and ImVec2(1.0, 0.0) or ImVec2(1.0, 1.0))
+            Ui.RenderLogo(imgDisplayed:GetTextureID())
             ImGui.SameLine()
             local titlePos = ImGui.GetCursorPosVec()
             Ui.RenderText("RGMercs %s [%s]",
@@ -161,6 +160,8 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             ImGui.SetCursorPos(titlePos)
 
             Ui.RenderText("Author(s): %s", Modules:ExecModule("Class", "GetAuthorString"))
+
+            ImGui.NewLine()
 
             self:RenderWindowControls()
 

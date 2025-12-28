@@ -930,10 +930,11 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
     local startingPosVec = ImGui.GetCursorPosVec()
     local offset_trash = 40
     local offset_enable = 160
+    local yOffset = ImGui.GetStyle().FramePadding.y
 
     self:RenderClickyHeaderIcon(clickies[clickyIdx], headerScreenPos)
 
-    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_enable, headerCursorPos.y)
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_enable, headerCursorPos.y + yOffset)
 
     ImGui.PushID("##_small_btn_ctrl_clicky_" .. tostring(clickyIdx) .. (preRender and "_pre" or ""))
 
@@ -977,7 +978,7 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
         ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
     end
 
-    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_trash, headerCursorPos.y + 3)
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_trash, headerCursorPos.y + yOffset)
 
     if ImGui.SmallButton(Icons.FA_TRASH) then
         -- if we do this in the UI thread then there could be a race condition if the user is clicking fast
@@ -991,6 +992,7 @@ end
 function Module:RenderConditionControls(clickyIdx, idx, conditionsTable, headerPos)
     local startingPosVec = ImGui.GetCursorPosVec()
     local offset = 110
+
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset, headerPos.y)
 
     ImGui.PushID("##_small_btn_up_wp_" .. tostring(clickyIdx) .. "_" .. tostring(idx))

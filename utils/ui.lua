@@ -1,13 +1,15 @@
-local mq            = require('mq')
-local Config        = require('utils.config')
-local Modules       = require("utils.modules")
-local Logger        = require("utils.logger")
-local Core          = require("utils.core")
-local Comms         = require("utils.comms")
-local Targeting     = require("utils.targeting")
-local Icons         = require('mq.ICONS')
-local Strings       = require("utils.strings")
-local ClassLoader   = require('utils.classloader')
+local mq          = require('mq')
+local Config      = require('utils.config')
+local Modules     = require("utils.modules")
+local Logger      = require("utils.logger")
+local Core        = require("utils.core")
+local Comms       = require("utils.comms")
+local Targeting   = require("utils.targeting")
+local Icons       = require('mq.ICONS')
+local Strings     = require("utils.strings")
+local ClassLoader = require('utils.classloader')
+local Math        = require('utils.math')
+
 
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
 local ICON_SIZE     = 20
@@ -17,6 +19,7 @@ local Ui            = { _version = '1.0', _name = "Ui", _author = 'Derple', }
 Ui.__index          = Ui
 Ui.ConfigFilter     = ""
 Ui.ShowDownNamed    = false
+Ui.TempSettings     = {}
 
 
 --- Renders the assist list.
@@ -1048,12 +1051,73 @@ function Ui.RenderPopAndSettings(moduleName)
     end
 end
 
+function Ui.RenderLogo(textureId)
+    local afConfig = Config:GetSetting('EnableAFUI')
+    local draw = ImGui.GetWindowDrawList()
+
+    local mx, my = ImGui.GetMousePos()
+    local cx, cy = ImGui.GetCursorScreenPos()
+    local w, h = 60, 60
+
+    local x1, y1 = 0, 0
+    local x2, y2 = w, 0
+    local x3, y3 = w, h
+    local x4, y4 = 0, h
+
+    ImGui.Dummy(ImVec2(60, 60))
+
+    if afConfig then
+        local t = Ui.TempSettings.LogoMOTime and (mq.gettime() / 100 - Ui.TempSettings.LogoMOTime) or 0
+        t = t % 120
+        local delta
+        if t <= 59 then
+            delta = -t
+        else
+            delta = -(119 - t)
+        end
+        cx, cy = cx + w * 0.5, cy + h * 0.5
+        local angle = math.atan2(my - cy, mx - cx)
+
+        w, h = math.max(1, w + delta), math.max(1, h + delta)
+        local hw, hh = w * 0.5, h * 0.5
+
+        x1, y1 = Math.Rotate(angle, -hw, -hh)
+        x2, y2 = Math.Rotate(angle, hw, -hh)
+        x3, y3 = Math.Rotate(angle, hw, hh)
+        x4, y4 = Math.Rotate(angle, -hw, hh)
+
+        if ImGui.IsItemHovered() then
+            if not Ui.TempSettings.LogoMOTime then
+                Ui.TempSettings.LogoMOTime = mq.gettime() / 100
+            end
+        else
+            Ui.TempSettings.LogoMOTime = nil
+        end
+    end
+
+    draw:AddImageQuad(
+        textureId,
+        ImVec2(cx + x1, cy + y1),
+        ImVec2(cx + x2, cy + y2),
+        ImVec2(cx + x3, cy + y3),
+        ImVec2(cx + x4, cy + y4),
+        ImVec2(0, 0),
+        ImVec2(1, 0),
+        ImVec2(1, 1),
+        ImVec2(0, 1)
+    )
+end
+
 function Ui.RenderText(text, ...)
     local formattedText = string.format(text, ...)
     local afConfig = Config:GetSetting('EnableAFUI')
-    if afConfig then
+    local textSizeX, textSizeY = ImGui.CalcTextSize(formattedText)
+    local startPos = ImGui.GetCursorPosVec()
+    ImGui.Dummy(ImVec2(textSizeX, textSizeY))
+    if afConfig and not ImGui.IsItemHovered() then
         formattedText = formattedText:reverse()
     end
+    ImGui.SetCursorPos(startPos)
     ImGui.Text(formattedText)
 end
 
@@ -1066,7 +1130,7 @@ function Ui.RenderHyperText(text, normalColor, highlightColor, callback)
         end
     end
     local afConfig = Config:GetSetting('EnableAFUI')
-    if afConfig then
+    if afConfig and not ImGui.IsItemHovered() then
         text = text:reverse()
     end
     ImGui.SetCursorPos(startingPos)
