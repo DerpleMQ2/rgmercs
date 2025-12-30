@@ -129,6 +129,14 @@ Binds.Handlers    = {
             end
         end,
     },
+    ['forcetargetclear'] = {
+        usage = "/rgl forcetargetclear",
+        about = "Will clear the current forced target.",
+        handler = function()
+            Config.Globals.ForceTargetID = 0
+            Logger.log_info("\awForced target cleared.")
+        end,
+    },
     ['forcenamed'] = {
         usage = "/rgl forcenamed",
         about = "Will force the current target to be considered a Named (this flag does not persist and is for testing purposes).",
