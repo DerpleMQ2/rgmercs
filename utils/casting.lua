@@ -1414,7 +1414,9 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         return false
     end
 
-    local allowCastWindow = Core.MyClassIs("BRD") and (item.CastTime() or -1) == 0
+    local castTime = item.CastTime()
+
+    local allowCastWindow = Core.MyClassIs("BRD") and (castTime or -1) == 0
     if (mq.TLO.Window("CastingWindow").Open() or me.Casting()) and not allowCastWindow then
         Logger.log_debug("\awUseItem(\ag%s\aw): \arCANT Use Item - Casting Window Open", itemName or "None")
         return false
@@ -1465,14 +1467,14 @@ function Casting.UseItem(itemName, targetId, forceTarget)
 
     local cmd = string.format("/useitem \"%s\"", itemName)
     Core.DoCmd(cmd)
-    Logger.log_debug("Running: \at'%s' [%d]", cmd, item.CastTime())
+    Logger.log_debug("Running: \at'%s' [%d]", cmd, castTime or 0)
 
     mq.delay(2)
 
     -- Not satisifed with below, I intend to refactor to use waitcastfinish(); I'll adjust waiting to start at that time.
-    if not item.CastTime() or item.CastTime() < 101 then
-        -- slight delay for instant casts, bypass checking for cast window on faster casts, as the client may never see the cast at all.
-        local delay = item.CastTime() or 20
+    if not castTime or castTime < 101 then
+        -- slight delay for instant or 0.1s casts, bypass checking for cast window on faster casts, as the client may never see the cast at all.
+        local delay = castTime or 20
         mq.delay(delay)
     else
         local maxWait = 1000
@@ -1481,14 +1483,14 @@ function Casting.UseItem(itemName, targetId, forceTarget)
             mq.delay(50)
             mq.doevents()
             -- in case very fast casts serverside don't make it to the client
-            -- this was originall added for 100ms clickies on laz that don't ever show casting (which has now been addressed above), but left as a fallback
+            -- this was originally added for 100ms clickies on laz that don't ever show casting (which has now been addressed above), but left as a fallback
             if not me.ItemReady(itemName) then
                 Logger.log_verbose("No start cast noted, but item now reports on cooldown, moving on.")
                 break
             end
             maxWait = maxWait - 50
         end
-        mq.delay(item.CastTime(), function() return not me.Casting() end)
+        mq.delay(castTime, function() return not me.Casting() end)
 
         -- pick up any additonal server lag.
         while me.Casting() do

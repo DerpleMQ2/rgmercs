@@ -15,6 +15,8 @@ local HudUI    = { _version = '1.0', _name = "HudUI", _author = 'Derple', }
 HudUI.__index  = HudUI
 HudUI.Settings = {}
 HudUI.InitMsg  = "cmV0dXJuIHsKIFsxXSA9ICJIYXBweSBBcHJpbCBGb29scyBEYXkgZnJvbSBSR01lcmNzISIsCn0="
+HudUI.ClickMsg =
+"cmV0dXJuIHsKIFsxXSA9ICJBV1csIFlPVSdSRSBOTyBGVU4hISEiLAogWzJdID0gIk1JTklNT0RFIEJFU1QgTU9ERSIsCiBbM10gPSAiWSBVIE5PIExJS0UgTUlOST8hPyIsCiBbNF0gPSAiQlVUVE9OIEVSUk9SLCBQTEVBU0UgVFJZIEFHQUlOISIsCn0="
 
 function HudUI:LoadAllOptions()
     local moduleSettings = Config:GetAllModuleSettings()
@@ -28,11 +30,9 @@ function HudUI:LoadAllOptions()
     end
 
     if tonumber(os.date("%m%d")) == 401 then
-        local _, m = RGShare.ImportConfig(self.InitMsg)
-        Comms.PopUp(m[1])
-        Logger.log_info(m[1])
-
+        self:AFPopUp(self.InitMsg, 1)
         Config:SetSetting('EnableAFUI', true)
+        Config.Globals.Minimized = true
     end
 end
 
@@ -54,14 +54,22 @@ function HudUI:RenderToggleHud()
         local btnImg = Casting.LastBurnCheck and ImagesUI.burnImg or ImagesUI.derpImg
         if Config.Globals.PauseMain then
             if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
-                Config.Globals.Minimized = not Config.Globals.Minimized
+                if enableAFUI then
+                    self:AFPopUp(self.ClickMsg, math.random(4))
+                else
+                    Config.Globals.Minimized = not Config.Globals.Minimized
+                end
             end
             if ImGui.IsItemHovered() then
                 Ui.Tooltip("RGMercs is Paused.\n Click to open the main window.")
             end
         else
             if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then
-                Config.Globals.Minimized = not Config.Globals.Minimized
+                if enableAFUI then
+                    self:AFPopUp(self.ClickMsg, math.random(4))
+                else
+                    Config.Globals.Minimized = not Config.Globals.Minimized
+                end
             end
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
@@ -137,6 +145,13 @@ function HudUI:RenderToggleHud()
         end
     end
     ImGui.End()
+end
+
+function HudUI:AFPopUp(msg, key)
+    if msg and key then
+        local _, clickMsg = RGShare.ImportConfig(msg)
+        Comms.PopUp(clickMsg[key] or "Error")
+    end
 end
 
 return HudUI
