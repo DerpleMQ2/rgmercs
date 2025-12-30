@@ -370,7 +370,9 @@ Binds.Handlers    = {
         usage = "/rgl mini",
         about = "Toggle minimizing of the RGMercs window to a small icon.",
         handler = function()
-            Config.Globals.Minimized = not Config.Globals.Minimized
+            if not Config:GetSetting('EnableAFUI') then
+                Config.Globals.Minimized = not Config.Globals.Minimized
+            end
         end,
     },
     ['help'] = {
