@@ -124,27 +124,6 @@ Module.DefaultServerClickies            = {
     ['EQ Might']        = {
         [1] = {
             ['target'] = 'Self',
-            ['combat_state'] = 'Combat',
-            ['itemName'] = 'Veeshan\'s Distillate of Celestial Healing',
-            ['conditions'] = {
-                [1] = {
-                    ['target'] = 'Self',
-                    ['type'] = 'HP Threshold',
-                    ['args'] = {
-                        [1] = 0,
-                        [2] = 65,
-                    },
-                },
-                [2] = {
-                    ['target'] = 'Self',
-                    ['type'] = 'None',
-                    ['args'] = {},
-                },
-            },
-            ['iconId'] = 656,
-        },
-        [2] = {
-            ['target'] = 'Self',
             ['combat_state'] = 'Downtime',
             ['itemName'] = 'Ring of the Warden',
             ['conditions'] = {},

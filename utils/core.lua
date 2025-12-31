@@ -96,6 +96,21 @@ function Core.DoGroupCmd(cmd, ...)
     mq.cmd(formatted)
 end
 
+--- Executes a group command with the provided arguments.
+--- @param cmd string The command to be executed.
+--- @param ... any Additional arguments for the command.
+function Core.DoGroupOrRaidCmd(cmd, ...)
+    local dgcmd = "/dga /if ($\\{Zone.ID} == ${Zone.ID} && $\\{Group.Leader.Name.Equal[${Group.Leader.Name}]}) "
+    if mq.TLO.Raid.Members() > 0 then
+        dgcmd = "/dga /if ($\\{Zone.ID} == ${Zone.ID} && $\\{Raid.Leader.Name.Equal[${Raid.Leader.Name}]}) "
+    end
+    local formatted = cmd
+    if ... ~= nil then formatted = string.format(cmd, ...) end
+    formatted = dgcmd .. formatted
+    Logger.log_debug("\atRGMercs \awsent MQ \amGroup Command\aw: >> \ag%s\aw <<", formatted)
+    mq.cmd(formatted)
+end
+
 --- Checks the status of plugins.
 ---
 --- This function iterates over the provided table of plugins and performs a check on each one.
