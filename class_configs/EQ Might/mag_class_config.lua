@@ -579,7 +579,7 @@ _ClassConfig      = {
                 local delay = Config:GetSetting('AIGroupDelay')
                 Comms.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
                 mq.delay(delay)
-                Core.DoGroupCmd("/autoinventory")
+                Core.DoGroupOrRaidCmd("/autoinventory")
             elseif scope == "personal" then
                 local delay = Config:GetSetting('AISelfDelay')
                 mq.delay(delay)
@@ -881,6 +881,18 @@ _ClassConfig      = {
         },
         ['DPS'] = {
             {
+                name = "Artifact of Asterion",
+                type = "Item",
+                load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Asterion")() end,
+                cond = function(self, _) return mq.TLO.Me.Pet.ID() == 0 end,
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
+            },
+            {
                 name = "SwarmPet",
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoSwarmPet') > 1 end,
@@ -914,18 +926,6 @@ _ClassConfig      = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Targeting.TargetBodyIs(target, "Undead Pet")
-                end,
-            },
-            {
-                name = "Artifact of Asterion",
-                type = "Item",
-                load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Asterion")() end,
-                cond = function(self, _) return mq.TLO.Me.Pet.ID() == 0 end,
-                post_activate = function(self, spell, success)
-                    if success and mq.TLO.Me.Pet.ID() > 0 then
-                        mq.delay(50) -- slight delay to prevent chat bug with command issue
-                        self:SetPetHold()
-                    end
                 end,
             },
         },

@@ -719,20 +719,19 @@ local _ClassConfig = {
             -- cond = function(self) return true end, --Code kept here for illustration, if there is no condition to check, this line is not required
             spells = {
                 --role and critical functions
-                { name = "MezAESong",       cond = function(self) return Config:GetSetting('DoAEMez') end, },
-                { name = "MezSong",         cond = function(self) return Config:GetSetting('DoSTMez') end, },
-                { name = "CharmSong",       cond = function(self) return Config:GetSetting('CharmOn') end, },
-                { name = "SlowSong",        cond = function(self) return Config:GetSetting('DoSTSlow') end, },
-                { name = "AESlowSong",      cond = function(self) return Config:GetSetting('DoAESlow') end, },
-                { name = "DispelSong",      cond = function(self) return Config:GetSetting('DoDispel') end, },
-                { name = "CureSong",        cond = function(self) return Config:GetSetting('UseCure') end, },
-                { name = "RunBuffSong",     cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA("Selo's Sonata") end, },
-                { name = "EndBreathSong",   cond = function(self) return Config:GetSetting('UseEndBreath') end, },
-                { name = "AccelerandoSong", cond = function(self) return Config:GetSetting('UseAccelerando') end, },
+                { name = "MezAESong",     cond = function(self) return Config:GetSetting('DoAEMez') end, },
+                { name = "MezSong",       cond = function(self) return Config:GetSetting('DoSTMez') end, },
+                { name = "CharmSong",     cond = function(self) return Config:GetSetting('CharmOn') end, },
+                { name = "SlowSong",      cond = function(self) return Config:GetSetting('DoSTSlow') end, },
+                { name = "AESlowSong",    cond = function(self) return Config:GetSetting('DoAESlow') end, },
+                { name = "DispelSong",    cond = function(self) return Config:GetSetting('DoDispel') end, },
+                { name = "CureSong",      cond = function(self) return Config:GetSetting('UseCure') end, },
+                { name = "RunBuffSong",   cond = function(self) return Config:GetSetting('UseRunBuff') and not Casting.CanUseAA("Selo's Sonata") end, },
+                { name = "EndBreathSong", cond = function(self) return Config:GetSetting('UseEndBreath') end, },
 
                 -- main group dps
-                { name = "WarMarchSong",    cond = function(self) return Config:GetSetting('UseMarch') > 1 end, },
-                { name = "AriaSong",        cond = function(self) return Config:GetSetting('UseAria') > 1 end, },
+                { name = "WarMarchSong",  cond = function(self) return Config:GetSetting('UseMarch') > 1 end, },
+                { name = "AriaSong",      cond = function(self) return Config:GetSetting('UseAria') > 1 end, },
                 {
                     name = "OverhasteSong",
                     cond = function(self)
@@ -772,21 +771,22 @@ local _ClassConfig = {
                         return Config:GetSetting('UseInsult') == 3 and (not Config:GetSetting('UseLLInsult') or not Core.GetResolvedActionMapItem('LLInsultSong'))
                     end,
                 },
-                { name = "LLInsultSong2", cond = function(self) return Config:GetSetting('UseInsult') == 3 and Config:GetSetting('UseLLInsult') end, },
+                { name = "LLInsultSong2",   cond = function(self) return Config:GetSetting('UseInsult') == 3 and Config:GetSetting('UseLLInsult') end, },
                 -- melee dps songs
-                { name = "SufferingSong", cond = function(self) return Config:GetSetting('UseSuffering') > 1 end, },
+                { name = "SufferingSong",   cond = function(self) return Config:GetSetting('UseSuffering') > 1 end, },
                 -- caster dps songs
-                { name = "FireBuffSong",  cond = function(self) return Config:GetSetting('UseFireBuff') > 1 end, },
-                { name = "ColdBuffSong",  cond = function(self) return Config:GetSetting('UseColdBuff') > 1 end, },
-                { name = "DotBuffSong",   cond = function(self) return Config:GetSetting('UseDotBuff') > 1 end, },
+                { name = "FireBuffSong",    cond = function(self) return Config:GetSetting('UseFireBuff') > 1 end, },
+                { name = "ColdBuffSong",    cond = function(self) return Config:GetSetting('UseColdBuff') > 1 end, },
+                { name = "DotBuffSong",     cond = function(self) return Config:GetSetting('UseDotBuff') > 1 end, },
                 -- healer songs
-                { name = "RecklessSong",  cond = function(self) return Config:GetSetting('UseReckless') > 1 end, },
+                { name = "AccelerandoSong", cond = function(self) return Config:GetSetting('UseAccelerando') end, },
+                { name = "RecklessSong",    cond = function(self) return Config:GetSetting('UseReckless') > 1 end, },
                 -- tank songs
-                { name = "SpitefulSong",  cond = function(self) return Config:GetSetting('UseSpiteful') > 1 end, },
-                { name = "SprySong",      cond = function(self) return Config:GetSetting('UseSpry') > 1 end, },
-                { name = "ResistSong",    cond = function(self) return Config:GetSetting('UseResist') > 1 end, },
+                { name = "SpitefulSong",    cond = function(self) return Config:GetSetting('UseSpiteful') > 1 end, },
+                { name = "SprySong",        cond = function(self) return Config:GetSetting('UseSpry') > 1 end, },
+                { name = "ResistSong",      cond = function(self) return Config:GetSetting('UseResist') > 1 end, },
                 -- filler
-                { name = "CalmSong",      cond = function(self) return true end, }, -- condition not needed, for uniformity
+                { name = "CalmSong",        cond = function(self) return true end, }, -- condition not needed, for uniformity
             },
         },
     },

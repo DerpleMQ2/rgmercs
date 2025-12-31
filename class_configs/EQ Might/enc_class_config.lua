@@ -489,10 +489,8 @@ local _ClassConfig = {
             end
 
             Logger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
-
-            Comms.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
             mq.delay(Config:GetSetting("AICrystalDelay"))
-            Core.DoGroupCmd("/autoinventory")
+            Core.DoCmd("/autoinventory")
         end,
     },
     ['Rotations']       = {

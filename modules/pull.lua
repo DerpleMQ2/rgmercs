@@ -1013,11 +1013,11 @@ function Module:Render()
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
         if campData.returnToCamp then
             if ImGui.Button("Break Group Camp", ImGui.GetWindowWidth() * .3, 18) then
-                Core.DoGroupCmd("/rgl campoff")
+                Core.DoGroupOrRaidCmd("/rgl campoff")
             end
         else
             if ImGui.Button("Set Group Camp Here", ImGui.GetWindowWidth() * .3, 18) then
-                Core.DoGroupCmd("/rgl campon")
+                Core.DoGroupOrRaidCmd("/rgl campon")
             end
         end
         ImGui.SameLine()

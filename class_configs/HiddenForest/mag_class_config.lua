@@ -1000,7 +1000,7 @@ _ClassConfig      = {
                 local delay = Config:GetSetting('AIGroupDelay')
                 Comms.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
                 mq.delay(delay)
-                Core.DoGroupCmd("/autoinventory")
+                Core.DoGroupOrRaidCmd("/autoinventory")
             elseif scope == "personal" then
                 local delay = Config:GetSetting('AISelfDelay')
                 mq.delay(delay)
