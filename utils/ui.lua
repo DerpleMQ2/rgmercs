@@ -196,7 +196,7 @@ function Ui.RenderMercsStatus(showPopout)
             ImGui.TableNextColumn()
             ImGui.Text(string.format("%s", data.Data.Assist or "None"))
             ImGui.TableNextColumn()
-            _, clicked = ImGui.Selectable(string.format("%s", data.Data.Chase or "None"), false)
+            local _, clicked = ImGui.Selectable(string.format("%s", data.Data.Chase or "None"), false)
             if clicked then
                 Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.Chase == "Chase Off" and ("chaseon " .. mq.TLO.Me.CleanName()) or "chaseoff")
             end
@@ -230,9 +230,10 @@ function Ui.RenderForceTargetList(showPopout)
         Config.Globals.ForceTargetID = 0
     end
 
-    if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 7 or 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
+    if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 8 or 6, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
-        ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
+        ImGui.TableSetupColumn('', (ImGuiTableColumnFlags.WidthFixed), 16.0)
+        ImGui.TableSetupColumn('', (ImGuiTableColumnFlags.WidthFixed), 16.0)
         if Config:GetSetting("ExtendedFTInfo") then
             ImGui.TableSetupColumn('XT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
         end
@@ -246,10 +247,28 @@ function Ui.RenderForceTargetList(showPopout)
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
+        if ImGui.TableSetColumnIndex(0) then
+            ImGui.SameLine()
+            ImGui.Text("FT")
+            ImGui.SameLine()
+            ImGui.Text(Icons.MD_INFO_OUTLINE)
+            Ui.Tooltip("Target is Forced")
+        end
+
+        if ImGui.TableSetColumnIndex(1) then
+            ImGui.SameLine()
+            ImGui.Text("Ig")
+            ImGui.SameLine()
+            ImGui.Text(Icons.MD_INFO_OUTLINE)
+            Ui.Tooltip("Ignore This Target")
+        end
+
+        ImGui.TableNextRow()
         local xtCount = mq.TLO.Me.XTarget() or 0
         for i = 1, xtCount do
             local xtarg = mq.TLO.Me.XTarget(i)
             if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Config.Globals.ForceCombatID) then
+                ImGui.PushID(string.format("##xtarg_%d", i))
                 ImGui.TableNextColumn()
                 if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, Ui.GetConHighlightBySpawn(xtarg))
@@ -260,6 +279,16 @@ function Ui.RenderForceTargetList(showPopout)
                     ImGui.PopStyleColor(1)
                 else
                     ImGui.Text("")
+                end
+                ImGui.TableNextColumn()
+
+                local checked, pressed = ImGui.Checkbox("", Config.Globals.IgnoredTargetIDs:contains(xtarg.ID()))
+                if pressed then
+                    if checked then
+                        Config.Globals.IgnoredTargetIDs:add(xtarg.ID())
+                    else
+                        Config.Globals.IgnoredTargetIDs:remove(xtarg.ID())
+                    end
                 end
                 if Config:GetSetting("ExtendedFTInfo") then
                     ImGui.TableNextColumn()
@@ -285,6 +314,7 @@ function Ui.RenderForceTargetList(showPopout)
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(math.ceil(xtarg.ID() or 0)))
                 end
+                ImGui.PopID()
             end
         end
 

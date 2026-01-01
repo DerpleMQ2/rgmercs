@@ -6,7 +6,8 @@ local Targeting   = require("utils.targeting")
 local Strings     = require("utils.strings")
 local Logger      = require("utils.logger")
 local ConfigShare = require("utils.rg_config_share")
-local DanNet      = require('lib.dannet.helpers')
+local Set         = require('mq.set')
+
 
 local Binds       = { _version = '0.1a', _name = "Binds", _author = 'Derple', }
 
@@ -88,6 +89,28 @@ Binds.Handlers    = {
 
         handler = function(config)
             Config:ClearAllTempSettings()
+        end,
+    },
+    ['ignoretarget'] = {
+        usage = "/rgl ignoretarget <id?>",
+        about =
+        "Will force target to be ignored when picking your assist target as the MA.",
+        handler = function(targetId)
+            targetId = targetId and tonumber(targetId) or mq.TLO.Target.ID()
+            if targetId > 0 then
+                Logger.log_info("\awIgnored Target: %d", targetId)
+                Config.Globals.IgnoredTargetIDs:add(targetId)
+            else
+                Logger.log_info("\awIgnoring a target requires a valid supplied ID or target!")
+            end
+        end,
+    },
+    ['ignoretargetclear'] = {
+        usage = "/rgl ignoretargetclear",
+        about = "Will clear all ignored targets.",
+        handler = function()
+            Config.Globals.IgnoredTargetIDs = Set.new({})
+            Logger.log_info("\awIgnored targets cleared.")
         end,
     },
     ['forcecombat'] = {

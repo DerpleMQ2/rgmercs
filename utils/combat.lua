@@ -385,6 +385,12 @@ function Combat.FindBestAutoTarget(validateFn)
         end
     end
 
+    if Config.Globals.IgnoredTargetIDs:contains(mq.TLO.Target.ID()) then
+        Logger.log_debug("\ayFindAutoTarget() : Clearing Target (%d/%s) because it is in the ignored list.", mq.TLO.Target.ID(),
+            mq.TLO.Target.CleanName() or "None")
+        Targeting.ClearTarget()
+    end
+
     -- FollowMarkTarget causes RG to have allow RG toons focus on who the group has marked. We'll exit early if this is the case.
     if Config:GetSetting('FollowMarkTarget') then
         if mq.TLO.Me.GroupMarkNPC(1).ID() and Config.Globals.AutoTargetID ~= mq.TLO.Me.GroupMarkNPC(1).ID() then
@@ -410,7 +416,8 @@ function Combat.FindBestAutoTarget(validateFn)
                 Config.Globals.ForceTargetID = 0
             end
         else
-            local targetValid = (Targeting.TargetIsType("npc", target) or Targeting.TargetIsType("npcpet", target))
+            local targetValid = (not Config.Globals.IgnoredTargetIDs:contains(target.ID())) and
+                (Targeting.TargetIsType("npc", target) or Targeting.TargetIsType("npcpet", target))
                 and target.Mezzed.ID() == nil and target.Charmed.ID() == nil
                 and Targeting.GetTargetDistance(target) < Config:GetSetting('AssistRange')
                 and Targeting.GetTargetDistanceZ(target) < 20
@@ -597,6 +604,11 @@ function Combat.OkToEngagePreValidateId(targetId)
         return false
     end
 
+    if Config.Globals.IgnoredTargetIDs:contains(targetId) then
+        Logger.log_verbose("\ayOkToEngagePrevalidate check for %s(ID: %d) - Target is in IgnoredTargetIDs --> Not Engaging", targetName, targetId)
+        return false
+    end
+
     local pcCheck = Targeting.TargetIsType("pc", target) or (Targeting.TargetIsType("pet", target) and Targeting.TargetIsType("pc", target.Master))
     local mercCheck = Targeting.TargetIsType("mercenary", target)
     if pcCheck or mercCheck then
@@ -651,6 +663,11 @@ function Combat.OkToEngage(autoTargetId)
 
     if target.Dead() then
         Logger.log_verbose("\ayOkToEngage check for %s(ID: %d) - Target Dead --> Not Engaging", targetName, targetId)
+        return false
+    end
+
+    if Config.Globals.IgnoredTargetIDs:contains(targetId) then
+        Logger.log_verbose("\ayOkToEngage check for %s(ID: %d) - Target is in IgnoredTargetIDs --> Not Engaging", targetName, targetId)
         return false
     end
 

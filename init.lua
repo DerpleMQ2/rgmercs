@@ -32,6 +32,7 @@ local Ui          = require("utils.ui")
 local Comms       = require("utils.comms")
 local Strings     = require("utils.strings")
 local Movement    = require("utils.movement")
+local Set         = require('mq.set')
 
 -- Initialize class-based moduldes
 local Modules     = require("utils.modules")
@@ -314,6 +315,7 @@ local function Main()
             Modules:ExecAll("OnZone")
             notifyZoning = false
             Config.Globals.ForceTargetID = 0
+            Config.Globals.IgnoredTargetIDs = Set.new({})
             Config.Globals.AutoTargetID = 0
             Config.Globals.ForceCombatID = 0
         end
@@ -379,12 +381,15 @@ local function Main()
         end
     else
         if curState ~= "Downtime" then
+            Logger.log_debug("Switching to Downtime state.")
+
             -- clear the cache during state transition.
             Targeting.ClearSafeTargetCache()
-            Targeting.ForceBurnTargetID = 0
-            Config.Globals.LastPulledID = 0
-            Config.Globals.AutoTargetID = 0
-            Casting.LastBurnCheck = false
+            Targeting.ForceBurnTargetID     = 0
+            Config.Globals.LastPulledID     = 0
+            Config.Globals.AutoTargetID     = 0
+            Config.Globals.IgnoredTargetIDs = Set.new({})
+            Casting.LastBurnCheck           = false
             Modules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
 
