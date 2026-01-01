@@ -176,8 +176,7 @@ function Ui.RenderMercsStatus(showPopout)
         for peer, data in pairs(mercs) do
             ImGui.PushID(string.format("##table_entry_%s", peer))
             ImGui.TableNextColumn()
-            local _, clicked = ImGui.Selectable(peer, false)
-            --if clicked then
+            ImGui.Selectable(peer, false)
             local name, _ = Comms.GetCharAndServerFromPeer(peer)
             if name then
                 if ImGui.IsMouseClicked(ImGuiMouseButton.Left) then
@@ -186,7 +185,6 @@ function Ui.RenderMercsStatus(showPopout)
                     Comms.SendPeerDoCmd(peer, "/foreground")
                 end
             end
-            --end
             ImGui.TableNextColumn()
             ImGui.Text(string.format("%d%%", math.ceil(data.Data.HPs or 0)))
             ImGui.TableNextColumn()
