@@ -57,6 +57,12 @@ function Comms.SendMessage(peer, module, event, data)
     Logger.log_debug("Sent Message: %s to:  %s event: %s", event, peer, Strings.TableToString(data or {}, 512))
 end
 
+function Comms.SendPeerDoCmd(peer, cmd, ...)
+    cmd = string.format(cmd, ...)
+    Comms.SendMessage(peer, "Core", "DoCmd", {
+        cmd = cmd, })
+end
+
 function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, chase)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()

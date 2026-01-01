@@ -177,12 +177,16 @@ function Ui.RenderMercsStatus(showPopout)
             ImGui.PushID(string.format("##table_entry_%s", peer))
             ImGui.TableNextColumn()
             local _, clicked = ImGui.Selectable(peer, false)
-            if clicked then
-                local name, _ = Comms.GetCharAndServerFromPeer(peer)
-                if name then
+            --if clicked then
+            local name, _ = Comms.GetCharAndServerFromPeer(peer)
+            if name then
+                if ImGui.IsMouseClicked(ImGuiMouseButton.Left) then
                     mq.TLO.Spawn("=" .. name).DoTarget()
+                elseif ImGui.IsMouseClicked(ImGuiMouseButton.Right) then
+                    Comms.SendPeerDoCmd(peer, "/foreground")
                 end
             end
+            --end
             ImGui.TableNextColumn()
             ImGui.Text(string.format("%d%%", math.ceil(data.Data.HPs or 0)))
             ImGui.TableNextColumn()
@@ -196,17 +200,14 @@ function Ui.RenderMercsStatus(showPopout)
             ImGui.TableNextColumn()
             _, clicked = ImGui.Selectable(string.format("%s", data.Data.Chase or "None"), false)
             if clicked then
-                Comms.SendMessage(peer, "Core", "DoCmd", {
-                    cmd = string.format("/rgl %s",
-                        data.Data.Chase == "Chase Off" and ("chaseon " .. mq.TLO.Me.CleanName()) or "chaseoff"),
-                })
+                Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.Chase == "Chase Off" and ("chaseon " .. mq.TLO.Me.CleanName()) or "chaseoff")
             end
 
             ImGui.TableNextColumn()
 
             _, clicked = ImGui.Selectable(string.format("%s", data.Data.State or "None"), false)
             if clicked then
-                Comms.SendMessage(peer, "Core", "DoCmd", { cmd = string.format("/rgl %s", data.Data.State == "Paused" and "unpause" or "pause"), })
+                Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
             end
 
             ImGui.TableNextColumn()
