@@ -7,21 +7,23 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      # Additional steps like build or test
+      # 1️ Create a file to upload
+      - name: Create artifact
+        run: |
+          mkdir dist
+          echo "Build from commit $GITHUB_SHA" > dist/info.txt
+          zip -r dist/package.zip dist
 
-      - name: Create Release
-        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged)
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 2️ Create release + upload asset
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          draft: false
-          prerelease: false
+          tag_name: v-${{ github.run_id }}
+          name: Release v-${{ github.run_id }}
+          files: |
+            dist/package.zip
