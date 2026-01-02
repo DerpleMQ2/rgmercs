@@ -428,9 +428,9 @@ local function Main()
     else
         if Targeting.GetXTHaterCount(true) > 0 or mq.TLO.Me.Combat() then
             local targetId = Targeting.GetTargetID()
-            local ignored = Config.Globals.IgnoredTargetIDs:contains(targetId)
-            local pullTarget = Config:GetSetting('DoPull') and targetId == Config.Globals.LastPulledID
-            local assistHater = Core.IAmMA() and Targeting.IsSpawnXTHater(targetId)
+            local ignored = Config.Globals.IgnoredTargetIDs:contains(targetId)                         -- don't target something in our ignore list
+            local pullTarget = Config:GetSetting('DoPull') and targetId == Config.Globals.LastPulledID -- don't clear your pull target while its traveling to you
+            local assistHater = Core.IAmMA() and Targeting.IsSpawnXTHater(targetId)                    -- don't clear a targeted hater as MA unless it is ignored
 
             if ignored or (not pullTarget and not assistHater) then
                 Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
