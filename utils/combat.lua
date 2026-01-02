@@ -214,6 +214,45 @@ function Combat.DoCombatActions()
     return true
 end
 
+--- @param target xtarget The target spawn to validate.
+--- @return boolean true if the target is valid for MATargeting, false otherwise.
+function Combat.ValidMAXTarget(target)
+    local spawnId = target.ID() or 0
+
+    if spawnId <= 0 then
+        Logger.log_verbose("ValidateMATarget: Invalid Spawn ID %d", spawnId)
+        return false
+    end
+
+    if target.ID() > 0 and target.Dead() then
+        Logger.log_verbose("ValidateMATarget: Spawn ID %d is dead", spawnId)
+        return false
+    end
+
+    if target.ID() > 0 and not (target.Aggressive() or target.TargetType():lower() == "auto hater" or spawnId == Config.Globals.ForceCombatID) then
+        Logger.log_verbose("ValidateMATarget: Spawn ID %d is not aggressive or auto hater or forced", spawnId)
+        return false
+    end
+
+    if Targeting.IsTempPet(target) then
+        Logger.log_verbose("ValidateMATarget: Spawn ID %d is a temporary pet", spawnId)
+        return false
+    end
+
+    if Config.Globals.IgnoredTargetIDs:contains(spawnId) then
+        Logger.log_verbose("ValidateMATarget: Spawn ID %d is in ignored target list", spawnId)
+        return false
+    end
+
+    -- believe it or not, target can become invalid between the time we get its ID and now
+    if target.ID() <= 0 then
+        Logger.log_verbose("ValidateMATarget: Spawn ID %d is no longer valid", spawnId)
+        return false
+    end
+
+    return true
+end
+
 --- Scans for targets within a specified radius.
 ---
 --- @param radius number The horizontal radius to scan for targets.
@@ -255,7 +294,7 @@ function Combat.MATargetScan(radius, zradius)
             local xtName = xtSpawn.CleanName() or "Error"
             local spawnId = xtSpawn.ID() or 0
 
-            if spawnId > 0 and not xtSpawn.Dead() and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or spawnId == Config.Globals.ForceCombatID) and not Targeting.IsTempPet(xtSpawn) and not Config.Globals.IgnoredTargetIDs:contains(spawnId) then
+            if Combat.ValidMAXTarget(xtSpawn) then
                 if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(xtSpawn, radius) then
                     Logger.log_verbose("MATargetScan Found %s [%d] Distance: %d", xtName, spawnId, xtSpawn.Distance() or 0)
                     if (xtSpawn.Distance() or 999) <= radius then
