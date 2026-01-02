@@ -1313,6 +1313,17 @@ function Ui.Tooltip(desc)
     end
 end
 
+function Ui.NonCollapsingHeader(label)
+    ImGui.TreeNodeEx(label, bit32.bor(ImGuiTreeNodeFlags.DefaultOpen,
+        ImGuiTreeNodeFlags.Framed,
+        ImGuiTreeNodeFlags.SpanAvailWidth,
+        ImGuiTreeNodeFlags.NoTreePushOnOpen,
+        ImGuiTreeNodeFlags.Leaf,
+        ImGuiTreeNodeFlags.NoTreePushOnOpen))
+
+    return true
+end
+
 --- Renders text as strikethrough
 --- @param text string The text to be displayed with strikethrough.
 function Ui.StrikeThroughText(text)

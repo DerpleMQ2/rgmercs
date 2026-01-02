@@ -1,7 +1,7 @@
 -- Sample FAQ Class Module
 local mq               = require('mq')
 local Config           = require('utils.config')
-local Core             = require("utils.core")
+local Ui               = require('utils.ui')
 local Comms            = require("utils.comms")
 local Logger           = require("utils.logger")
 local Binds            = require("utils.binds")
@@ -427,7 +427,9 @@ function Module:RenderConfig(search)
 			end
 		end
 
-		if ImGui.CollapsingHeader("Frequently Asked Questions") then
+		ImGui.NewLine()
+
+		if Ui.NonCollapsingHeader("Frequently Asked Questions") then
 			local questions = Modules:ExecAll("GetFAQ")
 			local configFaq = {}
 
