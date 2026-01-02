@@ -396,7 +396,7 @@ function Module:RenderConfig(search)
 
 	self.TempSettings.Search = search
 
-	if ImGui.BeginChild("##FAQCommandContainer", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.Border, ImGuiChildFlags.AlwaysAutoResize)) then
+	if ImGui.BeginChild("##FAQCommandContainer", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.Border, ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY)) then
 		if ImGui.CollapsingHeader("Command List") then
 			if ImGui.BeginTable("##CommandHelper", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
 				ImGui.TableSetupColumn("Command", ImGuiTableColumnFlags.WidthFixed, 100)
