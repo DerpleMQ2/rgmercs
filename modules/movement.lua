@@ -656,6 +656,10 @@ function Module:GiveTime(combat_state)
         return
     end
 
+    if not self:InCampZone() then
+        Config:SetSetting("ReturnToCamp", false)
+    end
+
     if combat_state == "Downtime" then
         if Casting.ShouldShrink() then
             Casting.UseItem(Config:GetSetting('ShrinkItem'), mq.TLO.Me.ID())
@@ -685,7 +689,7 @@ function Module:GiveTime(combat_state)
     end
 
     if Config:GetSetting('MaintainCampfire') > 1 and Casting.OkayToBuff() then
-        if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId then
+        if not mq.TLO.Me.Fellowship.CampfireZone() and self:InCampZone() then
             --Logger.log_debug("Doing campfire maintainance")
             self:Campfire()
         end
