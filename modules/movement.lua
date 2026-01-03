@@ -656,7 +656,7 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    if not self:InCampZone() then
+    if not self:InCampZone() and Config:GetSetting("ReturnToCamp") then
         Config:SetSetting("ReturnToCamp", false)
     end
 
