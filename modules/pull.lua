@@ -5,6 +5,7 @@ local Math                                = require('utils.math')
 local Combat                              = require("utils.combat")
 local Casting                             = require("utils.casting")
 local Core                                = require("utils.core")
+local Movement                            = require("utils.Movement")
 local Targeting                           = require("utils.targeting")
 local Ui                                  = require("utils.ui")
 local Comms                               = require("utils.comms")
@@ -347,6 +348,7 @@ Module.DefaultConfig                   = {
         Default = 350,
         Min = 1,
         Max = 10000,
+        OnChange = function(self) Movement.UpdateMapRadii() end,
     },
     ['PullRadiusHunt']                         = {
         DisplayName = "Pull Radius (Hunt)",

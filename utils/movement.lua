@@ -152,4 +152,14 @@ function Movement:NavAroundCircle(target, radius)
     return false
 end
 
+function Movement.UpdateMapRadii()
+    if Config:GetSetting('ReturnToCamp') then
+        Core.DoCmd("/squelch /mapfilter campradius %d", Config:GetSetting('AutoCampRadius'))
+        Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadius'))
+    else
+        Core.DoCmd("/squelch /mapfilter campradius off")
+        Core.DoCmd("/squelch /mapfilter pullradius off")
+    end
+end
+
 return Movement

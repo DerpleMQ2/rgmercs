@@ -5,6 +5,7 @@ local Math                         = require('utils.math')
 local Combat                       = require('utils.combat')
 local Core                         = require("utils.core")
 local Targeting                    = require("utils.targeting")
+local Movement                     = require("utils.movement")
 local Casting                      = require("utils.casting")
 local Ui                           = require("utils.ui")
 local Comms                        = require("utils.comms")
@@ -203,6 +204,7 @@ Module.DefaultConfig   = {
         Default = (Config.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60),
         Min = 10,
         Max = 300,
+        OnChange = function(self) Movement.UpdateMapRadii() end,
     },
     ['CampHard']                               = {
         DisplayName = "Camp Hard",
@@ -295,14 +297,6 @@ function Module:WriteSettings()
 
     mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
 
-    if Config:GetSetting('ReturnToCamp') then
-        Core.DoCmd("/squelch /mapfilter campradius %d", Config:GetSetting('AutoCampRadius'))
-        Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadius'))
-    else
-        Core.DoCmd("/squelch /mapfilter campradius off")
-        Core.DoCmd("/squelch /mapfilter pullradius off")
-    end
-
     if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
@@ -390,8 +384,7 @@ function Module:CampOn()
     self.TempSettings.AutoCampY  = mq.TLO.Me.Y()
     self.TempSettings.AutoCampZ  = mq.TLO.Me.Z()
     self.TempSettings.CampZoneId = mq.TLO.Zone.ID()
-    Core.DoCmd("/squelch /mapfilter campradius %d", Config:GetSetting('AutoCampRadius'))
-    Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadius'))
+    Movement.UpdateMapRadii()
     Logger.log_info("\ayCamping On: (X: \at%d\ay ; Y: \at%d\ay)", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY)
 end
 
