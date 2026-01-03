@@ -97,6 +97,7 @@ Module.DefaultConfig   = {
         Default = false,
         FAQ = "How do I set a camp?",
         Answer = "You can set a camp using a button on the Movement tab, or by using the campon command (see command list) .",
+        OnChange = function(self) Movement.UpdateMapRadii() end,
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
@@ -384,7 +385,6 @@ function Module:CampOn()
     self.TempSettings.AutoCampY  = mq.TLO.Me.Y()
     self.TempSettings.AutoCampZ  = mq.TLO.Me.Z()
     self.TempSettings.CampZoneId = mq.TLO.Zone.ID()
-    Movement.UpdateMapRadii()
     Logger.log_info("\ayCamping On: (X: \at%d\ay ; Y: \at%d\ay)", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY)
 end
 
@@ -401,8 +401,6 @@ end
 function Module:CampOff()
     Config:SetSetting('ReturnToCamp', false)
     self:SaveSettings(false)
-    Core.DoCmd("/squelch /mapfilter campradius off")
-    Core.DoCmd("/squelch /mapfilter pullradius off")
 end
 
 function Module:DestoryCampfire()
