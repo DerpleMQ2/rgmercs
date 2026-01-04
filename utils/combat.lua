@@ -230,7 +230,8 @@ function Combat.ValidMAXTarget(target)
     end
 
     if target.ID() > 0 and not (target.Aggressive() or target.TargetType():lower() == "auto hater" or spawnId == Config.Globals.ForceCombatID) then
-        Logger.log_verbose("ValidateMATarget: Spawn ID %d is not aggressive or auto hater or forced", spawnId)
+        Logger.log_verbose("ValidateMATarget: Spawn ID %d is not aggressive or auto hater or forced (Aggressive: %s, TargetType: %s)", spawnId,
+            Strings.BoolToColorString(target.Aggressive()), target.TargetType())
         return false
     end
 
