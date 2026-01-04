@@ -14,7 +14,7 @@ jobs:
 
       - name: Generate version.lua
         run: |
-          cat > version2.lua << 'EOF'
+          cat > extras/version.lua << 'EOF'
           return {
               run_number = ${{ github.run_number }},
               version = "1.0.${{ github.run_number }}",
@@ -22,7 +22,7 @@ jobs:
           }
           EOF
 
-      - name: Commit version.lua
+      - name: Commit version2.lua
         run: |
           if git diff --quiet; then
             echo "No changes to commit"
@@ -32,7 +32,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add version.lua
+          git add extras/version.lua
           git commit -m "ci: update version.lua [skip ci]"
           git push
 
