@@ -625,12 +625,7 @@ function Module:OnDeath()
 end
 
 function Module:ShouldFollow()
-    local me = mq.TLO.Me
-    local assistSpawn = Core.GetMainAssistSpawn()
-
-    return not mq.TLO.MoveTo.Moving() and
-        (not me.Casting() or Core.MyClassIs("brd")) and
-        (Targeting.GetXTHaterCount() == 0 or (assistSpawn() and (assistSpawn.Distance() or 0) > Config:GetSetting('ChaseDistance')))
+    return not mq.TLO.MoveTo.Moving() and (not mq.TLO.Me.Casting() or Core.MyClassIs("brd"))
 end
 
 function Module:OnZone()
