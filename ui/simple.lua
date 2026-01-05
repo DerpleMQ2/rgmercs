@@ -3,7 +3,6 @@ local ImGui                  = require('ImGui')
 local Config                 = require('utils.config')
 local Ui                     = require('utils.ui')
 local Icons                  = require('mq.ICONS')
-local GitCommit              = require('extras.version')
 
 local SimpleUI               = { _version = '1.0', _name = "SimpleUI", _author = 'Derple', }
 SimpleUI.__index             = SimpleUI

@@ -1,20 +1,20 @@
-local mq           = require('mq')
-local GitCommit    = require('extras.version')
-local OptionsUI    = require("ui.options")
-local ImGui        = require('ImGui')
-local Config       = require('utils.config')
-local Ui           = require('utils.ui')
-local Icons        = require('mq.ICONS')
-local ImageUI      = require('ui.images')
-local Core         = require('utils.core')
-local Targeting    = require('utils.targeting')
-local Casting      = require('utils.casting')
-local Modules      = require('utils.modules')
-local Movement     = require('utils.movement')
-local ConsoleUI    = require('ui.console')
+local mq            = require('mq')
+local CommitVersion = require('extras.version')
+local OptionsUI     = require("ui.options")
+local ImGui         = require('ImGui')
+local Config        = require('utils.config')
+local Ui            = require('utils.ui')
+local Icons         = require('mq.ICONS')
+local ImageUI       = require('ui.images')
+local Core          = require('utils.core')
+local Targeting     = require('utils.targeting')
+local Casting       = require('utils.casting')
+local Modules       = require('utils.modules')
+local Movement      = require('utils.movement')
+local ConsoleUI     = require('ui.console')
 
-local StandardUI   = { _version = '1.0', _name = "StandardUI", _author = 'Derple', }
-StandardUI.__index = StandardUI
+local StandardUI    = { _version = '1.0', _name = "StandardUI", _author = 'Derple', }
+StandardUI.__index  = StandardUI
 
 function StandardUI:renderModulesTabs()
     if not Config:SettingsLoaded() then return end
@@ -134,9 +134,9 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             Ui.RenderLogo(imgDisplayed:GetTextureID())
             ImGui.SameLine()
             local titlePos = ImGui.GetCursorPosVec()
-            Ui.RenderText("RGMercs %s [%s]",
+            Ui.RenderText("RGMercs %s [Build: %s]",
                 Config._version,
-                GitCommit.commitId or "None"
+                CommitVersion.version or "None"
             )
             titlePos = ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing())
             ImGui.SetCursorPos(titlePos)
