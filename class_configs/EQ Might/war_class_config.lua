@@ -332,6 +332,11 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Xeno's Faceguard",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Xeno's Faceguard")() end,
+            },
+            {
                 name = "Blast of Anger",
                 type = "AA",
             },

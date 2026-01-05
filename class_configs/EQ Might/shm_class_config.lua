@@ -717,6 +717,18 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Artifact of Nature Spirit",
+                type = "Item",
+                load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Nature Spirit")() end,
+                cond = function(self, _) return mq.TLO.Me.Pet.ID() == 0 end,
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
+            },
+            {
                 name = "Companion's Blessing",
                 type = "AA",
                 cond = function(self, aaName, target)
@@ -920,10 +932,24 @@ local _ClassConfig = {
         },
         ['PetSummon']   = {
             {
+                name = "Artifact of Nature Spirit",
+                type = "Item",
+                load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Nature Spirit")() end,
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
+            },
+            {
                 name = "PetSpell",
                 type = "Spell",
-                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
-                cond = function(self, _) return Config:GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
+                load_cond = function(self)
+                    return not Config:GetSetting("UseDonorPet") or not mq.TLO.FindItem("=Artifact of Nature Spirit")()
+                end,
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
                 post_activate = function(self, spell, success)
                     if success and mq.TLO.Me.Pet.ID() > 0 then
                         mq.delay(50) -- slight delay to prevent chat bug with command issue
@@ -1719,6 +1745,16 @@ local _ClassConfig = {
             Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
+        },
+        ['UseDonorPet']       = {
+            DisplayName = "Summon Nature Spirit",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Pet Summoning",
+            Index = 101,
+            Tooltip = "Use your Artifact of Nature Spirit to summon the donor mammoth pet.",
+            RequiresLoadoutChange = true, -- this is a load condition
+            Default = true,
         },
     },
     ['ClassFAQ']          = {

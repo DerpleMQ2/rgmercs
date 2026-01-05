@@ -636,6 +636,18 @@ local _ClassConfig = {
                     return Casting.OkayToNuke(true)
                 end,
             },
+            {
+                name = "Artifact of Nature Spirit",
+                type = "Item",
+                load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Nature Spirit") end,
+                cond = function(self, _) return mq.TLO.Me.Pet.ID() == 0 end,
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
+            },
         },
         ['DPS(AE)'] = {
             {
@@ -896,9 +908,24 @@ local _ClassConfig = {
         },
         ['PetSummon'] = {
             {
+                name = "Artifact of Nature Spirit",
+                type = "Item",
+                load_cond = function(self) return Config:GetSetting("UseDonorPet") and mq.TLO.FindItem("=Artifact of Nature Spirit")() end,
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
+            },
+            {
                 name = "PetSpell",
                 type = "Spell",
-                active_cond = function() return mq.TLO.Me.Pet.ID() ~= 0 end,
+                load_cond = function(self)
+                    return not Config:GetSetting("UseDonorPet") or not mq.TLO.FindItem("=Artifact of Nature Spirit")()
+                end,
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
                 post_activate = function(self, spell, success)
                     if success and mq.TLO.Me.Pet.ID() > 0 then
                         mq.delay(50) -- slight delay to prevent chat bug with command issue
@@ -1392,6 +1419,16 @@ local _ClassConfig = {
             Tooltip = "Keep (Lesser) Succor memorized.",
             Default = false,
             RequiresLoadoutChange = true,
+        },
+        ['UseDonorPet']       = {
+            DisplayName = "Summon Nature Spirit",
+            Group = "Abilities",
+            Header = "Pet",
+            Category = "Pet Summoning",
+            Index = 101,
+            Tooltip = "Use your Artifact of Nature Spirit to summon the donor mammoth pet.",
+            RequiresLoadoutChange = true, -- this is a load condition
+            Default = true,
         },
     },
     ['ClassFAQ']          = {
