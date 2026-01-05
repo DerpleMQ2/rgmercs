@@ -9,6 +9,9 @@ LoaderUI.__index = LoaderUI
 function LoaderUI:RenderLoader(initPctComplete, initMsg)
     ImagesUI:InitLoader()
 
+    ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 15)
+    ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 15)
+    ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 100)
     ImGui.SetNextWindowSize(ImVec2(400, 80), ImGuiCond.Always)
     ImGui.SetNextWindowPos(ImVec2(ImGui.GetIO().DisplaySize.x / 2 - 200, ImGui.GetIO().DisplaySize.y / 3 - 75), ImGuiCond.Always)
 
@@ -23,6 +26,7 @@ function LoaderUI:RenderLoader(initPctComplete, initMsg)
     ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 0.2, 0.7, 1 - (initPctComplete / 100), initPctComplete / 100)
     ImGui.ProgressBar(initPctComplete / 100, ImVec2(310, 0), initMsg)
     ImGui.PopStyleColor()
+    ImGui.PopStyleVar(3)
     ImGui.End()
 end
 
