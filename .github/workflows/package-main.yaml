@@ -12,18 +12,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1️ Create a file to upload
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(sed -n 's/.*version *= *"\(.*\)".*/\1/p' version.lua)
+          [ -z "$VERSION" ] && exit 1
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # Create a file to upload
       - name: Create artifact
         run: |
           mkdir dist
           echo "Build from commit $GITHUB_SHA" > dist/info.txt
           zip -r dist/package.zip dist
 
-      # 2️ Create release + upload asset
+      # Create release + upload asset
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
           files: |
             dist/package.zip
