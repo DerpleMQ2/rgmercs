@@ -15,7 +15,7 @@ jobs:
       - name: Read version
         id: version
         run: |
-          VERSION=$(sed -n 's/.*version *= *"\(.*\)".*/\1/p' extras/version.lua)
+          VERSION=$(sed -n 's/.*version *= *\([0-9]\+\).*/\1/p' extras/version.lua)
           [ -z "$VERSION" ] && exit 1
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
