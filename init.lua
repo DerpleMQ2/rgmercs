@@ -363,7 +363,7 @@ local function Main()
         Core.DoCmd("/nav stop")
     end
 
-    if Targeting.GetXTHaterCount() > 0 then
+    if Targeting.GetXTHaterCount(true) > 0 then
         if curState == "Downtime" and mq.TLO.Me.Sitting() then
             -- if switching into combat state stand up.
             mq.TLO.Me.Stand()
@@ -426,7 +426,7 @@ local function Main()
     if Combat.OkToEngage(Config.Globals.AutoTargetID) then
         Combat.EngageTarget(Config.Globals.AutoTargetID)
     else
-        if Targeting.GetXTHaterCount(true) > 0 or mq.TLO.Me.Combat() then
+        if curState == "Combat" then
             local targetId = Targeting.GetTargetID()
             local ignored = Config.Globals.IgnoredTargetIDs:contains(targetId)                         -- don't target something in our ignore list
             local pullTarget = Config:GetSetting('DoPull') and targetId == Config.Globals.LastPulledID -- don't clear your pull target while its traveling to you
@@ -436,6 +436,9 @@ local function Main()
                 Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
                 Targeting.ClearTarget()
             end
+        elseif mq.TLO.Me.Combat() and (Config:GetSetting('AutoAttackSafety') or not mq.TLO.Target()) then
+            Logger.log_debug("\ayTurning off attack because we don't have a target or we are not OkToEngage!")
+            Core.DoCmd("/attack off")
         end
     end
 
@@ -483,18 +486,6 @@ local function Main()
 
     if Combat.ShouldKillTargetReset() then
         Config.Globals.AutoTargetID = 0
-    end
-
-    -- If target is not attackable then turn off attack
-    local pcCheck = Targeting.TargetIsType("pc") or
-        (Targeting.TargetIsType("pet") and Targeting.TargetIsType("pc", mq.TLO.Target.Master))
-    local mercCheck = Targeting.TargetIsType("mercenary")
-    if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
-        Logger.log_debug(
-            "\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
-            Strings.BoolToColorString(mq.TLO.Me.Combat()), Strings.BoolToColorString(pcCheck),
-            Strings.BoolToColorString(mercCheck))
-        Core.DoCmd("/attack off")
     end
 
     -- Revive our mercenary if they're dead and we're using a mercenary

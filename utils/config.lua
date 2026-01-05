@@ -720,6 +720,16 @@ Config.DefaultConfig               = {
         Default = false,
         ConfigType = "Advanced",
     },
+    ['AutoAttackSafety']     = {
+        DisplayName = "Auto Attack Safety Check",
+        Group = "Combat",
+        Header = "Targeting",
+        Category = "Targeting Behavior",
+        Index = 6,
+        Tooltip = "Turn auto-attack off if we are not cleared to engage the current target.",
+        Default = true,
+        ConfigType = "Advanced",
+    },
 
     ['ScanNamedPriority']    = {
         DisplayName = "Scan Priority:",
