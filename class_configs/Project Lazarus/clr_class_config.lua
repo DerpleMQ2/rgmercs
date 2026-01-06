@@ -549,7 +549,7 @@ local _ClassConfig = {
             timer = 30,
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('DoManaRestore') and (Casting.CanUseAA("Veturika's Perseverence") or Casting.CanUseAA("Quiet Miracle")) end,
+            load_cond = function() return Config:GetSetting('DoManaRestore') and (Casting.CanUseAA("Veturika's Perseverance") or Casting.CanUseAA("Quiet Miracle")) end,
             targetId = function(self)
                 return { Combat.FindWorstHurtManaGroupMember(Config:GetSetting('ManaRestorePct')),
                     Combat.FindWorstHurtManaXT(Config:GetSetting('ManaRestorePct')), }
@@ -588,7 +588,7 @@ local _ClassConfig = {
     ['Rotations']         = {
         ['ManaRestore'] = {
             {
-                name = "Veturika's Perseverence",
+                name = "Veturika's Perseverance",
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Targeting.TargetIsMyself(target) and Casting.AmIBuffable()
