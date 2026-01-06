@@ -889,7 +889,7 @@ function Module:StopAttack()
     if mq.TLO.Me.Combat() then
         Logger.log_debug("\awMEZ:\ax Stopping attack to avoid breaking mez.")
         Core.DoCmd("/attack off")
-        mq.delay(500, function() return not mq.TLO.Me.Combat() end)
+        mq.delay(500, function() return mq.TLO.Me.Combat() == false end)
     end
 end
 
@@ -897,7 +897,7 @@ function Module:StopCast()
     if mq.TLO.Me.Casting() then
         Logger.log_debug("\awMEZ:\ax Stopping cast or song so I can mez.")
         mq.TLO.Me.StopCast()
-        mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
+        mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() == false end)
     end
 end
 

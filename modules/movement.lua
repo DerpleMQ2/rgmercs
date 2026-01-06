@@ -408,14 +408,14 @@ function Module:DestoryCampfire()
     Logger.log_debug("DestoryCampfire()")
 
     mq.TLO.Window("FellowshipWnd").DoOpen()
-    mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() end)
+    mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() == true end)
     mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
     if mq.TLO.Me.Fellowship.Campfire() then
         mq.TLO.Window("FellowshipWnd").Child("FP_DestroyCampsite").LeftMouseUp()
-        mq.delay("5s", function() return mq.TLO.Window("ConfirmationDialogBox").Open() end)
+        mq.delay("5s", function() return mq.TLO.Window("ConfirmationDialogBox").Open() == true end)
 
-        if mq.TLO.Window("ConfirmationDialogBox").Open() then
+        if mq.TLO.Window("ConfirmationDialogBox").Open() == true then
             mq.TLO.Window("ConfirmationDialogBox").Child("Yes_Button").LeftMouseUp()
         end
 
@@ -466,15 +466,15 @@ function Module:Campfire(camptype)
 
     if fellowCount >= 3 then
         mq.TLO.Window("FellowshipWnd").DoOpen()
-        mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() end)
+        mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() == true end)
         mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
         if mq.TLO.Me.Fellowship.Campfire() then
             if mq.TLO.Zone.ID() ~= mq.TLO.Me.Fellowship.CampfireZone.ID() then
                 mq.TLO.Window("FellowshipWnd").Child("FP_DestroyCampsite").LeftMouseUp()
-                mq.delay("5s", function() return mq.TLO.Window("ConfirmationDialogBox").Open() end)
+                mq.delay("5s", function() return mq.TLO.Window("ConfirmationDialogBox").Open() == true end)
 
-                if mq.TLO.Window("ConfirmationDialogBox").Open() then
+                if mq.TLO.Window("ConfirmationDialogBox").Open() == true then
                     mq.TLO.Window("ConfirmationDialogBox").Child("Yes_Button").LeftMouseUp()
                 end
 

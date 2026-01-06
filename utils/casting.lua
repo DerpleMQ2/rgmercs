@@ -1184,7 +1184,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             end
             Core.DoCmd("/cast \"%s%s\"", Config:GetSetting('UseExactSpellNames') and "=" or "", songName)
 
-            mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
+            mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() == true end)
 
             -- If we /stopsong too soon after a cast, the server will re-open the cast window.
             -- -- This can be observed with the following:
@@ -1389,7 +1389,7 @@ end
 function Casting.UseAbility(abilityName)
     local me = mq.TLO.Me
     Core.DoCmd("/doability %s", abilityName)
-    mq.delay(8, function() return not me.AbilityReady(abilityName) end)
+    mq.delay(50, function() return me.AbilityReady(abilityName) ~= true end)
     Logger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", abilityName)
     return true
 end

@@ -1645,9 +1645,9 @@ end
 
 function Module:OnZone()
     -- Zone Handler
-    mq.delay("30s", function() return not mq.TLO.Me.Zoning() end) --don't try to do anything while we are still zoning
+    mq.delay("30s", function() return mq.TLO.Me.Zoning() == false end) --don't try to do anything while we are still zoning
     if not mq.TLO.Me.Zoning() then
-        local addDelay = 8 * (mq.TLO.EverQuest.Ping() or 150)     -- add'l delay to ensure we are fully loaded
+        local addDelay = 8 * (mq.TLO.EverQuest.Ping() or 150)          -- add'l delay to ensure we are fully loaded
         mq.delay(addDelay)
         self:SetPetHold()
     end

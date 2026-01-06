@@ -1034,7 +1034,7 @@ local _ClassConfig = {
                 end,
                 post_activate = function(self, spell, success)
                     local petName = mq.TLO.Me.Pet.CleanName() or "None"
-                    mq.delay("3s", function() return not mq.TLO.Me.Casting() end)
+                    mq.delay("3s", function() return mq.TLO.Me.Casting() == nil end)
                     if success and mq.TLO.Me.XTarget(petName)() then
                         Comms.PrintGroupMessage("It seems %s has triggered combat due to a server bug, calling the pet back.", spell)
                         Core.DoCmd('/pet back off')

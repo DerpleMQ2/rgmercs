@@ -636,7 +636,7 @@ function Module:ProcessCharmList()
 							mq.delay("3s", function() return not mq.TLO.Me.Combat() end)
 							Core.DoCmd("/stopcast")
 							Core.DoCmd("/stopsong")
-							mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
+							mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() == false end)
 						end
 
 						Targeting.SetTarget(id)
