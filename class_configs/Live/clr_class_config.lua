@@ -943,14 +943,14 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Veturika's Perseverence",
+                name = "Veturika's Perseverance",
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Targeting.TargetIsMyself(target)
                 end,
             },
             { --The stuff above is down, lets make mainhealpoint chonkier. Homework: Wondering if we should be using this more/elsewhere.
-                name = "Channeling of the Divine",
+                name = "Channeling the Divine",
                 type = "AA",
             },
             {
@@ -1141,7 +1141,7 @@ local _ClassConfig = {
             timer = 30,
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('DoManaRestore') and (Casting.CanUseAA("Veturika's Perseverence") or Casting.CanUseAA("Quiet Prayer")) end,
+            load_cond = function() return Config:GetSetting('DoManaRestore') and (Casting.CanUseAA("Veturika's Perseverance") or Casting.CanUseAA("Quiet Prayer")) end,
             targetId = function(self)
                 return { Combat.FindWorstHurtManaGroupMember(Config:GetSetting('ManaRestorePct')),
                     Combat.FindWorstHurtManaXT(Config:GetSetting('ManaRestorePct')), }
@@ -1176,7 +1176,7 @@ local _ClassConfig = {
     ['Rotations']         = {
         ['ManaRestore'] = {
             {
-                name = "Veturika's Perseverence",
+                name = "Veturika's Perseverance",
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Targeting.TargetIsMyself(target) and Casting.AmIBuffable()
