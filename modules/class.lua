@@ -1324,6 +1324,7 @@ function Module:RunCureRotation(combat_state)
     local dannetPeers = mq.TLO.DanNet.PeerCount()
     local actorPeers = Config:GetAllPeerHeartbeats()
     local handledPeers = Set.new({})
+    local handledPeerCount = 0
 
     for peer, _ in pairs(actorPeers) do
         local char, _ = Comms.GetCharAndServerFromPeer(peer)
@@ -1347,10 +1348,11 @@ function Module:RunCureRotation(combat_state)
 
         if handled then
             handledPeers:add(char:lower())
+            handledPeerCount = handledPeerCount + 1
         end
     end
 
-    if handledPeers:count() ~= dannetPeers then
+    if handledPeerCount ~= dannetPeers then
         for i = 1, dannetPeers do
             ---@diagnostic disable-next-line: redundant-parameter
             local peer = DanNet.getPeer(i)
