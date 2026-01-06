@@ -1350,38 +1350,40 @@ function Module:RunCureRotation(combat_state)
         end
     end
 
-    for i = 1, dannetPeers do
-        ---@diagnostic disable-next-line: redundant-parameter
-        local peer = mq.TLO.DanNet.Peers(i)()
-        if peer and peer:len() > 0 then
-            local startindex = string.find(peer, "_")
-            if startindex then
-                peer = string.sub(peer, startindex + 1)
-            end
-            peer = peer:lower()
-            if peer ~= mq.TLO.Me.Name():lower() and not handledPeers:contains(peer) then
-                local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
-                local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
+    if handledPeers:count() ~= dannetPeers then
+        for i = 1, dannetPeers do
+            ---@diagnostic disable-next-line: redundant-parameter
+            local peer = DanNet.getPeer(i)
+            if peer and peer:len() > 0 then
+                local startindex = string.find(peer, "_")
+                if startindex then
+                    peer = string.sub(peer, startindex + 1)
+                end
+                peer = peer:lower()
+                if peer ~= mq.TLO.Me.Name():lower() and not handledPeers:contains(peer) then
+                    local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
+                    local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
 
-                --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
-                if cureTargetID > 0 then
-                    if (cureTarget.Distance() or 999) < 150 then
-                        Logger.log_verbose("\ag[Cures - DanNet] %s is in range - checking for curables", peer)
+                    --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
+                    if cureTargetID > 0 then
+                        if (cureTarget.Distance() or 999) < 150 then
+                            Logger.log_verbose("\ag[Cures - DanNet] %s is in range - checking for curables", peer)
 
-                        local newCoroutine = coroutine.create(function()
-                            self:CheckPeerForCures(peer, cureTargetID)
-                        end)
+                            local newCoroutine = coroutine.create(function()
+                                self:CheckPeerForCures(peer, cureTargetID)
+                            end)
 
-                        if newCoroutine then
-                            table.insert(self.TempSettings.CureCoroutines, newCoroutine)
+                            if newCoroutine then
+                                table.insert(self.TempSettings.CureCoroutines, newCoroutine)
+                            else
+                                Logger.log_error("\ar[Cures - DanNet] Failed to create coroutine for %s", peer)
+                            end
                         else
-                            Logger.log_error("\ar[Cures - DanNet] Failed to create coroutine for %s", peer)
+                            Logger.log_verbose("\ao[Cures - DanNet] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
                         end
                     else
-                        Logger.log_verbose("\ao[Cures - DanNet] %d::%s is \arNOT\ao in range", i, peer or "Unknown")
+                        Logger.log_verbose("\ao[Cures - DanNet] %d::No valid ID for %s, \arNOT\ao in zone", i, peer or "Unknown")
                     end
-                else
-                    Logger.log_verbose("\ao[Cures - DanNet] %d::No valid ID for %s, \arNOT\ao in zone", i, peer or "Unknown")
                 end
             end
         end

@@ -163,7 +163,7 @@ function Module:GiveTime(combat_state)
             local dannetPeers = mq.TLO.DanNet.PeerCount()
             for i = 1, dannetPeers do
                 ---@diagnostic disable-next-line: redundant-parameter
-                local peer = mq.TLO.DanNet.Peers(i)()
+                local peer = DanNet.getPeer(i)
 
                 if peer and peer:len() > 0 then
                     Logger.log_debug("Searching corpses for: %s", peer)
