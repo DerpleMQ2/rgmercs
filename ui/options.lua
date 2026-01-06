@@ -666,13 +666,16 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
             bottom_right.y     = bottom_right.y + ImGui.GetScrollY()
 
             local draw_list    = ImGui.GetWindowDrawList()
-            draw_list:PushClipRect(top_left, bottom_right, true)
-            draw_list:AddImage(self.bgImg:GetTextureID(),
-                top_left,
-                bottom_right,
-                ImVec2(0, 0), ImVec2(1, 1),
-                IM_COL32(255, 255, 255, 30))
-            draw_list:PopClipRect()
+            if self.bgImg then
+                draw_list:PushClipRect(top_left, bottom_right, true)
+
+                draw_list:AddImage(self.bgImg:GetTextureID(),
+                    top_left,
+                    bottom_right,
+                    ImVec2(0, 0), ImVec2(1, 1),
+                    IM_COL32(255, 255, 255, 30))
+                draw_list:PopClipRect()
+            end
         end
         ImGui.EndChild()
 

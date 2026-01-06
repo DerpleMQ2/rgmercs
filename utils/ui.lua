@@ -157,9 +157,9 @@ function Ui.RenderMercsStatus(showPopout)
         ImGui.NewLine()
     end
 
-    if ImGui.BeginTable("MercStatusTable", 9, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
+    if ImGui.BeginTable("MercStatusTable", 9, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
-        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 150)
+        ImGui.TableSetupColumn('Name', bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultSort), 150)
         ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.TableSetupColumn('Mana %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthFixed), 80.0)
@@ -173,10 +173,59 @@ function Ui.RenderMercsStatus(showPopout)
 
         local mercs = Config:GetAllPeerHeartbeats()
 
-        for peer, data in pairs(mercs) do
+        if not Ui.TempSettings.SortedMercs then
+            Ui.TempSettings.SortedMercs = {}
+            for peer, _ in pairs(mercs) do table.insert(Ui.TempSettings.SortedMercs, peer) end
+        end
+
+        local sort_specs = ImGui.TableGetSortSpecs()
+        if sort_specs and sort_specs.SpecsDirty then
+            table.sort(Ui.TempSettings.SortedMercs, function(a, b)
+                local spec = sort_specs:Specs(1) -- single-column sort
+
+                local col = spec.ColumnIndex
+                local dir = spec.SortDirection
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+
+                local av, bv
+                if col == 0 then
+                    av, bv = a, b
+                elseif col == 1 then
+                    av, bv = data_a.Data.HPs, data_b.Data.HPs
+                elseif col == 2 then
+                    av, bv = data_a.Data.Mana, data_b.Data.Mana
+                elseif col == 3 then
+                    av, bv = data_a.Data.Target, data_b.Data.Target
+                elseif col == 4 then
+                    av, bv = data_a.Data.AutoTarget, data_b.Data.AutoTarget
+                elseif col == 5 then
+                    av, bv = data_a.Data.Assist, data_b.Data.Assist
+                elseif col == 6 then
+                    av, bv = data_a.Data.Chase, data_b.Data.Chase
+                elseif col == 7 then
+                    av, bv = data_a.Data.State, data_b.Data.State
+                elseif col == 8 then
+                    av, bv = data_a.Data.LastUpdate, data_b.Data.LastUpdate
+                else
+                    av, bv = a, b
+                end
+
+                if dir == ImGuiSortDirection.Ascending then
+                    return av < bv
+                else
+                    return av > bv
+                end
+            end)
+
+            sort_specs.SpecsDirty = false
+        end
+
+        for _, peer in ipairs(Ui.TempSettings.SortedMercs) do
+            local data = mercs[peer]
             ImGui.PushID(string.format("##table_entry_%s", peer))
             ImGui.TableNextColumn()
-            ImGui.Selectable(peer, false)
+            ImGui.SmallButton(peer)
             local name, _ = Comms.GetCharAndServerFromPeer(peer)
             if name then
                 if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
@@ -186,9 +235,9 @@ function Ui.RenderMercsStatus(showPopout)
                 end
             end
             ImGui.TableNextColumn()
-            ImGui.Text(string.format("%d%%", math.ceil(data.Data.HPs or 0)))
+            Ui.RenderColoredText(Ui.GetPercentageColor(math.ceil(data.Data.HPs or 0) / 100), "%d%%", math.ceil(data.Data.HPs or 0))
             ImGui.TableNextColumn()
-            ImGui.Text(string.format("%d%%", math.ceil(data.Data.Mana or 0)))
+            Ui.RenderColoredText(Ui.GetPercentageColor(math.ceil(data.Data.Mana or 0) / 100), "%d%%", math.ceil(data.Data.Mana or 0))
             ImGui.TableNextColumn()
             ImGui.Text(string.format("%s", data.Data.Target or "None"))
             ImGui.TableNextColumn()
@@ -203,7 +252,11 @@ function Ui.RenderMercsStatus(showPopout)
 
             ImGui.TableNextColumn()
 
+            ImGui.PushStyleColor(ImGuiCol.Text, data.Data.State == "Paused" and ImVec4(1.0, 1.0, 0.2, 1.0) or
+                data.Data.State == "Combat" and ImVec4(0.9, 0.2, 0.3, 1.0) or
+                ImVec4(0.2, 0.8, 0.2, 1.0))
             _, clicked = ImGui.Selectable(string.format("%s", data.Data.State or "None"), false)
+            ImGui.PopStyleColor()
             if clicked then
                 Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
             end
@@ -305,7 +358,7 @@ function Ui.RenderForceTargetList(showPopout)
                 ImGui.PopID()
                 ImGui.PopStyleColor(1)
                 ImGui.TableNextColumn()
-                ImGui.Text(tostring(math.ceil(xtarg.PctHPs() or 0)))
+                Ui.TextImGui.Text(tostring(math.ceil(xtarg.PctHPs() or 0)))
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(math.ceil(xtarg.PctAggro() or 0)))
                 ImGui.TableNextColumn()
@@ -1150,6 +1203,19 @@ function Ui.RenderText(text, ...)
     ImGui.Text(formattedText)
 end
 
+function Ui.RenderColoredText(color, text, ...)
+    local formattedText = string.format(text, ...)
+    local afConfig = Config:GetSetting('EnableAFUI')
+    local textSizeX, textSizeY = ImGui.CalcTextSize(formattedText)
+    local startPos = ImGui.GetCursorPosVec()
+    ImGui.Dummy(ImVec2(textSizeX, textSizeY))
+    if afConfig and not ImGui.IsItemHovered() then
+        formattedText = formattedText:reverse()
+    end
+    ImGui.SetCursorPos(startPos)
+    ImGui.TextColored(color, formattedText)
+end
+
 function Ui.RenderHyperText(text, normalColor, highlightColor, callback)
     local startingPos = ImGui.GetCursorPosVec()
     local version = Modules:ExecModule("Class", "GetVersionString")
@@ -1188,6 +1254,19 @@ function Ui.GetDynamicTooltipForAA(action)
 
     return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None",
         resolvedItem.Description() or "None")
+end
+
+---@return ImVec4 The color corresponding to the given percentage.
+function Ui.GetPercentageColor(pct)
+    if pct >= 0.75 then
+        return ImVec4(0.2, 1.0, 0.2, 1.0)
+    elseif pct >= 0.5 then
+        return ImVec4(1.0, 1.0, 0.2, 1.0)
+    elseif pct >= 0.25 then
+        return ImVec4(1.0, 0.6, 0.2, 1.0)
+    end
+
+    return ImVec4(1.0, 1.0, 1.0, 1.0)
 end
 
 --- Get the con color based on the provided color value.
