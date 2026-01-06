@@ -553,7 +553,7 @@ end
 --- Determines if the PC can/should use buffs if their corpse is nearby.
 --- @return boolean True if the entity can be buffed, false otherwise.
 function Casting.AmIBuffable()
-    local myCorpseCount = Config:GetSetting('BuffRezables') and 0 or mq.TLO.SpawnCount(string.format('pccorpse %s radius 100 zradius 50', mq.TLO.Me.CleanName()))()
+    local myCorpseCount = Config:GetSetting('BuffRezables') and 0 or mq.TLO.SpawnCount(string.format('pccorpse =%s radius 100 zradius 50', mq.TLO.Me.CleanName()))()
     if myCorpseCount > 0 then Logger.log_debug("Corpse detected (%s), aborting rotation.", mq.TLO.Me.CleanName()) end
     return myCorpseCount == 0
 end
@@ -570,7 +570,7 @@ function Casting.GetBuffableGroupIDs()
 
         local count = mq.TLO.Group.Members()
         for i = 1, count do
-            local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+            local rezSearch = string.format("pccorpse =%s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
             if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
                 groupIds = {}
                 Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
