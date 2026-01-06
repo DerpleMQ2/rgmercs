@@ -223,47 +223,49 @@ function Ui.RenderMercsStatus(showPopout)
 
         for _, peer in ipairs(Ui.TempSettings.SortedMercs) do
             local data = mercs[peer]
-            ImGui.PushID(string.format("##table_entry_%s", peer))
-            ImGui.TableNextColumn()
-            ImGui.SmallButton(peer)
-            local name, _ = Comms.GetCharAndServerFromPeer(peer)
-            if name then
-                if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
-                    mq.TLO.Spawn("=" .. name).DoTarget()
-                elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
-                    Comms.SendPeerDoCmd(peer, "/foreground")
+            if data then
+                ImGui.PushID(string.format("##table_entry_%s", peer))
+                ImGui.TableNextColumn()
+                ImGui.SmallButton(peer)
+                local name, _ = Comms.GetCharAndServerFromPeer(peer)
+                if name then
+                    if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
+                        mq.TLO.Spawn("=" .. name).DoTarget()
+                    elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
+                        Comms.SendPeerDoCmd(peer, "/foreground")
+                    end
                 end
-            end
-            ImGui.TableNextColumn()
-            Ui.RenderColoredText(Ui.GetPercentageColor(math.ceil(data.Data.HPs or 0) / 100), "%d%%", math.ceil(data.Data.HPs or 0))
-            ImGui.TableNextColumn()
-            Ui.RenderColoredText(Ui.GetPercentageColor(math.ceil(data.Data.Mana or 0) / 100), "%d%%", math.ceil(data.Data.Mana or 0))
-            ImGui.TableNextColumn()
-            ImGui.Text(string.format("%s", data.Data.Target or "None"))
-            ImGui.TableNextColumn()
-            ImGui.Text(string.format("%s", data.Data.AutoTarget or "None"))
-            ImGui.TableNextColumn()
-            ImGui.Text(string.format("%s", data.Data.Assist or "None"))
-            ImGui.TableNextColumn()
-            local _, clicked = ImGui.Selectable(string.format("%s", data.Data.Chase or "None"), false)
-            if clicked then
-                Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.Chase == "Chase Off" and ("chaseon " .. mq.TLO.Me.CleanName()) or "chaseoff")
-            end
+                ImGui.TableNextColumn()
+                Ui.RenderColoredText(Ui.GetPercentageColor(math.ceil(data.Data.HPs or 0) / 100), "%d%%", math.ceil(data.Data.HPs or 0))
+                ImGui.TableNextColumn()
+                Ui.RenderColoredText(Ui.GetPercentageColor(math.ceil(data.Data.Mana or 0) / 100), "%d%%", math.ceil(data.Data.Mana or 0))
+                ImGui.TableNextColumn()
+                ImGui.Text(string.format("%s", data.Data.Target or "None"))
+                ImGui.TableNextColumn()
+                ImGui.Text(string.format("%s", data.Data.AutoTarget or "None"))
+                ImGui.TableNextColumn()
+                ImGui.Text(string.format("%s", data.Data.Assist or "None"))
+                ImGui.TableNextColumn()
+                local _, clicked = ImGui.Selectable(string.format("%s", data.Data.Chase or "None"), false)
+                if clicked then
+                    Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.Chase == "Chase Off" and ("chaseon " .. mq.TLO.Me.CleanName()) or "chaseoff")
+                end
 
-            ImGui.TableNextColumn()
+                ImGui.TableNextColumn()
 
-            ImGui.PushStyleColor(ImGuiCol.Text, data.Data.State == "Paused" and ImVec4(1.0, 1.0, 0.2, 1.0) or
-                data.Data.State == "Combat" and ImVec4(0.9, 0.2, 0.3, 1.0) or
-                ImVec4(0.2, 0.8, 0.2, 1.0))
-            _, clicked = ImGui.Selectable(string.format("%s", data.Data.State or "None"), false)
-            ImGui.PopStyleColor()
-            if clicked then
-                Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
+                ImGui.PushStyleColor(ImGuiCol.Text, data.Data.State == "Paused" and ImVec4(1.0, 1.0, 0.2, 1.0) or
+                    data.Data.State == "Combat" and ImVec4(0.9, 0.2, 0.3, 1.0) or
+                    ImVec4(0.2, 0.8, 0.2, 1.0))
+                _, clicked = ImGui.Selectable(string.format("%s", data.Data.State or "None"), false)
+                ImGui.PopStyleColor()
+                if clicked then
+                    Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
+                end
+
+                ImGui.TableNextColumn()
+                ImGui.Text(string.format("%s", Strings.FormatTime(os.time() - data.LastHeartbeat) or "None"))
+                ImGui.PopID()
             end
-
-            ImGui.TableNextColumn()
-            ImGui.Text(string.format("%s", Strings.FormatTime(os.time() - data.LastHeartbeat) or "None"))
-            ImGui.PopID()
         end
 
         ImGui.EndTable()
