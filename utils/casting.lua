@@ -1271,7 +1271,7 @@ function Casting.UseDisc(discSpell, targetId)
                     Logger.log_debug("canceling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(),
                         me.ActiveDisc.Name())
                     Core.DoCmd("/stopdisc")
-                    mq.delay(20, function() return not me.ActiveDisc() end)
+                    mq.delay(20, function() return me.ActiveDisc() == nil end)
                 end
             end
 
@@ -1282,7 +1282,7 @@ function Casting.UseDisc(discSpell, targetId)
 
             -- Is this even needed?
             if Casting.IsActiveDisc(discSpell.RankName.Name()) then
-                mq.delay(20, function() return me.ActiveDisc() end)
+                mq.delay(20, function() return me.ActiveDisc() ~= nil end)
             end
 
             Logger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName.Name())
@@ -1490,7 +1490,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
             end
             maxWait = maxWait - 50
         end
-        mq.delay(castTime, function() return not me.Casting() end)
+        mq.delay(castTime, function() return me.Casting() == nil end)
 
         -- pick up any additonal server lag.
         while me.Casting() do

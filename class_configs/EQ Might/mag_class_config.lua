@@ -455,15 +455,15 @@ _ClassConfig      = {
         DeleteEpicOrb = function(self)
             if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
                 Core.DoCmd("/autoinventory")
-                mq.delay(50, function() return not mq.TLO.Cursor() end)
+                mq.delay(50, function() return mq.TLO.Cursor() == nil end)
             end
             if not mq.TLO.Cursor() then
                 Core.DoCmd("/nomodkey /itemnotify \"Orb of Mastery\" leftmouseup")
-                mq.delay(50, function() return mq.TLO.Cursor() end)
+                mq.delay(50, function() return mq.TLO.Cursor() ~= nil end)
                 if mq.TLO.Cursor() then
                     if mq.TLO.Cursor.ID() == 28034 then
                         Core.DoCmd("/destroy")
-                        mq.delay(50, function() return not mq.TLO.Cursor() end)
+                        mq.delay(50, function() return mq.TLO.Cursor() == nil end)
                         if not mq.TLO.FindItem("28034")() then
                             return
                         end

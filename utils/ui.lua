@@ -179,9 +179,9 @@ function Ui.RenderMercsStatus(showPopout)
             ImGui.Selectable(peer, false)
             local name, _ = Comms.GetCharAndServerFromPeer(peer)
             if name then
-                if ImGui.IsMouseClicked(ImGuiMouseButton.Left) then
+                if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
                     mq.TLO.Spawn("=" .. name).DoTarget()
-                elseif ImGui.IsMouseClicked(ImGuiMouseButton.Right) then
+                elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
                     Comms.SendPeerDoCmd(peer, "/foreground")
                 end
             end
