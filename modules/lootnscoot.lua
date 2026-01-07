@@ -243,7 +243,7 @@ end
 function Module:CheckChaseTargetInRange()
 	if Config:GetSetting('ChaseOn') then
 		local chaseSpawn = mq.TLO.Spawn("pc =" .. Core.GetChaseTarget())
-		if chaseSpawn() and (chaseSpawn.Distance3D() or 0) > Config:GetSetting('MaxChaseTargetDistance') then
+		if chaseSpawn() and chaseSpawn.ID() > 0 and (chaseSpawn.Distance3D() or 0) > Config:GetSetting('MaxChaseTargetDistance') then
 			return false
 		end
 	end

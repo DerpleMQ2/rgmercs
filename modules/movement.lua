@@ -504,7 +504,7 @@ function Module:ValidChaseTarget()
 end
 
 function Module:GetChaseTarget()
-    return Config:GetSetting('ChaseTarget'):len() > 0 and Config:GetSetting('ChaseTarget') or "<None>"
+    return Config:GetSetting('ChaseTarget'):len() > 0 and Config:GetSetting('ChaseTarget') or "None"
 end
 
 function Module:ShouldRender()
