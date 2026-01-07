@@ -2029,6 +2029,10 @@ function Module:GiveTime(combat_state)
         end
     end
 
+    if Config:GetSetting('HuntFromPlayer') then
+        Movement.UpdateMapRadii()
+    end
+
     Logger.log_verbose("PULL:GiveTime() - DoPull: %s", Strings.BoolToColorString(Config:GetSetting('DoPull')))
     if not Config:GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
