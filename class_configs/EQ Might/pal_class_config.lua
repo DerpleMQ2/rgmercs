@@ -914,6 +914,10 @@ return {
                 load_cond = function(self) return Config:GetSetting('DoValorousRage') end,
             },
             {
+                name = "Inquisitor's Judgment",
+                type = "AA",
+            },
+            {
                 name = "WardProc",
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoWardProc') and Core.IsTanking() end,
