@@ -2,6 +2,7 @@ local mq                = require('mq')
 local Config            = require('utils.config')
 local Logger            = require("utils.logger")
 local Core              = require("utils.core")
+local Modules           = require("utils.modules")
 
 local Movement          = { _version = '1.0', _name = "Movement", _author = 'Derple', }
 Movement.__index        = Movement
@@ -153,9 +154,13 @@ function Movement:NavAroundCircle(target, radius)
 end
 
 function Movement.UpdateMapRadii()
-    if Config:GetSetting('ReturnToCamp') then
+    if Config:GetSetting('DoPull') or Config:GetSetting('ReturnToCamp') then
+        if Modules:ExecModule("Pull", "IsPullMode", "Hunt") then
+            Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadiusHunt'))
+        elseif Config:GetSetting('ReturnToCamp') then
+            Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadius'))
+        end
         Core.DoCmd("/squelch /mapfilter campradius %d", Config:GetSetting('AutoCampRadius'))
-        Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadius'))
     else
         Core.DoCmd("/squelch /mapfilter campradius off")
         Core.DoCmd("/squelch /mapfilter pullradius off")

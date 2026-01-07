@@ -2029,10 +2029,6 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    if Config:GetSetting('HuntFromPlayer') then
-        Movement.UpdateMapRadii()
-    end
-
     Logger.log_verbose("PULL:GiveTime() - DoPull: %s", Strings.BoolToColorString(Config:GetSetting('DoPull')))
     if not Config:GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
@@ -2041,7 +2037,7 @@ function Module:GiveTime(combat_state)
             self.TempSettings.HuntX = mq.TLO.Me.X()
             self.TempSettings.HuntY = mq.TLO.Me.Y()
             self.TempSettings.HuntZ = mq.TLO.Me.Z()
-            Core.DoCmd("/squelch /mapfilter pullradius %d", Config:GetSetting('PullRadiusHunt'))
+            Movement.UpdateMapRadii()
         end
         if #self.TempSettings.PullIgnoreTargets > 0 then
             self:ValidateIgnoreList()
