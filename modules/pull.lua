@@ -41,6 +41,7 @@ Module.TempSettings.LastGroupUpdateTime   = os.clock()
 Module.TempSettings.SelectedPath          = "None"
 Module.TempSettings.PullAttemptStarted    = 0
 Module.TempSettings.PullRadius            = 0
+Module.TempSettings.PausePulls            = false
 Module.FAQ                                = {}
 Module.SaveRequested                      = nil
 
@@ -990,13 +991,24 @@ function Module:Render()
             else
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
             end
-
+            local cursorXPos = ImGui.GetCursorPosX()
             if ImGui.Button(Config:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
                 Config:SetSetting('DoPull', not Config:GetSetting('DoPull'))
                 Module:SetRoles()
                 self:SaveSettings(false)
             end
             ImGui.PopStyleColor()
+            if Module.TempSettings.PausePulls then
+                ImGui.PushStyleColor(ImGuiCol.Button, 0.4, 0.02, 0.02, 1)
+            else
+                ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
+            end
+            ImGui.SetCursorPosX(cursorXPos)
+            if ImGui.Button(Module.TempSettings.PausePulls and "Unpause Pulls" or "Pause Pulls", ImGui.GetWindowWidth() * .3, 25) then
+                Module.TempSettings.PausePulls = not Module.TempSettings.PausePulls
+            end
+            ImGui.PopStyleColor()
+            Ui.Tooltip("Pausing pulls will keep the pull settings (camp, locs, etc), but it will not attempt to pull any targets until unpaused.")
         else
             ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
             ImGui.Button("No Nav Mesh Loaded!", ImGui.GetWindowWidth() * .3, 25)
@@ -1366,6 +1378,11 @@ end
 ---@return boolean, string
 function Module:ShouldPull(campData)
     local me = mq.TLO.Me
+
+    if self.TempSettings.PausePulls then
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax Pulls are Paused.")
+        return false, "Pulls Paused"
+    end
 
     if me.PctHPs() < Config:GetSetting('PullHPPct') then
         Logger.log_verbose("\ay::PULL:: \arAborted!\ax PctHPs < %d", Config:GetSetting('PullHPPct'))
@@ -1826,6 +1843,11 @@ end
 ---@param pullID number
 ---@return boolean
 function Module:CheckForAbort(pullID, bNavigating)
+    if self.TempSettings.PausePulls then
+        Logger.log_debug("\ar ALERT: Aborting pull - paused at user's request \ax")
+        return true
+    end
+
     if self.TempSettings.PullListUpdated then
         Logger.log_debug("\ar ALERT: Aborting pull due to change in pull allow or deny list. \ax")
         self.TempSettings.PullListUpdated = false
