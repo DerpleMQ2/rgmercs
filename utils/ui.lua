@@ -7,6 +7,7 @@ local Comms       = require("utils.comms")
 local Targeting   = require("utils.targeting")
 local Icons       = require('mq.ICONS')
 local Strings     = require("utils.strings")
+local Tables      = require("utils.tables")
 local ClassLoader = require('utils.classloader')
 local Math        = require('utils.math')
 
@@ -158,27 +159,35 @@ function Ui.RenderMercsStatus(showPopout)
     end
 
     if ImGui.BeginTable("MercStatusTable", 9, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
-        ImGui.TableSetupColumn('Name', bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultSort), 150)
-        ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        ImGui.TableSetupColumn('Mana %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        ImGui.TableSetupColumn('AutoTarget', (ImGuiTableColumnFlags.WidthFixed), 120.0)
-        ImGui.TableSetupColumn('Assist', (ImGuiTableColumnFlags.WidthFixed), 120.0)
-        ImGui.TableSetupColumn('Chase', (ImGuiTableColumnFlags.WidthFixed), 120.0)
-        ImGui.TableSetupColumn('State', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        ImGui.TableSetupColumn('Last Update', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        ImGui.PopStyleColor()
-        ImGui.TableHeadersRow()
-
         local mercs = Config:GetAllPeerHeartbeats()
 
         if not Ui.TempSettings.SortedMercs then
             Ui.TempSettings.SortedMercs = {}
-            for peer, _ in pairs(mercs) do table.insert(Ui.TempSettings.SortedMercs, peer) end
         end
 
         local sort_specs = ImGui.TableGetSortSpecs()
+
+        if #Ui.TempSettings.SortedMercs ~= Tables.GetTableSize(mercs) then
+            Ui.TempSettings.SortedMercs = {}
+            printf("Rebuilding sorted mercs list, current size: %d, mercs size: %d", #Ui.TempSettings.SortedMercs, Tables.GetTableSize(mercs))
+            for peer, _ in pairs(mercs) do table.insert(Ui.TempSettings.SortedMercs, peer) end
+            if sort_specs then sort_specs.SpecsDirty = true end
+        end
+
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn(string.format('Name (%d)', #Ui.TempSettings.SortedMercs), bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultSort), 150)
+        ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
+        ImGui.TableSetupColumn('Mana %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
+        ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthStretch), 80.0)
+        ImGui.TableSetupColumn('AutoTarget', (ImGuiTableColumnFlags.WidthStretch), 120.0)
+        ImGui.TableSetupColumn('Assist', (ImGuiTableColumnFlags.WidthStretch), 120.0)
+        ImGui.TableSetupColumn('Chase', (ImGuiTableColumnFlags.WidthStretch), 120.0)
+        ImGui.TableSetupColumn('State', (ImGuiTableColumnFlags.WidthStretch), 80.0)
+        ImGui.TableSetupColumn('Last Update', (ImGuiTableColumnFlags.WidthStretch), 40.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+
         if sort_specs and sort_specs.SpecsDirty then
             table.sort(Ui.TempSettings.SortedMercs, function(a, b)
                 local spec = sort_specs:Specs(1) -- single-column sort
@@ -230,7 +239,13 @@ function Ui.RenderMercsStatus(showPopout)
                 local name, _ = Comms.GetCharAndServerFromPeer(peer)
                 if name then
                     if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
-                        mq.TLO.Spawn("=" .. name).DoTarget()
+                        local peerSpawn = mq.TLO.Spawn("=" .. name)
+                        if peerSpawn.ID() > 0 then
+                            peerSpawn.DoTarget()
+                            if (mq.TLO.Cursor.ID() or 0) > 0 and peerSpawn.Distance() <= 15 then
+                                Core.DoCmd("/timed 1 /click left target")
+                            end
+                        end
                     elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
                         Comms.SendPeerDoCmd(peer, "/foreground")
                     end
@@ -256,14 +271,15 @@ function Ui.RenderMercsStatus(showPopout)
                 ImGui.PushStyleColor(ImGuiCol.Text, data.Data.State == "Paused" and ImVec4(1.0, 1.0, 0.2, 1.0) or
                     data.Data.State == "Combat" and ImVec4(0.9, 0.2, 0.3, 1.0) or
                     ImVec4(0.2, 0.8, 0.2, 1.0))
-                _, clicked = ImGui.Selectable(string.format("%s", data.Data.State or "None"), false)
+                _, clicked = ImGui.Selectable(string.format("%s", string.sub(data.Data.State or "N", 1, 1)), false)
                 ImGui.PopStyleColor()
                 if clicked then
                     Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
                 end
+                Ui.Tooltip(string.format("%s", data.Data.State or "None"))
 
                 ImGui.TableNextColumn()
-                ImGui.Text(string.format("%s", Strings.FormatTime(os.time() - data.LastHeartbeat) or "None"))
+                ImGui.Text(string.format("%ds", os.time() - (data.LastHeartbeat or 0)))
                 ImGui.PopID()
             end
         end
