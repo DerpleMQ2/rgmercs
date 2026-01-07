@@ -361,6 +361,8 @@ local _ClassConfig = {
                     rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
                 elseif mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
                     rezAction = okayToRez and Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
+                else
+                    Logger.log_debug("DoRez: No fast rez options available in combat for %s.", mq.TLO.Spawn(corpseId).CleanName() or "Unknown")
                 end
             elseif combatState ~= "combat" then
                 if Casting.AAReady("Blessing of Resurrection") then
