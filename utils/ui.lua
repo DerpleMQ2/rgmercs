@@ -10,6 +10,7 @@ local Strings     = require("utils.strings")
 local Tables      = require("utils.tables")
 local ClassLoader = require('utils.classloader')
 local Math        = require('utils.math')
+local Set         = require('mq.set')
 
 
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
@@ -299,6 +300,11 @@ function Ui.RenderForceTargetList(showPopout)
 
     if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
         Config.Globals.ForceTargetID = 0
+    end
+    ImGui.SameLine()
+
+    if ImGui.Button("Clear Ignored Targets", ImGui.GetWindowWidth() * .3, 18) then
+        Config.Globals.IgnoredTargetIDs = Set.new({})
     end
 
     if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 8 or 6, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
@@ -1276,11 +1282,11 @@ end
 
 ---@return ImVec4 The color corresponding to the given percentage.
 function Ui.GetPercentageColor(pct)
-    if pct >= 0.75 then
+    if pct >= .75 then
         return ImVec4(0.2, 1.0, 0.2, 1.0)
-    elseif pct >= 0.5 then
+    elseif pct >= .35 then
         return ImVec4(1.0, 1.0, 0.2, 1.0)
-    elseif pct >= 0.25 then
+    elseif pct < .35 then
         return ImVec4(1.0, 0.6, 0.2, 1.0)
     end
 
