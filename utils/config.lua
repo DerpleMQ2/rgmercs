@@ -2456,8 +2456,8 @@ function Config:GetAllPeerHeartbeats()
     return self.TempSettings.PeersHeartbeats or {}
 end
 
-function Config:GetPeerHeartbeatByName(peerName)
-    return self.TempSettings.PeersHeartbeats[Comms.GetPeerName(peerName)] or {}
+function Config:GetPeerHeartbeatByName(name)
+    return self.TempSettings.PeersHeartbeats[Comms.GetPeerName(name)] or {}
 end
 
 function Config:GetPeerHeartbeat(peer)
@@ -2472,6 +2472,8 @@ function Config:UpdatePeerHeartbeat(peer, data)
 end
 
 function Config:ValidatePeers()
+    Logger.log_verbose("\ayValidating peers heartbeats for timeouts: \n  :: %s\n  :: %s", Strings.TableToString(Config.TempSettings.PeersHeartbeats, 512),
+        Strings.TableToString(Config.TempSettings.Peers:toList(), 512))
     for peer, heartbeat in pairs(Config.TempSettings.PeersHeartbeats) do
         if os.time() - heartbeat.LastHeartbeat > Config:GetSetting("ActorPeerTimeout") then
             Logger.log_debug("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
