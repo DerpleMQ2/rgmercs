@@ -1602,7 +1602,7 @@ Config.DefaultConfig               = {
 
 
     -- [ UI ] --
-    ['DisplayManualTarget']  = {
+    ['DisplayManualTarget']         = {
         DisplayName = "Display Manual Target",
         Group = "General",
         Header = "Interface",
@@ -1611,7 +1611,7 @@ Config.DefaultConfig               = {
         Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
         Default = false,
     },
-    ['ExtendedFTInfo']       = {
+    ['ExtendedFTInfo']              = {
         DisplayName = "Extended ForceTarget Info",
         Group = "General",
         Header = "Interface",
@@ -1620,7 +1620,7 @@ Config.DefaultConfig               = {
         Tooltip = "Show extended information in the Force Target window.",
         Default = false,
     },
-    ['AlwaysShowMiniButton'] = {
+    ['AlwaysShowMiniButton']        = {
         DisplayName = "Always Show Mini Button",
         Group = "General",
         Header = "Interface",
@@ -1630,7 +1630,7 @@ Config.DefaultConfig               = {
         Default = false,
         ConfigType = "Normal",
     },
-    ['EscapeMinimizes']      = {
+    ['EscapeMinimizes']             = {
         DisplayName = "Escape Closes Main Window",
         Group = "General",
         Header = "Interface",
@@ -1640,7 +1640,7 @@ Config.DefaultConfig               = {
         Default = false,
         ConfigType = "Normal",
     },
-    ['ShowDebugTiming']      = {
+    ['ShowDebugTiming']             = {
         DisplayName = "Show Rotation Debug Timing",
         Group = "General",
         Header = "Interface",
@@ -1650,7 +1650,7 @@ Config.DefaultConfig               = {
         Tooltip = "Enable displaying the timing of each rotation step.",
         Default = false,
     },
-    ['BgOpacity']            = {
+    ['BgOpacity']                   = {
         DisplayName = "Background Opacity",
         Group = "General",
         Header = "Interface",
@@ -1661,7 +1661,7 @@ Config.DefaultConfig               = {
         Min = 20,
         Max = 100,
     },
-    ['FrameEdgeRounding']    = {
+    ['FrameEdgeRounding']           = {
         DisplayName = "Frame Edge Rounding",
         Group = "General",
         Header = "Interface",
@@ -1672,7 +1672,7 @@ Config.DefaultConfig               = {
         Min = 0,
         Max = 50,
     },
-    ['ScrollBarRounding']    = {
+    ['ScrollBarRounding']           = {
         DisplayName = "Scroll Bar Rounding",
         Group = "General",
         Header = "Interface",
@@ -1683,11 +1683,11 @@ Config.DefaultConfig               = {
         Min = 0,
         Max = 50,
     },
-    ['Red']                  = {
+    ['Red']                         = {
         DisplayName = "UI Color - Red",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 11,
         Tooltip = "Red component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Red),
@@ -1696,11 +1696,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['LightRed']             = {
+    ['LightRed']                    = {
         DisplayName = "UI Color - Light Red",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 12,
         Tooltip = "Red component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightRed),
@@ -1709,11 +1709,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['Green']                = {
+    ['Green']                       = {
         DisplayName = "UI Color - Green",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 13,
         Tooltip = "Green component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Green),
@@ -1722,11 +1722,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['LightGreen']           = {
+    ['LightGreen']                  = {
         DisplayName = "UI Color - Light Green",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 14,
         Tooltip = "Green component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightGreen),
@@ -1735,11 +1735,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['Blue']                 = {
+    ['Blue']                        = {
         DisplayName = "UI Color - Blue",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 15,
         Tooltip = "Blue component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Blue),
@@ -1748,11 +1748,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['LightBlue']            = {
+    ['LightBlue']                   = {
         DisplayName = "UI Color - Light Blue",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 16,
         Tooltip = "Blue component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightBlue),
@@ -1761,11 +1761,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['Yellow']               = {
+    ['Yellow']                      = {
         DisplayName = "UI Color - Yellow",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 17,
         Tooltip = "Yellow component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Yellow),
@@ -1774,11 +1774,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['LightYellow']          = {
+    ['LightYellow']                 = {
         DisplayName = "UI Color - Light Yellow",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 18,
         Tooltip = "Yellow component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightYellow),
@@ -1787,11 +1787,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['Purple']               = {
+    ['Purple']                      = {
         DisplayName = "UI Color - Purple",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 19,
         Tooltip = "Purple component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Purple),
@@ -1800,11 +1800,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['LightPurple']          = {
+    ['LightPurple']                 = {
         DisplayName = "UI Color - Light Purple",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 20,
         Tooltip = "Purple component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightPurple),
@@ -1813,11 +1813,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['Orange']               = {
+    ['Orange']                      = {
         DisplayName = "UI Color - Orange",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 21,
         Tooltip = "Orange component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Orange),
@@ -1826,11 +1826,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['LightOrange']          = {
+    ['LightOrange']                 = {
         DisplayName = "UI Color - Light Orange",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 22,
         Tooltip = "Orange component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightOrange),
@@ -1839,11 +1839,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['Grey']                 = {
+    ['Grey']                        = {
         DisplayName = "UI Color - Grey",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 23,
         Tooltip = "Grey component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Grey),
@@ -1852,11 +1852,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['LightGrey']            = {
+    ['LightGrey']                   = {
         DisplayName = "UI Color - Light Grey",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 24,
         Tooltip = "Grey component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightGrey),
@@ -1865,11 +1865,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['Cyan']                 = {
+    ['Cyan']                        = {
         DisplayName = "UI Color - Cyan",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 25,
         Tooltip = "Cyan component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Cyan),
@@ -1878,11 +1878,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['White']                = {
+    ['White']                       = {
         DisplayName = "UI Color - White",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 26,
         Tooltip = "White component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.White),
@@ -1891,11 +1891,11 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
-    ['Black']                = {
+    ['Black']                       = {
         DisplayName = "UI Color - Black",
         Group = "General",
         Header = "Interface",
-        Category = "Colors",
+        Category = "Default Colors",
         Index = 27,
         Tooltip = "Black component of the main UI color.",
         Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Black),
@@ -1904,8 +1904,29 @@ Config.DefaultConfig               = {
             Config.CacheCustomColors()
         end,
     },
+    ['UserThemeOverrideClassTheme'] = {
+        DisplayName = "Override Class Theme",
+        Group = "General",
+        Header = "Interface",
+        Category = "User Theme",
+        Index = 28,
+        Tooltip = "User the user theme even if a class theme is defined.",
+        Default = true,
+        Type = "Custom",
+    },
+    ['UserTheme']                   = {
+        DisplayName = "User Theme",
+        Group = "General",
+        Header = "Interface",
+        Category = "User Theme",
+        Index = 29,
+        Tooltip = "Override any ImGui style settings with a custom theme.",
+        Default = {},
+        Type = "Custom",
+    },
+
     -- Cross client comms
-    ['ActorPeerTimeout']     = {
+    ['ActorPeerTimeout']            = {
         DisplayName = "Actor Peer Timeout",
         Group = "General",
         Header = "Interface",
@@ -1917,7 +1938,7 @@ Config.DefaultConfig               = {
         Max = 120,
     },
 
-    ['LootModuleType']       = {
+    ['LootModuleType']              = {
         DisplayName = "Loot Module Type",
         Group = "General",
         Header = "Loot(Emu)",
@@ -1950,7 +1971,7 @@ Config.DefaultConfig               = {
     },
 
     --Deprecated/Need Adjusted to Custom/Etc
-    ['FullUI']               = {
+    ['FullUI']                      = {
         DisplayName = "Use Full UI",
         Group = "General",
         Header = "Interface",
@@ -1958,7 +1979,7 @@ Config.DefaultConfig               = {
         Tooltip = "Toggle between Full UI and a Simple UI [Experimental]",
         Default = true,
     },
-    ['EnableOptionsUI']      = {
+    ['EnableOptionsUI']             = {
         DisplayName = "Enable Options UI",
         Type = "Custom",
         Group = "General",
@@ -1967,7 +1988,7 @@ Config.DefaultConfig               = {
         Tooltip = "Show the experimental Options UI window",
         Default = false,
     },
-    ['EnableAFUI']           = {
+    ['EnableAFUI']                  = {
         DisplayName = "Enable Very Special UI",
         Type = "Custom",
         Group = "General",

@@ -22,6 +22,12 @@ Ui.__index          = Ui
 Ui.ConfigFilter     = ""
 Ui.ShowDownNamed    = false
 Ui.TempSettings     = {}
+Ui.ImGuiColorVars   = {}
+
+for i = 0, ImGuiCol.COUNT - 1 do
+    local name = ImGui.GetStyleColorName(i)
+    table.insert(Ui.ImGuiColorVars, name)
+end
 
 
 --- Renders the assist list.
@@ -1014,17 +1020,22 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
             ((pressed or false) and (requiresLoadoutChange))
         any_pressed = any_pressed or (pressed or false)
     elseif type == 'Color' then
+        local skipDefaultButton = args[1] or false
         ImGui.PushID("##color_setting_" .. id)
         ImGui.SetNextItemWidth(-1)
         setting, pressed = ImGui.ColorEdit4("", Tables.TableToImVec4(setting) or ImVec4(0, 0, 0, 0), ImGuiColorEditFlags.NoInputs + ImGuiColorEditFlags.NoLabel)
         if pressed then
             setting = Tables.ImVec4ToTable(setting)
         end
-        ImGui.SameLine()
-        if ImGui.SmallButton("Default##reset_color_" .. id) then
-            print("Resetting color to default for " .. id)
-            setting = Tables.ImVec4ToTable(Config.Constants.DefaultColors[id])
-            pressed = true
+        if not skipDefaultButton then
+            ImGui.SameLine()
+            if ImGui.SmallButton("Default##reset_color_" .. id) then
+                print("Resetting color to default for " .. id)
+                setting = Tables.ImVec4ToTable(Config.Constants.DefaultColors[id])
+                pressed = true
+            end
+        else
+
         end
         ImGui.PopID()
         new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
@@ -1065,6 +1076,96 @@ function Ui.RenderPopAndSettings(moduleName)
             ImGui.NewLine()
         end
     end
+end
+
+function Ui.RenderThemeConfigElement(id, themeColorElement)
+    local setting = themeColorElement.element or "Text"
+    local any_pressed, delete_pressed = false, false
+
+    ---@diagnostic disable-next-line: cast-local-type
+    local settingNum, _, pressed = Ui.RenderOption("Combo", ImGuiCol[setting] + 1, id, false, Ui.ImGuiColorVars)
+    any_pressed = any_pressed or (pressed or false)
+
+    ImGui.TableNextColumn()
+
+    local settingColor, _, pressed = Ui.RenderOption("Color", themeColorElement.color, id .. "_color", false, true)
+    any_pressed = any_pressed or (pressed or false)
+
+    if any_pressed then
+        local userConfig = Config:GetSetting('UserTheme')
+        userConfig[id].element = ImGui.GetStyleColorName((tonumber(settingNum) or 1) - 1)
+        userConfig[id].color = settingColor
+        Config:SetSetting('UserTheme', userConfig)
+    end
+
+    ImGui.SameLine()
+    if ImGui.SmallButton(Icons.MD_DELETE .. "##delete_" .. id) then
+        local userConfig = Config:GetSetting('UserTheme')
+        userConfig[id].element = "DELETE"
+        delete_pressed = true
+    end
+
+    return any_pressed, delete_pressed
+end
+
+function Ui.RenderThemeConfig(searchFilter)
+    local renderWidth = 325
+    local windowWidth = ImGui.GetWindowWidth()
+    local numCols     = math.max(1, math.floor(windowWidth / renderWidth))
+    local category    = "UserTheme"
+
+    if not Ui.ThemeConfigMatchesFilter(searchFilter) then
+        return
+    end
+
+    local overrideClass, changed = Ui.RenderOptionToggle("OverrideClassTheme", "Override Class Theme Colors", Config:GetSetting('UserThemeOverrideClassTheme'), true)
+
+    if changed then
+        Config:SetSetting('UserThemeOverrideClassTheme', overrideClass)
+    end
+
+    ImGui.NewLine()
+
+    if ImGui.SmallButton("Add New Color") then
+        Config:SetSetting('UserTheme', table.insert(Config:GetSetting('UserTheme') or {}, {
+            element = "Text",
+            color = { x = 1, y = 1, z = 1, w = 1, },
+        }))
+    end
+
+    if ImGui.BeginChild("themechild_" .. category, ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY), ImGuiWindowFlags.None) then
+        if ImGui.BeginTable("themelements_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
+            for _ = 1, numCols do
+                ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 180.0)
+                ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
+            end
+
+            local userTheme = Config:GetSetting('UserTheme') or {}
+            local deletePressed = false
+
+            for idx, themeElement in ipairs(userTheme) do
+                ImGui.TableNextColumn()
+                _, deletePressed = Ui.RenderThemeConfigElement(idx, themeElement)
+            end
+
+            if deletePressed then
+                local cleanedTheme = {}
+                for _, themeElement in ipairs(userTheme) do
+                    if themeElement.element ~= "DELETE" then
+                        table.insert(cleanedTheme, themeElement)
+                    end
+                end
+                Config:SetSetting('UserTheme', cleanedTheme)
+            end
+
+            ImGui.EndTable()
+        end
+        ImGui.EndChild()
+    end
+end
+
+function Ui.ThemeConfigMatchesFilter(searchFilter)
+    return (searchFilter or ""):len() == 0 or string.find("theme", searchFilter, 1, true) ~= nil
 end
 
 function Ui.RenderLogo(textureId)

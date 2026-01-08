@@ -31,8 +31,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.FA_COGS,
         IconImage = OptionsUI.LoadIcon("settingsicon"),
         Headers = {
-            { Name = 'Announcements', Categories = { "Announcements", }, },                                       -- group announce stuff
-            { Name = 'Interface',     Categories = { "Interface", "Colors", }, },                                 -- ui stuff
+            { Name = 'Announcements', Categories = { "Announcements", }, },                                       -- group announce stuff-- ui stuff
             { Name = 'Loot(Emu)',     Categories = { "Looting Script", "LNS", "SmartLoot", }, },
             { Name = 'Misc',          Categories = { "Misc", }, },                                                -- ??? profit
             { Name = 'Uncategorized', Categories = { "Uncategorized", },                      CatchAll = true, }, -- settings from custom configs that don't have proper group/header
@@ -102,6 +101,30 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
                         end,
                         Search = function(searchFilter)
                             return Modules:ExecModule("Clickies", "HaveSearchMatches", searchFilter)
+                        end,
+                    },
+                },
+            },
+        },
+    },
+    {
+        Name = "Interface",
+        Description = "Clickies, Bandolier Swaps",
+        Icon = Icons.MD_RESTAURANT_MENU,
+        IconImage = OptionsUI.LoadIcon("themeicon"),
+        Headers = {
+            { Name = 'Interface', Categories = { "Interface", "Default Colors", }, },
+            {
+                Name = 'User Theme',
+                RenderCategories = {
+                    {
+                        Header = "User Theme",
+
+                        Render = function(searchFilter)
+                            return Ui.RenderThemeConfig(searchFilter)
+                        end,
+                        Search = function(searchFilter)
+                            return Ui.ThemeConfigMatchesFilter(searchFilter)
                         end,
                     },
                 },

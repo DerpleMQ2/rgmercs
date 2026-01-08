@@ -82,7 +82,16 @@ local function Alive()
 end
 
 local function GetTheme()
-    return Modules:ExecModule("Class", "GetTheme")
+    local classTheme = Modules:ExecModule("Class", "GetTheme") or {}
+    local userTheme = Config:GetSetting('UserTheme') or {}
+
+    if #userTheme > 0 then
+        if #classTheme == 0 or Config:GetSetting('UserThemeOverrideClassTheme') then
+            return userTheme
+        end
+    end
+
+    return classTheme
 end
 
 local function RGMercsGUI()
@@ -104,7 +113,8 @@ local function RGMercsGUI()
             if theme ~= nil then
                 for _, t in pairs(theme) do
                     if t.color then
-                        ImGui.PushStyleColor(t.element, t.color.r, t.color.g, t.color.b, t.color.a)
+                        ImGui.PushStyleColor(type(t.element) == 'string' and ImGuiCol[t.element] or t.element, t.color.r or t.color.x, t.color.g or t.color.y, t.color.b or t.color
+                        .z, t.color.a or t.color.w)
                         themeColorPop = themeColorPop + 1
                     elseif t.value then
                         ImGui.PushStyleVar(t.element, t.value)
