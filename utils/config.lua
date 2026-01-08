@@ -2001,22 +2001,6 @@ Config.DefaultConfig               = {
 
 Config.CommandHandlers             = {}
 
-local function deep_copy(orig, copies)
-    copies = copies or {} -- to handle cycles
-    if type(orig) ~= "table" then
-        return orig
-    elseif copies[orig] then
-        return copies[orig]
-    end
-
-    local copy = {}
-    copies[orig] = copy
-    for k, v in pairs(orig) do
-        copy[deep_copy(k, copies)] = deep_copy(v, copies)
-    end
-    return setmetatable(copy, getmetatable(orig))
-end
-
 function Config:GetConfigFileName()
     local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServerNormalized .. "_" .. self.Globals.CurLoadedChar .. '.lua'
@@ -2468,7 +2452,7 @@ function Config:SetSetting(setting, value, tempOnly)
         if tempOnly then
             self.moduleTempSettings[settingModuleName][setting] = cleanValue
         else
-            self.moduleSettings[settingModuleName][setting] = deep_copy(cleanValue)
+            self.moduleSettings[settingModuleName][setting] = Tables.DeepCopy(cleanValue)
             self.moduleTempSettings[settingModuleName][setting] = cleanValue
             self:SaveModuleSettings(settingModuleName, self.moduleSettings[settingModuleName])
         end
@@ -2511,7 +2495,7 @@ end
 
 --- Clears Temporarily set settings
 function Config:ClearAllTempSettings()
-    self.moduleTempSettings = deep_copy(self.moduleSettings) -- make sure nothing is a reference.
+    self.moduleTempSettings = Tables.DeepCopy(self.moduleSettings) -- make sure nothing is a reference.
 end
 
 --- Resolves the default values for a given settings table.
@@ -2595,7 +2579,7 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
 
     -- Setup Defaults
     settings, settingsChanged = Config.ResolveDefaults(defaultSettings, settings)
-    self.moduleSettings[module] = deep_copy(settings) -- make sure nothing is a reference.
+    self.moduleSettings[module] = Tables.DeepCopy(settings) -- make sure nothing is a reference.
     self.moduleTempSettings[module] = settings
     self.moduleDefaultSettings[module] = defaultSettings
     self.moduleSettingCategories[module] = settingCategories
@@ -2810,7 +2794,7 @@ function Config:UpdatePeerSettings(data)
         self.TempSettings.PeerModuleSettingsLowerToNameCache[setting:lower()] = nil
     end
 
-    self.peerModuleSettings[module] = deep_copy(settings or {})
+    self.peerModuleSettings[module] = Tables.DeepCopy(settings or {})
     self.peerModuleSettingCategories[module] = Set.new(settingsCategories or {})
 
     for setting, _ in pairs(settings) do

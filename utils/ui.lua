@@ -35,10 +35,13 @@ end
 table.sort(preSortedColors, function(a, b) return a.Value < b.Value end)
 
 for _, v in ipairs(preSortedColors) do
+    while #Ui.ImGuiColorVars < v.Value do
+        table.insert(Ui.ImGuiColorVars, "<Unused>")
+    end
     table.insert(Ui.ImGuiColorVars, v.Name)
 end
 
---- Renders the assist list.
+--- Renders the assist list._
 --- This function is responsible for displaying the list of assist names
 --- It does not take any parameters and does not return any values.
 function Ui.RenderAssistList()
@@ -969,10 +972,9 @@ function Ui.RenderOptionNumber(id, text, cur, min, max, step)
     return input, changed
 end
 
-function Ui.SearchableCombo(id, curIdx, options)
+function Ui.SearchableCombo(id, curIdx, options, hideText)
     local pressed = false
-
-    if ImGui.BeginCombo("##combo_box" .. id, options[curIdx]) then
+    if ImGui.BeginCombo("##combo_box" .. id, curIdx .. " : " .. options[curIdx]) then
         -- Search box
         if ImGui.IsWindowAppearing() then
             ImGui.SetKeyboardFocusHere()
@@ -984,8 +986,8 @@ function Ui.SearchableCombo(id, curIdx, options)
 
         -- List
         for i, item in ipairs(options) do
-            if Ui.ComboFilterText == "" or item:lower():find(Ui.ComboFilterText:lower(), 1, true) then
-                if ImGui.Selectable(item, i == curIdx) then
+            if item:find(hideText) == nil and (Ui.ComboFilterText == "" or item:lower():find(Ui.ComboFilterText:lower(), 1, true)) then
+                if ImGui.Selectable(i .. ": " .. item, i == curIdx) then
                     if curIdx ~= i then
                         curIdx = i
                         pressed = true
@@ -1009,9 +1011,10 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         ImGui.PushID("##combo_setting_" .. id)
         ---@type string[]
         local comboOptions = args[1]
+        local hideText = args[2]
         ImGui.SetNextItemWidth(-1)
         --setting, pressed = ImGui.Combo("", setting, comboOptions)
-        setting, pressed = Ui.SearchableCombo(id, setting, comboOptions)
+        setting, pressed = Ui.SearchableCombo(id, setting, comboOptions, hideText)
         ImGui.PopID()
         new_loadout = ((pressed or false) and (requiresLoadoutChange))
         any_pressed = any_pressed or (pressed or false)
@@ -1122,7 +1125,7 @@ function Ui.RenderThemeConfigElement(id, themeColorElement)
     local any_pressed, delete_pressed = false, false
 
     ---@diagnostic disable-next-line: cast-local-type
-    local settingNum, _, pressed = Ui.RenderOption("Combo", (ImGuiCol[setting] or 0) + 1, id, false, Ui.ImGuiColorVars)
+    local settingNum, _, pressed = Ui.RenderOption("Combo", (ImGuiCol[setting] or 0) + 1, id, false, Ui.ImGuiColorVars, "<Unused>")
     any_pressed = any_pressed or (pressed or false)
 
     ImGui.TableNextColumn()
@@ -1140,8 +1143,8 @@ function Ui.RenderThemeConfigElement(id, themeColorElement)
     ImGui.SameLine()
     if ImGui.SmallButton(Icons.MD_DELETE .. "##delete_" .. id) then
         local userConfig = Config:GetSetting('UserTheme')
-        userConfig[id].element = "DELETE"
-        delete_pressed = true
+        table.remove(userConfig, id)
+        Config:SetSetting('UserTheme', userConfig)
     end
 
     return any_pressed, delete_pressed
@@ -1165,6 +1168,20 @@ function Ui.RenderThemeConfig(searchFilter)
 
     ImGui.NewLine()
 
+    if ImGui.SmallButton("I'm Feeling Lucky") then
+        local randomTheme = {}
+        for _, v in ipairs(Ui.ImGuiColorVars) do
+            if v:len() > 0 then
+                table.insert(randomTheme, { element = v, color = { x = math.random(), y = math.random(), z = math.random(), w = 1.0, }, })
+            end
+        end
+        Logger.log_debug("Generated a random theme with %d colors", #randomTheme)
+        Config:SetSetting('UserTheme', randomTheme)
+    end
+    Ui.Tooltip("Randomizes all colors in the theme. Warning: May be hard to read!")
+
+    ImGui.NewLine()
+
     if ImGui.SmallButton("Add New Color") then
         Config:SetSetting('UserTheme', table.insert(Config:GetSetting('UserTheme') or {}, {
             element = "Text",
@@ -1179,22 +1196,11 @@ function Ui.RenderThemeConfig(searchFilter)
                 ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
             end
 
-            local userTheme = Config:GetSetting('UserTheme') or {}
-            local deletePressed = false
+            local userTheme = Tables.DeepCopy(Config:GetSetting('UserTheme') or {})
 
             for idx, themeElement in ipairs(userTheme) do
                 ImGui.TableNextColumn()
-                _, deletePressed = Ui.RenderThemeConfigElement(idx, themeElement)
-            end
-
-            if deletePressed then
-                local cleanedTheme = {}
-                for _, themeElement in ipairs(userTheme) do
-                    if themeElement.element ~= "DELETE" then
-                        table.insert(cleanedTheme, themeElement)
-                    end
-                end
-                Config:SetSetting('UserTheme', cleanedTheme)
+                Ui.RenderThemeConfigElement(idx, themeElement)
             end
 
             ImGui.EndTable()

@@ -39,4 +39,20 @@ function Tables.TableToImVec4(t)
     return ImVec4(t.x, t.y, t.z, t.w)
 end
 
+function Tables.DeepCopy(orig, copies)
+    copies = copies or {} -- to handle cycles
+    if type(orig) ~= "table" then
+        return orig
+    elseif copies[orig] then
+        return copies[orig]
+    end
+
+    local copy = {}
+    copies[orig] = copy
+    for k, v in pairs(orig) do
+        copy[Tables.DeepCopy(k, copies)] = Tables.DeepCopy(v, copies)
+    end
+    return setmetatable(copy, getmetatable(orig))
+end
+
 return Tables
