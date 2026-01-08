@@ -13,22 +13,30 @@ local Math        = require('utils.math')
 local Set         = require('mq.set')
 
 
-local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
-local ICON_SIZE     = 20
+local animSpellGems   = mq.FindTextureAnimation('A_SpellGems')
+local ICON_SIZE       = 20
 
-local Ui            = { _version = '1.0', _name = "Ui", _author = 'Derple', }
+local Ui              = { _version = '1.0', _name = "Ui", _author = 'Derple', }
 
-Ui.__index          = Ui
-Ui.ConfigFilter     = ""
-Ui.ShowDownNamed    = false
-Ui.TempSettings     = {}
-Ui.ImGuiColorVars   = {}
+Ui.__index            = Ui
+Ui.ConfigFilter       = ""
+Ui.ShowDownNamed      = false
+Ui.TempSettings       = {}
+Ui.ImGuiColorVars     = {}
+Ui.ComboFilterText    = ""
 
-for i = 0, ImGuiCol.COUNT - 1 do
-    local name = ImGui.GetStyleColorName(i)
-    table.insert(Ui.ImGuiColorVars, name)
+local preSortedColors = {}
+for k, v in pairs(getmetatable(ImGuiCol).__index) do
+    if k ~= "COUNT" then
+        table.insert(preSortedColors, { Name = k, Value = v, })
+    end
 end
 
+table.sort(preSortedColors, function(a, b) return a.Value < b.Value end)
+
+for _, v in ipairs(preSortedColors) do
+    table.insert(Ui.ImGuiColorVars, v.Name)
+end
 
 --- Renders the assist list.
 --- This function is responsible for displaying the list of assist names
@@ -176,7 +184,6 @@ function Ui.RenderMercsStatus(showPopout)
 
         if #Ui.TempSettings.SortedMercs ~= Tables.GetTableSize(mercs) then
             Ui.TempSettings.SortedMercs = {}
-            printf("Rebuilding sorted mercs list, current size: %d, mercs size: %d", #Ui.TempSettings.SortedMercs, Tables.GetTableSize(mercs))
             for peer, _ in pairs(mercs) do table.insert(Ui.TempSettings.SortedMercs, peer) end
             if sort_specs then sort_specs.SpecsDirty = true end
         end
@@ -962,6 +969,38 @@ function Ui.RenderOptionNumber(id, text, cur, min, max, step)
     return input, changed
 end
 
+function Ui.SearchableCombo(id, curIdx, options)
+    local pressed = false
+
+    if ImGui.BeginCombo("##combo_box" .. id, options[curIdx]) then
+        -- Search box
+        if ImGui.IsWindowAppearing() then
+            ImGui.SetKeyboardFocusHere()
+        end
+
+        Ui.ComboFilterText = ImGui.InputText("##combo_search", Ui.ComboFilterText)
+
+        ImGui.Separator()
+
+        -- List
+        for i, item in ipairs(options) do
+            if Ui.ComboFilterText == "" or item:lower():find(Ui.ComboFilterText:lower(), 1, true) then
+                if ImGui.Selectable(item, i == curIdx) then
+                    if curIdx ~= i then
+                        curIdx = i
+                        pressed = true
+                        Ui.ComboFilterText = ""
+                        ImGui.CloseCurrentPopup()
+                    end
+                end
+            end
+        end
+        ImGui.EndCombo()
+    end
+
+    return curIdx, pressed
+end
+
 function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
     local args = { ..., }
     local new_loadout, any_pressed, pressed = false, false, false
@@ -971,7 +1010,8 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         ---@type string[]
         local comboOptions = args[1]
         ImGui.SetNextItemWidth(-1)
-        setting, pressed = ImGui.Combo("", setting, comboOptions)
+        --setting, pressed = ImGui.Combo("", setting, comboOptions)
+        setting, pressed = Ui.SearchableCombo(id, setting, comboOptions)
         ImGui.PopID()
         new_loadout = ((pressed or false) and (requiresLoadoutChange))
         any_pressed = any_pressed or (pressed or false)
@@ -1023,10 +1063,9 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         local skipDefaultButton = args[1] or false
         ImGui.PushID("##color_setting_" .. id)
         ImGui.SetNextItemWidth(-1)
-        setting, pressed = ImGui.ColorEdit4("", Tables.TableToImVec4(setting) or ImVec4(0, 0, 0, 0), ImGuiColorEditFlags.NoInputs + ImGuiColorEditFlags.NoLabel)
-        if pressed then
-            setting = Tables.ImVec4ToTable(setting)
-        end
+        local newSetting
+        newSetting, pressed = ImGui.ColorEdit4("", Tables.TableToImVec4(setting) or ImVec4(0, 0, 0, 0), ImGuiColorEditFlags.NoInputs + ImGuiColorEditFlags.NoLabel)
+        setting = newSetting and Tables.ImVec4ToTable(newSetting) or setting
         if not skipDefaultButton then
             ImGui.SameLine()
             if ImGui.SmallButton("Default##reset_color_" .. id) then
