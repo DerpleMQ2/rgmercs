@@ -1012,18 +1012,19 @@ function Combat.FindWorstHurtXT(minHPs)
         local healTarget = mq.TLO.Me.XTarget(i)
 
         if healTarget and healTarget() and Targeting.TargetIsType("pc", healTarget) then
-            if not healTarget.Dead() and (healTarget.PctHPs() or 101) < worstPct then
-                Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                worstPct = healTarget.PctHPs()
+            local playerHP = healTarget.PctHPs() or 101
+            if not healTarget.Dead() and playerHP < worstPct then
+                Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName() or "Error")
+                worstPct = playerHP
                 worstId = healTarget.ID()
             end
 
             if Config:GetSetting('DoPetHeals') and healTarget.Pet.ID() > 0 then
                 local petHP = healTarget.Pet.PctHPs() or 101
                 if petHP < worstPct and petHP < Config:GetSetting('PetHealPoint') then
-                    Logger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
-                        healTarget.Pet.DisplayName())
-                    worstPct = healTarget.Pet.PctHPs()
+                    Logger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName() or "Error",
+                        healTarget.Pet.DisplayName() or "Error")
+                    worstPct = petHP
                     worstId = healTarget.Pet.ID()
                 end
             end
