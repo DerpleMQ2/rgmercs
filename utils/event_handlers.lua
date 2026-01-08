@@ -101,6 +101,8 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
                 Logger.log_debug("TooClose: Attempting to Kick.")
             end
         end
+    elseif Modules:ExecModule("Pull", "IsPullState", "PULL_RETURN_TO_CAMP") then
+        Logger.log_debug("CantSee event detected, but we are pulling and currently returning to camp.")
     else
         if Config:GetSetting('HandleTooClose') then
             local haterCount = Targeting.GetXTHaterCount()
@@ -143,6 +145,8 @@ local function tooFarHandler()
             Targeting.GetTargetDistance())
         Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.7)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
+    elseif Modules:ExecModule("Pull", "IsPullState", "PULL_RETURN_TO_CAMP") then
+        Logger.log_debug("CantSee event detected, but we are pulling and currently returning to camp.")
     else
         if Config:GetSetting('HandleTooFar') then
             local classConfig = Modules:ExecModule("Class", "GetClassConfig")
