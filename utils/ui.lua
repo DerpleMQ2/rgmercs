@@ -1122,7 +1122,7 @@ function Ui.RenderThemeConfigElement(id, themeColorElement)
     local any_pressed, delete_pressed = false, false
 
     ---@diagnostic disable-next-line: cast-local-type
-    local settingNum, _, pressed = Ui.RenderOption("Combo", ImGuiCol[setting] + 1, id, false, Ui.ImGuiColorVars)
+    local settingNum, _, pressed = Ui.RenderOption("Combo", (ImGuiCol[setting] or 0) + 1, id, false, Ui.ImGuiColorVars)
     any_pressed = any_pressed or (pressed or false)
 
     ImGui.TableNextColumn()
