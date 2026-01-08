@@ -28,6 +28,8 @@ mq.event("CantSee", "You cannot see your target.", function()
         Logger.log_debug("CantSee: \ayWe are in Pull_State PULLING and Cannot see our target!")
         Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
+    elseif Modules:ExecModule("Pull", "IsPullState", "PULL_RETURN_TO_CAMP") then
+        Logger.log_debug("CantSee event detected, but we are pulling and currently returning to camp.")
     else
         if Config:GetSetting('HandleCantSeeTarget') then
             local haterCount = Targeting.GetXTHaterCount()
