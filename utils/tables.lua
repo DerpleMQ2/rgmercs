@@ -23,4 +23,20 @@ function Tables.TableContains(t, value)
     return false
 end
 
+--- Converts an ImVec4 to a table.
+--- @param vec ImVec4 The ImVec4 to convert.
+--- @return table|nil The converted table with x, y, z, w keys.
+function Tables.ImVec4ToTable(vec)
+    if not vec then return nil end
+    return { x = vec.x, y = vec.y, z = vec.z, w = vec.w, }
+end
+
+--- Converts a table to an ImVec4.
+--- @param t table The table to convert. Must have x, y, z, w keys.
+--- @return ImVec4|nil The converted ImVec4.
+function Tables.TableToImVec4(t)
+    if not t then return nil end
+    return ImVec4(t.x, t.y, t.z, t.w)
+end
+
 return Tables

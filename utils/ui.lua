@@ -29,9 +29,9 @@ Ui.TempSettings     = {}
 --- It does not take any parameters and does not return any values.
 function Ui.RenderAssistList()
     if Config:GetSetting('UseAssistList') then
-        ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, .75)
+        ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Green)
     else
-        ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, .75)
+        ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
     end
     ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(20, 3))
 
@@ -49,7 +49,7 @@ function Ui.RenderAssistList()
         ImGui.PopID()
     end
     if ImGui.BeginTable("AssistList Names", 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
 
         ImGui.TableSetupColumn('ID', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 140.0)
@@ -75,13 +75,13 @@ function Ui.RenderAssistList()
             end
             ImGui.TableNextColumn()
             if spawn() and spawn.ID() > 0 then
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
+                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
                 ImGui.Text(tostring(math.ceil(spawn.Distance())))
                 ImGui.PopStyleColor()
                 ImGui.TableNextColumn()
                 Ui.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                 ImGui.Text("0")
                 ImGui.PopStyleColor()
                 ImGui.TableNextColumn()
@@ -175,7 +175,6 @@ function Ui.RenderMercsStatus(showPopout)
             if sort_specs then sort_specs.SpecsDirty = true end
         end
 
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn(string.format('Name (%d)', #Ui.TempSettings.SortedMercs), bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultSort), 150)
         ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('Mana %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
@@ -186,7 +185,6 @@ function Ui.RenderMercsStatus(showPopout)
         ImGui.TableSetupColumn('Chase', (ImGuiTableColumnFlags.WidthStretch), 120.0)
         ImGui.TableSetupColumn('State', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('Last Update', (ImGuiTableColumnFlags.WidthStretch), 40.0)
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
 
@@ -280,9 +278,9 @@ function Ui.RenderMercsStatus(showPopout)
 
                 ImGui.TableNextColumn()
 
-                ImGui.PushStyleColor(ImGuiCol.Text, data.Data.State == "Paused" and ImVec4(1.0, 1.0, 0.2, 1.0) or
-                    data.Data.State == "Combat" and ImVec4(0.9, 0.2, 0.3, 1.0) or
-                    ImVec4(0.2, 0.8, 0.2, 1.0))
+                ImGui.PushStyleColor(ImGuiCol.Text, data.Data.State == "Paused" and Config.Constants.Colors.Yellow or
+                    data.Data.State == "Combat" and Config.Constants.Colors.Red or
+                    Config.Constants.Colors.Green)
                 _, clicked = ImGui.Selectable(string.format("%s", string.sub(data.Data.State or "N", 1, 1)), false)
                 ImGui.PopStyleColor()
                 if clicked then
@@ -322,7 +320,6 @@ function Ui.RenderForceTargetList(showPopout)
     end
 
     if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 8 or 6, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('', (ImGuiTableColumnFlags.WidthFixed), 16.0)
         ImGui.TableSetupColumn('', (ImGuiTableColumnFlags.WidthFixed), 16.0)
         if Config:GetSetting("ExtendedFTInfo") then
@@ -335,7 +332,6 @@ function Ui.RenderForceTargetList(showPopout)
         if Config:GetSetting("ExtendedFTInfo") then
             ImGui.TableSetupColumn('SpawnID', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         end
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         if ImGui.TableSetColumnIndex(0) then
@@ -421,12 +417,10 @@ function Ui.RenderZoneNamed()
     Ui.ShowDownNamed, _ = Ui.RenderOptionToggle("ShowDown", "Show Downed Named", Ui.ShowDownNamed)
 
     if ImGui.BeginTable("Zone Named", 4, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
         ImGui.TableSetupColumn('Up', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
         ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthFixed), 160.0)
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         local namedList = Modules:ExecModule("Named", "GetNamedList")
@@ -441,13 +435,13 @@ function Ui.RenderZoneNamed()
                 end
                 ImGui.TableNextColumn()
                 if named.Spawn() and named.Spawn.PctHPs() > 0 then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
                     ImGui.Text(Icons.FA_SMILE_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(math.ceil(named.Distance)))
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                     ImGui.Text(Icons.FA_FROWN_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
@@ -491,13 +485,11 @@ end
 --- @param loadoutTable table The table containing loadout information to be rendered.
 function Ui.RenderLoadoutTable(loadoutTable)
     if ImGui.BeginTable("Spells", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('Icon', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Gem', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Var Name', (ImGuiTableColumnFlags.WidthFixed), 150.0)
         ImGui.TableSetupColumn('Level', ImGuiTableColumnFlags.None)
         ImGui.TableSetupColumn('Rank Name', ImGuiTableColumnFlags.None)
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         for gem, loadoutData in pairs(loadoutTable) do
@@ -533,19 +525,19 @@ function Ui.RenderRotationTableKey()
         ImGui.Text(Icons.MD_CLOSE .. ": Rotation was Skipped (Conditions Not Met)")
 
         ImGui.TableNextColumn()
-        ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
         ImGui.Text(Icons.FA_SMILE_O .. ": Entry Effect was Active")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
-        ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
         ImGui.Text(Icons.MD_CHECK .. ": Entry Conditions Passed")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
         ImGui.Text(Icons.FA_EXCLAMATION .. ": Entry Conditions Failed")
 
         ImGui.PopStyleColor()
@@ -603,7 +595,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             ImGui.Text(tostring(idx))
             if rotationState > 0 then
                 ImGui.TableNextColumn()
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
                 if idx == rotationState then
                     ImGui.Text(Icons.FA_DOT_CIRCLE_O)
                 end
@@ -624,13 +616,13 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             end
 
             if active == true then
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
                 ImGui.Text(Icons.FA_SMILE_O)
             elseif pass == true then
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
                 ImGui.Text(Icons.MD_CHECK)
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                 ImGui.Text(Icons.FA_EXCLAMATION)
             end
             ImGui.PopStyleColor()
@@ -644,8 +636,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             local mappedAction = resolvedActionMap[entry.name]
             if mappedAction then
                 if entry.type:lower() == "spell" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.75, 0.25, 0.75, 1.0)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Config.Constants.Colors.Grey)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -654,8 +646,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     ImGui.PopStyleColor(2)
                     Ui.Tooltip(string.format("Spell: %s (click to inspect)", rankSpell() or "Unknown"))
                 elseif entry.type:lower() == "song" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.6, 1.0)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Config.Constants.Colors.Grey)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -664,8 +656,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     ImGui.PopStyleColor(2)
                     Ui.Tooltip(string.format("Song: %s (click to inspect)", rankSpell() or "Unknown"))
                 elseif entry.type:lower() == "disc" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.3, 1.0, 1.0)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Config.Constants.Colors.Grey)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -676,8 +668,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                 elseif type(mappedAction) == "string" and entry.type:lower() == "item" then
                     local item = mq.TLO.FindItem("=" .. mappedAction)
                     if item() and item.Clicky() then
-                        ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.9, 0.1, 1.0)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.LightOrange)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Config.Constants.Colors.Grey)
                         local _, clicked = ImGui.Selectable(mappedAction)
                         local clickySpell = item.Clicky.Spell
                         if clickySpell() and clicked then
@@ -686,48 +678,48 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                         ImGui.PopStyleColor(2)
                         Ui.Tooltip(string.format("Clicky Spell: %s (click to inspect)", clickySpell.Name() or "Unknown"))
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.8, 1.0)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Grey)
                         ImGui.Text(mappedAction)
                         ImGui.PopStyleColor()
                     end
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.8, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Grey)
                     ImGui.Text(mappedAction.Name() or mappedAction)
                     ImGui.PopStyleColor()
                 end
             else
                 if entry.type:lower() == "customfunc" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.7, 0.7, .05, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Yellow)
                     ImGui.Text(entry.desc or "Custom Function")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "spell" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                     ImGui.Text("No Spell Detected")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "song" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                     ImGui.Text("No Song Detected")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "disc" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                     ImGui.Text("No Disc Detected")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "ability" then
                     local abilTrained = mq.TLO.Me.Ability(entry.name)()
                     if abilTrained then
-                        ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.5, 0.5, 1.0)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.LightRed)
                         ImGui.Text(entry.name)
                         ImGui.PopStyleColor()
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                         ImGui.Text("No Ability Detected")
                         ImGui.PopStyleColor()
                     end
                 elseif entry.type:lower() == "aa" then
                     local aaPurchased = mq.TLO.Me.AltAbility(entry.name)() ~= nil
                     if aaPurchased then
-                        ImGui.PushStyleColor(ImGuiCol.Text, 0.45, 0.45, 1.0, 1.0)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.LightBlue)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Config.Constants.Colors.Grey)
                         local _, clicked = ImGui.Selectable(entry.name)
                         local aaSpell = mq.TLO.Me.AltAbility(entry.name).Spell
                         if aaSpell() and clicked then
@@ -736,15 +728,15 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                         ImGui.PopStyleColor(2)
                         Ui.Tooltip(string.format("AA Spell: %s (click to inspect)", aaSpell.Name() or "Unknown"))
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                         ImGui.Text("No AA Detected")
                         ImGui.PopStyleColor()
                     end
                 elseif entry.type:lower() == "item" then
                     local item = mq.TLO.FindItem("=" .. entry.name)
                     if item() and item.Clicky() then
-                        ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.9, 0.1, 1.0)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.2, 0.2, 0.2, 0.5)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Yellow)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Config.Constants.Colors.Grey)
                         local _, clicked = ImGui.Selectable(entry.name)
                         local clickySpell = item.Clicky.Spell
                         if clickySpell() and clicked then
@@ -753,12 +745,12 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                         ImGui.PopStyleColor(2)
                         Ui.Tooltip(string.format("Clicky Spell: %s (click to inspect)", clickySpell.Name() or "Unknown"))
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.25, 0.25, 1.0)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                         ImGui.Text("No Item Detected")
                         ImGui.PopStyleColor()
                     end
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.8, 1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Grey)
                     ImGui.Text(entry.name)
                     ImGui.PopStyleColor()
                 end
@@ -824,7 +816,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
 
     on_color = on_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBgActive)
     off_color = off_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)
-    knob_color = knob_color or ImVec4(1, 1, 1, 1) -- default white
+    knob_color = knob_color or Config.Constants.Colors.White -- default white
 
     if not right_label and label and label:len() > 0 then
         ImGui.Text(label)
@@ -917,7 +909,7 @@ end
 --- @return boolean: state
 --- @return boolean: changed
 function Ui.RenderOptionToggle(id, text, on, center_vertically)
-    return Ui.RenderFancyToggle(id, text, on, ImVec2(26, 14), ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true, true, true, center_vertically)
+    return Ui.RenderFancyToggle(id, text, on, ImVec2(26, 14), Config.Constants.Colors.Green, Config.Constants.Colors.Red, nil, true, true, true, center_vertically)
 end
 
 --- Renders a progress bar.
@@ -948,10 +940,10 @@ end
 --- @return boolean  # changed
 function Ui.RenderOptionNumber(id, text, cur, min, max, step)
     ImGui.PushID("##num_spin_" .. id)
-    ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0.5, 0.5, 0.5, 1.0)
-    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.5, 0.5, 0.5, 0.8)
-    ImGui.PushStyleColor(ImGuiCol.Button, 1.0, 1.0, 1.0, 0.2)
-    ImGui.PushStyleColor(ImGuiCol.FrameBg, 1.0, 1.0, 1.0, 0)
+    ImGui.PushStyleColor(ImGuiCol.ButtonActive, Config.Constants.Colors.LightGrey)
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Config.Constants.Colors.Grey)
+    ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Grey)
+    ImGui.PushStyleColor(ImGuiCol.FrameBg, Config.Constants.Colors.Black)
     local input, changed = ImGui.InputInt(text, cur, step, 1, ImGuiInputTextFlags.None)
     ImGui.PopStyleColor(4)
     ImGui.PopID()
@@ -1021,6 +1013,22 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         new_loadout = new_loadout or
             ((pressed or false) and (requiresLoadoutChange))
         any_pressed = any_pressed or (pressed or false)
+    elseif type == 'Color' then
+        ImGui.PushID("##color_setting_" .. id)
+        ImGui.SetNextItemWidth(-1)
+        setting, pressed = ImGui.ColorEdit4("", Tables.TableToImVec4(setting) or ImVec4(0, 0, 0, 0), ImGuiColorEditFlags.NoInputs + ImGuiColorEditFlags.NoLabel)
+        if pressed then
+            setting = Tables.ImVec4ToTable(setting)
+        end
+        ImGui.SameLine()
+        if ImGui.SmallButton("Default##reset_color_" .. id) then
+            print("Resetting color to default for " .. id)
+            setting = Tables.ImVec4ToTable(Config.Constants.DefaultColors[id])
+            pressed = true
+        end
+        ImGui.PopID()
+        new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
+        any_pressed = any_pressed or pressed
     elseif type == 'boolean' then
         setting, pressed = Ui.RenderOptionToggle(id, "", setting, true)
         new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
@@ -1037,118 +1045,6 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
     end
 
     return setting, new_loadout, any_pressed
-end
-
---- Renders a settings table.
----
---- @param settings table The settings table to render.
---- @param settingNames table A table containing the names of the settings.
---- @param defaults table A table containing the default values for the settings.
---- @param category string The category of the settings.
---- @return table   # settings
---- @return boolean # any_pressed
---- @return boolean # requires_new_loadout
-function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
-    local any_pressed           = false
-    local new_loadout           = false
-    local pressed               = false
-    local loadout_change        = false
-    local renderWidth           = 300
-    local windowWidth           = ImGui.GetWindowWidth()
-    local numCols               = math.max(1, math.floor(windowWidth / renderWidth))
-
-    local settingToDrawIndicies = {}
-
-    for idx, k in ipairs(settingNames) do
-        if Config:GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
-            if defaults[k].Category == category and (defaults[k].Type or "none"):lower() ~= "custom" then
-                table.insert(settingToDrawIndicies, idx)
-            end
-        end
-    end
-
-    local settingsCount = #settingToDrawIndicies
-
-    local itemsPerRow = math.ceil(settingsCount / numCols)
-
-    if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
-        for _ = 1, numCols do
-            ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 150.0)
-            ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
-        end
-        ImGui.PopStyleColor()
-        ImGui.TableHeadersRow()
-        ImGui.TableNextRow()
-
-        if #settingToDrawIndicies > 0 then
-            for row = 1, itemsPerRow do
-                for col = 1, numCols do
-                    ImGui.TableNextColumn()
-                    local itemIndex = row + ((col - 1) * itemsPerRow)
-                    if itemIndex <= #settingToDrawIndicies then
-                        local k = settingNames[settingToDrawIndicies[itemIndex]]
-                        if defaults[k].Type ~= "Custom" then
-                            if (defaults[k].Type or ""):find("Array") then
-                                local arrayType = defaults[k].Type:sub(7)
-
-                                for idx, _ in ipairs(settings[k] or {}) do
-                                    ImGui.Text(string.format("%s", defaults[k].DisplayName or (string.format("None %d", idx))))
-                                    Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
-                                        type(defaults[k].Tooltip) == 'function' and defaults[k].Tooltip() or defaults[k].Tooltip,
-                                        k,
-                                        tostring(defaults[k].Default)))
-                                    ImGui.TableNextColumn()
-
-                                    settings[k][idx], loadout_change, pressed = Ui.RenderOption(
-                                        arrayType,
-                                        settings[k][idx],
-                                        k .. "_" .. idx,
-                                        defaults[k].RequiresLoadoutChange or false,
-                                        defaults[k].ComboOptions or defaults[k].Min, defaults[k].Max, defaults[k].Step or 1)
-
-                                    new_loadout = new_loadout or loadout_change
-                                    any_pressed = any_pressed or pressed
-                                    if idx < #settings[k] then ImGui.TableNextColumn() end
-                                end
-                                local removeQueue = {}
-                                for idx, item in ipairs(settings[k] or {}) do
-                                    if (not item or item == '') and idx < #settings[k] then
-                                        table.insert(removeQueue, idx)
-                                    end
-                                end
-
-                                for _, idx in ipairs(removeQueue) do
-                                    table.remove(settings[k], idx)
-                                    any_pressed = true
-                                end
-                            else
-                                ImGui.Text(defaults[k].DisplayName or "None")
-                                Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
-                                    type(defaults[k].Tooltip) == 'function' and defaults[k].Tooltip() or defaults[k].Tooltip,
-                                    k,
-                                    tostring(defaults[k].Default)))
-                                ImGui.TableNextColumn()
-
-                                settings[k], loadout_change, pressed = Ui.RenderOption(
-                                    type(defaults[k].Type) == 'string' and defaults[k].Type or type(settings[k]),
-                                    settings[k],
-                                    k,
-                                    defaults[k].RequiresLoadoutChange or false,
-                                    defaults[k].ComboOptions or defaults[k].Min, defaults[k].Max, defaults[k].Step or 1)
-                                new_loadout = new_loadout or loadout_change
-                                any_pressed = any_pressed or pressed
-                            end
-                        end
-                    end
-                end
-                ImGui.TableNextRow()
-            end
-        end
-        ImGui.EndTable()
-    end
-
-    return settings, any_pressed, new_loadout
 end
 
 function Ui.RenderPopAndSettings(moduleName)
@@ -1407,9 +1303,9 @@ end
 --- Checks if navigation is enabled for a given location.
 --- @param loc string The location to check, represented as a string with coordinates.
 function Ui.NavEnabledLoc(loc)
-    ImGui.PushStyleColor(ImGuiCol.Text, 0.690, 0.553, 0.259, 1)
-    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.33, 0.33, 0.33, 0.5)
-    ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0.0, 0.66, 0.33, 0.5)
+    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Yellow)
+    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Config.Constants.Colors.Grey)
+    ImGui.PushStyleColor(ImGuiCol.HeaderActive, Config.Constants.Colors.Green)
     local navLoc = ImGui.Selectable(loc, false, ImGuiSelectableFlags.AllowDoubleClick)
     ImGui.PopStyleColor(3)
     if loc ~= "0,0,0" then

@@ -253,7 +253,7 @@ function Module:Render()
 		if ImGui.CollapsingHeader("Charm Target List") then
 			ImGui.Indent()
 			if ImGui.BeginTable("CharmedList", 4, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Hideable)) then
-				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+				ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
 				ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
 				ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 150.0)
@@ -280,7 +280,7 @@ function Module:Render()
 		if ImGui.CollapsingHeader("Invalid Charm Targets") then
 			ImGui.Indent()
 			if ImGui.BeginTable("Immune", 5, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Hideable)) then
-				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+				ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
 				ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 250.0)
 				ImGui.TableSetupColumn('Lvl', ImGuiTableColumnFlags.WidthFixed, 70.0)
@@ -298,7 +298,7 @@ function Module:Render()
 					ImGui.TableNextColumn()
 					ImGui.Text(data.body)
 					ImGui.TableNextColumn()
-					ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", data.reason)
+					ImGui.TextColored(Config.Constants.Colors.Yellow, "%s", data.reason)
 				end
 				for name, data in pairs(self.ImmuneTable[mq.TLO.Zone.ShortName()] or {}) do
 					for lvl, body in pairs(data) do
@@ -318,7 +318,7 @@ function Module:Render()
 							ImGui.TableNextColumn()
 							ImGui.Text(bodyType)
 							ImGui.TableNextColumn()
-							ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", reason)
+							ImGui.TextColored(Config.Constants.Colors.Yellow, "%s", reason)
 						end
 					end
 				end

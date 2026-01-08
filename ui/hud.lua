@@ -53,7 +53,7 @@ function HudUI:RenderToggleHud()
     if show then
         local btnImg = Casting.LastBurnCheck and ImagesUI.burnImg or ImagesUI.derpImg
         if Config.Globals.PauseMain then
-            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
+            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), Config.Constants.Colors.Black, Config.Constants.Colors.Red) then
                 if enableAFUI then
                     self:AFPopUp(self.ClickMsg, math.random(4))
                 else
@@ -97,7 +97,7 @@ function HudUI:RenderToggleHud()
         local toggleXPos = ImGui.GetCursorPosX()
 
         local pause_main, pause_main_pushed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pause", lbl, not Config.Globals.PauseMain, ImVec2(32, toggleHeight),
-            ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true)
+            Config.Constants.Colors.Green, Config.Constants.Colors.Red, nil, true)
 
         ImGui.SameLine()
         ImGui.SetCursorPosX(miniWidth - (enableAFUI and 30 or 20) - ImGui.GetStyle().WindowPadding.x)
@@ -118,7 +118,7 @@ function HudUI:RenderToggleHud()
         cursorPos.y = cursorPos.y + toggleHeight + ImGui.GetStyle().ItemSpacing.y
         ImGui.SetCursorPos(cursorPos)
         local pull_toggle, pull_toggle_changed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pulls", lbl, Config:GetSetting('DoPull'), nil,
-            ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true)
+            Config.Constants.Colors.Green, Config.Constants.Colors.Red, nil, true)
         ImGui.SetCursorPos(cursorPosAfter)
 
         if pull_toggle_changed then
@@ -136,7 +136,7 @@ function HudUI:RenderToggleHud()
             for k, displayName in pairs(self.Settings) do
                 ImGui.SetCursorPosX(toggleXPos)
                 local newTog, changeTog = Ui.RenderFancyToggle("##rgmercs_hud_toggle_" .. k, displayName, Config:GetSetting(k), nil,
-                    ImVec4(0.3, 0.8, 0.3, 0.8), ImVec4(0.8, 0.3, 0.3, 0.8), nil, true)
+                    Config.Constants.Colors.Green, Config.Constants.Colors.Red, nil, true)
 
                 if changeTog then
                     Config:SetSetting(k, not newTog)

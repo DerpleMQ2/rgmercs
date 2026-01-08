@@ -1268,11 +1268,11 @@ function Module:RenderClickiesWithConditions(type, clickies)
                             local headerPos = ImGui.GetCursorPosVec()
 
                             if clicky.conditionsCache and clicky.conditionsCache[condIdx] == true then
-                                ImGui.PushStyleColor(ImGuiCol.Text, 0.2, 0.8, 0.2, 1.0)
+                                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
                             elseif clicky.conditionsCache and clicky.conditionsCache[condIdx] == false then
-                                ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.2, 0.2, 1.0)
+                                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
                             else
-                                ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.2, 1.0)
+                                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Yellow)
                             end
 
                             if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
@@ -1329,11 +1329,9 @@ end
 
 function Module:RenderClickyData(clicky, clickyIdx)
     if ImGui.BeginTable("##clickies_table_" .. clicky.itemName .. tostring(clickyIdx), 3, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('Last Used', (ImGuiTableColumnFlags.WidthFixed), 100.0)
         ImGui.TableSetupColumn('Item', (ImGuiTableColumnFlags.WidthFixed), 150.0)
         ImGui.TableSetupColumn('Effect', (ImGuiTableColumnFlags.WidthStretch), 200.0)
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         if clicky.itemName:len() > 0 then

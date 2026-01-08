@@ -60,18 +60,18 @@ local PullStates                          = {
 }
 
 local PullStateDisplayStrings             = {
-    ['MERCS_PAUSED']            = { Display = Icons.MD_REPORT_PROBLEM, Text = "RGMercs Main Paused", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
-    ['PULL_IDLE']               = { Display = Icons.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
-    ['PULL_GROUPWATCH_WAIT']    = { Display = Icons.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_NAV_INTERRUPT']      = { Display = Icons.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation Interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
-    ['PULL_SCAN']               = { Display = Icons.FA_EYE, Text = "Scanning for Targets", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_PULLING']            = { Display = Icons.FA_BULLSEYE, Text = "Pulling", Color = { r = 0.8, g = 0.03, b = 0.02, a = 1.0, }, },
-    ['PULL_MOVING_TO_WP']       = { Display = Icons.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_NAV_TO_TARGET']      = { Display = Icons.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_RETURN_TO_CAMP']     = { Display = Icons.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_WAITING_ON_MOB']     = { Display = Icons.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_WAITING_SHOULDPULL'] = { Display = Icons.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
-    ['PULL_MOVING_CHECKS']      = { Display = Icons.FA_EYE, Text = "Rechecking Actions", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['MERCS_PAUSED']            = { Display = Icons.MD_REPORT_PROBLEM, Text = "RGMercs Main Paused", Color = 'Red', },
+    ['PULL_IDLE']               = { Display = Icons.FA_CLOCK_O, Text = "Idle", Color = 'Green', },
+    ['PULL_GROUPWATCH_WAIT']    = { Display = Icons.MD_GROUP, Text = "Waiting on GroupWatch", Color = 'Yellow', },
+    ['PULL_NAV_INTERRUPT']      = { Display = Icons.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation Interrupted", Color = 'Red', },
+    ['PULL_SCAN']               = { Display = Icons.FA_EYE, Text = "Scanning for Targets", Color = 'Green', },
+    ['PULL_PULLING']            = { Display = Icons.FA_BULLSEYE, Text = "Pulling", Color = 'Red', },
+    ['PULL_MOVING_TO_WP']       = { Display = Icons.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = 'Yellow', },
+    ['PULL_NAV_TO_TARGET']      = { Display = Icons.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = 'Yellow', },
+    ['PULL_RETURN_TO_CAMP']     = { Display = Icons.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = 'Green', },
+    ['PULL_WAITING_ON_MOB']     = { Display = Icons.FA_CLOCK_O, Text = "Waiting on Mob", Color = 'Yellow', },
+    ['PULL_WAITING_SHOULDPULL'] = { Display = Icons.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = 'Red', },
+    ['PULL_MOVING_CHECKS']      = { Display = Icons.FA_EYE, Text = "Rechecking Actions", Color = 'Yellow', },
 }
 
 local PullStatesIDToName                  = {}
@@ -893,7 +893,7 @@ end
 
 function Module:RenderPullTargets()
     if ImGui.BeginTable("Pull Targets", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
         ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
         ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 60.0)
@@ -936,7 +936,7 @@ function Module:RenderIgnoreTargets()
     end
     ImGui.PopID()
     if ImGui.BeginTable("Pull Targets", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
         ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.None), 250.0)
         ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 60.0)
@@ -987,9 +987,9 @@ function Module:Render()
     if self.ModuleLoaded and Config.Globals.SubmodulesLoaded then
         if mq.TLO.Navigation.MeshLoaded() then
             if Config:GetSetting('DoPull') then
-                ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
+                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
+                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Green)
             end
             local cursorXPos = ImGui.GetCursorPosX()
             if ImGui.Button(Config:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
@@ -999,9 +999,9 @@ function Module:Render()
             end
             ImGui.PopStyleColor()
             if Module.TempSettings.PausePulls then
-                ImGui.PushStyleColor(ImGuiCol.Button, 0.4, 0.02, 0.02, 1)
+                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
+                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Green)
             end
             ImGui.SetCursorPosX(cursorXPos)
             if ImGui.Button(Module.TempSettings.PausePulls and "Unpause Pulls" or "Pause Pulls", ImGui.GetWindowWidth() * .3, 25) then
@@ -1010,7 +1010,7 @@ function Module:Render()
             ImGui.PopStyleColor()
             Ui.Tooltip("Pausing pulls will keep the pull settings (camp, locs, etc), but it will not attempt to pull any targets until unpaused.")
         else
-            ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
+            ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
             ImGui.Button("No Nav Mesh Loaded!", ImGui.GetWindowWidth() * .3, 25)
             ImGui.PopStyleColor()
         end
@@ -1070,8 +1070,7 @@ function Module:Render()
             ImGui.Text("Pull State")
             ImGui.TableNextColumn()
             local stateData = Config.Globals.PauseMain and PullStateDisplayStrings['MERCS_PAUSED'] or PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
-            local stateColor = stateData and ImGui.GetColorU32(stateData.Color.r or 1.0, stateData.Color.g or 1.0, stateData.Color.b or 1.0, stateData.Color.a or 1.0) or
-                ImGui.GetColorU32(1.0, 1.0, 1.0, 1.0)
+            local stateColor = stateData and Config.Constants.Colors[stateData.Color] or ImGui.GetColorU32(1.0, 1.0, 1.0, 1.0)
             ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
             if not stateData then
                 ImGui.Text("Invalid State Data... This should auto resolve.")

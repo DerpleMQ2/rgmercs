@@ -32,7 +32,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         IconImage = OptionsUI.LoadIcon("settingsicon"),
         Headers = {
             { Name = 'Announcements', Categories = { "Announcements", }, },                                       -- group announce stuff
-            { Name = 'Interface',     Categories = { "Interface", }, },                                           -- ui stuff
+            { Name = 'Interface',     Categories = { "Interface", "Colors", }, },                                 -- ui stuff
             { Name = 'Loot(Emu)',     Categories = { "Looting Script", "LNS", "SmartLoot", }, },
             { Name = 'Misc',          Categories = { "Misc", }, },                                                -- ??? profit
             { Name = 'Uncategorized', Categories = { "Uncategorized", },                      CatchAll = true, }, -- settings from custom configs that don't have proper group/header
@@ -374,7 +374,7 @@ function OptionsUI:RenderCategorySeperator(category)
     ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextAlign, ImVec2(0.05, 0.5))
 
     if self.HighlightedCategories:contains(category) then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
+        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Orange)
     end
 
     ImGui.SeparatorText(category)
@@ -390,7 +390,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
     if self.FilteredGroups[self.GroupsNameToIDs[groupName]] then
         for _, header in ipairs(self.FilteredGroups[self.GroupsNameToIDs[groupName]].Headers or {}) do
             if header.highlighted then
-                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
+                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Orange)
             end
 
             if ImGui.CollapsingHeader(header.Name) then
@@ -457,7 +457,7 @@ function OptionsUI:RenderCategorySettings(category)
                 -- defaults can go away when a different class config is loaded in.
                 if settingDefaults then
                     local setting        = Config:PeerGetSetting(self.selectedCharacter, settingName)
-                    local id             = "##" .. settingName
+                    local id             = settingName -- important! the color configs use this to look up defaults.
                     local settingTooltip = (type(settingDefaults.Tooltip) == 'function' and settingDefaults.Tooltip() or settingDefaults.Tooltip) or ""
 
                     if settingDefaults.Type ~= "Custom" then
@@ -468,7 +468,7 @@ function OptionsUI:RenderCategorySettings(category)
 
                         ImGui.TableNextColumn()
                         if self.HighlightedSettings:contains(settingName) then
-                            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.5, 0.0, 1.0)
+                            ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Orange)
                         end
                         local text_height = ImGui.GetTextLineHeightWithSpacing()
                         local row_height  = ImGui.GetFrameHeightWithSpacing()

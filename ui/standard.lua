@@ -52,9 +52,9 @@ function StandardUI:RenderTarget()
         local ratioHPs = pctHPs / 100
         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 1 - ratioHPs, ratioHPs, 0.2, 0.7)
         if math.floor(assistSpawn.Distance() or 0) >= 350 then
-            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 0.0, 1)
+            ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
         else
-            ImGui.PushStyleColor(ImGuiCol.Text, 1, 1, 1, 1)
+            ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.White)
         end
         ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
             assistSpawn.ID() or 0, assistSpawn.Level() or 0,
@@ -76,8 +76,8 @@ function StandardUI:RenderTarget()
         end
         Ui.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
-        ImGui.PushStyleColor(ImGuiCol.Button, 0.6, 0.2, 0.01, 0.8)
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.3, 0.1, 0.01, 1.0)
+        ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.LightOrange)
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Config.Constants.Colors.Orange)
         local burnLabel = (Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()) and " FORCE BURN ACTIVATED " or " FORCE BURN THIS TARGET! "
         if ImGui.SmallButton(Icons.FA_FIRE .. burnLabel .. Icons.FA_FIRE) then
             Core.DoCmd("/squelch /dgga /rgl burnnow %d", assistSpawn.ID())
@@ -166,9 +166,9 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             self:RenderWindowControls()
 
             if not Config.Globals.PauseMain then
-                ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
+                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Green)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
+                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
             end
 
             local pauseLabel = Config.Globals.PauseMain and "PAUSED" or "Running"

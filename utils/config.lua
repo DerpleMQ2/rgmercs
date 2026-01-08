@@ -164,18 +164,27 @@ Config.Constants.LogLevels         = {
     "Super-Verbose",
 }
 
-Config.Constants.Colors            = {
-    Red        = ImVec4(1.0, 0.2, 0.2, 1.0),
-    Green      = ImVec4(0.2, 1.0, 0.2, 1.0),
-    LightGreen = ImVec4(0.6, 1.0, 0.4, 1.0),
-    Blue       = ImVec4(0.2, 0.2, 1.0, 1.0),
-    Yellow     = ImVec4(1.0, 1.0, 0.2, 1.0),
-    Purple     = ImVec4(1.0, 0.2, 1.0, 1.0),
-    Cyan       = ImVec4(0.2, 1.0, 1.0, 1.0),
-    White      = ImVec4(1.0, 1.0, 1.0, 1.0),
-    Grey       = ImVec4(0.7, 0.7, 0.7, 1.0),
-    LightBlue  = ImVec4(0.4, 0.6, 1.0, 1.0),
+Config.Constants.DefaultColors     = {
+    Red         = ImVec4(0.8, 0.3, 0.3, 0.8),
+    LightRed    = ImVec4(0.9, 0.5, 0.5, 0.8),
+    Green       = ImVec4(0.3, 0.8, 0.3, 0.8),
+    LightGreen  = ImVec4(0.6, 0.8, 0.4, 0.8),
+    Blue        = ImVec4(0.3, 0.3, 0.8, 0.8),
+    LightBlue   = ImVec4(0.4, 0.6, 0.8, 0.8),
+    Yellow      = ImVec4(0.8, 0.8, 0.3, 0.8),
+    LightYellow = ImVec4(0.9, 0.9, 0.4, 0.8),
+    Purple      = ImVec4(0.8, 0.3, 0.8, 0.8),
+    LightPurple = ImVec4(0.9, 0.4, 0.9, 0.8),
+    Orange      = ImVec4(1.0, 0.5, 0.0, 0.8),
+    LightOrange = ImVec4(1.0, 0.6, 0.2, 0.8),
+    Grey        = ImVec4(0.7, 0.7, 0.7, 0.8),
+    LightGrey   = ImVec4(0.9, 0.9, 0.9, 0.8),
+    Cyan        = ImVec4(0.3, 0.8, 0.8, 0.8),
+    White       = ImVec4(0.8, 0.8, 0.8, 0.8),
+    Black       = ImVec4(0.0, 0.0, 0.0, 1.0),
 }
+
+Config.Constants.Colors            = {}
 
 Config.Constants.ConColors         = {
     "Grey", "Green", "Light Blue", "Blue", "White", "Yellow", "Red",
@@ -1674,6 +1683,227 @@ Config.DefaultConfig               = {
         Min = 0,
         Max = 50,
     },
+    ['Red']                  = {
+        DisplayName = "UI Color - Red",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 11,
+        Tooltip = "Red component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Red),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['LightRed']             = {
+        DisplayName = "UI Color - Light Red",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 12,
+        Tooltip = "Red component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightRed),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['Green']                = {
+        DisplayName = "UI Color - Green",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 13,
+        Tooltip = "Green component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Green),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['LightGreen']           = {
+        DisplayName = "UI Color - Light Green",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 14,
+        Tooltip = "Green component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightGreen),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['Blue']                 = {
+        DisplayName = "UI Color - Blue",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 15,
+        Tooltip = "Blue component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Blue),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['LightBlue']            = {
+        DisplayName = "UI Color - Light Blue",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 16,
+        Tooltip = "Blue component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightBlue),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['Yellow']               = {
+        DisplayName = "UI Color - Yellow",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 17,
+        Tooltip = "Yellow component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Yellow),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['LightYellow']          = {
+        DisplayName = "UI Color - Light Yellow",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 18,
+        Tooltip = "Yellow component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightYellow),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['Purple']               = {
+        DisplayName = "UI Color - Purple",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 19,
+        Tooltip = "Purple component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Purple),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['LightPurple']          = {
+        DisplayName = "UI Color - Light Purple",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 20,
+        Tooltip = "Purple component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightPurple),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['Orange']               = {
+        DisplayName = "UI Color - Orange",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 21,
+        Tooltip = "Orange component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Orange),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['LightOrange']          = {
+        DisplayName = "UI Color - Light Orange",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 22,
+        Tooltip = "Orange component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightOrange),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['Grey']                 = {
+        DisplayName = "UI Color - Grey",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 23,
+        Tooltip = "Grey component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Grey),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['LightGrey']            = {
+        DisplayName = "UI Color - Light Grey",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 24,
+        Tooltip = "Grey component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightGrey),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['Cyan']                 = {
+        DisplayName = "UI Color - Cyan",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 25,
+        Tooltip = "Cyan component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Cyan),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['White']                = {
+        DisplayName = "UI Color - White",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 26,
+        Tooltip = "White component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.White),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['Black']                = {
+        DisplayName = "UI Color - Black",
+        Group = "General",
+        Header = "Interface",
+        Category = "Colors",
+        Index = 27,
+        Tooltip = "Black component of the main UI color.",
+        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Black),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
     -- Cross client comms
     ['ActorPeerTimeout']     = {
         DisplayName = "Actor Peer Timeout",
@@ -1818,6 +2048,8 @@ function Config:LoadSettings()
         Config.Globals.ScriptDir = string.format("%s/%s", mq.TLO.Lua.Dir(), scriptDir)
     end
 
+    Config.CacheCustomColors()
+
     self.SettingsLoadComplete = true
 
     return true
@@ -1869,7 +2101,14 @@ function Config:GetUsageText(config, showUsageText, defaults, valueOnly)
     local defaultText = ""
     local currentText = ""
 
-    if type(configData.Default) == 'number' then
+    if configData.Type == 'Color' then
+        rangeText = string.format("\aw[%s\ax]", Strings.PadString(string.format("\a-y<0.0-1.0>\aw, \a-y<0.0-1.0>\aw, \a-y<0.0-1.0>, \a-y<0.0-1.0>"), 15, false))
+        defaultText = string.format("[\a-tDefault: %s\ax]",
+            Strings.PadString(string.format("\ar%g\aw, \ag%g\aw, \at%g, \aw%g", configData.Default.x, configData.Default.y, configData.Default.z, configData.Default.w), 8, false))
+        currentText = string.format("\ar%g\aw, \ag%g\aw, \at%g, \aw%g", Config:GetSetting(config).x, Config:GetSetting(config).y, Config:GetSetting(config).z,
+            Config:GetSetting(config).w)
+        handledType = true
+    elseif type(configData.Default) == 'number' then
         rangeText = string.format("\aw[%s\ax]", Strings.PadString(string.format("\a-yRange: \a-y%d\aw-\a-y%d", configData.Min or 0, configData.Max or 999), 15, false))
         defaultText = string.format("[\a-tDefault: %s\ax]", Strings.PadString(tostring(configData.Default), 8, false))
         currentText = string.format("%d", Config:GetSetting(config))
@@ -2124,7 +2363,9 @@ end
 function Config:MakeValidSetting(module, setting, value)
     local defaultConfig = self:GetModuleDefaultSettings(module)
 
-    if type(defaultConfig[setting].Default) == 'number' then
+    if defaultConfig[setting].Type == "Color" then
+        return value
+    elseif type(defaultConfig[setting].Default) == 'number' then
         value = tonumber(value)
         if not value or value > (defaultConfig[setting].Max or 999) or value < (defaultConfig[setting].Min or 0) then
             Logger.log_info("\ayError: Invalid or out-of-range value supplied for %s, falling back to previous value.", setting)
@@ -2147,6 +2388,7 @@ function Config:MakeValidSetting(module, setting, value)
         return value
     end
 
+    Logger.log_error("Setting %s could not be validated! (%s)", setting, Strings.TableToString(defaultConfig[setting], 512))
     return nil
 end
 
@@ -2883,6 +3125,26 @@ function Config.ShouldPriorityFollow()
     end
 
     return false
+end
+
+function Config.CacheCustomColors()
+    Config.Constants.Colors.Red         = Tables.TableToImVec4(Config:GetSetting("Red")) or Config.Constants.DefaultColors.Red
+    Config.Constants.Colors.LightRed    = Tables.TableToImVec4(Config:GetSetting("LightRed")) or Config.Constants.DefaultColors.LightRed
+    Config.Constants.Colors.Green       = Tables.TableToImVec4(Config:GetSetting("Green")) or Config.Constants.DefaultColors.Green
+    Config.Constants.Colors.LightGreen  = Tables.TableToImVec4(Config:GetSetting("LightGreen")) or Config.Constants.DefaultColors.LightGreen
+    Config.Constants.Colors.Blue        = Tables.TableToImVec4(Config:GetSetting("Blue")) or Config.Constants.DefaultColors.Blue
+    Config.Constants.Colors.LightBlue   = Tables.TableToImVec4(Config:GetSetting("LightBlue")) or Config.Constants.DefaultColors.LightBlue
+    Config.Constants.Colors.Yellow      = Tables.TableToImVec4(Config:GetSetting("Yellow")) or Config.Constants.DefaultColors.Yellow
+    Config.Constants.Colors.LightYellow = Tables.TableToImVec4(Config:GetSetting("LightYellow")) or Config.Constants.DefaultColors.LightYellow
+    Config.Constants.Colors.Purple      = Tables.TableToImVec4(Config:GetSetting("Purple")) or Config.Constants.DefaultColors.Purple
+    Config.Constants.Colors.LightPurple = Tables.TableToImVec4(Config:GetSetting("LightPurple")) or Config.Constants.DefaultColors.LightPurple
+    Config.Constants.Colors.Orange      = Tables.TableToImVec4(Config:GetSetting("Orange")) or Config.Constants.DefaultColors.Orange
+    Config.Constants.Colors.LightOrange = Tables.TableToImVec4(Config:GetSetting("LightOrange")) or Config.Constants.DefaultColors.LightOrange
+    Config.Constants.Colors.Grey        = Tables.TableToImVec4(Config:GetSetting("Grey")) or Config.Constants.DefaultColors.Grey
+    Config.Constants.Colors.LightGrey   = Tables.TableToImVec4(Config:GetSetting("LightGrey")) or Config.Constants.DefaultColors.LightGrey
+    Config.Constants.Colors.Cyan        = Tables.TableToImVec4(Config:GetSetting("Cyan")) or Config.Constants.DefaultColors.Cyan
+    Config.Constants.Colors.White       = Tables.TableToImVec4(Config:GetSetting("White")) or Config.Constants.DefaultColors.White
+    Config.Constants.Colors.Black       = Tables.TableToImVec4(Config:GetSetting("Black")) or Config.Constants.DefaultColors.Black
 end
 
 return Config
