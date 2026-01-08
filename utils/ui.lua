@@ -159,7 +159,7 @@ function Ui.RenderMercsStatus(showPopout)
         ImGui.NewLine()
     end
 
-    if ImGui.BeginTable("MercStatusTable", 9, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
+    if ImGui.BeginTable("MercStatusTable", 10, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
         local mercs = Config:GetAllPeerHeartbeats()
 
         if not Ui.TempSettings.SortedMercs then
@@ -179,6 +179,7 @@ function Ui.RenderMercsStatus(showPopout)
         ImGui.TableSetupColumn(string.format('Name (%d)', #Ui.TempSettings.SortedMercs), bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultSort), 150)
         ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('Mana %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
+        ImGui.TableSetupColumn('End %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('AutoTarget', (ImGuiTableColumnFlags.WidthStretch), 120.0)
         ImGui.TableSetupColumn('Assist', (ImGuiTableColumnFlags.WidthStretch), 120.0)
@@ -206,25 +207,27 @@ function Ui.RenderMercsStatus(showPopout)
                 elseif col == 2 then
                     av, bv = data_a.Data.Mana, data_b.Data.Mana
                 elseif col == 3 then
-                    av, bv = data_a.Data.Target, data_b.Data.Target
+                    av, bv = data_a.Data.End, data_b.Data.End
                 elseif col == 4 then
-                    av, bv = data_a.Data.AutoTarget, data_b.Data.AutoTarget
+                    av, bv = data_a.Data.Target, data_b.Data.Target
                 elseif col == 5 then
-                    av, bv = data_a.Data.Assist, data_b.Data.Assist
+                    av, bv = data_a.Data.AutoTarget, data_b.Data.AutoTarget
                 elseif col == 6 then
-                    av, bv = data_a.Data.Chase, data_b.Data.Chase
+                    av, bv = data_a.Data.Assist, data_b.Data.Assist
                 elseif col == 7 then
-                    av, bv = data_a.Data.State, data_b.Data.State
+                    av, bv = data_a.Data.Chase, data_b.Data.Chase
                 elseif col == 8 then
+                    av, bv = data_a.Data.State, data_b.Data.State
+                elseif col == 9 then
                     av, bv = data_a.Data.LastUpdate, data_b.Data.LastUpdate
                 else
                     av, bv = a, b
                 end
 
                 if dir == ImGuiSortDirection.Ascending then
-                    return av < bv
+                    return (av or 0) < (bv or 0)
                 else
-                    return av > bv
+                    return (av or 0) > (bv or 0)
                 end
             end)
 
@@ -252,9 +255,17 @@ function Ui.RenderMercsStatus(showPopout)
                     end
                 end
                 ImGui.TableNextColumn()
-                Ui.RenderColoredText(Ui.GetPercentageColor(math.ceil(data.Data.HPs or 0) / 100), "%d%%", math.ceil(data.Data.HPs or 0))
+                Ui.RenderColoredText(
+                    Ui.GetPercentageColor(data.Data.HPs or 0, { Config.Constants.Colors.LightGreen, Config.Constants.Colors.Yellow, Config.Constants.Colors.Red, }), "%d%%",
+                    math.ceil(data.Data.HPs or 0) or "")
                 ImGui.TableNextColumn()
-                Ui.RenderColoredText(Ui.GetPercentageColor(math.ceil(data.Data.Mana or 0) / 100), "%d%%", math.ceil(data.Data.Mana or 0))
+                Ui.RenderColoredText(
+                    Ui.GetPercentageColor(data.Data.Mana or 0, { Config.Constants.Colors.Cyan, Config.Constants.Colors.LightBlue, Config.Constants.Colors.Red, }),
+                    data.Data.Mana and "%d%%" or "", math.ceil(data.Data.Mana or 0) or "")
+                ImGui.TableNextColumn()
+                Ui.RenderColoredText(
+                    Ui.GetPercentageColor(data.Data.Endurance or 0, { Config.Constants.Colors.Yellow, Config.Constants.Colors.Grey, Config.Constants.Colors.Red, }),
+                    data.Data.Endurance and "%d%%" or "", math.ceil(data.Data.Endurance or 0) or "")
                 ImGui.TableNextColumn()
                 ImGui.Text(string.format("%s", data.Data.Target or "None"))
                 ImGui.TableNextColumn()
@@ -278,9 +289,12 @@ function Ui.RenderMercsStatus(showPopout)
                     Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
                 end
                 Ui.Tooltip(string.format("%s", data.Data.State or "None"))
-
                 ImGui.TableNextColumn()
-                ImGui.Text(string.format("%ds", os.time() - (data.LastHeartbeat or 0)))
+                local lastHB = os.time() - (data.LastHeartbeat or 0)
+                Ui.RenderColoredText(
+                    Ui.GetPercentageColor((1 - lastHB / Config:GetSetting("ActorPeerTimeout")) * 100,
+                        { Config.Constants.Colors.White, Config.Constants.Colors.Yellow, Config.Constants.Colors.Red, }),
+                    "%ds", lastHB)
                 ImGui.PopID()
             end
         end
@@ -1281,16 +1295,23 @@ function Ui.GetDynamicTooltipForAA(action)
 end
 
 ---@return ImVec4 The color corresponding to the given percentage.
-function Ui.GetPercentageColor(pct)
-    if pct >= .75 then
-        return ImVec4(0.2, 1.0, 0.2, 1.0)
-    elseif pct >= .35 then
-        return ImVec4(1.0, 1.0, 0.2, 1.0)
-    elseif pct < .35 then
-        return ImVec4(1.0, 0.6, 0.2, 1.0)
-    end
+function Ui.GetPercentageColor(pct, scale)
+    local t = 1 - math.max(0, math.min(1, pct / 100.0))
+    local n = #scale
+    if n == 1 then return scale[1] end
 
-    return ImVec4(1.0, 1.0, 1.0, 1.0)
+    local scaled = t * (n - 1)
+    local i = math.floor(scaled) + 1
+    local f = scaled - (i - 1)
+
+    local c1 = scale[i]
+    local c2 = scale[math.min(i + 1, n)]
+
+    return ImVec4(
+        c1.x + (c2.x - c1.x) * f,
+        c1.y + (c2.y - c1.y) * f,
+        c1.z + (c2.z - c1.z) * f,
+        1.0)
 end
 
 --- Get the con color based on the provided color value.

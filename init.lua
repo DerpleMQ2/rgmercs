@@ -194,7 +194,9 @@ local function CreateHeartBeat()
         while (1) do
             Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or curState,
                 Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config.Globals.ForceCombatID,
-                Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
+                Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off",
+                Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()),
+                Config.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()))
             coroutine.yield()
         end
     end)

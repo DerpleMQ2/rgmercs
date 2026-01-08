@@ -164,6 +164,19 @@ Config.Constants.LogLevels         = {
     "Super-Verbose",
 }
 
+Config.Constants.Colors            = {
+    Red        = ImVec4(1.0, 0.2, 0.2, 1.0),
+    Green      = ImVec4(0.2, 1.0, 0.2, 1.0),
+    LightGreen = ImVec4(0.6, 1.0, 0.4, 1.0),
+    Blue       = ImVec4(0.2, 0.2, 1.0, 1.0),
+    Yellow     = ImVec4(1.0, 1.0, 0.2, 1.0),
+    Purple     = ImVec4(1.0, 0.2, 1.0, 1.0),
+    Cyan       = ImVec4(0.2, 1.0, 1.0, 1.0),
+    White      = ImVec4(1.0, 1.0, 1.0, 1.0),
+    Grey       = ImVec4(0.7, 0.7, 0.7, 1.0),
+    LightBlue  = ImVec4(0.4, 0.6, 1.0, 1.0),
+}
+
 Config.Constants.ConColors         = {
     "Grey", "Green", "Light Blue", "Blue", "White", "Yellow", "Red",
 }

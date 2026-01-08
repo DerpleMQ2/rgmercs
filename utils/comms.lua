@@ -63,7 +63,7 @@ function Comms.SendPeerDoCmd(peer, cmd, ...)
         cmd = cmd, })
 end
 
-function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, chase)
+function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, chase, useMana, useEnd)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()
     Comms.BroadcastMessage("RGMercs", "Heartbeat", {
@@ -80,8 +80,8 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, cha
         Corruption    = tostring(mq.TLO.Me.Diseased.ID()),
         Stunned       = mq.TLO.Me.Stunned(),
         HPs           = mq.TLO.Me.PctHPs(),
-        Mana          = mq.TLO.Me.PctMana(),
-        Endurance     = mq.TLO.Me.PctEndurance(),
+        Mana          = useMana and mq.TLO.Me.PctMana() or nil,
+        Endurance     = useEnd and mq.TLO.Me.PctEndurance() or nil,
         Target        = mq.TLO.Target.DisplayName() or "None",
         TargetID      = mq.TLO.Target.ID() or 0,
         ForceCombatID = forceCombatId,
