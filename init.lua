@@ -114,12 +114,13 @@ local function RGMercsGUI()
             if theme ~= nil then
                 for _, t in pairs(theme) do
                     if t.color then
-                        ImGui.PushStyleColor(type(t.element) == 'string' and (ImGuiCol[t.element] or 0) or t.element, t.color.r or t.color.x, t.color.g or t.color.y,
+                        ImGui.PushStyleColor(Ui.GetImGuiColorId(t.element), t.color.r or t.color.x,
+                            t.color.g or t.color.y,
                             t.color.b or t.color
                             .z, t.color.a or t.color.w)
                         themeColorPop = themeColorPop + 1
                     elseif t.value then
-                        local elementId = type(t.element) == 'string' and (ImGuiStyleVar[t.element] or 0) or t.element
+                        local elementId = Ui.GetImGuiStyleId(t.element)
                         if type(t.value) == 'number' then
                             ImGui.PushStyleVar(elementId, t.value)
                         else

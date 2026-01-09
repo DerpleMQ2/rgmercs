@@ -22,14 +22,13 @@ Ui.__index              = Ui
 Ui.ConfigFilter         = ""
 Ui.ShowDownNamed        = false
 Ui.TempSettings         = {}
-Ui.ImGuiColorVars       = {}
-Ui.ImGuiStyleVars       = {}
-Ui.ImGuiStyleVarNames   = {}
+
 Ui.ComboFilterText      = ""
+
+-- Themze support.
 Ui.Themez               = nil
 Ui.ThemezNames          = {}
 Ui.SelectedThemezImport = 1
-
 local themez, err       = loadfile(mq.configDir .. '/MyThemez.lua')
 if err or not themez then
     Logger.log_warn("\ayNo Themez Lua found.")
@@ -41,11 +40,18 @@ else
     end
 end
 
+-- The built-in ImGui color and style variable names and Ids seem to be out of sync so pulling these directly from C++ and caching them
+Ui.ImGuiColorVars     = {}
+Ui.ImGuiColorVarNames = {}
+Ui.ImGuiColorVarIds   = {}
+Ui.ImGuiStyleVars     = {}
+Ui.ImGuiStyleVarNames = {}
+Ui.ImGuiStyleVarIds   = {}
+
 local preSortedColors = {}
-for k, v in pairs(getmetatable(ImGuiCol).__index) do
-    if k ~= "COUNT" then
-        table.insert(preSortedColors, { Name = k, Value = v, })
-    end
+local ImGuiColCount   = 57
+for i = 0, ImGuiColCount do
+    table.insert(preSortedColors, { Name = ImGui.GetStyleColorName(i), Value = i, })
 end
 
 table.sort(preSortedColors, function(a, b) return a.Value < b.Value end)
@@ -55,6 +61,8 @@ for _, v in ipairs(preSortedColors) do
         table.insert(Ui.ImGuiColorVars, "<Unused>")
     end
     table.insert(Ui.ImGuiColorVars, v.Name)
+    Ui.ImGuiColorVarNames[v.Value] = v.Name
+    Ui.ImGuiColorVarIds[v.Name] = v.Value
 end
 
 local preSortedStyles = {}
@@ -72,6 +80,16 @@ for _, v in ipairs(preSortedStyles) do
     end
     table.insert(Ui.ImGuiStyleVars, v.Name)
     Ui.ImGuiStyleVarNames[v.Value] = v.Name
+    Ui.ImGuiStyleVarIds[v.Name] = v.Value
+end
+
+function Ui.GetImGuiColorId(e)
+    -- check c++ first then the ImGui Lua object
+    return type(e) == 'string' and (Ui.ImGuiColorVarIds[e] or ImGuiCol[e] or 0) or e
+end
+
+function Ui.GetImGuiStyleId(e)
+    return type(e) == 'string' and (Ui.ImGuiStyleVarIds[e] or ImGuiStyleVar[e] or 0) or e
 end
 
 --- Renders the assist list._
@@ -1171,7 +1189,7 @@ function Ui.RenderThemeConfigElement(id, themeElement)
 
     if themeElement.color ~= nil then
         ---@diagnostic disable-next-line: cast-local-type
-        local settingNum, _, pressed = Ui.RenderOption("Combo", (ImGuiCol[setting] or 0) + 1, id, false, Ui.ImGuiColorVars, "<Unused>")
+        local settingNum, _, pressed = Ui.RenderOption("Combo", Ui.GetImGuiColorId(setting) + 1, id, false, Ui.ImGuiColorVars, "<Unused>")
         any_pressed = any_pressed or (pressed or false)
 
         ImGui.TableNextColumn()
@@ -1187,7 +1205,7 @@ function Ui.RenderThemeConfigElement(id, themeElement)
         end
     else
         ---@diagnostic disable-next-line: cast-local-type
-        local settingNum, _, pressed = Ui.RenderOption("Combo", (ImGuiStyleVar[setting] or 0) + 1, id, false, Ui.ImGuiStyleVars, "<Unused>")
+        local settingNum, _, pressed = Ui.RenderOption("Combo", Ui.GetImGuiStyleId(setting) + 1, id, false, Ui.ImGuiStyleVars, "<Unused>")
         any_pressed = any_pressed or (pressed or false)
 
         ImGui.TableNextColumn()
@@ -1223,6 +1241,8 @@ function Ui.RenderImportThemez()
         return
     end
 
+    ImGui.BeginChild("##themez_importer_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY, ImGuiChildFlags.Border),
+        ImGuiWindowFlags.None)
     ImGui.Text("Import from Themez: ")
     ImGui.SameLine()
     Ui.SelectedThemezImport, _ = Ui.SearchableCombo("import_themez", Ui.SelectedThemezImport, Ui.ThemezNames, "Default")
@@ -1256,6 +1276,7 @@ function Ui.RenderImportThemez()
 
         Config:SetSetting('UserTheme', newUserTheme)
     end
+    ImGui.EndChild()
 end
 
 function Ui.RenderThemeConfig(searchFilter)
@@ -1282,6 +1303,22 @@ function Ui.RenderThemeConfig(searchFilter)
         Config:SetSetting('UserTheme', {})
     end
     ImGui.SameLine()
+    if ImGui.SmallButton("Import Current Class Theme") then
+        local userTheme = Tables.DeepCopy(Modules:ExecModule("Class", "GetTheme") or {})
+        for _, element in ipairs(userTheme) do
+            if element.element ~= nil then
+                local newElementName = element.color ~= nil and Ui.GetImGuiColorId(element.element) or Ui.GetImGuiStyleId(element.element)
+                if newElementName ~= nil then
+                    element.element = newElementName
+                end
+                if element.color and element.color.r ~= nil then
+                    element.color = Tables.TableRGBAToXYZW(element.color)
+                end
+            end
+        end
+        Config:SetSetting('UserTheme', userTheme)
+    end
+    ImGui.SameLine()
     if ImGui.SmallButton("Randomize Theme") then
         local randomTheme = {}
         for _, v in ipairs(Ui.ImGuiColorVars) do
@@ -1294,11 +1331,13 @@ function Ui.RenderThemeConfig(searchFilter)
     end
     Ui.Tooltip("Randomizes all colors in the theme. Warning: May be hard to read!")
 
+    ImGui.NewLine()
+
     Ui.RenderImportThemez()
 
-    ImGui.Separator()
-
     ImGui.NewLine()
+
+    ImGui.SeparatorText("Theme Customization")
 
     if ImGui.SmallButton("Add New Color") then
         Config:SetSetting('UserTheme', table.insert(Config:GetSetting('UserTheme') or {}, {
