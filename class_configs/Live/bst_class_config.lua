@@ -868,9 +868,10 @@ return {
             {
                 name = "Forceful Rejuvenation",
                 type = "AA",
+                load_cond = function(self) return Core.GetResolvedActionMapItem('DichoSpell') end,
                 cond = function(self, aaName)
-                    local dichoSpell = self.ResolvedActionMap['DichoSpell'].RankName() or "None"
-                    return not self.ClassConfig.HelperFunctions.FlurryActive(self) and (mq.TLO.Me.GemTimer(dichoSpell)() or -1) > 15
+                    local dichoSpell = Core.GetResolvedActionMapItem('DichoSpell')
+                    return not self.ClassConfig.HelperFunctions.FlurryActive(self) and (mq.TLO.Me.GemTimer(dichoSpell.RankName())() or -1) > 15
                 end,
             },
             {
