@@ -1,11 +1,14 @@
 name: Publish to RedGuides
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Publish to Github and Create Release"]
+    types:
+      - completed
 
 jobs:
   publish:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
