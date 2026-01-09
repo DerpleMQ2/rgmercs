@@ -22,22 +22,125 @@ Ui.__index              = Ui
 Ui.ConfigFilter         = ""
 Ui.ShowDownNamed        = false
 Ui.TempSettings         = {}
-
+Ui.ModalText            = ""
+Ui.ModalTitle           = "##UI Modal"
+Ui.ModalPrompt          = ""
+Ui.ModalCallbackFn      = nil
 Ui.ComboFilterText      = ""
 
 -- Themze support.
 Ui.Themez               = nil
 Ui.ThemezNames          = {}
 Ui.SelectedThemezImport = 1
-local themez, err       = loadfile(mq.configDir .. '/MyThemez.lua')
-if err or not themez then
-    Logger.log_warn("\ayNo Themez Lua found.")
-else
-    Ui.Themez = themez()
 
-    for _, theme in ipairs(Ui.Themez.Theme or {}) do
-        table.insert(Ui.ThemezNames, theme.Name or "Unnamed Theme")
+Ui.LoadThemez           = function()
+    local themez, err = loadfile(mq.configDir .. '/MyThemez.lua')
+    if err or not themez then
+        Logger.log_warn("\ayNo Themez Lua found.")
+    else
+        Ui.Themez = themez()
+
+        local ThemezNames = {}
+
+        for _, theme in ipairs(Ui.Themez.Theme or {}) do
+            table.insert(ThemezNames, theme.Name or "Unnamed Theme")
+        end
+
+        Ui.ThemezNames = ThemezNames
     end
+end
+
+Ui.LoadThemez()
+
+function Ui.ConvertFromThemez(themeName)
+    local newUserTheme = {}
+    local themeToImport = Ui.Themez.Theme[themeName]
+    if themeToImport then
+        for _, color in pairs(themeToImport.Color or {}) do
+            table.insert(newUserTheme, {
+                element = color.PropertyName,
+                color = {
+                    x = color.Color[1],
+                    y = color.Color[2],
+                    z = color.Color[3],
+                    w = color.Color[4],
+                },
+            })
+        end
+        for _, style in pairs(themeToImport.Style or {}) do
+            table.insert(newUserTheme, {
+                element = style.PropertyName,
+                value = style.Size and style.Size or
+                    {
+                        x = style.X,
+                        y = style.Y,
+                    },
+            })
+        end
+    end
+
+    return newUserTheme
+end
+
+function Ui.ConvertToThemez(userTheme)
+    local newThemezTheme = { Name = string.format("RGMercs Export - %s", os.date("%Y-%m-%d %H:%M:%S")), Color = {}, Style = {}, }
+
+    for _, setting in pairs(userTheme or {}) do
+        if setting.color then
+            table.insert(newThemezTheme.Color, {
+                PropertyName = Ui.ImGuiColorVarNames[setting.element],
+                Color = {
+                    setting.color.x or 0,
+                    setting.color.y or 0,
+                    setting.color.z or 0,
+                    setting.color.w or 0,
+                },
+            })
+        elseif setting.value then
+            if type(setting.value) == 'table' then
+                table.insert(newThemezTheme.Style, {
+                    PropertyName = Ui.ImGuiStyleVarNames[setting.element],
+                    X = setting.value.x or 0,
+                    Y = setting.value.y or 0,
+                })
+            else
+                table.insert(newThemezTheme.Style, {
+                    PropertyName = Ui.ImGuiStyleVarNames[setting.element],
+                    Size = setting.value,
+                })
+            end
+        end
+    end
+
+    return newThemezTheme
+end
+
+-- Now make a way to save / reload our themes
+Ui.MercThemes              = {}
+Ui.MercThemeNames          = {}
+Ui.SelectedMercThemeImport = 1
+
+Ui.LoadMercThemes          = function()
+    local themes, err = loadfile(mq.configDir .. '/rgmercs/themes.lua')
+    if err or not themes then
+        Logger.log_warn("\ayNo Save RGMercs Themes Lua found.")
+    else
+        Ui.MercThemes = themes()
+
+        local mercThemeNames = {}
+
+        for name, _ in pairs(Ui.MercThemes or {}) do
+            table.insert(mercThemeNames, name or "Unnamed Theme")
+        end
+
+        Ui.MercThemeNames = mercThemeNames
+    end
+end
+
+Ui.LoadMercThemes()
+
+function Ui.SaveThemes()
+    mq.pickle(mq.configDir .. '/rgmercs/themes.lua', Ui.MercThemes)
 end
 
 -- The built-in ImGui color and style variable names and Ids seem to be out of sync so pulling these directly from C++ and caching them
@@ -1029,7 +1132,7 @@ end
 function Ui.SearchableCombo(id, curIdx, options, hideText)
     local pressed = false
 
-    if ImGui.BeginCombo("##combo_box" .. id, curIdx .. " : " .. options[curIdx]) then
+    if ImGui.BeginCombo("##combo_box" .. id, curIdx .. " : " .. (options[curIdx] or "None")) then
         -- Search box
         if ImGui.IsWindowAppearing() then
             ImGui.SetKeyboardFocusHere()
@@ -1041,7 +1144,7 @@ function Ui.SearchableCombo(id, curIdx, options, hideText)
 
         -- List
         for i, item in ipairs(options) do
-            if item:find(hideText) == nil and (Ui.ComboFilterText == "" or item:lower():find(Ui.ComboFilterText:lower(), 1, true)) then
+            if hideText == nil or (item:find(hideText) == nil and (Ui.ComboFilterText == "" or item:lower():find(Ui.ComboFilterText:lower(), 1, true))) then
                 if ImGui.Selectable(i .. ": " .. item, i == curIdx) then
                     if curIdx ~= i then
                         curIdx = i
@@ -1245,37 +1348,107 @@ function Ui.RenderImportThemez()
         ImGuiWindowFlags.None)
     ImGui.Text("Import from Themez: ")
     ImGui.SameLine()
-    Ui.SelectedThemezImport, _ = Ui.SearchableCombo("import_themez", Ui.SelectedThemezImport, Ui.ThemezNames, "Default")
+    Ui.SelectedThemezImport, _ = Ui.SearchableCombo("import_themez", Ui.SelectedThemezImport, Ui.ThemezNames)
     ImGui.SameLine()
     if ImGui.SmallButton("Import") then
-        local newUserTheme = {}
-        local themeToImport = Ui.Themez.Theme[Ui.SelectedThemezImport or "Default"]
-        if themeToImport then
-            for _, color in pairs(themeToImport.Color or {}) do
-                table.insert(newUserTheme, {
-                    element = color.PropertyName,
-                    color = {
-                        x = color.Color[1],
-                        y = color.Color[2],
-                        z = color.Color[3],
-                        w = color.Color[4],
-                    },
-                })
-            end
-            for _, style in pairs(themeToImport.Style or {}) do
-                table.insert(newUserTheme, {
-                    element = style.PropertyName,
-                    value = style.Size and style.Size or
-                        {
-                            x = style.X,
-                            y = style.Y,
-                        },
-                })
-            end
-        end
+        local newUserTheme = Ui.ConvertFromThemez(Ui.SelectedThemezImport or "Default")
 
         Config:SetSetting('UserTheme', newUserTheme)
     end
+
+    ImGui.SameLine()
+    if ImGui.SmallButton(Icons.FA_REFRESH) then
+        Ui.LoadThemez()
+    end
+    Ui.Tooltip("Reload MyThemeZ.lua")
+
+    ImGui.EndChild()
+end
+
+function Ui.OpenModal(title, prompt, initText, callbackFn)
+    Ui.ModalCallbackFn = callbackFn
+    Ui.ModalText       = initText
+    Ui.ModalPrompt     = prompt or ""
+    Ui.ModalTitle      = title or Ui.ModalTitle
+    ImGui.OpenPopup(Ui.ModalTitle)
+end
+
+function Ui.RenderPopupModal()
+    ImGui.SetNextWindowSize(320, 0, ImGuiCond.Appearing)
+    if ImGui.BeginPopupModal(Ui.ModalTitle, nil, bit32.bor(ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.AlwaysAutoResize)) then
+        ImGui.Text("Theme Name:")
+        ImGui.Spacing()
+
+        -- Auto-focus input on open
+        if ImGui.IsWindowAppearing() then
+            ImGui.SetKeyboardFocusHere()
+        end
+
+        -- Input field
+        local pressed = false
+        Ui.ModalText, pressed = ImGui.InputText("##UiPopupModalInput", Ui.ModalText, bit32.bor(ImGuiInputTextFlags.EnterReturnsTrue))
+
+        ImGui.Separator()
+
+        -- Buttons
+        if ImGui.Button("Ok") or pressed then
+            if Ui.ModalCallbackFn then
+                Ui.ModalCallbackFn(Ui.ModalText)
+            end
+            Ui.ModalCallbackFn = nil
+            ImGui.CloseCurrentPopup()
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Cancel") then
+            ImGui.CloseCurrentPopup()
+            Ui.ModalCallbackFn = nil
+            Ui.ModalText = ""
+        end
+
+        ImGui.EndPopup()
+    end
+end
+
+function Ui.RenderImportMercThemes()
+    ImGui.BeginChild("##mercs_themes_importer_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY, ImGuiChildFlags.Border),
+        ImGuiWindowFlags.None)
+    ImGui.Text("Import from File: ")
+    ImGui.SameLine()
+    Ui.SelectedMercThemeImport, _ = Ui.SearchableCombo("import_merc_themes", Ui.SelectedMercThemeImport, Ui.MercThemeNames)
+    ImGui.SameLine()
+    if ImGui.SmallButton("Load") then
+        local newUserTheme = Ui.MercThemes[Ui.MercThemeNames[Ui.SelectedMercThemeImport] or "Default"]
+
+        Config:SetSetting('UserTheme', newUserTheme)
+    end
+
+    ImGui.SameLine()
+    if ImGui.SmallButton("Save") then
+        Ui.OpenModal("Save Theme", "Theme Name:", string.format("Exported Theme: %s", os.date("%Y-%m-%d %H:%M:%S")), function(themeName)
+            local userTheme = Config:GetSetting('UserTheme')
+            if userTheme then
+                --local themeName = string.format("Saved %s", os.date("%Y-%m-%d %H:%M:%S"))
+                Ui.MercThemes[themeName] = userTheme
+                Logger.log_debug("Saved current UserTheme to Themez as '%s'", themeName)
+                Ui.SaveThemes()
+                Ui.LoadMercThemes()
+            else
+                Logger.log_error("Failed to save current UserTheme to Themez.")
+            end
+        end)
+    end
+    Ui.Tooltip("Save current theme")
+
+    Ui.RenderPopupModal()
+
+    ImGui.SameLine()
+    if ImGui.SmallButton(Icons.FA_REFRESH) then
+        Ui.LoadMercThemes()
+    end
+    Ui.Tooltip("Reload MyThemeZ.lua")
+
     ImGui.EndChild()
 end
 
@@ -1330,6 +1503,10 @@ function Ui.RenderThemeConfig(searchFilter)
         Config:SetSetting('UserTheme', randomTheme)
     end
     Ui.Tooltip("Randomizes all colors in the theme. Warning: May be hard to read!")
+
+    ImGui.NewLine()
+
+    Ui.RenderImportMercThemes()
 
     ImGui.NewLine()
 
