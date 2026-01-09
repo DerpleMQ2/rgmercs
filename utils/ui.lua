@@ -13,17 +13,33 @@ local Math        = require('utils.math')
 local Set         = require('mq.set')
 
 
-local animSpellGems   = mq.FindTextureAnimation('A_SpellGems')
-local ICON_SIZE       = 20
+local animSpellGems     = mq.FindTextureAnimation('A_SpellGems')
+local ICON_SIZE         = 20
 
-local Ui              = { _version = '1.0', _name = "Ui", _author = 'Derple', }
+local Ui                = { _version = '1.0', _name = "Ui", _author = 'Derple', }
 
-Ui.__index            = Ui
-Ui.ConfigFilter       = ""
-Ui.ShowDownNamed      = false
-Ui.TempSettings       = {}
-Ui.ImGuiColorVars     = {}
-Ui.ComboFilterText    = ""
+Ui.__index              = Ui
+Ui.ConfigFilter         = ""
+Ui.ShowDownNamed        = false
+Ui.TempSettings         = {}
+Ui.ImGuiColorVars       = {}
+Ui.ImGuiStyleVars       = {}
+Ui.ImGuiStyleVarNames   = {}
+Ui.ComboFilterText      = ""
+Ui.Themez               = nil
+Ui.ThemezNames          = {}
+Ui.SelectedThemezImport = 1
+
+local themez, err       = loadfile(mq.configDir .. '/MyThemez.lua')
+if err or not themez then
+    Logger.log_warn("\ayNo Themez Lua found.")
+else
+    Ui.Themez = themez()
+
+    for _, theme in ipairs(Ui.Themez.Theme or {}) do
+        table.insert(Ui.ThemezNames, theme.Name or "Unnamed Theme")
+    end
+end
 
 local preSortedColors = {}
 for k, v in pairs(getmetatable(ImGuiCol).__index) do
@@ -39,6 +55,23 @@ for _, v in ipairs(preSortedColors) do
         table.insert(Ui.ImGuiColorVars, "<Unused>")
     end
     table.insert(Ui.ImGuiColorVars, v.Name)
+end
+
+local preSortedStyles = {}
+for k, v in pairs(getmetatable(ImGuiStyleVar).__index) do
+    if k ~= "COUNT" and k ~= 'Alpha' and k ~= 'DisabledAlpha' then
+        table.insert(preSortedStyles, { Name = k, Value = v, })
+    end
+end
+
+table.sort(preSortedStyles, function(a, b) return a.Value < b.Value end)
+
+for _, v in ipairs(preSortedStyles) do
+    while #Ui.ImGuiStyleVars < v.Value do
+        table.insert(Ui.ImGuiStyleVars, "<Unused>")
+    end
+    table.insert(Ui.ImGuiStyleVars, v.Name)
+    Ui.ImGuiStyleVarNames[v.Value] = v.Name
 end
 
 --- Renders the assist list._
@@ -964,6 +997,9 @@ function Ui.RenderOptionNumber(id, text, cur, min, max, step)
     ImGui.PopStyleColor(4)
     ImGui.PopID()
 
+    min = min or 0
+    max = max or 100
+
     input = tonumber(input) or 0
     if input > max then input = max end
     if input < min then input = min end
@@ -974,6 +1010,7 @@ end
 
 function Ui.SearchableCombo(id, curIdx, options, hideText)
     local pressed = false
+
     if ImGui.BeginCombo("##combo_box" .. id, curIdx .. " : " .. options[curIdx]) then
         -- Search box
         if ImGui.IsWindowAppearing() then
@@ -1072,13 +1109,21 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         if not skipDefaultButton then
             ImGui.SameLine()
             if ImGui.SmallButton("Default##reset_color_" .. id) then
-                print("Resetting color to default for " .. id)
                 setting = Tables.ImVec4ToTable(Config.Constants.DefaultColors[id])
                 pressed = true
             end
         else
 
         end
+        ImGui.PopID()
+        new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
+        any_pressed = any_pressed or pressed
+    elseif type == 'ImVec2' then
+        ImGui.PushID("##vec2_setting_" .. id)
+        local intArray = { setting.x or 0, setting.y or 0, }
+        local newSetting
+        newSetting, pressed = ImGui.InputInt2("", intArray)
+        setting = newSetting and { x = newSetting[1], y = newSetting[2], } or setting
         ImGui.PopID()
         new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
         any_pressed = any_pressed or pressed
@@ -1120,24 +1165,47 @@ function Ui.RenderPopAndSettings(moduleName)
     end
 end
 
-function Ui.RenderThemeConfigElement(id, themeColorElement)
-    local setting = themeColorElement.element or "Text"
+function Ui.RenderThemeConfigElement(id, themeElement)
+    local setting = themeElement.element
     local any_pressed, delete_pressed = false, false
 
-    ---@diagnostic disable-next-line: cast-local-type
-    local settingNum, _, pressed = Ui.RenderOption("Combo", (ImGuiCol[setting] or 0) + 1, id, false, Ui.ImGuiColorVars, "<Unused>")
-    any_pressed = any_pressed or (pressed or false)
+    if themeElement.color ~= nil then
+        ---@diagnostic disable-next-line: cast-local-type
+        local settingNum, _, pressed = Ui.RenderOption("Combo", (ImGuiCol[setting] or 0) + 1, id, false, Ui.ImGuiColorVars, "<Unused>")
+        any_pressed = any_pressed or (pressed or false)
 
-    ImGui.TableNextColumn()
+        ImGui.TableNextColumn()
 
-    local settingColor, _, pressed = Ui.RenderOption("Color", themeColorElement.color, id .. "_color", false, true)
-    any_pressed = any_pressed or (pressed or false)
+        local settingColor, _, pressed = Ui.RenderOption("Color", themeElement.color, id .. "_color", false, true)
+        any_pressed = any_pressed or (pressed or false)
 
-    if any_pressed then
-        local userConfig = Config:GetSetting('UserTheme')
-        userConfig[id].element = ImGui.GetStyleColorName((tonumber(settingNum) or 1) - 1)
-        userConfig[id].color = settingColor
-        Config:SetSetting('UserTheme', userConfig)
+        if any_pressed then
+            local userConfig = Config:GetSetting('UserTheme')
+            userConfig[id].element = ImGui.GetStyleColorName((tonumber(settingNum) or 1) - 1)
+            userConfig[id].color = settingColor
+            Config:SetSetting('UserTheme', userConfig)
+        end
+    else
+        ---@diagnostic disable-next-line: cast-local-type
+        local settingNum, _, pressed = Ui.RenderOption("Combo", (ImGuiStyleVar[setting] or 0) + 1, id, false, Ui.ImGuiStyleVars, "<Unused>")
+        any_pressed = any_pressed or (pressed or false)
+
+        ImGui.TableNextColumn()
+
+        -- if we changed the style var, we need to reset the value to default
+        if pressed then
+            local currentValue = ImGui.GetStyle()[Ui.ImGuiStyleVarNames[(tonumber(settingNum) or 1) - 1]]
+            themeElement.value = type(currentValue) == 'number' and currentValue or Tables.ImVec2ToTable(currentValue)
+        end
+
+        local settingStyle, _, pressed = Ui.RenderOption(type(themeElement.value) == 'number' and 'number' or 'ImVec2', themeElement.value, id .. "_style")
+        any_pressed = any_pressed or (pressed or false)
+        if any_pressed then
+            local userConfig = Config:GetSetting('UserTheme')
+            userConfig[id].element = Ui.ImGuiStyleVarNames[(tonumber(settingNum) or 1) - 1]
+            userConfig[id].value = settingStyle
+            Config:SetSetting('UserTheme', userConfig)
+        end
     end
 
     ImGui.SameLine()
@@ -1148,6 +1216,46 @@ function Ui.RenderThemeConfigElement(id, themeColorElement)
     end
 
     return any_pressed, delete_pressed
+end
+
+function Ui.RenderImportThemez()
+    if Ui.Themez == nil then
+        return
+    end
+
+    ImGui.Text("Import from Themez: ")
+    ImGui.SameLine()
+    Ui.SelectedThemezImport, _ = Ui.SearchableCombo("import_themez", Ui.SelectedThemezImport, Ui.ThemezNames, "Default")
+    ImGui.SameLine()
+    if ImGui.SmallButton("Import") then
+        local newUserTheme = {}
+        local themeToImport = Ui.Themez.Theme[Ui.SelectedThemezImport or "Default"]
+        if themeToImport then
+            for _, color in pairs(themeToImport.Color or {}) do
+                table.insert(newUserTheme, {
+                    element = color.PropertyName,
+                    color = {
+                        x = color.Color[1],
+                        y = color.Color[2],
+                        z = color.Color[3],
+                        w = color.Color[4],
+                    },
+                })
+            end
+            for _, style in pairs(themeToImport.Style or {}) do
+                table.insert(newUserTheme, {
+                    element = style.PropertyName,
+                    value = style.Size and style.Size or
+                        {
+                            x = style.X,
+                            y = style.Y,
+                        },
+                })
+            end
+        end
+
+        Config:SetSetting('UserTheme', newUserTheme)
+    end
 end
 
 function Ui.RenderThemeConfig(searchFilter)
@@ -1168,7 +1276,13 @@ function Ui.RenderThemeConfig(searchFilter)
 
     ImGui.NewLine()
 
-    if ImGui.SmallButton("I'm Feeling Lucky") then
+    ImGui.SeparatorText("Importers & Generators")
+
+    if ImGui.SmallButton("Reset Theme to Default") then
+        Config:SetSetting('UserTheme', {})
+    end
+    ImGui.SameLine()
+    if ImGui.SmallButton("Randomize Theme") then
         local randomTheme = {}
         for _, v in ipairs(Ui.ImGuiColorVars) do
             if v:len() > 0 then
@@ -1180,6 +1294,10 @@ function Ui.RenderThemeConfig(searchFilter)
     end
     Ui.Tooltip("Randomizes all colors in the theme. Warning: May be hard to read!")
 
+    Ui.RenderImportThemez()
+
+    ImGui.Separator()
+
     ImGui.NewLine()
 
     if ImGui.SmallButton("Add New Color") then
@@ -1189,18 +1307,50 @@ function Ui.RenderThemeConfig(searchFilter)
         }))
     end
 
-    if ImGui.BeginChild("themechild_" .. category, ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY), ImGuiWindowFlags.None) then
+    ImGui.SameLine()
+
+    if ImGui.SmallButton("Add New Style") then
+        Config:SetSetting('UserTheme', table.insert(Config:GetSetting('UserTheme') or {}, {
+            element = 'WindowPadding',
+            value = Tables.ImVec2ToTable(ImGui.GetStyle().WindowPadding),
+        }))
+    end
+
+    local userTheme = Tables.DeepCopy(Config:GetSetting('UserTheme') or {})
+
+    ImGui.SeparatorText("Colors")
+    if ImGui.BeginChild("themechild_colors_" .. category, ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY), ImGuiWindowFlags.None) then
         if ImGui.BeginTable("themelements_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
             for _ = 1, numCols do
                 ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 180.0)
                 ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
             end
 
-            local userTheme = Tables.DeepCopy(Config:GetSetting('UserTheme') or {})
+            for idx, themeElement in ipairs(userTheme) do
+                if themeElement.color ~= nil then
+                    ImGui.TableNextColumn()
+                    Ui.RenderThemeConfigElement(idx, themeElement)
+                end
+            end
+
+            ImGui.EndTable()
+        end
+        ImGui.EndChild()
+    end
+
+    ImGui.SeparatorText("Styles")
+    if ImGui.BeginChild("themechild_styles_" .. category, ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY), ImGuiWindowFlags.None) then
+        if ImGui.BeginTable("themelements_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
+            for _ = 1, numCols do
+                ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 180.0)
+                ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
+            end
 
             for idx, themeElement in ipairs(userTheme) do
-                ImGui.TableNextColumn()
-                Ui.RenderThemeConfigElement(idx, themeElement)
+                if themeElement.color == nil then
+                    ImGui.TableNextColumn()
+                    Ui.RenderThemeConfigElement(idx, themeElement)
+                end
             end
 
             ImGui.EndTable()

@@ -36,7 +36,23 @@ end
 --- @return ImVec4|nil The converted ImVec4.
 function Tables.TableToImVec4(t)
     if not t then return nil end
-    return ImVec4(t.x, t.y, t.z, t.w)
+    return ImVec4(t.x or t.r, t.y or t.g, t.z or t.b, t.w or t.a)
+end
+
+--- Converts an ImVec2 to a table.
+--- @param vec ImVec2 The ImVec2 to convert.
+--- @return table|nil The converted table with x, y keys.
+function Tables.ImVec2ToTable(vec)
+    if not vec then return nil end
+    return { x = vec.x, y = vec.y, }
+end
+
+--- Converts a table to an ImVec2.
+--- @param t table The table to convert. Must have x, y keys.
+--- @return ImVec2 The converted ImVec2.
+function Tables.TableToImVec2(t)
+    if not t then return ImVec2(0, 0) end
+    return ImVec2(t.x, t.y)
 end
 
 function Tables.DeepCopy(orig, copies)

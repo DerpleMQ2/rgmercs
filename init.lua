@@ -31,6 +31,7 @@ local Events      = require("utils.events")
 local Ui          = require("utils.ui")
 local Comms       = require("utils.comms")
 local Strings     = require("utils.strings")
+local Tables      = require("utils.tables")
 local Movement    = require("utils.movement")
 local Set         = require('mq.set')
 
@@ -118,7 +119,12 @@ local function RGMercsGUI()
                             .z, t.color.a or t.color.w)
                         themeColorPop = themeColorPop + 1
                     elseif t.value then
-                        ImGui.PushStyleVar(t.element, t.value)
+                        local elementId = type(t.element) == 'string' and (ImGuiStyleVar[t.element] or 0) or t.element
+                        if type(t.value) == 'number' then
+                            ImGui.PushStyleVar(elementId, t.value)
+                        else
+                            ImGui.PushStyleVar(elementId, t.value.x, t.value.y)
+                        end
                         themeStylePop = themeStylePop + 1
                     end
                 end
