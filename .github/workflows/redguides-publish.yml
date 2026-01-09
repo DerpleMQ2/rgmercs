@@ -38,9 +38,6 @@ jobs:
           # Find previous tag (if any)
           PREV_TAG=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo "")
 
-          echo "$TAG" > rg_release_notes.md
-          echo >> rg_release_notes.md
-          echo "$DATE" >> rg_release_notes.md
           echo "[$VERSION] - $DATE_SHORT" >> rg_release_notes.md
           echo >> rg_release_notes.md
           echo "〰️Commits" >> rg_release_notes.md
