@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          TAG="v$VERSION"
+          CURRENT_SHA="${{ github.sha }}"
           DATE="$(date -u +"%b %d, %Y")"
           DATE_SHORT="$(date -u +"%Y-%m-%d")"
 
@@ -44,12 +44,14 @@ jobs:
           echo "[$VERSION] - $DATE_SHORT" >> rg_release_notes.md
           echo >> rg_release_notes.md
           echo "〰️Commits" >> rg_release_notes.md
-          echo >> rg_release_notes.md
+          echo >> rg_release_notes.md          
+
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
 
           if [ -n "$PREV_TAG" ]; then
-            RANGE="$PREV_TAG..$TAG"
+            RANGE="$PREV_TAG..HEAD"
           else
-            RANGE="$TAG"
+            RANGE="HEAD"
           fi
 
           git log $RANGE --pretty=format:"* %s (%h) ~%an" >> rg_release_notes.md
