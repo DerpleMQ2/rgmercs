@@ -34,6 +34,6 @@ jobs:
         with:
           resource_id: "3040"
           version: "${{ github.event.release.tag_name }}"
-          file: "${{ github.event.repository.name }}_v${{ steps.version.outputs.version }}.zip"
+          file: "${{ github.event.repository.name }}_${{ steps.version.outputs.version }}.zip"
           message: "rg_release_notes.md"
           domain: "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.repository.default_branch }}/"
