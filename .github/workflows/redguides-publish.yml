@@ -14,8 +14,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(sed -n 's/.*version *= *\([0-9]\+\).*/\1/p' extras/version.lua)
+          [ -z "$VERSION" ] && exit 1
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Build zip file
-        run: git archive --format=zip --prefix="${{ github.event.repository.name }}/" -o "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip" HEAD
+        run: git archive --format=zip --prefix="${{ github.event.repository.name }}/" -o "${{ github.event.repository.name }}_${{ steps.version.outputs.version }}.zip" HEAD
 
       - name: Write message from GitHub Release body
         run: jq -r '.release.body // ""' "$GITHUB_EVENT_PATH" > rg_release_notes.md
@@ -27,6 +34,6 @@ jobs:
         with:
           resource_id: "3040"
           version: "${{ github.event.release.tag_name }}"
-          file: "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip"
+          file: "${{ github.event.repository.name }}_v${{ steps.version.outputs.version }}.zip"
           message: "rg_release_notes.md"
           domain: "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.repository.default_branch }}/"
