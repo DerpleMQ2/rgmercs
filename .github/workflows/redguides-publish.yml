@@ -27,6 +27,33 @@ jobs:
       - name: Write message from GitHub Release body
         run: jq -r '.release.body // ""' "$GITHUB_EVENT_PATH" > rg_release_notes.md
 
+      - name: Generate RedGuides release notes
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.version }}"
+          VERSION="${TAG}"
+          DATE="$(date -u +"%b %d, %Y")"
+          DATE_SHORT="$(date -u +"%Y-%m-%d")"
+
+          # Find previous tag (if any)
+          PREV_TAG=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo "")
+
+          echo "$TAG" > rg_release_notes.md
+          echo >> rg_release_notes.md
+          echo "$DATE" >> rg_release_notes.md
+          echo "[$VERSION] - $DATE_SHORT" >> rg_release_notes.md
+          echo >> rg_release_notes.md
+          echo "~Commits" >> rg_release_notes.md
+          echo >> rg_release_notes.md
+
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="$PREV_TAG..$TAG"
+          else
+            RANGE="$TAG"
+          fi
+
+          git log $RANGE --pretty=format:"* %s (%h) ~%an" >> rg_release_notes.md
+
       - name: Publish to RedGuides
         uses: RedGuides/redguides-publish@v1
         env:
