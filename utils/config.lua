@@ -8,7 +8,7 @@ local Comms                                              = require("utils.comms"
 local Set                                                = require("mq.Set")
 
 local Config                                             = {
-    _version = '1.4',
+    _version = '1.5.1',
     _subVersion = "Shattering of Ro",
     _name = "Config",
     _AppName = "RGMercs Lua Edition",
