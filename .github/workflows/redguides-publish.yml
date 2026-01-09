@@ -30,7 +30,7 @@ jobs:
       - name: Generate RedGuides release notes
         shell: bash
         run: |
-          VERSION="${steps.version.outputs.version}"
+          VERSION="${{ steps.version.outputs.version }}"
           TAG="v$VERSION"
           DATE="$(date -u +"%b %d, %Y")"
           DATE_SHORT="$(date -u +"%Y-%m-%d")"
@@ -53,6 +53,8 @@ jobs:
           fi
 
           git log $RANGE --pretty=format:"* %s (%h) ~%an" >> rg_release_notes.md
+
+          cat rg_release_notes.md
 
       - name: Publish to RedGuides
         uses: RedGuides/redguides-publish@v1
