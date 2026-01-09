@@ -1447,7 +1447,7 @@ function Ui.RenderImportMercThemes()
     if ImGui.SmallButton(Icons.FA_REFRESH) then
         Ui.LoadMercThemes()
     end
-    Ui.Tooltip("Reload MyThemeZ.lua")
+    Ui.Tooltip("Reload themes file")
 
     ImGui.EndChild()
 end
