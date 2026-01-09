@@ -1,0 +1,29 @@
+name: Publish to RedGuides
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build zip file
+        run: git archive --format=zip --prefix="${{ github.event.repository.name }}/" -o "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip" HEAD
+
+      - name: Write message from GitHub Release body
+        run: jq -r '.release.body // ""' "$GITHUB_EVENT_PATH" > rg_release_notes.md
+
+      - name: Publish to RedGuides
+        uses: RedGuides/redguides-publish@v1
+        env:
+          REDGUIDES_API_KEY: ${{ secrets.REDGUIDES_API_KEY }}
+        with:
+          resource_id: "3040"
+          version: "${{ github.event.release.tag_name }}"
+          file: "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip"
+          message: "rg_release_notes.md"
+          domain: "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.repository.default_branch }}/"
