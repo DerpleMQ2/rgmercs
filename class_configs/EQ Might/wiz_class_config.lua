@@ -559,7 +559,7 @@ return {
                 type = "AA",
                 load_condtion = function(self) return Casting.CanUseAA("Pyromancy") end,
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.Buff(aaName)()
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -592,7 +592,7 @@ return {
                 type = "AA",
                 load_condtion = function(self) return Casting.CanUseAA("Cryomancy") end,
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.Buff(aaName)()
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -625,7 +625,7 @@ return {
                 type = "AA",
                 load_condtion = function(self) return Casting.CanUseAA("Acromancy") end,
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.Buff(aaName)()
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
