@@ -407,6 +407,9 @@ function Ui.RenderMercsStatus(showPopout)
             if data then
                 ImGui.PushID(string.format("##table_entry_%s", peer))
                 ImGui.TableNextColumn()
+                if data.Data.Zone ~= mq.TLO.Zone.Name() then
+                    ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Grey)
+                end
                 ImGui.SmallButton(peer)
                 local name, _ = Comms.GetCharAndServerFromPeer(peer)
                 if name then
@@ -422,6 +425,10 @@ function Ui.RenderMercsStatus(showPopout)
                         Comms.SendPeerDoCmd(peer, "/foreground")
                     end
                 end
+                if data.Data.Zone ~= mq.TLO.Zone.Name() then
+                    ImGui.PopStyleColor()
+                end
+
                 ImGui.TableNextColumn()
                 Ui.RenderColoredText(
                     Ui.GetPercentageColor(data.Data.HPs or 0, { Config.Constants.Colors.LightGreen, Config.Constants.Colors.Yellow, Config.Constants.Colors.Red, }), "%d%%",
