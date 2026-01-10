@@ -335,7 +335,7 @@ end
 function Module:HandleMezBroke(mobName, breakerName)
     Logger.log_debug("%s broke mez on ==> %s", breakerName, mobName)
     Comms.HandleAnnounce(string.format("\ar MEZ Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName), Config:GetSetting('MezAnnounceGroup'),
-        Config:GetSetting('MezAnnounce'))
+        Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 end
 
 function Module:AddImmuneTarget(mobId, mobData)
@@ -395,10 +395,10 @@ function Module:MezNow(mezId, useAE, useAA)
                 -- Delay to wait till face finishes
                 mq.delay(5)
                 Comms.HandleAnnounce(string.format("\aw I AM \ar AE AA MEZZING \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
-                    Config:GetSetting('MezAnnounce'))
+                    Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                 Casting.UseAA("Beam of Slumber", mezId)
                 Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
-                    Config:GetSetting('MezAnnounce'))
+                    Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                 mq.doevents()
                 return
             elseif (mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 then
@@ -422,7 +422,7 @@ function Module:MezNow(mezId, useAE, useAA)
 
             if Casting.SpellReady(aeMezSpell) then
                 Comms.HandleAnnounce(string.format("\aw I AM \ar AE SPELL MEZZING \ag %s", aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
-                    Config:GetSetting('MezAnnounce'))
+                    Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 
                 if Core.MyClassIs("brd") then
                     Casting.UseSong(aeMezSpell.RankName(), mezId, false, 2)
@@ -430,7 +430,7 @@ function Module:MezNow(mezId, useAE, useAA)
                     Casting.UseSpell(aeMezSpell.RankName(), mezId, false, true, 2)
                 end
                 Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE SPELL MEZ \ag %s", aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
-                    Config:GetSetting('MezAnnounce'))
+                    Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             end
         end
         -- In case they're mez immune
@@ -442,19 +442,20 @@ function Module:MezNow(mezId, useAE, useAA)
             -- Only bards have single target AA Mez
             -- Cast and Return
             Comms.HandleAnnounce("\aw I AM USING \ar BRD AA MEZ \ag Dirge of the Sleepwalker", Config:GetSetting('MezAnnounceGroup'),
-                Config:GetSetting('MezAnnounce'))
+                Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             Casting.UseAA("Dirge of the Sleepwalker", mezId)
             Comms.HandleAnnounce("\aw I JUST CAST \ar BRD AA MEZ \ag Dirge of the Sleepwalker", Config:GetSetting('MezAnnounceGroup'),
-                Config:GetSetting('MezAnnounce'))
+                Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 
             mq.doevents()
 
             if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
                 Comms.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s <- Using: \at%s",
-                    mq.TLO.Spawn(mezId).CleanName(), "Dirge of the Sleepwalker"), Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'))
+                        mq.TLO.Spawn(mezId).CleanName(), "Dirge of the Sleepwalker"), Config:GetSetting('MezAnnounceGroup'), Config:GetSetting('MezAnnounce'),
+                    Config:GetSetting('AnnounceToRaidIfInRaid'))
             else
                 Comms.HandleAnnounce(string.format("\ar MEZ Failed: \ag -> \ay %s \ag <-", mq.TLO.Spawn(mezId).CleanName()), Config:GetSetting('MezAnnounceGroup'),
-                    Config:GetSetting('MezAnnounce'))
+                    Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             end
 
             mq.doevents()
@@ -504,10 +505,10 @@ function Module:MezNow(mezId, useAE, useAA)
             if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
                 Comms.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s \aw <- Using: \at%s",
                         mq.TLO.Spawn(mezId).CleanName(), mezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
-                    Config:GetSetting('MezAnnounce'))
+                    Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             else
                 Comms.HandleAnnounce(string.format("\ar MEZ Failed \ag -> \ay %s \ag <-", mq.TLO.Spawn(mezId).CleanName()), Config:GetSetting('MezAnnounceGroup'),
-                    Config:GetSetting('MezAnnounce'))
+                    Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             end
         end
 

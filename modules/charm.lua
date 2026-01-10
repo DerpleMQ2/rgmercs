@@ -337,7 +337,7 @@ function Module:HandleCharmBroke(mobName, breakerName)
 	Logger.log_debug("%s broke charm on ==> %s", breakerName, mobName)
 	Comms.HandleAnnounce(
 		string.format("\ar CHARM Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName),
-		Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'))
+		Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 end
 
 function Module:AddImmuneTarget(mobId, mobData)
@@ -433,7 +433,8 @@ function Module:CharmNow(charmId, useAA)
 			Comms.HandleAnnounce(
 				string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"),
 				Config:GetSetting('CharmAnnounceGroup'),
-				Config:GetSetting('CharmAnnounce'))
+				Config:GetSetting('CharmAnnounce'),
+				Config:GetSetting('AnnounceToRaidIfInRaid'))
 			Casting.UseAA("Dire Charm", charmId)
 		else
 			-- This may not work for Bards but will work for DRU/NEC/ENCs
@@ -451,11 +452,12 @@ function Module:CharmNow(charmId, useAA)
 	if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS and mq.TLO.Pet.ID() > 0 then
 		Comms.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
 				mq.TLO.Spawn(charmId).CleanName(), charmId), Config:GetSetting('CharmAnnounceGroup'),
-			Config:GetSetting('CharmAnnounce'))
+			Config:GetSetting('CharmAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 	else
 		Comms.HandleAnnounce(string.format("\ar CHARM Failed: \ag -> \ay %s \ag <-",
-			mq.TLO.Spawn(charmId).CleanName(),
-			charmId), Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'))
+				mq.TLO.Spawn(charmId).CleanName(),
+				charmId), Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'),
+			Config:GetSetting('AnnounceToRaidIfInRaid'))
 	end
 
 	mq.doevents()

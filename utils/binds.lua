@@ -1,6 +1,7 @@
 local mq          = require('mq')
 local Config      = require('utils.config')
 local Core        = require("utils.core")
+local Comms       = require("utils.comms")
 local Modules     = require("utils.modules")
 local Targeting   = require("utils.targeting")
 local Strings     = require("utils.strings")
@@ -60,7 +61,7 @@ Binds.Handlers    = {
         about = "Sets a specific setting for this character and all RGMercs peers.",
         handler = function(config, value)
             Config:HandleBind(config, value)
-            local peers = Config:GetPeers()
+            local peers = Comms.GetPeers()
             for _, peer in pairs(peers) do
                 if peer ~= mq.TLO.Me.Name() then
                     Config:PeerSetSetting(peer, config, value)
@@ -356,15 +357,16 @@ Binds.Handlers    = {
         usage = "/rgl yes",
         about = "All groupmembers running RGMercs will click on every possible 'Yes' Dialogue they have up.",
         handler = function()
-            Core.DoCmd("/dgga /notify LargeDialogWindow LDW_YesButton leftmouseup")
-            Core.DoCmd("/dgga /notify LargeDialogWindow LDW_OkButton leftmouseup")
-            Core.DoCmd("/dgga /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
-            Core.DoCmd("/dgga /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
-            Core.DoCmd("/dgga /notify TradeWND TRDW_Trade_Button leftmouseup")
-            Core.DoCmd("/dgga /notify GiveWnd GVW_Give_Button leftmouseup ")
-            Core.DoCmd("/dgga /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup")
-            Core.DoCmd("/dgga /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
-            Core.DoCmd("/dgga /notify RaidWindow RAID_AcceptButton leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify LargeDialogWindow LDW_YesButton leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify LargeDialogWindow LDW_YesButton leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify LargeDialogWindow LDW_OkButton leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify ConfirmationDialogBox CD_OK_Button leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify TradeWND TRDW_Trade_Button leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify GiveWnd GVW_Give_Button leftmouseup ")
+            Comms.SendAllPeersDoCmd(false, true, "/notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
+            Comms.SendAllPeersDoCmd(false, true, "/notify RaidWindow RAID_AcceptButton leftmouseup")
         end,
     },
     ['circle'] = {

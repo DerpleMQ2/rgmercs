@@ -1,6 +1,7 @@
 local mq                    = require('mq')
 local Config                = require('utils.config')
 local Core                  = require('utils.core')
+local Comms                 = require("utils.comms")
 local Modules               = require("utils.modules")
 local Logger                = require("utils.logger")
 local Strings               = require("utils.strings")
@@ -463,8 +464,11 @@ end
 function Targeting.SetForceBurn(targetId)
     Targeting.ForceBurnTargetID = tonumber(targetId) or mq.TLO.Target.ID()
     local burnNowSpawn = mq.TLO.Spawn(Targeting.ForceBurnTargetID)
-    Logger.log_info("\aoForcing Burn Now: \at%s \aw(\am%d\aw)", burnNowSpawn and (burnNowSpawn() and burnNowSpawn.CleanName() or "None") or "None",
-        Targeting.ForceBurnTargetID)
+    local burnName = burnNowSpawn and (burnNowSpawn() and burnNowSpawn.CleanName() or "None") or "None"
+    Logger.log_info("\aoForcing Burn Now: \at%s \aw(\am%d\aw)", burnName, Targeting.ForceBurnTargetID)
+
+    Comms.HandleAnnounce(string.format("Force Burning: %s!", burnName), Config:GetSetting('BurnAnnounceGroup'), Config:GetSetting('BurnAnnounce'),
+        Config:GetSetting('AnnounceToRaidIfInRaid'))
 end
 
 function Targeting.TargetIsMA(target)

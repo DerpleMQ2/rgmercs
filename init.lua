@@ -543,7 +543,7 @@ local script_actor = Comms.Actors.register(function(message)
     -- This is a core event so handle it here.
     if msg.Event == "Heartbeat" then
         --Logger.log_debug("Received Heartbeat from \am%s\aw: \ag%s", msg.From, Strings.TableToString(msg.Data))
-        Config:UpdatePeerHeartbeat(msg.From, msg.Data)
+        Comms.UpdatePeerHeartbeat(msg.From, msg.Data)
         return
     end
 

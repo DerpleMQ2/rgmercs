@@ -331,7 +331,7 @@ function Ui.RenderMercsStatus(showPopout)
     end
 
     if ImGui.BeginTable("MercStatusTable", 10, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
-        local mercs = Config:GetAllPeerHeartbeats()
+        local mercs = Comms.GetAllPeerHeartbeats()
 
         if not Ui.TempSettings.SortedMercs then
             Ui.TempSettings.SortedMercs = {}

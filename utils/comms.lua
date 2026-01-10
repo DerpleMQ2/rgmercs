@@ -1,13 +1,15 @@
-local mq            = require('mq')
-local Logger        = require("utils.logger")
-local Strings       = require("utils.strings")
+local mq              = require('mq')
+local Set             = require("mq.set")
+local Logger          = require("utils.logger")
+local Strings         = require("utils.strings")
 
-local Comms         = { _version = '1.0', _name = "Comms", _author = 'Derple', }
-Comms.__index       = Comms
-Comms.Actors        = require('actors')
-Comms.ScriptName    = "RGMercs"
-Comms.LastHeartbeat = 0
-
+local Comms           = { _version = '1.0', _name = "Comms", _author = 'Derple', }
+Comms.__index         = Comms
+Comms.Actors          = require('actors')
+Comms.ScriptName      = "RGMercs"
+Comms.LastHeartbeat   = 0
+Comms.Peers           = Set.new({})
+Comms.PeersHeartbeats = {}
 
 -- Putting this here for lack of a beter spot.
 --- @param peerName string? The character name string if not supplied then we use Me.DisplayName()
@@ -63,6 +65,22 @@ function Comms.SendPeerDoCmd(peer, cmd, ...)
         cmd = cmd, })
 end
 
+function Comms.SendAllPeersDoCmd(inZoneOnly, includeSelf, cmd, ...)
+    cmd = string.format(cmd, ...)
+
+    if includeSelf then
+        mq.cmd(cmd)
+    end
+
+    for peer, data in pairs(Comms.PeersHeartbeats) do
+        printf("Peer: %s Zome: %s", peer, data.Data.Zone)
+        if data.Data.Zone == mq.TLO.Zone.Name() or not inZoneOnly then
+            Comms.SendMessage(peer, "Core", "DoCmd", {
+                cmd = cmd, })
+        end
+    end
+end
+
 function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, chase, useMana, useEnd)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()
@@ -92,6 +110,45 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, cha
     })
 end
 
+function Comms.GetAllPeerHeartbeats()
+    return Comms.PeersHeartbeats or {}
+end
+
+function Comms.GetPeerHeartbeatByName(name)
+    return Comms.PeersHeartbeats[Comms.GetPeerName(name)] or {}
+end
+
+function Comms.GetPeerHeartbeat(peer)
+    return Comms.PeersHeartbeats[peer] or {}
+end
+
+function Comms.IsValidPeer(peer)
+    return Comms.Peers:contains(peer)
+end
+
+function Comms.GetPeers()
+    return Comms.Peers:toList() or {}
+end
+
+function Comms.UpdatePeerHeartbeat(peer, data)
+    Comms.Peers:add(peer)
+    Comms.PeersHeartbeats[peer] = Comms.PeersHeartbeats[peer] or {}
+    Comms.PeersHeartbeats[peer].LastHeartbeat = os.time()
+    Comms.PeersHeartbeats[peer].Data = data or {}
+end
+
+function Comms.ValidatePeers(timeout)
+    Logger.log_verbose("\ayValidating peers heartbeats for timeouts: \n  :: %s\n  :: %s", Strings.TableToString(Comms.PeersHeartbeats, 512),
+        Strings.TableToString(Comms.Peers:toList(), 512))
+    for peer, heartbeat in pairs(Comms.PeersHeartbeats) do
+        if os.time() - heartbeat.LastHeartbeat > timeout then
+            Logger.log_debug("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
+            Comms.Peers:remove(peer)
+            Comms.PeersHeartbeats[peer] = nil
+        end
+    end
+end
+
 --- Prints a group message with the given format and arguments.
 --- @param msg string: The message format string.
 --- @param ... any: Additional arguments to format the message.
@@ -116,10 +173,15 @@ end
 --- @param msg string: The message to be announced.
 --- @param sendGroup boolean: Whether to send the message to the group.
 --- @param sendDan boolean: Whether to send the message to DanNet.
-function Comms.HandleAnnounce(msg, sendGroup, sendDan)
+function Comms.HandleAnnounce(msg, sendGroup, sendDan, AnnounceToRaidIfInRaid)
     if sendGroup then
         local cleanMsg = msg:gsub("\a.", "")
-        mq.cmdf("/gsay %s", cleanMsg)
+
+        if mq.TLO.Raid.Members() > 0 and AnnounceToRaidIfInRaid then
+            mq.cmdf("/rsay %s", cleanMsg)
+        else
+            mq.cmdf("/gsay %s", cleanMsg)
+        end
     end
 
     if sendDan then

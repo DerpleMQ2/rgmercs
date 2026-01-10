@@ -722,7 +722,7 @@ function Module:GiveTime(combat_state)
         local useLocNav = false
 
         if Config:GetSetting('UseActorNav') then
-            local heartbeat = Config:GetPeerHeartbeatByName(chaseTarg)
+            local heartbeat = Comms.GetPeerHeartbeatByName(chaseTarg)
             local data = heartbeat and heartbeat.Data
             if data and data.X and data.Y and data.Z then
                 local peerLoc = string.format("%d, %d, %d", data.Y, data.X, data.Z)

@@ -1064,7 +1064,7 @@ function Module:HealById(id)
                         rotation.name)
                     Comms.HandleAnnounce(string.format('Healed %s :: %s', healTarget.CleanName() or "Target", Casting.GetLastUsedSpell()),
                         Config:GetSetting('HealAnnounceGroup'),
-                        Config:GetSetting('HealAnnounce'))
+                        Config:GetSetting('HealAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                     break
                 else
                     Logger.log_verbose(
@@ -1152,7 +1152,7 @@ function Module:AddCureToList(id, type)
 
     if not contained then
         Comms.HandleAnnounce(string.format('Queueing a %s cure for %s.', type:lower(), mq.TLO.Spawn(id).CleanName() or "Target"), Config:GetSetting('CureAnnounceGroup'),
-            Config:GetSetting('CureAnnounce'))
+            Config:GetSetting('CureAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
     end
 end
 
@@ -1194,7 +1194,7 @@ function Module:CheckActorForCures(peer, targetId)
         table.insert(checks, { type = "Corruption", })
     end
 
-    local heartbeat = Config:GetPeerHeartbeat(peer)
+    local heartbeat = Comms.GetPeerHeartbeat(peer)
     if heartbeat and heartbeat.Data then
         for _, data in ipairs(checks) do
             local effectId = heartbeat.Data[data.type] or "null"
@@ -1265,7 +1265,7 @@ function Module:CheckSelfForCures()
         if data.check > 0 then
             Comms.HandleAnnounce(string.format('%s effect found on myself, processing cure.', data.type),
                 Config:GetSetting('CureAnnounceGroup'),
-                Config:GetSetting('CureAnnounce'))
+                Config:GetSetting('CureAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
                 local successful, haveValidOptions = Core.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, mq.TLO.Me.ID())
 
@@ -1322,7 +1322,7 @@ function Module:RunCureRotation(combat_state)
     self.TempSettings.CureChecksStale = false
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
-    local actorPeers = Config:GetAllPeerHeartbeats()
+    local actorPeers = Comms.GetAllPeerHeartbeats()
     local handledPeers = Set.new({})
     local handledPeerCount = 0
 

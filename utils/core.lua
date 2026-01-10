@@ -1,5 +1,6 @@
 local mq      = require('mq')
 local Config  = require('utils.config')
+local Comms   = require("utils.comms")
 local Modules = require("utils.modules")
 local DanNet  = require('lib.dannet.helpers')
 local Logger  = require("utils.logger")
@@ -221,7 +222,7 @@ function Core.GetMainAssistPctHPs()
         return raidMember.PctHPs() or 100
     end
 
-    local heartbeat = Config:GetPeerHeartbeatByName(Config.Globals.MainAssist)
+    local heartbeat = Comms.GetPeerHeartbeatByName(Config.Globals.MainAssist)
     if heartbeat and heartbeat.Data and heartbeat.Data.HPs then
         local hpPct = tonumber(heartbeat.Data.HPs)
         if hpPct and type(hpPct) == 'number' then

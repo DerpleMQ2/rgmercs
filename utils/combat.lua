@@ -125,7 +125,7 @@ function Combat.EngageTarget(autoTargetId)
                     Logger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", Targeting.GetTargetCleanName())
                     if Core.IAmMA() then
                         Comms.HandleAnnounce(string.format('TANKING -> %s <-', Targeting.GetTargetCleanName()), Config:GetSetting('AnnounceTargetGroup'),
-                            Config:GetSetting('AnnounceTarget'))
+                            Config:GetSetting('AnnounceTarget'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                     end
                     Logger.log_debug("EngageTarget(): Attacking target!")
                     if Core.MyClassIs("ROG") and mq.TLO.Me.AbilityReady("Backstab")() then
@@ -506,7 +506,7 @@ function Combat.FindBestAutoTarget(validateFn)
         -- We're not the main assist so we need to choose our target based on our main assist.
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
-        local heartbeat = Config:GetPeerHeartbeatByName(Config.Globals.MainAssist)
+        local heartbeat = Comms.GetPeerHeartbeatByName(Config.Globals.MainAssist)
         if heartbeat and heartbeat.Data and heartbeat.Data.ForceCombatID then
             Config.Globals.ForceCombatID = tonumber(heartbeat.Data.ForceCombatID)
         end
@@ -594,7 +594,7 @@ function Combat.FindBestAutoTargetCheck()
         --- @diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet(Config.Globals.MainAssist)()
 
-        local heartbeat = Config:GetPeerHeartbeatByName(Config.Globals.MainAssist)
+        local heartbeat = Comms.GetPeerHeartbeatByName(Config.Globals.MainAssist)
         if heartbeat and heartbeat.Data and heartbeat.Data.TargetID then
             local targetID = tonumber(heartbeat.Data.TargetID)
             if targetID and type(targetID) == 'number' then

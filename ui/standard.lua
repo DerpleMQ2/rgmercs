@@ -3,6 +3,7 @@ local CommitVersion = require('extras.version')
 local OptionsUI     = require("ui.options")
 local ImGui         = require('ImGui')
 local Config        = require('utils.config')
+local Comms         = require('utils.comms')
 local Ui            = require('utils.ui')
 local Icons         = require('mq.ICONS')
 local ImageUI       = require('ui.images')
@@ -80,7 +81,7 @@ function StandardUI:RenderTarget()
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Config.Constants.Colors.Orange)
         local burnLabel = (Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()) and " FORCE BURN ACTIVATED " or " FORCE BURN THIS TARGET! "
         if ImGui.SmallButton(Icons.FA_FIRE .. burnLabel .. Icons.FA_FIRE) then
-            Core.DoCmd("/squelch /dgga /rgl burnnow %d", assistSpawn.ID())
+            Comms.SendAllPeersDoCmd(true, true, "/squelch /rgl burnnow %d", assistSpawn.ID())
         end
         ImGui.PopStyleColor(2)
     end

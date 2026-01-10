@@ -397,7 +397,7 @@ function Casting.ReagentCheck(spell)
         Comms.HandleAnnounce(
             string.format('I want to cast %s, but I am missing a reagent(%d)!', spell(), spell.ReagentID(1)()),
             Config:GetSetting('ReagentAnnounceGroup'),
-            Config:GetSetting('ReagentAnnounce'))
+            Config:GetSetting('ReagentAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
         return false
     end
 
@@ -407,7 +407,7 @@ function Casting.ReagentCheck(spell)
             Comms.HandleAnnounce(
                 string.format('I want to cast %s, but I am missing a non-expended reagent(%d)!', spell(), spell.NoExpendReagentID(1)()),
                 Config:GetSetting('ReagentAnnounceGroup'),
-                Config:GetSetting('ReagentAnnounce'))
+                Config:GetSetting('ReagentAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             return false
         end
     end
@@ -433,12 +433,23 @@ end
 --- This function evaluates certain criteria to determine if the burn phase should be initiated.
 --- @return boolean True if the burn condition is met, false otherwise.
 function Casting.BurnCheck()
+    local burnTarget = Targeting.GetAutoTarget()
+    local burnTargetName = burnTarget and (burnTarget() and burnTarget.CleanName() or "None") or "None"
     local autoBurn = Config:GetSetting('BurnAuto') and
-        ((Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('BurnNamed')))
+        ((Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount')) or (Targeting.IsNamed(burnTarget) and Config:GetSetting('BurnNamed')))
     local alwaysBurn = (Config:GetSetting('BurnAlways') and Config:GetSetting('BurnAuto'))
     local forcedBurn = Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()
 
+    local previousBurnState = Casting.LastBurnCheck
+
     Casting.LastBurnCheck = autoBurn or alwaysBurn or forcedBurn
+
+    if Casting.LastBurnCheck ~= previousBurnState then
+        Logger.log_info("BurnCheck: Burn state changed to %s.", tostring(Casting.LastBurnCheck))
+        Comms.HandleAnnounce(string.format("%s Burning: %s!", Casting.LastBurnCheck and "Now" or "Done", burnTargetName), Config:GetSetting('BurnAnnounceGroup'),
+            Config:GetSetting('BurnAnnounce'),
+            Config:GetSetting('AnnounceToRaidIfInRaid'))
+    end
     return Casting.LastBurnCheck
 end
 

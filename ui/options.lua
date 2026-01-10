@@ -595,7 +595,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
 
             ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth())
             -- character selecter
-            local peerList = Config:GetPeers()
+            local peerList = Comms.GetPeers()
             table.insert(peerList, 1, Comms.GetPeerName())
             local peerListIdx = 1
             for idx, name in ipairs(peerList) do
