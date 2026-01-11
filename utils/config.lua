@@ -41,6 +41,9 @@ Config.TempSettings.ResetOptionsUIPosition               = false
 
 Config.TempSettings.HighlightedModules                   = Set.new({})
 
+-- Legacy Support
+Config.Globals                                           = Globals
+
 -- Constants
 Config.Constants                                         = {}
 Config.Constants.SupportedEmuServers                     = Set.new({ "Project Lazarus", "HiddenForest", "EQ Might", })

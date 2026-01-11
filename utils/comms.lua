@@ -85,7 +85,7 @@ end
 function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, chase, useMana, useEnd)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()
-    Comms.BroadcastMessage("RGMercs", "Heartbeat", {
+    local heartBeat = {
         From          = Comms.GetPeerName(),
         Zone          = mq.TLO.Zone.Name(),
         X             = mq.TLO.Me.X(),
@@ -108,10 +108,23 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, cha
         Assist        = assist,
         State         = curState,
         Chase         = chase,
-    })
+    }
+    Comms.BroadcastMessage("RGMercs", "Heartbeat", heartBeat)
+    -- update our own heartbeat too
+    Comms.UpdatePeerHeartbeat(Comms.GetPeerName(), heartBeat)
 end
 
-function Comms.GetAllPeerHeartbeats()
+function Comms.GetAllPeerHeartbeats(includeSelf)
+    if not includeSelf then
+        local heartbeats = {}
+        for peer, heartbeat in pairs(Comms.PeersHeartbeats) do
+            if peer ~= Comms.GetPeerName() then
+                heartbeats[peer] = heartbeat
+            end
+        end
+        return heartbeats
+    end
+
     return Comms.PeersHeartbeats or {}
 end
 
@@ -127,7 +140,13 @@ function Comms.IsValidPeer(peer)
     return Comms.Peers:contains(peer)
 end
 
-function Comms.GetPeers()
+function Comms.GetPeers(includeSelf)
+    if not includeSelf then
+        local peers = Set.new(Comms.Peers:toList() or {})
+        peers:remove(Comms.GetPeerName())
+        return peers:toList() or {}
+    end
+
     return Comms.Peers:toList() or {}
 end
 

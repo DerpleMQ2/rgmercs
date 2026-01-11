@@ -69,7 +69,7 @@ Binds.Handlers    = {
         about = "Sets a specific setting for this character and all RGMercs peers.",
         handler = function(config, value)
             Config:HandleBind(config, value)
-            local peers = Comms.GetPeers()
+            local peers = Comms.GetPeers(false)
             for _, peer in pairs(peers) do
                 if peer ~= mq.TLO.Me.Name() then
                     Config:PeerSetSetting(peer, config, value)

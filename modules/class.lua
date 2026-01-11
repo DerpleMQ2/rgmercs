@@ -1324,7 +1324,7 @@ function Module:RunCureRotation(combat_state)
     self.TempSettings.CureChecksStale = false
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
-    local actorPeers = Comms.GetAllPeerHeartbeats()
+    local actorPeers = Comms.GetAllPeerHeartbeats(false)
     local handledPeers = Set.new({})
     local handledPeerCount = 0
 
