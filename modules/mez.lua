@@ -401,8 +401,7 @@ function Module:MezNow(mezId, useAE, useAA)
                 Casting.UseAA("Beam of Slumber", mezId)
                 Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
                     Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
-                mq.doevents()
-                Events.DoEvents()
+                mq.doevents('ImmuneMez')
                 return
             elseif (mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 then
                 local maxWaitToMez = 1500 + (mq.TLO.Window("CastingWindow").Open() and (mq.TLO.Me.Casting.MyCastTime() or 3000) or 0)
@@ -438,8 +437,7 @@ function Module:MezNow(mezId, useAE, useAA)
             end
         end
         -- In case they're mez immune
-        mq.doevents()
-        Events.DoEvents()
+        mq.doevents('ImmuneMez')
     else
         Logger.log_debug("Performing Single Target MEZ --> %d", mezId)
         if useAA and Core.MyClassIs("brd") and Casting.AAReady("Dirge of the Sleepwalker") and Config:GetSetting('DoAAMez') then
@@ -452,9 +450,7 @@ function Module:MezNow(mezId, useAE, useAA)
             Comms.HandleAnnounce("\aw I JUST CAST \ar BRD AA MEZ \ag Dirge of the Sleepwalker", Config:GetSetting('MezAnnounceGroup'),
                 Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 
-            mq.doevents()
-            Events.DoEvents()
-
+            mq.doevents('ImmuneMez')
             if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
                 Comms.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s <- Using: \at%s",
                         mq.TLO.Spawn(mezId).CleanName(), "Dirge of the Sleepwalker"), Config:GetSetting('MezAnnounceGroup'), Config:GetSetting('MezAnnounce'),
@@ -464,9 +460,7 @@ function Module:MezNow(mezId, useAE, useAA)
                     Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             end
 
-            mq.doevents()
-            Events.DoEvents()
-
+            mq.doevents('ImmuneMez')
             return
         end
 
@@ -508,8 +502,7 @@ function Module:MezNow(mezId, useAE, useAA)
             end
 
             -- In case they're mez immune
-            mq.doevents()
-            Events.DoEvents()
+            mq.doevents('ImmuneMez')
 
             if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
                 Comms.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s \aw <- Using: \at%s",
@@ -521,8 +514,7 @@ function Module:MezNow(mezId, useAE, useAA)
             end
         end
 
-        mq.doevents()
-        Events.DoEvents()
+        mq.doevents('ImmuneMez')
     end
 
     Targeting.SetTarget(currentTargetID, true)
@@ -584,8 +576,7 @@ function Module:AEMezCheck()
         self:MezNow(Globals.AutoTargetID, true, true)
     end
 
-    mq.doevents()
-    Events.DoEvents()
+    mq.doevents('ImmuneMez')
 end
 
 function Module:RemoveCCTarget(mobId)
@@ -708,7 +699,6 @@ function Module:UpdateMezList()
     end
 
     mq.doevents()
-    Events.DoEvents()
 end
 
 function Module:ProcessMezList()
@@ -806,7 +796,6 @@ function Module:ProcessMezList()
     end
 
     mq.doevents()
-    Events.DoEvents()
 end
 
 function Module:DoMez()
