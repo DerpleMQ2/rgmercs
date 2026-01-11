@@ -8,6 +8,7 @@ local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
 local Strings            = require("utils.strings")
 local Logger             = require("utils.logger")
+local Events             = require("utils.events")
 local Set                = require("mq.Set")
 
 local Module             = { _version = '1.0', _name = "SmartLoot", _author = 'andude2, Algar', }
@@ -332,6 +333,7 @@ function Module:ProcessLooting()
 		-- Small delay to not hammer the CPU
 		mq.delay(50)
 		mq.doevents()
+		Events.DoEvents()
 	end
 
 	Logger.log_verbose("\ay[LOOT]: \agFinished Processing Loot.")

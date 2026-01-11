@@ -42,11 +42,9 @@ Modules:load(Config.Constants.LootModuleTypes[Config:GetSetting('LootModuleType'
 require('utils.datatypes')
 
 -- ImGui Variables
-local openGUI            = true
-local notifyZoning       = true
-local curState           = "Downtime"
-local heartbeatCoroutine = nil
-
+local openGUI         = true
+local notifyZoning    = true
+local curState        = "Downtime"
 
 local initPctComplete = 0
 local initMsg         = "Initializing RGMercs..."
@@ -207,19 +205,6 @@ mq.imgui.init('RGMercsUI', RGMercsGUI)
 -- End UI --
 local unloadedPlugins = {}
 
-local function CreateHeartBeat()
-    heartbeatCoroutine = coroutine.create(function()
-        while (1) do
-            Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or curState,
-                Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config.Globals.ForceCombatID,
-                Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off",
-                Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()),
-                Config.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()))
-            coroutine.yield()
-        end
-    end)
-end
-
 local function RGInit(...)
     Core.CheckPlugins({
         "MQ2Rez",
@@ -245,7 +230,7 @@ local function RGInit(...)
     end
 
     -- send heartbeat to peers.
-    CreateHeartBeat()
+    Events.CreateHeartBeat()
 
     initPctComplete = 10
     initMsg = "Scanning for Configurations..."
@@ -345,16 +330,7 @@ local function Main()
         return
     end
 
-    if heartbeatCoroutine then
-        if coroutine.status(heartbeatCoroutine) ~= 'dead' then
-            local success, err = coroutine.resume(heartbeatCoroutine)
-            if not success then
-                Logger.log_error("\arError in Heartbeat Coroutine: %s", err)
-            end
-        else
-            CreateHeartBeat()
-        end
-    end
+    Events.DoEvents(true)
 
     Config:ValidatePeers()
 
@@ -368,6 +344,7 @@ local function Main()
     if Config.Globals.PauseMain then
         mq.delay(100)
         mq.doevents()
+        Events.DoEvents()
         if Config:GetSetting('RunMovePaused') then
             Modules:ExecModule("Movement", "GiveTime", curState)
         end

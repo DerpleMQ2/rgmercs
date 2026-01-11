@@ -13,6 +13,7 @@ local Modules                             = require("utils.modules")
 local Strings                             = require("utils.strings")
 local Files                               = require("utils.files")
 local Logger                              = require("utils.logger")
+local Events                              = require("utils.events")
 local Set                                 = require("mq.Set")
 local Icons                               = require('mq.ICONS')
 
@@ -1958,6 +1959,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
         mq.delay(100)
         mq.doevents()
+        Events.DoEvents()
         maxMove = maxMove - 100
 
         if maxMove <= 0 then
@@ -2254,6 +2256,7 @@ function Module:GiveTime(combat_state)
 
         mq.delay(100)
         mq.doevents()
+        Events.DoEvents()
 
         maxMove = maxMove - 100
 
@@ -2312,6 +2315,7 @@ function Module:GiveTime(combat_state)
                     end
                     mq.delay(10)
                     mq.doevents()
+                    Events.DoEvents()
                 end
 
                 Core.SetPetHold()
@@ -2342,6 +2346,7 @@ function Module:GiveTime(combat_state)
                     end
                     mq.delay(10)
                     mq.doevents()
+                    Events.DoEvents()
                 end
             elseif Config:GetSetting('PullAbility') == PullAbilityIDToName.Ranged then -- Ranged pull
                 -- Make sure we're looking straight ahead at our mob and delay
@@ -2370,6 +2375,7 @@ function Module:GiveTime(combat_state)
                     end
                     mq.delay(10)
                     mq.doevents()
+                    Events.DoEvents()
                 end
             elseif Config:GetSetting('PullAbility') == PullAbilityIDToName.AutoAttack then -- Auto Attack pull
                 -- Make sure we're looking straight ahead at our mob and delay
@@ -2398,6 +2404,7 @@ function Module:GiveTime(combat_state)
                     end
                     mq.delay(10)
                     mq.doevents()
+                    Events.DoEvents()
                 end
             else -- AA/Spell/Ability pull
                 self.TempSettings.PullAttemptStarted = os.clock()
@@ -2451,6 +2458,7 @@ function Module:GiveTime(combat_state)
 
                     mq.delay(10)
                     mq.doevents()
+                    Events.DoEvents()
                 end
             end
         end
@@ -2480,6 +2488,7 @@ function Module:GiveTime(combat_state)
                 Core.DoCmd("/nav pause")
             end
             mq.doevents()
+            Events.DoEvents()
             mq.delay(10)
         end
 

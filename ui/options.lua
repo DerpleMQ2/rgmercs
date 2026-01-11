@@ -31,10 +31,11 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.FA_COGS,
         IconImage = OptionsUI.LoadIcon("settingsicon"),
         Headers = {
-            { Name = 'Announcements', Categories = { "Announcements", }, },                                       -- group announce stuff-- ui stuff
-            { Name = 'Loot(Emu)',     Categories = { "Looting Script", "LNS", "SmartLoot", }, },
-            { Name = 'Misc',          Categories = { "Misc", }, },                                                -- ??? profit
-            { Name = 'Uncategorized', Categories = { "Uncategorized", },                      CatchAll = true, }, -- settings from custom configs that don't have proper group/header
+            { Name = 'Announcements',   Categories = { "Announcements", }, }, -- group announce stuff-- ui stuff
+            { Name = 'Loot(Emu)',       Categories = { "Looting Script", "LNS", "SmartLoot", }, },
+            { Name = 'Mercs Internals', Categories = { "Internals", }, },
+            { Name = 'Misc',            Categories = { "Misc", }, },                                              -- ??? profit
+            { Name = 'Uncategorized',   Categories = { "Uncategorized", },                      CatchAll = true, }, -- settings from custom configs that don't have proper group/header
         },
     },
     {

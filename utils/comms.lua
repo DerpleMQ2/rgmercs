@@ -1,15 +1,16 @@
-local mq              = require('mq')
-local Set             = require("mq.set")
-local Logger          = require("utils.logger")
-local Strings         = require("utils.strings")
+local mq                 = require('mq')
+local Set                = require("mq.set")
+local Logger             = require("utils.logger")
+local Strings            = require("utils.strings")
 
-local Comms           = { _version = '1.0', _name = "Comms", _author = 'Derple', }
-Comms.__index         = Comms
-Comms.Actors          = require('actors')
-Comms.ScriptName      = "RGMercs"
-Comms.LastHeartbeat   = 0
-Comms.Peers           = Set.new({})
-Comms.PeersHeartbeats = {}
+local Comms              = { _version = '1.0', _name = "Comms", _author = 'Derple', }
+Comms.__index            = Comms
+Comms.Actors             = require('actors')
+Comms.ScriptName         = "RGMercs"
+Comms.LastHeartbeat      = 0
+Comms.Peers              = Set.new({})
+Comms.PeersHeartbeats    = {}
+Comms.HeartbeatCoroutine = nil
 
 -- Putting this here for lack of a beter spot.
 --- @param peerName string? The character name string if not supplied then we use Me.DisplayName()
