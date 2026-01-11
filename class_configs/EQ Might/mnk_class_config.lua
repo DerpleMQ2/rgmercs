@@ -24,10 +24,6 @@ local _ClassConfig = {
             "Transcended Fistwraps of Immortality",
             "Fistwraps of Celestial Discipline",
         },
-        ['OoW_Chest'] = {
-            "Fiercehand Shroud of the Focused",
-            "Stillmind Tunic",
-        },
     },
     ['AbilitySets']     = {
         ['MonkAura'] = {
@@ -221,10 +217,6 @@ local _ClassConfig = {
             },
             {
                 name = "Epic",
-                type = "Item",
-            },
-            {
-                name = "OoW_Chest",
                 type = "Item",
             },
         },
