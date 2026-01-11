@@ -14,7 +14,7 @@ function SimpleUI:RenderSimplePanelOption(optionLabel, optionName)
     end
 end
 
-function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
+function SimpleUI:RenderMainWindow(_, openGUI)
     local shouldDrawGUI = true
 
     if not Config.Globals.Minimized then

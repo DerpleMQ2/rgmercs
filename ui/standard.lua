@@ -116,7 +116,7 @@ function StandardUI:RenderWindowControls()
     ImGui.SetCursorPos(position)
 end
 
-function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
+function StandardUI:RenderMainWindow(imgui_style, openGUI)
     local shouldDrawGUI = true
 
     if not Config.Globals.Minimized then
@@ -190,7 +190,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
                 ImGui.SetItemDefaultFocus()
                 if ImGui.BeginTabItem("RGMercsMain") then
-                    ImGui.Text("Current State: " .. curState)
+                    ImGui.Text("Current State: " .. GlobalCurrentState)
                     ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
                     if Config.TempSettings.AssistWarning and Core.IAmMA() then
                         ImGui.Text("MA: %s (Fallback Mode)", (Core.GetMainAssistSpawn().CleanName() or "None"))

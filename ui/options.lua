@@ -34,7 +34,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
             { Name = 'Announcements',   Categories = { "Announcements", }, }, -- group announce stuff-- ui stuff
             { Name = 'Loot(Emu)',       Categories = { "Looting Script", "LNS", "SmartLoot", }, },
             { Name = 'Mercs Internals', Categories = { "Internals", }, },
-            { Name = 'Misc',            Categories = { "Misc", }, },                                              -- ??? profit
+            { Name = 'Misc',            Categories = { "Misc", }, },                                                -- ??? profit
             { Name = 'Uncategorized',   Categories = { "Uncategorized", },                      CatchAll = true, }, -- settings from custom configs that don't have proper group/header
         },
     },
@@ -557,7 +557,7 @@ function OptionsUI:RenderCurrentTab()
     self:RenderOptionsPanel(self.selectedGroup)
 end
 
-function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
+function OptionsUI:RenderMainWindow(_, openGUI)
     local shouldDrawGUI = true
 
     if self.FirstRender or self.lastSortTime < Config:GetLastModuleRegisteredTime() or self.lastHighlightTime < Config:GetLastHighlightChangeTime() then

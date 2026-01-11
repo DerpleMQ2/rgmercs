@@ -44,7 +44,7 @@ require('utils.datatypes')
 -- ImGui Variables
 local openGUI         = true
 local notifyZoning    = true
-local curState        = "Downtime"
+GlobalCurrentState    = "Downtime"
 
 local initPctComplete = 0
 local initMsg         = "Initializing RGMercs..."
@@ -175,13 +175,13 @@ local function RGMercsGUI()
             end
 
             if Config:GetSetting('FullUI') then
-                openGUI = StandardUI:RenderMainWindow(imGuiStyle, curState, openGUI)
+                openGUI = StandardUI:RenderMainWindow(imGuiStyle, openGUI)
             else
-                openGUI = SimpleUI:RenderMainWindow(imGuiStyle, curState, openGUI)
+                openGUI = SimpleUI:RenderMainWindow(imGuiStyle, openGUI)
             end
 
             if Config:GetSetting('EnableOptionsUI') then
-                local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, curState, true)
+                local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, true)
                 if not openOptionsUI then
                     Config:SetSetting('EnableOptionsUI', false)
                 end
@@ -345,10 +345,10 @@ local function Main()
         mq.delay(100)
         mq.doevents()
         if Config:GetSetting('RunMovePaused') then
-            Modules:ExecModule("Movement", "GiveTime", curState)
+            Modules:ExecModule("Movement", "GiveTime", GlobalCurrentState)
         end
-        Modules:ExecModule("Drag", "GiveTime", curState)
-        Modules:ExecModule("Debug", "GiveTime", curState)
+        Modules:ExecModule("Drag", "GiveTime", GlobalCurrentState)
+        Modules:ExecModule("Debug", "GiveTime", GlobalCurrentState)
         Modules:ExecModule("Clickies", "ValidateClickies")
         Modules:ExecAll("WriteSettings") -- this needs to happen even when paused.
         return
@@ -360,12 +360,12 @@ local function Main()
     end
 
     if Targeting.GetXTHaterCount(true) > 0 then
-        if curState == "Downtime" and mq.TLO.Me.Sitting() then
+        if GlobalCurrentState == "Downtime" and mq.TLO.Me.Sitting() then
             -- if switching into combat state stand up.
             mq.TLO.Me.Stand()
         end
 
-        curState = "Combat"
+        GlobalCurrentState = "Combat"
         --if os.clock() - Config.Globals.LastFaceTime > 6 then
         if Config:GetSetting('FaceTarget') and not Targeting.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
             --Config.Globals.LastFaceTime = os.clock()
@@ -376,7 +376,7 @@ local function Main()
             Casting.AutoMed()
         end
     else
-        if curState ~= "Downtime" then
+        if GlobalCurrentState ~= "Downtime" then
             Logger.log_debug("Switching to Downtime state.")
 
             -- clear the cache during state transition.
@@ -389,7 +389,7 @@ local function Main()
             Modules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
 
-        curState = "Downtime"
+        GlobalCurrentState = "Downtime"
 
         if Config:GetSetting('DoMed') ~= 1 then
             Casting.AutoMed()
@@ -422,7 +422,7 @@ local function Main()
     if Combat.OkToEngage(Config.Globals.AutoTargetID) then
         Combat.EngageTarget(Config.Globals.AutoTargetID)
     else
-        if curState == "Combat" then
+        if GlobalCurrentState == "Combat" then
             local targetId = Targeting.GetTargetID()
             local ignored = Config.Globals.IgnoredTargetIDs:contains(targetId)                         -- don't target something in our ignore list
             local pullTarget = Config:GetSetting('DoPull') and targetId == Config.Globals.LastPulledID -- don't clear your pull target while its traveling to you
@@ -439,7 +439,7 @@ local function Main()
     end
 
     -- Handles state for when we're in combat
-    if curState == "Combat" then
+    if GlobalCurrentState == "Combat" then
         if ((os.clock() - Config.Globals.LastPetCmd) > 2) then
             Config.Globals.LastPetCmd = os.clock()
             if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
@@ -476,7 +476,7 @@ local function Main()
         end
     end
 
-    if Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Anytime" or (Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Combat" and curState == "Combat") then
+    if Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Anytime" or (Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Combat" and GlobalCurrentState == "Combat") then
         Casting.ClickModRod()
     end
 
@@ -498,7 +498,7 @@ local function Main()
         end
     end
 
-    Modules:ExecAll("GiveTime", curState)
+    Modules:ExecAll("GiveTime", GlobalCurrentState)
     Modules:ExecAll("WriteSettings")
 
     mq.doevents()
