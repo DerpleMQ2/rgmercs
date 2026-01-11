@@ -2518,6 +2518,8 @@ function Module:GiveTime(combat_state)
             if not Targeting.IsSpawnXTHater(self.TempSettings.PullID) then
                 break
             end
+            mq.doevents()
+            Events.DoEvents()
         end
         -- TODO PostPullCampFunc()
     end
