@@ -336,8 +336,7 @@ end
 
 function Module:HandleCharmBroke(mobName, breakerName)
 	Logger.log_debug("%s broke charm on ==> %s", breakerName, mobName)
-	Comms.HandleAnnounce(
-		string.format("\ar CHARM Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName),
+	Comms.HandleAnnounce(Comms.FormatChatEvent("Charm Broke", mobName, breakerName),
 		Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 end
 
@@ -431,8 +430,7 @@ function Module:CharmNow(charmId, useAA)
 	if not Core.MyClassIs("BRD") then
 		local dCharm = Config:GetSetting("DireCharm", true) == true
 		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= Config:GetSetting('DireCharmMaxLvl') then
-			Comms.HandleAnnounce(
-				string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"),
+			Comms.HandleAnnounce(Comms.FormatChatEvent("Dire Charm", mq.TLO.Spawn(charmId).CleanName(), mq.TLO.Me.DisplayName()),
 				Config:GetSetting('CharmAnnounceGroup'),
 				Config:GetSetting('CharmAnnounce'),
 				Config:GetSetting('AnnounceToRaidIfInRaid'))
@@ -451,13 +449,11 @@ function Module:CharmNow(charmId, useAA)
 	mq.doevents()
 
 	if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS and mq.TLO.Pet.ID() > 0 then
-		Comms.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
-				mq.TLO.Spawn(charmId).CleanName(), charmId), Config:GetSetting('CharmAnnounceGroup'),
+		Comms.HandleAnnounce(Comms.FormatChatEvent("Charm Success", mq.TLO.Spawn(charmId).CleanName(), charmSpell.RankName()), Config:GetSetting('CharmAnnounceGroup'),
 			Config:GetSetting('CharmAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 	else
-		Comms.HandleAnnounce(string.format("\ar CHARM Failed: \ag -> \ay %s \ag <-",
-				mq.TLO.Spawn(charmId).CleanName(),
-				charmId), Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'),
+		Comms.HandleAnnounce(Comms.FormatChatEvent("Charm Failed", mq.TLO.Spawn(charmId).CleanName(), charmSpell.RankName()), Config:GetSetting('CharmAnnounceGroup'),
+			Config:GetSetting('CharmAnnounce'),
 			Config:GetSetting('AnnounceToRaidIfInRaid'))
 	end
 

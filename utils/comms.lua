@@ -211,4 +211,8 @@ function Comms.HandleAnnounce(msg, sendGroup, sendDan, AnnounceToRaidIfInRaid)
     Logger.log_debug(msg)
 end
 
+function Comms.FormatChatEvent(event, target, source)
+    return string.format("[%s] => %s <= {%s}", event or "Unknown", target or "None", source or "???")
+end
+
 return Comms

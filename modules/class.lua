@@ -1063,7 +1063,7 @@ function Module:HealById(id)
                     Logger.log_verbose(
                         "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \agSuccessful\aw!", id,
                         rotation.name)
-                    Comms.HandleAnnounce(string.format('Healed %s :: %s', healTarget.CleanName() or "Target", Casting.GetLastUsedSpell()),
+                    Comms.HandleAnnounce(Comms.FormatChatEvent("Heal", healTarget.CleanName(), Casting.GetLastUsedSpell()),
                         Config:GetSetting('HealAnnounceGroup'),
                         Config:GetSetting('HealAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                     break
@@ -1152,7 +1152,7 @@ function Module:AddCureToList(id, type)
     end
 
     if not contained then
-        Comms.HandleAnnounce(string.format('Queueing a %s cure for %s.', type:lower(), mq.TLO.Spawn(id).CleanName() or "Target"), Config:GetSetting('CureAnnounceGroup'),
+        Comms.HandleAnnounce(Comms.FormatChatEvent("Cure", mq.TLO.Spawn(id).CleanName(), "Queued"), Config:GetSetting('CureAnnounceGroup'),
             Config:GetSetting('CureAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
     end
 end
@@ -1264,7 +1264,7 @@ function Module:CheckSelfForCures()
     for _, data in ipairs(selfChecks) do
         Logger.log_verbose("\ay[Cures] %s :: [%s] => %s", me.CleanName():lower(), data.type, data.check > 0 and data.check or "none")
         if data.check > 0 then
-            Comms.HandleAnnounce(string.format('%s effect found on myself, processing cure.', data.type),
+            Comms.HandleAnnounce(Comms.FormatChatEvent("Cure", me.CleanName(), string.format('%s effect found on myself, processing cure.', data.type)),
                 Config:GetSetting('CureAnnounceGroup'),
                 Config:GetSetting('CureAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then

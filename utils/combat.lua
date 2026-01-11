@@ -126,7 +126,7 @@ function Combat.EngageTarget(autoTargetId)
                 if not mq.TLO.Me.Combat() then
                     Logger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", Targeting.GetTargetCleanName())
                     if Core.IAmMA() then
-                        Comms.HandleAnnounce(string.format('TANKING -> %s <-', Targeting.GetTargetCleanName()), Config:GetSetting('AnnounceTargetGroup'),
+                        Comms.HandleAnnounce(Comms.FormatChatEvent("Tanking", Targeting.GetTargetCleanName(), "Started"), Config:GetSetting('AnnounceTargetGroup'),
                             Config:GetSetting('AnnounceTarget'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                     end
                     Logger.log_debug("EngageTarget(): Attacking target!")

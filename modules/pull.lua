@@ -1489,7 +1489,8 @@ function Module:ShouldPull(campData)
 
     if campData.returnToCamp and Math.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > math.max(Config:GetSetting('AutoCampRadius') ^ 2, 200 ^ 2) then
         Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am too far away from camp!")
-        Comms.HandleAnnounce("I am too far away from camp - Holding pulls!", Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'),
+        Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", "None", "I am too far away from camp - Holding pulls!"), Config:GetSetting('PullAnnounceGroup'),
+            Config:GetSetting('PullAnnounce'),
             Config:GetSetting('AnnounceToRaidIfInRaid'))
         return false,
             string.format("I am Too Far (%d) (%d,%d) (%d,%d)", Math.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY),
@@ -1563,21 +1564,24 @@ function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
         if groupWatch[i] and member() and member.ID() > 0 then
             local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceResumePct or resourcePausePct
             if member.PctHPs() < resourcePct then
-                Comms.HandleAnnounce(string.format("%s is low on hp - Holding pulls!", member.CleanName()), Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'),
+                Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", member.CleanName(), "Low on hp - Holding pulls!"),
+                    Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'),
                     Config:GetSetting('AnnounceToRaidIfInRaid'))
                 Logger.log_verbose("\arMember is low on Health - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
                     resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
                 return false, string.format("%s Low HP", member.CleanName())
             end
             if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct then
-                Comms.HandleAnnounce(string.format("%s is low on mana - Holding pulls!", member.CleanName()), Config:GetSetting('PullAnnounceGroup'),
+                Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", member.CleanName(), "Low on mana - Holding pulls!"),
+                    Config:GetSetting('PullAnnounceGroup'),
                     Config:GetSetting('PullAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                 Logger.log_verbose("\arMember is low on Mana - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
                     resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
                 return false, string.format("%s Low Mana", member.CleanName())
             end
             if Config:GetSetting('GroupWatchEnd') and member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
-                Comms.HandleAnnounce(string.format("%s is low on endurance - Holding pulls!", member.CleanName()), Config:GetSetting('PullAnnounceGroup'),
+                Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", member.CleanName(), "Low on endurance - Holding pulls!"),
+                    Config:GetSetting('PullAnnounceGroup'),
                     Config:GetSetting('PullAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                 Logger.log_verbose(
                     "\arMember is low on Endurance - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d", resourcePct,
@@ -1586,20 +1590,23 @@ function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
             end
 
             if member.Hovering() then
-                Comms.HandleAnnounce(string.format("%s is dead - Holding pulls!", member.CleanName()), Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'),
+                Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", member.CleanName(), "Dead - Holding pulls!"), Config:GetSetting('PullAnnounceGroup'),
+                    Config:GetSetting('PullAnnounce'),
                     Config:GetSetting('AnnounceToRaidIfInRaid'))
                 return false, string.format("%s Dead", member.CleanName())
             end
 
             if member.OtherZone() then
-                Comms.HandleAnnounce(string.format("%s is in another zone - Holding pulls!", member.CleanName()), Config:GetSetting('PullAnnounceGroup'),
+                Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", member.CleanName(), "Not in Zone - Holding pulls!"),
+                    Config:GetSetting('PullAnnounceGroup'),
                     Config:GetSetting('PullAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                 return false, string.format("%s Out of Zone", member.CleanName())
             end
 
             if campData.returnToCamp then
                 if Math.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
-                    Comms.HandleAnnounce(string.format("%s is too far away - Holding pulls!", member.CleanName()), Config:GetSetting('PullAnnounceGroup'),
+                    Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", member.CleanName(), "Too far away - Holding pulls!"),
+                        Config:GetSetting('PullAnnounceGroup'),
                         Config:GetSetting('PullAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                     return false,
                         string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
@@ -1608,7 +1615,8 @@ function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
                 end
             else
                 if (member.Distance() or 0) > math.max(Config:GetSetting('AutoCampRadius'), 200) then
-                    Comms.HandleAnnounce(string.format("%s is too far away - Holding pulls!", member.CleanName()), Config:GetSetting('PullAnnounceGroup'),
+                    Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", member.CleanName(), "Too far away - Holding pulls!"),
+                        Config:GetSetting('PullAnnounceGroup'),
                         Config:GetSetting('PullAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                     return false,
                         string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
@@ -1621,16 +1629,19 @@ function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
             if self.Constants.PullModes[Config:GetSetting('PullMode')] == "Chain" then
                 if member.ID() == Core.GetMainAssistId() then
                     if campData.returnToCamp and Math.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
-                        Comms.HandleAnnounce(string.format("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(),
+                        Comms.HandleAnnounce(
+                            Comms.FormatChatEvent("Pull", member.CleanName(), string.format("Assist Target is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.",
                                 campData.campSettings.AutoCampY,
-                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, Config:GetSetting('AutoCampRadius')), Config:GetSetting('PullAnnounceGroup'),
+                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, Config:GetSetting('AutoCampRadius'))), Config:GetSetting('PullAnnounceGroup'),
                             Config:GetSetting('PullAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                         return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                     end
                 else
                     if Math.GetDistanceSquared(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > maxDist then
-                        Comms.HandleAnnounce(string.format("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
-                                Config:GetSetting('AutoCampRadius')), Config:GetSetting('PullAnnounceGroup'),
+                        Comms.HandleAnnounce(
+                            Comms.FormatChatEvent("Pull", member.CleanName(),
+                                string.format("Assist Target is beyond AutoCampRadius from me : %d. Holding pulls.", Config:GetSetting('AutoCampRadius'))),
+                            Config:GetSetting('PullAnnounceGroup'),
                             Config:GetSetting('PullAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                         return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                     end
@@ -2059,7 +2070,8 @@ function Module:GiveTime(combat_state)
     local campData = Modules:ExecModule("Movement", "GetCampData")
 
     if Config:GetSetting('PullAbility') == PullAbilityIDToName.PetPull and (mq.TLO.Me.Pet.ID() or 0) == 0 then
-        Comms.HandleAnnounce("Need to create a new pet to throw as mob fodder.", Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'),
+        Comms.HandleAnnounce(Comms.FormatChatEvent("Pull", mq.TLO.Me.CleanName(), "Need to create a new pet to throw as mob fodder."), Config:GetSetting('PullAnnounceGroup'),
+            Config:GetSetting('PullAnnounce'),
             Config:GetSetting('AnnounceToRaidIfInRaid'))
         return
     end

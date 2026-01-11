@@ -396,8 +396,8 @@ function Casting.ReagentCheck(spell)
 
     if spell.ReagentID(1)() > 0 and mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then
         Logger.log_verbose("Missing Reagent: (%d)", spell.ReagentID(1)())
-        Comms.HandleAnnounce(
-            string.format('I want to cast %s, but I am missing a reagent(%d)!', spell(), spell.ReagentID(1)()),
+        Comms.HandleAnnounce(Comms.FormatChatEvent("Cast", mq.TLO.Me.CleanName(),
+                string.format('I want to cast %s, but I am missing a reagent(%d)!', spell(), spell.ReagentID(1)())),
             Config:GetSetting('ReagentAnnounceGroup'),
             Config:GetSetting('ReagentAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
         return false
@@ -407,7 +407,8 @@ function Casting.ReagentCheck(spell)
         if spell.NoExpendReagentID(1)() > 0 and mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() == 0 then
             Logger.log_verbose("Missing NoExpendReagent: (%d)", spell.NoExpendReagentID(1)())
             Comms.HandleAnnounce(
-                string.format('I want to cast %s, but I am missing a non-expended reagent(%d)!', spell(), spell.NoExpendReagentID(1)()),
+                Comms.FormatChatEvent("Cast", mq.TLO.Me.CleanName(),
+                    string.format('I want to cast %s, but I am missing a non-expended reagent(%d)!', spell(), spell.NoExpendReagentID(1)())),
                 Config:GetSetting('ReagentAnnounceGroup'),
                 Config:GetSetting('ReagentAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             return false
@@ -448,7 +449,7 @@ function Casting.BurnCheck()
 
     if Casting.LastBurnCheck ~= previousBurnState then
         Logger.log_info("BurnCheck: Burn state changed to %s.", tostring(Casting.LastBurnCheck))
-        Comms.HandleAnnounce(string.format("%s Burning: %s!", Casting.LastBurnCheck and "Now" or "Done", burnTargetName), Config:GetSetting('BurnAnnounceGroup'),
+        Comms.HandleAnnounce(Comms.FormatChatEvent("Burn", burnTargetName, Casting.LastBurnCheck and "Starting" or "Completed"), Config:GetSetting('BurnAnnounceGroup'),
             Config:GetSetting('BurnAnnounce'),
             Config:GetSetting('AnnounceToRaidIfInRaid'))
     end
