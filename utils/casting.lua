@@ -1497,6 +1497,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
             Logger.log_verbose("Waiting for item to start casting...")
             mq.delay(50)
             mq.doevents()
+            Events.DoEvents()
             -- in case very fast casts serverside don't make it to the client
             -- this was originally added for 100ms clickies on laz that don't ever show casting (which has now been addressed above), but left as a fallback
             if not me.ItemReady(itemName) then
@@ -1511,6 +1512,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         while me.Casting() do
             mq.delay(10)
             mq.doevents()
+            Events.DoEvents()
         end
     end
 
