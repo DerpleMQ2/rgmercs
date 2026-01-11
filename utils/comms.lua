@@ -98,7 +98,7 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, cha
         Mezzed        = tostring(mq.TLO.Me.Mezzed.ID()),
         Corruption    = tostring(mq.TLO.Me.Diseased.ID()),
         Stunned       = mq.TLO.Me.Stunned(),
-        HPs           = mq.TLO.Me.PctHPs(),
+        HPs           = mq.TLO.Me.Dead() and 0 or mq.TLO.Me.PctHPs(),
         Mana          = useMana and mq.TLO.Me.PctMana() or nil,
         Endurance     = useEnd and mq.TLO.Me.PctEndurance() or nil,
         Target        = mq.TLO.Target.DisplayName() or "None",
