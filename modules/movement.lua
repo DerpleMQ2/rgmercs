@@ -501,7 +501,8 @@ function Module:Campfire(camptype)
 end
 
 function Module:ValidChaseTarget()
-    return (Config:GetSetting('ChaseTarget') and Config:GetSetting('ChaseTarget'):len() > 0)
+    local chaseTarget = Config:GetSetting('ChaseTarget')
+    return ((chaseTarget or ""):len() > 0) and chaseTarget ~= mq.TLO.Me.CleanName()
 end
 
 function Module:GetChaseTarget()
