@@ -1542,7 +1542,7 @@ function Module:GiveTime(combat_state)
     --Counter TOB Debuff with AA Buff, this can be refactored/expanded if they add other similar systems
     if Config:GetSetting('UseCounterActions') then
         Logger.log_verbose("\ao[CounterActions] Checking for debuffs to counter...")
-        self:DoEvents()
+        self:RunCounterRotation()
     end
 
     if self:IsTanking() and Config:GetSetting('MovebackWhenBehind') then
