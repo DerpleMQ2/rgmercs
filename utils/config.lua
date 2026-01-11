@@ -2108,7 +2108,8 @@ function Config:UpdateCommandHandlers()
                     usage = usageString,
                     subModule = moduleName,
                     category = submoduleDefaults[moduleName][setting].Category,
-                    about = submoduleDefaults[moduleName][setting].Tooltip,
+                    about = type(submoduleDefaults[moduleName][setting].Tooltip) == "function" and submoduleDefaults[moduleName][setting].Tooltip() or
+                        submoduleDefaults[moduleName][setting].Tooltip,
                 }
             end
         end
@@ -3018,8 +3019,15 @@ function Config:HandleBind(config, value)
                             printf("\n\aoCategory: %s\aw", c)
                             printCategory = false
                         end
-                        printf("\am%-20s\aw - \atUsage: \ay%s\aw | %s", d.name,
-                            Strings.PadString(d.usage, 100, false), d.about)
+                        if (value or ""):len() > 0 and
+                            d.name:lower():find(value:lower()) == nil and
+                            (d.usage or ""):lower():find(value:lower()) == nil and
+                            (d.about or ""):lower():find(value:lower()) == nil then
+                            -- skip
+                        else
+                            printf("\am%-20s\aw - \atUsage: \ay%s\aw | %s", d.name,
+                                Strings.PadString(d.usage, 100, false), d.about)
+                        end
                     end
                 end
             end
