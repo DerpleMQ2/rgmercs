@@ -1227,8 +1227,9 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
                         break
                     end
                 end
-                mq.doevents()
                 mq.delay(20)
+                mq.doevents()
+                Events.DoEvents()
                 cancelWait = cancelWait - 20
             end
 
