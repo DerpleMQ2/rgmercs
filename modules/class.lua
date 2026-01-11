@@ -2,6 +2,7 @@
 local mq          = require('mq')
 local Combat      = require('utils.combat')
 local Config      = require('utils.config')
+local Globals     = require('utils.globals')
 local Core        = require("utils.core")
 local Modules     = require("utils.modules")
 local Movement    = require("utils.movement")
@@ -317,10 +318,10 @@ Module.CommandHandlers                       = {
 local function getConfigFileName()
     local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
     local newFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. "_" .. Config.Globals.CurLoadedClass:lower() .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
 
     if Files.file_exists(newFile) then
         return newFile
@@ -354,12 +355,12 @@ end
 
 function Module:LoadSettings()
     -- load base configurations
-    self.ClassConfig = ClassLoader.load(Config.Globals.CurLoadedClass)
+    self.ClassConfig = ClassLoader.load(Globals.CurLoadedClass)
     local settings = {}
     local firstSaveRequired = false
 
-    Logger.log_debug("\ar%s\ao Core Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
-        Config.Globals.CurLoadedChar)
+    Logger.log_debug("\ar%s\ao Core Module Loading Settings for: %s.", Globals.CurLoadedClass,
+        Globals.CurLoadedChar)
     Logger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author,
         self.ClassConfig._version)
     local settings_pickle_path = getConfigFileName()
@@ -367,14 +368,14 @@ function Module:LoadSettings()
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
         Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
-            Config.Globals.CurLoadedClass, settings_pickle_path)
+            Globals.CurLoadedClass, settings_pickle_path)
         firstSaveRequired = true
     else
         settings = config()
     end
 
     if not self.ClassConfig.DefaultConfig then
-        Logger.log_error("\arFailed to Load Core Class Config for Classs: %s", Config.Globals
+        Logger.log_error("\arFailed to Load Core Class Config for Classs: %s", Globals
             .CurLoadedClass)
         return
     end
@@ -399,7 +400,7 @@ function Module:LoadSettings()
 end
 
 function Module:WriteCustomConfig()
-    ClassLoader.writeCustomConfig(Config.Globals.CurLoadedClass)
+    ClassLoader.writeCustomConfig(Globals.CurLoadedClass)
 end
 
 function Module.New()
@@ -922,7 +923,7 @@ function Module:SelfCheckAndRez(combat_state)
             if rezSpawn() then
                 Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
                 if self.ClassConfig.HelperFunctions and self.ClassConfig.HelperFunctions.DoRez then
-                    if Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                    if Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                         Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                             rezSpawn.ID() or 0)
                     elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
@@ -953,7 +954,7 @@ function Module:IGCheckAndRez(combat_state)
                 if not Config:GetSetting('RezInZonePC') and mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but the player appears to be in-zone.", ownerName or "Unknown",
                         rezSpawn.ID() or 0)
-                elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
@@ -988,7 +989,7 @@ function Module:OOGCheckAndRez(combat_state)
                 if not Config:GetSetting('RezInZonePC') and mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but the player appears to be in-zone.", ownerName or "Unknown",
                         rezSpawn.ID() or 0)
-                elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atOOGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
@@ -1323,7 +1324,7 @@ function Module:RunCureRotation(combat_state)
     self.TempSettings.CureChecksStale = false
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
-    local actorPeers = Comms.GetAllPeerHeartbeats()
+    local actorPeers = Comms.GetAllPeerHeartbeats(false)
     local handledPeers = Set.new({})
     local handledPeerCount = 0
 
@@ -1517,8 +1518,8 @@ function Module:GiveTime(combat_state)
             if Core.OnEMU() then
                 local rezCount = mq.TLO.SpawnCount("pccorpse radius 150 zradius 50")()
                 if rezCount == 0 then
-                    Config.Globals.RezzedCorpses = {}
-                    Config.Globals.CorpseConned  = false
+                    Globals.RezzedCorpses = {}
+                    Globals.CorpseConned  = false
                 end
             end
         end
@@ -1551,7 +1552,7 @@ function Module:GiveTime(combat_state)
 
         for i = 1, xtCount do
             local xtSpawn = mq.TLO.Me.XTarget(i)
-            if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and not xtSpawn.Fleeing() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Config.Globals.ForceCombatID) and Config.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
+            if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and not xtSpawn.Fleeing() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceCombatID) and Config.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
                 Logger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(), (xtSpawn.Heading.Degrees() or 0))
                 if os.clock() - Movement:GetLastStickTimer() < 0.5 then
@@ -1565,7 +1566,7 @@ function Module:GiveTime(combat_state)
     end
 
     -- stop singing after pause so we can take over again (if we are active, we will stop our own songs). If paused, allow user to manage their own songs.
-    if Core.MyClassIs("BRD") and not Config.Globals.PauseMain and mq.TLO.Me.Casting() ~= nil and not mq.TLO.Window("CastingWindow").Open() then
+    if Core.MyClassIs("BRD") and not Globals.PauseMain and mq.TLO.Me.Casting() ~= nil and not mq.TLO.Window("CastingWindow").Open() then
         Core.DoCmd("/stopsong")
     end
 
@@ -1701,13 +1702,13 @@ function Module:DoGetState()
 
     local state = string.format("Combat State: %s", self.CombatState)
 
-    return string.format("Class(%s)\n%s\n%s\n%s\n%s", Config.Globals.CurLoadedClass, actionMap, spellLoadout,
+    return string.format("Class(%s)\n%s\n%s\n%s\n%s", Globals.CurLoadedClass, actionMap, spellLoadout,
         rotationStates, state)
 end
 
 function Module:GetVersionString()
     if not self.ClassConfig then return "Unknown" end
-    return string.format("%s %s", Config.Globals.CurLoadedClass, self.ClassConfig._version)
+    return string.format("%s %s", Globals.CurLoadedClass, self.ClassConfig._version)
 end
 
 function Module:GetAuthorString()

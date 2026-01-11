@@ -1,5 +1,6 @@
 local mq          = require('mq')
 local Config      = require('utils.config')
+local Globals     = require('utils.globals')
 local Core        = require("utils.core")
 local Comms       = require("utils.comms")
 local Modules     = require("utils.modules")
@@ -68,7 +69,7 @@ Binds.Handlers    = {
         about = "Sets a specific setting for this character and all RGMercs peers.",
         handler = function(config, value)
             Config:HandleBind(config, value)
-            local peers = Comms.GetPeers()
+            local peers = Comms.GetPeers(false)
             for _, peer in pairs(peers) do
                 if peer ~= mq.TLO.Me.Name() then
                     Config:PeerSetSetting(peer, config, value)
@@ -107,7 +108,7 @@ Binds.Handlers    = {
             targetId = targetId and tonumber(targetId) or mq.TLO.Target.ID()
             if targetId > 0 then
                 Logger.log_info("\awIgnored Target: %d", targetId)
-                Config.Globals.IgnoredTargetIDs:add(targetId)
+                Globals.IgnoredTargetIDs:add(targetId)
             else
                 Logger.log_info("\awIgnoring a target requires a valid supplied ID or target!")
             end
@@ -117,7 +118,7 @@ Binds.Handlers    = {
         usage = "/rgl ignoretargetclear",
         about = "Will clear all ignored targets.",
         handler = function()
-            Config.Globals.IgnoredTargetIDs = Set.new({})
+            Globals.IgnoredTargetIDs = Set.new({})
             Logger.log_info("\awIgnored targets cleared.")
         end,
     },
@@ -134,8 +135,8 @@ Binds.Handlers    = {
                 Core.DoCmd("/xtarget set 1 currenttarget")
                 mq.delay("2s", function() return mq.TLO.Me.XTarget(1).ID() == mq.TLO.Target.ID() end)
                 Logger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
-                Config.Globals.ForceCombatID = targetId
-                Config.Globals.ForceTargetID = targetId
+                Globals.ForceCombatID = targetId
+                Globals.ForceTargetID = targetId
             else
                 Logger.log_info("\awForced Combat requires a valid supplied ID or target!")
             end
@@ -145,7 +146,7 @@ Binds.Handlers    = {
         usage = "/rgl forcecombatclear",
         about = "Will cancel the current forced combat and reset the first XT slot if needed.",
         handler = function()
-            Logger.log_info("\awDisabling forced combat against %s(id:%d)!", mq.TLO.Spawn(Config.Globals.ForceCombatID).CleanName() or "Unknown", Config.Globals.ForceCombatID)
+            Logger.log_info("\awDisabling forced combat against %s(id:%d)!", mq.TLO.Spawn(Globals.ForceCombatID).CleanName() or "Unknown", Globals.ForceCombatID)
             Targeting.ClearTarget()
         end,
     },
@@ -155,7 +156,7 @@ Binds.Handlers    = {
         handler = function(targetId)
             local forcedTarget = targetId and mq.TLO.Spawn(targetId) or mq.TLO.Target
             if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget)) then
-                Config.Globals.ForceTargetID = forcedTarget.ID()
+                Globals.ForceTargetID = forcedTarget.ID()
                 Logger.log_info("\awForced Target: %s", forcedTarget.CleanName() or "None")
             end
         end,
@@ -164,7 +165,7 @@ Binds.Handlers    = {
         usage = "/rgl forcetargetclear",
         about = "Will clear the current forced target.",
         handler = function()
-            Config.Globals.ForceTargetID = 0
+            Globals.ForceTargetID = 0
             Logger.log_info("\awForced target cleared.")
         end,
     },
@@ -243,14 +244,14 @@ Binds.Handlers    = {
         about = "Toggles or sets backoff flag, which temporarily stops the PC from assisting or engaging.",
         handler = function(value)
             if value == nil then
-                Config.Globals.BackOffFlag = not Config.Globals.BackOffFlag
+                Globals.BackOffFlag = not Globals.BackOffFlag
             elseif value:lower() == "on" or value == "1" then
-                Config.Globals.BackOffFlag = true
+                Globals.BackOffFlag = true
             else
-                Config.Globals.BackOffFlag = false
+                Globals.BackOffFlag = false
             end
 
-            Logger.log_info("\ayBackoff \awset to: %s", Strings.BoolToColorString(Config.Globals.BackOffFlag))
+            Logger.log_info("\ayBackoff \awset to: %s", Strings.BoolToColorString(Globals.BackOffFlag))
         end,
     },
     ['qsay'] = {
@@ -325,21 +326,21 @@ Binds.Handlers    = {
         usage = "/rgl togglepause",
         about = "Toggle the pause state of your RGMercs Main Loop.",
         handler = function()
-            Config.Globals.PauseMain = not Config.Globals.PauseMain
+            Globals.PauseMain = not Globals.PauseMain
         end,
     },
     ['pause'] = {
         usage = "/rgl pause",
         about = "Pauses your RGMercs Main Loop.",
         handler = function()
-            Config.Globals.PauseMain = true
+            Globals.PauseMain = true
         end,
     },
     ['pauseall'] = {
         usage = "/rgl pauseall",
         about = "Pauses the RGMercs Main Loop for every client running RGMercs.",
         handler = function()
-            Config.Globals.PauseMain = true
+            Globals.PauseMain = true
             Core.DoCmd("/squelch /dge /rgl pause")
             Logger.log_info("\ayAll clients paused!")
         end,
@@ -348,14 +349,14 @@ Binds.Handlers    = {
         usage = "/rgl unpause",
         about = "Unpauses your RGMercs Main Loop.",
         handler = function()
-            Config.Globals.PauseMain = false
+            Globals.PauseMain = false
         end,
     },
     ['unpauseall'] = {
         usage = "/rgl unpauseall",
         about = "Unpauses the RGMercs Main Loop for every client running RGMercs.",
         handler = function()
-            Config.Globals.PauseMain = false
+            Globals.PauseMain = false
             Core.DoCmd("/squelch /dge /rgl unpause")
             Logger.log_info("\agAll clients paused!")
         end,
@@ -418,15 +419,15 @@ Binds.Handlers    = {
         about = "Toggle minimizing of the RGMercs window to a small icon.",
         handler = function()
             if not Config:GetSetting('EnableAFUI') then
-                Config.Globals.Minimized = not Config.Globals.Minimized
+                Globals.Minimized = not Globals.Minimized
             end
         end,
     },
     ['help'] = {
         handler = function()
             printf("RGMercs [%s/%s] by: %s running for %s (%s)", Config._version, Config._subVersion, Config._author,
-                Config.Globals.CurLoadedChar,
-                Config.Globals.CurLoadedClass)
+                Globals.CurLoadedChar,
+                Globals.CurLoadedClass)
             printf("\n\agCore \awCommand Help\aw\n------------\n")
             for c, d in pairs(Binds.Handlers) do
                 if c ~= "help" then

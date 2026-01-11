@@ -1,5 +1,6 @@
 local mq              = require('mq')
 local Config          = require('utils.config')
+local Globals         = require('utils.globals')
 local Strings         = require("utils.strings")
 local Core            = require("utils.core")
 local Modules         = require("utils.modules")
@@ -491,10 +492,9 @@ function Casting.OkayToRez(corpseId)
                 Logger.log_debug("\atEmuOkayToRez(): Corpse ID %d no longer exists, did someone else rez it? Aborting.", corpseId or 0)
                 return false
             end
-            if Config.Globals.CorpseConned then
+            if Globals.CorpseConned then
                 mq.doevents('AlreadyRezzed')
-                Events.DoEvents()
-                if Tables.TableContains(Config.Globals.RezzedCorpses, corpseId) then
+                if Tables.TableContains(Globals.RezzedCorpses, corpseId) then
                     Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, and it appears to have been rezzed already. Aborting.", corpseId or 0)
                     return false
                 else
@@ -510,7 +510,7 @@ function Casting.OkayToRez(corpseId)
                     corpseId or 0)
             end
         end
-        Config.Globals.CorpseConned = false
+        Globals.CorpseConned = false
     end
 
     if mq.TLO.Spawn(corpseId).Distance3D() > 25 then
@@ -538,7 +538,7 @@ end
 --- Perform ancillary checks to facilitate OkaytoBuff checks.
 function Casting.CheckOkayToBuff()
     local visible = not mq.TLO.Me.Invis()
-    local safe = Targeting.GetXTHaterCount() == 0 and Config.Globals.AutoTargetID == 0
+    local safe = Targeting.GetXTHaterCount() == 0 and Globals.AutoTargetID == 0
     local stationary = not (Config:GetSetting('BuffWaitMoveTimer') > Config:GetTimeSinceLastMove() or mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active())
     local able = not (Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10)
 
@@ -680,7 +680,7 @@ end
 --- @return boolean Returns true if the AA ability can be used, false otherwise.
 function Casting.CanUseAA(aaName)
     local haveAbility = mq.TLO.Me.AltAbility(aaName)() ~= nil
-    local levelCheck = haveAbility and (Config.Globals.CurServer == "EQ Might" or mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level())
+    local levelCheck = haveAbility and (Globals.CurServer == "EQ Might" or mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level())
     local rankCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).Rank() > 0
     Logger.log_super_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, Strings.BoolToColorString(haveAbility),
         Strings.BoolToColorString(levelCheck), Strings.BoolToColorString(rankCheck))
@@ -929,7 +929,7 @@ function Casting.CastCheck(spell, bAllowMove, bAllowCast)
 
     local currentMana = me.CurrentMana()
     local currentEnd = me.CurrentEndurance()
-    if Config.Globals.InMedState then --ensure false mana/end ticks don't make us stand early if we are medding by removing 2 ticks of resting for cost checks.
+    if Globals.InMedState then --ensure false mana/end ticks don't make us stand early if we are medding by removing 2 ticks of resting for cost checks.
         currentMana = math.max(0, me.CurrentMana() - (2 * me.ManaRegen()))
         currentEnd = math.max(0, me.CurrentEndurance() - (2 * me.EnduranceRegen()))
     end
@@ -1095,8 +1095,8 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
             retryCount = retryCount - 1
         until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
-        Config.Globals.LastUsedSpell = spellName
-        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+        Globals.LastUsedSpell = spellName
+        if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
             Logger.log_debug("UseSpell(): Retargeting previous target after spell use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1209,7 +1209,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
 
             -- while the casting window is open, still do movement if not paused or if movement enabled during pause.
             while mq.TLO.Window("CastingWindow").Open() do
-                if not Config.Globals.PauseMain or Config:GetSetting('RunMovePaused') then
+                if not Globals.PauseMain or Config:GetSetting('RunMovePaused') then
                     Modules:ExecModule("Movement", "GiveTime", "Combat")
                 end
 
@@ -1230,8 +1230,8 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
                         break
                     end
                 end
-                mq.doevents()
                 mq.delay(20)
+                mq.doevents()
                 Events.DoEvents()
                 cancelWait = cancelWait - 20
             end
@@ -1251,7 +1251,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             classConfig.HelperFunctions.SwapInst("Weapon")
         end
 
-        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+        if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
             Logger.log_debug("UseSong(): Retargeting previous target after song use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1393,7 +1393,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     else
         Core.DoCmd(cmd)
         mq.delay(5)
-        if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+        if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
             Logger.log_debug("UseAA(): Retargeting previous target after AA use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1523,7 +1523,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         Core.DoCmd("/autoinv")
     end
 
-    if oldTargetId > 0 and (oldTargetId == Config.Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+    if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
         Logger.log_debug("UseItem(): Retargeting previous target after item use.")
         Targeting.SetTarget(oldTargetId, true)
     end
@@ -1540,7 +1540,7 @@ function Casting.ActionPrep()
         mq.TLO.Me.Stand()
         mq.delay(10, function() return mq.TLO.Me.Standing() end)
 
-        --Config.Globals.InMedState = false -- allow us to sit back down after the action, automed has been adjusted
+        --Globals.InMedState = false -- allow us to sit back down after the action, automed has been adjusted
     end
 
     if mq.TLO.Window("SpellBookWnd").Open() then
@@ -1583,7 +1583,7 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
             end
             if Combat.DoCombatActions() and mq.TLO.Me.Pet.ID() > 0 and not mq.TLO.Me.Pet.Combat() and not string.find(mq.TLO.Me.Pet.CleanName() or "", "familiar") then --alleviate pets standing around at early levels where mob HPs are low and cast times are long
                 if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
-                    Combat.PetAttack(Config.Globals.AutoTargetID, true)
+                    Combat.PetAttack(Globals.AutoTargetID, true)
                 end
             end
         end
@@ -1593,7 +1593,7 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
         if maxWait <= 0 then
             local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d",
                 (mq.TLO.Me.Casting.ID() or -1), maxWaitOrig,
-                Strings.BoolToColorString(mq.TLO.Window("CastingWindow").Open()), Config.Globals.AutoTargetID)
+                Strings.BoolToColorString(mq.TLO.Window("CastingWindow").Open()), Globals.AutoTargetID)
 
             Logger.log_debug(msg)
             Comms.PrintGroupMessage(msg)
@@ -1652,26 +1652,26 @@ end
 --- Retrieves the name of the last cast result.
 --- @return string The name of the last cast result.
 function Casting.GetLastCastResultName()
-    return Config.Constants.CastResultsIdToName[Config.Globals.CastResult]
+    return Config.Constants.CastResultsIdToName[Globals.CastResult]
 end
 
 --- Retrieves the ID of the last cast result.
 --- @return number The ID of the last cast result.
 function Casting.GetLastCastResultId()
-    return Config.Globals.CastResult
+    return Globals.CastResult
 end
 
 --- Sets the result of the last cast operation.
 --- @param result number The result to be set for the last cast operation.
 function Casting.SetLastCastResult(result)
     Logger.log_debug("\awSet Last Cast Result => \ag%s", Config.Constants.CastResultsIdToName[result])
-    Config.Globals.CastResult = result
+    Globals.CastResult = result
 end
 
 --- Retrieves the last used spell.
 --- @return string The name of the last used spell.
 function Casting.GetLastUsedSpell()
-    return Config.Globals.LastUsedSpell
+    return Globals.LastUsedSpell
 end
 
 --- Automatically manages the medication process for the character.
@@ -1712,7 +1712,7 @@ function Casting.AutoMed()
         -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
         -- the original stat checks.
         if me.PctHPs() >= Config:GetSetting('HPMedPctStop') and me.PctMana() >= Config:GetSetting('ManaMedPctStop') and me.PctEndurance() >= Config:GetSetting('EndMedPctStop') then
-            Config.Globals.InMedState = false
+            Globals.InMedState = false
             forcestand = true
         end
 
@@ -1721,7 +1721,7 @@ function Casting.AutoMed()
         end
     elseif Config.Constants.RGMelee:contains(me.Class.ShortName()) then
         if me.PctHPs() >= Config:GetSetting('HPMedPctStop') and me.PctEndurance() >= Config:GetSetting('EndMedPctStop') then
-            Config.Globals.InMedState = false
+            Globals.InMedState = false
             forcestand = true
         end
 
@@ -1731,7 +1731,7 @@ function Casting.AutoMed()
     else
         Logger.log_error(
             "\arYour character class is not in the type list(s): rghybrid, rgcasters, rgmelee. That's a problem for a dev.")
-        Config.Globals.InMedState = false
+        Globals.InMedState = false
         return
     end
 
@@ -1744,14 +1744,14 @@ function Casting.AutoMed()
     -- This could likely be refactored
     if me.Sitting() and not Casting.Memorizing then
         if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or ((Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(Config:GetSetting('MedAggroPct'))))) then
-            Config.Globals.InMedState = false
+            Globals.InMedState = false
             Logger.log_debug("Forcing stand - Combat or aggro threshold reached.")
             me.Stand()
             return
         end
 
         if (Config:GetSetting('StandWhenDone') or Config:GetSetting('DoPull')) and forcestand then
-            Config.Globals.InMedState = false
+            Globals.InMedState = false
             Logger.log_debug("Forcing stand - all conditions met.")
             me.Stand()
             return
@@ -1759,8 +1759,8 @@ function Casting.AutoMed()
     end
 
     -- if we aren't sitting, see if we were already medding and we got interrupted, or if our checks above say we should start medding
-    if not me.Sitting() and (Config.Globals.InMedState or forcesit) then
-        Config.Globals.InMedState = true
+    if not me.Sitting() and (Globals.InMedState or forcesit) then
+        Globals.InMedState = true
         Logger.log_debug("Forcing sit - all conditions met.")
         me.Sit()
     end

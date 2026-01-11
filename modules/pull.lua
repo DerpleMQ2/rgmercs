@@ -1,6 +1,7 @@
 -- Sample Pull Class Module
 local mq                                  = require('mq')
 local Config                              = require('utils.config')
+local Globals                             = require('utils.globals')
 local Math                                = require('utils.math')
 local Combat                              = require("utils.combat")
 local Casting                             = require("utils.casting")
@@ -97,7 +98,7 @@ Module.Constants.PullAbilities         = {
         DisplayName = "Pet Pull",
         LOS = false,
         cond = function(self)
-            return Config.Constants.RGPetClass:contains(Config.Globals.CurLoadedClass) and Config:GetSetting('DoPetCommands')
+            return Config.Constants.RGPetClass:contains(Globals.CurLoadedClass) and Config:GetSetting('DoPetCommands')
         end,
     },
     {
@@ -744,10 +745,10 @@ Module.CommandHandlers                 = {
 local function getConfigFileName()
     local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
     local newFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. "_" .. Config.Globals.CurLoadedClass:lower() .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
 
     if Files.file_exists(newFile) then
         return newFile
@@ -777,7 +778,7 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-    Logger.log_debug("Pull Combat Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
+    Logger.log_debug("Pull Combat Module Loading Settings for: %s.", Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false
@@ -985,7 +986,7 @@ function Module:Render()
     -- dead... whoops
     if mq.TLO.Me.Hovering() then return end
 
-    if self.ModuleLoaded and Config.Globals.SubmodulesLoaded then
+    if self.ModuleLoaded and Globals.SubmodulesLoaded then
         if mq.TLO.Navigation.MeshLoaded() then
             if Config:GetSetting('DoPull') then
                 ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
@@ -1070,7 +1071,7 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text("Pull State")
             ImGui.TableNextColumn()
-            local stateData = Config.Globals.PauseMain and PullStateDisplayStrings['MERCS_PAUSED'] or PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
+            local stateData = Globals.PauseMain and PullStateDisplayStrings['MERCS_PAUSED'] or PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
             local stateColor = stateData and Config.Constants.Colors[stateData.Color] or ImGui.GetColorU32(1.0, 1.0, 1.0, 1.0)
             ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
             if not stateData then
@@ -1404,7 +1405,7 @@ function Module:ShouldPull(campData)
         return false, string.format("PctMana < %d", Config:GetSetting('PullManaPct'))
     end
 
-    if Config:GetSetting('PullRespectMedState') and Config.Globals.InMedState then
+    if Config:GetSetting('PullRespectMedState') and Globals.InMedState then
         Logger.log_verbose("\ay::PULL:: \arAborted!\ax Meditating.")
         return false, string.format("Meditating")
     end
@@ -1863,7 +1864,7 @@ function Module:CheckForAbort(pullID, bNavigating)
         return true
     end
 
-    if (not Config:GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0) or Config.Globals.PauseMain then
+    if (not Config:GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0) or Globals.PauseMain then
         Logger.log_debug("\ar ALERT: Pulling Disabled at user request. \ax")
         return true
     end
@@ -1931,7 +1932,7 @@ end
 function Module:NavToWaypoint(loc, ignoreAggro)
     -- if DoMed is set it will take care of standing us up
     if mq.TLO.Me.Sitting() then
-        Config.Globals.InMedState = false
+        Globals.InMedState = false
     end
 
     mq.TLO.Me.Stand()
@@ -2002,7 +2003,7 @@ function Module:GiveTime(combat_state)
     end
 
     -- Hold pulls if using SmartLoot and we have opted to wait for peers to finish looting
-    if Config.Globals.SLPeerLooting and Config:GetSetting("PullsYieldForLooting", true) then
+    if Globals.SLPeerLooting and Config:GetSetting("PullsYieldForLooting", true) then
         Logger.log_verbose("PULL:GiveTime() Holding pulls to finish processing looting.")
         return
     end
@@ -2203,7 +2204,7 @@ function Module:GiveTime(combat_state)
 
     -- if DoMed is set it will take care of standing us up
     if mq.TLO.Me.Sitting() then
-        Config.Globals.InMedState = false
+        Globals.InMedState = false
     end
 
     mq.TLO.Me.Stand()
@@ -2446,7 +2447,7 @@ function Module:GiveTime(combat_state)
                         Logger.log_error("\arInvalid PullAbilityType: %s :: %s", pullAbility.Type, pullAbility.id)
                     end
 
-                    if successFn() then Config.Globals.LastPulledID = self.TempSettings.PullID end
+                    if successFn() then Globals.LastPulledID = self.TempSettings.PullID end
 
                     if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         break
@@ -2552,7 +2553,7 @@ function Module:SetRoles()
         if self.Constants.PullModes[Config:GetSetting('PullMode')] ~= "Hunt" then
             Core.DoCmd("/grouproles %s %s 3", Config:GetSetting('DoPull') and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
         end
-        Core.DoCmd("/grouproles set %s 2", Config.Globals.MainAssist)                                                    -- set MA
+        Core.DoCmd("/grouproles set %s 2", Globals.MainAssist)                                                           -- set MA
     end
 end
 

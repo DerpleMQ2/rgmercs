@@ -1,6 +1,7 @@
 local mq           = require('mq')
 local Combat       = require('utils.combat')
 local Config       = require('utils.config')
+local Globals      = require('utils.globals')
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
@@ -369,6 +370,8 @@ local _ClassConfig = {
                     rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif staffReady then
                     rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
+                elseif mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
+                    rezAction = okayToRez and Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 elseif not Casting.CanUseAA("Blessing of Resurrection") and combatState == "active" or combatState == "resting" then
                     -- ^ if we have BoR, just wait for it, rather than taking the time to memorize a spell
                     if Casting.SpellReady(rezSpell, true) then
@@ -380,16 +383,16 @@ local _ClassConfig = {
             return rezAction
         end,
         GetMainAssistPctMana = function()
-            local groupMember = mq.TLO.Group.Member(Config.Globals.MainAssist)
+            local groupMember = mq.TLO.Group.Member(Globals.MainAssist)
             if groupMember and groupMember() then
                 return groupMember.PctMana() or 0
             end
 
-            local ret = tonumber(DanNet.query(Config.Globals.MainAssist, "Me.PctMana", 1000))
+            local ret = tonumber(DanNet.query(Globals.MainAssist, "Me.PctMana", 1000))
 
             if ret and type(ret) == 'number' then return ret end
 
-            return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).PctMana() or 0
+            return mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist)).PctMana() or 0
         end,
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
         AETargetCheck = function(minCount, printDebug)

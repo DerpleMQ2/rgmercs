@@ -1,6 +1,7 @@
 -- Clicky Module
 local mq                                = require('mq')
 local Config                            = require('utils.config')
+local Globals                           = require('utils.globals')
 local Core                              = require('utils.core')
 local Casting                           = require("utils.casting")
 local Strings                           = require("utils.strings")
@@ -627,7 +628,7 @@ Module.LogicBlocks                      = {
         cond = function(self, target, effect, negate)
             local hasEffect = Casting.TargetHasBuff(effect, target)
 
-            return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and (negate and not hasEffect or hasEffect)
+            return mq.TLO.Target.ID() == Globals.AutoTargetID and (negate and not hasEffect or hasEffect)
         end,
         tooltip = "Only use when this effect is (not) present on the RGMercs combat auto target. (Optional Negate)",
         render_header_text = function(self, cond)
@@ -642,7 +643,7 @@ Module.LogicBlocks                      = {
     {
         name = "The RGMercs Auto Target Has Any Beneficial Effect",
         cond = function(self, target)
-            return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Target.Beneficial() ~= nil
+            return mq.TLO.Target.ID() == Globals.AutoTargetID and mq.TLO.Target.Beneficial() ~= nil
         end,
         tooltip = "Only use when a beneficial effect is present on the RGMercs combat auto target. (Generally used for dispel clickies.)",
         render_header_text = function(self, cond)
@@ -787,10 +788,10 @@ end
 local function getConfigFileName()
     local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
     local newFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. "_" .. Config.Globals.CurLoadedClass:lower() .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
 
     if Files.file_exists(newFile) then
         return newFile
@@ -823,7 +824,7 @@ function Module:LoadSettings()
     -- Force any pending saves.
     self:WriteSettings()
 
-    Logger.log_debug("Clickies Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
+    Logger.log_debug("Clickies Module Loading Settings for: %s.", Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false
@@ -842,7 +843,7 @@ function Module:LoadSettings()
     -- insert default server clickies on very first run per PC
     if not settings.Clickies then
         -- Live/Test use "Live". Emu servers use server-specific.
-        local serverType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or Config.Globals.CurServer
+        local serverType = Globals.BuildType:lower() ~= "emu" and "Live" or Globals.CurServer
         local defaultClickyList = self.DefaultServerClickies[serverType]
         settings.Clickies = defaultClickyList or {}
         settingsChanged = true
@@ -1451,7 +1452,7 @@ end
 
 function Module:InsertDefaultClickies()
     -- Live/Test use "Live". Emu servers use server-specific.
-    local serverType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or Config.Globals.CurServer
+    local serverType = Globals.BuildType:lower() ~= "emu" and "Live" or Globals.CurServer
     local defaultClickyList = self.DefaultServerClickies[serverType]
     local clickes = Config:GetSetting('Clickies') or {}
 

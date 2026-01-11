@@ -1,5 +1,6 @@
 local Modules           = require("utils.modules")
 local Config            = require('utils.config')
+local Globals           = require("utils.globals")
 
 local mq                = require 'mq'
 
@@ -34,7 +35,7 @@ local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
 local rgMercsMainType   = mq.DataType.new('RGMercsMain', {
     Members = {
         Paused = function(_, self)
-            return 'bool', Config.Globals.PauseMain
+            return 'bool', Globals.PauseMain
         end,
         Config = function(param, self)
             if not param or param:len() == 0 then
@@ -44,7 +45,7 @@ local rgMercsMainType   = mq.DataType.new('RGMercsMain', {
             return 'string', Config:GetSetting(param)
         end,
         State = function(_, self)
-            return 'string', Config.Globals.PauseMain and "Paused" or "Running"
+            return 'string', Globals.PauseMain and "Paused" or "Running"
         end,
     },
 

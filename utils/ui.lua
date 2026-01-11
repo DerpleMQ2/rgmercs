@@ -1,5 +1,6 @@
 local mq          = require('mq')
 local Config      = require('utils.config')
+local Globals     = require('utils.globals')
 local Modules     = require("utils.modules")
 local Logger      = require("utils.logger")
 local Core        = require("utils.core")
@@ -233,7 +234,7 @@ function Ui.RenderAssistList()
         for idx, name in ipairs(Config:GetSetting('AssistList') or {}) do
             local spawn = mq.TLO.Spawn(string.format("PC =%s", name))
             ImGui.TableNextColumn()
-            if name == Config.Globals.MainAssist then
+            if name == Globals.MainAssist then
                 ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, IM_COL32(255, 255, 0, 64))
             end
             ImGui.Text(tostring(idx))
@@ -291,7 +292,7 @@ function Ui.RenderAssistList()
 end
 
 function Ui.GetClassConfigIDFromName(name)
-    for idx, curName in ipairs(Config.Globals.ClassConfigDirs or {}) do
+    for idx, curName in ipairs(Globals.ClassConfigDirs or {}) do
         if curName == name then return idx end
     end
 
@@ -299,14 +300,14 @@ function Ui.GetClassConfigIDFromName(name)
 end
 
 function Ui.RenderConfigSelector()
-    if Config.Globals.ClassConfigDirs ~= nil then
+    if Globals.ClassConfigDirs ~= nil then
         ImGui.Text("Config Type:")
         ImGui.SameLine()
         ImGui.SetNextItemWidth(200)
-        local newConfigDir, changed = ImGui.Combo("##config_type", Ui.GetClassConfigIDFromName(Config:GetSetting('ClassConfigDir')), Config.Globals.ClassConfigDirs,
-            #Config.Globals.ClassConfigDirs)
+        local newConfigDir, changed = ImGui.Combo("##config_type", Ui.GetClassConfigIDFromName(Config:GetSetting('ClassConfigDir')), Globals.ClassConfigDirs,
+            #Globals.ClassConfigDirs)
         if changed then
-            Config:SetSetting('ClassConfigDir', Config.Globals.ClassConfigDirs[newConfigDir])
+            Config:SetSetting('ClassConfigDir', Globals.ClassConfigDirs[newConfigDir])
             Config:SaveSettings()
             ClassLoader.reloadConfig()
         end
@@ -331,7 +332,7 @@ function Ui.RenderMercsStatus(showPopout)
     end
 
     if ImGui.BeginTable("MercStatusTable", 10, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
-        local mercs = Comms.GetAllPeerHeartbeats()
+        local mercs = Comms.GetAllPeerHeartbeats(true)
 
         if not Ui.TempSettings.SortedMercs then
             Ui.TempSettings.SortedMercs = {}
@@ -488,12 +489,12 @@ function Ui.RenderForceTargetList(showPopout)
     end
 
     if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
-        Config.Globals.ForceTargetID = 0
+        Globals.ForceTargetID = 0
     end
     ImGui.SameLine()
 
     if ImGui.Button("Clear Ignored Targets", ImGui.GetWindowWidth() * .3, 18) then
-        Config.Globals.IgnoredTargetIDs = Set.new({})
+        Globals.IgnoredTargetIDs = Set.new({})
     end
 
     if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 8 or 6, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
@@ -531,13 +532,13 @@ function Ui.RenderForceTargetList(showPopout)
         local xtCount = mq.TLO.Me.XTarget() or 0
         for i = 1, xtCount do
             local xtarg = mq.TLO.Me.XTarget(i)
-            if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Config.Globals.ForceCombatID) then
+            if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
                 ImGui.PushID(string.format("##xtarg_%d", i))
                 ImGui.TableNextColumn()
                 if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, Ui.GetConHighlightBySpawn(xtarg))
                 end
-                if Config.Globals.ForceTargetID > 0 and Config.Globals.ForceTargetID == xtarg.ID() then
+                if Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID() then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
                     ImGui.Text(Icons.MD_STAR)
                     ImGui.PopStyleColor(1)
@@ -546,12 +547,12 @@ function Ui.RenderForceTargetList(showPopout)
                 end
                 ImGui.TableNextColumn()
 
-                local checked, pressed = ImGui.Checkbox("", Config.Globals.IgnoredTargetIDs:contains(xtarg.ID()))
+                local checked, pressed = ImGui.Checkbox("", Globals.IgnoredTargetIDs:contains(xtarg.ID()))
                 if pressed then
                     if checked then
-                        Config.Globals.IgnoredTargetIDs:add(xtarg.ID())
+                        Globals.IgnoredTargetIDs:add(xtarg.ID())
                     else
-                        Config.Globals.IgnoredTargetIDs:remove(xtarg.ID())
+                        Globals.IgnoredTargetIDs:remove(xtarg.ID())
                     end
                 end
                 if Config:GetSetting("ExtendedFTInfo") then
@@ -563,7 +564,7 @@ function Ui.RenderForceTargetList(showPopout)
                 ImGui.PushID(string.format("##select_forcetarget_%d", i))
                 local _, clicked = ImGui.Selectable(xtarg.CleanName() or "None", false)
                 if clicked then
-                    Config.Globals.ForceTargetID = xtarg.ID()
+                    Globals.ForceTargetID = xtarg.ID()
                     Logger.log_debug("Forcing Target to: %s %d", xtarg.CleanName(), xtarg.ID())
                 end
                 ImGui.PopID()

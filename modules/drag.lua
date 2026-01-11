@@ -1,6 +1,7 @@
 -- Drag Module
 local mq             = require('mq')
 local Config         = require('utils.config')
+local Globals        = require("utils.globals")
 local Core           = require("utils.core")
 local Targeting      = require("utils.targeting")
 local Ui             = require("utils.ui")
@@ -61,7 +62,7 @@ Module.DefaultConfig = {
 
 local function getConfigFileName()
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -83,7 +84,7 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-    Logger.log_debug("Drag Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
+    Logger.log_debug("Drag Module Loading Settings for: %s.", Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false

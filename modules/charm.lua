@@ -1,6 +1,7 @@
 -- Sample Basic Class Module
 local mq        = require('mq')
 local Config    = require('utils.config')
+local Globals   = require('utils.globals')
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
@@ -149,10 +150,10 @@ Module.FAQ                       = {
 local function getConfigFileName()
 	local oldFile = mq.configDir ..
 		'/rgmercs/PCConfigs/' ..
-		Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+		Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
 	local newFile = mq.configDir ..
 		'/rgmercs/PCConfigs/' ..
-		Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. "_" .. Config.Globals.CurLoadedClass:lower() .. '.lua'
+		Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
 
 	if Files.file_exists(newFile) then
 		return newFile
@@ -166,7 +167,7 @@ end
 local function getImmuneFileName()
 	return mq.configDir ..
 		'/rgmercs/PCConfigs/' ..
-		Module._name .. "_Immune_" .. Config.Globals.CurServer .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+		Module._name .. "_Immune_" .. Globals.CurServer .. "_" .. Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -188,8 +189,8 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-	Logger.log_debug("\ar%s\ao Charm Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
-		Config.Globals.CurLoadedChar)
+	Logger.log_debug("\ar%s\ao Charm Module Loading Settings for: %s.", Globals.CurLoadedClass,
+		Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 	local settings = {}
 	local firstSaveRequired = false
@@ -197,14 +198,14 @@ function Module:LoadSettings()
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
 		Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
-			Config.Globals.CurLoadedClass, settings_pickle_path)
+			Globals.CurLoadedClass, settings_pickle_path)
 		firstSaveRequired = true
 	else
 		settings = config()
 	end
 
 	if not settings or not self.DefaultConfig then
-		Logger.log_error("\arFailed to Load Charm Config for Classs: %s", Config.Globals.CurLoadedClass)
+		Logger.log_error("\arFailed to Load Charm Config for Classs: %s", Globals.CurLoadedClass)
 		return
 	end
 
@@ -212,7 +213,7 @@ function Module:LoadSettings()
 	local immuneConfig, immuneErr = loadfile(immune_pickle_path)
 	if immuneErr or not immuneConfig then
 		Logger.log_error("\ay[%s]: Unable to load Immune settings file(%s), creating a new one!",
-			Config.Globals.CurLoadedClass, immune_pickle_path)
+			Globals.CurLoadedClass, immune_pickle_path)
 		self.ImmuneTable = {}
 		mq.pickle(immune_pickle_path, self.ImmuneTable)
 	else
@@ -421,7 +422,7 @@ function Module:CharmNow(charmId, useAA)
 	-- First thing we target the mob if we haven't already targeted them.
 	Core.DoCmd("/attack off")
 	local currentTargetID = mq.TLO.Target.ID()
-	if charmId == Config.Globals.AutoTargetID then return end
+	if charmId == Globals.AutoTargetID then return end
 	Targeting.SetTarget(charmId)
 
 	local charmSpell = self:GetCharmSpell()
@@ -629,7 +630,7 @@ function Module:ProcessCharmList()
 					Logger.log_debug("\ayProcessCharmList(%d) :: Distance(%d) LOS(%s)", id,
 						spawn.Distance(), Strings.BoolToColorString(spawn.LineOfSight()))
 				else
-					if id == Config.Globals.AutoTargetID then
+					if id == Globals.AutoTargetID then
 						Logger.log_debug("\ayProcessCharmList(%d) :: Mob is MA's target skipping", id)
 						table.insert(removeList, id)
 					else

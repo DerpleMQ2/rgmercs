@@ -1,6 +1,7 @@
 -- Sample Basic Class Module
 local mq        = require('mq')
 local Config    = require('utils.config')
+local Globals   = require('utils.globals')
 local Combat    = require("utils.combat")
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
@@ -192,10 +193,10 @@ Module.DefaultConfig           = {
 local function getConfigFileName()
     local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
     local newFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. "_" .. Config.Globals.CurLoadedClass:lower() .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
 
     if Files.file_exists(newFile) then
         return newFile
@@ -225,8 +226,8 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-    Logger.log_debug("\ar%s\ao Mez Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
-        Config.Globals.CurLoadedChar)
+    Logger.log_debug("\ar%s\ao Mez Module Loading Settings for: %s.", Globals.CurLoadedClass,
+        Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false
@@ -234,14 +235,14 @@ function Module:LoadSettings()
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
         Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
-            Config.Globals.CurLoadedClass, settings_pickle_path)
+            Globals.CurLoadedClass, settings_pickle_path)
         firstSaveRequired = true
     else
         settings = config()
     end
 
     if not self.DefaultConfig then
-        Logger.log_error("\arFailed to Load Mez Config for Classs: %s", Config.Globals.CurLoadedClass)
+        Logger.log_error("\arFailed to Load Mez Config for Classs: %s", Globals.CurLoadedClass)
         return
     end
 
@@ -580,7 +581,7 @@ function Module:AEMezCheck()
 
     if Combat.FindBestAutoTargetCheck() then
         Combat.FindBestAutoTarget()
-        self:MezNow(Config.Globals.AutoTargetID, true, true)
+        self:MezNow(Globals.AutoTargetID, true, true)
     end
 
     mq.doevents()
@@ -735,7 +736,7 @@ function Module:ProcessMezList()
         local spawn = mq.TLO.Spawn(id)
         Logger.log_debug("\ayProcessMezList(%d) :: Checking...", id)
 
-        if not spawn or not spawn() or spawn.Dead() or Targeting.TargetIsType("corpse", spawn) or (spawn.ID() or 0) == Config.Globals.AutoTargetID then
+        if not spawn or not spawn() or spawn.Dead() or Targeting.TargetIsType("corpse", spawn) or (spawn.ID() or 0) == Globals.AutoTargetID then
             table.insert(removeList, id)
             Logger.log_debug("\ayProcessMezList(%d) :: Can't find mob removing...", id)
         else
@@ -755,7 +756,7 @@ function Module:ProcessMezList()
                         Strings.FormatTime(spell.MyCastTime() / 100), spawn.Distance(),
                         Strings.BoolToColorString(spawn.LineOfSight()))
                 else
-                    if id == Config.Globals.AutoTargetID then
+                    if id == Globals.AutoTargetID then
                         Logger.log_debug("\ayProcessMezList(%d) :: Mob is MA's target skipping", id)
                         table.insert(removeList, id)
                     else
@@ -785,7 +786,7 @@ function Module:ProcessMezList()
 
                         --lets check to see if it is mezzed now/again and use a single target mez if necessary:
                         Targeting.SetTarget(id)
-                        if id ~= Config.Globals.AutoTargetID and Config:GetSetting('DoSTMez') and not mq.TLO.Target.Mezzed() then
+                        if id ~= Globals.AutoTargetID and Config:GetSetting('DoSTMez') and not mq.TLO.Target.Mezzed() then
                             Logger.log_debug("Single target mez is (still) needed.")
                             self:MezNow(id, false, true)
                         end

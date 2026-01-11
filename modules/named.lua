@@ -1,6 +1,7 @@
 -- Sample Named Class Module
 local mq               = require('mq')
 local Config           = require('utils.config')
+local Globals          = require("utils.globals")
 local Targeting        = require("utils.targeting")
 local Ui               = require("utils.ui")
 local Comms            = require("utils.comms")
@@ -66,7 +67,7 @@ Module.FAQ             = {
 
 local function getConfigFileName()
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -89,7 +90,7 @@ end
 
 function Module:LoadSettings()
     self.NamedList = {}
-    Logger.log_debug("Named Combat Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
+    Logger.log_debug("Named Combat Module Loading Settings for: %s.", Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false
@@ -287,7 +288,7 @@ end
 function Module:IsNamed(spawn)
     if not spawn or not spawn() then return false end
 
-    if Config.Globals.CurServer == "EQ Might" then
+    if Globals.CurServer == "EQ Might" then
         for _, name in ipairs(self.EQMightNamed) do
             if spawn and spawn() and (spawn.CleanName() or ""):find(name) then
                 return true

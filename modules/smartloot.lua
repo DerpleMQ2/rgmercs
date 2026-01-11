@@ -1,6 +1,7 @@
 -- SmartLoot Integration Module
 local mq                 = require('mq')
 local Config             = require('utils.config')
+local Globals            = require("utils.globals")
 local Core               = require("utils.core")
 local Casting            = require("utils.casting")
 local Targeting          = require("utils.targeting")
@@ -103,8 +104,8 @@ local function getConfigFileName()
 	local server = mq.TLO.EverQuest.Server()
 	server = server:gsub(" ", "")
 	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar ..
-		"_" .. Config.Globals.CurLoadedClass .. '.lua'
+		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Globals.CurLoadedChar ..
+		"_" .. Globals.CurLoadedClass .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -126,7 +127,7 @@ end
 
 function Module:LoadSettings()
 	Logger.log_debug("\ay[LOOT]: \atSmartLoot Integration Module Loading Settings for: %s.",
-		Config.Globals.CurLoadedChar)
+		Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 	local settings = {}
 	local firstSaveRequired = false
@@ -219,7 +220,7 @@ function Module:Render()
 			smartLootStatus = "SmartLoot Not Initialized"
 			statusColor = yellow
 		end
-		if Config.Globals.SLPeerLooting then
+		if Globals.SLPeerLooting then
 			peerStatus = "Looting"
 			peerColor = yellow
 		else
@@ -342,7 +343,7 @@ end
 function Module:GiveTime()
 	if not Config:GetSetting('UseSmartLoot') or not self.smartLootInitialized then return end
 	if not self:GetSLTLO() or not self:GetSLTLO().IsEnabled() then return end
-	if Config.Globals.PauseMain then return end
+	if Globals.PauseMain then return end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 
@@ -355,7 +356,7 @@ function Module:GiveTime()
 		end
 	end
 
-	Config.Globals.SLPeerLooting = self:GetSLTLO().AnyPeerLooting()
+	Globals.SLPeerLooting = self:GetSLTLO().AnyPeerLooting()
 end
 
 function Module:OnDeath()

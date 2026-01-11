@@ -1,6 +1,7 @@
 -- Sample Basic Class Module
 local mq                           = require('mq')
 local Config                       = require('utils.config')
+local Globals                      = require('utils.globals')
 local Math                         = require('utils.math')
 local Combat                       = require('utils.combat')
 local Core                         = require("utils.core")
@@ -275,10 +276,10 @@ Module.CommandHandlers = {
 local function getConfigFileName()
     local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
     local newFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. "_" .. Config.Globals.CurLoadedClass:lower() .. '.lua'
+        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
 
     if Files.file_exists(newFile) then
         return newFile
@@ -308,7 +309,7 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-    Logger.log_debug("Chase Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
+    Logger.log_debug("Chase Module Loading Settings for: %s.", Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false
@@ -500,7 +501,8 @@ function Module:Campfire(camptype)
 end
 
 function Module:ValidChaseTarget()
-    return (Config:GetSetting('ChaseTarget') and Config:GetSetting('ChaseTarget'):len() > 0)
+    local chaseTarget = Config:GetSetting('ChaseTarget')
+    return ((chaseTarget or ""):len() > 0) and chaseTarget ~= mq.TLO.Me.CleanName()
 end
 
 function Module:GetChaseTarget()
@@ -514,7 +516,7 @@ end
 function Module:Render()
     Ui.RenderPopAndSettings(self._name)
 
-    if self.ModuleLoaded and Config.Globals.SubmodulesLoaded then
+    if self.ModuleLoaded and Globals.SubmodulesLoaded then
         ImGui.Text("Chase Distance: %d", Config:GetSetting('ChaseDistance'))
         ImGui.Text("Chase Stop Distance: %d", Config:GetSetting('ChaseStopDistance'))
         ImGui.Text("Chase LOS Required: %s", Config:GetSetting('RequireLoS') == true and "On" or "Off")

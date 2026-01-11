@@ -1,6 +1,7 @@
 local mq                        = require('mq')
 local ImGui                     = require('ImGui')
 local Config                    = require('utils.config')
+local Globals                   = require("utils.globals")
 local Logger                    = require('utils.logger')
 local Ui                        = require('utils.ui')
 local Icons                     = require('mq.ICONS')
@@ -34,7 +35,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
             { Name = 'Announcements',   Categories = { "Announcements", }, }, -- group announce stuff-- ui stuff
             { Name = 'Loot(Emu)',       Categories = { "Looting Script", "LNS", "SmartLoot", }, },
             { Name = 'Mercs Internals', Categories = { "Internals", }, },
-            { Name = 'Misc',            Categories = { "Misc", }, },                                              -- ??? profit
+            { Name = 'Misc',            Categories = { "Misc", }, },                                                -- ??? profit
             { Name = 'Uncategorized',   Categories = { "Uncategorized", },                      CatchAll = true, }, -- settings from custom configs that don't have proper group/header
         },
     },
@@ -557,7 +558,7 @@ function OptionsUI:RenderCurrentTab()
     self:RenderOptionsPanel(self.selectedGroup)
 end
 
-function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
+function OptionsUI:RenderMainWindow(_, openGUI)
     local shouldDrawGUI = true
 
     if self.FirstRender or self.lastSortTime < Config:GetLastModuleRegisteredTime() or self.lastHighlightTime < Config:GetLastHighlightChangeTime() then
@@ -581,10 +582,10 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
     ImGui.SetNextWindowSize(ImVec2(700, 500), ImGuiCond.FirstUseEver)
     ImGui.SetNextWindowSizeConstraints(ImVec2(400, 300), ImVec2(2000, 2000))
 
-    openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+    openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
 
     if shouldDrawGUI then
-        ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
+        ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
         local _, y = ImGui.GetContentRegionAvail()
 
         if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
@@ -596,7 +597,7 @@ function OptionsUI:RenderMainWindow(imgui_style, curState, openGUI)
 
             ImGui.SetNextItemWidth(ImGui.GetWindowContentRegionWidth())
             -- character selecter
-            local peerList = Comms.GetPeers()
+            local peerList = Comms.GetPeers(false)
             table.insert(peerList, 1, Comms.GetPeerName())
             local peerListIdx = 1
             for idx, name in ipairs(peerList) do

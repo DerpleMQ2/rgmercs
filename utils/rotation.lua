@@ -1,6 +1,7 @@
 local mq         = require('mq')
 local Set        = require("mq.Set")
 local Config     = require("utils.config")
+local Globals    = require("utils.globals")
 local Core       = require("utils.core")
 local Logger     = require("utils.logger")
 local Casting    = require("utils.casting")
@@ -290,15 +291,14 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
                 local tStart = string.format("%.03f", mq.gettime() / 1000)
                 caller:SetCurrentRotationState(idx)
 
-                if Config.Globals.PauseMain then
+                if Globals.PauseMain then
                     break
                 end
 
                 if fnRotationCond then
                     local start = string.format("%.03f", mq.gettime() / 1000)
-                    local curState = Targeting.GetXTHaterCount() > 0 and "Combat" or "Downtime"
 
-                    if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, curState) then
+                    if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, Globals.CurrentState) then
                         Logger.log_verbose("\arStopping Rotation Due to condition check failure!")
                         break
                     end
@@ -341,7 +341,7 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
                             break
                         end
 
-                        if Config.Globals.PauseMain then
+                        if Globals.PauseMain then
                             break
                         end
                     end
@@ -544,13 +544,8 @@ function Rotation.LoadSpellLoadOut(spellLoadOut)
     local selectedRank = ""
 
     for gem, loadoutData in pairs(spellLoadOut) do
-        -- Removing this because using basename doesnt seem to work at all.
-        --if mq.TLO.Me.SpellRankCap() > 1 then
         selectedRank = loadoutData.spell.RankName()
-        --else
-        --    selectedRank = loadoutData.spell.BaseName()
-        --end
-
+        Logger.log_debug("Loading \ay%s\ax into gem \ag%d\ax", selectedRank, gem)
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
             Casting.MemorizeSpell(gem, selectedRank, false, 15000)
         end

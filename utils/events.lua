@@ -1,5 +1,6 @@
 local mq                  = require('mq')
 local Config              = require('utils.config')
+local Globals             = require('utils.globals')
 local Targeting           = require("utils.targeting")
 local Core                = require("utils.core")
 local Modules             = require("utils.modules")
@@ -31,7 +32,7 @@ function Events.HandleDeath()
         end
     end
 
-    mq.delay("2m", function() return not mq.TLO.Me.Hovering() or (mq.TLO.Zone.ID() ~= Config.Globals.CurZoneId) end)
+    mq.delay("2m", function() return not mq.TLO.Me.Hovering() or (mq.TLO.Zone.ID() ~= Globals.CurZoneId) end)
 
     Logger.log_debug("Fishfood no more! Accepted rez or finished zoning post death.")
 
@@ -52,8 +53,8 @@ end
 function Events.CreateHeartBeat()
     Events.HeartbeatCoroutine = coroutine.create(function()
         while (1) do
-            Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or curState,
-                Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config.Globals.ForceCombatID,
+            Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Globals.PauseMain and "Paused" or Globals.CurrentState,
+                Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Globals.ForceCombatID,
                 Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off",
                 Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()),
                 Config.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()))

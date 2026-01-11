@@ -1,6 +1,7 @@
 local mq                     = require('mq')
 local ImGui                  = require('ImGui')
 local Config                 = require('utils.config')
+local Globals                = require("utils.globals")
 local Ui                     = require('utils.ui')
 local Icons                  = require('mq.ICONS')
 
@@ -14,19 +15,19 @@ function SimpleUI:RenderSimplePanelOption(optionLabel, optionName)
     end
 end
 
-function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
+function SimpleUI:RenderMainWindow(_, openGUI)
     local shouldDrawGUI = true
 
-    if not Config.Globals.Minimized then
+    if not Globals.Minimized then
         local flags = ImGuiWindowFlags.None
 
         if Config:GetSetting('MainWindowLocked') then
             flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
         end
 
-        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercssimpleui'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercssimpleui'):format(Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
 
-        ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
+        ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
 
         if shouldDrawGUI then
             local _, y = ImGui.GetContentRegionAvail()

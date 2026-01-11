@@ -1,5 +1,6 @@
 local mq        = require('mq')
 local Config    = require('utils.config')
+local Globals   = require("utils.globals")
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
@@ -701,8 +702,8 @@ return {
                 custom_func = function(self)
                     if not Casting.AAReady("Braxi's Howl") then return false end
                     local ret = false
-                    ret = ret or Casting.UseAA("Braxi's Howl", Config.Globals.AutoTargetID)
-                    ret = ret or Casting.UseDisc(self.ResolvedActionMap['Dicho'], Config.Globals.AutoTargetID)
+                    ret = ret or Casting.UseAA("Braxi's Howl", Globals.AutoTargetID)
+                    ret = ret or Casting.UseDisc(self.ResolvedActionMap['Dicho'], Globals.AutoTargetID)
 
                     return ret
                 end,

@@ -1,6 +1,7 @@
 local mq          = require('mq')
 local Core        = require("utils.core")
 local Config      = require('utils.config')
+local Globals     = require('utils.globals')
 local Modules     = require("utils.modules")
 local Files       = require("utils.files")
 local Logger      = require("utils.logger")
@@ -8,14 +9,14 @@ local Logger      = require("utils.logger")
 local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple', }
 
 function ClassLoader.getClassConfigFileName(class)
-    local baseConfigDir = Config.Globals.ScriptDir .. "/class_configs"
+    local baseConfigDir = Globals.ScriptDir .. "/class_configs"
     local classConfigDir = Config:GetSetting('ClassConfigDir') -- now defaults to current server
     local useCustomConfig = (classConfigDir:find("Custom: ") ~= nil)
 
     -- temp fix to patch incorrect initial config dir settings due to a previous bug
     if Core.OnEMU() and not useCustomConfig then
         local defaultConfig
-        for _, server in ipairs(Config.Globals.ClassConfigDirs) do
+        for _, server in ipairs(Globals.ClassConfigDirs) do
             if server == classConfigDir then
                 defaultConfig = true
                 break
@@ -48,8 +49,8 @@ end
 
 function ClassLoader.getFallbackClassConfigFolder()
     if Core.OnEMU() then
-        if Config.Constants.SupportedEmuServers:contains(Config.Globals.CurServer) then
-            return Config.Globals.CurServer
+        if Config.Constants.SupportedEmuServers:contains(Globals.CurServer) then
+            return Globals.CurServer
         end
     end
     return "Live"
@@ -84,7 +85,7 @@ function ClassLoader.writeCustomConfig(class)
         currentConfigDir = currentConfigDir:sub(9)
     end
     local current_File = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", currentConfigPath, currentConfigDir, class:lower())
-    local configType = Config.Globals.BuildType:lower() ~= "emu" and "Live" or Config.Globals.CurServer
+    local configType = Globals.BuildType:lower() ~= "emu" and "Live" or Globals.CurServer
     local customFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, configType, class:lower())
     local backupFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config_%s.lua", mq.configDir, configType, class:lower(), os.date("%Y%m%d_%H%M%S"))
 
@@ -150,7 +151,7 @@ function ClassLoader.mergeTables(tblA, tblB)
 end
 
 function ClassLoader.changeLoadedClass()
-    Config.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
+    Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
     Logger.log_info("\ayPersona class swap detected! \awLoading settings for \ag%s.", mq.TLO.Me.Class())
     ClassLoader.reloadConfig()
 end

@@ -3,6 +3,7 @@ local CommitVersion = require('extras.version')
 local OptionsUI     = require("ui.options")
 local ImGui         = require('ImGui')
 local Config        = require('utils.config')
+local Globals       = require('utils.globals')
 local Comms         = require('utils.comms')
 local Ui            = require('utils.ui')
 local Icons         = require('mq.ICONS')
@@ -65,7 +66,7 @@ function StandardUI:RenderTarget()
             ImGui.TextColored(IM_COL32(52, 200, 52, 255),
                 string.format("**Named**"))
         end
-        if assistSpawn.ID() == Config.Globals.ForceTargetID then
+        if assistSpawn.ID() == Globals.ForceTargetID then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(52, 200, 200, 255),
                 string.format("**ForcedTarget**"))
@@ -109,26 +110,26 @@ function StandardUI:RenderWindowControls()
     ImGui.SameLine()
 
     if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
-        Config.Globals.Minimized = true
+        Globals.Minimized = true
     end
     Ui.Tooltip("Activate Mini Mode")
 
     ImGui.SetCursorPos(position)
 end
 
-function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
+function StandardUI:RenderMainWindow(imgui_style, openGUI)
     local shouldDrawGUI = true
 
-    if not Config.Globals.Minimized then
+    if not Globals.Minimized then
         local flags = ImGuiWindowFlags.None
 
         if Config:GetSetting('MainWindowLocked') then
             flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
         end
 
-        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
 
-        ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
+        ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
 
         if shouldDrawGUI then
             local imgDisplayed = Casting.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
@@ -166,19 +167,19 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
 
             self:RenderWindowControls()
 
-            if not Config.Globals.PauseMain then
+            if not Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Green)
             else
                 ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
             end
 
-            local pauseLabel = Config.Globals.PauseMain and "PAUSED" or "Running"
-            if Config.Globals.BackOffFlag then
+            local pauseLabel = Globals.PauseMain and "PAUSED" or "Running"
+            if Globals.BackOffFlag then
                 pauseLabel = pauseLabel .. " [Backoff]"
             end
 
             if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imgui_style.ScrollbarSize) - imgui_style.WindowPadding.x), 40) then
-                Config.Globals.PauseMain = not Config.Globals.PauseMain
+                Globals.PauseMain = not Globals.PauseMain
             end
             ImGui.PopStyleColor()
 
@@ -190,7 +191,7 @@ function StandardUI:RenderMainWindow(imgui_style, curState, openGUI)
             if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
                 ImGui.SetItemDefaultFocus()
                 if ImGui.BeginTabItem("RGMercsMain") then
-                    ImGui.Text("Current State: " .. curState)
+                    ImGui.Text("Current State: " .. Globals.CurrentState)
                     ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
                     if Config.TempSettings.AssistWarning and Core.IAmMA() then
                         ImGui.Text("MA: %s (Fallback Mode)", (Core.GetMainAssistSpawn().CleanName() or "None"))

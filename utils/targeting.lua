@@ -1,5 +1,6 @@
 local mq                    = require('mq')
 local Config                = require('utils.config')
+local Globals               = require('utils.globals')
 local Core                  = require('utils.core')
 local Comms                 = require("utils.comms")
 local Modules               = require("utils.modules")
@@ -42,7 +43,7 @@ end
 ---
 --- @return MQSpawn The current auto-target.
 function Targeting.GetAutoTarget()
-    return mq.TLO.Spawn(string.format("id %d", Config.Globals.AutoTargetID))
+    return mq.TLO.Spawn(string.format("id %d", Globals.AutoTargetID))
 end
 
 --- Clears the current target.
@@ -51,9 +52,9 @@ end
 function Targeting.ClearTarget()
     if Config:GetSetting('DoAutoTarget') then
         Logger.log_debug("Clearing Target")
-        Config.Globals.AutoTargetID = 0
-        Config.Globals.ForceCombatID = 0
-        if Config.Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Config.Globals.ForceTargetID) then Config.Globals.ForceTargetID = 0 end
+        Globals.AutoTargetID = 0
+        Globals.ForceCombatID = 0
+        if Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Globals.ForceTargetID) then Globals.ForceTargetID = 0 end
         if mq.TLO.Stick.Status():lower() == "on" then Movement:DoStickCmd("off") end
         if mq.TLO.Me.Combat() then Core.DoCmd("/attack off") end
         Core.DoCmd("/target clear")
@@ -237,7 +238,7 @@ function Targeting.GetHighestAggroPct()
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Config.Globals.ForceCombatID) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceCombatID) then
             if xtSpawn.PctAggro() > highestPct then highestPct = xtSpawn.PctAggro() end
         end
     end
@@ -259,7 +260,7 @@ function Targeting.IHaveAggro(pct)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Config.Globals.ForceCombatID) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceCombatID) then
             if xtSpawn.PctAggro() >= pct then return true end
         end
     end
@@ -277,7 +278,7 @@ function Targeting.GetXTHaterIDs(printDebug)
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs() or 0)) > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Config.Globals.ForceCombatID) then
+        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs() or 0)) > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
             if printDebug then
                 Logger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
             end
@@ -533,7 +534,7 @@ function Targeting.BigGroupHealsNeeded()
 end
 
 function Targeting.CheckForAutoTargetID()
-    return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {}
+    return mq.TLO.Target.ID() == Globals.AutoTargetID and { Globals.AutoTargetID, } or {}
 end
 
 function Targeting.InSpellRange(spell, target)
@@ -560,12 +561,12 @@ function Targeting.TargetNotStunned()
 end
 
 function Targeting.LostAutoTargetAggro()
-    if Config.Globals.AutoTargetID == 0 or mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then return false end
+    if Globals.AutoTargetID == 0 or mq.TLO.Target.ID() ~= Globals.AutoTargetID then return false end
     return mq.TLO.Me.PctAggro() < 100
 end
 
 function Targeting.HateToolsNeeded()
-    if Config.Globals.AutoTargetID == 0 or mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then return false end
+    if Globals.AutoTargetID == 0 or mq.TLO.Target.ID() ~= Globals.AutoTargetID then return false end
     return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget())
 end
 

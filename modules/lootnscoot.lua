@@ -1,6 +1,7 @@
 -- Sample Basic Class Module
 local mq                 = require('mq')
 local Config             = require('utils.config')
+local Globals            = require('utils.globals')
 local Core               = require("utils.core")
 local Casting            = require("utils.casting")
 local Ui                 = require("utils.ui")
@@ -98,8 +99,8 @@ Module.CommandHandlers   = {
 
 local function getConfigFileName()
 	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar ..
-		"_" .. Config.Globals.CurLoadedClass .. '.lua'
+		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar ..
+		"_" .. Globals.CurLoadedClass .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -134,7 +135,7 @@ end
 
 function Module:LoadSettings()
 	Logger.log_debug("\ay[LOOT]: \atLootnScoot EMU, Loot Module Loading Settings for: %s.",
-		Config.Globals.CurLoadedChar)
+		Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 	local settings = {}
 	local firstSaveRequired = false
@@ -161,7 +162,7 @@ function Module:Init()
 	self:LoadSettings()
 	self:LootMessageHandler()
 	if not Core.OnEMU() then
-		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s", Config.Globals.BuildType)
+		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s", Globals.BuildType)
 	else
 		if Config:GetSetting('DoLoot') then
 			if mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' then
@@ -232,7 +233,7 @@ function Module:LootMessageHandler()
 		local subject = mail.Subject or ''
 		local who = mail.Who or ''
 
-		if who ~= Config.Globals.CurLoadedChar then return end
+		if who ~= Globals.CurLoadedChar then return end
 
 		if subject == ('done_looting' or 'done_processing') then
 			Module.TempSettings.Looting = false
@@ -254,7 +255,7 @@ end
 
 function Module:GiveTime(combat_state)
 	if not Config:GetSetting('DoLoot') then return end
-	if Config.Globals.PauseMain then return end
+	if Globals.PauseMain then return end
 	if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
 		if not warningMessageSent then
 			Logger.log_error("\ar[LOOT]: Looting is enabled, but LNS does not appear to be running!")
@@ -271,7 +272,7 @@ function Module:GiveTime(combat_state)
 		return
 	end
 
-	if Config:GetSetting('LootRespectMedState') and Config.Globals.InMedState then
+	if Config:GetSetting('LootRespectMedState') and Globals.InMedState then
 		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Meditating.")
 		return
 	end
@@ -285,7 +286,7 @@ function Module:GiveTime(combat_state)
 	if (combat_state ~= "Combat" or Config:GetSetting('CombatLooting')) and deadCount > 0 then
 		if not self.TempSettings.Looting then
 			self.Actor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
-				{ who = Config.Globals.CurLoadedChar, server = serverLNSFormat, directions = 'doloot', })
+				{ who = Globals.CurLoadedChar, server = serverLNSFormat, directions = 'doloot', })
 			self.TempSettings.Looting = true
 		end
 	end

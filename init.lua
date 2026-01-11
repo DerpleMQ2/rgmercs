@@ -38,13 +38,14 @@ local Set         = require('mq.set')
 -- Initialize class-based moduldes
 local Modules     = require("utils.modules")
 Modules:load(Config.Constants.LootModuleTypes[Config:GetSetting('LootModuleType')])
+local Globals = require("utils.globals")
 
 require('utils.datatypes')
 
 -- ImGui Variables
 local openGUI         = true
 local notifyZoning    = true
-local curState        = "Downtime"
+Globals.CurrentState  = "Downtime"
 
 local initPctComplete = 0
 local initMsg         = "Initializing RGMercs..."
@@ -170,18 +171,18 @@ local function RGMercsGUI()
 
             renderModulesPopped()
 
-            if Config:GetSetting("AlwaysShowMiniButton") or Config.Globals.Minimized then
+            if Config:GetSetting("AlwaysShowMiniButton") or Globals.Minimized then
                 HudUI:RenderToggleHud()
             end
 
             if Config:GetSetting('FullUI') then
-                openGUI = StandardUI:RenderMainWindow(imGuiStyle, curState, openGUI)
+                openGUI = StandardUI:RenderMainWindow(imGuiStyle, openGUI)
             else
-                openGUI = SimpleUI:RenderMainWindow(imGuiStyle, curState, openGUI)
+                openGUI = SimpleUI:RenderMainWindow(imGuiStyle, openGUI)
             end
 
             if Config:GetSetting('EnableOptionsUI') then
-                local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, curState, true)
+                local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, true)
                 if not openOptionsUI then
                     Config:SetSetting('EnableOptionsUI', false)
                 end
@@ -223,7 +224,7 @@ local function RGInit(...)
         Logger.log_info("Arguments passed to RGMercs: %s", table.concat(args, ", "))
         for _, v in ipairs(args) do
             if v == "mini" then
-                Config.Globals.Minimized = true
+                Globals.Minimized = true
                 break
             end
         end
@@ -240,7 +241,7 @@ local function RGInit(...)
     initMsg = "Initializing Modules..."
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
     Modules:ExecAll("Init")
-    Config.Globals.SubmodulesLoaded = true
+    Globals.SubmodulesLoaded = true
 
     initPctComplete = 30
     initMsg = "Updating Command Handlers..."
@@ -253,12 +254,12 @@ local function RGInit(...)
 
     Ui.GetAssistWarningString()
 
-    local assistString = Config.Globals.MainAssist:len() > 0 and string.format("set to %s.", Config.Globals.MainAssist) or string.format("unset!")
+    local assistString = Globals.MainAssist:len() > 0 and string.format("set to %s.", Globals.MainAssist) or string.format("unset!")
 
     if Config.TempSettings.AssistWarning then
         Comms.PopUp("RGMercs " .. Config.TempSettings.AssistWarning .. "\nYour assist is currently " .. assistString)
     else
-        Comms.PopUp("Welcome to RGMercs!\nYour assist is currently set to %s.", Config.Globals.MainAssist)
+        Comms.PopUp("Welcome to RGMercs!\nYour assist is currently set to %s.", Globals.MainAssist)
     end
 
     if Core.IAmMA() then
@@ -315,18 +316,18 @@ local function RGInit(...)
 end
 
 local function Main()
-    if mq.TLO.Zone.ID() ~= Config.Globals.CurZoneId or mq.TLO.Me.Instance() ~= Config.Globals.CurInstance then
+    if mq.TLO.Zone.ID() ~= Globals.CurZoneId or mq.TLO.Me.Instance() ~= Globals.CurInstance then
         if notifyZoning then
             Modules:ExecAll("OnZone")
             notifyZoning = false
-            Config.Globals.ForceTargetID = 0
-            Config.Globals.IgnoredTargetIDs = Set.new({})
-            Config.Globals.AutoTargetID = 0
-            Config.Globals.ForceCombatID = 0
+            Globals.ForceTargetID = 0
+            Globals.IgnoredTargetIDs = Set.new({})
+            Globals.AutoTargetID = 0
+            Globals.ForceCombatID = 0
         end
         mq.delay(100)
-        Config.Globals.CurZoneId = mq.TLO.Zone.ID()
-        Config.Globals.CurInstance = mq.TLO.Me.Instance()
+        Globals.CurZoneId = mq.TLO.Zone.ID()
+        Globals.CurInstance = mq.TLO.Me.Instance()
         return
     end
 
@@ -341,15 +342,15 @@ local function Main()
         Casting.UseGem = mq.TLO.Me.NumGems()
     end
 
-    if Config.Globals.PauseMain then
+    if Globals.PauseMain then
         mq.delay(100)
         mq.doevents()
         Events.DoEvents()
         if Config:GetSetting('RunMovePaused') then
-            Modules:ExecModule("Movement", "GiveTime", curState)
+            Modules:ExecModule("Movement", "GiveTime", Globals.CurrentState)
         end
-        Modules:ExecModule("Drag", "GiveTime", curState)
-        Modules:ExecModule("Debug", "GiveTime", curState)
+        Modules:ExecModule("Drag", "GiveTime", Globals.CurrentState)
+        Modules:ExecModule("Debug", "GiveTime", Globals.CurrentState)
         Modules:ExecModule("Clickies", "ValidateClickies")
         Modules:ExecAll("WriteSettings") -- this needs to happen even when paused.
         return
@@ -361,15 +362,15 @@ local function Main()
     end
 
     if Targeting.GetXTHaterCount(true) > 0 then
-        if curState == "Downtime" and mq.TLO.Me.Sitting() then
+        if Globals.CurrentState == "Downtime" and mq.TLO.Me.Sitting() then
             -- if switching into combat state stand up.
             mq.TLO.Me.Stand()
         end
 
-        curState = "Combat"
-        --if os.clock() - Config.Globals.LastFaceTime > 6 then
+        Globals.CurrentState = "Combat"
+        --if os.clock() - Globals.LastFaceTime > 6 then
         if Config:GetSetting('FaceTarget') and not Targeting.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
-            --Config.Globals.LastFaceTime = os.clock()
+            --Globals.LastFaceTime = os.clock()
             Core.DoCmd("/squelch /face fast")
         end
 
@@ -377,20 +378,20 @@ local function Main()
             Casting.AutoMed()
         end
     else
-        if curState ~= "Downtime" then
+        if Globals.CurrentState ~= "Downtime" then
             Logger.log_debug("Switching to Downtime state.")
 
             -- clear the cache during state transition.
             Targeting.ClearSafeTargetCache()
-            Targeting.ForceBurnTargetID     = 0
-            Config.Globals.LastPulledID     = 0
-            Config.Globals.AutoTargetID     = 0
-            Config.Globals.IgnoredTargetIDs = Set.new({})
-            Casting.LastBurnCheck           = false
+            Targeting.ForceBurnTargetID = 0
+            Globals.LastPulledID        = 0
+            Globals.AutoTargetID        = 0
+            Globals.IgnoredTargetIDs    = Set.new({})
+            Casting.LastBurnCheck       = false
             Modules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
 
-        curState = "Downtime"
+        Globals.CurrentState = "Downtime"
 
         if Config:GetSetting('DoMed') ~= 1 then
             Casting.AutoMed()
@@ -399,12 +400,12 @@ local function Main()
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
-    if Config.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() then
+    if Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() then
         Config:LoadSettings()
         Modules:ExecAll("LoadSettings")
     end
 
-    if Config.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName() then
+    if Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName() then
         ClassLoader.changeLoadedClass()
     end
 
@@ -416,18 +417,18 @@ local function Main()
     Ui.GetAssistWarningString()
 
     if Combat.FindBestAutoTargetCheck() then
-        -- This will find a valid target and set it to : Config.Globals.AutoTargetID
+        -- This will find a valid target and set it to : Globals.AutoTargetID
         Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
     end
 
-    if Combat.OkToEngage(Config.Globals.AutoTargetID) then
-        Combat.EngageTarget(Config.Globals.AutoTargetID)
+    if Combat.OkToEngage(Globals.AutoTargetID) then
+        Combat.EngageTarget(Globals.AutoTargetID)
     else
-        if curState == "Combat" then
+        if Globals.CurrentState == "Combat" then
             local targetId = Targeting.GetTargetID()
-            local ignored = Config.Globals.IgnoredTargetIDs:contains(targetId)                         -- don't target something in our ignore list
-            local pullTarget = Config:GetSetting('DoPull') and targetId == Config.Globals.LastPulledID -- don't clear your pull target while its traveling to you
-            local assistHater = Core.IAmMA() and Targeting.IsSpawnXTHater(targetId)                    -- don't clear a targeted hater as MA unless it is ignored
+            local ignored = Globals.IgnoredTargetIDs:contains(targetId)                         -- don't target something in our ignore list
+            local pullTarget = Config:GetSetting('DoPull') and targetId == Globals.LastPulledID -- don't clear your pull target while its traveling to you
+            local assistHater = Core.IAmMA() and Targeting.IsSpawnXTHater(targetId)             -- don't clear a targeted hater as MA unless it is ignored
 
             if ignored or (not pullTarget and not assistHater) then
                 Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
@@ -440,11 +441,11 @@ local function Main()
     end
 
     -- Handles state for when we're in combat
-    if curState == "Combat" then
-        if ((os.clock() - Config.Globals.LastPetCmd) > 2) then
-            Config.Globals.LastPetCmd = os.clock()
+    if Globals.CurrentState == "Combat" then
+        if ((os.clock() - Globals.LastPetCmd) > 2) then
+            Globals.LastPetCmd = os.clock()
             if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
-                Combat.PetAttack(Config.Globals.AutoTargetID, true)
+                Combat.PetAttack(Globals.AutoTargetID, true)
             end
         end
 
@@ -477,12 +478,12 @@ local function Main()
         end
     end
 
-    if Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Anytime" or (Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Combat" and curState == "Combat") then
+    if Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Anytime" or (Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Combat" and Globals.CurrentState == "Combat") then
         Casting.ClickModRod()
     end
 
     if Combat.ShouldKillTargetReset() then
-        Config.Globals.AutoTargetID = 0
+        Globals.AutoTargetID = 0
     end
 
     -- Revive our mercenary if they're dead and we're using a mercenary
@@ -499,7 +500,7 @@ local function Main()
         end
     end
 
-    Modules:ExecAll("GiveTime", curState)
+    Modules:ExecAll("GiveTime", Globals.CurrentState)
     Modules:ExecAll("WriteSettings")
 
     mq.doevents()
