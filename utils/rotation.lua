@@ -544,13 +544,8 @@ function Rotation.LoadSpellLoadOut(spellLoadOut)
     local selectedRank = ""
 
     for gem, loadoutData in pairs(spellLoadOut) do
-        -- Removing this because using basename doesnt seem to work at all.
-        --if mq.TLO.Me.SpellRankCap() > 1 then
         selectedRank = loadoutData.spell.RankName()
-        --else
-        --    selectedRank = loadoutData.spell.BaseName()
-        --end
-
+        Logger.log_debug("Loading \ay%s\ax into gem \ag%d\ax", selectedRank, gem)
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
             Casting.MemorizeSpell(gem, selectedRank, false, 15000)
         end

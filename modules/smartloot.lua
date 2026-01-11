@@ -333,7 +333,6 @@ function Module:ProcessLooting()
 		-- Small delay to not hammer the CPU
 		mq.delay(50)
 		mq.doevents()
-		Events.DoEvents()
 	end
 
 	Logger.log_verbose("\ay[LOOT]: \agFinished Processing Loot.")

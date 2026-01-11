@@ -221,7 +221,6 @@ function Module.DoLooting(combat_state)
 			break
 		end
 		mq.doevents()
-		Events.DoEvents()
 	end
 	Logger.log_verbose("\ay[LOOT]: \atFinished or Aborted Looting: \agResuming")
 end

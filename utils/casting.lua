@@ -486,14 +486,12 @@ function Casting.OkayToRez(corpseId)
         while maxWait > 0 do
             mq.doevents('CorpseConned')
             mq.delay(50)
-            Events.DoEvents()
             if not mq.TLO.Spawn(corpseId)() then
                 Logger.log_debug("\atEmuOkayToRez(): Corpse ID %d no longer exists, did someone else rez it? Aborting.", corpseId or 0)
                 return false
             end
             if Config.Globals.CorpseConned then
                 mq.doevents('AlreadyRezzed')
-                Events.DoEvents()
                 if Tables.TableContains(Config.Globals.RezzedCorpses, corpseId) then
                     Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, and it appears to have been rezzed already. Aborting.", corpseId or 0)
                     return false
@@ -1089,7 +1087,6 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
             Logger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
             Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
             mq.doevents()
-            Events.DoEvents()
             mq.delay(1)
             Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
@@ -1232,7 +1229,6 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
                 end
                 mq.doevents()
                 mq.delay(20)
-                Events.DoEvents()
                 cancelWait = cancelWait - 20
             end
 
@@ -1500,7 +1496,6 @@ function Casting.UseItem(itemName, targetId, forceTarget)
             Logger.log_verbose("Waiting for item to start casting...")
             mq.delay(50)
             mq.doevents()
-            Events.DoEvents()
             -- in case very fast casts serverside don't make it to the client
             -- this was originally added for 100ms clickies on laz that don't ever show casting (which has now been addressed above), but left as a fallback
             if not me.ItemReady(itemName) then
@@ -1515,7 +1510,6 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         while me.Casting() do
             mq.delay(10)
             mq.doevents()
-            Events.DoEvents()
         end
     end
 
