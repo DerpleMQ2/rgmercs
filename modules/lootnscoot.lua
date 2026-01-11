@@ -8,6 +8,7 @@ local Comms              = require("utils.comms")
 local Strings            = require("utils.strings")
 local Logger             = require("utils.logger")
 local Actors             = require("actors")
+local Events             = require("utils.events")
 
 -- Server name formatted for LNS to recognize
 local serverLNSFormat    = mq.TLO.EverQuest.Server():gsub(" ", "_")
@@ -220,6 +221,7 @@ function Module.DoLooting(combat_state)
 			break
 		end
 		mq.doevents()
+		Events.DoEvents()
 	end
 	Logger.log_verbose("\ay[LOOT]: \atFinished or Aborted Looting: \agResuming")
 end

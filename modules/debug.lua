@@ -303,7 +303,8 @@ function Module:Pop()
     Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
-function Module:GiveTime(combat_state)
+function Module:DoEvents()
+    -- Process Events if needed
     if self.execRequested or (self.autoRun and self.execCoroutine == nil) then
         self.execRequested = false
         self.execCoroutine = self:ExecCoroutine()
@@ -317,6 +318,10 @@ function Module:GiveTime(combat_state)
         self.execCoroutine = nil
         self.status = "Idle..."
     end
+end
+
+function Module:GiveTime(combat_state)
+    self:DoEvents()
 
     if self.luaBuffer:HasFlag(Zep.BufferFlags.Dirty) then
         Config:SetSetting('script', self.luaBuffer:GetText())

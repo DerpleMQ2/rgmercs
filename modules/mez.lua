@@ -12,6 +12,7 @@ local Strings   = require("utils.strings")
 local Tables    = require("utils.tables")
 local Files     = require("utils.files")
 local Logger    = require("utils.logger")
+local Events    = require("utils.events")
 
 require('utils.datatypes')
 
@@ -400,6 +401,7 @@ function Module:MezNow(mezId, useAE, useAA)
                 Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
                     Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
                 mq.doevents()
+                Events.DoEvents()
                 return
             elseif (mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1) == 0 then
                 local maxWaitToMez = 1500 + (mq.TLO.Window("CastingWindow").Open() and (mq.TLO.Me.Casting.MyCastTime() or 3000) or 0)
@@ -410,6 +412,7 @@ function Module:MezNow(mezId, useAE, useAA)
                     end
                     mq.delay(50)
                     mq.doevents()
+                    Events.DoEvents()
                     maxWaitToMez = maxWaitToMez - 50
                 end
                 if maxWaitToMez <= 0 and not Casting.SpellReady(aeMezSpell) then
@@ -435,6 +438,7 @@ function Module:MezNow(mezId, useAE, useAA)
         end
         -- In case they're mez immune
         mq.doevents()
+        Events.DoEvents()
     else
         Logger.log_debug("Performing Single Target MEZ --> %d", mezId)
         if useAA and Core.MyClassIs("brd") and Casting.AAReady("Dirge of the Sleepwalker") and Config:GetSetting('DoAAMez') then
@@ -448,6 +452,7 @@ function Module:MezNow(mezId, useAE, useAA)
                 Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 
             mq.doevents()
+            Events.DoEvents()
 
             if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
                 Comms.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s <- Using: \at%s",
@@ -459,6 +464,7 @@ function Module:MezNow(mezId, useAE, useAA)
             end
 
             mq.doevents()
+            Events.DoEvents()
 
             return
         end
@@ -480,6 +486,7 @@ function Module:MezNow(mezId, useAE, useAA)
                     end
                     mq.delay(50)
                     mq.doevents()
+                    Events.DoEvents()
                     maxWaitToMez = maxWaitToMez - 50
                 end
                 if maxWaitToMez <= 0 and not Casting.SpellReady(mezSpell) then
@@ -501,6 +508,7 @@ function Module:MezNow(mezId, useAE, useAA)
 
             -- In case they're mez immune
             mq.doevents()
+            Events.DoEvents()
 
             if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
                 Comms.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s \aw <- Using: \at%s",
@@ -513,6 +521,7 @@ function Module:MezNow(mezId, useAE, useAA)
         end
 
         mq.doevents()
+        Events.DoEvents()
     end
 
     Targeting.SetTarget(currentTargetID, true)
@@ -575,6 +584,7 @@ function Module:AEMezCheck()
     end
 
     mq.doevents()
+    Events.DoEvents()
 end
 
 function Module:RemoveCCTarget(mobId)
@@ -697,6 +707,7 @@ function Module:UpdateMezList()
     end
 
     mq.doevents()
+    Events.DoEvents()
 end
 
 function Module:ProcessMezList()
@@ -794,6 +805,7 @@ function Module:ProcessMezList()
     end
 
     mq.doevents()
+    Events.DoEvents()
 end
 
 function Module:DoMez()

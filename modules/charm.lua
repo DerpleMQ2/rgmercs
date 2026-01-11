@@ -11,7 +11,7 @@ local Strings   = require("utils.strings")
 local Files     = require("utils.files")
 local Logger    = require("utils.logger")
 local Modules   = require("utils.modules")
-local Set       = require("mq.Set")
+local Events    = require("utils.events")
 local Icons     = require('mq.ICONS')
 
 require('utils.datatypes')
@@ -448,6 +448,7 @@ function Module:CharmNow(charmId, useAA)
 	end
 
 	mq.doevents()
+	Events.DoEvents()
 
 	if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS and mq.TLO.Pet.ID() > 0 then
 		Comms.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
@@ -461,6 +462,7 @@ function Module:CharmNow(charmId, useAA)
 	end
 
 	mq.doevents()
+	Events.DoEvents()
 
 	Targeting.SetTarget(currentTargetID)
 end
@@ -590,6 +592,7 @@ function Module:UpdateCharmList()
 	end
 
 	mq.doevents()
+	Events.DoEvents()
 end
 
 function Module:ProcessCharmList()
@@ -661,6 +664,7 @@ function Module:ProcessCharmList()
 	end
 
 	mq.doevents()
+	Events.DoEvents()
 end
 
 function Module:DoCharm()

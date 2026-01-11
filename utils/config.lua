@@ -270,28 +270,6 @@ Config.DefaultConfig               = {
         Type = "Custom",
     },
 
-    ['LogLevel']               = {
-        DisplayName = "Log Level",
-        Category = "Debug",
-        Type = "Custom",
-        Default = 3,
-        Min = 1,
-        Max = 6,
-    },
-    ['LogToFile']              = {
-        DisplayName = "Log To File",
-        Category = "Debug",
-        Type = "Custom",
-        Default = false,
-    },
-    ['EnableDebugging']        = {
-        DisplayName = "Enable Debugging",
-        Category = "Misc",
-        Tooltip = "Enable the Debug Panel",
-        Default = false,
-        ConfigType = "Advanced",
-    },
-
     -- Announcements
     ['AnnounceToRaidIfInRaid'] = {
         DisplayName = "Announce to Raid if In Raid",
@@ -1952,6 +1930,39 @@ Config.DefaultConfig               = {
         Tooltip = "Override any ImGui style settings with a custom theme.",
         Default = {},
         Type = "Custom",
+    },
+
+    -- [Internals] --
+    ['LogLevel']                    = {
+        DisplayName = "Log Level",
+        Category = "Internals",
+        Type = "Custom",
+        Default = 3,
+        Min = 1,
+        Max = 6,
+    },
+    ['LogToFile']                   = {
+        DisplayName = "Log To File",
+        Category = "Internals",
+        Type = "Custom",
+        Default = false,
+    },
+    ['EnableDebugging']             = {
+        DisplayName = "Enable Debugging",
+        Category = "Internals",
+        Index = 0,
+        Tooltip = "Enable the Debug Panel",
+        Default = false,
+        ConfigType = "Advanced",
+    },
+
+    ['RunCoroutinesDuringLoops']    = {
+        DisplayName = "Run Coroutines During Loops",
+        Category = "Internals",
+        Index = 1,
+        Tooltip = "Allow coroutines to run during blocking loops (such as casting, pulling, combat, etc.)",
+        Default = true,
+        ConfigType = "Advanced",
     },
 
     -- Cross client comms

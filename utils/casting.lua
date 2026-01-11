@@ -9,6 +9,7 @@ local DanNet          = require('lib.dannet.helpers')
 local Logger          = require("utils.logger")
 local Combat          = require("utils.combat")
 local Tables          = require("utils.tables")
+local Events          = require("utils.events")
 
 local Casting         = { _version = '2.0', _name = "Casting", _author = 'Derple, Algar', }
 Casting.__index       = Casting
@@ -485,12 +486,14 @@ function Casting.OkayToRez(corpseId)
         while maxWait > 0 do
             mq.doevents('CorpseConned')
             mq.delay(50)
+            Events.DoEvents()
             if not mq.TLO.Spawn(corpseId)() then
                 Logger.log_debug("\atEmuOkayToRez(): Corpse ID %d no longer exists, did someone else rez it? Aborting.", corpseId or 0)
                 return false
             end
             if Config.Globals.CorpseConned then
                 mq.doevents('AlreadyRezzed')
+                Events.DoEvents()
                 if Tables.TableContains(Config.Globals.RezzedCorpses, corpseId) then
                     Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, and it appears to have been rezzed already. Aborting.", corpseId or 0)
                     return false
@@ -665,6 +668,7 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
         end
         mq.delay(100)
         mq.doevents()
+        Events.DoEvents()
         maxWait = maxWait - 100
     end
 
@@ -1085,6 +1089,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
             Logger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
             Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
             mq.doevents()
+            Events.DoEvents()
             mq.delay(1)
             Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
@@ -1227,6 +1232,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
                 end
                 mq.doevents()
                 mq.delay(20)
+                Events.DoEvents()
                 cancelWait = cancelWait - 20
             end
 
@@ -1379,6 +1385,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
             Logger.log_verbose("\ayUseAA(): Started to cast: %s - waiting to finish", aaName)
             Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
             mq.doevents()
+            Events.DoEvents()
             mq.delay(1)
             Logger.log_verbose("\atUseAA(): Finished waiting on cast: %s result = %s retries left = %d", aaName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
@@ -1493,6 +1500,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
             Logger.log_verbose("Waiting for item to start casting...")
             mq.delay(50)
             mq.doevents()
+            Events.DoEvents()
             -- in case very fast casts serverside don't make it to the client
             -- this was originally added for 100ms clickies on laz that don't ever show casting (which has now been addressed above), but left as a fallback
             if not me.ItemReady(itemName) then
@@ -1507,6 +1515,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         while me.Casting() do
             mq.delay(10)
             mq.doevents()
+            Events.DoEvents()
         end
     end
 
@@ -1595,6 +1604,7 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
         end
 
         mq.doevents()
+        Events.DoEvents()
     end
 end
 
@@ -1605,6 +1615,7 @@ function Casting.WaitCastReady(spell, maxWait)
     while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
         mq.delay(1)
         mq.doevents()
+        Events.DoEvents()
         if Targeting.GetXTHaterCount() > 0 then
             Logger.log_debug("I was interruped by combat while waiting to cast %s.", spell)
             return
@@ -1633,6 +1644,7 @@ function Casting.WaitGlobalCoolDown(logPrefix)
     while mq.TLO.Me.SpellInCooldown() do
         mq.delay(100)
         mq.doevents()
+        Events.DoEvents()
         Logger.log_verbose(logPrefix and logPrefix or "" .. "Waiting for Global Cooldown to be ready...")
     end
 end

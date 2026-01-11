@@ -1283,7 +1283,8 @@ function Module:CureIsQueued()
     return (Tables.GetTableSize(self.TempSettings.NeedCuresList) or 0) > 0
 end
 
-function Module:ManageCureCoroutines()
+function Module:DoEvents()
+    -- Process Cure Coroutines
     local deadCoroutines = {}
     for idx, c in ipairs(self.TempSettings.CureCoroutines) do
         if coroutine.status(c) ~= 'dead' then
@@ -1534,13 +1535,13 @@ function Module:GiveTime(combat_state)
             end
         end
 
-        self:ManageCureCoroutines()
+        self:DoEvents()
     end
 
     --Counter TOB Debuff with AA Buff, this can be refactored/expanded if they add other similar systems
     if Config:GetSetting('UseCounterActions') then
         Logger.log_verbose("\ao[CounterActions] Checking for debuffs to counter...")
-        self:RunCounterRotation()
+        self:DoEvents()
     end
 
     if self:IsTanking() and Config:GetSetting('MovebackWhenBehind') then

@@ -9,6 +9,7 @@ local Targeting = require("utils.targeting")
 local DanNet    = require("lib.dannet.helpers")
 local Strings   = require("utils.strings")
 local Movement  = require("utils.movement")
+local Events    = require("utils.events")
 
 local Combat    = { _version = '1.0', _name = "Combat", _author = 'Derple', }
 Combat.__index  = Combat
@@ -831,12 +832,14 @@ function Combat.AutoCampCheck(tempConfig)
             while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
                 mq.delay(10)
                 mq.doevents()
+                Events.DoEvents()
             end
         else
             Core.DoCmd("/moveto loc %d %d|on", tempConfig.AutoCampY, tempConfig.AutoCampX)
             while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveTo.Stopped() do
                 mq.delay(10)
                 mq.doevents()
+                Events.DoEvents()
             end
         end
     end
@@ -875,12 +878,14 @@ function Combat.CombatCampCheck(tempConfig)
             while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
                 mq.delay(10)
                 mq.doevents()
+                Events.DoEvents()
             end
         else
             Core.DoCmd("/moveto loc %d %d|on", tempConfig.AutoCampY, tempConfig.AutoCampX)
             while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveTo.Stopped() do
                 mq.delay(10)
                 mq.doevents()
+                Events.DoEvents()
             end
         end
     end

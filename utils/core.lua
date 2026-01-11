@@ -312,7 +312,7 @@ function Core.GetResolvedActionMapItem(action)
 end
 
 function Core.ProcessCureChecks()
-    Modules:ExecModule("Class", "ManageCureCoroutines")
+    Modules:ExecModule("Class", "DoEvents")
 end
 
 function Core.SetPetHold()
