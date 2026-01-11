@@ -405,7 +405,7 @@ function Ui.RenderMercsStatus(showPopout)
 
         for _, peer in ipairs(Ui.TempSettings.SortedMercs) do
             local data = mercs[peer]
-            if data then
+            if data and data.Data then
                 ImGui.PushID(string.format("##table_entry_%s", peer))
                 ImGui.TableNextColumn()
                 if data.Data.Zone ~= mq.TLO.Zone.Name() then
