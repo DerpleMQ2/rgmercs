@@ -6,6 +6,7 @@ local Files                                              = require("utils.files"
 local Logger                                             = require("utils.logger")
 local Comms                                              = require("utils.comms")
 local Set                                                = require("mq.Set")
+local Globals                                            = require("utils.globals")
 
 local Config                                             = {
     _version = '1.5.1',
@@ -39,37 +40,6 @@ Config.TempSettings.LastPeerConfigReceivedTime           = 0
 Config.TempSettings.ResetOptionsUIPosition               = false
 
 Config.TempSettings.HighlightedModules                   = Set.new({})
-
--- Global State
-Config.Globals                                           = {}
-Config.Globals.MainAssist                                = ""
-Config.Globals.ScriptDir                                 = ""
-Config.Globals.AutoTargetID                              = 0
-Config.Globals.ForceTargetID                             = 0
-Config.Globals.ForceCombatID                             = 0
-Config.Globals.LastPulledID                              = 0
-Config.Globals.CurrentState                              = "None"
-Config.Globals.IgnoredTargetIDs                          = Set.new({})
-Config.Globals.SubmodulesLoaded                          = false
-Config.Globals.PauseMain                                 = false
-Config.Globals.LastMove                                  = nil
-Config.Globals.BackOffFlag                               = false
-Config.Globals.InMedState                                = false
-Config.Globals.LastPetCmd                                = 0
-Config.Globals.LastFaceTime                              = 0
-Config.Globals.CurZoneId                                 = mq.TLO.Zone.ID()
-Config.Globals.CurInstance                               = mq.TLO.Me.Instance()
-Config.Globals.CurLoadedChar                             = mq.TLO.Me.DisplayName()
-Config.Globals.CurLoadedClass                            = mq.TLO.Me.Class.ShortName()
-Config.Globals.CurServer                                 = mq.TLO.EverQuest.Server()
-Config.Globals.CurServerNormalized                       = mq.TLO.EverQuest.Server():gsub(" ", "")
-Config.Globals.CastResult                                = 0
-Config.Globals.BuildType                                 = mq.TLO.MacroQuest.BuildName()
-Config.Globals.Minimized                                 = false
-Config.Globals.LastUsedSpell                             = "None"
-Config.Globals.CorpseConned                              = false
-Config.Globals.RezzedCorpses                             = {}
-Config.Globals.SLPeerLooting                             = false
 
 -- Constants
 Config.Constants                                         = {}
@@ -233,7 +203,7 @@ Config.DefaultConfig               = {
     ['ClassConfigDir']         = {
         DisplayName = "Class Config Dir",
         Type = "Custom",
-        Default = (Config.Globals.BuildType:lower() == "emu" and Config.Constants.SupportedEmuServers:contains(Config.Globals.CurServer)) and Config.Globals.CurServer or "Live",
+        Default = (Globals.BuildType:lower() == "emu" and Config.Constants.SupportedEmuServers:contains(Globals.CurServer)) and Globals.CurServer or "Live",
     },
     ['UseAssistList']          = {
         DisplayName = "Assist Outside of Group",
@@ -466,7 +436,7 @@ Config.DefaultConfig               = {
         Tooltip = "Choose if/when to meditate.\nMay interfere with bard songs (refer to FAQ for 'Bard Meditation').",
         Type = "Combo",
         ComboOptions = { 'Off', 'Out of Combat', 'In and Out of Combat', },
-        Default = Config.Globals.CurLoadedClass == "BRD" and 1 or 2,
+        Default = Globals.CurLoadedClass == "BRD" and 1 or 2,
         Min = 1,
         Max = 3,
         ConfigType = "Normal",
@@ -478,7 +448,7 @@ Config.DefaultConfig               = {
         Category = "Med Rules",
         Index = 2,
         Tooltip = "Force a stand to end meditation when thresholds are reached.",
-        Default = Config.Globals.CurLoadedClass == "BRD",
+        Default = Globals.CurLoadedClass == "BRD",
     },
     ['AfterCombatMedDelay']    = {
         DisplayName = "After Combat Med Delay",
@@ -865,7 +835,7 @@ Config.DefaultConfig               = {
         Category = "Assisting",
         Index = 4,
         Tooltip = "Auto attack the combat target.",
-        Default = Config.Globals.CurLoadedClass ~= "RNG" and Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass),
+        Default = Globals.CurLoadedClass ~= "RNG" and Config.Constants.RGMelee:contains(Globals.CurLoadedClass),
         ConfigType = "Normal",
     },
     ['AllowMezBreak']          = {
@@ -907,7 +877,7 @@ Config.DefaultConfig               = {
         Category = "Assisting",
         Index = 8,
         Tooltip = "Allow RGMercs to issue mercenary commands. We plan to add selectable stances in a future update.",
-        Default = (Config.Globals.BuildType ~= 'Emu'),
+        Default = (Globals.BuildType ~= 'Emu'),
         ConfigType = "Normal",
     },
     ['FollowMarkTarget']       = {
@@ -1992,7 +1962,7 @@ Config.DefaultConfig               = {
         Type = "Combo",
         ComboOptions = Config.Constants.LootModuleTypes,
         OnChange = function(oldValue, newValue)
-            if Config.Globals.BuildType:lower() ~= "emu" and newValue > 1 then
+            if Globals.BuildType:lower() ~= "emu" and newValue > 1 then
                 Logger.log_error("\ayLoot Modules are not used on offical servers.")
                 Config:SetSetting("LootModuleType", 1, false)
                 return
@@ -2044,9 +2014,9 @@ Config.CommandHandlers             = {}
 
 function Config:GetConfigFileName()
     local oldFile = mq.configDir ..
-        '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServerNormalized .. "_" .. self.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/RGMerc_' .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
     local newFile = mq.configDir ..
-        '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServerNormalized .. "_" .. self.Globals.CurLoadedChar .. "_" .. self.Globals.CurLoadedClass:lower() .. '.lua'
+        '/rgmercs/PCConfigs/RGMerc_' .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
 
     if Files.file_exists(newFile) then
         return newFile
@@ -2065,13 +2035,13 @@ function Config:SaveSettings()
 end
 
 function Config:LoadSettings()
-    self.Globals.CurLoadedChar       = mq.TLO.Me.DisplayName()
-    self.Globals.CurLoadedClass      = mq.TLO.Me.Class.ShortName()
-    self.Globals.CurServer           = mq.TLO.EverQuest.Server()
-    self.Globals.CurServerNormalized = mq.TLO.EverQuest.Server():gsub(" ", "")
+    Globals.CurLoadedChar       = mq.TLO.Me.DisplayName()
+    Globals.CurLoadedClass      = mq.TLO.Me.Class.ShortName()
+    Globals.CurServer           = mq.TLO.EverQuest.Server()
+    Globals.CurServerNormalized = mq.TLO.EverQuest.Server():gsub(" ", "")
     Logger.log_info(
         "\ayLoading Main Settings for %s!",
-        self.Globals.CurLoadedChar)
+        Globals.CurLoadedChar)
 
     local settings = {}
     local firstSaveRequired = false
@@ -2088,10 +2058,10 @@ function Config:LoadSettings()
     Config:RegisterModuleSettings("Core", settings, Config.DefaultConfig, Config.FAQ, firstSaveRequired)
 
     -- setup our script path for later usage since getting it kind of sucks, but only on the first run (personas)
-    if Config.Globals.ScriptDir == "" then
+    if Globals.ScriptDir == "" then
         local info = debug.getinfo(2, "S")
         local scriptDir = info.short_src:sub(info.short_src:find("lua") + 4):sub(0, -10)
-        Config.Globals.ScriptDir = string.format("%s/%s", mq.TLO.Lua.Dir(), scriptDir)
+        Globals.ScriptDir = string.format("%s/%s", mq.TLO.Lua.Dir(), scriptDir)
     end
 
     Config.CacheCustomColors()
@@ -2935,7 +2905,7 @@ function Config:ConvertAssistNameToID(arg1)
 end
 
 function Config:GetTimeSinceLastMove()
-    return os.clock() - self.Globals.LastMove.TimeAtMove
+    return os.clock() - Globals.LastMove.TimeAtMove
 end
 
 function Config:GetCommandHandlers()
@@ -3081,21 +3051,21 @@ end
 function Config:StoreLastMove()
     local me = mq.TLO.Me
 
-    if not self.Globals.LastMove or
-        math.abs(self.Globals.LastMove.X - me.X()) > 1 or
-        math.abs(self.Globals.LastMove.Y - me.Y()) > 1 or
-        math.abs(self.Globals.LastMove.Z - me.Z()) > 1 or
-        math.abs(self.Globals.LastMove.Heading - me.Heading.Degrees()) > 1 or
+    if not Globals.LastMove or
+        math.abs(Globals.LastMove.X - me.X()) > 1 or
+        math.abs(Globals.LastMove.Y - me.Y()) > 1 or
+        math.abs(Globals.LastMove.Z - me.Z()) > 1 or
+        math.abs(Globals.LastMove.Heading - me.Heading.Degrees()) > 1 or
         me.Combat() or
         me.CombatState():lower() == "combat" or
-        me.Sitting() ~= self.Globals.LastMove.Sitting then
-        self.Globals.LastMove = self.Globals.LastMove or {}
-        self.Globals.LastMove.X = me.X()
-        self.Globals.LastMove.Y = me.Y()
-        self.Globals.LastMove.Z = me.Z()
-        self.Globals.LastMove.Heading = me.Heading.Degrees()
-        self.Globals.LastMove.Sitting = me.Sitting()
-        self.Globals.LastMove.TimeAtMove = os.clock()
+        me.Sitting() ~= Globals.LastMove.Sitting then
+        Globals.LastMove = Globals.LastMove or {}
+        Globals.LastMove.X = me.X()
+        Globals.LastMove.Y = me.Y()
+        Globals.LastMove.Z = me.Z()
+        Globals.LastMove.Heading = me.Heading.Degrees()
+        Globals.LastMove.Sitting = me.Sitting()
+        Globals.LastMove.TimeAtMove = os.clock()
     end
 end
 

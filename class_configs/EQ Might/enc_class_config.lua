@@ -1,5 +1,6 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
+local Globals      = require('utils.globals')
 local Comms        = require("utils.comms")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
@@ -886,7 +887,7 @@ local _ClassConfig = {
                 name = "Self Stasis",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Globals.AutoTargetID
                 end,
                 post_activate = function(self, aaName, success)
                     if success and mq.TLO.Me.Buff("Self Stasis")() then
@@ -907,7 +908,7 @@ local _ClassConfig = {
                 type = "AA",
                 load_cond = function() return Config:GetSetting("DoBeguilers") end,
                 cond = function(self, aaName, target)
-                    if target.ID() == Config.Globals.AutoTargetID then return false end
+                    if target.ID() == Globals.AutoTargetID then return false end
                     return Targeting.IHaveAggro(100) and not Targeting.IsNamed(target)
                 end,
             },

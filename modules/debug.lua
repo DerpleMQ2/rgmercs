@@ -1,5 +1,6 @@
 local mq                         = require('mq')
 local Config                     = require('utils.config')
+local Globals                    = require("utils.globals")
 local Core                       = require("utils.core")
 local Ui                         = require("utils.ui")
 local Comms                      = require("utils.comms")
@@ -48,7 +49,7 @@ Module.autoRun                   = false
 
 local function getConfigFileName()
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -70,7 +71,7 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-    Logger.log_debug("Debug Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
+    Logger.log_debug("Debug Module Loading Settings for: %s.", Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false

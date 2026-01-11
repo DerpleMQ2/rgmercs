@@ -1,5 +1,6 @@
 local mq        = require('mq')
 local Config    = require('utils.config')
+local Globals   = require("utils.globals")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
 local Logger    = require("utils.logger")
@@ -84,7 +85,7 @@ return {
             state = 1,
             steps = 1,
             targetId = function(self)
-                return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or { mq.TLO.Me.ID(), }
+                return mq.TLO.Target.ID() == Globals.AutoTargetID and { Globals.AutoTargetID, } or { mq.TLO.Me.ID(), }
             end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" or (combat_state == "Downtime" and Casting.OkayToBuff())

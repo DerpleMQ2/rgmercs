@@ -2,6 +2,7 @@ local mq       = require('mq')
 local ImGui    = require('ImGui')
 local ImagesUI = require('ui.images')
 local Config   = require('utils.config')
+local Globals  = require('utils.globals')
 local Casting  = require('utils.casting')
 local Core     = require('utils.core')
 local Ui       = require('utils.ui')
@@ -32,7 +33,7 @@ function HudUI:LoadAllOptions()
     if tonumber(os.date("%m%d")) == 401 then
         self:AFPopUp(self.InitMsg, 1)
         Config:SetSetting('EnableAFUI', true)
-        Config.Globals.Minimized = true
+        Globals.Minimized = true
     end
 end
 
@@ -52,12 +53,12 @@ function HudUI:RenderToggleHud()
     if not open then show = false end
     if show then
         local btnImg = Casting.LastBurnCheck and ImagesUI.burnImg or ImagesUI.derpImg
-        if Config.Globals.PauseMain then
+        if Globals.PauseMain then
             if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), Config.Constants.Colors.Black, Config.Constants.Colors.Red) then
                 if enableAFUI then
                     self:AFPopUp(self.ClickMsg, math.random(4))
                 else
-                    Config.Globals.Minimized = not Config.Globals.Minimized
+                    Globals.Minimized = not Globals.Minimized
                 end
             end
             if ImGui.IsItemHovered() then
@@ -68,7 +69,7 @@ function HudUI:RenderToggleHud()
                 if enableAFUI then
                     self:AFPopUp(self.ClickMsg, math.random(4))
                 else
-                    Config.Globals.Minimized = not Config.Globals.Minimized
+                    Globals.Minimized = not Globals.Minimized
                 end
             end
             if ImGui.IsItemHovered() then
@@ -83,20 +84,20 @@ function HudUI:RenderToggleHud()
             end
         end
         if ImGui.BeginPopupContextWindow() then
-            local pauseLabel = Config.Globals.PauseMain and "Resume" or "Pause"
+            local pauseLabel = Globals.PauseMain and "Resume" or "Pause"
             if ImGui.MenuItem(pauseLabel) then
-                Config.Globals.PauseMain = not Config.Globals.PauseMain
+                Globals.PauseMain = not Globals.PauseMain
             end
             ImGui.EndPopup()
         end
         ImGui.SameLine()
 
-        local lbl = Config.Globals.PauseMain and "Paused" or "Running"
+        local lbl = Globals.PauseMain and "Paused" or "Running"
         local cursorPos = ImGui.GetCursorPosVec()
         local toggleHeight = 16
         local toggleXPos = ImGui.GetCursorPosX()
 
-        local pause_main, pause_main_pushed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pause", lbl, not Config.Globals.PauseMain, ImVec2(32, toggleHeight),
+        local pause_main, pause_main_pushed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pause", lbl, not Globals.PauseMain, ImVec2(32, toggleHeight),
             Config.Constants.Colors.Green, Config.Constants.Colors.Red, nil, true)
 
         ImGui.SameLine()
@@ -110,7 +111,7 @@ function HudUI:RenderToggleHud()
         local cursorPosAfter = ImGui.GetCursorPosVec()
 
         if pause_main_pushed then
-            Config.Globals.PauseMain = not pause_main
+            Globals.PauseMain = not pause_main
         end
 
         lbl = Config:GetSetting('DoPull') and Strings.PadString("Pulling", 10, false) or "Not Pulling"
@@ -127,8 +128,8 @@ function HudUI:RenderToggleHud()
             Core.DoCmd("/rgl %s", cmd)
         end
 
-        if ImGui.IsKeyPressed(ImGuiKey.Escape) and Config:GetSetting("EscapeMinimizes") and not Config.Globals.Minimized then
-            Config.Globals.Minimized = true
+        if ImGui.IsKeyPressed(ImGuiKey.Escape) and Config:GetSetting("EscapeMinimizes") and not Globals.Minimized then
+            Globals.Minimized = true
         end
 
         if enableAFUI then

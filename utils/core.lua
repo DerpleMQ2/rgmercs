@@ -1,5 +1,6 @@
 local mq      = require('mq')
 local Config  = require('utils.config')
+local Globals = require('utils.globals')
 local Comms   = require("utils.comms")
 local Modules = require("utils.modules")
 local DanNet  = require('lib.dannet.helpers')
@@ -11,10 +12,10 @@ Core.__index  = Core
 
 --- Scans for updates in the class_configs folder.
 function Core.ScanConfigDirs()
-    Config.Globals.ClassConfigDirs = {}
+    Globals.ClassConfigDirs = {}
     local curloadedClassName = mq.TLO.Me.Class.ShortName():lower()
 
-    local classConfigDir = Config.Globals.ScriptDir .. "/class_configs"
+    local classConfigDir = Globals.ScriptDir .. "/class_configs"
 
     for dir in LuaFS.dir(classConfigDir) do
         if dir ~= "." and dir ~= ".." and LuaFS.attributes(classConfigDir .. "/" .. dir).mode == "directory" then
@@ -23,7 +24,7 @@ function Core.ScanConfigDirs()
                 local class = file:match("(.*)_class_config.lua")
                 if class and class == curloadedClassName then
                     Logger.log_debug("Found class config: %s for class %s in directory %s", file, class, dir)
-                    table.insert(Config.Globals.ClassConfigDirs, dir)
+                    table.insert(Globals.ClassConfigDirs, dir)
                 end
             end
         end
@@ -37,7 +38,7 @@ function Core.ScanConfigDirs()
                 local class = file:match("(.*)_class_config.lua")
                 if class and class == curloadedClassName then
                     Logger.log_debug("Found class config: %s for class %s in directory %s", file, class, dir)
-                    table.insert(Config.Globals.ClassConfigDirs, "Custom: " .. dir)
+                    table.insert(Globals.ClassConfigDirs, "Custom: " .. dir)
                 end
             end
         end
@@ -65,14 +66,14 @@ end
 ---
 --- @return boolean True if the environment is EMU, false otherwise.
 function Core.OnEMU()
-    return Config.Globals.BuildType:lower() == "emu"
+    return Globals.BuildType:lower() == "emu"
 end
 
 --- Checks if the current server is Project Lazarus.
 ---
 --- @return boolean True if the server is Project Lazarus, false otherwise.
 function Core.OnLaz()
-    return Config.Globals.CurServer:lower() == "project lazarus"
+    return Globals.CurServer:lower() == "project lazarus"
 end
 
 --- Executes a given command with optional arguments.
@@ -197,32 +198,32 @@ end
 ---
 --- @return number The ID of the main assist.
 function Core.GetMainAssistId()
-    return (Config.Globals.MainAssist or ""):len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist or "")).ID() or 0
+    return (Globals.MainAssist or ""):len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist or "")).ID() or 0
 end
 
 --- Retrieves the main assist spawn.
 --- @return MQSpawn The main assist spawn data.
 function Core.GetMainAssistSpawn()
-    return Config.Globals.MainAssist:len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)) or mq.TLO.Spawn("")
+    return Globals.MainAssist:len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist)) or mq.TLO.Spawn("")
 end
 
 --- Retrieves the percentage of hit points (HP) of the main assist.
 ---
 --- @return number The percentage of HP of the main assist.
 function Core.GetMainAssistPctHPs()
-    if Config.Globals.MainAssist:len() == 0 then return 100 end
+    if Globals.MainAssist:len() == 0 then return 100 end
 
-    local groupMember = mq.TLO.Group.Member(Config.Globals.MainAssist)
+    local groupMember = mq.TLO.Group.Member(Globals.MainAssist)
     if groupMember and groupMember() then
         return groupMember.PctHPs() or 100
     end
 
-    local raidMember = mq.TLO.Raid.Member(Config.Globals.MainAssist)
+    local raidMember = mq.TLO.Raid.Member(Globals.MainAssist)
     if raidMember and raidMember() then
         return raidMember.PctHPs() or 100
     end
 
-    local heartbeat = Comms.GetPeerHeartbeatByName(Config.Globals.MainAssist)
+    local heartbeat = Comms.GetPeerHeartbeatByName(Globals.MainAssist)
     if heartbeat and heartbeat.Data and heartbeat.Data.HPs then
         local hpPct = tonumber(heartbeat.Data.HPs)
         if hpPct and type(hpPct) == 'number' then
@@ -230,11 +231,11 @@ function Core.GetMainAssistPctHPs()
         end
     end
 
-    local ret = tonumber(DanNet.query(Config.Globals.MainAssist, "Me.PctHPs", 1000))
+    local ret = tonumber(DanNet.query(Globals.MainAssist, "Me.PctHPs", 1000))
 
     if ret and type(ret) == 'number' then return ret end
 
-    return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).PctHPs() or 100
+    return mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist)).PctHPs() or 100
 end
 
 --- Checks if a given mode is active.

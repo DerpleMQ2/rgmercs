@@ -1,6 +1,7 @@
 -- Sample Basic Class Module
 local mq                           = require('mq')
 local Config                       = require('utils.config')
+local Globals                      = require('utils.globals')
 local Ui                           = require("utils.ui")
 local Comms                        = require("utils.comms")
 local Core                         = require("utils.core")
@@ -60,7 +61,7 @@ Module.DefaultConfig               = {
 
 local function getConfigFileName()
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -82,7 +83,7 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-    Logger.log_debug("Travel Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
+    Logger.log_debug("Travel Module Loading Settings for: %s.", Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false
@@ -119,7 +120,7 @@ end
 
 function Module:SendPorterInfo()
     Logger.log_debug("\atBroadcasting TravelerUpdate")
-    Comms.BroadcastMessage(self._name, "TravelerUpdate", self.TransportSpells[Config.Globals.CurLoadedChar])
+    Comms.BroadcastMessage(self._name, "TravelerUpdate", self.TransportSpells[Globals.CurLoadedChar])
 end
 
 function Module:RequestPorterInfo()
@@ -138,12 +139,12 @@ function Module:Init()
     self:LoadSettings()
 
     if Core.MyClassIs("wiz") or Core.MyClassIs("dru") then
-        self.TransportSpells                                              = {}
-        self.TransportSpells[Config.Globals.CurLoadedChar]                = {}
-        self.TransportSpells[Config.Globals.CurLoadedChar].Class          = className
-        self.TransportSpells[Config.Globals.CurLoadedChar].Name           = Config.Globals.CurLoadedChar
-        self.TransportSpells[Config.Globals.CurLoadedChar].Tabs           = {}
-        self.TransportSpells[Config.Globals.CurLoadedChar].SortedTabNames = {}
+        self.TransportSpells                                       = {}
+        self.TransportSpells[Globals.CurLoadedChar]                = {}
+        self.TransportSpells[Globals.CurLoadedChar].Class          = className
+        self.TransportSpells[Globals.CurLoadedChar].Name           = Globals.CurLoadedChar
+        self.TransportSpells[Globals.CurLoadedChar].Tabs           = {}
+        self.TransportSpells[Globals.CurLoadedChar].SortedTabNames = {}
 
         for i = 1, Config.Constants.SpellBookSlots do
             local spell = mq.TLO.Me.Book(i)
@@ -151,8 +152,8 @@ function Module:Init()
                 Logger.log_debug("\ayFound Transport Spell: <\ay%-15s\ay> => \at'%s'\ay \ao(%d) \ay[\am%s\ay]", spell.Subcategory(), spell.RankName(), spell.ID(),
                     spell.TargetType())
                 local subCat = spell.Subcategory()
-                self.TransportSpells[Config.Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[Config.Globals.CurLoadedChar].Tabs[subCat] or {}
-                table.insert(self.TransportSpells[Config.Globals.CurLoadedChar].Tabs[subCat],
+                self.TransportSpells[Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[Globals.CurLoadedChar].Tabs[subCat] or {}
+                table.insert(self.TransportSpells[Globals.CurLoadedChar].Tabs[subCat],
                     {
                         Name = spell.RankName(),
                         Type = spell.TargetType(),
@@ -161,11 +162,11 @@ function Module:Init()
             end
         end
 
-        for k in pairs(self.TransportSpells[Config.Globals.CurLoadedChar].Tabs) do
+        for k in pairs(self.TransportSpells[Globals.CurLoadedChar].Tabs) do
             table.insert(
-                self.TransportSpells[Config.Globals.CurLoadedChar].SortedTabNames, k)
+                self.TransportSpells[Globals.CurLoadedChar].SortedTabNames, k)
         end
-        table.sort(self.TransportSpells[Config.Globals.CurLoadedChar].SortedTabNames)
+        table.sort(self.TransportSpells[Globals.CurLoadedChar].SortedTabNames)
 
         -- notify everyone else of my state...
         self:SendPorterInfo()

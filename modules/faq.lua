@@ -1,6 +1,7 @@
 -- Sample FAQ Class Module
 local mq               = require('mq')
 local Config           = require('utils.config')
+local Globals          = require('utils.globals')
 local Ui               = require('utils.ui')
 local Comms            = require("utils.comms")
 local Logger           = require("utils.logger")
@@ -66,7 +67,7 @@ Module.FAQ             = {
 
 local function getConfigFileName()
 	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. Config.Globals.CurServerNormalized .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -88,7 +89,7 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-	Logger.log_debug("FAQ Combat Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
+	Logger.log_debug("FAQ Combat Module Loading Settings for: %s.", Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 	local settings = {}
 	local firstSaveRequired = false
@@ -283,7 +284,7 @@ function Module:ExportFAQToWiki()
 	if classFaq then
 		for module, info in pairs(classFaq) do
 			if module:lower() == 'class' and info.FAQ then
-				local title = "RGMercs Lua Edition: FAQ - " .. (Config.Globals.CurLoadedClass) .. " Class"
+				local title = "RGMercs Lua Edition: FAQ - " .. (Globals.CurLoadedClass) .. " Class"
 				local fileContent = "[[" .. title .. "]]\n\n"
 				fileContent = fileContent .. "__FORCETOC__\n\n"
 				fileContent = fileContent .. "== " .. title .. " ==\n\n"
@@ -295,13 +296,13 @@ function Module:ExportFAQToWiki()
 					fileContent = fileContent .. "* Settings Used:\n  " .. (data.Settings_Used or "None") .. "\n\n"
 				end
 
-				local classFileName = mq.configDir .. "/WIKI/" .. Config.Globals.CurLoadedClass .. "_Class_FAQ.txt"
+				local classFileName = mq.configDir .. "/WIKI/" .. Globals.CurLoadedClass .. "_Class_FAQ.txt"
 				local classFile = io.open(classFileName, "w")
 				if classFile then
 					classFile:write(fileContent)
 					classFile:close()
 				else
-					print("Failed to open file for " .. Config.Globals.CurLoadedClass)
+					print("Failed to open file for " .. Globals.CurLoadedClass)
 				end
 			end
 		end
@@ -390,7 +391,7 @@ function Module:RenderConfig(search)
 		ImGui.EndTooltip()
 	end
 
-	if not Config.Globals.SubmodulesLoaded then
+	if not Globals.SubmodulesLoaded then
 		return
 	end
 

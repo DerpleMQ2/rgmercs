@@ -1,5 +1,6 @@
 local mq          = require('mq')
 local Config      = require('utils.config')
+local Globals     = require("utils.globals")
 local Core        = require("utils.core")
 local Targeting   = require("utils.targeting")
 local Casting     = require("utils.casting")
@@ -1366,7 +1367,7 @@ _ClassConfig      = {
                     local baseItem = self.ResolvedActionMap['FireOrbSummon'].RankName.Base(1)() or "None"
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
-                        return Casting.UseItem(invItem.Name(), Config.Globals.AutoTargetID)
+                        return Casting.UseItem(invItem.Name(), Globals.AutoTargetID)
                     end
                     return false
                 end,

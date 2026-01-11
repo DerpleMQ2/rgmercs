@@ -1,5 +1,6 @@
 local mq          = require('mq')
 local Config      = require('utils.config')
+local Globals     = require('utils.globals')
 local Modules     = require("utils.modules")
 local Core        = require("utils.core")
 local Combat      = require("utils.combat")
@@ -16,8 +17,8 @@ local Strings     = require("utils.strings")
 
 mq.event("CantSee", "You cannot see your target.", function()
     Logger.log_debug("CantSee: Event Detected")
-    if Config.Globals.BackOffFlag then return end
-    if Config.Globals.PauseMain then return end
+    if Globals.BackOffFlag then return end
+    if Globals.PauseMain then return end
     local target = mq.TLO.Target
     if mq.TLO.Stick.Active() then
         Movement:DoStickCmd("off")
@@ -131,8 +132,8 @@ end)
 
 local function tooFarHandler()
     Logger.log_debug("TooFar: Event Detected")
-    if Config.Globals.BackOffFlag then return end
-    if Config.Globals.PauseMain then return end
+    if Globals.BackOffFlag then return end
+    if Globals.PauseMain then return end
     if mq.TLO.Stick.Active() then
         Movement:DoStickCmd("off")
         Movement:ClearLastStickTimer()
@@ -240,7 +241,7 @@ end)
 
 mq.event('Level Up', "You have gained a level! Welcome to level#*#", function()
     -- we may have spells scribed for the new level already on EQ Might, where deleveling is a standard part of play
-    if Config.Globals.CurServer == "EQ Might" then
+    if Globals.CurServer == "EQ Might" then
         Modules:ExecModule("Class", "RescanLoadout")
     end
 end)
@@ -408,22 +409,22 @@ end)
 
 mq.event('Immune2', "Your target is immune to changes in its attack speed#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
-    Modules:ExecModule("Class", "AddImmuneTarget", "Slow", Config.Globals.AutoTargetID or 0)
+    Modules:ExecModule("Class", "AddImmuneTarget", "Slow", Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune3', "Your target is immune to changes in its run speed#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
-    Modules:ExecModule("Class", "AddImmuneTarget", "Snare", Config.Globals.AutoTargetID or 0)
+    Modules:ExecModule("Class", "AddImmuneTarget", "Snare", Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune4', "Your target is immune to snare spells#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
-    Modules:ExecModule("Class", "AddImmuneTarget", "Snare", Config.Globals.AutoTargetID or 0)
+    Modules:ExecModule("Class", "AddImmuneTarget", "Snare", Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune5', "Your target is immune to the stun portion of this effect#*#", function()
     Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
-    Modules:ExecModule("Class", "AddImmuneTarget", "Stun", Config.Globals.AutoTargetID or 0)
+    Modules:ExecModule("Class", "AddImmuneTarget", "Stun", Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune6', "Your target looks unaffected#*#", function()
@@ -474,7 +475,7 @@ end)
 
 mq.event('Summoned', "You have been summoned!", function(_)
     if Config:GetSetting('DoAutoEngage') and not Config:GetSetting('DoMelee') and not Core.IAmMA() and Config:GetSetting('ReturnToCamp') then
-        Comms.PrintGroupMessage("%s was just summoned -- returning to camp!", Config.Globals.CurLoadedChar)
+        Comms.PrintGroupMessage("%s was just summoned -- returning to camp!", Globals.CurLoadedChar)
         Modules:ExecModule("Movement", "DoAutoCampCheck")
     end
 end)
@@ -484,7 +485,7 @@ end)
 -- [ GAME EVENT HANDLERS ] --
 
 mq.event('Camping', "It will take you about #1# seconds to prepare your camp.", function(_, seconds)
-    Config.Globals.PauseMain = true
+    Globals.PauseMain = true
 end)
 
 -- [ END GAME EVENT HANDLERS ] --
@@ -501,7 +502,7 @@ end)
 
 -- [ CLASS CHANGE EVENT HANDLERS ] --
 mq.event('PersonaEquipLoad', "You successfully loaded your #*# equipment set.", function()
-    if Config.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName() then
+    if Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName() then
         ClassLoader.changeLoadedClass()
     end
 end)
@@ -511,14 +512,14 @@ end)
 mq.event('CorpseConned', "This corpse will decay#*#.", function()
     if Core.OnEMU and Modules:ExecModule("Class", "IsRezing") then
         Logger.log_verbose("Corpse /con message received for rez checks.")
-        Config.Globals.CorpseConned = true
+        Globals.CorpseConned = true
     end
 end)
 
 mq.event('AlreadyRezzed', "This corpse has already accepted a resurrection.", function()
     if Core.OnEMU and Modules:ExecModule("Class", "IsRezing") then
         Logger.log_verbose("Already rezzed corpse detected, we will ignore this corpse for now.")
-        table.insert(Config.Globals.RezzedCorpses, mq.TLO.Target.ID()) --target.id returns 0 if no target
+        table.insert(Globals.RezzedCorpses, mq.TLO.Target.ID()) --target.id returns 0 if no target
     end
 end)
 -- [ END EMU REZ HANDLERS] --

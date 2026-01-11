@@ -10,6 +10,7 @@
 
 local mq        = require('mq')
 local Config    = require('utils.config')
+local Globals   = require("utils.globals")
 local Core      = require("utils.core")
 local Modules   = require("utils.modules")
 local Targeting = require("utils.targeting")
@@ -1680,7 +1681,7 @@ local _ClassConfig = {
                     Core.DoCmd('/squelch face fast')
                     Movement:DoStickCmd("10 moveback")
                 elseif tooFar or forceMove then
-                    Core.DoCmd("/squelch /nav id %d distance=%d lineofsight=on", Config.Globals.AutoTargetID, Config:GetSetting('BowNavDistance'))
+                    Core.DoCmd("/squelch /nav id %d distance=%d lineofsight=on", Globals.AutoTargetID, Config:GetSetting('BowNavDistance'))
                     Core.DoCmd('/squelch face fast')
                 end
             end

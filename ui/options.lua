@@ -1,6 +1,7 @@
 local mq                        = require('mq')
 local ImGui                     = require('ImGui')
 local Config                    = require('utils.config')
+local Globals                   = require("utils.globals")
 local Logger                    = require('utils.logger')
 local Ui                        = require('utils.ui')
 local Icons                     = require('mq.ICONS')
@@ -581,10 +582,10 @@ function OptionsUI:RenderMainWindow(_, openGUI)
     ImGui.SetNextWindowSize(ImVec2(700, 500), ImGuiCond.FirstUseEver)
     ImGui.SetNextWindowSizeConstraints(ImVec2(400, 300), ImVec2(2000, 2000))
 
-    openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+    openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
 
     if shouldDrawGUI then
-        ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
+        ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
         local _, y = ImGui.GetContentRegionAvail()
 
         if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
