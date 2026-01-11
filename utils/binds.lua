@@ -353,6 +353,13 @@ Binds.Handlers    = {
             Logger.log_info("\agAll clients paused!")
         end,
     },
+    ['rescanloadout'] = {
+        usage = "/rgl rescanloadout",
+        about = "Rescans your current loadout for changes.",
+        handler = function()
+            Modules:ExecModule("Class", "RescanLoadout")
+        end,
+    },
     ['yes'] = {
         usage = "/rgl yes",
         about = "All groupmembers running RGMercs will click on every possible 'Yes' Dialogue they have up.",
