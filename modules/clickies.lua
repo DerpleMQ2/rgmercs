@@ -9,6 +9,7 @@ local Comms                             = require("utils.comms")
 local Logger                            = require("utils.logger")
 local Targeting                         = require("utils.targeting")
 local Files                             = require("utils.files")
+local Tables                            = require("utils.tables")
 local Set                               = require("mq.Set")
 local Icons                             = require('mq.ICONS')
 local animItems                         = mq.FindTextureAnimation("A_DragItem")
@@ -882,6 +883,23 @@ function Module:LoadSettings()
         self:SaveSettings(false)
     end
 
+    -- validate condition targets.
+    for _, clicky in ipairs(settings.Clickies or {}) do
+        for _, cond in ipairs(clicky.conditions or {}) do
+            local blockDef = self.LogicBlocks[self.LogicBlockTypeIDs[cond.type]]
+            if blockDef and blockDef.cond_targets then
+                local condTarget = cond.target or 'Self'
+                if not Tables.TableContains(blockDef.cond_targets, condTarget) then
+                    cond.target = blockDef.cond_targets[1] or 'Self'
+                    Logger.log_warn(
+                        "\ayClicky Module: \ayClicky Condition Target '%s' is invalid for Condition Type '%s', resetting to default.",
+                        cond.target, cond.type)
+                    self:SaveSettings(false)
+                end
+            end
+        end
+    end
+
     Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
 
     Logger.log_debug("\awClicky Module: \atLoaded \ag%d\at Clickies", #settings.Clickies or 0)
@@ -1024,6 +1042,7 @@ function Module:RenderConditionTypesCombo(cond, condIdx)
         if changed then
             cond.type = self.LogicBlocks[selectedNum].name or "None"
             cond.args = {}
+            cond.target = self.LogicBlocks[selectedNum].cond_targets and self.LogicBlocks[selectedNum].cond_targets[1] or "Self"
             for argIdx, arg in ipairs(self:GetLogicBlockArgsByType(cond.type) or {}) do
                 cond.args[argIdx] = arg.default
             end
@@ -1479,7 +1498,8 @@ function Module:GiveTime(combat_state)
                                 target = Targeting.GetAutoTarget()
                             end
                         end
-                        Logger.log_super_verbose("\ayClicky: \awTesting Condition: \at%s\aw on target: \at%s", cond.type, target and (target.CleanName() or "None") or "None")
+                        Logger.log_super_verbose("\ayClicky: \awTesting Condition: \at%s\aw on target: \at%s (%s)", cond.type, target and (target.CleanName() or "None") or "None",
+                            cond.target or "Self")
 
                         if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
                             Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \arFailed!")
