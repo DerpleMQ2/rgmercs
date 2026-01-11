@@ -52,7 +52,7 @@ end
 function Events.CreateHeartBeat()
     Events.HeartbeatCoroutine = coroutine.create(function()
         while (1) do
-            Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or GlobalCurrentState,
+            Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config.Globals.PauseMain and "Paused" or Config.Globals.CurrentState,
                 Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None", Config.Globals.ForceCombatID,
                 Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off",
                 Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()),

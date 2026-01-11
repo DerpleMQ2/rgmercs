@@ -190,7 +190,7 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
             if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
                 ImGui.SetItemDefaultFocus()
                 if ImGui.BeginTabItem("RGMercsMain") then
-                    ImGui.Text("Current State: " .. GlobalCurrentState)
+                    ImGui.Text("Current State: " .. Config.Globals.CurrentState)
                     ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
                     if Config.TempSettings.AssistWarning and Core.IAmMA() then
                         ImGui.Text("MA: %s (Fallback Mode)", (Core.GetMainAssistSpawn().CleanName() or "None"))

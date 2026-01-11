@@ -297,7 +297,7 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
                 if fnRotationCond then
                     local start = string.format("%.03f", mq.gettime() / 1000)
 
-                    if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, GlobalCurrentState) then
+                    if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, Config.Globals.CurrentState) then
                         Logger.log_verbose("\arStopping Rotation Due to condition check failure!")
                         break
                     end

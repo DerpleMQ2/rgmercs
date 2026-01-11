@@ -48,6 +48,7 @@ Config.Globals.AutoTargetID                              = 0
 Config.Globals.ForceTargetID                             = 0
 Config.Globals.ForceCombatID                             = 0
 Config.Globals.LastPulledID                              = 0
+Config.Globals.CurrentState                              = "None"
 Config.Globals.IgnoredTargetIDs                          = Set.new({})
 Config.Globals.SubmodulesLoaded                          = false
 Config.Globals.PauseMain                                 = false
