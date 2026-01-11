@@ -19,6 +19,13 @@ Binds.MainHandler = function(cmd, ...)
         return Binds.Handlers[cmd].handler(...)
     end
 
+    -- try to process as a substring
+    for bindCmd, bindData in pairs(Binds.Handlers) do
+        if Strings.StartsWith(bindCmd, cmd) then
+            return bindData.handler(...)
+        end
+    end
+
     local processed = false
     local results = Modules:ExecAll("HandleBind", cmd, ...)
 

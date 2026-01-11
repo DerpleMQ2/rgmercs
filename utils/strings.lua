@@ -43,6 +43,17 @@ function Strings.split(text, pattern, plain)
     return ret
 end
 
+function Strings.StartsWith(str, start)
+    if type(str) ~= "string" or type(start) ~= "string" then
+        return false
+    end
+    if #start == 0 then
+        return true
+    end
+
+    return str:lower():sub(1, #start) == start:lower()
+end
+
 --- Formats a given time
 ---
 --- @param time number The time value to format.

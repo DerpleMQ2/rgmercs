@@ -1745,6 +1745,20 @@ function Module:HandleBind(cmd, ...)
     if self.CommandHandlers and self.CommandHandlers[cmd] then
         return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), self.CommandHandlers[cmd].handler, self, ...)
     end
+
+    -- try to process as a substring
+    for bindCmd, bindData in pairs(self.ClassConfig.CommandHandlers or {}) do
+        if Strings.StartsWith(bindCmd, cmd) then
+            return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), bindData.handler, self, ...)
+        end
+    end
+
+    for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
+        if Strings.StartsWith(bindCmd, cmd) then
+            return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), bindData.handler, self, ...)
+        end
+    end
+
     return handled
 end
 

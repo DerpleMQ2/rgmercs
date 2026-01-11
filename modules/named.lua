@@ -344,6 +344,14 @@ function Module:HandleBind(cmd, ...)
         handled = true
     end
 
+    -- try to process as a substring
+    for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
+        if Strings.StartsWith(bindCmd, cmd) then
+            bindData.handler(self, params)
+            handled = true
+        end
+    end
+
     return handled
 end
 
