@@ -53,8 +53,8 @@ function Targeting.ClearTarget()
     if Config:GetSetting('DoAutoTarget') then
         Logger.log_debug("Clearing Target")
         Globals.AutoTargetID = 0
-        Globals.ForceCombatID = 0
         if Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Globals.ForceTargetID) then Globals.ForceTargetID = 0 end
+        Globals.ForceCombatID = 0
         if mq.TLO.Stick.Status():lower() == "on" then Movement:DoStickCmd("off") end
         if mq.TLO.Me.Combat() then Core.DoCmd("/attack off") end
         Core.DoCmd("/target clear")
@@ -238,7 +238,7 @@ function Targeting.GetHighestAggroPct()
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceCombatID) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceTargetID) then
             if xtSpawn.PctAggro() > highestPct then highestPct = xtSpawn.PctAggro() end
         end
     end
@@ -260,7 +260,7 @@ function Targeting.IHaveAggro(pct)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceCombatID) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceTargetID) then
             if xtSpawn.PctAggro() >= pct then return true end
         end
     end
@@ -277,7 +277,7 @@ function Targeting.GetXTHaterIDsSet(printDebug)
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs() or 0)) > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
+        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs() or 0)) > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID) then
             if printDebug then
                 Logger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
             end

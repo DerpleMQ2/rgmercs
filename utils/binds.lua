@@ -125,34 +125,29 @@ Binds.Handlers    = {
     ['forcecombat'] = {
         usage = "/rgl forcecombat <id?>",
         about =
-        "Will force targeting and combat on a (potentially non-hostile) entity. If no ID is supplied, it will use your current target. See associated FAQ entry.",
+        "Alias for /rgl forcetarget. Will force the current target or <id> to be your autotarget no matter what until it is no longer valid. Can force combat on non-hostiles.",
         handler = function(targetId)
-            targetId = targetId and tonumber(targetId) or mq.TLO.Target.ID()
-            if targetId > 0 then
-                if mq.TLO.Target.ID() ~= targetId then
-                    Targeting.SetTarget(targetId, true)
-                end
-                Core.DoCmd("/xtarget set 1 currenttarget")
-                mq.delay("2s", function() return mq.TLO.Me.XTarget(1).ID() == mq.TLO.Target.ID() end)
-                Logger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
-                Globals.ForceCombatID = targetId
-                Globals.ForceTargetID = targetId
-            else
-                Logger.log_info("\awForced Combat requires a valid supplied ID or target!")
+            local forcedTarget = targetId and mq.TLO.Spawn(targetId) or mq.TLO.Target
+            if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget)) then
+                Globals.ForceTargetID = forcedTarget.ID()
+                Logger.log_info("\awForced Target: %s", forcedTarget.CleanName() or "None")
             end
+            Logger.log_warning("This command has been deprecated! The forcecombat command has been replaced by /rgl forcetarget and is slated for eventual removal.")
         end,
     },
     ['forcecombatclear'] = {
         usage = "/rgl forcecombatclear",
-        about = "Will cancel the current forced combat and reset the first XT slot if needed.",
+        about = "Alias for /rgl forcetargetclear. Will clear the current forced target.",
         handler = function()
-            Logger.log_info("\awDisabling forced combat against %s(id:%d)!", mq.TLO.Spawn(Globals.ForceCombatID).CleanName() or "Unknown", Globals.ForceCombatID)
-            Targeting.ClearTarget()
+            Globals.ForceTargetID = 0
+            Logger.log_info("\awForced target cleared.")
+            Logger.log_warning(
+                "This command has been deprecated! The forcecombatclear command has been replaced by /rgl forcetargetclear and is slated for eventual removal.")
         end,
     },
     ['forcetarget'] = {
         usage = "/rgl forcetarget <id?>",
-        about = "Will force the current target or <id> to be your autotarget no matter what until it is no longer valid.",
+        about = "Will force the current target or <id> to be your autotarget no matter what until it is no longer valid. Can force combat on non-hostiles.",
         handler = function(targetId)
             local forcedTarget = targetId and mq.TLO.Spawn(targetId) or mq.TLO.Target
             if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget)) then

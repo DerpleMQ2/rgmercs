@@ -1017,7 +1017,7 @@ function Ui.RenderForceTargetList(showPopout)
                 local xtCount = mq.TLO.Me.XTarget() or 0
                 for i = 1, xtCount do
                     local xtarg = mq.TLO.Me.XTarget(i)
-                    if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
+                    if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID) then
                         table.insert(Ui.TempSettings.SortedXT, xtarg)
                         Ui.TempSettings.SortedXTIDToSlot[xtarg.ID()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
                     end

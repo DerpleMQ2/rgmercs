@@ -337,9 +337,9 @@ local function Main()
             Modules:ExecAll("OnZone")
             notifyZoning = false
             Globals.ForceTargetID = 0
+            Globals.ForceCombatID = 0
             Globals.IgnoredTargetIDs = Set.new({})
             Globals.AutoTargetID = 0
-            Globals.ForceCombatID = 0
         end
         mq.delay(100)
         Globals.CurZoneId = mq.TLO.Zone.ID()
@@ -432,7 +432,7 @@ local function Main()
     Combat.SetMainAssist()
     Ui.GetAssistWarningString()
 
-    if Combat.FindBestAutoTargetCheck() then
+    if not Globals.BackOffFlag then
         -- This will find a valid target and set it to : Globals.AutoTargetID
         Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
     end
