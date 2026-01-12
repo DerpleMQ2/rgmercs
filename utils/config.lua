@@ -3017,6 +3017,10 @@ function Config.CacheCustomColors()
     Globals.Constants.Colors.Cyan        = Tables.TableToImVec4(Config:GetSetting("Cyan")) or Globals.Constants.DefaultColors.Cyan
     Globals.Constants.Colors.White       = Tables.TableToImVec4(Config:GetSetting("White")) or Globals.Constants.DefaultColors.White
     Globals.Constants.Colors.Black       = Tables.TableToImVec4(Config:GetSetting("Black")) or Globals.Constants.DefaultColors.Black
+
+    for i, v in ipairs(Globals.Constants.ConColors) do
+        Globals.Constants.ConColorsNameToVec4[v:upper()] = Globals.Constants.Colors[Globals.Constants.ConColors[i]:gsub(" ", "")] or Globals.Constants.Colors.White
+    end
 end
 
 return Config

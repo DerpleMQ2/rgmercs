@@ -332,8 +332,9 @@ function Ui.RenderMercsStatus(showPopout)
     end
 
     local Colors = Globals.Constants.Colors
+    local ConColorsNameToVec4 = Globals.Constants.ConColorsNameToVec4
 
-    if ImGui.BeginTable("MercStatusTable", 8, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
+    if ImGui.BeginTable("MercStatusTable", 9, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
         local mercs = Comms.GetAllPeerHeartbeats(true)
 
         if not Ui.TempSettings.SortedMercs then
@@ -354,6 +355,7 @@ function Ui.RenderMercsStatus(showPopout)
         ImGui.TableSetupColumn('End %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('Casting', (ImGuiTableColumnFlags.WidthStretch), 120.0)
+        ImGui.TableSetupColumn('Pet', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('State', (ImGuiTableColumnFlags.WidthStretch), 80.0)
         ImGui.TableSetupColumn('Last Update', (ImGuiTableColumnFlags.WidthStretch), 40.0)
         ImGui.TableHeadersRow()
@@ -382,8 +384,10 @@ function Ui.RenderMercsStatus(showPopout)
                 elseif col == 5 then
                     av, bv = data_a.Data.Casting, data_b.Data.Casting
                 elseif col == 6 then
-                    av, bv = data_a.Data.State, data_b.Data.State
+                    av, bv = data_a.Data.PetID, data_b.Data.PetID
                 elseif col == 7 then
+                    av, bv = data_a.Data.State, data_b.Data.State
+                elseif col == 8 then
                     av, bv = data_a.Data.LastUpdate, data_b.Data.LastUpdate
                 else
                     av, bv = a, b
@@ -409,6 +413,7 @@ function Ui.RenderMercsStatus(showPopout)
                 end
 
                 ImGui.SmallButton(peer)
+
                 local name, _ = Comms.GetCharAndServerFromPeer(peer)
                 if name then
                     if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
@@ -445,6 +450,30 @@ function Ui.RenderMercsStatus(showPopout)
                 ImGui.Text(string.format("%s", data.Data.Target or "None"))
                 ImGui.TableNextColumn()
                 ImGui.Text(string.format("%s", data.Data.Casting or "None"))
+                ImGui.TableNextColumn()
+                if data.Data.PetID > 0 then
+                    ImGui.PushStyleColor(ImGuiCol.Text, ConColorsNameToVec4[data.Data.PetConColor])
+
+                    if ImGui.SmallButton(Icons.MD_PETS) then
+                        Core.DoCmd("/mqtarget id %d", data.Data.PetID)
+                    end
+
+                    ImGui.PopStyleColor()
+
+                    Ui.MultilineTooltipWithColors(
+                        {
+                            { text = "Name:",                       color = Colors.White, },
+                            { text = data.Data.PetName or "None",   color = Colors.LightGreen, sameLine = true, },
+                            { text = "Level:",                      color = Colors.White, },
+                            { text = data.Data.PetLevel or "None",  color = Colors.LightBlue,  sameLine = true, },
+                            { text = "HPs:",                        color = Colors.White, },
+                            { text = data.Data.PetHPs or "None",    color = Colors.Cyan,       sameLine = true, },
+                            { text = "Target:",                     color = Colors.White, },
+                            { text = data.Data.PetTarget or "None", color = Colors.LightRed,   sameLine = true, },
+                        })
+                else
+                    ImGui.Text("")
+                end
                 ImGui.TableNextColumn()
 
                 local stateColor =

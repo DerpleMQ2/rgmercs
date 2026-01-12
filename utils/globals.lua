@@ -119,7 +119,7 @@ Globals.Constants.ExpansionNameToID = {
 Globals.Constants.ExpansionIDToName = {}
 for k, v in pairs(Globals.Constants.ExpansionNameToID) do Globals.Constants.ExpansionIDToName[v] = k end
 
-Globals.Constants.LogLevels         = {
+Globals.Constants.LogLevels           = {
     "Errors",
     "Warnings",
     "Info",
@@ -128,7 +128,7 @@ Globals.Constants.LogLevels         = {
     "Super-Verbose",
 }
 
-Globals.Constants.DefaultColors     = {
+Globals.Constants.DefaultColors       = {
     Red         = ImVec4(0.8, 0.3, 0.3, 0.8),
     LightRed    = ImVec4(0.9, 0.5, 0.5, 0.8),
     Green       = ImVec4(0.3, 0.8, 0.3, 0.8),
@@ -148,12 +148,13 @@ Globals.Constants.DefaultColors     = {
     Black       = ImVec4(0.0, 0.0, 0.0, 1.0),
 }
 
-Globals.Constants.Colors            = {}
+Globals.Constants.Colors              = {}
 
-Globals.Constants.ConColors         = {
+Globals.Constants.ConColors           = {
     "Grey", "Green", "Light Blue", "Blue", "White", "Yellow", "Red",
 }
-Globals.Constants.ConColorsNameToId = {}
+Globals.Constants.ConColorsNameToVec4 = {}
+Globals.Constants.ConColorsNameToId   = {}
 for i, v in ipairs(Globals.Constants.ConColors) do Globals.Constants.ConColorsNameToId[v:upper()] = i end
 
 Globals.Constants.SpireChoices      = { "First", "Second", "Third", "Disabled", }
