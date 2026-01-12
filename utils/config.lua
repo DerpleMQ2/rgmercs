@@ -45,7 +45,7 @@ Config.TempSettings.HighlightedModules                   = Set.new({})
 Config.Globals                                           = Globals
 
 -- Constants
-Globals.Constants                                        = Globals.Constants
+Config.Constants                                         = Globals.Constants
 
 Config.FAQ                                               = {
     [1] = {
