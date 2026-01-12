@@ -277,7 +277,7 @@ function Module:Render()
         if ImGui.CollapsingHeader("CC Target List") then
             ImGui.Indent()
             if ImGui.BeginTable("MezzedList", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
                 ImGui.TableSetupColumn('Duration', (ImGuiTableColumnFlags.WidthFixed), 150.0)
                 ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
@@ -289,11 +289,11 @@ function Module:Render()
                     ImGui.Text(tostring(id))
                     ImGui.TableNextColumn()
                     if data.duration > 30000 then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
                     elseif data.duration > 15000 then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Yellow)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Yellow)
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                     end
                     ImGui.Text(tostring(Strings.FormatTime(math.max(0, data.duration / 1000))))
                     ImGui.PopStyleColor()
@@ -312,7 +312,7 @@ function Module:Render()
         if ImGui.CollapsingHeader("Immune Target List") then
             ImGui.Indent()
             if ImGui.BeginTable("Immune", 2, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
                 ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 250.0)
                 ImGui.PopStyleColor()
@@ -450,7 +450,7 @@ function Module:MezNow(mezId, useAE, useAA)
             Casting.UseAA("Dirge of the Sleepwalker", mezId)
 
             mq.doevents('ImmuneMez')
-            if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
+            if Casting.GetLastCastResultId() == Globals.Constants.CastResults.CAST_SUCCESS then
                 Comms.HandleAnnounce(Comms.FormatChatEvent("Mez Success", mq.TLO.Spawn(mezId).CleanName(), "AA:Dirge of the Sleepwalker"), Config:GetSetting('MezAnnounceGroup'),
                     Config:GetSetting('MezAnnounce'),
                     Config:GetSetting('AnnounceToRaidIfInRaid'))
@@ -503,7 +503,7 @@ function Module:MezNow(mezId, useAE, useAA)
             -- In case they're mez immune
             mq.doevents('ImmuneMez')
 
-            if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
+            if Casting.GetLastCastResultId() == Globals.Constants.CastResults.CAST_SUCCESS then
                 Comms.HandleAnnounce(Comms.FormatChatEvent("Mez Success", mq.TLO.Spawn(mezId).CleanName(), mezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
                     Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
             else

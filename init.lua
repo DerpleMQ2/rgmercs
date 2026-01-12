@@ -34,11 +34,11 @@ local Strings     = require("utils.strings")
 local Tables      = require("utils.tables")
 local Movement    = require("utils.movement")
 local Set         = require('mq.set')
+local Globals     = require("utils.globals")
 
--- Initialize class-based moduldes
+-- Initialize class-based modules
 local Modules     = require("utils.modules")
-Modules:load(Config.Constants.LootModuleTypes[Config:GetSetting('LootModuleType')])
-local Globals = require("utils.globals")
+Modules:load(Globals.Constants.LootModuleTypes[Config:GetSetting('LootModuleType')])
 
 require('utils.datatypes')
 
@@ -387,7 +387,7 @@ local function Main()
             Globals.LastPulledID        = 0
             Globals.AutoTargetID        = 0
             Globals.IgnoredTargetIDs    = Set.new({})
-            Casting.LastBurnCheck       = false
+            Globals.LastBurnCheck       = false
             Modules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
 
@@ -478,7 +478,7 @@ local function Main()
         end
     end
 
-    if Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Anytime" or (Config.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Combat" and Globals.CurrentState == "Combat") then
+    if Globals.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Anytime" or (Globals.Constants.ModRodUse[Config:GetSetting('ModRodUse')] == "Combat" and Globals.CurrentState == "Combat") then
         Casting.ClickModRod()
     end
 

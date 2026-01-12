@@ -479,17 +479,17 @@ end
 
 function Targeting.TargetIsACaster(target)
     if not (target and target()) then return false end
-    return Config.Constants.RGCasters:contains(target.Class.ShortName())
+    return Globals.Constants.RGCasters:contains(target.Class.ShortName())
 end
 
 function Targeting.TargetIsAMelee(target)
     if not (target and target()) then return false end
-    return Config.Constants.RGMelee:contains(target.Class.ShortName())
+    return Globals.Constants.RGMelee:contains(target.Class.ShortName())
 end
 
 function Targeting.TargetIsATank(target)
     if not (target and target()) then return false end
-    return Config.Constants.RGTank:contains(target.Class.ShortName())
+    return Globals.Constants.RGTank:contains(target.Class.ShortName())
 end
 
 function Targeting.TargetIsMyself(target)

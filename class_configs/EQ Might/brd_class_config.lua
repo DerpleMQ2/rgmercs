@@ -873,10 +873,10 @@ local _ClassConfig = {
                 "Second Spire: Healing Power Buff to Self.\n" ..
                 "Third Spire: Large Group HP Buff.",
             Type = "Combo",
-            ComboOptions = Config.Constants.SpireChoices,
+            ComboOptions = Globals.Constants.SpireChoices,
             Default = 3,
             Min = 1,
-            Max = #Config.Constants.SpireChoices,
+            Max = #Globals.Constants.SpireChoices,
         },
 
         -- Debuffs

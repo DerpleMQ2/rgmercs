@@ -17,7 +17,6 @@ Casting.__index       = Casting
 Casting.Memorizing    = false
 
 -- cached for UI display
-Casting.LastBurnCheck = false
 Casting.UseGem        = mq.TLO.Me.NumGems()
 
 --- Simple (no trigger or stacking checks) check to see if the player has a buff. Can pass a spell(userdata), ID, or effect name(string).
@@ -443,17 +442,17 @@ function Casting.BurnCheck()
     local alwaysBurn = (Config:GetSetting('BurnAlways') and Config:GetSetting('BurnAuto'))
     local forcedBurn = Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()
 
-    local previousBurnState = Casting.LastBurnCheck
+    local previousBurnState = Globals.LastBurnCheck
 
-    Casting.LastBurnCheck = autoBurn or alwaysBurn or forcedBurn
+    Globals.LastBurnCheck = autoBurn or alwaysBurn or forcedBurn
 
-    if Casting.LastBurnCheck ~= previousBurnState then
-        Logger.log_info("BurnCheck: Burn state changed to %s.", tostring(Casting.LastBurnCheck))
-        Comms.HandleAnnounce(Comms.FormatChatEvent("Burn", burnTargetName, Casting.LastBurnCheck and "Starting" or "Completed"), Config:GetSetting('BurnAnnounceGroup'),
+    if Globals.LastBurnCheck ~= previousBurnState then
+        Logger.log_info("BurnCheck: Burn state changed to %s.", tostring(Globals.LastBurnCheck))
+        Comms.HandleAnnounce(Comms.FormatChatEvent("Burn", burnTargetName, Globals.LastBurnCheck and "Starting" or "Completed"), Config:GetSetting('BurnAnnounceGroup'),
             Config:GetSetting('BurnAnnounce'),
             Config:GetSetting('AnnounceToRaidIfInRaid'))
     end
-    return Casting.LastBurnCheck
+    return Globals.LastBurnCheck
 end
 
 --- GOMCheck performs a check if Gift of Mana is active.
@@ -541,7 +540,7 @@ function Casting.CheckOkayToBuff()
     local visible = not mq.TLO.Me.Invis()
     local safe = Targeting.GetXTHaterCount() == 0 and Globals.AutoTargetID == 0
     local stationary = not (Config:GetSetting('BuffWaitMoveTimer') > Config:GetTimeSinceLastMove() or mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active())
-    local able = not (Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10)
+    local able = not (Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10)
 
     return visible and safe and stationary and able
 end
@@ -552,8 +551,8 @@ function Casting.OkayToDebuff(bIgnoreAggro)
     local enoughMana = Casting.HaveManaToDebuff()
     local lowAggro = bIgnoreAggro or Targeting.AggroCheckOkay()
     local named = Targeting.IsNamed(Targeting.GetAutoTarget())
-    local debuffChoice = Config.Constants.DebuffChoice[Config:GetSetting(named and 'NamedDebuff' or 'MobDebuff')]
-    local conLevel = (Config.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
+    local debuffChoice = Globals.Constants.DebuffChoice[Config:GetSetting(named and 'NamedDebuff' or 'MobDebuff')]
+    local conLevel = (Globals.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
 
     return lowAggro and enoughMana and (debuffChoice == "Always" or (debuffChoice == "Based on Con Color" and conLevel >= Config:GetSetting('DebuffMinCon')))
 end
@@ -648,11 +647,12 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
         Logger.log_warning("\ar %s was not memorized in slot %d due to aggro! The loadout may need manual rescan after combat.", spell, gem)
         return false
     end
-    Logger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
+    Logger.log_info("\ag Meming \aw%s in \agslot %d", spell, gem)
     Core.DoCmd("/memspell %d \"%s\"", gem, spell)
 
     Casting.Memorizing = true
 
+    local startMem = mq.gettime()
     while (me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not me.SpellReady(gem)())) and maxWait > 0 do
         Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         if (me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100)) or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
@@ -667,11 +667,14 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
             Logger.log_debug("I was trying to memorize %s as my persona was changed, aborting.", spell)
             break
         end
+
         mq.delay(100)
         mq.doevents()
         Events.DoEvents()
         maxWait = maxWait - 100
     end
+
+    Logger.log_info("\agMemorizeSpell: \awFinished waiting for '\at%s\aw' to load in slot \am%d\aw. Time taken: \ay%d\aws", spell, gem, (mq.gettime() - startMem) / 1000)
 
     Casting.Memorizing = false
 end
@@ -1078,7 +1081,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
 
         local cmd = string.format("/cast \"%s%s\"", Config:GetSetting('UseExactSpellNames') and "=" or "", spellName)
 
-        Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESULT_NONE)
+        Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_RESULT_NONE)
 
         local spellRange = spell.MyRange() > 0 and spell.MyRange() or (spell.AERange() > 0 and spell.AERange() or 250)
 
@@ -1094,7 +1097,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
             mq.delay(1)
             Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
-        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
+        until Globals.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
         Globals.LastUsedSpell = spellName
         if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
@@ -1197,7 +1200,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
         repeat
             if Core.OnEMU() then
                 -- EMU doesn't seem to tell us we begin singing.
-                Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)
+                Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_SUCCESS)
             end
             Core.DoCmd("/cast \"%s%s\"", Config:GetSetting('UseExactSpellNames') and "=" or "", songName)
 
@@ -1238,7 +1241,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             end
 
             retryCount = retryCount - 1
-        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
+        until Globals.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
         -- if we interrupted ourselves earlier, we don't need to do this
         if mq.TLO.Me.Casting() then
@@ -1257,7 +1260,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             Targeting.SetTarget(oldTargetId, true)
         end
 
-        return Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS
+        return Casting.GetLastCastResultId() == Globals.Constants.CastResults.CAST_SUCCESS
     end
 
     return false
@@ -1374,7 +1377,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     Logger.log_debug("\ayUseAA():Activating AA: '%s' [t: %dms]", cmd, aaAbility.Spell.MyCastTime())
 
     if aaAbility.Spell.MyCastTime() > 0 then
-        Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESULT_NONE)
+        Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_RESULT_NONE)
 
         local spellRange = aaAbility.Spell.MyRange() > 0 and aaAbility.Spell.MyRange() or (aaAbility.Spell.AERange() > 0 and aaAbility.Spell.AERange() or 250)
 
@@ -1390,7 +1393,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
             mq.delay(1)
             Logger.log_verbose("\atUseAA(): Finished waiting on cast: %s result = %s retries left = %d", aaName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
-        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
+        until Globals.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
     else
         Core.DoCmd(cmd)
         mq.delay(5)
@@ -1653,7 +1656,7 @@ end
 --- Retrieves the name of the last cast result.
 --- @return string The name of the last cast result.
 function Casting.GetLastCastResultName()
-    return Config.Constants.CastResultsIdToName[Globals.CastResult]
+    return Globals.Constants.CastResultsIdToName[Globals.CastResult]
 end
 
 --- Retrieves the ID of the last cast result.
@@ -1665,7 +1668,7 @@ end
 --- Sets the result of the last cast operation.
 --- @param result number The result to be set for the last cast operation.
 function Casting.SetLastCastResult(result)
-    Logger.log_debug("\awSet Last Cast Result => \ag%s", Config.Constants.CastResultsIdToName[result])
+    Logger.log_debug("\awSet Last Cast Result => \ag%s", Globals.Constants.CastResultsIdToName[result])
     Globals.CastResult = result
 end
 
@@ -1709,7 +1712,7 @@ function Casting.AutoMed()
     local forcesit   = false
     local forcestand = false
 
-    if Config.Constants.RGHybrid:contains(me.Class.ShortName()) or Config.Constants.RGCasters:contains(me.Class.ShortName()) then
+    if Globals.Constants.RGHybrid:contains(me.Class.ShortName()) or Globals.Constants.RGCasters:contains(me.Class.ShortName()) then
         -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
         -- the original stat checks.
         if me.PctHPs() >= Config:GetSetting('HPMedPctStop') and me.PctMana() >= Config:GetSetting('ManaMedPctStop') and me.PctEndurance() >= Config:GetSetting('EndMedPctStop') then
@@ -1720,7 +1723,7 @@ function Casting.AutoMed()
         if me.PctHPs() < Config:GetSetting('HPMedPct') or me.PctMana() < Config:GetSetting('ManaMedPct') or me.PctEndurance() < Config:GetSetting('EndMedPct') then
             forcesit = true
         end
-    elseif Config.Constants.RGMelee:contains(me.Class.ShortName()) then
+    elseif Globals.Constants.RGMelee:contains(me.Class.ShortName()) then
         if me.PctHPs() >= Config:GetSetting('HPMedPctStop') and me.PctEndurance() >= Config:GetSetting('EndMedPctStop') then
             Globals.InMedState = false
             forcestand = true
@@ -1807,11 +1810,11 @@ end
 --- Function to execute use of modrods.
 function Casting.ClickModRod()
     local me = mq.TLO.Me
-    if not Config.Constants.RGCasters:contains(me.Class.ShortName()) or me.PctMana() > Config:GetSetting('ModRodManaPct') or me.PctHPs() < 60 or Casting.IAmFeigning() or mq.TLO.Me.Invis() or (Core.MyClassIs("BRD") and Core.OnEMU()) then
+    if not Globals.Constants.RGCasters:contains(me.Class.ShortName()) or me.PctMana() > Config:GetSetting('ModRodManaPct') or me.PctHPs() < 60 or Casting.IAmFeigning() or mq.TLO.Me.Invis() or (Core.MyClassIs("BRD") and Core.OnEMU()) then
         return
     end
 
-    for _, itemName in ipairs(Config.Constants.ModRods) do
+    for _, itemName in ipairs(Globals.Constants.ModRods) do
         while mq.TLO.Cursor.Name() == itemName do
             Core.DoCmd("/squelch /autoinv")
             mq.delay(10)

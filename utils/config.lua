@@ -45,134 +45,9 @@ Config.TempSettings.HighlightedModules                   = Set.new({})
 Config.Globals                                           = Globals
 
 -- Constants
-Config.Constants                                         = {}
-Config.Constants.SupportedEmuServers                     = Set.new({ "Project Lazarus", "HiddenForest", "EQ Might", })
-Config.Constants.LootModuleTypes                         = { 'None', 'LootNScoot', 'SmartLoot', }
-Config.Constants.RGCasters                               = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
-    "SHM", "WIZ", })
-Config.Constants.RGMelee                                 = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
-Config.Constants.RGHybrid                                = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
-Config.Constants.RGTank                                  = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGPetClass                              = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
-Config.Constants.RGNotMezzedAnims                        = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
-Config.Constants.ModRods                                 = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", "Azure Mind Crystal", }
-Config.Constants.ModRodUse                               = { "Never", "Combat", "Anytime", }
-Config.Constants.SpellBookSlots                          = 1120
-Config.Constants.CastCompleted                           = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
+Globals.Constants                                        = Globals.Constants
 
-Config.Constants.CastResults                             = {
-    ['CAST_RESULT_NONE'] = 0,
-    ['CAST_SUCCESS']     = 1,
-    ['CAST_BLOCKED']     = 2,
-    ['CAST_IMMUNE']      = 3,
-    ['CAST_FDFAIL']      = 4,
-    ['CAST_COMPONENTS']  = 5,
-    ['CAST_CANNOTSEE']   = 6,
-    ['CAST_TAKEHOLD']    = 7,
-    ['CAST_STUNNED']     = 8,
-    ['CAST_STANDING']    = 9,
-    ['CAST_RESISTED']    = 10,
-    ['CAST_RECOVER']     = 11,
-    ['CAST_PENDING']     = 12,
-    ['CAST_OUTDOORS']    = 13,
-    ['CAST_OUTOFRANGE']  = 14,
-    ['CAST_OUTOFMANA']   = 15,
-    ['CAST_NOTREADY']    = 16,
-    ['CAST_NOTARGET']    = 17,
-    ['CAST_INTERRUPTED'] = 18,
-    ['CAST_FIZZLE']      = 19,
-    ['CAST_DISTRACTED']  = 20,
-    ['CAST_COLLAPSE']    = 21,
-    ['CAST_OVERWRITTEN'] = 22,
-}
-
-Config.Constants.CastResultsIdToName                     = {}
-for k, v in pairs(Config.Constants.CastResults) do Config.Constants.CastResultsIdToName[v] = k end
-
-Config.Constants.ExpansionNameToID = {
-    ['EXPANSION_LEVEL_CLASSIC'] = 0,  -- No Expansion
-    ['EXPANSION_LEVEL_ROK']     = 1,  -- The Ruins of Kunark
-    ['EXPANSION_LEVEL_SOV']     = 2,  -- The Scars of Velious
-    ['EXPANSION_LEVEL_SOL']     = 3,  -- The Shadows of Luclin
-    ['EXPANSION_LEVEL_POP']     = 4,  -- The Planes of Power
-    ['EXPANSION_LEVEL_LOY']     = 5,  -- The Legacy of Ykesha
-    ['EXPANSION_LEVEL_LDON']    = 6,  -- Lost Dungeons of Norrath
-    ['EXPANSION_LEVEL_GOD']     = 7,  -- Gates of Discord
-    ['EXPANSION_LEVEL_OOW']     = 8,  -- Omens of War
-    ['EXPANSION_LEVEL_DON']     = 9,  -- Dragons of Norrath
-    ['EXPANSION_LEVEL_DODH']    = 10, -- Depths of Darkhollow
-    ['EXPANSION_LEVEL_POR']     = 11, -- Prophecy of Ro
-    ['EXPANSION_LEVEL_TSS']     = 12, -- The Serpent's Spine
-    ['EXPANSION_LEVEL_TBS']     = 13, -- The Buried Sea
-    ['EXPANSION_LEVEL_SOF']     = 14, -- Secrets of Faydwer
-    ['EXPANSION_LEVEL_SOD']     = 15, -- Seeds of Destruction
-    ['EXPANSION_LEVEL_UF']      = 16, -- Underfoot
-    ['EXPANSION_LEVEL_HOT']     = 17, -- House of Thule
-    ['EXPANSION_LEVEL_VOA']     = 18, -- Veil of Alaris
-    ['EXPANSION_LEVEL_ROF']     = 19, -- Rain of Fear
-    ['EXPANSION_LEVEL_COTF']    = 20, -- Call of the Forsaken
-    ['EXPANSION_LEVEL_TDS']     = 21, -- The Darkened Sea
-    ['EXPANSION_LEVEL_TBM']     = 22, -- The Broken Mirror
-    ['EXPANSION_LEVEL_EOK']     = 23, -- Empires of Kunark
-    ['EXPANSION_LEVEL_ROS']     = 24, -- Ring of Scale
-    ['EXPANSION_LEVEL_TBL']     = 25, -- The Burning Lands
-    ['EXPANSION_LEVEL_TOV']     = 26, -- Torment of Velious
-    ['EXPANSION_LEVEL_COV']     = 27, -- Claws of Veeshan
-    ['EXPANSION_LEVEL_TOL']     = 28, -- Terror of Luclin
-    ['EXPANSION_LEVEL_NOS']     = 29, -- Night of Shadows
-    ['EXPANSION_LEVEL_LS']      = 30, -- Laurion's Song
-    ['EXPANSION_LEVEL_TOB']     = 31, -- The Outer Brood
-}
-
-Config.Constants.ExpansionIDToName = {}
-for k, v in pairs(Config.Constants.ExpansionNameToID) do Config.Constants.ExpansionIDToName[v] = k end
-
-Config.Constants.LogLevels         = {
-    "Errors",
-    "Warnings",
-    "Info",
-    "Debug",
-    "Verbose",
-    "Super-Verbose",
-}
-
-Config.Constants.DefaultColors     = {
-    Red         = ImVec4(0.8, 0.3, 0.3, 0.8),
-    LightRed    = ImVec4(0.9, 0.5, 0.5, 0.8),
-    Green       = ImVec4(0.3, 0.8, 0.3, 0.8),
-    LightGreen  = ImVec4(0.6, 0.8, 0.4, 0.8),
-    Blue        = ImVec4(0.3, 0.3, 0.8, 0.8),
-    LightBlue   = ImVec4(0.4, 0.6, 0.8, 0.8),
-    Yellow      = ImVec4(0.8, 0.8, 0.3, 0.8),
-    LightYellow = ImVec4(0.9, 0.9, 0.4, 0.8),
-    Purple      = ImVec4(0.8, 0.3, 0.8, 0.8),
-    LightPurple = ImVec4(0.9, 0.4, 0.9, 0.8),
-    Orange      = ImVec4(1.0, 0.5, 0.0, 0.8),
-    LightOrange = ImVec4(1.0, 0.6, 0.2, 0.8),
-    Grey        = ImVec4(0.7, 0.7, 0.7, 0.8),
-    LightGrey   = ImVec4(0.9, 0.9, 0.9, 0.8),
-    Cyan        = ImVec4(0.3, 0.8, 0.8, 0.8),
-    White       = ImVec4(0.8, 0.8, 0.8, 0.8),
-    Black       = ImVec4(0.0, 0.0, 0.0, 1.0),
-}
-
-Config.Constants.Colors            = {}
-
-Config.Constants.ConColors         = {
-    "Grey", "Green", "Light Blue", "Blue", "White", "Yellow", "Red",
-}
-Config.Constants.ConColorsNameToId = {}
-for i, v in ipairs(Config.Constants.ConColors) do Config.Constants.ConColorsNameToId[v:upper()] = i end
-
-Config.Constants.SpireChoices      = { "First", "Second", "Third", "Disabled", }
-
-Config.Constants.LastGemRemem      = { "Do Nothing", "Mem Previous Spell", "Mem Loadout Spell", }
-Config.Constants.DebuffChoice      = { "Never", "Based on Con Color", "Always", }
-
-Config.Constants.ScanNamedPriority = { "Named", "No Preference", "Non-Named", }
-Config.Constants.ScanHPPriority    = { "Lowest HP%", "No Preference", "Highest HP%", }
-
-Config.FAQ                         = {
+Config.FAQ                                               = {
     [1] = {
         Question = "What do Announcements do?",
         Answer = "  Announcments are used to broadcast the selected options to the DanNet channel. The Group Announce optios will output the announcement to /gsay.",
@@ -200,13 +75,13 @@ Config.FAQ                         = {
     },
 }
 -- Defaults
-Config.DefaultConfig               = {
+Config.DefaultConfig                                     = {
 
     -- Custom: These use custom UI elements and do not display in normal settings windows.
     ['ClassConfigDir']         = {
         DisplayName = "Class Config Dir",
         Type = "Custom",
-        Default = (Globals.BuildType:lower() == "emu" and Config.Constants.SupportedEmuServers:contains(Globals.CurServer)) and Globals.CurServer or "Live",
+        Default = (Globals.BuildType:lower() == "emu" and Globals.Constants.SupportedEmuServers:contains(Globals.CurServer)) and Globals.CurServer or "Live",
     },
     ['UseAssistList']          = {
         DisplayName = "Assist Outside of Group",
@@ -571,7 +446,7 @@ Config.DefaultConfig               = {
         Index = 1,
         Tooltip = "Use available Mod Rods or Azure Crystals when we have less that the Mod Rod Mana % setting.",
         Type = "Combo",
-        ComboOptions = Config.Constants.ModRodUse,
+        ComboOptions = Globals.Constants.ModRodUse,
         Default = 2,
         Min = 1,
         Max = 3,
@@ -742,10 +617,10 @@ Config.DefaultConfig               = {
         Index = 1,
         Tooltip = "Choose whether this PC will prioritize Named or Non-Named mobs if set as MA.",
         Type = "Combo",
-        ComboOptions = Config.Constants.ScanNamedPriority,
+        ComboOptions = Globals.Constants.ScanNamedPriority,
         Default = 1,
         Min = 1,
-        Max = #Config.Constants.ScanNamedPriority,
+        Max = #Globals.Constants.ScanNamedPriority,
         ConfigType = "Advanced",
     },
     ['ScanHPPriority']         = {
@@ -757,10 +632,10 @@ Config.DefaultConfig               = {
         Tooltip = "Choose whether this PC will prioritize low or high HP% mobs if set as MA.\n" ..
             "If no preference is selected, we will simply choose the lowest mob ID.",
         Type = "Combo",
-        ComboOptions = Config.Constants.ScanHPPriority,
+        ComboOptions = Globals.Constants.ScanHPPriority,
         Default = 1,
         Min = 1,
-        Max = #Config.Constants.ScanHPPriority,
+        Max = #Globals.Constants.ScanHPPriority,
         ConfigType = "Advanced",
     },
     ['AreaScanFallback']       = {
@@ -838,7 +713,7 @@ Config.DefaultConfig               = {
         Category = "Assisting",
         Index = 4,
         Tooltip = "Auto attack the combat target.",
-        Default = Globals.CurLoadedClass ~= "RNG" and Config.Constants.RGMelee:contains(Globals.CurLoadedClass),
+        Default = Globals.CurLoadedClass ~= "RNG" and Globals.Constants.RGMelee:contains(Globals.CurLoadedClass),
         ConfigType = "Normal",
     },
     ['AllowMezBreak']          = {
@@ -848,7 +723,7 @@ Config.DefaultConfig               = {
         Category = "Assisting",
         Index = 5,
         Tooltip = "Allow combat actions if the target is mezzed.",
-        Default = (Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
+        Default = (Globals.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
         ConfigType = "Advanced",
     },
     ['DoPetCommands']          = {
@@ -1092,9 +967,9 @@ Config.DefaultConfig               = {
             "Remem Loadout Spell: Rememorize the spell from the current loadout, if there is one.",
         Default = 3,
         Min = 1,
-        Max = #Config.Constants.LastGemRemem,
+        Max = #Globals.Constants.LastGemRemem,
         Type = "Combo",
-        ComboOptions = Config.Constants.LastGemRemem,
+        ComboOptions = Globals.Constants.LastGemRemem,
         ConfigType = "Advanced",
     },
     ['IgnoreLevelCheck']       = {
@@ -1194,9 +1069,9 @@ Config.DefaultConfig               = {
         Tooltip = "Min Con to use debuffs on when con-color debuffing is enabled for enemies.",
         Default = 4,
         Min = 1,
-        Max = #Config.Constants.ConColors,
+        Max = #Globals.Constants.ConColors,
         Type = "Combo",
-        ComboOptions = Config.Constants.ConColors,
+        ComboOptions = Globals.Constants.ConColors,
         ConfigType = "Advanced",
     },
     ['MobDebuff']              = {
@@ -1208,9 +1083,9 @@ Config.DefaultConfig               = {
         Tooltip = "The circumstances in which we will debuff a (non-named) mob.",
         Default = 2,
         Min = 1,
-        Max = #Config.Constants.DebuffChoice,
+        Max = #Globals.Constants.DebuffChoice,
         Type = "Combo",
-        ComboOptions = Config.Constants.DebuffChoice,
+        ComboOptions = Globals.Constants.DebuffChoice,
         ConfigType = "Advanced",
     },
     ['NamedDebuff']            = {
@@ -1222,9 +1097,9 @@ Config.DefaultConfig               = {
         Tooltip = "The circumstances in which we will debuff a (named) mob.",
         Default = 2,
         Min = 1,
-        Max = #Config.Constants.DebuffChoice,
+        Max = #Globals.Constants.DebuffChoice,
         Type = "Combo",
-        ComboOptions = Config.Constants.DebuffChoice,
+        ComboOptions = Globals.Constants.DebuffChoice,
         ConfigType = "Advanced",
     },
 
@@ -1671,7 +1546,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 11,
         Tooltip = "Red component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Red),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Red),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1684,7 +1559,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 12,
         Tooltip = "Red component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightRed),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightRed),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1697,7 +1572,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 13,
         Tooltip = "Green component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Green),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Green),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1710,7 +1585,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 14,
         Tooltip = "Green component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightGreen),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightGreen),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1723,7 +1598,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 15,
         Tooltip = "Blue component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Blue),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Blue),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1736,7 +1611,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 16,
         Tooltip = "Blue component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightBlue),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightBlue),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1749,7 +1624,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 17,
         Tooltip = "Yellow component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Yellow),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Yellow),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1762,7 +1637,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 18,
         Tooltip = "Yellow component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightYellow),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightYellow),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1775,7 +1650,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 19,
         Tooltip = "Purple component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Purple),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Purple),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1788,7 +1663,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 20,
         Tooltip = "Purple component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightPurple),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightPurple),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1801,7 +1676,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 21,
         Tooltip = "Orange component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Orange),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Orange),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1814,7 +1689,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 22,
         Tooltip = "Orange component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightOrange),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightOrange),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1827,7 +1702,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 23,
         Tooltip = "Grey component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Grey),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Grey),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1840,7 +1715,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 24,
         Tooltip = "Grey component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.LightGrey),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightGrey),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1853,7 +1728,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 25,
         Tooltip = "Cyan component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Cyan),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Cyan),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1866,7 +1741,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 26,
         Tooltip = "White component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.White),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.White),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1879,7 +1754,7 @@ Config.DefaultConfig               = {
         Category = "Default Colors",
         Index = 27,
         Tooltip = "Black component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Config.Constants.DefaultColors.Black),
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Black),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
@@ -1961,17 +1836,17 @@ Config.DefaultConfig               = {
         Tooltip = "Choose which loot module to use.",
         Default = 1,
         Min = 1,
-        Max = #Config.Constants.LootModuleTypes,
+        Max = #Globals.Constants.LootModuleTypes,
         Type = "Combo",
-        ComboOptions = Config.Constants.LootModuleTypes,
+        ComboOptions = Globals.Constants.LootModuleTypes,
         OnChange = function(oldValue, newValue)
             if Globals.BuildType:lower() ~= "emu" and newValue > 1 then
                 Logger.log_error("\ayLoot Modules are not used on offical servers.")
                 Config:SetSetting("LootModuleType", 1, false)
                 return
             end
-            local oldLootModule = Config.Constants.LootModuleTypes[oldValue]
-            local newLootModule = Config.Constants.LootModuleTypes[newValue]
+            local oldLootModule = Globals.Constants.LootModuleTypes[oldValue]
+            local newLootModule = Globals.Constants.LootModuleTypes[newValue]
             Logger.log_info("\ayLoot Module changed from %s to: \ag%s", oldLootModule or "Unknown", newLootModule or "Unknown")
             Modules:unloadModule(oldLootModule)
             Config:ClearModuleSettings(oldLootModule)
@@ -2013,7 +1888,7 @@ Config.DefaultConfig               = {
     },
 }
 
-Config.CommandHandlers             = {}
+Config.CommandHandlers                                   = {}
 
 function Config:GetConfigFileName()
     local oldFile = mq.configDir ..
@@ -3125,23 +3000,23 @@ function Config.ShouldPriorityFollow()
 end
 
 function Config.CacheCustomColors()
-    Config.Constants.Colors.Red         = Tables.TableToImVec4(Config:GetSetting("Red")) or Config.Constants.DefaultColors.Red
-    Config.Constants.Colors.LightRed    = Tables.TableToImVec4(Config:GetSetting("LightRed")) or Config.Constants.DefaultColors.LightRed
-    Config.Constants.Colors.Green       = Tables.TableToImVec4(Config:GetSetting("Green")) or Config.Constants.DefaultColors.Green
-    Config.Constants.Colors.LightGreen  = Tables.TableToImVec4(Config:GetSetting("LightGreen")) or Config.Constants.DefaultColors.LightGreen
-    Config.Constants.Colors.Blue        = Tables.TableToImVec4(Config:GetSetting("Blue")) or Config.Constants.DefaultColors.Blue
-    Config.Constants.Colors.LightBlue   = Tables.TableToImVec4(Config:GetSetting("LightBlue")) or Config.Constants.DefaultColors.LightBlue
-    Config.Constants.Colors.Yellow      = Tables.TableToImVec4(Config:GetSetting("Yellow")) or Config.Constants.DefaultColors.Yellow
-    Config.Constants.Colors.LightYellow = Tables.TableToImVec4(Config:GetSetting("LightYellow")) or Config.Constants.DefaultColors.LightYellow
-    Config.Constants.Colors.Purple      = Tables.TableToImVec4(Config:GetSetting("Purple")) or Config.Constants.DefaultColors.Purple
-    Config.Constants.Colors.LightPurple = Tables.TableToImVec4(Config:GetSetting("LightPurple")) or Config.Constants.DefaultColors.LightPurple
-    Config.Constants.Colors.Orange      = Tables.TableToImVec4(Config:GetSetting("Orange")) or Config.Constants.DefaultColors.Orange
-    Config.Constants.Colors.LightOrange = Tables.TableToImVec4(Config:GetSetting("LightOrange")) or Config.Constants.DefaultColors.LightOrange
-    Config.Constants.Colors.Grey        = Tables.TableToImVec4(Config:GetSetting("Grey")) or Config.Constants.DefaultColors.Grey
-    Config.Constants.Colors.LightGrey   = Tables.TableToImVec4(Config:GetSetting("LightGrey")) or Config.Constants.DefaultColors.LightGrey
-    Config.Constants.Colors.Cyan        = Tables.TableToImVec4(Config:GetSetting("Cyan")) or Config.Constants.DefaultColors.Cyan
-    Config.Constants.Colors.White       = Tables.TableToImVec4(Config:GetSetting("White")) or Config.Constants.DefaultColors.White
-    Config.Constants.Colors.Black       = Tables.TableToImVec4(Config:GetSetting("Black")) or Config.Constants.DefaultColors.Black
+    Globals.Constants.Colors.Red         = Tables.TableToImVec4(Config:GetSetting("Red")) or Globals.Constants.DefaultColors.Red
+    Globals.Constants.Colors.LightRed    = Tables.TableToImVec4(Config:GetSetting("LightRed")) or Globals.Constants.DefaultColors.LightRed
+    Globals.Constants.Colors.Green       = Tables.TableToImVec4(Config:GetSetting("Green")) or Globals.Constants.DefaultColors.Green
+    Globals.Constants.Colors.LightGreen  = Tables.TableToImVec4(Config:GetSetting("LightGreen")) or Globals.Constants.DefaultColors.LightGreen
+    Globals.Constants.Colors.Blue        = Tables.TableToImVec4(Config:GetSetting("Blue")) or Globals.Constants.DefaultColors.Blue
+    Globals.Constants.Colors.LightBlue   = Tables.TableToImVec4(Config:GetSetting("LightBlue")) or Globals.Constants.DefaultColors.LightBlue
+    Globals.Constants.Colors.Yellow      = Tables.TableToImVec4(Config:GetSetting("Yellow")) or Globals.Constants.DefaultColors.Yellow
+    Globals.Constants.Colors.LightYellow = Tables.TableToImVec4(Config:GetSetting("LightYellow")) or Globals.Constants.DefaultColors.LightYellow
+    Globals.Constants.Colors.Purple      = Tables.TableToImVec4(Config:GetSetting("Purple")) or Globals.Constants.DefaultColors.Purple
+    Globals.Constants.Colors.LightPurple = Tables.TableToImVec4(Config:GetSetting("LightPurple")) or Globals.Constants.DefaultColors.LightPurple
+    Globals.Constants.Colors.Orange      = Tables.TableToImVec4(Config:GetSetting("Orange")) or Globals.Constants.DefaultColors.Orange
+    Globals.Constants.Colors.LightOrange = Tables.TableToImVec4(Config:GetSetting("LightOrange")) or Globals.Constants.DefaultColors.LightOrange
+    Globals.Constants.Colors.Grey        = Tables.TableToImVec4(Config:GetSetting("Grey")) or Globals.Constants.DefaultColors.Grey
+    Globals.Constants.Colors.LightGrey   = Tables.TableToImVec4(Config:GetSetting("LightGrey")) or Globals.Constants.DefaultColors.LightGrey
+    Globals.Constants.Colors.Cyan        = Tables.TableToImVec4(Config:GetSetting("Cyan")) or Globals.Constants.DefaultColors.Cyan
+    Globals.Constants.Colors.White       = Tables.TableToImVec4(Config:GetSetting("White")) or Globals.Constants.DefaultColors.White
+    Globals.Constants.Colors.Black       = Tables.TableToImVec4(Config:GetSetting("Black")) or Globals.Constants.DefaultColors.Black
 end
 
 return Config

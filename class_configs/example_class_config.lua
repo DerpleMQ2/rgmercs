@@ -6,6 +6,7 @@
 local mq           = require('mq')
 local ItemManager  = require("utils.item_manager")
 local Config       = require('utils.config')
+local Globals      = require("utils.globals")
 local Core         = require("utils.core")
 local Ui           = require("utils.ui")
 local Targeting    = require("utils.targeting")
@@ -491,7 +492,7 @@ local _ClassConfig = {
 
             { -- Spire, the SpireChoice setting will determine which ability is displayed/used.
                 name_func = function(self)
-                    local spireAbil = string.format("Fundament: %s Spire of Nature", Config.Constants.SpireChoices[Config:GetSetting('SpireChoice') or 4])
+                    local spireAbil = string.format("Fundament: %s Spire of Nature", Globals.Constants.SpireChoices[Config:GetSetting('SpireChoice') or 4])
                     return Casting.CanUseAA(spireAbil) and spireAbil or "Spire Not Purchased/Selected"
                 end,
                 type = "AA",

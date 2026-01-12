@@ -49,7 +49,7 @@ end
 
 function ClassLoader.getFallbackClassConfigFolder()
     if Core.OnEMU() then
-        if Config.Constants.SupportedEmuServers:contains(Globals.CurServer) then
+        if Globals.Constants.SupportedEmuServers:contains(Globals.CurServer) then
             return Globals.CurServer
         end
     end

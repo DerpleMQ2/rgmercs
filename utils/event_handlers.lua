@@ -248,212 +248,212 @@ end)
 
 -- [ CAST RESULT HANDLERS ] --
 mq.event('Success1', "You begin casting#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_SUCCESS)
 end)
 
 mq.event('Success2', "You begin singing#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_SUCCESS)
 end)
 
 mq.event('Success3', "Your #1# begins to glow.#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_SUCCESS)
 end)
 
 mq.event('Overwritten1', "Your#*#has been overwritten#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_OVERWRITTEN)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_OVERWRITTEN)
 end)
 
 mq.event('Collapsed1', "Your gate is too unstable, and collapses#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_COLLAPSE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_COLLAPSE)
 end)
 
 mq.event('Distracted1', "You need to play a#*#instrument for this song#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_DISTRACTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_DISTRACTED)
 end)
 
 mq.event('Distracted2', "You are too distracted to cast a spell now#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_DISTRACTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_DISTRACTED)
 end)
 
 mq.event('Distracted3', "You can't cast spells while invulnerable#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_DISTRACTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_DISTRACTED)
 end)
 
 mq.event('Distracted4', "You *CANNOT* cast spells, you have been silenced#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_DISTRACTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_DISTRACTED)
 end)
 
 mq.event('Distracted5', "You do not have sufficient focus to maintain that ability.", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_DISTRACTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_DISTRACTED)
 end)
 
 mq.event('Fizzle1', "Your spell fizzles#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_FIZZLE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_FIZZLE)
 end)
 
 mq.event('Fizzle2', "You miss a note, bringing your song to a close#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_FIZZLE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_FIZZLE)
 end)
 
 mq.event('Fizzle3', "You miss a note, bringing your #*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_FIZZLE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_FIZZLE)
 end)
 
 mq.event('Interrupted1', "Your spell is interrupted#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_INTERRUPTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_INTERRUPTED)
 end)
 
 mq.event('Interrupted2', "Your casting has been interrupted#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_INTERRUPTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_INTERRUPTED)
 end)
 
 mq.event('Interrupted3', "Your #1# spell is interrupted#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_INTERRUPTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_INTERRUPTED)
 end)
 
 mq.event('NoTarget1', "You must first select a target for this spell#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_NOTARGET)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_NOTARGET)
 end)
 
 mq.event('NoTarget2', "This spell only works on#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_NOTARGET)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_NOTARGET)
 end)
 
 mq.event('NoTarget3', "You must first target a group member#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_NOTARGET)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_NOTARGET)
 end)
 
 mq.event('NotReady1', "Spell recast time not yet met#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_NOTREADY)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_NOTREADY)
 end)
 
 mq.event('OutOfMana1', "Insufficient Mana to cast this spell#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_OUTOFMANA)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_OUTOFMANA)
 end)
 
 mq.event('OutOfRange1', "Your target is out of range, get closer#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_OUTOFRANGE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_OUTOFRANGE)
 end)
 
 mq.event('OutDoors1', "This spell does not work here#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_OUTDOORS)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_OUTDOORS)
 end)
 
 mq.event('OutDoors2', "You can only cast this spell in the outdoors#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_OUTDOORS)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_OUTDOORS)
 end)
 
 mq.event('Recover1', "You haven't recovered yet#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RECOVER)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_RECOVER)
 end)
 
 mq.event('Recover2', "Spell recovery time not yet met#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RECOVER)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_RECOVER)
 end)
 
 mq.event('Resist1', "Your target resisted the #1# spell#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESISTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_RESISTED)
 end)
 
 mq.event('Resist2', "#2# resisted your #1#!", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESISTED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_RESISTED)
 end)
 
 mq.event('Standing1', "You must be standing to cast a spell#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_STANDING)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_STANDING)
 end)
 
 mq.event('Stunned1', "You can't cast spells while stunned#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_STUNNED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_STUNNED)
 end)
 
 mq.event('Stunned2', "You are stunned#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_STUNNED)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_STUNNED)
 end)
 
 mq.event('TakeHold1', "Your #*# did not take hold on #*#. (Blocked by #*#.)", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_TAKEHOLD)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_TAKEHOLD)
 end)
 
 mq.event('TakeHold2', "Your spell did not take hold#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_TAKEHOLD)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_TAKEHOLD)
 end)
 
 mq.event('TakeHold3', "Your spell would not have taken hold#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_TAKEHOLD)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_TAKEHOLD)
 end)
 
 mq.event('TakeHold4', "Your spell is too powerfull for your intended target#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_TAKEHOLD)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_TAKEHOLD)
 end)
 
 mq.event('CanNotSee1', "You cannot see your target#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_CANNOTSEE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_CANNOTSEE)
 end)
 
 mq.event('Components1', "You are missing some required components#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_COMPONENTS)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_COMPONENTS)
 end)
 
 mq.event('Components2', "Your ability to use this item has been disabled because you do not have at least a gold membership#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_COMPONENTS)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_COMPONENTS)
 end)
 
 mq.event('FDFail1', "#1# has fallen to the ground.#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_FDFAIL)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_FDFAIL)
 end)
 
 mq.event('Immune1', "Your target has no mana to affect#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
 end)
 
 mq.event('Immune2', "Your target is immune to changes in its attack speed#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
     Modules:ExecModule("Class", "AddImmuneTarget", "Slow", Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune3', "Your target is immune to changes in its run speed#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
     Modules:ExecModule("Class", "AddImmuneTarget", "Snare", Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune4', "Your target is immune to snare spells#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
     Modules:ExecModule("Class", "AddImmuneTarget", "Snare", Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune5', "Your target is immune to the stun portion of this effect#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
     Modules:ExecModule("Class", "AddImmuneTarget", "Stun", Globals.AutoTargetID or 0)
 end)
 
 mq.event('Immune6', "Your target looks unaffected#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
 end)
 
 mq.event('ImmuneMez', "Your target cannot be mesmerized#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
     local target = mq.TLO.Target
     Modules:ExecModule("Mez", "AddImmuneTarget", target.ID(),
         { id = target.ID(), name = target.CleanName(), lvl = target.Level(), body = target.Body(), reason = "IMMUNE", })
 end)
 
 mq.event('ImmuneCharm', "Your target cannot be charmed#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
     local target = mq.TLO.Target
     Modules:ExecModule("Charm", "AddImmuneTarget", target.ID(),
         { id = target.ID(), name = target.CleanName(), lvl = target.Level(), body = target.Body(), reason = "IMMUNE", })
 end)
 
 mq.event('ImmuneCharm2', "This NPC cannot be charmed#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
     local target = mq.TLO.Target
     Modules:ExecModule("Charm", "AddImmuneTarget", target.ID(),
         { id = target.ID(), name = target.CleanName(), lvl = target.Level(), body = target.Body(), reason = "IMMUNE", })
 end)
 
 mq.event('LvlHighCharm', "Your target is too high of a level for your charm spell.#*#", function()
-    Casting.SetLastCastResult(Config.Constants.CastResults.CAST_IMMUNE)
+    Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_IMMUNE)
     Logger.log_debug("\awNOTICE:\ax Target is to \aoHigh Level\ax to Charm with this spell!")
     local target = mq.TLO.Target
 

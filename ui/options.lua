@@ -399,7 +399,7 @@ function OptionsUI:RenderCategorySeperator(category)
     ImGui.PushStyleVar(ImGuiStyleVar.SeparatorTextAlign, ImVec2(0.05, 0.5))
 
     if self.HighlightedCategories:contains(category) then
-        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Orange)
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Orange)
     end
 
     ImGui.SeparatorText(category)
@@ -415,7 +415,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
     if self.FilteredGroups[self.GroupsNameToIDs[groupName]] then
         for _, header in ipairs(self.FilteredGroups[self.GroupsNameToIDs[groupName]].Headers or {}) do
             if header.highlighted then
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Orange)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Orange)
             end
 
             if ImGui.CollapsingHeader(header.Name) then
@@ -493,7 +493,7 @@ function OptionsUI:RenderCategorySettings(category)
 
                         ImGui.TableNextColumn()
                         if self.HighlightedSettings:contains(settingName) then
-                            ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Orange)
+                            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Orange)
                         end
                         local text_height = ImGui.GetTextLineHeightWithSpacing()
                         local row_height  = ImGui.GetFrameHeightWithSpacing()

@@ -357,10 +357,10 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
     end
 
     if Targeting.GetXTHaterCount() == 0 then -- no magic numbers, just 4 u bb
-        if Config.Constants.LastGemRemem[Config:GetSetting('LastGemRemem')] == "Mem Previous Spell" and oldSpellInSlot() and mq.TLO.Me.Gem(Casting.UseGem)() ~= oldSpellInSlot.Name() then
+        if Globals.Constants.LastGemRemem[Config:GetSetting('LastGemRemem')] == "Mem Previous Spell" and oldSpellInSlot() and mq.TLO.Me.Gem(Casting.UseGem)() ~= oldSpellInSlot.Name() then
             Logger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, Casting.UseGem)
             Casting.MemorizeSpell(Casting.UseGem, oldSpellInSlot.Name(), false, 15000)
-        elseif Config.Constants.LastGemRemem[Config:GetSetting('LastGemRemem')] == "Mem Loadout Spell" and loadoutSpell and mq.TLO.Me.Gem(Casting.UseGem)() ~= loadoutSpell.RankName() then
+        elseif Globals.Constants.LastGemRemem[Config:GetSetting('LastGemRemem')] == "Mem Loadout Spell" and loadoutSpell and mq.TLO.Me.Gem(Casting.UseGem)() ~= loadoutSpell.RankName() then
             Logger.log_debug("\ayRestoring %s in slot %d", loadoutSpell.RankName(), Casting.UseGem)
             Casting.MemorizeSpell(Casting.UseGem, loadoutSpell.RankName(), false, 15000)
         end

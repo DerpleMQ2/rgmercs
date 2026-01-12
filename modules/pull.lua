@@ -98,7 +98,7 @@ Module.Constants.PullAbilities         = {
         DisplayName = "Pet Pull",
         LOS = false,
         cond = function(self)
-            return Config.Constants.RGPetClass:contains(Globals.CurLoadedClass) and Config:GetSetting('DoPetCommands')
+            return Globals.Constants.RGPetClass:contains(Globals.CurLoadedClass) and Config:GetSetting('DoPetCommands')
         end,
     },
     {
@@ -485,9 +485,9 @@ Module.DefaultConfig                   = {
         Tooltip = "The minimum con color to be considered a valid pull target.",
         Default = 2,
         Min = 1,
-        Max = #Config.Constants.ConColors,
+        Max = #Globals.Constants.ConColors,
         Type = "Combo",
-        ComboOptions = Config.Constants.ConColors,
+        ComboOptions = Globals.Constants.ConColors,
     },
     ['PullMaxCon']                             = {
         DisplayName = "Pull Max Con",
@@ -498,9 +498,9 @@ Module.DefaultConfig                   = {
         Tooltip = "The maximum con color to be considered a valid pull target.",
         Default = 5,
         Min = 1,
-        Max = #Config.Constants.ConColors,
+        Max = #Globals.Constants.ConColors,
         Type = "Combo",
-        ComboOptions = Config.Constants.ConColors,
+        ComboOptions = Globals.Constants.ConColors,
     },
     ['MaxLevelDiff']                           = {
         DisplayName = "Max Red Con Level Diff",
@@ -895,7 +895,7 @@ end
 
 function Module:RenderPullTargets()
     if ImGui.BeginTable("Pull Targets", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
         ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
         ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 60.0)
@@ -938,7 +938,7 @@ function Module:RenderIgnoreTargets()
     end
     ImGui.PopID()
     if ImGui.BeginTable("Pull Targets", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Purple)
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
         ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.None), 250.0)
         ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 60.0)
@@ -989,9 +989,9 @@ function Module:Render()
     if self.ModuleLoaded and Globals.SubmodulesLoaded then
         if mq.TLO.Navigation.MeshLoaded() then
             if Config:GetSetting('DoPull') then
-                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Red)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Green)
             end
             local cursorXPos = ImGui.GetCursorPosX()
             if ImGui.Button(Config:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
@@ -1001,9 +1001,9 @@ function Module:Render()
             end
             ImGui.PopStyleColor()
             if Module.TempSettings.PausePulls then
-                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Red)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Green)
             end
             ImGui.SetCursorPosX(cursorXPos)
             if ImGui.Button(Module.TempSettings.PausePulls and "Unpause Pulls" or "Pause Pulls", ImGui.GetWindowWidth() * .3, 25) then
@@ -1012,7 +1012,7 @@ function Module:Render()
             ImGui.PopStyleColor()
             Ui.Tooltip("Pausing pulls will keep the pull settings (camp, locs, etc), but it will not attempt to pull any targets until unpaused.")
         else
-            ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
+            ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Red)
             ImGui.Button("No Nav Mesh Loaded!", ImGui.GetWindowWidth() * .3, 25)
             ImGui.PopStyleColor()
         end
@@ -1072,7 +1072,7 @@ function Module:Render()
             ImGui.Text("Pull State")
             ImGui.TableNextColumn()
             local stateData = Globals.PauseMain and PullStateDisplayStrings['MERCS_PAUSED'] or PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
-            local stateColor = stateData and Config.Constants.Colors[stateData.Color] or ImGui.GetColorU32(1.0, 1.0, 1.0, 1.0)
+            local stateColor = stateData and Globals.Constants.Colors[stateData.Color] or ImGui.GetColorU32(1.0, 1.0, 1.0, 1.0)
             ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
             if not stateData then
                 ImGui.Text("Invalid State Data... This should auto resolve.")
@@ -1754,7 +1754,7 @@ function Module:GetPullableSpawns()
             end
         else
             -- check cons.
-            local conLevel = Config.Constants.ConColorsNameToId[spawn.ConColor()]
+            local conLevel = Globals.Constants.ConColorsNameToId[spawn.ConColor()]
             if conLevel > Config:GetSetting('PullMaxCon') or conLevel < Config:GetSetting('PullMinCon') then
                 Logger.log_verbose("\atPULL::FindPullTarget \awSpawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
                     spawn.CleanName(), spawn.ID(),

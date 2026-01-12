@@ -400,7 +400,7 @@ local _ClassConfig = {
             },
             { -- Spire, the SpireChoice setting will determine which ability is displayed/used.
                 name_func = function(self)
-                    local spireAbil = string.format("Fundament: %s Spire of the Minstrels", Config.Constants.SpireChoices[Config:GetSetting('SpireChoice') or 4])
+                    local spireAbil = string.format("Fundament: %s Spire of the Minstrels", Globals.Constants.SpireChoices[Config:GetSetting('SpireChoice') or 4])
                     return Casting.CanUseAA(spireAbil) and spireAbil or "Spire Not Purchased/Selected"
                 end,
                 type = "AA",
@@ -869,10 +869,10 @@ local _ClassConfig = {
                 "Second Spire: Healing Power Buff to Self.\n" ..
                 "Third Spire: Large Group HP Buff.",
             Type = "Combo",
-            ComboOptions = Config.Constants.SpireChoices,
+            ComboOptions = Globals.Constants.SpireChoices,
             Default = 3,
             Min = 1,
-            Max = #Config.Constants.SpireChoices,
+            Max = #Globals.Constants.SpireChoices,
         },
         ['DoVetAA']         = {
             DisplayName = "Use Vet AA",

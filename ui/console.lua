@@ -1,5 +1,6 @@
 local Console             = require('utils.console')
 local Config              = require('utils.config')
+local Globals             = require("utils.globals")
 local Ui                  = require('utils.ui')
 local Icons               = require('mq.ICONS')
 local Logger              = require("utils.logger")
@@ -40,8 +41,8 @@ function ConsoleUI:DrawConsole(showPopout)
             local logLevel = Config:GetSetting('LogLevel')
 
             logLevel, changed = ImGui.Combo("##Debug Level",
-                logLevel, Config.Constants.LogLevels,
-                #Config.Constants.LogLevels)
+                logLevel, Globals.Constants.LogLevels,
+                #Globals.Constants.LogLevels)
 
             if changed then
                 Config:SetSetting('LogLevel', logLevel)

@@ -1288,11 +1288,11 @@ function Module:RenderClickiesWithConditions(type, clickies)
                             local headerPos = ImGui.GetCursorPosVec()
 
                             if clicky.conditionsCache and clicky.conditionsCache[condIdx] == true then
-                                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
+                                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
                             elseif clicky.conditionsCache and clicky.conditionsCache[condIdx] == false then
-                                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
+                                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                             else
-                                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Yellow)
+                                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Yellow)
                             end
 
                             if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then

@@ -1,5 +1,6 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
+local Globals      = require("utils.globals")
 local Comms        = require("utils.comms")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
@@ -1075,10 +1076,10 @@ local _ClassConfig = {
                 "Second Spire: Pet Damage Proc Buff.\n" ..
                 "Third Spire: DoT Crit Damage Buff.",
             Type = "Combo",
-            ComboOptions = Config.Constants.SpireChoices,
+            ComboOptions = Globals.Constants.SpireChoices,
             Default = 3,
             Min = 1,
-            Max = #Config.Constants.SpireChoices,
+            Max = #Globals.Constants.SpireChoices,
         },
         ['EmergencyStart']    = {
             DisplayName = "Emergency HP%",

@@ -52,9 +52,9 @@ function HudUI:RenderToggleHud()
     local open, show = ImGui.Begin("RGMercsHUD", true, bit32.bor(ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoResize))
     if not open then show = false end
     if show then
-        local btnImg = Casting.LastBurnCheck and ImagesUI.burnImg or ImagesUI.derpImg
+        local btnImg = Globals.LastBurnCheck and ImagesUI.burnImg or ImagesUI.derpImg
         if Globals.PauseMain then
-            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), Config.Constants.Colors.Black, Config.Constants.Colors.Red) then
+            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), Globals.Constants.Colors.Black, Globals.Constants.Colors.Red) then
                 if enableAFUI then
                     self:AFPopUp(self.ClickMsg, math.random(4))
                 else
@@ -74,7 +74,7 @@ function HudUI:RenderToggleHud()
             end
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
-                if Casting.LastBurnCheck then
+                if Globals.LastBurnCheck then
                     ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
                         string.format("RGMercs is BURNING!\nClick to open the main window."))
                 else
@@ -98,7 +98,7 @@ function HudUI:RenderToggleHud()
         local toggleXPos = ImGui.GetCursorPosX()
 
         local pause_main, pause_main_pushed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pause", lbl, not Globals.PauseMain, ImVec2(32, toggleHeight),
-            Config.Constants.Colors.Green, Config.Constants.Colors.Red, nil, true)
+            Globals.Constants.Colors.Green, Globals.Constants.Colors.Red, nil, true)
 
         ImGui.SameLine()
         ImGui.SetCursorPosX(miniWidth - (enableAFUI and 30 or 20) - ImGui.GetStyle().WindowPadding.x)
@@ -119,7 +119,7 @@ function HudUI:RenderToggleHud()
         cursorPos.y = cursorPos.y + toggleHeight + ImGui.GetStyle().ItemSpacing.y
         ImGui.SetCursorPos(cursorPos)
         local pull_toggle, pull_toggle_changed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pulls", lbl, Config:GetSetting('DoPull'), nil,
-            Config.Constants.Colors.Green, Config.Constants.Colors.Red, nil, true)
+            Globals.Constants.Colors.Green, Globals.Constants.Colors.Red, nil, true)
         ImGui.SetCursorPos(cursorPosAfter)
 
         if pull_toggle_changed then
@@ -137,7 +137,7 @@ function HudUI:RenderToggleHud()
             for k, displayName in pairs(self.Settings) do
                 ImGui.SetCursorPosX(toggleXPos)
                 local newTog, changeTog = Ui.RenderFancyToggle("##rgmercs_hud_toggle_" .. k, displayName, Config:GetSetting(k), nil,
-                    Config.Constants.Colors.Green, Config.Constants.Colors.Red, nil, true)
+                    Globals.Constants.Colors.Green, Globals.Constants.Colors.Red, nil, true)
 
                 if changeTog then
                     Config:SetSetting(k, not newTog)

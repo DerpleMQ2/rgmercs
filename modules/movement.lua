@@ -203,7 +203,7 @@ Module.DefaultConfig   = {
         Category = "Camp",
         Index = 1,
         Tooltip = "The distance to allow from camp before you return to it. During combat, we relax this distance slightly.",
-        Default = (Config.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60),
+        Default = (Globals.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60),
         Min = 10,
         Max = 300,
         OnChange = function(self) Movement.UpdateMapRadii() end,
@@ -550,9 +550,9 @@ function Module:Render()
             ImGui.Text("Line of Sight")
             ImGui.TableNextColumn()
             if chaseSpawn.LineOfSight() then
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
             end
             ImGui.Text(haveChaseTarget and (chaseSpawn.LineOfSight() and Icons.FA_EYE or Icons.FA_EYE_SLASH) or "N/A")
             ImGui.PopStyleColor(1)
@@ -588,10 +588,10 @@ function Module:Render()
 
             ImGui.TableNextColumn()
             if Config:GetSetting('ReturnToCamp') then
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
                 ImGui.Text(Icons.FA_FREE_CODE_CAMP)
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                 ImGui.Text(Icons.MD_NOT_INTERESTED)
             end
             ImGui.PopStyleColor(1)

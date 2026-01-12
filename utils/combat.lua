@@ -150,7 +150,7 @@ function Combat.EngageTarget(autoTargetId)
             else
                 Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Targeting.GetTargetCleanName())
 
-                if not Config:GetSetting('DoMelee') and Config:GetSetting("BellyCastStick") and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Body.Name() == "Dragon" and Targeting.IsNamed(target) then
+                if not Config:GetSetting('DoMelee') and Config:GetSetting("BellyCastStick") and Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Body.Name() == "Dragon" and Targeting.IsNamed(target) then
                     Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Dragon Named detected, sticking for belly cast.", Targeting.GetTargetCleanName())
                     Movement:DoStickCmd("pin 40")
                 end
@@ -268,10 +268,10 @@ function Combat.MATargetScan(radius, zradius)
     local highestHP        = 0   -- unless we used some convoluted logic to initialize them that is more expensive than the extra checks
     local killId           = Globals.AutoTargetID or 0
     local namedSpawn       = nil -- initialize fallback for attacking a named when we prefer trash and its the only thing left
-    local preferNamed      = Config.Constants.ScanNamedPriority[Config:GetSetting('ScanNamedPriority')] == "Named"
-    local preferTrash      = Config.Constants.ScanNamedPriority[Config:GetSetting('ScanNamedPriority')] == "Non-Named"
-    local preferLowHealth  = Config.Constants.ScanHPPriority[Config:GetSetting('ScanHPPriority')] == "Lowest HP%"
-    local preferHighHealth = Config.Constants.ScanHPPriority[Config:GetSetting('ScanHPPriority')] == "Highest HP%"
+    local preferNamed      = Globals.Constants.ScanNamedPriority[Config:GetSetting('ScanNamedPriority')] == "Named"
+    local preferTrash      = Globals.Constants.ScanNamedPriority[Config:GetSetting('ScanNamedPriority')] == "Non-Named"
+    local preferLowHealth  = Globals.Constants.ScanHPPriority[Config:GetSetting('ScanHPPriority')] == "Lowest HP%"
+    local preferHighHealth = Globals.Constants.ScanHPPriority[Config:GetSetting('ScanHPPriority')] == "Highest HP%"
     local xtCount          = mq.TLO.Me.XTarget()
 
     local function TargetScanLowHealth(targetSpawn)
@@ -306,7 +306,7 @@ function Combat.MATargetScan(radius, zradius)
                             -- Added move check to prevent false positives on the pull from things like bard song aggro. Testing. Algar 3/5/25
                             if xtSpawn.PctAggro() < 100 and not xtSpawn.Moving() and Core.IsTanking() then
                                 -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
-                                if Config.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) then
+                                if Globals.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) then
                                     Logger.log_verbose("MATargetScan \agHave not fully aggro'd %s -- returning %s [%d]", xtName, xtName, spawnId)
                                     return spawnId
                                 end
@@ -910,7 +910,7 @@ function Combat.FindWorstHurtManaGroupMember(minMana)
         local healTarget = mq.TLO.Group.Member(i)
 
         if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
-            if Config.Constants.RGCasters:contains(healTarget.Class.ShortName()) then
+            if Globals.Constants.RGCasters:contains(healTarget.Class.ShortName()) then
                 if not healTarget.Dead() and healTarget.PctMana() < worstPct then
                     Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
                     worstPct = healTarget.PctMana()
@@ -985,7 +985,7 @@ function Combat.FindWorstHurtManaXT(minMana)
         local healTarget = mq.TLO.Me.XTarget(i)
 
         if healTarget and healTarget() and Targeting.TargetIsType("pc", healTarget) then
-            if Config.Constants.RGCasters:contains(healTarget.Class.ShortName()) then -- berzerkers have special handing
+            if Globals.Constants.RGCasters:contains(healTarget.Class.ShortName()) then -- berzerkers have special handing
                 if not healTarget.Dead() and healTarget.PctMana() < worstPct then
                     Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
                     worstPct = healTarget.PctMana()

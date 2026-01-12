@@ -2,6 +2,7 @@ local mq                 = require('mq')
 local Set                = require("mq.set")
 local Logger             = require("utils.logger")
 local Strings            = require("utils.strings")
+local Globals            = require("utils.globals")
 
 local Comms              = { _version = '1.0', _name = "Comms", _author = 'Derple', }
 Comms.__index            = Comms
@@ -62,6 +63,12 @@ end
 
 function Comms.SendPeerDoCmd(peer, cmd, ...)
     cmd = string.format(cmd, ...)
+
+    if peer == Comms.GetPeerName() then
+        mq.cmd(cmd)
+        return
+    end
+
     Comms.SendMessage(peer, "Core", "DoCmd", {
         cmd = cmd, })
 end
@@ -82,8 +89,11 @@ function Comms.SendAllPeersDoCmd(inZoneOnly, includeSelf, cmd, ...)
     end
 end
 
-function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, chase, useMana, useEnd)
+function Comms.SendHeartbeat(assist, curAutoTarget, chase)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
+    local useMana = Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName())
+    local useEnd = Globals.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName())
+
     Comms.LastHeartbeat = os.time()
     local heartBeat = {
         From          = Comms.GetPeerName(),
@@ -103,10 +113,12 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, cha
         Endurance     = useEnd and mq.TLO.Me.PctEndurance() or nil,
         Target        = mq.TLO.Target.DisplayName() or "None",
         TargetID      = mq.TLO.Target.ID() or 0,
-        ForceCombatID = forceCombatId,
+        Casting       = mq.TLO.Me.Casting.ID() ~= 0 and mq.TLO.Me.Casting.RankName() or "None",
+        Burning       = Globals.LastBurnCheck,
+        ForceCombatID = Globals.ForceCombatID,
         AutoTarget    = curAutoTarget,
         Assist        = assist,
-        State         = curState,
+        State         = Globals.PauseMain and "Paused" or Globals.CurrentState,
         Chase         = chase,
     }
     Comms.BroadcastMessage("RGMercs", "Heartbeat", heartBeat)
@@ -161,7 +173,7 @@ function Comms.ValidatePeers(timeout)
     Logger.log_verbose("\ayValidating peers heartbeats for timeouts: \n  :: %s\n  :: %s", Strings.TableToString(Comms.PeersHeartbeats, 512),
         Strings.TableToString(Comms.Peers:toList(), 512))
     for peer, heartbeat in pairs(Comms.PeersHeartbeats) do
-        if os.time() - heartbeat.LastHeartbeat > timeout then
+        if os.time() - (heartbeat.LastHeartbeat or 0) > timeout then
             Logger.log_debug("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
             Comms.Peers:remove(peer)
             Comms.PeersHeartbeats[peer] = nil

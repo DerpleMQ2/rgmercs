@@ -146,7 +146,7 @@ function Module:Init()
         self.TransportSpells[Globals.CurLoadedChar].Tabs           = {}
         self.TransportSpells[Globals.CurLoadedChar].SortedTabNames = {}
 
-        for i = 1, Config.Constants.SpellBookSlots do
+        for i = 1, Globals.Constants.SpellBookSlots do
             local spell = mq.TLO.Me.Book(i)
             if spell.Category() == "Transport" then
                 Logger.log_debug("\ayFound Transport Spell: <\ay%-15s\ay> => \at'%s'\ay \ao(%d) \ay[\am%s\ay]", spell.Subcategory(), spell.RankName(), spell.ID(),
@@ -241,9 +241,9 @@ function Module:Render()
         ImGui.SameLine()
 
         if groupedWithPorter then
-            ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Green)
+            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
         else
-            ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
+            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
         end
         ImGui.Text(groupedWithPorter and "Yes" or "No")
         ImGui.PopStyleColor()
@@ -263,7 +263,7 @@ function Module:Render()
                     ImGui.BeginTable("Buttons", buttonsPerRow)
                     for _, sv in ipairs(self.TempSettings.FilteredList.Tabs[k]) do
                         ImGui.TableNextColumn()
-                        ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Black)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Black)
                         ImGui.PushStyleColor(ImGuiCol.Button, self:GetColorForType(sv.Type))
                         if ImGui.Button(sv.Name, self.ButtonWidth, self.ButtonHeight) then
                             local cmd = string.format("/rgl cast \"%s\"", sv.Name)

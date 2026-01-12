@@ -178,7 +178,7 @@ end
 --- @param name string The name of the expansion to check.
 --- @return boolean True if the expansion is available, false otherwise.
 function Core.HaveExpansion(name)
-    return mq.TLO.Me.HaveExpansion(Config.Constants.ExpansionNameToID[name])
+    return mq.TLO.Me.HaveExpansion(Globals.Constants.ExpansionNameToID[name])
 end
 
 --- Checks if the player's class matches the specified class.

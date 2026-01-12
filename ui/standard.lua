@@ -54,9 +54,9 @@ function StandardUI:RenderTarget()
         local ratioHPs = pctHPs / 100
         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 1 - ratioHPs, ratioHPs, 0.2, 0.7)
         if math.floor(assistSpawn.Distance() or 0) >= 350 then
-            ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.Red)
+            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
         else
-            ImGui.PushStyleColor(ImGuiCol.Text, Config.Constants.Colors.White)
+            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.White)
         end
         ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
             assistSpawn.ID() or 0, assistSpawn.Level() or 0,
@@ -71,15 +71,15 @@ function StandardUI:RenderTarget()
             ImGui.TextColored(IM_COL32(52, 200, 200, 255),
                 string.format("**ForcedTarget**"))
         end
-        if Casting.LastBurnCheck and assistSpawn.ID() > 0 then
+        if Globals.LastBurnCheck and assistSpawn.ID() > 0 then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
                 string.format("**BURNING**"))
         end
         Ui.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
-        ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.LightOrange)
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Config.Constants.Colors.Orange)
+        ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.LightOrange)
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Globals.Constants.Colors.Orange)
         local burnLabel = (Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()) and " FORCE BURN ACTIVATED " or " FORCE BURN THIS TARGET! "
         if ImGui.SmallButton(Icons.FA_FIRE .. burnLabel .. Icons.FA_FIRE) then
             Comms.SendAllPeersDoCmd(true, true, "/squelch /rgl burnnow %d", assistSpawn.ID())
@@ -132,7 +132,7 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
         ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
 
         if shouldDrawGUI then
-            local imgDisplayed = Casting.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
+            local imgDisplayed = Globals.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
             Ui.RenderLogo(imgDisplayed:GetTextureID())
             ImGui.SameLine()
             local titlePos = ImGui.GetCursorPosVec()
@@ -168,9 +168,9 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
             self:RenderWindowControls()
 
             if not Globals.PauseMain then
-                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Green)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, Config.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Red)
             end
 
             local pauseLabel = Globals.PauseMain and "PAUSED" or "Running"
