@@ -417,6 +417,8 @@ function Ui.RenderMercsStatus(showPopout)
                             peerSpawn.DoTarget()
                             if (mq.TLO.Cursor.ID() or 0) > 0 and peerSpawn.Distance() <= 15 then
                                 Core.DoCmd("/timed 1 /click left target")
+                                Core.DoCmd('/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
+                                Comms.SendPeerDoCmd(peer, '/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
                             end
                         end
                     elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
