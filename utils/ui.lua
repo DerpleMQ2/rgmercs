@@ -532,7 +532,7 @@ function Ui.RenderForceTargetList(showPopout)
         local xtCount = mq.TLO.Me.XTarget() or 0
         for i = 1, xtCount do
             local xtarg = mq.TLO.Me.XTarget(i)
-            if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
+            if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID) then
                 ImGui.PushID(string.format("##xtarg_%d", i))
                 ImGui.TableNextColumn()
                 if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then

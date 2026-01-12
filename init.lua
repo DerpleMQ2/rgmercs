@@ -323,7 +323,6 @@ local function Main()
             Globals.ForceTargetID = 0
             Globals.IgnoredTargetIDs = Set.new({})
             Globals.AutoTargetID = 0
-            Globals.ForceCombatID = 0
         end
         mq.delay(100)
         Globals.CurZoneId = mq.TLO.Zone.ID()

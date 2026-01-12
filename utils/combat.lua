@@ -231,7 +231,7 @@ function Combat.ValidMAXTarget(target)
         return false
     end
 
-    if target.ID() > 0 and not (target.Aggressive() or target.TargetType():lower() == "auto hater" or spawnId == Globals.ForceCombatID) then
+    if target.ID() > 0 and not (target.Aggressive() or target.TargetType():lower() == "auto hater" or spawnId == Globals.ForceTargetID) then
         Logger.log_verbose("ValidateMATarget: Spawn ID %d is not aggressive or auto hater or forced (Aggressive: %s, TargetType: %s)", spawnId,
             Strings.BoolToColorString(target.Aggressive()), target.TargetType())
         return false
@@ -505,48 +505,65 @@ function Combat.FindBestAutoTarget(validateFn)
             end
         end
     else
-        -- We're not the main assist so we need to choose our target based on our main assist.
-        -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
-        -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
-        local heartbeat = Comms.GetPeerHeartbeatByName(Globals.MainAssist)
-        if heartbeat and heartbeat.Data and heartbeat.Data.ForceCombatID then
-            Globals.ForceCombatID = tonumber(heartbeat.Data.ForceCombatID)
+        local assistId = 0
+
+        -- check if we are currently forcing a target, use it as the assistId to validate if so
+        -- clear the ForceTargetID if its dead
+        if Globals.ForceTargetID ~= 0 then
+            local forceSpawn = mq.TLO.Spawn(Globals.ForceTargetID)
+            if forceSpawn and forceSpawn() and not forceSpawn.Dead() then
+                assistId = Globals.ForceTargetID
+                Logger.log_info("FindAutoTarget(): Forced Targeting: \ag%s\ax [ID: \ag%d\ax]", forceSpawn.CleanName() or "None", forceSpawn.ID())
+            else
+                Globals.ForceTargetID = 0
+            end
         end
 
-        local assistId = 0
-        if Config:GetSetting('UseAssistList') and Globals.MainAssist:len() > 0 then
-            --- @diagnostic disable-next-line: redundant-parameter
-            local peer = mq.TLO.DanNet(Globals.MainAssist)()
-            local assistTarget = nil
+        -- if we aren't directly forcing a target, then lets use the more traditional methods of getting an autotarget from the MA
+        if assistId == 0 then
+            -- We're not the main assist so we need to choose our target based on our main assist.
+            -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
+            -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
 
-            if heartbeat and heartbeat.Data and heartbeat.Data.TargetID then
-                local targetID = tonumber(heartbeat.Data.TargetID)
-                if targetID and type(targetID) == 'number' then
-                    assistId = targetID
-                    assistTarget = mq.TLO.Spawn(targetID)
-                    Logger.log_verbose("\ayFindAutoTarget Check Assist's Target via Actors :: %s (%s)",
-                        assistTarget.CleanName() or "None", targetID)
-                end
-            elseif peer then
-                local queryResult = DanNet.query(Globals.MainAssist, "Target.ID", 1000)
-                if queryResult then
-                    assistId = tonumber(queryResult) or 0
-                    assistTarget = mq.TLO.Spawn(queryResult)
-                    Logger.log_verbose("\ayFindAutoTarget Check Assist's Target via DanNet :: %s (%s)",
-                        assistTarget.CleanName() or "None", queryResult)
+            local heartbeat = Comms.GetPeerHeartbeatByName(Globals.MainAssist)
+
+            if heartbeat and heartbeat.Data and heartbeat.Data.ForceTargetID then
+                Globals.ForceTargetID = tonumber(heartbeat.Data.ForceTargetID)
+                assistId = Globals.ForceTargetID
+            elseif Config:GetSetting('UseAssistList') and Globals.MainAssist:len() > 0 then
+                --- @diagnostic disable-next-line: redundant-parameter
+                local peer = mq.TLO.DanNet(Globals.MainAssist)()
+                local assistTarget = nil
+
+                if heartbeat and heartbeat.Data and heartbeat.Data.TargetID then
+                    local targetID = tonumber(heartbeat.Data.TargetID)
+                    if targetID and type(targetID) == 'number' then
+                        assistId = targetID
+                        assistTarget = mq.TLO.Spawn(targetID)
+                        Logger.log_verbose("\ayFindAutoTarget Check Assist's Target via Actors :: %s (%s)",
+                            assistTarget.CleanName() or "None", targetID)
+                    end
+                elseif peer then
+                    local queryResult = DanNet.query(Globals.MainAssist, "Target.ID", 1000)
+                    if queryResult then
+                        assistId = tonumber(queryResult) or 0
+                        assistTarget = mq.TLO.Spawn(queryResult)
+                        Logger.log_verbose("\ayFindAutoTarget Check Assist's Target via DanNet :: %s (%s)",
+                            assistTarget.CleanName() or "None", queryResult)
+                    end
+                else
+                    local assistSpawn = Core.GetMainAssistSpawn()
+                    if assistSpawn and assistSpawn() then
+                        Targeting.SetTarget(assistSpawn.ID(), true)
+                        assistTarget = mq.TLO.Me.TargetOfTarget
+                        assistId = assistTarget.ID() or 0
+                        Logger.log_verbose("\ayFindAutoTarget Check Assist's Target via TargetOfTarget :: %s ",
+                            assistTarget.CleanName() or "None")
+                    end
                 end
             else
-                local assistSpawn = Core.GetMainAssistSpawn()
-                if assistSpawn and assistSpawn() then
-                    Targeting.SetTarget(assistSpawn.ID(), true)
-                    assistTarget = mq.TLO.Me.TargetOfTarget
-                    assistId = assistTarget.ID() or 0
-                    Logger.log_verbose("\ayFindAutoTarget Check Assist's Target via TargetOfTarget :: %s ",
-                        assistTarget.CleanName() or "None")
-                end
+                assistId = Combat.GetGroupOrRaidAssistTargetId()
             end
-        else
-            assistId = Combat.GetGroupOrRaidAssistTargetId()
         end
         if assistId > 0 and (validateFn and validateFn(assistId)) then
             targetValidated = true
@@ -560,7 +577,7 @@ function Combat.FindBestAutoTarget(validateFn)
         mq.TLO.Target.ID())
 
     if Config:GetSetting('DoAutoTarget') then
-        local autoTargetId = Globals.AutoTargetID
+        local autoTargetId = Globals.AutoTargetID or 0
         if autoTargetId > 0 and (targetValidated or (validateFn and validateFn(autoTargetId))) then
             if mq.TLO.Target.ID() ~= autoTargetId then
                 Targeting.SetTarget(autoTargetId)
@@ -568,8 +585,9 @@ function Combat.FindBestAutoTarget(validateFn)
 
             -- For Assist Lists, this ensures we correctly and quickly receive health percent to assist in a timely manner
             -- For Emu, this helps correct for emu xtarget bugs
+            -- For Force Target, this makes sure a non-aggressive mob is added to our xtargets for tracking
             -- Second dead check because targets were ocasionally dying between the validateFn and this check
-            if Config:GetSetting('UseAssistList') or Core.OnEMU() then
+            if Config:GetSetting('UseAssistList') or Core.OnEMU() or autoTargetId == Globals.ForceTargetID then
                 if mq.TLO.Spawn(autoTargetId)() and not mq.TLO.Spawn(autoTargetId).Dead() and not Targeting.IsSpawnXTHater(autoTargetId) then
                     Targeting.AddXTByID(1, Globals.AutoTargetID)
                     Logger.log_verbose("FindAutoTarget(): FoundTargetID(%d) not on xt list, adding.", autoTargetId or 0)
@@ -666,7 +684,7 @@ function Combat.OkToEngagePreValidateId(targetId)
             return true
         else
             local distanceCheck = Targeting.GetTargetDistance(target) < Config:GetSetting('AssistRange')
-            local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() or target.ID() == Globals.ForceCombatID
+            local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() or target.ID() == Globals.ForceTargetID
 
             Logger.log_verbose("OkToEngagePrevalidate check for %s(ID: %d) - DistanceCheck(%s), HostileCheck(%s)", targetName, targetId,
                 Strings.BoolToColorString(distanceCheck), Strings.BoolToColorString(hostileCheck))
@@ -735,7 +753,7 @@ function Combat.OkToEngage(autoTargetId)
         else
             local distanceCheck = Targeting.GetTargetDistance() < Config:GetSetting('AssistRange')
             local assistHPCheck = Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt')
-            local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() or target.ID() == Globals.ForceCombatID
+            local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() or target.ID() == Globals.ForceTargetID
 
             Logger.log_verbose("OkToEngage check for %s(ID: %d) - DistanceCheck(%s), AssistHPCheck(%s), HostileCheck(%s)", targetName, targetId,
                 Strings.BoolToColorString(distanceCheck), Strings.BoolToColorString(assistHPCheck), Strings.BoolToColorString(hostileCheck))

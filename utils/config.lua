@@ -190,12 +190,12 @@ Config.FAQ                         = {
     },
     [3] = {
         Question = "How do I force auto combat on a target that isn't aggressive or isn't hostile?",
-        Answer = "This is accomplished with the /rgl forcecombat <id?> command:\n\n" ..
+        Answer = "This is accomplished with the /rgl forcetarget <id?> command:\n\n" ..
             "The command accepts a target ID, and will fall back to your current target's ID if one is not supplied.\n\n" ..
-            "When commanded, the MA will add the target to the first XT slot and immediately force target.\n\n" ..
-            "The force combat state will be broadcasted to peers via actors, and will allow the target to check as valid even when the 'Target Non-Aggressives' setting is disabled." ..
+            "When commanded, the PC will add the target to the first XT slot and immediately force target.\n\n" ..
+            "The force target state can be issued to any PC, but if issued by the MA, it will be broadcasted to peers via actors, and will allow the target to check as valid even when the 'Target Non-Aggressives' setting is disabled." ..
             " Actors may need to be configured in MQ if all peers are not on the same PC. As an alternative, the setting above can be enabled temporarily.\n\n" ..
-            "Only one Force Combat target can be directed at a time, and the state will be cleared automatically. It can be cleared manually with the /rgl forcecombatclear command.",
+            "Only one Force Target can be directed at a time, and the state will be cleared automatically. It can be cleared manually with the /rgl forcetargetclear command.",
         Settings_Used = "",
     },
 }
@@ -709,7 +709,7 @@ Config.DefaultConfig               = {
         Category = "Targeting Behavior",
         Index = 4,
         Tooltip =
-        "Allow targeting of NPCs that are not aggressive (hostile) if they are targeted by our MA.\nNote: If combat has been forced on the target (by the MA via the forcecombat command), the target will also be allowed.",
+        "Allow targeting of NPCs that are not aggressive (hostile) if they are targeted by our MA.\nNote: If combat has been forced on the target (via a forcetarget command by this PC or the MA), the target will also be allowed.",
         Default = false,
         ConfigType = "Advanced",
     },

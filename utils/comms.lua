@@ -82,7 +82,7 @@ function Comms.SendAllPeersDoCmd(inZoneOnly, includeSelf, cmd, ...)
     end
 end
 
-function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, chase, useMana, useEnd)
+function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceTargetId, chase, useMana, useEnd)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
     Comms.LastHeartbeat = os.time()
     local heartBeat = {
@@ -103,7 +103,7 @@ function Comms.SendHeartbeat(assist, curState, curAutoTarget, forceCombatId, cha
         Endurance     = useEnd and mq.TLO.Me.PctEndurance() or nil,
         Target        = mq.TLO.Target.DisplayName() or "None",
         TargetID      = mq.TLO.Target.ID() or 0,
-        ForceCombatID = forceCombatId,
+        ForceTargetID = forceTargetId,
         AutoTarget    = curAutoTarget,
         Assist        = assist,
         State         = curState,
