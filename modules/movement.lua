@@ -447,7 +447,7 @@ function Module:Campfire(camptype)
     end
 
     if Config:GetSetting('MaintainCampfire') > 2 then
-        if mq.TLO.FindItemCount("Fellowship Campfire Materials") == 0 then
+        if mq.TLO.FindItemCount("Fellowship Campfire Materials")() == 0 then
             Config:SetSetting('MaintainCampfire', 36) -- Regular Fellowship
             self:SaveSettings(false)
             Logger.log_info("Fellowship Campfire Materials Not Found. Setting to Regular Fellowship.")
