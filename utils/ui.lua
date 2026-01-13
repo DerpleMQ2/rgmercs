@@ -462,10 +462,14 @@ function Ui.RenderMercsStatus(showPopout)
             render = function(peer, data)
                 if data.Data.PetID > 0 then
                     ImGui.PushStyleColor(ImGuiCol.Text, ConColorsNameToVec4[data.Data.PetConColor])
-
-                    if ImGui.SmallButton(Icons.MD_PETS) then
+                    local buttonPos = ImGui.GetCursorPosVec()
+                    if ImGui.InvisibleButton("##pet_btn_" .. tostring(peer), ImVec2(ICON_SIZE, ICON_SIZE)) then
                         Core.DoCmd("/mqtarget id %d", data.Data.PetID)
                     end
+
+                    ImGui.SetCursorPos(buttonPos)
+
+                    ImGui.Text(Icons.MD_PETS)
 
                     ImGui.PopStyleColor()
 
@@ -512,7 +516,7 @@ function Ui.RenderMercsStatus(showPopout)
                 end
 
                 Ui.MultilineTooltipWithColors({
-                    { text = "State:",                       color = Colors.White, },
+                    { text = "State:",                                           color = Colors.White, },
                     {
                         text = data.Data.State or "None",
                         color = data.Data.State == "Paused" and Colors.Yellow or
@@ -520,16 +524,18 @@ function Ui.RenderMercsStatus(showPopout)
                             Colors.Green,
                         sameLine = true,
                     },
-                    { text = "AutoTarget:",                  color = Colors.White, },
-                    { text = data.Data.AutoTarget or "None", color = Colors.LightRed, sameLine = true, },
-                    { text = "Assist:",                      color = Colors.White, },
-                    { text = data.Data.Assist or "None",     color = Colors.Cyan,     sameLine = true, },
-                    { text = "Chase:",                       color = Colors.White, },
-                    { text = data.Data.Chase or "None",      color = Colors.Cyan,     sameLine = true, },
-                    { text = "Exp:",                         color = Colors.White, },
-                    { text = data.Data.PctExp or "0%",       color = Colors.Yellow,   sameLine = true, },
-                    { text = "Unspent AA:",                  color = Colors.White, },
-                    { text = data.Data.UnSpentAA or "None",  color = Colors.Orange,   sameLine = true, },
+                    { text = "AutoTarget:",                                      color = Colors.White, },
+                    { text = data.Data.AutoTarget or "None",                     color = Colors.LightRed,    sameLine = true, },
+                    { text = "Assist:",                                          color = Colors.White, },
+                    { text = data.Data.Assist or "None",                         color = Colors.Cyan,        sameLine = true, },
+                    { text = "Chase:",                                           color = Colors.White, },
+                    { text = data.Data.Chase or "None",                          color = Colors.Cyan,        sameLine = true, },
+                    { text = "Level:",                                           color = Colors.White, },
+                    { text = tostring(data.Data.Level) or "0",                   color = Colors.Yellow,      sameLine = true, },
+                    { text = "Exp:",                                             color = Colors.White, },
+                    { text = string.format("%0.2f%%", data.Data.PctExp) or "0%", color = Colors.LightYellow, sameLine = true, },
+                    { text = "Unspent AA:",                                      color = Colors.White, },
+                    { text = data.Data.UnSpentAA or "None",                      color = Colors.Orange,      sameLine = true, },
                 })
             end,
 
