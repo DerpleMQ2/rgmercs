@@ -1539,6 +1539,15 @@ Config.DefaultConfig                                     = {
         Min = 0,
         Max = 50,
     },
+    ['WarnCombatPaused']            = {
+        DisplayName = "Warn on Combat While Paused",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 9,
+        Tooltip = "If we gain aggro while paused, display a warning in the chat window.",
+        Default = true,
+    },
     ['Red']                         = {
         DisplayName = "UI Color - Red",
         Group = "General",

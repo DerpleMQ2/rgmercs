@@ -175,10 +175,26 @@ local function RGMercsGUI()
                 HudUI:RenderToggleHud()
             end
 
+            local flashingWarning = Globals.PauseMain and Targeting.GetXTHaterCount(false) > 0 and Config:GetSetting('WarnCombatPaused')
+
+            if flashingWarning then
+                if os.time() % 3 == 0 then
+                    Comms.PopUpColor(15, 1, "RGMercs Warning: You have aggro while paused!")
+                end
+
+                ImGui.PushStyleColor(ImGuiCol.WindowBg, os.time() % 2 == 0 and
+                    ImVec4(0.7, 0.1, 0.1, Config:GetMainOpacity()) or
+                    ImVec4(0.3, 0.1, 0.1, Config:GetMainOpacity()))
+            end
+
             if Config:GetSetting('FullUI') then
                 openGUI = StandardUI:RenderMainWindow(imGuiStyle, openGUI)
             else
                 openGUI = SimpleUI:RenderMainWindow(imGuiStyle, openGUI)
+            end
+
+            if flashingWarning then
+                ImGui.PopStyleColor()
             end
 
             if Config:GetSetting('EnableOptionsUI') then

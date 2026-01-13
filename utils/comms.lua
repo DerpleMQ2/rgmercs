@@ -213,6 +213,16 @@ function Comms.PopUp(msg, ...)
     mq.cmdf("/popupecho 15 5 %s", output)
 end
 
+--- Displays a pop-up message with the given text.
+--- @param msg string: The message to be displayed in the pop-up.
+--- @param ... any: Additional arguments that may be used within the function.
+function Comms.PopUpColor(color, time, msg, ...)
+    local output = msg
+    if (... ~= nil) then output = string.format(output, ...) end
+
+    mq.cmdf("/popupecho %d %d %s", color, time, output)
+end
+
 --- Handles the announcement message.
 --- @param msg string: The message to be announced.
 --- @param sendGroup boolean: Whether to send the message to the group.
