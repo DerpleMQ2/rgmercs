@@ -344,7 +344,7 @@ function Ui.RenderMercsStatus(showPopout)
             flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultSort),
             width = 150.0,
             sort = function(_, a, b)
-                return a, b
+                return a or "", b or ""
             end,
             render = function(peer, data)
                 if data.Data.Zone ~= mq.TLO.Zone.Name() then
@@ -381,7 +381,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.HPs, data_b.Data.HPs
+                return data_a.Data.HPs or 0, data_b.Data.HPs or 0
             end,
             render = function(peer, data)
                 Ui.RenderColoredText(
@@ -397,7 +397,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.Mana, data_b.Data.Mana
+                return data_a.Data.Mana or 0, data_b.Data.Mana or 0
             end,
             render = function(peer, data)
                 Ui.RenderColoredText(
@@ -413,7 +413,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.Endurance, data_b.Data.Endurance
+                return data_a.Data.Endurance or 0, data_b.Data.Endurance or 0
             end,
             render = function(peer, data)
                 Ui.RenderColoredText(
@@ -429,7 +429,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.Target, data_b.Data.Target
+                return data_a.Data.Target or "", data_b.Data.Target or ""
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.Target or "None"))
@@ -443,7 +443,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.Casting, data_b.Data.Casting
+                return data_a.Data.Casting or "", data_b.Data.Casting or ""
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.Casting or "None"))
@@ -457,7 +457,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.PetID, data_b.Data.PetID
+                return data_a.Data.PetID or 0, data_b.Data.PetID or 0
             end,
             render = function(peer, data)
                 if data.Data.PetID > 0 then
@@ -491,7 +491,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.State, data_b.Data.State
+                return data_a.Data.State or "", data_b.Data.State or ""
             end,
             render = function(peer, data)
                 local stateColor =
@@ -541,7 +541,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.LastUpdate, data_b.Data.LastUpdate
+                return data_a.Data.LastUpdate or 0, data_b.Data.LastUpdate or 0
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%ds", os.time() - (data.LastHeartbeat or 0)))
@@ -556,7 +556,7 @@ function Ui.RenderMercsStatus(showPopout)
                 local data_a = mq.TLO.Zone.Name() == mercs[a].Data.Zone and mq.TLO.Spawn(mercs[a].Data.ID) or 999
                 local data_b = mq.TLO.Zone.Name() == mercs[b].Data.Zone and mq.TLO.Spawn(mercs[b].Data.ID) or 999
 
-                return data_a.Distance(), data_b.Distance()
+                return data_a.Distance() or 999, data_b.Distance() or 999
             end,
             render = function(peer, data)
                 local distance = mq.TLO.Zone.Name() == data.Data.Zone and mq.TLO.Spawn(data.Data.ID).Distance() or 999
@@ -579,7 +579,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.Level, data_b.Data.Level
+                return data_a.Data.Level or 0, data_b.Data.Level or 0
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%d", data.Data.Level or 0))
@@ -592,7 +592,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.Chase, data_b.Data.Chase
+                return data_a.Data.Chase or "", data_b.Data.Chase or ""
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.Chase or "None"))
@@ -605,7 +605,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.Assist, data_b.Data.Assist
+                return data_a.Data.Assist or "", data_b.Data.Assist or ""
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.Assist or "None"))
@@ -618,7 +618,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.AutoTarget, data_b.Data.AutoTarget
+                return data_a.Data.AutoTarget or "", data_b.Data.AutoTarget or ""
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.AutoTarget or "None"))
@@ -631,7 +631,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.Zone, data_b.Data.Zone
+                return data_a.Data.Zone or "", data_b.Data.Zone or ""
             end,
             render = function(peer, data)
                 if data.Data.ZoneShortName == mq.TLO.Zone.ShortName() then
@@ -652,7 +652,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.ZoneShortName, data_b.Data.ZoneshortName
+                return data_a.Data.ZoneShortName or "", data_b.Data.ZoneShortName or ""
             end,
             render = function(peer, data)
                 if data.Data.ZoneShortName == mq.TLO.Zone.ShortName() then
@@ -673,7 +673,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.UnSpentAA, data_b.Data.UnSpentAA
+                return data_a.Data.UnSpentAA or 0, data_b.Data.UnSpentAA or 0
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%d", data.Data.UnSpentAA or 0))
@@ -686,7 +686,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.PctExp, data_b.Data.PctExp
+                return data_a.Data.PctExp or 0, data_b.Data.PctExp or 0
             end,
             render = function(peer, data)
                 Ui.RenderColoredText(
@@ -701,7 +701,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.PetID, data_b.Data.PetID
+                return data_a.Data.PetID or 0, data_b.Data.PetID or 0
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%d", data.Data.PetID or 0))
@@ -714,7 +714,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.PetHPs, data_b.Data.PetHPs
+                return data_a.Data.PetHPs or 0, data_b.Data.PetHPs or 0
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.PetHPs or "0%"))
@@ -727,7 +727,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.PetLevel, data_b.Data.PetLevel
+                return data_a.Data.PetLevel or 0, data_b.Data.PetLevel or 0
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%d", data.Data.PetLevel or 0))
@@ -740,7 +740,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.PetName, data_b.Data.PetName
+                return data_a.Data.PetName or "", data_b.Data.PetName or ""
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.PetName or "None"))
@@ -753,7 +753,7 @@ function Ui.RenderMercsStatus(showPopout)
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
-                return data_a.Data.PetTarget, data_b.Data.PetTarget
+                return data_a.Data.PetTarget or "", data_b.Data.PetTarget or ""
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.PetTarget or "None"))
