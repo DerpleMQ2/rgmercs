@@ -634,7 +634,36 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Zone, data_b.Data.Zone
             end,
             render = function(peer, data)
+                if data.Data.ZoneShortName == mq.TLO.Zone.ShortName() then
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.LightGreen)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.LightRed)
+                end
+
                 ImGui.Text(string.format("%s", data.Data.Zone or "None"))
+
+                ImGui.PopStyleColor()
+            end,
+        },
+        {
+            name = 'Zone Short Name',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 120.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.ZoneShortName, data_b.Data.ZoneshortName
+            end,
+            render = function(peer, data)
+                if data.Data.ZoneShortName == mq.TLO.Zone.ShortName() then
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.LightGreen)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.LightRed)
+                end
+
+                ImGui.Text(string.format("%s", data.Data.ZoneShortName or "None"))
+
+                ImGui.PopStyleColor()
             end,
         },
         {

@@ -99,6 +99,7 @@ function Comms.SendHeartbeat(assist, chase)
     local heartBeat = {
         From          = Comms.GetPeerName(),
         Zone          = mq.TLO.Zone.Name(),
+        ZoneShortName = mq.TLO.Zone.ShortName(),
         ID            = mq.TLO.Me.ID(),
         Level         = mq.TLO.Me.Level(),
         X             = mq.TLO.Me.X(),
