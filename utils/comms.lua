@@ -98,6 +98,7 @@ function Comms.SendHeartbeat(assist, chase)
     Comms.LastHeartbeat = os.time()
     local heartBeat = {
         From          = Comms.GetPeerName(),
+        Server        = mq.TLO.EverQuest.Server(),
         Zone          = mq.TLO.Zone.Name(),
         ZoneShortName = mq.TLO.Zone.ShortName(),
         ID            = mq.TLO.Me.ID(),

@@ -351,9 +351,10 @@ function Ui.RenderMercsStatus(showPopout)
                     ImGui.PushStyleColor(ImGuiCol.Text, Colors.Grey)
                 end
 
-                ImGui.SmallButton(peer)
-
                 local name, _ = Comms.GetCharAndServerFromPeer(peer)
+
+                ImGui.SmallButton(name or "Unknown")
+
                 if name then
                     if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
                         local peerSpawn = mq.TLO.Spawn("=" .. name)
@@ -370,6 +371,25 @@ function Ui.RenderMercsStatus(showPopout)
                     end
                 end
                 if data.Data.Zone ~= mq.TLO.Zone.Name() then
+                    ImGui.PopStyleColor()
+                end
+            end,
+        },
+        {
+            name = string.format('Sever'),
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 150.0,
+            sort = function(_, a, b)
+                return a.Data.Server or "", b.Data.Server or ""
+            end,
+            render = function(peer, data)
+                if data.Data.Server ~= mq.TLO.EverQuest.Server() then
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.Grey)
+                end
+
+                ImGui.Text(data.Data.Server or "Unknown")
+
+                if data.Data.Server ~= mq.TLO.EverQuest.Server() then
                     ImGui.PopStyleColor()
                 end
             end,
