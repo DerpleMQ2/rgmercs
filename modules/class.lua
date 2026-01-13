@@ -1641,6 +1641,7 @@ function Module:SetCurrentRotationState(state)
 end
 
 function Module:OnDeath()
+    Targeting.ClearTarget()
     Core.DoCmd("/nav stop")
     Movement:DoStickCmd("off")
 end

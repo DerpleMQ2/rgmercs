@@ -509,6 +509,10 @@ function Ui.RenderMercsStatus(showPopout)
                         { text = data.Data.Assist or "None",     color = Colors.Cyan,     sameLine = true, },
                         { text = "Chase:",                       color = Colors.White, },
                         { text = data.Data.Chase or "None",      color = Colors.Cyan,     sameLine = true, },
+                        { text = "Exp:",                         color = Colors.White, },
+                        { text = data.Data.PctExp or "0%",       color = Colors.Yellow,   sameLine = true, },
+                        { text = "Unspent AA:",                  color = Colors.White, },
+                        { text = data.Data.UnSpentAA or "None",  color = Colors.Orange,   sameLine = true, },
                     })
 
                 ImGui.TableNextColumn()

@@ -1,5 +1,6 @@
 local mq                = require('mq')
 local Config            = require('utils.config')
+local Events            = require('utils.events')
 local Logger            = require("utils.logger")
 local Core              = require("utils.core")
 local Modules           = require("utils.modules")
@@ -82,11 +83,15 @@ function Movement:NavInCombat(targetId, distance, bDontStick)
         Core.DoCmd("/nav id %d distance=%d log=off lineofsight=on", targetId, distance or 15)
         while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
             mq.delay(100)
+            mq.doevents()
+            Events.DoEvents()
         end
     else
         Core.DoCmd("/moveto id %d uw mdist %d", targetId, distance)
         while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveUtils.Stuck() do
             mq.delay(100)
+            mq.doevents()
+            Events.DoEvents()
         end
     end
 

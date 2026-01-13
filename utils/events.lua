@@ -1,7 +1,6 @@
 local mq                  = require('mq')
 local Config              = require('utils.config')
 local Globals             = require('utils.globals')
-local Targeting           = require("utils.targeting")
 local Core                = require("utils.core")
 local Modules             = require("utils.modules")
 local Logger              = require("utils.logger")
@@ -16,8 +15,6 @@ Events.HeartbeatCoroutine = nil
 --- This function is triggered when a death event occurs and performs necessary operations.
 function Events.HandleDeath()
     Logger.log_warn("You are sleeping with the fishes.")
-
-    Targeting.ClearTarget()
 
     Modules:ExecAll("OnDeath")
 
@@ -54,7 +51,6 @@ function Events.CreateHeartBeat()
     Events.HeartbeatCoroutine = coroutine.create(function()
         while (1) do
             Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(),
-                Targeting.GetAutoTarget() and Targeting.GetAutoTarget().DisplayName() or "None",
                 Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
             coroutine.yield()
         end

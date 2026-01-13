@@ -89,10 +89,11 @@ function Comms.SendAllPeersDoCmd(inZoneOnly, includeSelf, cmd, ...)
     end
 end
 
-function Comms.SendHeartbeat(assist, curAutoTarget, chase)
+function Comms.SendHeartbeat(assist, chase)
     --if os.time() - Comms.LastHeartbeat < 1 then return end
     local useMana = Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName())
     local useEnd = Globals.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName())
+    local curAutoTarget = mq.TLO.Spawn(string.format("id %d", Globals.AutoTargetID))
 
     Comms.LastHeartbeat = os.time()
     local heartBeat = {
@@ -122,7 +123,9 @@ function Comms.SendHeartbeat(assist, curAutoTarget, chase)
         PetName       = mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.DisplayName() or "",
         PetTarget     = mq.TLO.Me.Pet.ID() ~= 0 and (mq.TLO.Me.Pet.Target.CleanName() or "None") or "None",
         PetConColor   = mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.ConColor() or "Grey",
-        AutoTarget    = curAutoTarget,
+        AutoTarget    = curAutoTarget and (curAutoTarget.DisplayName() or "None") or "None",
+        UnSpentAA     = mq.TLO.Me.AAPoints(),
+        PctExp        = string.format("%.2f%%", mq.TLO.Me.PctExp()),
         Assist        = assist,
         State         = Globals.PauseMain and "Paused" or Globals.CurrentState,
         Chase         = chase,
