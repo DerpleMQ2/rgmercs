@@ -334,80 +334,19 @@ function Ui.RenderMercsStatus(showPopout)
     local Colors = Globals.Constants.Colors
     local ConColorsNameToVec4 = Globals.Constants.ConColorsNameToVec4
 
-    if ImGui.BeginTable("MercStatusTable", 9, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable)) then
-        local mercs = Comms.GetAllPeerHeartbeats(true)
+    if not Ui.TempSettings.SortedMercs then
+        Ui.TempSettings.SortedMercs = {}
+    end
 
-        if not Ui.TempSettings.SortedMercs then
-            Ui.TempSettings.SortedMercs = {}
-        end
-
-        local sort_specs = ImGui.TableGetSortSpecs()
-
-        if #Ui.TempSettings.SortedMercs ~= Tables.GetTableSize(mercs) then
-            Ui.TempSettings.SortedMercs = {}
-            for peer, _ in pairs(mercs) do table.insert(Ui.TempSettings.SortedMercs, peer) end
-            if sort_specs then sort_specs.SpecsDirty = true end
-        end
-
-        ImGui.TableSetupColumn(string.format('Name (%d)', #Ui.TempSettings.SortedMercs), bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultSort), 150)
-        ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
-        ImGui.TableSetupColumn('Mana %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
-        ImGui.TableSetupColumn('End %', (ImGuiTableColumnFlags.WidthStretch), 80.0)
-        ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthStretch), 80.0)
-        ImGui.TableSetupColumn('Casting', (ImGuiTableColumnFlags.WidthStretch), 120.0)
-        ImGui.TableSetupColumn('Pet', (ImGuiTableColumnFlags.WidthStretch), 80.0)
-        ImGui.TableSetupColumn('State', (ImGuiTableColumnFlags.WidthStretch), 80.0)
-        ImGui.TableSetupColumn('Last Update', (ImGuiTableColumnFlags.WidthStretch), 40.0)
-        ImGui.TableHeadersRow()
-
-
-        if sort_specs and sort_specs.SpecsDirty then
-            table.sort(Ui.TempSettings.SortedMercs, function(a, b)
-                local spec = sort_specs:Specs(1) -- single-column sort
-
-                local col = spec.ColumnIndex
-                local dir = spec.SortDirection
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-
-                local av, bv
-                if col == 0 then
-                    av, bv = a, b
-                elseif col == 1 then
-                    av, bv = data_a.Data.HPs, data_b.Data.HPs
-                elseif col == 2 then
-                    av, bv = data_a.Data.Mana, data_b.Data.Mana
-                elseif col == 3 then
-                    av, bv = data_a.Data.End, data_b.Data.End
-                elseif col == 4 then
-                    av, bv = data_a.Data.Target, data_b.Data.Target
-                elseif col == 5 then
-                    av, bv = data_a.Data.Casting, data_b.Data.Casting
-                elseif col == 6 then
-                    av, bv = data_a.Data.PetID, data_b.Data.PetID
-                elseif col == 7 then
-                    av, bv = data_a.Data.State, data_b.Data.State
-                elseif col == 8 then
-                    av, bv = data_a.Data.LastUpdate, data_b.Data.LastUpdate
-                else
-                    av, bv = a, b
-                end
-
-                if dir == ImGuiSortDirection.Ascending then
-                    return (av or 0) < (bv or 0)
-                else
-                    return (av or 0) > (bv or 0)
-                end
-            end)
-
-            sort_specs.SpecsDirty = false
-        end
-
-        for _, peer in ipairs(Ui.TempSettings.SortedMercs) do
-            local data = mercs[peer]
-            if data and data.Data then
-                ImGui.PushID(string.format("##table_entry_%s", peer))
-                ImGui.TableNextColumn()
+    local tableColumns = {
+        {
+            name = string.format('Name (%d)', #Ui.TempSettings.SortedMercs),
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultSort),
+            width = 150.0,
+            sort = function(_, a, b)
+                return a, b
+            end,
+            render = function(peer, data)
                 if data.Data.Zone ~= mq.TLO.Zone.Name() then
                     ImGui.PushStyleColor(ImGuiCol.Text, Colors.Grey)
                 end
@@ -433,24 +372,94 @@ function Ui.RenderMercsStatus(showPopout)
                 if data.Data.Zone ~= mq.TLO.Zone.Name() then
                     ImGui.PopStyleColor()
                 end
-
-                ImGui.TableNextColumn()
+            end,
+        },
+        {
+            name = 'HP %',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.HPs, data_b.Data.HPs
+            end,
+            render = function(peer, data)
                 Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.HPs or 0, { Colors.LightGreen, Colors.Yellow, Colors.Red, }), "%d%%",
-                    math.ceil(data.Data.HPs or 0) or "")
-                ImGui.TableNextColumn()
+                    Ui.GetPercentageColor(data.Data.HPs or 0, { Colors.LightGreen, Colors.Yellow, Colors.Red, }),
+                    data.Data.HPs and "%d%%" or "", math.ceil(data.Data.HPs or 0) or "")
+            end,
+
+        },
+        {
+            name = 'Mana %',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Mana, data_b.Data.Mana
+            end,
+            render = function(peer, data)
                 Ui.RenderColoredText(
                     Ui.GetPercentageColor(data.Data.Mana or 0, { Colors.Cyan, Colors.LightBlue, Colors.Red, }),
                     data.Data.Mana and "%d%%" or "", math.ceil(data.Data.Mana or 0) or "")
-                ImGui.TableNextColumn()
+            end,
+
+        },
+        {
+            name = 'End %',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Endurance, data_b.Data.Endurance
+            end,
+            render = function(peer, data)
                 Ui.RenderColoredText(
                     Ui.GetPercentageColor(data.Data.Endurance or 0, { Colors.Yellow, Colors.Grey, Colors.Red, }),
                     data.Data.Endurance and "%d%%" or "", math.ceil(data.Data.Endurance or 0) or "")
-                ImGui.TableNextColumn()
+            end,
+
+        },
+        {
+            name = 'Target',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Target, data_b.Data.Target
+            end,
+            render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.Target or "None"))
-                ImGui.TableNextColumn()
+            end,
+
+        },
+        {
+            name = 'Casting',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 120.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Casting, data_b.Data.Casting
+            end,
+            render = function(peer, data)
                 ImGui.Text(string.format("%s", data.Data.Casting or "None"))
-                ImGui.TableNextColumn()
+            end,
+
+        },
+        {
+            name = 'Pet',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.PetID, data_b.Data.PetID
+            end,
+            render = function(peer, data)
                 if data.Data.PetID > 0 then
                     ImGui.PushStyleColor(ImGuiCol.Text, ConColorsNameToVec4[data.Data.PetConColor])
 
@@ -462,20 +471,27 @@ function Ui.RenderMercsStatus(showPopout)
 
                     Ui.MultilineTooltipWithColors(
                         {
-                            { text = "Name:",                       color = Colors.White, },
-                            { text = data.Data.PetName or "None",   color = Colors.LightGreen, sameLine = true, },
-                            { text = "Level:",                      color = Colors.White, },
-                            { text = data.Data.PetLevel or "None",  color = Colors.LightBlue,  sameLine = true, },
-                            { text = "HPs:",                        color = Colors.White, },
-                            { text = data.Data.PetHPs or "None",    color = Colors.Cyan,       sameLine = true, },
-                            { text = "Target:",                     color = Colors.White, },
-                            { text = data.Data.PetTarget or "None", color = Colors.LightRed,   sameLine = true, },
+                            { text = "Name:",                      color = Colors.White, },
+                            { text = data.Data.PetName or "None",  color = Colors.LightGreen, sameLine = true, },
+                            { text = "Level:",                     color = Colors.White, },
+                            { text = data.Data.PetLevel or "None", color = Colors.LightBlue,  sameLine = true, },
+                            { text = "HPs:",                       color = Colors.White, },
+                            { text = data.Data.PetHPs or "None",   color = Colors.Cyan,       sameLine = true, },
                         })
-                else
-                    ImGui.Text("")
                 end
-                ImGui.TableNextColumn()
+            end,
 
+        },
+        {
+            name = 'State',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.State, data_b.Data.State
+            end,
+            render = function(peer, data)
                 local stateColor =
                     (data.Data.Burning and (os.time() % 2 == 0 and Colors.Orange or Colors.Red)) or
                     (data.Data.State == "Paused" and Colors.Yellow) or
@@ -495,32 +511,219 @@ function Ui.RenderMercsStatus(showPopout)
 
                 Ui.MultilineTooltipWithColors(
                     {
-                        { text = "State:",                       color = Colors.White, },
-                        {
-                            text = data.Data.State or "None",
-                            color = data.Data.State == "Paused" and Colors.Yellow or
-                                data.Data.State == "Combat" and Colors.Red or
-                                Colors.Green,
-                            sameLine = true,
-                        },
-                        { text = "AutoTarget:",                  color = Colors.White, },
-                        { text = data.Data.AutoTarget or "None", color = Colors.LightRed, sameLine = true, },
-                        { text = "Assist:",                      color = Colors.White, },
-                        { text = data.Data.Assist or "None",     color = Colors.Cyan,     sameLine = true, },
-                        { text = "Chase:",                       color = Colors.White, },
-                        { text = data.Data.Chase or "None",      color = Colors.Cyan,     sameLine = true, },
-                        { text = "Exp:",                         color = Colors.White, },
-                        { text = data.Data.PctExp or "0%",       color = Colors.Yellow,   sameLine = true, },
-                        { text = "Unspent AA:",                  color = Colors.White, },
-                        { text = data.Data.UnSpentAA or "None",  color = Colors.Orange,   sameLine = true, },
+                        { text = "State:",                    color = Colors.White, },
+                        { text = data.Data.State or "None",   color = Colors.LightGreen, sameLine = true, },
+                        { text = "Burning:",                  color = Colors.White, },
+                        { text = tostring(data.Data.Burning), color = Colors.Orange,     sameLine = true, },
                     })
+            end,
 
-                ImGui.TableNextColumn()
-                local lastHB = os.time() - (data.LastHeartbeat or 0)
-                Ui.RenderColoredText(
-                    Ui.GetPercentageColor((1 - lastHB / Config:GetSetting("ActorPeerTimeout")) * 100,
-                        { Colors.White, Colors.Yellow, Colors.Red, }),
-                    "%ds", lastHB)
+        },
+        {
+            name = 'Last Update',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 40.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.LastUpdate, data_b.Data.LastUpdate
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%ds", os.time() - (data.LastHeartbeat or 0)))
+            end,
+
+        },
+        {
+            name = 'Chase',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Chase, data_b.Data.Chase
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.Chase or "None"))
+            end,
+        },
+        {
+            name = 'Assist',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Assist, data_b.Data.Assist
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.Assist or "None"))
+            end,
+        },
+        {
+            name = 'AutoTarget',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 120.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.AutoTarget, data_b.Data.AutoTarget
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.AutoTarget or "None"))
+            end,
+        },
+        {
+            name = 'Zone',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 120.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Zone, data_b.Data.Zone
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.Zone or "None"))
+            end,
+        },
+        {
+            name = 'Unspent AA',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.UnSpentAA, data_b.Data.UnSpentAA
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%d", data.Data.UnSpentAA or 0))
+            end,
+        },
+        {
+            name = 'Pct Exp',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.PctExp, data_b.Data.PctExp
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.PctExp or "0%"))
+            end,
+        },
+        {
+            name = 'Pet ID',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 60.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.PetID, data_b.Data.PetID
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%d", data.Data.PetID or 0))
+            end,
+        },
+        {
+            name = "Pet HPs",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.PetHPs, data_b.Data.PetHPs
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.PetHPs or "0%"))
+            end,
+        },
+        {
+            name = "Pet Level",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 60.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.PetLevel, data_b.Data.PetLevel
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%d", data.Data.PetLevel or 0))
+            end,
+        },
+        {
+            name = "Pet Name",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 120.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.PetName, data_b.Data.PetName
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.PetName or "None"))
+            end,
+        },
+        {
+            name = "Pet Target",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 120.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.PetTarget, data_b.Data.PetTarget
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.PetTarget or "None"))
+            end,
+        },
+
+
+    }
+
+    if ImGui.BeginTable("MercStatusTable", #tableColumns, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable)) then
+        local mercs = Comms.GetAllPeerHeartbeats(true)
+
+        for id, data in ipairs(tableColumns) do
+            ImGui.TableSetupColumn(data.name, data.flags, data.width, id - 1)
+        end
+
+        ImGui.TableHeadersRow()
+
+        local sort_specs = ImGui.TableGetSortSpecs()
+
+        if #Ui.TempSettings.SortedMercs ~= Tables.GetTableSize(mercs) then
+            Ui.TempSettings.SortedMercs = {}
+            for peer, _ in pairs(mercs) do table.insert(Ui.TempSettings.SortedMercs, peer) end
+            if sort_specs then sort_specs.SpecsDirty = true end
+        end
+
+        if sort_specs and sort_specs.SpecsDirty then
+            table.sort(Ui.TempSettings.SortedMercs, function(a, b)
+                local spec = sort_specs:Specs(1) -- single-column sort
+
+                local col = spec.ColumnIndex
+                local dir = spec.SortDirection
+
+                local av, bv = tableColumns[col + 1].sort(mercs, a, b)
+
+                if dir == ImGuiSortDirection.Ascending then
+                    return (av or 0) < (bv or 0)
+                else
+                    return (av or 0) > (bv or 0)
+                end
+            end)
+
+            sort_specs.SpecsDirty = false
+        end
+
+        for _, peer in ipairs(Ui.TempSettings.SortedMercs) do
+            local data = mercs[peer]
+            if data and data.Data then
+                ImGui.PushID(string.format("##table_entry_%s", peer))
+                for _, colData in ipairs(tableColumns) do
+                    ImGui.TableNextColumn()
+                    colData.render(peer, data)
+                end
                 ImGui.PopID()
             end
         end
