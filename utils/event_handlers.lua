@@ -246,6 +246,13 @@ mq.event('Level Up', "You have gained a level! Welcome to level#*#", function()
     end
 end)
 
+mq.event('Level Down', "You have LOST a level! You are now level#*#", function()
+    -- support EQ Might, where deleveling is a standard part of play
+    if Globals.CurServer == "EQ Might" then
+        Modules:ExecModule("Class", "RescanLoadout")
+    end
+end)
+
 -- [ CAST RESULT HANDLERS ] --
 mq.event('Success1', "You begin casting#*#", function()
     Casting.SetLastCastResult(Globals.Constants.CastResults.CAST_SUCCESS)
