@@ -245,7 +245,7 @@ Module.DefaultConfig   = {
 Module.CommandHandlers = {
     chaseon = {
         usage = "/rgl chaseon <name?>",
-        about = "Chase <name> (uses your current target if no name is supplied). Clears your camp.",
+        about = "Chase <name> (If no name is supplied, this will use your current target, or fallback to the MA). Clears your camp.",
         handler = function(self, params)
             self:ChaseOn(params)
         end,
