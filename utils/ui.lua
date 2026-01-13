@@ -579,8 +579,8 @@ function Ui.RenderMercsStatus(showPopout)
             flags = ImGuiTableColumnFlags.WidthStretch,
             width = 80.0,
             sort = function(mercs, a, b)
-                local data_a = mq.TLO.Zone.Name() == mercs[a].Data.Zone and mq.TLO.Spawn(mercs[a].Data.ID)() or 999
-                local data_b = mq.TLO.Zone.Name() == mercs[b].Data.Zone and mq.TLO.Spawn(mercs[b].Data.ID)() or 999
+                local data_a = (mq.TLO.Zone.Name() == mercs[a].Data.Zone and (mq.TLO.Spawn(mercs[a].Data.ID).Distance() or 999) or 999)
+                local data_b = (mq.TLO.Zone.Name() == mercs[b].Data.Zone and (mq.TLO.Spawn(mercs[b].Data.ID).Distance() or 999) or 999)
 
                 return data_a, data_b
             end,
@@ -796,16 +796,14 @@ function Ui.RenderMercsStatus(showPopout)
                 if sort_specs then sort_specs.SpecsDirty = true end
             end
 
-            if sort_specs and sort_specs.SpecsDirty then
+            local sortingByDistance = tableColumns[(sort_specs and sort_specs:Specs(1).ColumnIndex or 0) + 1].name == "Distance"
+            if sort_specs and sort_specs.SpecsDirty or sortingByDistance then
                 table.sort(Ui.TempSettings.SortedMercs, function(a, b)
                     local spec = sort_specs:Specs(1) -- single-column sort
 
-                    local col = spec.ColumnIndex
-                    local dir = spec.SortDirection
+                    local av, bv = tableColumns[spec.ColumnIndex + 1].sort(mercs, a, b)
 
-                    local av, bv = tableColumns[col + 1].sort(mercs, a, b)
-
-                    if dir == ImGuiSortDirection.Ascending then
+                    if spec.SortDirection == ImGuiSortDirection.Ascending then
                         return (av or 0) < (bv or 0)
                     else
                         return (av or 0) > (bv or 0)
