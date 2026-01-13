@@ -549,6 +549,43 @@ function Ui.RenderMercsStatus(showPopout)
 
         },
         {
+            name = "Distance",
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mq.TLO.Zone.Name() == mercs[a].Data.Zone and mq.TLO.Spawn(mercs[a].Data.ID) or 999
+                local data_b = mq.TLO.Zone.Name() == mercs[b].Data.Zone and mq.TLO.Spawn(mercs[b].Data.ID) or 999
+
+                return data_a.Distance(), data_b.Distance()
+            end,
+            render = function(peer, data)
+                local distance = mq.TLO.Zone.Name() == data.Data.Zone and mq.TLO.Spawn(data.Data.ID).Distance() or 999
+                local distString = distance == 999 and "" or string.format("%0.2f", distance)
+                ImGui.PushStyleColor(ImGuiCol.Text,
+                    distance == 999 and Colors.Grey or
+                    distance > 75 and Colors.LightRed or
+                    distance > 50 and Colors.Orange or
+                    distance > 25 and Colors.Yellow or
+                    Colors.LightGreen
+                )
+                ImGui.Text(distString)
+                ImGui.PopStyleColor()
+            end,
+        },
+        {
+            name = "Level",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
+            width = 60.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Level, data_b.Data.Level
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%d", data.Data.Level or 0))
+            end,
+        },
+        {
             name = 'Chase',
             flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
             width = 80.0,
