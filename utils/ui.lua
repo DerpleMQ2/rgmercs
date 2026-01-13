@@ -689,7 +689,9 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.PctExp, data_b.Data.PctExp
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.PctExp or "0%"))
+                Ui.RenderColoredText(
+                    Ui.GetPercentageColor(data.Data.PctExp or 0, { Colors.LightGreen, Colors.Orange, Colors.LightRed, }),
+                    data.Data.HPs and "%d%%" or "", data.Data.PctExp or 0)
             end,
         },
         {
