@@ -759,60 +759,50 @@ function Ui.RenderMercsStatus(showPopout)
                 ImGui.Text(string.format("%s", data.Data.PetTarget or "None"))
             end,
         },
-
-
     }
 
-    if ImGui.BeginTable("MercStatusTable", #tableColumns, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable)) then
-        local mercs = Comms.GetAllPeerHeartbeats(true)
+    Ui.RenderTableData("MercStatusTable", tableColumns, function(sort_specs)
+            local mercs = Comms.GetAllPeerHeartbeats(true)
 
-        for id, data in ipairs(tableColumns) do
-            ImGui.TableSetupColumn(data.name, data.flags, data.width, id - 1)
-        end
-
-        ImGui.TableHeadersRow()
-
-        local sort_specs = ImGui.TableGetSortSpecs()
-
-        if #Ui.TempSettings.SortedMercs ~= Tables.GetTableSize(mercs) then
-            Ui.TempSettings.SortedMercs = {}
-            for peer, _ in pairs(mercs) do table.insert(Ui.TempSettings.SortedMercs, peer) end
-            if sort_specs then sort_specs.SpecsDirty = true end
-        end
-
-        if sort_specs and sort_specs.SpecsDirty then
-            table.sort(Ui.TempSettings.SortedMercs, function(a, b)
-                local spec = sort_specs:Specs(1) -- single-column sort
-
-                local col = spec.ColumnIndex
-                local dir = spec.SortDirection
-
-                local av, bv = tableColumns[col + 1].sort(mercs, a, b)
-
-                if dir == ImGuiSortDirection.Ascending then
-                    return (av or 0) < (bv or 0)
-                else
-                    return (av or 0) > (bv or 0)
-                end
-            end)
-
-            sort_specs.SpecsDirty = false
-        end
-
-        for _, peer in ipairs(Ui.TempSettings.SortedMercs) do
-            local data = mercs[peer]
-            if data and data.Data then
-                ImGui.PushID(string.format("##table_entry_%s", peer))
-                for _, colData in ipairs(tableColumns) do
-                    ImGui.TableNextColumn()
-                    colData.render(peer, data)
-                end
-                ImGui.PopID()
+            if #Ui.TempSettings.SortedMercs ~= Tables.GetTableSize(mercs) then
+                Ui.TempSettings.SortedMercs = {}
+                for peer, _ in pairs(mercs) do table.insert(Ui.TempSettings.SortedMercs, peer) end
+                if sort_specs then sort_specs.SpecsDirty = true end
             end
-        end
 
-        ImGui.EndTable()
-    end
+            if sort_specs and sort_specs.SpecsDirty then
+                table.sort(Ui.TempSettings.SortedMercs, function(a, b)
+                    local spec = sort_specs:Specs(1) -- single-column sort
+
+                    local col = spec.ColumnIndex
+                    local dir = spec.SortDirection
+
+                    local av, bv = tableColumns[col + 1].sort(mercs, a, b)
+
+                    if dir == ImGuiSortDirection.Ascending then
+                        return (av or 0) < (bv or 0)
+                    else
+                        return (av or 0) > (bv or 0)
+                    end
+                end)
+
+                sort_specs.SpecsDirty = false
+            end
+        end,
+        function()
+            local mercs = Comms.GetAllPeerHeartbeats(true)
+            for _, peer in ipairs(Ui.TempSettings.SortedMercs) do
+                local data = mercs[peer]
+                if data and data.Data then
+                    ImGui.PushID(string.format("##table_entry_%s", peer))
+                    for _, colData in ipairs(tableColumns) do
+                        ImGui.TableNextColumn()
+                        colData.render(peer, data)
+                    end
+                    ImGui.PopID()
+                end
+            end
+        end)
 end
 
 function Ui.RenderForceTargetList(showPopout)
@@ -833,44 +823,17 @@ function Ui.RenderForceTargetList(showPopout)
         Globals.IgnoredTargetIDs = Set.new({})
     end
 
-    if ImGui.BeginTable("XTargs", Config:GetSetting("ExtendedFTInfo") and 8 or 6, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg)) then
-        ImGui.TableSetupColumn('', (ImGuiTableColumnFlags.WidthFixed), 16.0)
-        ImGui.TableSetupColumn('', (ImGuiTableColumnFlags.WidthFixed), 16.0)
-        if Config:GetSetting("ExtendedFTInfo") then
-            ImGui.TableSetupColumn('XT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
-        end
-        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 300)
-        ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        ImGui.TableSetupColumn('Aggro %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        if Config:GetSetting("ExtendedFTInfo") then
-            ImGui.TableSetupColumn('SpawnID', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        end
-        ImGui.TableHeadersRow()
-
-        if ImGui.TableSetColumnIndex(0) then
-            ImGui.SameLine()
-            ImGui.Text("FT")
-            ImGui.SameLine()
-            ImGui.Text(Icons.MD_INFO_OUTLINE)
-            Ui.Tooltip("Target is Forced")
-        end
-
-        if ImGui.TableSetColumnIndex(1) then
-            ImGui.SameLine()
-            ImGui.Text("Ig")
-            ImGui.SameLine()
-            ImGui.Text(Icons.MD_INFO_OUTLINE)
-            Ui.Tooltip("Ignore This Target")
-        end
-
-        ImGui.TableNextRow()
-        local xtCount = mq.TLO.Me.XTarget() or 0
-        for i = 1, xtCount do
-            local xtarg = mq.TLO.Me.XTarget(i)
-            if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
-                ImGui.PushID(string.format("##xtarg_%d", i))
-                ImGui.TableNextColumn()
+    local tableColumns = {
+        {
+            name = "FT",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
+            width = 16.0,
+            sort = function(a, b)
+                return
+                    (Globals.ForceTargetID > 0 and (Globals.ForceTargetID == a.ID() and 1 or 0) or 0),
+                    (Globals.ForceTargetID > 0 and (Globals.ForceTargetID == b.ID() and 1 or 0) or 0)
+            end,
+            render = function(xtarg, _)
                 if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, Ui.GetConHighlightBySpawn(xtarg))
                 end
@@ -881,8 +844,16 @@ function Ui.RenderForceTargetList(showPopout)
                 else
                     ImGui.Text("")
                 end
-                ImGui.TableNextColumn()
-
+            end,
+        },
+        {
+            name = "Ig",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
+            width = 16.0,
+            sort = function(a, b)
+                return Globals.IgnoredTargetIDs:contains(a.ID()) and 1 or 0, Globals.IgnoredTargetIDs:contains(b.ID()) and 1 or 0
+            end,
+            render = function(xtarg, _)
                 local checked, pressed = ImGui.Checkbox("", Globals.IgnoredTargetIDs:contains(xtarg.ID()))
                 if pressed then
                     if checked then
@@ -891,11 +862,27 @@ function Ui.RenderForceTargetList(showPopout)
                         Globals.IgnoredTargetIDs:remove(xtarg.ID())
                     end
                 end
-                if Config:GetSetting("ExtendedFTInfo") then
-                    ImGui.TableNextColumn()
-                    ImGui.Text(tostring(i))
-                end
-                ImGui.TableNextColumn()
+            end,
+        },
+        {
+            name = "XT",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoSort, ImGuiTableColumnFlags.DefaultHide),
+            width = 16.0,
+            sort = function(a, b)
+                return 0, 0
+            end,
+            render = function(xtarg, i)
+                ImGui.Text(tostring(i))
+            end,
+        },
+        {
+            name = "Name",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultSort),
+            width = ImGui.GetWindowWidth() - 300,
+            sort = function(a, b)
+                return a.CleanName() or "None", b.CleanName() or "None"
+            end,
+            render = function(xtarg, i)
                 ImGui.PushStyleColor(ImGuiCol.Text, Ui.GetConColorBySpawn(xtarg))
                 ImGui.PushID(string.format("##select_forcetarget_%d", i))
                 local _, clicked = ImGui.Selectable(xtarg.CleanName() or "None", false)
@@ -905,19 +892,120 @@ function Ui.RenderForceTargetList(showPopout)
                 end
                 ImGui.PopID()
                 ImGui.PopStyleColor(1)
-                ImGui.TableNextColumn()
+            end,
+        },
+        {
+            name = "HP %",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
+            width = 80.0,
+            sort = function(a, b)
+                return math.ceil(a.PctHPs() or 0), math.ceil(b.PctHPs() or 0)
+            end,
+            render = function(xtarg, _)
                 Ui.RenderText(tostring(math.ceil(xtarg.PctHPs() or 0)))
-                ImGui.TableNextColumn()
+            end,
+        },
+        {
+            name = "Aggro %",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
+            width = 80.0,
+            sort = function(a, b)
+                return math.ceil(a.PctAggro() or 0), math.ceil(b.PctAggro() or 0)
+            end,
+            render = function(xtarg, _)
                 Ui.RenderText(tostring(math.ceil(xtarg.PctAggro() or 0)))
-                ImGui.TableNextColumn()
+            end,
+        },
+        {
+            name = "Distance",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
+            width = 80.0,
+            sort = function(a, b)
+                return math.ceil(a.Distance() or 0), math.ceil(b.Distance() or 0)
+            end,
+            render = function(xtarg, _)
                 ImGui.Text(tostring(math.ceil(xtarg.Distance() or 0)))
-                if Config:GetSetting("ExtendedFTInfo") then
-                    ImGui.TableNextColumn()
-                    ImGui.Text(tostring(math.ceil(xtarg.ID() or 0)))
+            end,
+        },
+        {
+            name = "SpawnID",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 80.0,
+            sort = function(a, b)
+                return a.ID(), b.ID()
+            end,
+            render = function(xtarg, _)
+                ImGui.Text(tostring(math.ceil(xtarg.ID() or 0)))
+            end,
+
+        },
+    }
+
+    if not Ui.TempSettings.SortedXT then
+        Ui.TempSettings.SortedXT = {}
+        Ui.TempSettings.SortedXTIDs = Set.new({})
+    end
+
+    Ui.RenderTableData("XTargs", tableColumns, function(sort_specs)
+            if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) then
+                Ui.TempSettings.SortedXT = {}
+                Ui.TempSettings.SortedXTIDs = Targeting.GetXTHaterIDsSet(true)
+                local xtCount = mq.TLO.Me.XTarget() or 0
+                for i = 1, xtCount do
+                    local xtarg = mq.TLO.Me.XTarget(i)
+                    if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
+                        table.insert(Ui.TempSettings.SortedXT, xtarg)
+                    end
+                end
+                if sort_specs then sort_specs.SpecsDirty = true end
+            end
+
+            if sort_specs and sort_specs.SpecsDirty then
+                table.sort(Ui.TempSettings.SortedXT, function(a, b)
+                    local spec = sort_specs:Specs(1) -- single-column sort
+
+                    local col = spec.ColumnIndex
+
+                    local av, bv = tableColumns[col + 1].sort(a, b)
+
+                    if spec.SortDirection == ImGuiSortDirection.Ascending then
+                        return (av or 0) < (bv or 0)
+                    else
+                        return (av or 0) > (bv or 0)
+                    end
+                end)
+            end
+
+            sort_specs.SpecsDirty = false
+        end,
+        function()
+            for i, xtarg in ipairs(Ui.TempSettings.SortedXT) do
+                ImGui.PushID(string.format("##xtarg_%d", i))
+                if xtarg.ID() > 0 then
+                    for _, colData in ipairs(tableColumns) do
+                        ImGui.TableNextColumn()
+                        colData.render(xtarg, i)
+                    end
                 end
                 ImGui.PopID()
             end
         end
+    )
+end
+
+function Ui.RenderTableData(tableName, tableColumns, sortFn, rowFn)
+    if ImGui.BeginTable(tableName, #tableColumns, bit32.bor(bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable))) then
+        for id, data in ipairs(tableColumns) do
+            ImGui.TableSetupColumn(data.name, data.flags, data.width, id - 1)
+        end
+
+        ImGui.TableHeadersRow()
+
+        local sort_specs = ImGui.TableGetSortSpecs()
+
+        sortFn(sort_specs)
+
+        rowFn()
 
         ImGui.EndTable()
     end

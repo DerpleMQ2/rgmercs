@@ -271,10 +271,9 @@ end
 --- Retrieves the IDs of the top haters.
 --- @param printDebug boolean?: If true, debug information will be printed.
 --- @return table: A table containing the IDs of the top haters.
-function Targeting.GetXTHaterIDs(printDebug)
+function Targeting.GetXTHaterIDsSet(printDebug)
     local xtCount = mq.TLO.Me.XTarget() or 0
     local uniqHaters = Set.new({})
-
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
@@ -286,7 +285,14 @@ function Targeting.GetXTHaterIDs(printDebug)
         end
     end
 
-    return uniqHaters:toList()
+    return uniqHaters
+end
+
+--- Retrieves the IDs of the top haters.
+--- @param printDebug boolean?: If true, debug information will be printed.
+--- @return table: A table containing the IDs of the top haters.
+function Targeting.GetXTHaterIDs(printDebug)
+    return Targeting.GetXTHaterIDsSet(printDebug):toList()
 end
 
 --- Gets the count of XTHaters.
@@ -306,8 +312,34 @@ function Targeting.DiffXTHaterIDs(t, printDebug)
     local curHaters   = Targeting.GetXTHaterIDs(printDebug)
 
     for _, xtargID in ipairs(curHaters) do
+        Logger.log_verbose("DiffXTHaterIDs(): XT(%d) Checking list for known hater. %s", xtargID, Strings.TableToString(oldHaterSet:toList()))
         if not oldHaterSet:contains(xtargID) then return true end
     end
+
+    return false
+end
+
+--- Computes the difference in Hater IDs.
+---
+--- @param t table The table containing Hater IDs.
+--- @param printDebug boolean? Whether to print debug information.
+--- @return boolean True if there is a difference, false otherwise
+function Targeting.CrossDiffXTHaterIDs(t, printDebug)
+    local oldHaterSet  = Set.new(t)
+    local curHatersSet = Targeting.GetXTHaterIDsSet(printDebug)
+    local curHaters    = curHatersSet:toList()
+
+
+    for _, xtargID in ipairs(curHaters) do
+        Logger.log_verbose("CrossDiffXTHaterIDs(): XT(%d) Checking list for known hater. %s", xtargID, Strings.TableToString(oldHaterSet:toList()))
+        if not oldHaterSet:contains(xtargID) then return true end
+    end
+
+    for _, oldID in ipairs(t) do
+        Logger.log_verbose("CrossDiffXTHaterIDs(): Old XT(%d) Checking list for known hater. %s", oldID, Strings.TableToString(curHaters))
+        if not curHatersSet:contains(oldID) then return true end
+    end
+
 
     return false
 end
@@ -479,17 +511,17 @@ end
 
 function Targeting.TargetIsACaster(target)
     if not (target and target()) then return false end
-    return Globals.Constants.RGCasters:contains(target.Class.ShortName())
+    return Config.Constants.RGCasters:contains(target.Class.ShortName())
 end
 
 function Targeting.TargetIsAMelee(target)
     if not (target and target()) then return false end
-    return Globals.Constants.RGMelee:contains(target.Class.ShortName())
+    return Config.Constants.RGMelee:contains(target.Class.ShortName())
 end
 
 function Targeting.TargetIsATank(target)
     if not (target and target()) then return false end
-    return Globals.Constants.RGTank:contains(target.Class.ShortName())
+    return Config.Constants.RGTank:contains(target.Class.ShortName())
 end
 
 function Targeting.TargetIsMyself(target)

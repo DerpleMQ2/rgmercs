@@ -1467,15 +1467,6 @@ Config.DefaultConfig                                     = {
         Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
         Default = false,
     },
-    ['ExtendedFTInfo']              = {
-        DisplayName = "Extended ForceTarget Info",
-        Group = "General",
-        Header = "Interface",
-        Category = "Interface",
-        Index = 2,
-        Tooltip = "Show extended information in the Force Target window.",
-        Default = false,
-    },
     ['AlwaysShowMiniButton']        = {
         DisplayName = "Always Show Mini Button",
         Group = "General",
