@@ -128,7 +128,7 @@ function Comms.SendHeartbeat(assist, chase)
         PetConColor   = mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.ConColor() or "Grey",
         AutoTarget    = curAutoTarget and (curAutoTarget.DisplayName() or "None") or "None",
         UnSpentAA     = mq.TLO.Me.AAPoints(),
-        PctExp        = string.format("%.2f%%", mq.TLO.Me.PctExp()),
+        PctExp        = mq.TLO.Me.PctExp(),
         Assist        = assist,
         State         = Globals.PauseMain and "Paused" or Globals.CurrentState,
         Chase         = chase,
