@@ -691,7 +691,7 @@ function Ui.RenderMercsStatus(showPopout)
             render = function(peer, data)
                 Ui.RenderColoredText(
                     Ui.GetPercentageColor(data.Data.PctExp or 0, { Colors.LightGreen, Colors.Orange, Colors.LightRed, }),
-                    data.Data.HPs and "%d%%" or "", data.Data.PctExp or 0)
+                    data.Data.HPs and "%6.2f%%" or "", data.Data.PctExp or 0)
             end,
         },
         {
