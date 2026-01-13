@@ -471,12 +471,14 @@ function Ui.RenderMercsStatus(showPopout)
 
                     Ui.MultilineTooltipWithColors(
                         {
-                            { text = "Name:",                      color = Colors.White, },
-                            { text = data.Data.PetName or "None",  color = Colors.LightGreen, sameLine = true, },
-                            { text = "Level:",                     color = Colors.White, },
-                            { text = data.Data.PetLevel or "None", color = Colors.LightBlue,  sameLine = true, },
-                            { text = "HPs:",                       color = Colors.White, },
-                            { text = data.Data.PetHPs or "None",   color = Colors.Cyan,       sameLine = true, },
+                            { text = "Name:",                       color = Colors.White, },
+                            { text = data.Data.PetName or "None",   color = Colors.LightGreen, sameLine = true, },
+                            { text = "Level:",                      color = Colors.White, },
+                            { text = data.Data.PetLevel or "None",  color = Colors.LightBlue,  sameLine = true, },
+                            { text = "HPs:",                        color = Colors.White, },
+                            { text = data.Data.PetHPs or "None",    color = Colors.Cyan,       sameLine = true, },
+                            { text = "Target:",                     color = Colors.White, },
+                            { text = data.Data.PetTarget or "None", color = Colors.LightRed,   sameLine = true, },
                         })
                 end
             end,
@@ -509,13 +511,26 @@ function Ui.RenderMercsStatus(showPopout)
                     Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
                 end
 
-                Ui.MultilineTooltipWithColors(
+                Ui.MultilineTooltipWithColors({
+                    { text = "State:",                       color = Colors.White, },
                     {
-                        { text = "State:",                    color = Colors.White, },
-                        { text = data.Data.State or "None",   color = Colors.LightGreen, sameLine = true, },
-                        { text = "Burning:",                  color = Colors.White, },
-                        { text = tostring(data.Data.Burning), color = Colors.Orange,     sameLine = true, },
-                    })
+                        text = data.Data.State or "None",
+                        color = data.Data.State == "Paused" and Colors.Yellow or
+                            data.Data.State == "Combat" and Colors.Red or
+                            Colors.Green,
+                        sameLine = true,
+                    },
+                    { text = "AutoTarget:",                  color = Colors.White, },
+                    { text = data.Data.AutoTarget or "None", color = Colors.LightRed, sameLine = true, },
+                    { text = "Assist:",                      color = Colors.White, },
+                    { text = data.Data.Assist or "None",     color = Colors.Cyan,     sameLine = true, },
+                    { text = "Chase:",                       color = Colors.White, },
+                    { text = data.Data.Chase or "None",      color = Colors.Cyan,     sameLine = true, },
+                    { text = "Exp:",                         color = Colors.White, },
+                    { text = data.Data.PctExp or "0%",       color = Colors.Yellow,   sameLine = true, },
+                    { text = "Unspent AA:",                  color = Colors.White, },
+                    { text = data.Data.UnSpentAA or "None",  color = Colors.Orange,   sameLine = true, },
+                })
             end,
 
         },
