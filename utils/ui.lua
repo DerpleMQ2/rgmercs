@@ -579,8 +579,8 @@ function Ui.RenderMercsStatus(showPopout)
             flags = ImGuiTableColumnFlags.WidthStretch,
             width = 80.0,
             sort = function(mercs, a, b)
-                local data_a = mq.TLO.Zone.Name() == mercs[a].Data.Zone and mq.TLO.Spawn(mercs[a].Data.ID) or 999
-                local data_b = mq.TLO.Zone.Name() == mercs[b].Data.Zone and mq.TLO.Spawn(mercs[b].Data.ID) or 999
+                local data_a = mq.TLO.Zone.Name() == mercs[a].Data.Zone and mq.TLO.Spawn(mercs[a].Data.ID)() or 999
+                local data_b = mq.TLO.Zone.Name() == mercs[b].Data.Zone and mq.TLO.Spawn(mercs[b].Data.ID)() or 999
 
                 return data_a, data_b
             end,
