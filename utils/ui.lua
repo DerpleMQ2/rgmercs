@@ -936,6 +936,33 @@ function Ui.RenderForceTargetList(showPopout)
                 return a.CleanName() or "None", b.CleanName() or "None"
             end,
             render = function(xtarg, i)
+                local checked = Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID()
+
+                if checked then
+                    local draw_list = ImGui.GetWindowDrawList()
+
+                    local screenPosVec = ImGui.GetCursorScreenPosVec()
+
+                    local min =
+                        ImVec2(
+                            screenPosVec.x - ImGui.GetStyle().CellPadding.x,
+                            screenPosVec.y - ImGui.GetStyle().CellPadding.y
+                        )
+
+                    local max = ImVec2(
+                        min.x + ImGui.GetColumnWidth() + ImGui.GetStyle().CellPadding.x * 2,
+                        min.y + ImGui.GetTextLineHeight() + ImGui.GetStyle().CellPadding.y * 2
+                    )
+
+                    draw_list:AddRect(
+                        min,
+                        max,
+                        ImGui.GetColorU32(Globals.Constants.Colors.Red),
+                        0.0,
+                        0,
+                        1.5
+                    )
+                end
                 ImGui.PushStyleColor(ImGuiCol.Text, Ui.GetConColorBySpawn(xtarg))
                 ImGui.PushID(string.format("##select_forcetarget_%d", i))
                 local _, clicked = ImGui.Selectable(xtarg.CleanName() or "None", false)
