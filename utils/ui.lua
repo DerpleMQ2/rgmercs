@@ -22,7 +22,13 @@ local Ui                = { _version = '1.0', _name = "Ui", _author = 'Derple', 
 Ui.__index              = Ui
 Ui.ConfigFilter         = ""
 Ui.ShowDownNamed        = false
-Ui.TempSettings         = {}
+
+Ui.TempSettings         = {
+    SortedXT = {},
+    SortedXTNameToSlot = {},
+    SortedXTIDs = Set.new({}),
+}
+
 Ui.ModalText            = ""
 Ui.ModalTitle           = "##UI Modal"
 Ui.ModalPrompt          = ""
@@ -848,18 +854,32 @@ function Ui.RenderForceTargetList(showPopout)
                     (Globals.ForceTargetID > 0 and (Globals.ForceTargetID == b.ID() and 1 or 0) or 0)
             end,
             render = function(xtarg, i)
+                local checked = Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID()
+
                 if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, Ui.GetConHighlightBySpawn(xtarg))
                 end
-                if Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID() then
-                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
-                    Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.MD_STAR, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
-                        function() Globals.ForceTargetID = 0 end)
-                    ImGui.PopStyleColor(1)
+
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
+
+                ImGui.Text("[")
+
+                ImGui.SameLine()
+
+                if not checked then
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
                 else
-                    Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), "", ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
-                        function() Globals.ForceTargetID = xtarg.ID() end)
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
                 end
+
+                Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.MD_STAR, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                    function() if checked then Globals.ForceTargetID = 0 else Globals.ForceTargetID = xtarg.ID() end end)
+
+                ImGui.PopStyleColor(1)
+
+                ImGui.SameLine()
+                ImGui.Text("]")
+                ImGui.PopStyleVar(1)
             end,
         },
         {
@@ -871,7 +891,15 @@ function Ui.RenderForceTargetList(showPopout)
             end,
             render = function(xtarg, i)
                 local checked = Globals.IgnoredTargetIDs:contains(xtarg.ID())
-                Ui.InvisibleWithButtonText("##ig_btn_" .. tostring(i), checked and Icons.MD_CHECK or "", ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
+
+                ImGui.Text("[")
+                if not checked then
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
+                end
+                ImGui.SameLine()
+
+                Ui.InvisibleWithButtonText("##ig_btn_" .. tostring(i), Icons.MD_CHECK, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
                     function()
                         if checked then
                             Globals.IgnoredTargetIDs:remove(xtarg.ID())
@@ -879,6 +907,14 @@ function Ui.RenderForceTargetList(showPopout)
                             Globals.IgnoredTargetIDs:add(xtarg.ID())
                         end
                     end)
+
+
+                if not checked then
+                    ImGui.PopStyleColor()
+                end
+                ImGui.SameLine()
+                ImGui.Text("]")
+                ImGui.PopStyleVar(1)
             end,
         },
         {
@@ -889,7 +925,7 @@ function Ui.RenderForceTargetList(showPopout)
                 return a.Name() and (Ui.TempSettings.SortedXTNameToSlot[a.Name()].Slot or 0) or 0, b.Name() and (Ui.TempSettings.SortedXTNameToSlot[b.Name()].Slot or 0) or 0
             end,
             render = function(xtarg, i)
-                ImGui.Text(tostring(xtarg.Name() and (Ui.TempSettings.SortedXTNameToSlot[xtarg.Name()].Slot or 0) or 0))
+                ImGui.Text(xtarg.Name() and (Ui.TempSettings.SortedXTNameToSlot[xtarg.Name()].Slot or "") or "")
             end,
         },
         {
@@ -958,12 +994,6 @@ function Ui.RenderForceTargetList(showPopout)
 
         },
     }
-
-    if not Ui.TempSettings.SortedXT then
-        Ui.TempSettings.SortedXT = {}
-        Ui.TempSettings.SortedXTNameToSlot = {}
-        Ui.TempSettings.SortedXTIDs = Set.new({})
-    end
 
     Ui.RenderTableData("XTargs", tableColumns, function(sort_specs)
             if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) then
