@@ -883,13 +883,13 @@ function Ui.RenderForceTargetList(showPopout)
         },
         {
             name = "XT",
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoSort, ImGuiTableColumnFlags.DefaultHide),
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
             width = 16.0,
             sort = function(a, b)
-                return 0, 0
+                return a.Name() and (Ui.TempSettings.SortedXTNameToSlot[a.Name()].Slot or 0) or 0, b.Name() and (Ui.TempSettings.SortedXTNameToSlot[b.Name()].Slot or 0) or 0
             end,
             render = function(xtarg, i)
-                ImGui.Text(tostring(i))
+                ImGui.Text(tostring(xtarg.Name() and (Ui.TempSettings.SortedXTNameToSlot[xtarg.Name()].Slot or 0) or 0))
             end,
         },
         {
@@ -961,6 +961,7 @@ function Ui.RenderForceTargetList(showPopout)
 
     if not Ui.TempSettings.SortedXT then
         Ui.TempSettings.SortedXT = {}
+        Ui.TempSettings.SortedXTNameToSlot = {}
         Ui.TempSettings.SortedXTIDs = Set.new({})
     end
 
@@ -973,6 +974,7 @@ function Ui.RenderForceTargetList(showPopout)
                     local xtarg = mq.TLO.Me.XTarget(i)
                     if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
                         table.insert(Ui.TempSettings.SortedXT, xtarg)
+                        Ui.TempSettings.SortedXTNameToSlot[xtarg.Name()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
                     end
                 end
                 if sort_specs then sort_specs.SpecsDirty = true end
