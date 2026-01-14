@@ -675,22 +675,10 @@ local _ClassConfig = {
             "Pendril's Animation",
         },
         ['PetBuffSpell'] = {
-            ---Pet Buff Spell * Var Name: PetBuffSpell string outer
             "Empowered Minion IV",
-            "Speed of Margator",
-            "Speed of Vallon",
-            "Visions of Grandeur",
-            "Wondrous Rapidity",
-            "Aanya's Quickening",
-            "Swift Like the Wind",
-            "Celerity",
-            "Augmentation",
-            "Alacrity",
-            "Quickness",
             "Infused Minion",
             "Empowered Minion",
             "Invigorated Minion",
-            --- Speed of the Brood won't take effect properly on pets. Unless u Purchase the AA
         },
         ['MezAESpell'] = {
             "Mesmerizing Wave XV",
@@ -1074,6 +1062,14 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.ID()).ID() end,
                 cond = function(self, spell) return Casting.PetBuffCheck(spell) end,
             },
+            {
+                name = "HasteBuff",
+                type = "Spell",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem('PetBuffSpell') end,
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.ID()).ID() end,
+                cond = function(self, spell) return Casting.PetBuffCheck(spell) end,
+            },
+
         },
         ['GroupBuff'] = {
             {

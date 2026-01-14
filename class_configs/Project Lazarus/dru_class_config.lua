@@ -575,32 +575,36 @@ local _ClassConfig = {
             {
                 name = "StunNuke",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('DoStunNuke') end,
+                load_cond = function() return Config:GetSetting('StunNukeUse') > 1 end,
                 cond = function(self, spell, target)
+                    if Config:GetSetting('StunNukeUse') == 2 and not mq.TLO.Me.Song("Wrath of the Wilderness")() then return false end
                     return Casting.HaveManaToNuke() and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
                 end,
             },
             { -- in-game description is incorrect, mob must be targeted.
                 name = "TwinHealNuke",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('DoTwinHealNuke') end,
+                load_cond = function() return Config:GetSetting('TwinHealNukeUse') > 1 end,
                 cond = function(self, spell, target)
+                    if Config:GetSetting('TwinHealNukeUse') == 2 and not mq.TLO.Me.Song("Wrath of the Wilderness")() then return false end
                     return Casting.OkayToNuke() and not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('DoFireNuke') end,
+                load_cond = function() return Config:GetSetting('FireNukeUse') > 1 end,
                 cond = function(self, spell, target)
+                    if Config:GetSetting('FireNukeUse') == 2 and not mq.TLO.Me.Song("Wrath of the Wilderness")() then return false end
                     return Casting.OkayToNuke(true)
                 end,
             },
             {
                 name = "IceNuke",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('DoIceNuke') end,
+                load_cond = function() return Config:GetSetting('IceNukeUse') > 1 end,
                 cond = function(self, spell, target)
+                    if Config:GetSetting('IceNukeUse') == 2 and not mq.TLO.Me.Song("Wrath of the Wilderness")() then return false end
                     return Casting.OkayToNuke(true)
                 end,
             },
@@ -941,10 +945,10 @@ local _ClassConfig = {
                 },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
+                { name = "StunNuke",       cond = function(self) return Config:GetSetting('StunNukeUse') > 1 end, },
+                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('TwinHealNukeUse') > 1 end, },
+                { name = "FireNuke",       cond = function(self) return Config:GetSetting('FireNukeUse') > 1 end, },
+                { name = "IceNuke",        cond = function(self) return Config:GetSetting('IceNukeUse') > 1 end, },
                 { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
                 { name = "IceRain",        cond = function(self) return Config:GetSetting('DoRain') end, },
                 { name = "FlameLickDot",   cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
@@ -1163,7 +1167,7 @@ local _ClassConfig = {
         },
 
         --Damage
-        ['DoFireNuke']        = {
+        ['FireNukeUse']       = {
             DisplayName = "Fire Nuke",
             Group = "Abilities",
             Header = "Damage",
@@ -1171,9 +1175,13 @@ local _ClassConfig = {
             Index = 101,
             Tooltip = "Use your single-target fire nukes.",
             RequiresLoadoutChange = true,
-            Default = true,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Epic Procs Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
         },
-        ['DoIceNuke']         = {
+        ['IceNukeUse']        = {
             DisplayName = "Cold Nuke",
             Group = "Abilities",
             Header = "Damage",
@@ -1181,9 +1189,13 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Use your single-target cold nukes.",
             RequiresLoadoutChange = true,
-            Default = false,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Epic Procs Only', 'All Combat', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
         },
-        ['DoStunNuke']        = {
+        ['StunNukeUse']       = {
             DisplayName = "Stun Nuke",
             Group = "Abilities",
             Header = "Damage",
@@ -1191,9 +1203,14 @@ local _ClassConfig = {
             Index = 103,
             Tooltip = "Use your stun nukes (magic damage with stun component).",
             RequiresLoadoutChange = true,
-            Default = true,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Epic Procs Only', 'All Combat', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            lt = true,
         },
-        ['DoTwinHealNuke']    = {
+        ['TwinHealNukeUse']   = {
             DisplayName = "Twinheal Nuke",
             Group = "Abilities",
             Header = "Damage",
@@ -1201,7 +1218,11 @@ local _ClassConfig = {
             Index = 104,
             Tooltip = "Use your twinheal nuke (fire damage with a twinheal buff effect).",
             RequiresLoadoutChange = true,
-            Default = true,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Epic Procs Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
         },
         ['DoFlameLickDot']    = {
             DisplayName = "Fire Debuff Dot",
@@ -1421,6 +1442,11 @@ local _ClassConfig = {
                 "  Clickies that aren't already included should be managed via the clickies tab, or by customizing the config to add them directly.\n" ..
                 "  Additionally, those wishing more fine-tune control for specific encounters or raids should customize this config to their preference. \n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
+            Settings_Used = "",
+        },
+        [2] = {
+            Question = "Why would I only want to nuke on an 'Epic Proc'",
+            Answer = "Epic 1.5, 2,0, and 2.5 worn foci have the chance to proc 'Wrath of the Wilderness', which makes your next nuke an instant cast.",
             Settings_Used = "",
         },
     },
