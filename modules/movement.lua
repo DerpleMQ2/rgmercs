@@ -710,7 +710,7 @@ function Module:GiveTime(combat_state)
         local chaseId = chaseSpawn.ID()
 
         if not chaseSpawn or chaseSpawn.Dead() or chaseId == 0 then
-            Logger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone.", chaseTarg)
+            Logger.log_verbose("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone.", chaseTarg)
             return
         end
 
@@ -746,7 +746,7 @@ function Module:GiveTime(combat_state)
         if chaseSpawnDist > chaseDist then
             --recheck valid spawn because they could have zoned
             if not chaseSpawn() or chaseSpawn.ID() == 0 then
-                Logger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone.", chaseTarg)
+                Logger.log_verbose("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone.", chaseTarg)
                 return
             end
 
