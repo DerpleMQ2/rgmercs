@@ -709,7 +709,7 @@ function Module:GiveTime(combat_state)
         local chaseSpawn = mq.TLO.Spawn("pc =" .. chaseTarg)
         local chaseId = chaseSpawn.ID()
 
-        if not chaseSpawn or chaseSpawn.Dead() or not chaseId then
+        if not chaseSpawn or chaseSpawn.Dead() or chaseId == 0 then
             Logger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone.", chaseTarg)
             return
         end
@@ -744,6 +744,12 @@ function Module:GiveTime(combat_state)
         -- -- Otherwise, if the mesh is loaded, we will nav to the spawn to take advantage of MQ2Nav spawn tracking, and fallback to a moveto if no path exists
         -- -- Finally, if there is no mesh loaded, we will fall back on afollow if the target is close enough
         if chaseSpawnDist > chaseDist then
+            --recheck valid spawn because they could have zoned
+            if not chaseSpawn() or chaseSpawn.ID() == 0 then
+                Logger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone.", chaseTarg)
+                return
+            end
+
             local Nav = mq.TLO.Navigation
             if Nav.MeshLoaded() then
                 if not Nav.Active() or useLocNav then -- if naving to a location, update that to the most recent location in case the target is moving
