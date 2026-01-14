@@ -582,6 +582,10 @@ function Ui.RenderMercsStatus(showPopout)
                 local data_a = (mq.TLO.Zone.Name() == mercs[a].Data.Zone and (mq.TLO.Spawn(mercs[a].Data.ID).Distance() or 999) or 999)
                 local data_b = (mq.TLO.Zone.Name() == mercs[b].Data.Zone and (mq.TLO.Spawn(mercs[b].Data.ID).Distance() or 999) or 999)
 
+                if data_a == data_b then
+                    return a, b
+                end
+
                 return data_a, data_b
             end,
             render = function(peer, data)
