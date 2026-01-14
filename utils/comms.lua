@@ -43,7 +43,7 @@ function Comms.BroadcastMessage(module, event, data)
         Event = event,
         Data = data,
     })
-    Logger.log_verbose("Broadcasted: %s event: %s", event, Strings.TableToString(data or {}, 512))
+    Logger.log_super_verbose("Broadcasted: %s event: %s", event, Strings.TableToString(data or {}, 512))
 end
 
 --- @param module string The name of the module to broadcast the update to.
@@ -58,7 +58,7 @@ function Comms.SendMessage(peer, module, event, data)
         Event = event,
         Data = data,
     })
-    Logger.log_debug("Sent Message: %s to:  %s event: %s", event, peer, Strings.TableToString(data or {}, 512))
+    Logger.log_super_verbose("Sent Message: %s to:  %s event: %s", event, peer, Strings.TableToString(data or {}, 512))
 end
 
 function Comms.SendPeerDoCmd(peer, cmd, ...)
@@ -81,7 +81,6 @@ function Comms.SendAllPeersDoCmd(inZoneOnly, includeSelf, cmd, ...)
     end
 
     for peer, data in pairs(Comms.PeersHeartbeats) do
-        printf("Peer: %s Zome: %s", peer, data.Data.Zone)
         if data.Data.Zone == mq.TLO.Zone.Name() or not inZoneOnly then
             Comms.SendMessage(peer, "Core", "DoCmd", {
                 cmd = cmd, })
@@ -183,7 +182,7 @@ function Comms.UpdatePeerHeartbeat(peer, data)
 end
 
 function Comms.ValidatePeers(timeout)
-    Logger.log_verbose("\ayValidating peers heartbeats for timeouts: \n  :: %s\n  :: %s", Strings.TableToString(Comms.PeersHeartbeats, 512),
+    Logger.log_super_verbose("\ayValidating peers heartbeats for timeouts: \n  :: %s\n  :: %s", Strings.TableToString(Comms.PeersHeartbeats, 512),
         Strings.TableToString(Comms.Peers:toList(), 512))
     for peer, heartbeat in pairs(Comms.PeersHeartbeats) do
         if os.time() - (heartbeat.LastHeartbeat or 0) > timeout then

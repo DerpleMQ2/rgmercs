@@ -253,7 +253,6 @@ local _ClassConfig = {
                     return
                 end
             elseif type == "Brass Instruments" then
-                printf("\ayBard SwapInst()\ax:\ao Swapping to Instrument Type: %s", type)
                 if mq.TLO.Me.Bandolier('brass')() and Config:GetSetting('UseBandolier') then
                     Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atBrass Bandolier")
                     ItemManager.BandolierSwap('brass')

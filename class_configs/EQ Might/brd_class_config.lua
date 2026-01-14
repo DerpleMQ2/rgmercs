@@ -278,7 +278,6 @@ local _ClassConfig = {
                     return
                 end
             elseif type == "Brass Instruments" then
-                printf("\ayBard SwapInst()\ax:\ao Swapping to Instrument Type: %s", type)
                 if mq.TLO.Me.Bandolier('brass')() and Config:GetSetting('UseBandolier') then
                     Logger.log_debug("\ayBard SwapInst()\ax:\ao Swapping to \atBrass Bandolier")
                     ItemManager.BandolierSwap('brass')
@@ -488,18 +487,6 @@ local _ClassConfig = {
             },
         },
         ['Combat'] = {
-            -- Kludge that addresses bards not attempting to start attacking until after a song completes
-            -- Uncomment if you'd like to occasionally start attacking earlier than normal
-            --[[{
-                name = "Force Attack",
-                type = "AA",
-                cond = function(self, itemName)
-                    local mytar = mq.TLO.Target
-                    if not mq.TLO.Me.Combat() and mytar() and mytar.Distance() < 50 then
-                        Core.DoCmd("/keypress AUTOPRIM")
-                    end
-                end,
-            },]]
             {
                 name = "Epic",
                 type = "Item",
@@ -521,67 +508,59 @@ local _ClassConfig = {
                 name = "Selo's Kick",
                 type = "AA",
             },
-            {
-                name = "Kick",
-                type = "Ability",
-            },
         },
         ['CombatSongs'] = {
             {
                 name = "FireDotSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseFireDots') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseFireDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
-                        -- If dot is about to wear off, recast
-                        self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
+                        self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= Config:GetSetting('RefreshCombat')
                 end,
             },
             {
                 name = "IceDotSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseIceDots') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseIceDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
-                        -- If dot is about to wear off, recast
-                        self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
+                        self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= Config:GetSetting('RefreshCombat')
                 end,
             },
             {
                 name = "PoisonDotSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UsePoisonDots') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UsePoisonDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
-                        -- If dot is about to wear off, recast
-                        self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
+                        self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= Config:GetSetting('RefreshCombat')
                 end,
             },
             {
                 name = "DiseaseDotSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseDiseaseDots') end,
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseDiseaseDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
-                        -- If dot is about to wear off, recast
-                        self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
+                        self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= Config:GetSetting('RefreshCombat')
                 end,
             },
             --failsafe/fallback to fill dead space and/or refresh charges, may adjust after more testing
             {
                 name = "AriaSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseAria') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting("UseAria") == 1 then return false end
-                    return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 9
+                    return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 6
                 end,
             },
             {
                 name = "ArcaneSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseArcane') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting("UseArcane") == 1 then return false end
-                    return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 9
+                    return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 6
                 end,
             },
             {
@@ -589,7 +568,7 @@ local _ClassConfig = {
                 type = "Song",
                 cond = function(self, songSpell)
                     if Config:GetSetting("UseProcSong") == 1 then return false end
-                    return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 9
+                    return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 6
                 end,
             },
         },
@@ -606,64 +585,64 @@ local _ClassConfig = {
             {
                 name = "AriaSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseAria') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseAria') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAria") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "WarMarchSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseMarch') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseMarch') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseMarch") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "Jonthan",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseJonthan') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseJonthan') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseJonthan") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "ProcSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseProcSong') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseProcSong') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseProcSong") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "ResistSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseResist') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseResist') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseResist") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "MitigationSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseMitigation') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseMitigation') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseMitigation") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "ArcaneSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseArcane') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseArcane') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseArcane") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "GroupRegenSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('RegenSong') == 2 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('RegenSong') ~= 2 then return false end
                     local pct = Config:GetSetting('GroupManaPct')
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell) and
                         ((Config:GetSetting('UseRegen') == 1 and (mq.TLO.Group.LowMana(pct)() or 999) >= Config:GetSetting('GroupManaCt'))
@@ -673,8 +652,8 @@ local _ClassConfig = {
             {
                 name = "AreaRegenSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('RegenSong') == 3 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('RegenSong') ~= 3 then return false end
                     local pct = Config:GetSetting('GroupManaPct')
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell) and
                         not (mq.TLO.Me.Combat() and (mq.TLO.Group.LowMana(pct)() or 999) < Config:GetSetting('GroupManaCt'))
@@ -683,8 +662,8 @@ local _ClassConfig = {
             {
                 name = "AmpSong",
                 type = "Song",
+                load_cond = function(self) return Config:GetSetting('UseAmp') > 1 end,
                 cond = function(self, songSpell)
-                    if Config:GetSetting('UseAmp') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAmp") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
