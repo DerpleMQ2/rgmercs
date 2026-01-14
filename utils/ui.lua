@@ -734,7 +734,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.PetID or 0, data_b.Data.PetID or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%d", data.Data.PetID or 0))
+                ImGui.Text(data.Data.PetID > 0 and string.format("%d", data.Data.PetID) or "")
             end,
         },
         {
@@ -747,7 +747,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.PetHPs or 0, data_b.Data.PetHPs or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.PetHPs or "0%"))
+                ImGui.Text(data.Data.PetID > 0 and string.format("%s", data.Data.PetHPs) or "")
             end,
         },
         {
@@ -760,7 +760,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.PetLevel or 0, data_b.Data.PetLevel or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%d", data.Data.PetLevel or 0))
+                ImGui.Text(data.Data.PetID > 0 and string.format("%d", data.Data.PetLevel) or "")
             end,
         },
         {
@@ -773,7 +773,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.PetName or "", data_b.Data.PetName or ""
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.PetName or "None"))
+                ImGui.Text(data.Data.PetID > 0 and string.format("%s", data.Data.PetName) or "None")
             end,
         },
         {
@@ -786,7 +786,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.PetTarget or "", data_b.Data.PetTarget or ""
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.PetTarget or "None"))
+                ImGui.Text(data.Data.PetID > 0 and string.format("%s", data.Data.PetTarget or "None") or "")
             end,
         },
     }
