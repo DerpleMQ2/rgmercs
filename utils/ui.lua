@@ -968,6 +968,7 @@ function Ui.RenderForceTargetList(showPopout)
     Ui.RenderTableData("XTargs", tableColumns, function(sort_specs)
             if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) then
                 Ui.TempSettings.SortedXT = {}
+                Ui.TempSettings.SortedXTNameToSlot = {}
                 Ui.TempSettings.SortedXTIDs = Targeting.GetXTHaterIDsSet(true)
                 local xtCount = mq.TLO.Me.XTarget() or 0
                 for i = 1, xtCount do
