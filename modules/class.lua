@@ -500,7 +500,7 @@ function Module:RenderQueuedAbilities()
         end
         if #self.TempSettings.QueuedAbilities > 0 then
             if ImGui.BeginTable("QueuedAbilities", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constans.Colors.Purple)
+                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constantquers.Colors.Purple)
                 ImGui.TableSetupColumn('Time in Queue', (ImGuiTableColumnFlags.WidthFixed), 40.0)
                 ImGui.TableSetupColumn('Type', (ImGuiTableColumnFlags.WidthFixed), 20.0)
                 ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthFixed), 100.0)
