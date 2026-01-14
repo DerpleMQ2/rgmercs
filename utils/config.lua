@@ -1760,12 +1760,26 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
+    ['FTHighlight']                 = {
+        DisplayName = "UI Color - ForceTarget Highlight",
+        Group = "General",
+        Header = "Interface",
+        Category = "Default Colors",
+        Index = 28,
+        Tooltip = "Force Target Highlight border in the Force Target Window.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.FTHighlight),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+
     ['UserThemeOverrideClassTheme'] = {
         DisplayName = "Override Class Theme",
         Group = "General",
         Header = "Interface",
         Category = "User Theme",
-        Index = 28,
+        Index = 40,
         Tooltip = "User the user theme even if a class theme is defined.",
         Default = true,
         Type = "Custom",
@@ -1775,7 +1789,7 @@ Config.DefaultConfig                                     = {
         Group = "General",
         Header = "Interface",
         Category = "User Theme",
-        Index = 29,
+        Index = 41,
         Tooltip = "Override any ImGui style settings with a custom theme.",
         Default = {},
         Type = "Custom",
@@ -3000,23 +3014,9 @@ function Config.ShouldPriorityFollow()
 end
 
 function Config.CacheCustomColors()
-    Globals.Constants.Colors.Red         = Tables.TableToImVec4(Config:GetSetting("Red")) or Globals.Constants.DefaultColors.Red
-    Globals.Constants.Colors.LightRed    = Tables.TableToImVec4(Config:GetSetting("LightRed")) or Globals.Constants.DefaultColors.LightRed
-    Globals.Constants.Colors.Green       = Tables.TableToImVec4(Config:GetSetting("Green")) or Globals.Constants.DefaultColors.Green
-    Globals.Constants.Colors.LightGreen  = Tables.TableToImVec4(Config:GetSetting("LightGreen")) or Globals.Constants.DefaultColors.LightGreen
-    Globals.Constants.Colors.Blue        = Tables.TableToImVec4(Config:GetSetting("Blue")) or Globals.Constants.DefaultColors.Blue
-    Globals.Constants.Colors.LightBlue   = Tables.TableToImVec4(Config:GetSetting("LightBlue")) or Globals.Constants.DefaultColors.LightBlue
-    Globals.Constants.Colors.Yellow      = Tables.TableToImVec4(Config:GetSetting("Yellow")) or Globals.Constants.DefaultColors.Yellow
-    Globals.Constants.Colors.LightYellow = Tables.TableToImVec4(Config:GetSetting("LightYellow")) or Globals.Constants.DefaultColors.LightYellow
-    Globals.Constants.Colors.Purple      = Tables.TableToImVec4(Config:GetSetting("Purple")) or Globals.Constants.DefaultColors.Purple
-    Globals.Constants.Colors.LightPurple = Tables.TableToImVec4(Config:GetSetting("LightPurple")) or Globals.Constants.DefaultColors.LightPurple
-    Globals.Constants.Colors.Orange      = Tables.TableToImVec4(Config:GetSetting("Orange")) or Globals.Constants.DefaultColors.Orange
-    Globals.Constants.Colors.LightOrange = Tables.TableToImVec4(Config:GetSetting("LightOrange")) or Globals.Constants.DefaultColors.LightOrange
-    Globals.Constants.Colors.Grey        = Tables.TableToImVec4(Config:GetSetting("Grey")) or Globals.Constants.DefaultColors.Grey
-    Globals.Constants.Colors.LightGrey   = Tables.TableToImVec4(Config:GetSetting("LightGrey")) or Globals.Constants.DefaultColors.LightGrey
-    Globals.Constants.Colors.Cyan        = Tables.TableToImVec4(Config:GetSetting("Cyan")) or Globals.Constants.DefaultColors.Cyan
-    Globals.Constants.Colors.White       = Tables.TableToImVec4(Config:GetSetting("White")) or Globals.Constants.DefaultColors.White
-    Globals.Constants.Colors.Black       = Tables.TableToImVec4(Config:GetSetting("Black")) or Globals.Constants.DefaultColors.Black
+    for k, v in pairs(Globals.Constants.DefaultColors) do
+        Globals.Constants.Colors[k] = Tables.TableToImVec4(Config:GetSetting(k)) or v
+    end
 
     for i, v in ipairs(Globals.Constants.ConColors) do
         Globals.Constants.ConColorsNameToVec4[v:upper()] = Globals.Constants.Colors[Globals.Constants.ConColors[i]:gsub(" ", "")] or Globals.Constants.Colors.White

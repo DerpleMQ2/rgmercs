@@ -146,6 +146,7 @@ Globals.Constants.DefaultColors       = {
     Cyan        = ImVec4(0.3, 0.8, 0.8, 0.8),
     White       = ImVec4(0.8, 0.8, 0.8, 0.8),
     Black       = ImVec4(0.0, 0.0, 0.0, 1.0),
+    FTHighlight = ImVec4(1.0, 0.5, 0.0, 0.8),
 }
 
 Globals.Constants.Colors              = {}

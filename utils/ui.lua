@@ -957,7 +957,7 @@ function Ui.RenderForceTargetList(showPopout)
                     draw_list:AddRect(
                         min,
                         max,
-                        ImGui.GetColorU32(Globals.Constants.Colors.Red),
+                        ImGui.GetColorU32(Globals.Constants.Colors.FTHighlight),
                         0.0,
                         0,
                         1.5
