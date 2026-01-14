@@ -482,14 +482,9 @@ function Ui.RenderMercsStatus(showPopout)
             render = function(peer, data)
                 if data.Data.PetID > 0 then
                     ImGui.PushStyleColor(ImGuiCol.Text, ConColorsNameToVec4[data.Data.PetConColor])
-                    local buttonPos = ImGui.GetCursorPosVec()
-                    if ImGui.InvisibleButton("##pet_btn_" .. tostring(peer), ImVec2(ICON_SIZE, ImGui.GetTextLineHeight())) then
-                        Core.DoCmd("/mqtarget id %d", data.Data.PetID)
-                    end
 
-                    ImGui.SetCursorPos(buttonPos)
-
-                    ImGui.Text(Icons.MD_PETS)
+                    Ui.InvisibleWithButtonText("##pet_btn_" .. tostring(peer), Icons.MD_PETS, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                        function() Core.DoCmd("/mqtarget id %d", data.Data.PetID) end)
 
                     ImGui.PopStyleColor()
 
@@ -842,15 +837,6 @@ function Ui.RenderForceTargetList(showPopout)
         ImGui.NewLine()
     end
 
-    if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
-        Globals.ForceTargetID = 0
-    end
-    ImGui.SameLine()
-
-    if ImGui.Button("Clear Ignored Targets", ImGui.GetWindowWidth() * .3, 18) then
-        Globals.IgnoredTargetIDs = Set.new({})
-    end
-
     local tableColumns = {
         {
             name = "FT",
@@ -861,16 +847,18 @@ function Ui.RenderForceTargetList(showPopout)
                     (Globals.ForceTargetID > 0 and (Globals.ForceTargetID == a.ID() and 1 or 0) or 0),
                     (Globals.ForceTargetID > 0 and (Globals.ForceTargetID == b.ID() and 1 or 0) or 0)
             end,
-            render = function(xtarg, _)
+            render = function(xtarg, i)
                 if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, Ui.GetConHighlightBySpawn(xtarg))
                 end
                 if Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID() then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
-                    ImGui.Text(Icons.MD_STAR)
+                    Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.MD_STAR, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                        function() Globals.ForceTargetID = 0 end)
                     ImGui.PopStyleColor(1)
                 else
-                    ImGui.Text("")
+                    Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), "", ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                        function() Globals.ForceTargetID = xtarg.ID() end)
                 end
             end,
         },
@@ -881,15 +869,16 @@ function Ui.RenderForceTargetList(showPopout)
             sort = function(a, b)
                 return Globals.IgnoredTargetIDs:contains(a.ID()) and 1 or 0, Globals.IgnoredTargetIDs:contains(b.ID()) and 1 or 0
             end,
-            render = function(xtarg, _)
-                local checked, pressed = ImGui.Checkbox("", Globals.IgnoredTargetIDs:contains(xtarg.ID()))
-                if pressed then
-                    if checked then
-                        Globals.IgnoredTargetIDs:add(xtarg.ID())
-                    else
-                        Globals.IgnoredTargetIDs:remove(xtarg.ID())
-                    end
-                end
+            render = function(xtarg, i)
+                local checked = Globals.IgnoredTargetIDs:contains(xtarg.ID())
+                Ui.InvisibleWithButtonText("##ig_btn_" .. tostring(i), checked and Icons.MD_CHECK or "", ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                    function()
+                        if checked then
+                            Globals.IgnoredTargetIDs:remove(xtarg.ID())
+                        else
+                            Globals.IgnoredTargetIDs:add(xtarg.ID())
+                        end
+                    end)
             end,
         },
         {
@@ -915,8 +904,9 @@ function Ui.RenderForceTargetList(showPopout)
                 ImGui.PushID(string.format("##select_forcetarget_%d", i))
                 local _, clicked = ImGui.Selectable(xtarg.CleanName() or "None", false)
                 if clicked then
-                    Globals.ForceTargetID = xtarg.ID()
-                    Logger.log_debug("Forcing Target to: %s %d", xtarg.CleanName(), xtarg.ID())
+                    local newId = Globals.ForceTargetID == xtarg.ID() and 0 or xtarg.ID()
+                    Globals.ForceTargetID = newId
+                    Logger.log_debug("Forcing Target to: %s %d", newId == 0 and "None" or xtarg.CleanName(), newId)
                 end
                 ImGui.PopID()
                 ImGui.PopStyleColor(1)
@@ -1007,6 +997,19 @@ function Ui.RenderForceTargetList(showPopout)
             sort_specs.SpecsDirty = false
         end,
         function()
+            if ImGui.TableSetColumnIndex(0) then
+                ImGui.SameLine()
+                ImGui.Text("     " .. Icons.MD_INFO_OUTLINE)
+                Ui.Tooltip("Click here to set forced target.")
+            end
+
+            if ImGui.TableSetColumnIndex(1) then
+                ImGui.SameLine()
+                ImGui.Text("     " .. Icons.MD_INFO_OUTLINE)
+                Ui.Tooltip("Click here to ignore this target.")
+                ImGui.TableNextRow()
+            end
+
             for i, xtarg in ipairs(Ui.TempSettings.SortedXT) do
                 ImGui.PushID(string.format("##xtarg_%d", i))
                 if xtarg.ID() > 0 then
@@ -2425,6 +2428,19 @@ function Ui.GetAssistWarningString()
     end
 
     Config.TempSettings.AssistWarning = warningString
+end
+
+function Ui.InvisibleWithButtonText(id, text, size, callbackFn)
+    local buttonPos = ImGui.GetCursorPosVec()
+    if ImGui.InvisibleButton(id, size or ImVec2(0, 0)) then
+        if callbackFn then
+            callbackFn()
+        end
+    end
+
+    ImGui.SetCursorPos(buttonPos)
+
+    ImGui.Text(text)
 end
 
 return Ui
