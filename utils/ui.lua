@@ -335,7 +335,6 @@ function Ui.RenderMercsStatus(showPopout)
     end
 
     local Colors = Globals.Constants.Colors
-    local BasicColors = Globals.Constants.BasicColors
     local ConColorsNameToVec4 = Globals.Constants.ConColorsNameToVec4
 
     if not Ui.TempSettings.SortedMercs then
