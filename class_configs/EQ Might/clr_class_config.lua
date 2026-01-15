@@ -163,6 +163,7 @@ local _ClassConfig = {
             ----Use HP Type one until Temperance at 40... Group Buff at 45 (Blessing of Temperance)
             "Hand of Conviction",
             "Hand of Virtue",
+            "Ancient: Gift of Aegolism",
             "Blessing of Aegolism",
             "Blessing of Temperance",
             "Temperance",

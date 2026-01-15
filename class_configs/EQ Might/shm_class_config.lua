@@ -145,6 +145,7 @@ local _ClassConfig = {
             -- Low Level Attack Buff --- user under level 86. Including Harnessing of Spirit as they will have similar usecases and targets.
             "Harnessing of Spirit",
             "Primal Avatar",
+            "Ancient: Feral Avatar",
             "Ferine Avatar",
             "Champion",
         },
