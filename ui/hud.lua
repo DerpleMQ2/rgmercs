@@ -54,7 +54,7 @@ function HudUI:RenderToggleHud()
     if show then
         local btnImg = Globals.LastBurnCheck and ImagesUI.burnImg or ImagesUI.derpImg
         if Globals.PauseMain then
-            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), Globals.Constants.BasicColors.Black, Globals.Constants.BasicColors.Red) then
+            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), Globals.Constants.Colors.Black, Globals.Constants.Colors.Red) then
                 if enableAFUI then
                     self:AFPopUp(self.ClickMsg, math.random(4))
                 else

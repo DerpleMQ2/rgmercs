@@ -409,7 +409,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.HPs or 0, { BasicColors.LightGreen, BasicColors.Yellow, BasicColors.Red, }),
+                    Ui.GetPercentageColor(data.Data.HPs or 0, { Colors.LightGreen, Colors.Yellow, Colors.Red, }),
                     data.Data.HPs and "%d%%" or "", math.ceil(data.Data.HPs or 0) or "")
             end,
 
@@ -425,7 +425,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.Mana or 0, { BasicColors.Cyan, BasicColors.LightBlue, BasicColors.Red, }),
+                    Ui.GetPercentageColor(data.Data.Mana or 0, { Colors.Cyan, Colors.LightBlue, Colors.Red, }),
                     data.Data.Mana and "%d%%" or "", math.ceil(data.Data.Mana or 0) or "")
             end,
 
@@ -441,7 +441,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.Endurance or 0, { BasicColors.Yellow, BasicColors.Grey, BasicColors.Red, }),
+                    Ui.GetPercentageColor(data.Data.Endurance or 0, { Colors.Yellow, Colors.Grey, Colors.Red, }),
                     data.Data.Endurance and "%d%%" or "", math.ceil(data.Data.Endurance or 0) or "")
             end,
 
@@ -494,14 +494,14 @@ function Ui.RenderMercsStatus(showPopout)
 
                     Ui.MultilineTooltipWithColors(
                         {
-                            { text = "Name:",                       color = BasicColors.White, },
-                            { text = data.Data.PetName or "None",   color = BasicColors.LightGreen, sameLine = true, },
-                            { text = "Level:",                      color = BasicColors.White, },
-                            { text = data.Data.PetLevel or "None",  color = BasicColors.LightBlue,  sameLine = true, },
-                            { text = "HPs:",                        color = BasicColors.White, },
-                            { text = data.Data.PetHPs or "None",    color = BasicColors.Cyan,       sameLine = true, },
-                            { text = "Target:",                     color = BasicColors.White, },
-                            { text = data.Data.PetTarget or "None", color = BasicColors.LightRed,   sameLine = true, },
+                            { text = "Name:",                       color = Colors.White, },
+                            { text = data.Data.PetName or "None",   color = Colors.LightGreen, sameLine = true, },
+                            { text = "Level:",                      color = Colors.White, },
+                            { text = data.Data.PetLevel or "None",  color = Colors.LightBlue,  sameLine = true, },
+                            { text = "HPs:",                        color = Colors.White, },
+                            { text = data.Data.PetHPs or "None",    color = Colors.Cyan,       sameLine = true, },
+                            { text = "Target:",                     color = Colors.White, },
+                            { text = data.Data.PetTarget or "None", color = Colors.LightRed,   sameLine = true, },
                         })
                 end
             end,
@@ -535,7 +535,7 @@ function Ui.RenderMercsStatus(showPopout)
                 end
 
                 Ui.MultilineTooltipWithColors({
-                    { text = "State:",                                           color = BasicColors.White, },
+                    { text = "State:",                                           color = Colors.White, },
                     {
                         text = data.Data.State or "None",
                         color = data.Data.State == "Paused" and Colors.MainButtonPausedColor or
@@ -543,18 +543,18 @@ function Ui.RenderMercsStatus(showPopout)
                             Colors.MainDowntimeColor,
                         sameLine = true,
                     },
-                    { text = "AutoTarget:",                                      color = BasicColors.White, },
-                    { text = data.Data.AutoTarget or "None",                     color = BasicColors.LightRed,    sameLine = true, },
-                    { text = "Assist:",                                          color = BasicColors.White, },
-                    { text = data.Data.Assist or "None",                         color = BasicColors.Cyan,        sameLine = true, },
-                    { text = "Chase:",                                           color = BasicColors.White, },
-                    { text = data.Data.Chase or "None",                          color = BasicColors.Cyan,        sameLine = true, },
-                    { text = "Level:",                                           color = BasicColors.White, },
-                    { text = tostring(data.Data.Level) or "0",                   color = BasicColors.Yellow,      sameLine = true, },
-                    { text = "Exp:",                                             color = BasicColors.White, },
-                    { text = string.format("%0.2f%%", data.Data.PctExp) or "0%", color = BasicColors.LightYellow, sameLine = true, },
-                    { text = "Unspent AA:",                                      color = BasicColors.White, },
-                    { text = data.Data.UnSpentAA or "None",                      color = BasicColors.Orange,      sameLine = true, },
+                    { text = "AutoTarget:",                                      color = Colors.White, },
+                    { text = data.Data.AutoTarget or "None",                     color = Colors.LightRed,    sameLine = true, },
+                    { text = "Assist:",                                          color = Colors.White, },
+                    { text = data.Data.Assist or "None",                         color = Colors.Cyan,        sameLine = true, },
+                    { text = "Chase:",                                           color = Colors.White, },
+                    { text = data.Data.Chase or "None",                          color = Colors.Cyan,        sameLine = true, },
+                    { text = "Level:",                                           color = Colors.White, },
+                    { text = tostring(data.Data.Level) or "0",                   color = Colors.Yellow,      sameLine = true, },
+                    { text = "Exp:",                                             color = Colors.White, },
+                    { text = string.format("%0.2f%%", data.Data.PctExp) or "0%", color = Colors.LightYellow, sameLine = true, },
+                    { text = "Unspent AA:",                                      color = Colors.White, },
+                    { text = data.Data.UnSpentAA or "None",                      color = Colors.Orange,      sameLine = true, },
                 })
             end,
 
@@ -719,7 +719,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.PctExp or 0, { BasicColors.LightGreen, BasicColors.Orange, BasicColors.LightRed, }),
+                    Ui.GetPercentageColor(data.Data.PctExp or 0, { Colors.LightGreen, Colors.Orange, Colors.LightRed, }),
                     data.Data.HPs and "%6.2f%%" or "", data.Data.PctExp or 0)
             end,
         },
@@ -1365,8 +1365,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             local mappedAction = resolvedActionMap[entry.name]
             if mappedAction then
                 if entry.type:lower() == "spell" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Purple)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.BasicColors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -1375,8 +1375,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     ImGui.PopStyleColor(2)
                     Ui.Tooltip(string.format("Spell: %s (click to inspect)", rankSpell() or "Unknown"))
                 elseif entry.type:lower() == "song" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Purple)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.BasicColors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -1385,8 +1385,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     ImGui.PopStyleColor(2)
                     Ui.Tooltip(string.format("Song: %s (click to inspect)", rankSpell() or "Unknown"))
                 elseif entry.type:lower() == "disc" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Purple)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.BasicColors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -1397,8 +1397,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                 elseif type(mappedAction) == "string" and entry.type:lower() == "item" then
                     local item = mq.TLO.FindItem("=" .. mappedAction)
                     if item() and item.Clicky() then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.LightOrange)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.BasicColors.Grey)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.LightOrange)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
                         local _, clicked = ImGui.Selectable(mappedAction)
                         local clickySpell = item.Clicky.Spell
                         if clickySpell() and clicked then
@@ -1407,48 +1407,48 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                         ImGui.PopStyleColor(2)
                         Ui.Tooltip(string.format("Clicky Spell: %s (click to inspect)", clickySpell.Name() or "Unknown"))
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Grey)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Grey)
                         ImGui.Text(mappedAction)
                         ImGui.PopStyleColor()
                     end
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Grey)
                     ImGui.Text(mappedAction.Name() or mappedAction)
                     ImGui.PopStyleColor()
                 end
             else
                 if entry.type:lower() == "customfunc" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Yellow)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Yellow)
                     ImGui.Text(entry.desc or "Custom Function")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "spell" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Red)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                     ImGui.Text("No Spell Detected")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "song" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Red)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                     ImGui.Text("No Song Detected")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "disc" then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Red)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                     ImGui.Text("No Disc Detected")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "ability" then
                     local abilTrained = mq.TLO.Me.Ability(entry.name)()
                     if abilTrained then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.LightRed)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.LightRed)
                         ImGui.Text(entry.name)
                         ImGui.PopStyleColor()
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Red)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                         ImGui.Text("No Ability Detected")
                         ImGui.PopStyleColor()
                     end
                 elseif entry.type:lower() == "aa" then
                     local aaPurchased = mq.TLO.Me.AltAbility(entry.name)() ~= nil
                     if aaPurchased then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.LightBlue)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.BasicColors.Grey)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.LightBlue)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
                         local _, clicked = ImGui.Selectable(entry.name)
                         local aaSpell = mq.TLO.Me.AltAbility(entry.name).Spell
                         if aaSpell() and clicked then
@@ -1457,15 +1457,15 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                         ImGui.PopStyleColor(2)
                         Ui.Tooltip(string.format("AA Spell: %s (click to inspect)", aaSpell.Name() or "Unknown"))
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Red)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                         ImGui.Text("No AA Detected")
                         ImGui.PopStyleColor()
                     end
                 elseif entry.type:lower() == "item" then
                     local item = mq.TLO.FindItem("=" .. entry.name)
                     if item() and item.Clicky() then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Yellow)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.BasicColors.Grey)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Yellow)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
                         local _, clicked = ImGui.Selectable(entry.name)
                         local clickySpell = item.Clicky.Spell
                         if clickySpell() and clicked then
@@ -1474,12 +1474,12 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                         ImGui.PopStyleColor(2)
                         Ui.Tooltip(string.format("Clicky Spell: %s (click to inspect)", clickySpell.Name() or "Unknown"))
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Red)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
                         ImGui.Text("No Item Detected")
                         ImGui.PopStyleColor()
                     end
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Grey)
                     ImGui.Text(entry.name)
                     ImGui.PopStyleColor()
                 end
@@ -1545,7 +1545,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
 
     on_color = on_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBgActive)
     off_color = off_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)
-    knob_color = knob_color or Globals.Constants.BasicColors.White -- default white
+    knob_color = knob_color or Globals.Constants.Colors.White -- default white
 
     if not right_label and label and label:len() > 0 then
         ImGui.Text(label)
@@ -1638,7 +1638,7 @@ end
 --- @return boolean: state
 --- @return boolean: changed
 function Ui.RenderOptionToggle(id, text, on, center_vertically)
-    return Ui.RenderFancyToggle(id, text, on, ImVec2(26, 14), Globals.Constants.BasicColors.Green, Globals.Constants.BasicColors.Red, nil, true, true, true, center_vertically)
+    return Ui.RenderFancyToggle(id, text, on, ImVec2(26, 14), Globals.Constants.Colors.Green, Globals.Constants.Colors.Red, nil, true, true, true, center_vertically)
 end
 
 --- Renders a progress bar.
@@ -1669,10 +1669,10 @@ end
 --- @return boolean  # changed
 function Ui.RenderOptionNumber(id, text, cur, min, max, step)
     ImGui.PushID("##num_spin_" .. id)
-    ImGui.PushStyleColor(ImGuiCol.ButtonActive, Globals.Constants.BasicColors.LightGrey)
-    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Globals.Constants.BasicColors.Grey)
-    ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.BasicColors.Grey)
-    ImGui.PushStyleColor(ImGuiCol.FrameBg, Globals.Constants.BasicColors.Black)
+    ImGui.PushStyleColor(ImGuiCol.ButtonActive, Globals.Constants.Colors.LightGrey)
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Globals.Constants.Colors.Grey)
+    ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Grey)
+    ImGui.PushStyleColor(ImGuiCol.FrameBg, Globals.Constants.Colors.Black)
     local input, changed = ImGui.InputInt(text, cur, step, 1, ImGuiInputTextFlags.None)
     ImGui.PopStyleColor(4)
     ImGui.PopID()
@@ -2374,9 +2374,9 @@ end
 --- Checks if navigation is enabled for a given location.
 --- @param loc string The location to check, represented as a string with coordinates.
 function Ui.NavEnabledLoc(loc)
-    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Yellow)
-    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.BasicColors.Grey)
-    ImGui.PushStyleColor(ImGuiCol.HeaderActive, Globals.Constants.BasicColors.Green)
+    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Yellow)
+    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
+    ImGui.PushStyleColor(ImGuiCol.HeaderActive, Globals.Constants.Colors.Green)
     local navLoc = ImGui.Selectable(loc, false, ImGuiSelectableFlags.AllowDoubleClick)
     ImGui.PopStyleColor(3)
     if loc ~= "0,0,0" then

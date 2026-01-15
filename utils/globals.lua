@@ -168,7 +168,6 @@ Globals.Constants.DefaultColors       = {
     MainButtonUnpausedColor = Globals.Constants.BasicColors.Green,
     MainCombatColor         = Globals.Constants.BasicColors.Red,
     MainDowntimeColor       = Globals.Constants.BasicColors.Green,
-
 }
 
 Globals.Constants.Colors              = {}

@@ -3044,8 +3044,13 @@ function Config.CacheCustomColors()
         Globals.Constants.Colors[k] = Tables.TableToImVec4(Config:GetSetting(k)) or v
     end
 
+    -- Add here for completeness even though it is a duplicate of BasicColors
+    for c, v in pairs(Globals.Constants.BasicColors) do
+        Globals.Constants.Colors[c] = v
+    end
+
     for i, v in ipairs(Globals.Constants.ConColors) do
-        Globals.Constants.ConColorsNameToVec4[v:upper()] = Globals.Constants.BasicColors[Globals.Constants.ConColors[i]:gsub(" ", "")] or Globals.Constants.BasicColors.White
+        Globals.Constants.ConColorsNameToVec4[v:upper()] = Globals.Constants.Colors[Globals.Constants.ConColors[i]:gsub(" ", "")] or Globals.Constants.Colors.White
     end
 end
 
