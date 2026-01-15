@@ -62,7 +62,6 @@ local Tooltips  = {
     SkinLike            = "Spell Line: Increase AC + Increase Max HP",
     MoveSpells          = "Spell Line: Increase Movement Speed",
     Alliance            = "Spell Line: Alliance (Requires Multiple of Same Class). Adds Fire Damage to other Ranger Spells and triggers a massive Fire and Cold Nuke",
-    AgiBuff             = "Spell Line: Increase Agility",
     Cloak               = "Spell Line: Melee Absorb Proc + ATK/AC/Fire Resist Debuff",
     Veil                = "Spell Line: Add Parry Proc",
     JoltingKicks        = "Spell Line: Two Kicks w/ Increased Accuracy that Decrease Hatred",
@@ -764,9 +763,6 @@ local _ClassConfig = {
             "Dusksage Stalker's Conjunction",
             "Fernstalker's Covariance",
         },
-        ["AgiBuff"] = {
-            "Feet Like Cat",
-        },
         ["Cloak"] = {
             "Ro's Burning Cloak VI",
             "Shalowain's Crucible Cloak",
@@ -939,8 +935,9 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            load_cond = function(self, spell) return Core.IsTanking() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.IsTanking()
+                return combat_state == "Combat"
             end,
         },
     },
@@ -986,54 +983,10 @@ local _ClassConfig = {
                 name = "Eyes",
                 type = "Spell",
                 tooltip = Tooltips.Eyes,
+                load_cond = function(self) return not Config:GetSetting('DoMask') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return not castWSU() and Casting.SelfBuffCheck(spell) and not Config:GetSetting('DoMask')
-                end,
-            },
-            {
-                name = "GroupPredatorBuff",
-                type = "Spell",
-                tooltip = Tooltips.GroupPredatorBuff,
-                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "ShoutBuff",
-                type = "Spell",
-                tooltip = Tooltips.ShoutBuff,
-                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell) and not Casting.IHaveBuff("Shared " .. spell.Name())
-                end,
-            },
-            {
-                name = "GroupStrengthBuff",
-                type = "Spell",
-                tooltip = Tooltips.GroupStrengthBuff,
-                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell) and not Casting.IHaveBuff("Shared " .. spell.Name())
-                end,
-            },
-            {
-                name = "Rathe",
-                type = "Spell",
-                tooltip = Tooltips.Rathe,
-                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell) and not Casting.IHaveBuff("Shared " .. spell.Name())
-                end,
-            },
-            {
-                name = "GroupEnrichmentBuff",
-                type = "Spell",
-                tooltip = Tooltips.GroupEnrichmentBuff,
-                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell)
+                    return not castWSU() and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1049,18 +1002,20 @@ local _ClassConfig = {
                 name = "Mask",
                 type = "Spell",
                 tooltip = Tooltips.Mask,
+                load_cond = function(self) return Config:GetSetting('DoMask') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell) and Config:GetSetting('DoMask')
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "FireFist",
                 type = "Spell",
                 tooltip = Tooltips.FireFist,
+                load_cond = function(self) return Config:GetSetting('DoFireFist') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return Config:GetSetting('DoFireFist') and Casting.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1092,15 +1047,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "AgiBuff",
-                type = "Spell",
-                tooltip = Tooltips.AgiBuff,
-                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
                 name = "Cloak",
                 type = "Spell",
                 tooltip = Tooltips.Cloak,
@@ -1122,7 +1068,8 @@ local _ClassConfig = {
                 name = "AgroReducerBuff",
                 type = "Spell",
                 tooltip = Tooltips.AgroReducerBuff,
-                active_cond = function(self, spell) return not Core.IsTanking() end,
+                load_cond = function(self, spell) return not Core.IsTanking() end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return Config:GetSetting('DoAgroReducerBuff') and Casting.SelfBuffCheck(spell)
                 end,
@@ -1131,18 +1078,10 @@ local _ClassConfig = {
                 name = "AgroBuff",
                 type = "Spell",
                 tooltip = Tooltips.AgroBuff,
-                active_cond = function(self, spell) return Core.IsTanking() end,
+                load_cond = function(self, spell) return Core.IsTanking() end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return not Config:GetSetting('DoAgroReducerBuff') and Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "RegenSpells",
-                type = "Spell",
-                tooltip = Tooltips.RegenSpells,
-                active_cond = function(self, spell) return Config:GetSetting('DoRegen') end,
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1169,6 +1108,52 @@ local _ClassConfig = {
                 name = "Rathe",
                 type = "Spell",
                 tooltip = Tooltips.Rathe,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "GroupStrengthBuff",
+                type = "Spell",
+                tooltip = Tooltips.GroupStrengthBuff,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "GroupPredatorBuff",
+                type = "Spell",
+                tooltip = Tooltips.GroupPredatorBuff,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "ShoutBuff",
+                type = "Spell",
+                tooltip = Tooltips.ShoutBuff,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "GroupEnrichmentBuff",
+                type = "Spell",
+                tooltip = Tooltips.GroupEnrichmentBuff,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "RegenSpells",
+                type = "Spell",
+                tooltip = Tooltips.RegenSpells,
+                load_cond = function(self, spell) return Config:GetSetting('DoRegen') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
                     return Casting.GroupBuffCheck(spell, target)
@@ -1262,7 +1247,6 @@ local _ClassConfig = {
                 name = "SummerNuke",
                 type = "Spell",
                 tooltip = Tooltips.SummerNuke,
-                active_cond = function(self, spell) return Core.IsTanking() end,
                 cond = function(self, spell)
                     return Casting.DetSpellCheck(spell) and (mq.TLO.Me.PctAggro() < 100 or mq.TLO.Me.SecondaryPctAggro() > 50)
                 end,
