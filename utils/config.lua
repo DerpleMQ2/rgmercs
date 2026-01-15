@@ -3045,7 +3045,7 @@ function Config.CacheCustomColors()
     end
 
     for i, v in ipairs(Globals.Constants.ConColors) do
-        Globals.Constants.ConColorsNameToVec4[v:upper()] = Globals.Constants.Colors[Globals.Constants.ConColors[i]:gsub(" ", "")] or Globals.Constants.BasicColors.White
+        Globals.Constants.ConColorsNameToVec4[v:upper()] = Globals.Constants.BasicColors[Globals.Constants.ConColors[i]:gsub(" ", "")] or Globals.Constants.BasicColors.White
     end
 end
 
