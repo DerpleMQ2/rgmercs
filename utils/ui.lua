@@ -790,7 +790,9 @@ function Ui.RenderMercsStatus(showPopout)
         },
     }
 
-    Ui.RenderTableData("MercStatusTable", tableColumns, function(sort_specs)
+    Ui.RenderTableData("MercStatusTable", tableColumns,
+        bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable),
+        function(sort_specs)
             local mercs = Comms.GetAllPeerHeartbeats(true)
 
             if #Ui.TempSettings.SortedMercs ~= Tables.GetTableSize(mercs) then
@@ -839,6 +841,17 @@ function Ui.RenderForceTargetList(showPopout)
         end
         Ui.Tooltip("Pop the Force Target list out into its own window.")
         ImGui.NewLine()
+    end
+
+    if Config:GetSetting('ShowFTControls') then
+        if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .4, 18) then
+            Globals.ForceTargetID = 0
+        end
+        ImGui.SameLine()
+
+        if ImGui.Button("Clear Ignored Targets", ImGui.GetWindowWidth() * .4, 18) then
+            Globals.IgnoredTargetIDs = Set.new({})
+        end
     end
 
     local tableColumns = {
@@ -934,33 +947,6 @@ function Ui.RenderForceTargetList(showPopout)
                 return a.CleanName() or "None", b.CleanName() or "None"
             end,
             render = function(xtarg, i)
-                local checked = Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID()
-
-                if checked then
-                    local draw_list = ImGui.GetWindowDrawList()
-
-                    local screenPosVec = ImGui.GetCursorScreenPosVec()
-
-                    local min =
-                        ImVec2(
-                            screenPosVec.x - ImGui.GetStyle().CellPadding.x,
-                            screenPosVec.y - ImGui.GetStyle().CellPadding.y
-                        )
-
-                    local max = ImVec2(
-                        min.x + ImGui.GetColumnWidth() + ImGui.GetStyle().CellPadding.x * 2,
-                        min.y + ImGui.GetTextLineHeight() + ImGui.GetStyle().CellPadding.y * 2
-                    )
-
-                    draw_list:AddRect(
-                        min,
-                        max,
-                        ImGui.GetColorU32(Globals.Constants.Colors.FTHighlight),
-                        0.0,
-                        0,
-                        1.5
-                    )
-                end
                 ImGui.PushStyleColor(ImGuiCol.Text, Ui.GetConColorBySpawn(xtarg))
                 ImGui.PushID(string.format("##select_forcetarget_%d", i))
                 local _, clicked = ImGui.Selectable(xtarg.CleanName() or "None", false)
@@ -989,10 +975,10 @@ function Ui.RenderForceTargetList(showPopout)
             flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
             width = 80.0,
             sort = function(a, b)
-                return math.ceil(a.PctAggro() or 0), math.ceil(b.PctAggro() or 0)
+                return math.ceil(a.ID() or 0), math.ceil(b.ID() or 0)
             end,
             render = function(xtarg, _)
-                Ui.RenderText(tostring(math.ceil(xtarg.PctAggro() or 0)))
+                Ui.RenderText(tostring(math.ceil(xtarg.ID() or 0)))
             end,
         },
         {
@@ -1020,8 +1006,11 @@ function Ui.RenderForceTargetList(showPopout)
         },
     }
 
-    Ui.RenderTableData("XTargs", tableColumns, function(sort_specs)
-            if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) then
+    Ui.RenderTableData("XTargs", tableColumns,
+        bit32.bor(ImGuiTableFlags.NoBordersInBodyUntilResize, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable,
+            ImGuiTableFlags.Reorderable),
+        function(sort_specs)
+            if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) or true then
                 Ui.TempSettings.SortedXT = {}
                 Ui.TempSettings.SortedXTNameToSlot = {}
                 Ui.TempSettings.SortedXTIDs = Targeting.GetXTHaterIDsSet(true)
@@ -1033,6 +1022,31 @@ function Ui.RenderForceTargetList(showPopout)
                         Ui.TempSettings.SortedXTNameToSlot[xtarg.Name()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
                     end
                 end
+                --[[ TEST DATA REMOVE LATER
+                table.insert(Ui.TempSettings.SortedXT, mq.TLO.Me)
+                table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(2))
+                table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(1))
+                table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(3))
+                Ui.TempSettings.SortedXTNameToSlot[mq.TLO.Me.Name()] = { Name = mq.TLO.Me.CleanName() or "None", Slot = #Ui.TempSettings.SortedXT + 1, ID = mq.TLO.Me.ID(), }
+                Ui.TempSettings.SortedXTNameToSlot[mq.TLO.NearestSpawn(2).Name()] = {
+                    Name = mq.TLO.NearestSpawn(2).CleanName() or "None",
+                    Slot = #Ui.TempSettings.SortedXT + 1,
+                    ID =
+                        mq.TLO.NearestSpawn(2).ID(),
+                }
+                Ui.TempSettings.SortedXTNameToSlot[mq.TLO.NearestSpawn(1).Name()] = {
+                    Name = mq.TLO.NearestSpawn(1).CleanName() or "None",
+                    Slot = #Ui.TempSettings.SortedXT + 1,
+                    ID =
+                        mq.TLO.NearestSpawn(1).ID(),
+                }
+                Ui.TempSettings.SortedXTNameToSlot[mq.TLO.NearestSpawn(3).Name()] = {
+                    Name = mq.TLO.NearestSpawn(3).CleanName() or "None",
+                    Slot = #Ui.TempSettings.SortedXT + 1,
+                    ID =
+                        mq.TLO.NearestSpawn(3).ID(),
+                }
+                ]] --
                 if sort_specs then sort_specs.SpecsDirty = true end
             end
 
@@ -1055,15 +1069,17 @@ function Ui.RenderForceTargetList(showPopout)
             sort_specs.SpecsDirty = false
         end,
         function()
+            local cellPadding = ImGui.GetStyle().CellPadding
+            local windowPadding = ImGui.GetStyle().WindowPadding
             if ImGui.TableSetColumnIndex(0) then
                 ImGui.SameLine()
-                ImGui.Text("     " .. Icons.MD_INFO_OUTLINE)
+                ImGui.Text("     ")
                 Ui.Tooltip("Click here to set forced target.")
             end
 
             if ImGui.TableSetColumnIndex(1) then
                 ImGui.SameLine()
-                ImGui.Text("     " .. Icons.MD_INFO_OUTLINE)
+                ImGui.Text("     ")
                 Ui.Tooltip("Click here to ignore this target.")
                 ImGui.TableNextRow()
             end
@@ -1071,19 +1087,41 @@ function Ui.RenderForceTargetList(showPopout)
             for i, xtarg in ipairs(Ui.TempSettings.SortedXT) do
                 ImGui.PushID(string.format("##xtarg_%d", i))
                 if xtarg.ID() > 0 then
-                    for _, colData in ipairs(tableColumns) do
+                    local checked = Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID()
+                    ImGui.TableNextRow()
+
+                    local rowStartX, rowStartY
+                    for colIdx, colData in ipairs(tableColumns) do
                         ImGui.TableNextColumn()
+                        if colIdx == 1 then
+                            local screenPosVec = ImGui.GetCursorScreenPosVec()
+                            rowStartX = screenPosVec.x
+                            rowStartY = screenPosVec.y - cellPadding.y
+                        end
+
                         colData.render(xtarg, i)
+                    end
+
+                    if checked and rowStartX then
+                        local draw_list = ImGui.GetForegroundDrawList()
+
+                        local min = ImVec2(rowStartX, rowStartY)
+                        local max = ImVec2(
+                            rowStartX + (ImGui.GetWindowWidth() - ((windowPadding.x * 2))),
+                            rowStartY + ImGui.GetTextLineHeight() + (cellPadding.y * 2)
+
+                        )
+
+                        draw_list:AddRect(min, max, ImGui.GetColorU32(Globals.Constants.Colors.FTHighlight), 0.0, 0, 1.5)
                     end
                 end
                 ImGui.PopID()
             end
-        end
-    )
+        end)
 end
 
-function Ui.RenderTableData(tableName, tableColumns, sortFn, rowFn)
-    if ImGui.BeginTable(tableName, #tableColumns, bit32.bor(bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable))) then
+function Ui.RenderTableData(tableName, tableColumns, tableFlags, sortFn, rowFn)
+    if ImGui.BeginTable(tableName, #tableColumns, tableFlags) then
         for id, data in ipairs(tableColumns) do
             ImGui.TableSetupColumn(data.name, data.flags, data.width, id - 1)
         end
