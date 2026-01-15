@@ -25,7 +25,7 @@ Ui.ShowDownNamed        = false
 
 Ui.TempSettings         = {
     SortedXT = {},
-    SortedXTNameToSlot = {},
+    SortedXTIDToSlot = {},
     SortedXTIDs = Set.new({}),
 }
 
@@ -882,7 +882,7 @@ function Ui.RenderForceTargetList(showPopout)
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
                 end
 
-                Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.MD_STAR, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.FA_ARROW_RIGHT, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
                     function() if checked then Globals.ForceTargetID = 0 else Globals.ForceTargetID = xtarg.ID() end end)
 
                 ImGui.PopStyleColor(1)
@@ -932,10 +932,10 @@ function Ui.RenderForceTargetList(showPopout)
             flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
             width = 16.0,
             sort = function(a, b)
-                return a.Name() and (Ui.TempSettings.SortedXTNameToSlot[a.Name()].Slot or 0) or 0, b.Name() and (Ui.TempSettings.SortedXTNameToSlot[b.Name()].Slot or 0) or 0
+                return a.Name() and (Ui.TempSettings.SortedXTIDToSlot[a.ID()].Slot or 0) or 0, b.Name() and (Ui.TempSettings.SortedXTIDToSlot[b.ID()].Slot or 0) or 0
             end,
             render = function(xtarg, i)
-                ImGui.Text(xtarg.Name() and (Ui.TempSettings.SortedXTNameToSlot[xtarg.Name()].Slot or "") or "")
+                ImGui.Text(xtarg.Name() and (Ui.TempSettings.SortedXTIDToSlot[xtarg.ID()].Slot or "") or "")
             end,
         },
         {
@@ -1011,14 +1011,14 @@ function Ui.RenderForceTargetList(showPopout)
         function(sort_specs)
             if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) or true then
                 Ui.TempSettings.SortedXT = {}
-                Ui.TempSettings.SortedXTNameToSlot = {}
+                Ui.TempSettings.SortedXTIDToSlot = {}
                 Ui.TempSettings.SortedXTIDs = Targeting.GetXTHaterIDsSet(true)
                 local xtCount = mq.TLO.Me.XTarget() or 0
                 for i = 1, xtCount do
                     local xtarg = mq.TLO.Me.XTarget(i)
                     if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
                         table.insert(Ui.TempSettings.SortedXT, xtarg)
-                        Ui.TempSettings.SortedXTNameToSlot[xtarg.Name()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
+                        Ui.TempSettings.SortedXTIDToSlot[xtarg.ID()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
                     end
                 end
                 --[[ TEST DATA REMOVE LATER
