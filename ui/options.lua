@@ -570,10 +570,6 @@ function OptionsUI:RenderMainWindow(_, openGUI)
 
     local flags = ImGuiWindowFlags.None
 
-    if Config:GetSetting('MainWindowLocked') then
-        flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
-    end
-
     if Config.TempSettings.ResetOptionsUIPosition then
         ImGui.SetNextWindowPos(ImVec2(100, 100), ImGuiCond.Always)
         Config.TempSettings.ResetOptionsUIPosition = false
