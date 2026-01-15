@@ -895,13 +895,11 @@ end
 
 function Module:RenderPullTargets()
     if ImGui.BeginTable("Pull Targets", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
         ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
         ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 60.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
         ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthFixed), 160.0)
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         for idx, spawn in ipairs(self.TempSettings.PullTargets) do
@@ -938,13 +936,11 @@ function Module:RenderIgnoreTargets()
     end
     ImGui.PopID()
     if ImGui.BeginTable("Pull Targets", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
         ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.None), 250.0)
         ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 60.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
         ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthFixed), 160.0)
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         for idx, spawn in ipairs(self.TempSettings.PullIgnoreTargets) do
@@ -989,9 +985,9 @@ function Module:Render()
     if self.ModuleLoaded and Globals.SubmodulesLoaded then
         if mq.TLO.Navigation.MeshLoaded() then
             if Config:GetSetting('DoPull') then
-                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionPassColor)
             end
             local cursorXPos = ImGui.GetCursorPosX()
             if ImGui.Button(Config:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
@@ -1001,9 +997,9 @@ function Module:Render()
             end
             ImGui.PopStyleColor()
             if Module.TempSettings.PausePulls then
-                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionPassColor)
             end
             ImGui.SetCursorPosX(cursorXPos)
             if ImGui.Button(Module.TempSettings.PausePulls and "Unpause Pulls" or "Pause Pulls", ImGui.GetWindowWidth() * .3, 25) then
@@ -1012,7 +1008,7 @@ function Module:Render()
             ImGui.PopStyleColor()
             Ui.Tooltip("Pausing pulls will keep the pull settings (camp, locs, etc), but it will not attempt to pull any targets until unpaused.")
         else
-            ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Red)
+            ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
             ImGui.Button("No Nav Mesh Loaded!", ImGui.GetWindowWidth() * .3, 25)
             ImGui.PopStyleColor()
         end

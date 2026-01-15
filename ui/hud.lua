@@ -54,7 +54,7 @@ function HudUI:RenderToggleHud()
     if show then
         local btnImg = Globals.LastBurnCheck and ImagesUI.burnImg or ImagesUI.derpImg
         if Globals.PauseMain then
-            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), Globals.Constants.Colors.Black, Globals.Constants.Colors.Red) then
+            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), Globals.Constants.BasicColors.Black, Globals.Constants.BasicColors.Red) then
                 if enableAFUI then
                     self:AFPopUp(self.ClickMsg, math.random(4))
                 else
@@ -98,8 +98,7 @@ function HudUI:RenderToggleHud()
         local toggleXPos = ImGui.GetCursorPosX()
 
         local pause_main, pause_main_pushed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pause", lbl, not Globals.PauseMain, ImVec2(32, toggleHeight),
-            Globals.Constants.Colors.Green, Globals.Constants.Colors.Red, nil, true)
-
+            Globals.Constants.Colors.MainButtonUnpausedColor, Globals.Constants.Colors.MainButtonPausedColor, nil, true)
         ImGui.SameLine()
         ImGui.SetCursorPosX(miniWidth - (enableAFUI and 30 or 20) - ImGui.GetStyle().WindowPadding.x)
 
@@ -119,7 +118,7 @@ function HudUI:RenderToggleHud()
         cursorPos.y = cursorPos.y + toggleHeight + ImGui.GetStyle().ItemSpacing.y
         ImGui.SetCursorPos(cursorPos)
         local pull_toggle, pull_toggle_changed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pulls", lbl, Config:GetSetting('DoPull'), nil,
-            Globals.Constants.Colors.Green, Globals.Constants.Colors.Red, nil, true)
+            Globals.Constants.Colors.MainButtonUnpausedColor, Globals.Constants.Colors.MainButtonPausedColor, nil, true)
         ImGui.SetCursorPos(cursorPosAfter)
 
         if pull_toggle_changed then
@@ -137,7 +136,7 @@ function HudUI:RenderToggleHud()
             for k, displayName in pairs(self.Settings) do
                 ImGui.SetCursorPosX(toggleXPos)
                 local newTog, changeTog = Ui.RenderFancyToggle("##rgmercs_hud_toggle_" .. k, displayName, Config:GetSetting(k), nil,
-                    Globals.Constants.Colors.Green, Globals.Constants.Colors.Red, nil, true)
+                    Globals.Constants.Colors.MainButtonUnpausedColor, Globals.Constants.Colors.MainButtonPausedColor, nil, true)
 
                 if changeTog then
                     Config:SetSetting(k, not newTog)

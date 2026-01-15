@@ -128,7 +128,7 @@ Globals.Constants.LogLevels           = {
     "Super-Verbose",
 }
 
-Globals.Constants.DefaultColors       = {
+Globals.Constants.BasicColors         = {
     Red         = ImVec4(0.8, 0.3, 0.3, 0.8),
     LightRed    = ImVec4(0.9, 0.5, 0.5, 0.8),
     Green       = ImVec4(0.3, 0.8, 0.3, 0.8),
@@ -146,7 +146,29 @@ Globals.Constants.DefaultColors       = {
     Cyan        = ImVec4(0.3, 0.8, 0.8, 0.8),
     White       = ImVec4(0.8, 0.8, 0.8, 0.8),
     Black       = ImVec4(0.0, 0.0, 0.0, 1.0),
-    FTHighlight = ImVec4(1.0, 0.5, 0.0, 0.8),
+}
+
+Globals.Constants.DefaultColors       = {
+    FTHighlight             = Globals.Constants.BasicColors.Orange,
+    CharmReasonColor        = Globals.Constants.BasicColors.Yellow,
+    ConditionPassColor      = Globals.Constants.BasicColors.Green,
+    ConditionFailColor      = Globals.Constants.BasicColors.Red,
+    ConditionMidColor       = Globals.Constants.BasicColors.Yellow,
+    ConditionDisabledColor  = Globals.Constants.BasicColors.Grey,
+    FAQCmdQuestionColor     = Globals.Constants.BasicColors.LightOrange,
+    FAQUsageAnswerColor     = Globals.Constants.BasicColors.LightBlue,
+    FAQDescColor            = Globals.Constants.BasicColors.LightGreen,
+    FAQLinkColor            = Globals.Constants.BasicColors.LightYellow,
+    SearchHighlightColor    = Globals.Constants.BasicColors.Orange,
+    AssistSpawnCloseColor   = Globals.Constants.BasicColors.LightGrey,
+    AssistSpawnFarColor     = Globals.Constants.BasicColors.LightRed,
+    BurnFlashColorOne       = Globals.Constants.BasicColors.Orange,
+    BurnFlashColorTwo       = Globals.Constants.BasicColors.LightOrange,
+    MainButtonPausedColor   = Globals.Constants.BasicColors.Red,
+    MainButtonUnpausedColor = Globals.Constants.BasicColors.Green,
+    MainCombatColor         = Globals.Constants.BasicColors.Red,
+    MainDowntimeColor       = Globals.Constants.BasicColors.Green,
+
 }
 
 Globals.Constants.Colors              = {}

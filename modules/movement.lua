@@ -550,9 +550,9 @@ function Module:Render()
             ImGui.Text("Line of Sight")
             ImGui.TableNextColumn()
             if chaseSpawn.LineOfSight() then
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
             end
             ImGui.Text(haveChaseTarget and (chaseSpawn.LineOfSight() and Icons.FA_EYE or Icons.FA_EYE_SLASH) or "N/A")
             ImGui.PopStyleColor(1)
@@ -588,10 +588,10 @@ function Module:Render()
 
             ImGui.TableNextColumn()
             if Config:GetSetting('ReturnToCamp') then
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
                 ImGui.Text(Icons.FA_FREE_CODE_CAMP)
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
                 ImGui.Text(Icons.MD_NOT_INTERESTED)
             end
             ImGui.PopStyleColor(1)

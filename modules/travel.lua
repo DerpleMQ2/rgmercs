@@ -241,9 +241,9 @@ function Module:Render()
         ImGui.SameLine()
 
         if groupedWithPorter then
-            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
         else
-            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
+            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
         end
         ImGui.Text(groupedWithPorter and "Yes" or "No")
         ImGui.PopStyleColor()
@@ -263,7 +263,7 @@ function Module:Render()
                     ImGui.BeginTable("Buttons", buttonsPerRow)
                     for _, sv in ipairs(self.TempSettings.FilteredList.Tabs[k]) do
                         ImGui.TableNextColumn()
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Black)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Black)
                         ImGui.PushStyleColor(ImGuiCol.Button, self:GetColorForType(sv.Type))
                         if ImGui.Button(sv.Name, self.ButtonWidth, self.ButtonHeight) then
                             local cmd = string.format("/rgl cast \"%s\"", sv.Name)
