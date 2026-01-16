@@ -1027,20 +1027,20 @@ function Ui.RenderForceTargetList(showPopout)
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(2))
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(1))
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(3))
-                Ui.TempSettings.SortedXTNameToSlot[mq.TLO.Me.Name()] = { Name = mq.TLO.Me.CleanName() or "None", Slot = #Ui.TempSettings.SortedXT + 1, ID = mq.TLO.Me.ID(), }
-                Ui.TempSettings.SortedXTNameToSlot[mq.TLO.NearestSpawn(2).Name()] = {
+                Ui.TempSettings.SortedXTIDToSlot[mq.TLO.Me.ID()] = { Name = mq.TLO.Me.CleanName() or "None", Slot = #Ui.TempSettings.SortedXT + 1, ID = mq.TLO.Me.ID(), }
+                Ui.TempSettings.SortedXTIDToSlot[mq.TLO.NearestSpawn(2).ID()] = {
                     Name = mq.TLO.NearestSpawn(2).CleanName() or "None",
                     Slot = #Ui.TempSettings.SortedXT + 1,
                     ID =
                         mq.TLO.NearestSpawn(2).ID(),
                 }
-                Ui.TempSettings.SortedXTNameToSlot[mq.TLO.NearestSpawn(1).Name()] = {
+                Ui.TempSettings.SortedXTIDToSlot[mq.TLO.NearestSpawn(1).ID()] = {
                     Name = mq.TLO.NearestSpawn(1).CleanName() or "None",
                     Slot = #Ui.TempSettings.SortedXT + 1,
                     ID =
                         mq.TLO.NearestSpawn(1).ID(),
                 }
-                Ui.TempSettings.SortedXTNameToSlot[mq.TLO.NearestSpawn(3).Name()] = {
+                Ui.TempSettings.SortedXTIDToSlot[mq.TLO.NearestSpawn(3).ID()] = {
                     Name = mq.TLO.NearestSpawn(3).CleanName() or "None",
                     Slot = #Ui.TempSettings.SortedXT + 1,
                     ID =
@@ -1084,6 +1084,14 @@ function Ui.RenderForceTargetList(showPopout)
                 ImGui.TableNextRow()
             end
 
+            local style = ImGui.GetStyle()
+            local scrollbarW = style.ScrollbarSize + style.ItemSpacing.x
+            local win_pos = ImGui.GetWindowPosVec()
+            local win_min = win_pos
+            local win_max = win_pos + ImGui.GetWindowSizeVec()
+            local hasScrollbar = ImGui.GetScrollMaxY() > 0
+            local effectiveWidth = win_max.x - (hasScrollbar and scrollbarW or 0)
+
             for i, xtarg in ipairs(Ui.TempSettings.SortedXT) do
                 ImGui.PushID(string.format("##xtarg_%d", i))
                 if xtarg.ID() > 0 then
@@ -1112,7 +1120,10 @@ function Ui.RenderForceTargetList(showPopout)
 
                         )
 
+                        win_max.x = effectiveWidth
+                        draw_list:PushClipRect(win_min, win_max, true)
                         draw_list:AddRect(min, max, ImGui.GetColorU32(Globals.Constants.Colors.FTHighlight), 0.0, 0, 1.5)
+                        draw_list:PopClipRect()
                     end
                 end
                 ImGui.PopID()
