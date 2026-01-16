@@ -330,12 +330,6 @@ function Module:Pop()
 	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
-function Module:HandleCharmBroke(mobName, breakerName)
-	Logger.log_debug("%s broke charm on ==> %s", breakerName, mobName)
-	Comms.HandleAnnounce(Comms.FormatChatEvent("Charm Broke", mobName, breakerName),
-		Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
-end
-
 function Module:AddImmuneTarget(mobId, mobData)
 	if self.TempSettings.CharmImmune[mobId] ~= nil then return end
 	local zone = mq.TLO.Zone.ShortName()
