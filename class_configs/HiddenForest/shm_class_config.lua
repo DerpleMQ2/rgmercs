@@ -994,7 +994,7 @@ local _ClassConfig = {
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoGroupShrink') then return false end
-                    return target.Height() > 2.2
+                    return Targeting.GetTargetHeight(target) > 2.2
                 end,
             },
             {
@@ -1003,7 +1003,7 @@ local _ClassConfig = {
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoGroupShrink') or Casting.CanUseAA("Group Shrink") then return false end
-                    return target.Height() > 2.2
+                    return Targeting.GetTargetHeight(target) > 2.2
                 end,
             },
             {
