@@ -701,7 +701,7 @@ function Combat.OkToEngagePreValidateId(targetId)
             return true
         else -- can't check HP yet, as we haven't targeted
             local distanceCheck = Targeting.GetTargetDistance(target) < Config:GetSetting('AssistRange')
-            local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() ~= nil
+            local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive()
             local forcedTarget = Globals.ForceTargetID > 0 and target.ID() == Globals.ForceTargetID
             local forcedCombat = Globals.ForceCombatID > 0 and targetId == Globals.ForceCombatID
 
@@ -779,7 +779,7 @@ function Combat.OkToEngage(autoTargetId)
         else
             local distanceCheck = Targeting.GetTargetDistance() < Config:GetSetting('AssistRange')
             local assistHPCheck = Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt')
-            local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive() ~= nil
+            local hostileCheck = Config:GetSetting('TargetNonAggressives') or target.Aggressive()
             local forcedTarget = Globals.ForceTargetID > 0 and targetId == Globals.ForceTargetID
             local forcedCombat = Globals.ForceCombatID > 0 and targetId == Globals.ForceCombatID
 
