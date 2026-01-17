@@ -135,6 +135,13 @@ function Targeting.GetTargetPctHPs(target)
     return useTarget.PctHPs() or 0
 end
 
+--- Returns the height of the target.
+--- @param target MQTarget|MQSpawn? The target entity
+--- @return number The distance to the target.
+function Targeting.GetTargetHeight(target)
+    return (target and target.Height() or (mq.TLO.Target.Height() or 0))
+end
+
 --- Retrieves the percentage of HPs for auto-targeting.
 ---
 --- @return number The percentage of HPs for auto-targeting.
