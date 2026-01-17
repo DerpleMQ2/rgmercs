@@ -687,7 +687,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 if data.Data.PetID > 0 then
-                    ImGui.PushStyleColor(ImGuiCol.Text, ConColorsNameToVec4[data.Data.PetConColor])
+                    ImGui.PushStyleColor(ImGuiCol.Text, (ConColorsNameToVec4[data.Data.PetConColor] or Colors.White))
 
                     Ui.InvisibleWithButtonText("##pet_btn_" .. tostring(peer), Icons.MD_PETS, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
                         function() Core.DoCmd("/mqtarget id %d", data.Data.PetID) end)
