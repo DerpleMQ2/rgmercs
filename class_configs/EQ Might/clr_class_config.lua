@@ -455,6 +455,11 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     return Targeting.BigHealsNeeded(target) -- if multiples are hurt with at least one needing big heals
                 end,
+                pre_activate = function(self)
+                    if Casting.AAReady("Mass Group Buff") and Targeting.IsNamed(Targeting.GetAutoTarget()) then
+                        Casting.UseAA("Mass Group Buff", Globals.AutoTargetID)
+                    end
+                end,
             },
             {
                 name = "GroupElixir",

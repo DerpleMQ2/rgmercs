@@ -818,14 +818,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Tome of Nife's Mercy",
-                type = "Item",
-                load_cond = function(self) return mq.TLO.FindItem("=Tome of Nife's Mercy")() end,
-                cond = function(self, itemName, target)
-                    return Casting.GroupLowManaCount(50) > 1
-                end,
-            },
-            {
                 name = "Glyph Spray",
                 type = "AA",
             },
