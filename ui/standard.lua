@@ -61,7 +61,7 @@ function StandardUI:RenderTarget()
         ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
             assistSpawn.ID() or 0, assistSpawn.Level() or 0,
             assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
-        if Targeting.IsNamed(assistSpawn) then
+        if Globals.AutoTargetIsNamed then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(52, 200, 52, 255),
                 string.format("**Named**"))

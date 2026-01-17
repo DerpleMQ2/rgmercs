@@ -704,7 +704,7 @@ local _ClassConfig = {
                         (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 999) < 70
                 end,
                 cond = function(self, itemName, target)
-                    return Targeting.IsNamed(target) and Casting.DotItemCheck(itemName, target)
+                    return Globals.AutoTargetIsNamed and Casting.DotItemCheck(itemName, target)
                 end,
             },
             {
@@ -744,7 +744,7 @@ local _ClassConfig = {
                 name = "Ancestral Aid",
                 type = "AA",
                 pre_activate = function(self)
-                    if Casting.AAReady("Mass Group Buff") and Targeting.IsNamed(Targeting.GetAutoTarget()) then
+                    if Casting.AAReady("Mass Group Buff") and Globals.AutoTargetIsNamed then
                         Casting.UseAA("Mass Group Buff", Globals.AutoTargetID)
                     end
                 end,
@@ -753,7 +753,7 @@ local _ClassConfig = {
                 name = "Focus of Arcanum",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -775,7 +775,7 @@ local _ClassConfig = {
                 name = "Spear of Fate",
                 type = "Item",
                 cond = function(self, itemName, target)
-                    return Targeting.IsNamed(target) and Casting.DotItemCheck(itemName, target)
+                    return Globals.AutoTargetIsNamed and Casting.DotItemCheck(itemName, target)
                 end,
             },
         },
@@ -874,7 +874,7 @@ local _ClassConfig = {
                 name = "CurseDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoCurseDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if not Config:GetSetting('DoCurseDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
@@ -882,7 +882,7 @@ local _ClassConfig = {
                 name = "SaryrnDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSaryrnDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if not Config:GetSetting('DoSaryrnDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
@@ -890,7 +890,7 @@ local _ClassConfig = {
                 name = "UltorDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoUltorDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if not Config:GetSetting('DoUltorDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
@@ -917,7 +917,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoColdNuke') then return false end
-                    return (Targeting.MobHasLowHP or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target))) and Casting.OkayToNuke(true)
+                    return (Targeting.MobHasLowHP or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed)) and Casting.OkayToNuke(true)
                 end,
             },
             {
@@ -925,7 +925,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoPoisonNuke') then return false end
-                    return (Targeting.MobHasLowHP or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target))) and Casting.OkayToNuke(true)
+                    return (Targeting.MobHasLowHP or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed)) and Casting.OkayToNuke(true)
                 end,
             },
         },

@@ -456,7 +456,7 @@ local _ClassConfig = {
                     return Targeting.BigHealsNeeded(target) -- if multiples are hurt with at least one needing big heals
                 end,
                 pre_activate = function(self)
-                    if Casting.AAReady("Mass Group Buff") and Targeting.IsNamed(Targeting.GetAutoTarget()) then
+                    if Casting.AAReady("Mass Group Buff") and Globals.AutoTargetIsNamed then
                         Casting.UseAA("Mass Group Buff", Globals.AutoTargetID)
                     end
                 end,
@@ -784,7 +784,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     local targetLevel = Targeting.GetAutoTargetLevel()
                     if targetLevel == 0 or targetLevel > 55 then return false end
-                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
+                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Globals.AutoTargetIsNamed
                 end,
             },
             {

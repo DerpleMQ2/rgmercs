@@ -1274,7 +1274,7 @@ local _ClassConfig = {
                 name = "Affirmation",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -1306,7 +1306,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Globals.AutoTargetIsNamed and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
             {
@@ -1366,7 +1366,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    return Casting.NoDiscActive() and (Globals.AutoTargetIsNamed or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
@@ -1374,7 +1374,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    return Casting.NoDiscActive() and (Globals.AutoTargetIsNamed or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
@@ -1382,7 +1382,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    return Casting.NoDiscActive() and (Globals.AutoTargetIsNamed or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
@@ -1517,7 +1517,7 @@ local _ClassConfig = {
                 end,
                 cond = function(self, target)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -1530,7 +1530,7 @@ local _ClassConfig = {
                 cond = function()
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
                     return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and
-                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("2Hand") end,
             },

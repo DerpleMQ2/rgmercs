@@ -1,5 +1,6 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
+local Globals      = require("utils.globals")
 local Core         = require("utils.core")
 local Targeting    = require("utils.Targeting")
 local Casting      = require("utils.casting")
@@ -371,7 +372,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 --need to look at rotation and decide if it should fire during emergencies. leaning towards no
                 return combat_state == "Combat" and Core.IsTanking() and (mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') or
-                    Targeting.IsNamed(Targeting.GetAutoTarget()) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    Globals.AutoTargetIsNamed or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
@@ -502,7 +503,7 @@ local _ClassConfig = {
                 name = "Attention",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             --used to reinforce hatred after it is initially established
@@ -527,7 +528,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Globals.AutoTargetIsNamed and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
             {
@@ -564,7 +565,7 @@ local _ClassConfig = {
                 name = "AgroPet",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             -- { --this appears to have incredibly limited usage and the line was discontinued
@@ -635,7 +636,7 @@ local _ClassConfig = {
                 end,
                 cond = function()
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -647,7 +648,7 @@ local _ClassConfig = {
                 end,
                 cond = function()
                     if mq.TLO.Me.Bandolier("DW").Active() then return false end
-                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('EquipDW') and not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('EquipDW') and not (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("DW") end,
             },

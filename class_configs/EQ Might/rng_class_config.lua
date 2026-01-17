@@ -283,7 +283,7 @@ return {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return Targeting.GetXTHaterCount() > 0 and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         { --Keep things from running
@@ -293,7 +293,7 @@ return {
             load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.OkayToNotHeal() and not Targeting.IsNamed(Targeting.GetAutoTarget()) and
+                return combat_state == "Combat" and Core.OkayToNotHeal() and not Globals.AutoTargetIsNamed and
                     Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
@@ -408,7 +408,7 @@ return {
                 name = "Auspice of the Hunter",
                 type = "AA",
                 pre_activate = function(self)
-                    if Casting.AAReady("Mass Group Buff") and Targeting.IsNamed(Targeting.GetAutoTarget()) then
+                    if Casting.AAReady("Mass Group Buff") and Globals.AutoTargetIsNamed then
                         Casting.UseAA("Mass Group Buff", Globals.AutoTargetID)
                     end
                 end,
@@ -483,7 +483,7 @@ return {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoJoltSpell') end,
                 cond = function(self, spell, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 80
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 80
                 end,
             },
             {
@@ -542,7 +542,7 @@ return {
                 name = "SwarmDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSwarmDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if not Config:GetSetting('DoSwarmDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },

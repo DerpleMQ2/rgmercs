@@ -10,6 +10,7 @@ Globals.MainAssist                    = ""
 Globals.ScriptDir                     = ""
 Globals.AutoTargetID                  = 0
 Globals.ForceTargetID                 = 0
+Globals.AutoTargetIsNamed             = false
 Globals.ForceCombatID                 = 0
 Globals.LastPulledID                  = 0
 Globals.CurrentState                  = "None"

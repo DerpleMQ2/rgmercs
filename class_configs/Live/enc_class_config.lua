@@ -1187,14 +1187,14 @@ local _ClassConfig = {
                 name = "Glyph Spray",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() <= Config:GetSetting('EmergencyStart'))
+                    return ((Globals.AutoTargetIsNamed and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() <= Config:GetSetting('EmergencyStart'))
                 end,
             },
             {
                 name = "Reactive Rune",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() <= Config:GetSetting('EmergencyStart'))
+                    return ((Globals.AutoTargetIsNamed and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() <= Config:GetSetting('EmergencyStart'))
                 end,
             },
             {
@@ -1255,7 +1255,7 @@ local _ClassConfig = {
                 name = "Arcane Whisper",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() >= 90
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() >= 90
                 end,
 
             },
@@ -1263,7 +1263,7 @@ local _ClassConfig = {
                 name = "Silent Casting",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() >= 60
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() >= 60
                 end,
 
             },
@@ -1282,7 +1282,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoMindDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Targeting.IsNamed(target) or not Casting.IHaveBuff(spell and spell.Trigger()))
+                    return Casting.DotSpellCheck(spell) and (Globals.AutoTargetIsNamed or not Casting.IHaveBuff(spell and spell.Trigger()))
                 end,
             },
             {
@@ -1386,7 +1386,7 @@ local _ClassConfig = {
             {
                 name = "Mental Contortion",
                 type = "AA",
-                cond = function(self, aaName, target) return Targeting.IsNamed(target) end,
+                cond = function(self, aaName, target) return Globals.AutoTargetIsNamed end,
             },
             {
                 name = "Chromatic Haze",
@@ -1423,7 +1423,7 @@ local _ClassConfig = {
                 name = "TashSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell) and (not Casting.TargetHasBuff("Bite of Tashani") or Targeting.IsNamed(target))
+                    return Casting.DetSpellCheck(spell) and (not Casting.TargetHasBuff("Bite of Tashani") or Globals.AutoTargetIsNamed)
                 end,
             },
         },

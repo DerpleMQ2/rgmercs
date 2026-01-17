@@ -607,7 +607,7 @@ Module.LogicBlocks                      = {
     {
         name = "The RGMercs Auto Target Is Named",
         cond = function(self, target, negate)
-            local isNamed = Targeting.IsNamed(Targeting.GetAutoTarget())
+            local isNamed = Globals.AutoTargetIsNamed
             if negate then
                 return not isNamed
             else

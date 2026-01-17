@@ -16,7 +16,7 @@ Targeting.ForceBurnTargetID = 0
 Targeting.SafeTargetCache   = {}
 
 function Targeting.IsNamed(spawn)
-    if not spawn() then return false end
+    if not spawn or not spawn() then return false end
     if (spawn.Level() or 0) < Config:GetSetting("NamedMinLevel") then return false end
     return Modules:ExecModule("Named", "IsNamed", spawn) or false
 end
@@ -53,6 +53,7 @@ function Targeting.ClearTarget()
     if Config:GetSetting('DoAutoTarget') then
         Logger.log_debug("Clearing Target")
         Globals.AutoTargetID = 0
+        Globals.AutoTargetIsNamed = false
         if Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Globals.ForceTargetID) then Globals.ForceTargetID = 0 end
         Globals.ForceCombatID = 0
         if mq.TLO.Stick.Status():lower() == "on" then Movement:DoStickCmd("off") end
@@ -565,7 +566,7 @@ function Targeting.MobNotLowHP(target)
     if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
     if not (target and target()) then return false end
 
-    local threshold = Targeting.IsNamed(target) and Config:GetSetting('NamedLowHP') or Config:GetSetting('MobLowHP')
+    local threshold = Globals.AutoTargetIsNamed and Config:GetSetting('NamedLowHP') or Config:GetSetting('MobLowHP')
     return Targeting.GetTargetPctHPs(target) >= threshold
 end
 
@@ -573,7 +574,7 @@ function Targeting.MobHasLowHP(target)
     if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
     if not (target and target()) then return false end
 
-    local threshold = Targeting.IsNamed(target) and Config:GetSetting('NamedLowHP') or Config:GetSetting('MobLowHP')
+    local threshold = Globals.AutoTargetIsNamed and Config:GetSetting('NamedLowHP') or Config:GetSetting('MobLowHP')
     return threshold > Targeting.GetTargetPctHPs(target)
 end
 
@@ -631,7 +632,7 @@ end
 
 function Targeting.HateToolsNeeded()
     if Globals.AutoTargetID == 0 or mq.TLO.Target.ID() ~= Globals.AutoTargetID then return false end
-    return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget())
+    return mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Globals.AutoTargetIsNamed
 end
 
 --- Checks spawn surname to check if it is a pet that has evaded other TLO checks.

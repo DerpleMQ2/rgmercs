@@ -464,7 +464,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.OkayToNotHeal() and not Targeting.IsNamed(Targeting.GetAutoTarget()) and
+                return combat_state == "Combat" and Core.OkayToNotHeal() and not Globals.AutoTargetIsNamed and
                     Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
@@ -533,7 +533,7 @@ local _ClassConfig = {
                 name = "Nature Walkers Scimitar",
                 type = "Item",
                 cond = function(self, itemName, target)
-                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Targeting.MobNotLowHP(target) and Casting.DetItemCheck(itemName, target)
                 end,
             },
@@ -542,7 +542,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoFlameLickDot') end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
@@ -559,7 +559,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoSwarmDot') end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
@@ -568,7 +568,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoVengeanceDot') end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
@@ -577,7 +577,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoStunNuke') end,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
+                    return Casting.HaveManaToNuke() and Targeting.TargetNotStunned() and not Globals.AutoTargetIsNamed
                 end,
             },
             { -- in-game description is incorrect, mob must be targeted.

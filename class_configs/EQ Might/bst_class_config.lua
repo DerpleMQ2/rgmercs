@@ -268,7 +268,7 @@ return {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return Targeting.GetXTHaterCount() > 0 and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
@@ -486,7 +486,7 @@ return {
                     return Casting.GroupLowManaCount(Config:GetSetting('ParaPct')) > 0
                 end,
                 pre_activate = function(self)
-                    if Casting.AAReady("Mass Group Buff") and Targeting.IsNamed(Targeting.GetAutoTarget()) then
+                    if Casting.AAReady("Mass Group Buff") and Globals.AutoTargetIsNamed then
                         Casting.UseAA("Mass Group Buff", Globals.AutoTargetID)
                     end
                 end,
@@ -503,7 +503,7 @@ return {
                 name = "BloodDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
@@ -511,7 +511,7 @@ return {
                 name = "EndemicDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },

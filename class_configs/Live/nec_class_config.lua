@@ -10,6 +10,7 @@
 
 local mq           = require('mq')
 local Config       = require('utils.config')
+local Globals      = require("utils.globals")
 local Comms        = require("utils.comms")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
@@ -803,7 +804,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Targeting.IsNamed(Targeting.GetAutoTarget()) and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount') and
+                return combat_state == "Combat" and not Globals.AutoTargetIsNamed and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount') and
                     not Casting.IAmFeigning()
             end,
         },
@@ -941,7 +942,7 @@ local _ClassConfig = {
                 name = "Silent Casting",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 60
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 60
                 end,
             },
             {
@@ -1123,7 +1124,7 @@ local _ClassConfig = {
             {
                 name = "Gathering Dusk",
                 type = "AA",
-                cond = function(self, aaName, target) return Targeting.IsNamed(target) end,
+                cond = function(self, aaName, target) return Globals.AutoTargetIsNamed end,
             },
             {
                 name = "Swarm of Decay",
@@ -1140,7 +1141,7 @@ local _ClassConfig = {
             {
                 name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName, target) return Targeting.IsNamed(target) end,
+                cond = function(self, aaName, target) return Globals.AutoTargetIsNamed end,
             },
             {
                 name = "Forceful Rejuvenation",

@@ -5,6 +5,7 @@
 
 local mq        = require('mq')
 local Config    = require('utils.config')
+local Globals   = require("utils.globals")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
 local Core      = require("utils.core")
@@ -312,7 +313,7 @@ return {
             load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Targeting.IsNamed(Targeting.GetAutoTarget()) and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+                return combat_state == "Combat" and not Globals.AutoTargetIsNamed and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
         { --Keep things from doing
@@ -450,7 +451,7 @@ return {
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoManaBurn') end,
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() < 70 and Casting.OkayToNuke(true) and not mq.TLO.Target.FindBuff("detspa 350")()
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() < 70 and Casting.OkayToNuke(true) and not mq.TLO.Target.FindBuff("detspa 350")()
                 end,
             },
             {
@@ -471,14 +472,14 @@ return {
                 name = "Mind Crash",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 90
                 end,
             },
             {
                 name = "Arcane Whisper",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 90
                 end,
             },
             {
@@ -510,7 +511,7 @@ return {
                 name = "StunSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToDebuff() and Targeting.TargetNotStunned() and not Targeting.IsNamed(target) and not Casting.StunImmuneTarget(target)
+                    return Casting.HaveManaToDebuff() and Targeting.TargetNotStunned() and not Globals.AutoTargetIsNamed and not Casting.StunImmuneTarget(target)
                 end,
             },
         },

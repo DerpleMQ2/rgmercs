@@ -1,6 +1,7 @@
 local mq        = require('mq')
 local Combat    = require('utils.combat')
 local Config    = require('utils.config')
+local Globals   = require("utils.globals")
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
@@ -250,7 +251,7 @@ return {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return Targeting.GetXTHaterCount() > 0 and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
@@ -505,7 +506,7 @@ return {
                 name = "BloodDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
@@ -513,7 +514,7 @@ return {
                 name = "EndemicDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
+                    if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },

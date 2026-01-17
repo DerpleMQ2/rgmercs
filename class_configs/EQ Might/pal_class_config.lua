@@ -1,5 +1,6 @@
 local mq          = require('mq')
 local Config      = require('utils.config')
+local Globals     = require("utils.globals")
 local Core        = require("utils.core")
 local Targeting   = require("utils.targeting")
 local Casting     = require("utils.casting")
@@ -666,7 +667,7 @@ return {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Targeting.IsNamed(Targeting.GetAutoTarget()) or
+                return combat_state == "Combat" and (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Globals.AutoTargetIsNamed or
                     self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
             end,
         },
@@ -931,7 +932,7 @@ return {
                 load_cond = function(self) return not Core.IsTanking() end,
                 cond = function(self, discSpell, target)
                     if not Targeting.TargetBodyIs(target, "Undead") then return false end
-                    return Targeting.IsNamed(target) and Casting.NoDiscActive()
+                    return Globals.AutoTargetIsNamed and Casting.NoDiscActive()
                 end,
             },
         },
@@ -1057,7 +1058,7 @@ return {
                 type = "CustomFunc",
                 cond = function(self, target)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -1067,7 +1068,7 @@ return {
                 cond = function()
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
                     return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc() ~= "Deflection Discipline" and
-                        not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                        not (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("2Hand") end,
             },

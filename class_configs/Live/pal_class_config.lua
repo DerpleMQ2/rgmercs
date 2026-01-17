@@ -1,5 +1,6 @@
 local mq        = require('mq')
 local Config    = require('utils.config')
+local Globals   = require("utils.globals")
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
@@ -1013,7 +1014,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and Casting.NoDiscActive()
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Globals.AutoTargetIsNamed) and Casting.NoDiscActive()
                 end,
             },
             {
@@ -1021,7 +1022,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and Casting.NoDiscActive()
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Globals.AutoTargetIsNamed) and Casting.NoDiscActive()
                 end,
             },
             {
@@ -1029,7 +1030,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and Casting.NoDiscActive()
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Globals.AutoTargetIsNamed) and Casting.NoDiscActive()
                 end,
             },
             {
@@ -1037,7 +1038,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and Casting.NoDiscActive()
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Globals.AutoTargetIsNamed) and Casting.NoDiscActive()
                 end,
             },
             {

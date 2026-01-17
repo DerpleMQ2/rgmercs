@@ -10,6 +10,7 @@
 
 local mq           = require('mq')
 local Config       = require('utils.config')
+local Globals      = require('utils.globals')
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
@@ -815,7 +816,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return Targeting.GetXTHaterCount() > 0 and not Casting.IAmFeigning() and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget())) and mq.TLO.Me.PctAggro() > 99)
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99)
             end,
         },
         {
@@ -881,7 +882,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('AggroFeign') then return false end
-                    return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 99)
+                    return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99)
                 end,
             },
             {
@@ -984,7 +985,7 @@ local _ClassConfig = {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Targeting.MobHasLowHP or Targeting.IsNamed(target)) and Casting.OkayToNuke()
+                    return (Targeting.MobHasLowHP or Globals.AutoTargetIsNamed) and Casting.OkayToNuke()
                 end,
             },
             {
@@ -1022,7 +1023,7 @@ local _ClassConfig = {
                 name = "Scent of Thule",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -1048,7 +1049,7 @@ local _ClassConfig = {
             {
                 name = "Gathering Dusk",
                 type = "AA",
-                cond = function(self, aaName, target) return Targeting.IsNamed(target) end,
+                cond = function(self, aaName, target) return Globals.AutoTargetIsNamed end,
             },
             {
                 name = "Swarm of Decay",
@@ -1065,7 +1066,7 @@ local _ClassConfig = {
             {
                 name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName, target) return Targeting.IsNamed(target) end,
+                cond = function(self, aaName, target) return Globals.AutoTargetIsNamed end,
             },
             {
                 name = "Forceful Rejuvenation",
@@ -1092,14 +1093,14 @@ local _ClassConfig = {
                 name = "Silent Casting",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 60
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 60
                 end,
             },
             {
                 name = "Dying Grasp",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() <= 50
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() <= 50
                 end,
             },
         },
