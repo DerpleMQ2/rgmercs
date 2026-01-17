@@ -1,6 +1,7 @@
 local mq        = require('mq')
 local Combat    = require('utils.combat')
 local Config    = require('utils.config')
+local Globals   = require('utils.globals')
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
@@ -483,6 +484,11 @@ return {
                 cond = function(self, aaName)
                     if not Config:GetSetting('DoParagon') then return false end
                     return Casting.GroupLowManaCount(Config:GetSetting('ParaPct')) > 0
+                end,
+                pre_activate = function(self)
+                    if Casting.AAReady("Mass Group Buff") and Targeting.IsNamed(Targeting.GetAutoTarget()) then
+                        Casting.UseAA("Mass Group Buff", Globals.AutoTargetID)
+                    end
                 end,
             },
             {
