@@ -1,23 +1,23 @@
-local mq              = require('mq')
-local Config          = require('utils.config')
-local Globals         = require('utils.globals')
-local Strings         = require("utils.strings")
-local Core            = require("utils.core")
-local Modules         = require("utils.modules")
-local Comms           = require("utils.comms")
-local Targeting       = require("utils.targeting")
-local DanNet          = require('lib.dannet.helpers')
-local Logger          = require("utils.logger")
-local Combat          = require("utils.combat")
-local Tables          = require("utils.tables")
-local Events          = require("utils.events")
+local mq           = require('mq')
+local Config       = require('utils.config')
+local Globals      = require('utils.globals')
+local Strings      = require("utils.strings")
+local Core         = require("utils.core")
+local Modules      = require("utils.modules")
+local Comms        = require("utils.comms")
+local Targeting    = require("utils.targeting")
+local DanNet       = require('lib.dannet.helpers')
+local Logger       = require("utils.logger")
+local Combat       = require("utils.combat")
+local Tables       = require("utils.tables")
+local Events       = require("utils.events")
 
-local Casting         = { _version = '2.0', _name = "Casting", _author = 'Derple, Algar', }
-Casting.__index       = Casting
-Casting.Memorizing    = false
+local Casting      = { _version = '2.0', _name = "Casting", _author = 'Derple, Algar', }
+Casting.__index    = Casting
+Casting.Memorizing = false
 
 -- cached for UI display
-Casting.UseGem        = mq.TLO.Me.NumGems()
+Casting.UseGem     = mq.TLO.Me.NumGems()
 
 --- Simple (no trigger or stacking checks) check to see if the player has a buff. Can pass a spell(userdata), ID, or effect name(string).
 --- @param effect MQSpell|string|integer|nil The effect to check for.
@@ -822,7 +822,7 @@ function Casting.SpellReady(spell, skipGemTimer)
     if not spell or not spell() then return false end
 
     local ready = mq.TLO.Me.SpellReady(spell.RankName.Name())()
-    local bookCheck = mq.TLO.Me.Book(spell.RankName.Name())()
+    local bookCheck = (mq.TLO.Me.Book(spell.RankName.Name())() or 0) > 0
     local silenced = mq.TLO.Me.Silenced() ~= nil
 
     Logger.log_verbose("SpellReady for %s(%d): Silenced (%s), BookCheck(%s), ReadyCheck(%s), Memorization Allowed (%s).", spell.RankName(), spell.ID(),
@@ -1614,9 +1614,10 @@ end
 
 --- Waits until the specified spell is ready to be cast or the maximum wait time is reached.
 --- @param spell string The name of the spell to wait for.
---- @param maxWait number The maximum amount of time (in seconds) to wait for the spell to be ready.
+--- @param maxWait number The maximum amount of time (in miliseconds) to wait for the spell to be ready.
 function Casting.WaitCastReady(spell, maxWait)
     while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
+        local startTime = mq.gettime()
         mq.delay(1)
         mq.doevents()
         Events.DoEvents()
@@ -1628,8 +1629,10 @@ function Casting.WaitCastReady(spell, maxWait)
             Logger.log_debug("I was trying to cast %s as my persona was changed, aborting.", spell)
             return
         end
+        local endTime = mq.gettime()
+        local elapsed = endTime - startTime
 
-        maxWait = maxWait - 1
+        maxWait = maxWait - elapsed
 
         if (maxWait % 100) == 0 then
             Logger.log_verbose("Waiting for spell '%s' to be ready...", spell)
