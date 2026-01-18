@@ -565,7 +565,7 @@ function Module:AEMezCheck()
     -- Call MezNow and pass the AE flag and allow it to use the AA if the Spell isn't ready.
     Logger.log_debug("\awNOTICE:\ax Re-targeting to our main assist's mob.")
 
-    if not Globals.BackOffFlag then -- Combat.FindBestAutoTargetCheck() then
+    if not Globals.BackOffFlag then
         Combat.FindBestAutoTarget()
         if Globals.AutoTargetID > 0 then
             self:MezNow(Globals.AutoTargetID, true, true)
