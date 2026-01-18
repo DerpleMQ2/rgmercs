@@ -182,6 +182,20 @@ function Targeting.GetTargetLOS(target)
     return useTarget.LineOfSight()
 end
 
+--- Returns the max distance from this spawn for you to hit it.
+--- @param target MQTarget The name or identifier of the target to check.
+--- @param failHigh boolean Return 999 for an invalid target, otherwise return 0.
+--- @return number Returns The max distance to hit this target
+function Targeting.GetMaxMeleeRange(target, failHigh)
+    local useTarget = target
+    if not useTarget then useTarget = mq.TLO.Target end
+    if not useTarget or not useTarget() then
+        return failHigh and 999 or 0
+    end
+
+    return useTarget.MaxRangeTo() or (failHigh and 999 or 0)
+end
+
 --- Retrieves the name of the given target.
 --- @param target MQTarget? The target whose name is to be retrieved.
 --- @return string The name of the target.
