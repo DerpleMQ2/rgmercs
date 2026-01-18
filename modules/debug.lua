@@ -293,7 +293,7 @@ end
 
 function Module:Render()
     Ui.RenderPopAndSettings(self._name)
-
+    ImGui.NewLine()
     if self.ModuleLoaded then
         self:RenderEditor()
         self:RenderToolbar()

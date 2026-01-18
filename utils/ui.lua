@@ -1846,7 +1846,10 @@ end
 function Ui.RenderPopAndSettings(moduleName)
     -- The size wont change so I don't want to use CalcTextSize every frame
     local style = ImGui.GetStyle()
-    local paddingNeeded = 35 + style.FramePadding.x
+    local scrollBarVis = ImGui.GetScrollMaxY() > 0
+
+    local paddingNeeded = 35 + style.FramePadding.x + (scrollBarVis and style.ScrollbarSize or 0)
+
     local cursorPos = ImGui.GetCursorPosVec()
     if Config:HaveSetting(moduleName .. "_Popped") then
         if not Config:GetSetting(moduleName .. "_Popped") then
@@ -1862,7 +1865,6 @@ function Ui.RenderPopAndSettings(moduleName)
             ImGui.NewLine()
         else
             ImGui.SetCursorPos(ImVec2(cursorPos.x + (ImGui.GetWindowWidth() - paddingNeeded), cursorPos.y))
-
             Ui.RenderSettingsButton(moduleName)
         end
         ImGui.SetCursorPos(cursorPos)
