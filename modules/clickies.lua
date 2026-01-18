@@ -487,7 +487,7 @@ Module.LogicBlocks                      = {
     },
 
     {
-        name = "Target Aggro Percent",
+        name = "Your Aggro Percent",
         cond = function(self, target, aboveAggro, belowAggro)
             if not target or not target() then
                 return false
@@ -497,7 +497,7 @@ Module.LogicBlocks                      = {
 
             local pctAggro = mq.TLO.Target.PctAggro() or 0
 
-            Logger.log_super_verbose("\ayClicky: \ayClicky: \awTarget Aggro condition check on \at%s\aw, aboveAggro(\a-t%d\aw/%s) belowAggro(\a-t%d\aw/%s) pctAggro(\a-t%d\aw)",
+            Logger.log_super_verbose("\ayClicky: \ayClicky: \awYour Aggro condition check on \at%s\aw, aboveAggro(\a-t%d\aw/%s) belowAggro(\a-t%d\aw/%s) pctAggro(\a-t%d\aw)",
                 target.CleanName() or "None", aboveAggro, Strings.BoolToColorString((pctAggro >= aboveAggro)), belowAggro,
                 Strings.BoolToColorString((pctAggro <= belowAggro)), pctAggro)
 
@@ -513,7 +513,7 @@ Module.LogicBlocks                      = {
         cond_targets = { "Auto Target", },
         tooltip = "Only use if your aggro on the RGMercs combat auto target is above/below this percent.",
         render_header_text = function(self, cond)
-            return string.format("Auto Target aggro is between %d%% and %d%%", cond.args[1] or 0, cond.args[2] or 100)
+            return string.format("Your aggro on the Auto Target is between %d%% and %d%%", cond.args[1] or 0, cond.args[2] or 100)
         end,
         args = {
             { name = ">= Aggro %", type = "number", default = 0,   min = 0, max = 100, },
@@ -522,7 +522,7 @@ Module.LogicBlocks                      = {
     },
 
     {
-        name = "Target Secondary Aggro Percent",
+        name = "Secondary Aggro Percent",
         cond = function(self, target, aboveAggro, belowAggro)
             if not target or not target() then
                 return false
@@ -547,7 +547,7 @@ Module.LogicBlocks                      = {
             return true
         end,
         cond_targets = { "Auto Target", },
-        tooltip = "Only use if the secondary aggro on the RGMercs combat auto target is above/below this percent.",
+        tooltip = "Only use if the secondary (next-highest) aggro on the RGMercs combat auto target is above/below this percent.",
         render_header_text = function(self, cond)
             return string.format("Auto Target secondary aggro is between %d%% and %d%%", cond.args[1] or 0, cond.args[2] or 100)
         end,
