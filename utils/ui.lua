@@ -1024,7 +1024,7 @@ function Ui.RenderForceTargetList(showPopout)
                         Ui.TempSettings.SortedXTIDToSlot[xtarg.ID()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
                     end
                 end
-                --[[ TEST DATA REMOVE LATER]]
+                --[[ TEST DATA REMOVE LATER
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.Me)
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(2))
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(1))
@@ -1048,7 +1048,7 @@ function Ui.RenderForceTargetList(showPopout)
                     ID =
                         mq.TLO.NearestSpawn(3).ID(),
                 }
-                --]] --
+                ]] --
                 if sort_specs then sort_specs.SpecsDirty = true end
             end
 
