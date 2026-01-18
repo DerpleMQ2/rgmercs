@@ -854,6 +854,8 @@ function Ui.RenderForceTargetList(showPopout)
         end
     end
 
+    local iconWidth = ImGui.CalcTextSizeVec(Icons.MD_DO_NOT_DISTURB).x + ImGui.GetStyle().ItemInnerSpacing.x * 2
+
     local tableColumns = {
         {
             name = "FT",
@@ -873,10 +875,6 @@ function Ui.RenderForceTargetList(showPopout)
 
                 ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
 
-                ImGui.Text("[")
-
-                ImGui.SameLine()
-
                 if not checked then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
                 else
@@ -888,13 +886,15 @@ function Ui.RenderForceTargetList(showPopout)
 
                 ImGui.PopStyleColor(1)
 
-                ImGui.SameLine()
-                ImGui.Text("]")
+                local min = ImGui.GetItemRectMinVec()
+                local max = ImGui.GetItemRectMaxVec()
+                local draw = ImGui.GetWindowDrawList()
+                draw:AddRect(min, max, IM_COL32(180, 180, 180, 180), 0.5)
                 ImGui.PopStyleVar(1)
             end,
         },
         {
-            name = "Ig",
+            name = "IT",
             flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
             width = 16.0,
             sort = function(a, b)
@@ -904,13 +904,11 @@ function Ui.RenderForceTargetList(showPopout)
                 local checked = Globals.IgnoredTargetIDs:contains(xtarg.ID())
                 ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
 
-                ImGui.Text("[")
                 if not checked then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
                 end
-                ImGui.SameLine()
 
-                Ui.InvisibleWithButtonText("##ig_btn_" .. tostring(i), Icons.MD_CHECK, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                Ui.InvisibleWithButtonText("##ig_btn_" .. tostring(i), Icons.MD_CLOSE, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
                     function()
                         if checked then
                             Globals.IgnoredTargetIDs:remove(xtarg.ID())
@@ -923,8 +921,11 @@ function Ui.RenderForceTargetList(showPopout)
                 if not checked then
                     ImGui.PopStyleColor()
                 end
-                ImGui.SameLine()
-                ImGui.Text("]")
+
+                local min = ImGui.GetItemRectMinVec()
+                local max = ImGui.GetItemRectMaxVec()
+                local draw = ImGui.GetWindowDrawList()
+                draw:AddRect(min, max, IM_COL32(180, 180, 180, 180), 0.5)
                 ImGui.PopStyleVar(1)
             end,
         },
@@ -1007,7 +1008,8 @@ function Ui.RenderForceTargetList(showPopout)
     }
 
     Ui.RenderTableData("XTargs", tableColumns,
-        bit32.bor(ImGuiTableFlags.NoBordersInBodyUntilResize, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable,
+        bit32.bor(ImGuiTableFlags.NoBordersInBody, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags
+            .Hideable,
             ImGuiTableFlags.Reorderable),
         function(sort_specs)
             if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) or true then
@@ -1022,7 +1024,7 @@ function Ui.RenderForceTargetList(showPopout)
                         Ui.TempSettings.SortedXTIDToSlot[xtarg.ID()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
                     end
                 end
-                --[[ TEST DATA REMOVE LATER
+                --[[ TEST DATA REMOVE LATER]]
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.Me)
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(2))
                 table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(1))
@@ -1046,7 +1048,7 @@ function Ui.RenderForceTargetList(showPopout)
                     ID =
                         mq.TLO.NearestSpawn(3).ID(),
                 }
-                ]] --
+                --]] --
                 if sort_specs then sort_specs.SpecsDirty = true end
             end
 
@@ -1117,7 +1119,6 @@ function Ui.RenderForceTargetList(showPopout)
                         local max = ImVec2(
                             rowStartX + (ImGui.GetWindowWidth() - ((windowPadding.x * 2))),
                             rowStartY + ImGui.GetTextLineHeight() + (cellPadding.y * 2)
-
                         )
 
                         win_max.x = effectiveWidth
