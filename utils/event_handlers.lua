@@ -44,7 +44,8 @@ mq.event("CantSee", "You cannot see your target.", function()
                     if Combat.OkToEngage(target.ID() or 0) then
                         Core.DoCmd("/squelch /face fast")
                         -- if we are too close, lets just take a step back
-                        if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then
+                        local targDist = Targeting.GetTargetDistance()
+                        if Config:GetSetting('DoMelee') and targDist < 10 and targDist < (Targeting.GetMaxMeleeRange(target, true)) then
                             Logger.log_debug("CantSee: Can't See target (%s [%d]). Moving back 10.", target.CleanName() or "", target.ID() or 0)
                             Movement:DoStickCmd("10 moveback uw")
                             -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
