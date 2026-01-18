@@ -1615,13 +1615,15 @@ end
 --- Waits until the specified spell is ready to be cast or the maximum wait time is reached.
 --- @param spell string The name of the spell to wait for.
 --- @param maxWait number The maximum amount of time (in miliseconds) to wait for the spell to be ready.
-function Casting.WaitCastReady(spell, maxWait)
+--- @param ignoreCombat? boolean Whether to ignore combat status while waiting.
+function Casting.WaitCastReady(spell, maxWait, ignoreCombat)
+    if not ignoreCombat then ignoreCombat = false end
     while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
         local startTime = mq.gettime()
         mq.delay(1)
         mq.doevents()
         Events.DoEvents()
-        if Targeting.GetXTHaterCount() > 0 then
+        if not ignoreCombat and Targeting.GetXTHaterCount() > 0 then
             Logger.log_debug("I was interruped by combat while waiting to cast %s.", spell)
             return
         end
