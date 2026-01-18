@@ -1844,8 +1844,14 @@ function Ui.RenderSettingsButton(moduleName)
 end
 
 function Ui.RenderPopAndSettings(moduleName)
+    -- The size wont change so I don't want to use CalcTextSize every frame
+    local style = ImGui.GetStyle()
+    local paddingNeeded = 35 + style.FramePadding.x
+    local cursorPos = ImGui.GetCursorPosVec()
     if Config:HaveSetting(moduleName .. "_Popped") then
         if not Config:GetSetting(moduleName .. "_Popped") then
+            paddingNeeded = paddingNeeded + style.ItemSpacing.x + 35
+            ImGui.SetCursorPos(ImVec2(cursorPos.x + (ImGui.GetWindowWidth() - paddingNeeded), cursorPos.y))
             Ui.RenderSettingsButton(moduleName)
             ImGui.SameLine()
             if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
@@ -1855,12 +1861,17 @@ function Ui.RenderPopAndSettings(moduleName)
             Ui.Tooltip(string.format("Pop the %s tab out into its own window.", moduleName))
             ImGui.NewLine()
         else
+            ImGui.SetCursorPos(ImVec2(cursorPos.x + (ImGui.GetWindowWidth() - paddingNeeded), cursorPos.y))
+
             Ui.RenderSettingsButton(moduleName)
         end
+        ImGui.SetCursorPos(cursorPos)
     else
+        ImGui.SetCursorPos(ImVec2(cursorPos.x + (ImGui.GetWindowWidth() - paddingNeeded), cursorPos.y))
         Ui.RenderSettingsButton(moduleName)
-        ImGui.NewLine()
     end
+
+    return paddingNeeded
 end
 
 function Ui.RenderThemeConfigElement(id, themeElement)

@@ -975,7 +975,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopAndSettings(self._name)
+    local controlPadding = Ui.RenderPopAndSettings(self._name)
 
     local pressed
 
@@ -983,66 +983,71 @@ function Module:Render()
     if mq.TLO.Me.Hovering() then return end
 
     if self.ModuleLoaded and Globals.SubmodulesLoaded then
-        if mq.TLO.Navigation.MeshLoaded() then
-            if Config:GetSetting('DoPull') then
-                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
+        if ImGui.BeginTable("PullControls", 3, bit32.bor(ImGuiTableFlags.NoBordersInBody), ImVec2(ImGui.GetWindowWidth() - (controlPadding + 20), 0)) then
+            if mq.TLO.Navigation.MeshLoaded() then
+                ImGui.TableNextColumn()
+                if Config:GetSetting('DoPull') then
+                    ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionPassColor)
+                end
+                if ImGui.Button(Config:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", -1, 25) then
+                    Config:SetSetting('DoPull', not Config:GetSetting('DoPull'))
+                    Module:SetRoles()
+                    self:SaveSettings(false)
+                end
+                ImGui.PopStyleColor()
+                ImGui.TableNextColumn()
+                if Module.TempSettings.PausePulls then
+                    ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionPassColor)
+                end
+                if ImGui.Button(Module.TempSettings.PausePulls and "Unpause Pulls" or "Pause Pulls", -1, 25) then
+                    Module.TempSettings.PausePulls = not Module.TempSettings.PausePulls
+                end
+                ImGui.PopStyleColor()
+                Ui.Tooltip("Pausing pulls will keep the pull settings (camp, locs, etc), but it will not attempt to pull any targets until unpaused.")
+                ImGui.TableNextColumn()
+                if mq.TLO.Target() and Targeting.TargetIsType("NPC") then
+                    if ImGui.Button("Pull Target " .. Icons.FA_BULLSEYE, -1, 25) then
+                        self:SetPullTarget()
+                    end
+                end
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionPassColor)
-            end
-            local cursorXPos = ImGui.GetCursorPosX()
-            if ImGui.Button(Config:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
-                Config:SetSetting('DoPull', not Config:GetSetting('DoPull'))
-                Module:SetRoles()
-                self:SaveSettings(false)
-            end
-            ImGui.PopStyleColor()
-            ImGui.SameLine()
-            if Module.TempSettings.PausePulls then
+                ImGui.TableNextColumn()
                 ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
+                ImGui.Button("No Nav Mesh Loaded!", ImGui.GetWindowWidth() * .3, 25)
+                ImGui.PopStyleColor()
+                ImGui.TableNextRow()
+            end
+
+            local campData = Modules:ExecModule("Movement", "GetCampData")
+
+            --            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
+            ImGui.TableNextColumn()
+            if campData.returnToCamp then
+                if ImGui.Button("Break Group Camp", -1, 18) then
+                    Core.DoGroupOrRaidCmd("/rgl campoff")
+                end
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionPassColor)
+                if ImGui.Button("Set Group Camp Here", -1, 18) then
+                    Core.DoGroupOrRaidCmd("/rgl campon")
+                end
             end
-            if ImGui.Button(Module.TempSettings.PausePulls and "Unpause Pulls" or "Pause Pulls", ImGui.GetWindowWidth() * .3, 25) then
-                Module.TempSettings.PausePulls = not Module.TempSettings.PausePulls
+            ImGui.TableNextColumn()
+            if campData.returnToCamp then
+                if ImGui.Button("Break My Camp", -1, 18) then
+                    Core.DoCmd("/rgl campoff")
+                end
+            else
+                if ImGui.Button("Set My Camp Here", -1, 18) then
+                    Core.DoCmd("/rgl campon")
+                end
             end
-            ImGui.PopStyleColor()
-            Ui.Tooltip("Pausing pulls will keep the pull settings (camp, locs, etc), but it will not attempt to pull any targets until unpaused.")
-        else
-            ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
-            ImGui.Button("No Nav Mesh Loaded!", ImGui.GetWindowWidth() * .3, 25)
-            ImGui.PopStyleColor()
+            --ImGui.PopStyleVar(1)
+            ImGui.EndTable()
         end
-
-        if mq.TLO.Target() and Targeting.TargetIsType("NPC") then
-            ImGui.SameLine()
-            if ImGui.Button("Pull Target " .. Icons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
-                self:SetPullTarget()
-            end
-        end
-
-        local campData = Modules:ExecModule("Movement", "GetCampData")
-
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
-        if campData.returnToCamp then
-            if ImGui.Button("Break Group Camp", ImGui.GetWindowWidth() * .3, 18) then
-                Core.DoGroupOrRaidCmd("/rgl campoff")
-            end
-        else
-            if ImGui.Button("Set Group Camp Here", ImGui.GetWindowWidth() * .3, 18) then
-                Core.DoGroupOrRaidCmd("/rgl campon")
-            end
-        end
-        ImGui.SameLine()
-        if campData.returnToCamp then
-            if ImGui.Button("Break My Camp", ImGui.GetWindowWidth() * .3, 18) then
-                Core.DoCmd("/rgl campoff")
-            end
-        else
-            if ImGui.Button("Set My Camp Here", ImGui.GetWindowWidth() * .3, 18) then
-                Core.DoCmd("/rgl campon")
-            end
-        end
-        ImGui.PopStyleVar(1)
 
         local pullMode = Config:GetSetting('PullMode')
         pullMode, pressed = ImGui.Combo("Pull Mode", pullMode, self.Constants.PullModes, #self.Constants.PullModes)
