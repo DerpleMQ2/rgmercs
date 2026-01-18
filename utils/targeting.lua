@@ -171,6 +171,17 @@ function Targeting.GetTargetDead(target)
     return useTarget.Dead()
 end
 
+--- Checks if the specified target is in Line Of Sight.
+--- @param target MQTarget The name or identifier of the target to check.
+--- @return boolean Returns true if the target is in LoS, false otherwise.
+function Targeting.GetTargetLOS(target)
+    local useTarget = target
+    if not useTarget then useTarget = mq.TLO.Target end
+    if not useTarget or not useTarget() then return false end
+
+    return useTarget.LineOfSight()
+end
+
 --- Retrieves the name of the given target.
 --- @param target MQTarget? The target whose name is to be retrieved.
 --- @return string The name of the target.

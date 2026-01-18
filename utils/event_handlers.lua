@@ -43,6 +43,7 @@ mq.event("CantSee", "You cannot see your target.", function()
                     Logger.log_debug("CantSee: \ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
                     if Combat.OkToEngage(target.ID() or 0) then
                         Core.DoCmd("/squelch /face fast")
+                        -- if we are too close, lets just take a step back
                         if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then
                             Logger.log_debug("CantSee: Can't See target (%s [%d]). Moving back 10.", target.CleanName() or "", target.ID() or 0)
                             Movement:DoStickCmd("10 moveback uw")
@@ -51,7 +52,9 @@ mq.event("CantSee", "You cannot see your target.", function()
                             mq.delay(500, function() return not mq.TLO.Me.Moving() end)
                             Movement:DoStickCmd("off")
                             Movement:ClearLastStickTimer()
-                        else
+                        end
+                        -- if we aren't too close, or still dont have LoS, lets nav, as long as the mob is still around
+                        if target.ID() > 0 and not Targeting.GetTargetDead(target) and not Targeting.GetTargetLOS(target) then
                             local desiredDistance = (target.MaxRangeTo() or 0) * 0.7
                             if not Config:GetSetting('DoMelee') then
                                 desiredDistance = Targeting.GetTargetDistance() * .95
