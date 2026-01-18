@@ -1836,23 +1836,30 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
     return setting, new_loadout, any_pressed
 end
 
-function Ui.RenderPopAndSettings(moduleName)
+function Ui.RenderSettingsButton(moduleName)
     if ImGui.SmallButton(Icons.MD_SETTINGS) then
         Config:OpenOptionsUIAndHighlightModule(moduleName)
     end
     Ui.Tooltip(string.format("Open the RGMercs Options with %s settings highlighted.", moduleName))
+end
 
+function Ui.RenderPopAndSettings(moduleName)
     if Config:HaveSetting(moduleName .. "_Popped") then
-        ImGui.SameLine()
-
         if not Config:GetSetting(moduleName .. "_Popped") then
+            Ui.RenderSettingsButton(moduleName)
+            ImGui.SameLine()
             if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
                 Config:SetSetting(moduleName .. "_Popped", not Config:GetSetting(moduleName .. "_Popped"))
                 Config:GetSetting('EnableOptionsUI')
             end
             Ui.Tooltip(string.format("Pop the %s tab out into its own window.", moduleName))
             ImGui.NewLine()
+        else
+            Ui.RenderSettingsButton(moduleName)
         end
+    else
+        Ui.RenderSettingsButton(moduleName)
+        ImGui.NewLine()
     end
 end
 

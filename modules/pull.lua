@@ -996,12 +996,12 @@ function Module:Render()
                 self:SaveSettings(false)
             end
             ImGui.PopStyleColor()
+            ImGui.SameLine()
             if Module.TempSettings.PausePulls then
                 ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
             else
                 ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionPassColor)
             end
-            ImGui.SetCursorPosX(cursorXPos)
             if ImGui.Button(Module.TempSettings.PausePulls and "Unpause Pulls" or "Pause Pulls", ImGui.GetWindowWidth() * .3, 25) then
                 Module.TempSettings.PausePulls = not Module.TempSettings.PausePulls
             end
