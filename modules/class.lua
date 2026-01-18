@@ -1017,7 +1017,7 @@ function Module:HealById(id)
 
     local healTarget = mq.TLO.Spawn(id)
 
-    if not healTarget or not healTarget() or healTarget.PctHPs() <= 0 or healTarget.PctHPs() == 100 then
+    if not healTarget or not healTarget() or Targeting.GetTargetPctHPs(healTarget) <= 0 or Targeting.GetTargetPctHPs(healTarget) == 100 then
         Logger.log_verbose("\ayHealById(%d):: Target is dead fully healed or in another zone bailing!", id)
         return
     end
