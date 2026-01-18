@@ -18,7 +18,7 @@ Targeting.SafeTargetCache   = {}
 function Targeting.IsNamed(spawn)
     if not spawn() then return false end
     if (spawn.Level() or 0) < Config:GetSetting("NamedMinLevel") then return false end
-    return Modules:ExecModule("Named", "IsNamed", spawn)
+    return Modules:ExecModule("Named", "IsNamed", spawn) or false
 end
 
 --- Sets the target.
