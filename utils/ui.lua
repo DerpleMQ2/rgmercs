@@ -22,7 +22,13 @@ local Ui                = { _version = '1.0', _name = "Ui", _author = 'Derple', 
 Ui.__index              = Ui
 Ui.ConfigFilter         = ""
 Ui.ShowDownNamed        = false
-Ui.TempSettings         = {}
+
+Ui.TempSettings         = {
+    SortedXT = {},
+    SortedXTIDToSlot = {},
+    SortedXTIDs = Set.new({}),
+}
+
 Ui.ModalText            = ""
 Ui.ModalTitle           = "##UI Modal"
 Ui.ModalPrompt          = ""
@@ -201,9 +207,9 @@ end
 --- It does not take any parameters and does not return any values.
 function Ui.RenderAssistList()
     if Config:GetSetting('UseAssistList') then
-        ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Green)
+        ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionPassColor)
     else
-        ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.Red)
+        ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.ConditionFailColor)
     end
     ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(20, 3))
 
@@ -221,14 +227,11 @@ function Ui.RenderAssistList()
         ImGui.PopID()
     end
     if ImGui.BeginTable("AssistList Names", 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg)) then
-        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
-
         ImGui.TableSetupColumn('ID', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 140.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 40.0)
         ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthStretch), 150.0)
         ImGui.TableSetupColumn('Controls', (ImGuiTableColumnFlags.WidthFixed), 80.0)
-        ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         for idx, name in ipairs(Config:GetSetting('AssistList') or {}) do
@@ -247,13 +250,13 @@ function Ui.RenderAssistList()
             end
             ImGui.TableNextColumn()
             if spawn() and spawn.ID() > 0 then
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
                 ImGui.Text(tostring(math.ceil(spawn.Distance())))
                 ImGui.PopStyleColor()
                 ImGui.TableNextColumn()
                 Ui.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
                 ImGui.Text("0")
                 ImGui.PopStyleColor()
                 ImGui.TableNextColumn()
@@ -341,14 +344,14 @@ function Ui.RenderMercsStatus(showPopout)
     local tableColumns = {
         {
             name = string.format('Name (%d)', #Ui.TempSettings.SortedMercs),
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultSort),
-            width = 150.0,
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultSort),
+            width = 60.0,
             sort = function(_, a, b)
                 return a or "", b or ""
             end,
             render = function(peer, data)
                 if data.Data.Zone ~= mq.TLO.Zone.Name() then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionDisabledColor)
                 end
 
                 local name, _ = Comms.GetCharAndServerFromPeer(peer)
@@ -384,7 +387,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 if data.Data.Server ~= mq.TLO.EverQuest.Server() then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionDisabledColor)
                 end
 
                 ImGui.Text(data.Data.Server or "Unknown")
@@ -395,9 +398,145 @@ function Ui.RenderMercsStatus(showPopout)
             end,
         },
         {
-            name = 'HP %',
-            flags = ImGuiTableColumnFlags.WidthStretch,
+            name = 'Zone',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
             width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Zone or "", data_b.Data.Zone or ""
+            end,
+            render = function(peer, data)
+                if data.Data.ZoneShortName == mq.TLO.Zone.ShortName() then
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionPassColor)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionFailColor)
+                end
+
+                ImGui.Text(string.format("%s", data.Data.Zone or "None"))
+
+                ImGui.PopStyleColor()
+            end,
+        },
+        {
+            name = 'Zone Short Name',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 80.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.ZoneShortName or "", data_b.Data.ZoneShortName or ""
+            end,
+            render = function(peer, data)
+                if data.Data.ZoneShortName == mq.TLO.Zone.ShortName() then
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionPassColor)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionFailColor)
+                end
+
+                ImGui.Text(string.format("%s", data.Data.ZoneShortName or "None"))
+
+                ImGui.PopStyleColor()
+            end,
+        },
+        {
+            name = 'State',
+            flags = ImGuiTableColumnFlags.WidthFixed,
+            width = 15.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.State or "", data_b.Data.State or ""
+            end,
+            render = function(peer, data)
+                local stateColor =
+                    (data.Data.Burning and (os.time() % 2 == 0 and Colors.BurnFlashColorOne or Colors.BurnFlashColorTwo)) or
+                    (data.Data.State == "Paused" and Colors.MainButtonPausedColor) or
+                    (data.Data.State == "Combat" and Colors.MainCombatColor) or
+                    Colors.MainDowntimeColor
+
+                local stateIcon = (data.Data.Burning and Icons.FA_FIRE) or
+                    (data.Data.State == "Paused" and Icons.FA_PAUSE) or
+                    (data.Data.State == "Combat" and Icons.MD_GAMEPAD) or Icons.FA_PLAY
+
+                ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
+                local _, clicked = ImGui.Selectable(stateIcon, false)
+                ImGui.PopStyleColor()
+                if clicked then
+                    Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
+                end
+
+                Ui.MultilineTooltipWithColors({
+                    { text = "State:",                                           color = Colors.White, },
+                    {
+                        text = data.Data.State or "None",
+                        color = data.Data.State == "Paused" and Colors.MainButtonPausedColor or
+                            data.Data.State == "Combat" and Colors.MainCombatColor or
+                            Colors.MainDowntimeColor,
+                        sameLine = true,
+                    },
+                    { text = "AutoTarget:",                                      color = Colors.White, },
+                    { text = data.Data.AutoTarget or "None",                     color = Colors.LightRed,    sameLine = true, },
+                    { text = "Assist:",                                          color = Colors.White, },
+                    { text = data.Data.Assist or "None",                         color = Colors.Cyan,        sameLine = true, },
+                    { text = "Chase:",                                           color = Colors.White, },
+                    { text = data.Data.Chase or "None",                          color = Colors.Cyan,        sameLine = true, },
+                    { text = "Level:",                                           color = Colors.White, },
+                    { text = tostring(data.Data.Level) or "0",                   color = Colors.Yellow,      sameLine = true, },
+                    { text = "Exp:",                                             color = Colors.White, },
+                    { text = string.format("%0.2f%%", data.Data.PctExp) or "0%", color = Colors.LightYellow, sameLine = true, },
+                    { text = "Unspent AA:",                                      color = Colors.White, },
+                    { text = data.Data.UnSpentAA or "None",                      color = Colors.Orange,      sameLine = true, },
+                })
+            end,
+
+        },
+
+        {
+            name = "Level",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 20.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Level or 0, data_b.Data.Level or 0
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%d", data.Data.Level or 0))
+            end,
+        },
+        {
+            name = 'Unspent AA',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 40.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.UnSpentAA or 0, data_b.Data.UnSpentAA or 0
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%d", data.Data.UnSpentAA or 0))
+            end,
+        },
+        {
+            name = 'Pct Exp',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 40.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.PctExp or 0, data_b.Data.PctExp or 0
+            end,
+            render = function(peer, data)
+                Ui.RenderColoredText(
+                    Ui.GetPercentageColor(data.Data.PctExp or 0, { Colors.LightGreen, Colors.Orange, Colors.LightRed, }),
+                    data.Data.HPs and "%6.2f%%" or "", data.Data.PctExp or 0)
+            end,
+        },
+        {
+            name = 'HP %',
+            flags = ImGuiTableColumnFlags.WidthFixed,
+            width = 20.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
@@ -412,8 +551,8 @@ function Ui.RenderMercsStatus(showPopout)
         },
         {
             name = 'Mana %',
-            flags = ImGuiTableColumnFlags.WidthStretch,
-            width = 80.0,
+            flags = ImGuiTableColumnFlags.WidthFixed,
+            width = 20.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
@@ -428,8 +567,8 @@ function Ui.RenderMercsStatus(showPopout)
         },
         {
             name = 'End %',
-            flags = ImGuiTableColumnFlags.WidthStretch,
-            width = 80.0,
+            flags = ImGuiTableColumnFlags.WidthFixed,
+            width = 20.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
@@ -443,9 +582,76 @@ function Ui.RenderMercsStatus(showPopout)
 
         },
         {
+            name = "Distance",
+            flags = ImGuiTableColumnFlags.WidthFixed,
+            width = 40.0,
+            sort = function(mercs, a, b)
+                local data_a = (mq.TLO.Zone.Name() == mercs[a].Data.Zone and (mq.TLO.Spawn(mercs[a].Data.ID).Distance() or 999) or 999)
+                local data_b = (mq.TLO.Zone.Name() == mercs[b].Data.Zone and (mq.TLO.Spawn(mercs[b].Data.ID).Distance() or 999) or 999)
+
+                if data_a == data_b then
+                    return a, b
+                end
+
+                return data_a, data_b
+            end,
+            render = function(peer, data)
+                local distance = mq.TLO.Zone.Name() == data.Data.Zone and mq.TLO.Spawn(data.Data.ID).Distance() or 999
+                local distString = distance == 999 and "" or string.format("%6.2f", distance)
+                ImGui.PushStyleColor(ImGuiCol.Text,
+                    distance == 999 and Colors.ConditionDisabledColor or
+                    distance > 75 and Colors.ConditionFailColor or
+                    distance > 35 and Colors.ConditionMidColor or
+                    Colors.ConditionPassColor
+
+                )
+                ImGui.Text(distString)
+                ImGui.PopStyleColor()
+            end,
+        },
+        {
+            name = 'Chase',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 60.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Chase or "", data_b.Data.Chase or ""
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.Chase or "None"))
+            end,
+        },
+        {
+            name = 'Assist',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 60.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.Assist or "", data_b.Data.Assist or ""
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.Assist or "None"))
+            end,
+        },
+        {
+            name = 'AutoTarget',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 120.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.AutoTarget or "", data_b.Data.AutoTarget or ""
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%s", data.Data.AutoTarget or "None"))
+            end,
+        },
+        {
             name = 'Target',
             flags = ImGuiTableColumnFlags.WidthStretch,
-            width = 80.0,
+            width = 120.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
@@ -472,7 +678,7 @@ function Ui.RenderMercsStatus(showPopout)
         },
         {
             name = 'Pet',
-            flags = ImGuiTableColumnFlags.WidthStretch,
+            flags = ImGuiTableColumnFlags.WidthFixed,
             width = 80.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
@@ -481,15 +687,10 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 if data.Data.PetID > 0 then
-                    ImGui.PushStyleColor(ImGuiCol.Text, ConColorsNameToVec4[data.Data.PetConColor])
-                    local buttonPos = ImGui.GetCursorPosVec()
-                    if ImGui.InvisibleButton("##pet_btn_" .. tostring(peer), ImVec2(ICON_SIZE, ImGui.GetTextLineHeight())) then
-                        Core.DoCmd("/mqtarget id %d", data.Data.PetID)
-                    end
+                    ImGui.PushStyleColor(ImGuiCol.Text, (ConColorsNameToVec4[data.Data.PetConColor] or Colors.White))
 
-                    ImGui.SetCursorPos(buttonPos)
-
-                    ImGui.Text(Icons.MD_PETS)
+                    Ui.InvisibleWithButtonText("##pet_btn_" .. tostring(peer), Icons.MD_PETS, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                        function() Core.DoCmd("/mqtarget id %d", data.Data.PetID) end)
 
                     ImGui.PopStyleColor()
 
@@ -509,225 +710,9 @@ function Ui.RenderMercsStatus(showPopout)
 
         },
         {
-            name = 'State',
-            flags = ImGuiTableColumnFlags.WidthStretch,
-            width = 80.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.State or "", data_b.Data.State or ""
-            end,
-            render = function(peer, data)
-                local stateColor =
-                    (data.Data.Burning and (os.time() % 2 == 0 and Colors.Orange or Colors.Red)) or
-                    (data.Data.State == "Paused" and Colors.Yellow) or
-                    (data.Data.State == "Combat" and Colors.Red) or
-                    Colors.Green
-
-                local stateIcon = (data.Data.Burning and Icons.FA_FIRE) or
-                    (data.Data.State == "Paused" and Icons.FA_PAUSE) or
-                    (data.Data.State == "Combat" and Icons.MD_GAMEPAD) or Icons.FA_PLAY
-
-                ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
-                local _, clicked = ImGui.Selectable(stateIcon, false)
-                ImGui.PopStyleColor()
-                if clicked then
-                    Comms.SendPeerDoCmd(peer, "/rgl %s", data.Data.State == "Paused" and "unpause" or "pause")
-                end
-
-                Ui.MultilineTooltipWithColors({
-                    { text = "State:",                                           color = Colors.White, },
-                    {
-                        text = data.Data.State or "None",
-                        color = data.Data.State == "Paused" and Colors.Yellow or
-                            data.Data.State == "Combat" and Colors.Red or
-                            Colors.Green,
-                        sameLine = true,
-                    },
-                    { text = "AutoTarget:",                                      color = Colors.White, },
-                    { text = data.Data.AutoTarget or "None",                     color = Colors.LightRed,    sameLine = true, },
-                    { text = "Assist:",                                          color = Colors.White, },
-                    { text = data.Data.Assist or "None",                         color = Colors.Cyan,        sameLine = true, },
-                    { text = "Chase:",                                           color = Colors.White, },
-                    { text = data.Data.Chase or "None",                          color = Colors.Cyan,        sameLine = true, },
-                    { text = "Level:",                                           color = Colors.White, },
-                    { text = tostring(data.Data.Level) or "0",                   color = Colors.Yellow,      sameLine = true, },
-                    { text = "Exp:",                                             color = Colors.White, },
-                    { text = string.format("%0.2f%%", data.Data.PctExp) or "0%", color = Colors.LightYellow, sameLine = true, },
-                    { text = "Unspent AA:",                                      color = Colors.White, },
-                    { text = data.Data.UnSpentAA or "None",                      color = Colors.Orange,      sameLine = true, },
-                })
-            end,
-
-        },
-        {
-            name = 'Last Update',
-            flags = ImGuiTableColumnFlags.WidthStretch,
-            width = 40.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.LastUpdate or 0, data_b.Data.LastUpdate or 0
-            end,
-            render = function(peer, data)
-                ImGui.Text(string.format("%ds", os.time() - (data.LastHeartbeat or 0)))
-            end,
-
-        },
-        {
-            name = "Distance",
-            flags = ImGuiTableColumnFlags.WidthStretch,
-            width = 80.0,
-            sort = function(mercs, a, b)
-                local data_a = (mq.TLO.Zone.Name() == mercs[a].Data.Zone and (mq.TLO.Spawn(mercs[a].Data.ID).Distance() or 999) or 999)
-                local data_b = (mq.TLO.Zone.Name() == mercs[b].Data.Zone and (mq.TLO.Spawn(mercs[b].Data.ID).Distance() or 999) or 999)
-
-                if data_a == data_b then
-                    return a, b
-                end
-
-                return data_a, data_b
-            end,
-            render = function(peer, data)
-                local distance = mq.TLO.Zone.Name() == data.Data.Zone and mq.TLO.Spawn(data.Data.ID).Distance() or 999
-                local distString = distance == 999 and "" or string.format("%6.2f", distance)
-                ImGui.PushStyleColor(ImGuiCol.Text,
-                    distance == 999 and Colors.Grey or
-                    distance > 75 and Colors.LightRed or
-                    distance > 50 and Colors.Orange or
-                    distance > 25 and Colors.Yellow or
-                    Colors.LightGreen
-                )
-                ImGui.Text(distString)
-                ImGui.PopStyleColor()
-            end,
-        },
-        {
-            name = "Level",
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 60.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.Level or 0, data_b.Data.Level or 0
-            end,
-            render = function(peer, data)
-                ImGui.Text(string.format("%d", data.Data.Level or 0))
-            end,
-        },
-        {
-            name = 'Chase',
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 80.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.Chase or "", data_b.Data.Chase or ""
-            end,
-            render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.Chase or "None"))
-            end,
-        },
-        {
-            name = 'Assist',
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 80.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.Assist or "", data_b.Data.Assist or ""
-            end,
-            render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.Assist or "None"))
-            end,
-        },
-        {
-            name = 'AutoTarget',
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 120.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.AutoTarget or "", data_b.Data.AutoTarget or ""
-            end,
-            render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.AutoTarget or "None"))
-            end,
-        },
-        {
-            name = 'Zone',
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 120.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.Zone or "", data_b.Data.Zone or ""
-            end,
-            render = function(peer, data)
-                if data.Data.ZoneShortName == mq.TLO.Zone.ShortName() then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.LightGreen)
-                else
-                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.LightRed)
-                end
-
-                ImGui.Text(string.format("%s", data.Data.Zone or "None"))
-
-                ImGui.PopStyleColor()
-            end,
-        },
-        {
-            name = 'Zone Short Name',
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 120.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.ZoneShortName or "", data_b.Data.ZoneShortName or ""
-            end,
-            render = function(peer, data)
-                if data.Data.ZoneShortName == mq.TLO.Zone.ShortName() then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.LightGreen)
-                else
-                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.LightRed)
-                end
-
-                ImGui.Text(string.format("%s", data.Data.ZoneShortName or "None"))
-
-                ImGui.PopStyleColor()
-            end,
-        },
-        {
-            name = 'Unspent AA',
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 80.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.UnSpentAA or 0, data_b.Data.UnSpentAA or 0
-            end,
-            render = function(peer, data)
-                ImGui.Text(string.format("%d", data.Data.UnSpentAA or 0))
-            end,
-        },
-        {
-            name = 'Pct Exp',
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 80.0,
-            sort = function(mercs, a, b)
-                local data_a = mercs[a]
-                local data_b = mercs[b]
-                return data_a.Data.PctExp or 0, data_b.Data.PctExp or 0
-            end,
-            render = function(peer, data)
-                Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.PctExp or 0, { Colors.LightGreen, Colors.Orange, Colors.LightRed, }),
-                    data.Data.HPs and "%6.2f%%" or "", data.Data.PctExp or 0)
-            end,
-        },
-        {
             name = 'Pet ID',
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 60.0,
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 40.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
@@ -739,8 +724,8 @@ function Ui.RenderMercsStatus(showPopout)
         },
         {
             name = "Pet HPs",
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 80.0,
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 40.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
@@ -752,8 +737,8 @@ function Ui.RenderMercsStatus(showPopout)
         },
         {
             name = "Pet Level",
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 60.0,
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 15.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
@@ -766,7 +751,7 @@ function Ui.RenderMercsStatus(showPopout)
         {
             name = "Pet Name",
             flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
-            width = 120.0,
+            width = 80.0,
             sort = function(mercs, a, b)
                 local data_a = mercs[a]
                 local data_b = mercs[b]
@@ -789,9 +774,25 @@ function Ui.RenderMercsStatus(showPopout)
                 ImGui.Text(data.Data.PetID > 0 and string.format("%s", data.Data.PetTarget or "None") or "")
             end,
         },
+        {
+            name = 'Last Update',
+            flags = ImGuiTableColumnFlags.WidthFixed,
+            width = 15.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.LastUpdate or 0, data_b.Data.LastUpdate or 0
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%ds", os.time() - (data.LastHeartbeat or 0)))
+            end,
+
+        },
     }
 
-    Ui.RenderTableData("MercStatusTable", tableColumns, function(sort_specs)
+    Ui.RenderTableData("MercStatusTable", tableColumns,
+        bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable),
+        function(sort_specs)
             local mercs = Comms.GetAllPeerHeartbeats(true)
 
             if #Ui.TempSettings.SortedMercs ~= Tables.GetTableSize(mercs) then
@@ -842,14 +843,18 @@ function Ui.RenderForceTargetList(showPopout)
         ImGui.NewLine()
     end
 
-    if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
-        Globals.ForceTargetID = 0
-    end
-    ImGui.SameLine()
+    if Config:GetSetting('ShowFTControls') then
+        if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .4, 18) then
+            Globals.ForceTargetID = 0
+        end
+        ImGui.SameLine()
 
-    if ImGui.Button("Clear Ignored Targets", ImGui.GetWindowWidth() * .3, 18) then
-        Globals.IgnoredTargetIDs = Set.new({})
+        if ImGui.Button("Clear Ignored Targets", ImGui.GetWindowWidth() * .4, 18) then
+            Globals.IgnoredTargetIDs = Set.new({})
+        end
     end
+
+    local iconWidth = ImGui.CalcTextSizeVec(Icons.MD_DO_NOT_DISTURB).x + ImGui.GetStyle().ItemInnerSpacing.x * 2
 
     local tableColumns = {
         {
@@ -861,46 +866,78 @@ function Ui.RenderForceTargetList(showPopout)
                     (Globals.ForceTargetID > 0 and (Globals.ForceTargetID == a.ID() and 1 or 0) or 0),
                     (Globals.ForceTargetID > 0 and (Globals.ForceTargetID == b.ID() and 1 or 0) or 0)
             end,
-            render = function(xtarg, _)
+            render = function(xtarg, i)
+                local checked = Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID()
+
                 if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, Ui.GetConHighlightBySpawn(xtarg))
                 end
-                if Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID() then
-                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
-                    ImGui.Text(Icons.MD_STAR)
-                    ImGui.PopStyleColor(1)
+
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
+
+                if not checked then
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
                 else
-                    ImGui.Text("")
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
                 end
+
+                Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.FA_ARROW_RIGHT, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                    function() if checked then Globals.ForceTargetID = 0 else Globals.ForceTargetID = xtarg.ID() end end)
+
+                ImGui.PopStyleColor(1)
+
+                local min = ImGui.GetItemRectMinVec()
+                local max = ImGui.GetItemRectMaxVec()
+                local draw = ImGui.GetWindowDrawList()
+                draw:AddRect(min, max, IM_COL32(180, 180, 180, 180), 0.5)
+                ImGui.PopStyleVar(1)
             end,
         },
         {
-            name = "Ig",
+            name = "IT",
             flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
             width = 16.0,
             sort = function(a, b)
                 return Globals.IgnoredTargetIDs:contains(a.ID()) and 1 or 0, Globals.IgnoredTargetIDs:contains(b.ID()) and 1 or 0
             end,
-            render = function(xtarg, _)
-                local checked, pressed = ImGui.Checkbox("", Globals.IgnoredTargetIDs:contains(xtarg.ID()))
-                if pressed then
-                    if checked then
-                        Globals.IgnoredTargetIDs:add(xtarg.ID())
-                    else
-                        Globals.IgnoredTargetIDs:remove(xtarg.ID())
-                    end
+            render = function(xtarg, i)
+                local checked = Globals.IgnoredTargetIDs:contains(xtarg.ID())
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
+
+                if not checked then
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
                 end
+
+                Ui.InvisibleWithButtonText("##ig_btn_" .. tostring(i), Icons.MD_CLOSE, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
+                    function()
+                        if checked then
+                            Globals.IgnoredTargetIDs:remove(xtarg.ID())
+                        else
+                            Globals.IgnoredTargetIDs:add(xtarg.ID())
+                        end
+                    end)
+
+
+                if not checked then
+                    ImGui.PopStyleColor()
+                end
+
+                local min = ImGui.GetItemRectMinVec()
+                local max = ImGui.GetItemRectMaxVec()
+                local draw = ImGui.GetWindowDrawList()
+                draw:AddRect(min, max, IM_COL32(180, 180, 180, 180), 0.5)
+                ImGui.PopStyleVar(1)
             end,
         },
         {
             name = "XT",
-            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoSort, ImGuiTableColumnFlags.DefaultHide),
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
             width = 16.0,
             sort = function(a, b)
-                return 0, 0
+                return a.Name() and (Ui.TempSettings.SortedXTIDToSlot[a.ID()].Slot or 0) or 0, b.Name() and (Ui.TempSettings.SortedXTIDToSlot[b.ID()].Slot or 0) or 0
             end,
             render = function(xtarg, i)
-                ImGui.Text(tostring(i))
+                ImGui.Text(xtarg.Name() and (Ui.TempSettings.SortedXTIDToSlot[xtarg.ID()].Slot or "") or "")
             end,
         },
         {
@@ -915,8 +952,9 @@ function Ui.RenderForceTargetList(showPopout)
                 ImGui.PushID(string.format("##select_forcetarget_%d", i))
                 local _, clicked = ImGui.Selectable(xtarg.CleanName() or "None", false)
                 if clicked then
-                    Globals.ForceTargetID = xtarg.ID()
-                    Logger.log_debug("Forcing Target to: %s %d", xtarg.CleanName(), xtarg.ID())
+                    local newId = Globals.ForceTargetID == xtarg.ID() and 0 or xtarg.ID()
+                    Globals.ForceTargetID = newId
+                    Logger.log_debug("Forcing Target to: %s %d", newId == 0 and "None" or xtarg.CleanName(), newId)
                 end
                 ImGui.PopID()
                 ImGui.PopStyleColor(1)
@@ -938,10 +976,10 @@ function Ui.RenderForceTargetList(showPopout)
             flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
             width = 80.0,
             sort = function(a, b)
-                return math.ceil(a.PctAggro() or 0), math.ceil(b.PctAggro() or 0)
+                return math.ceil(a.ID() or 0), math.ceil(b.ID() or 0)
             end,
             render = function(xtarg, _)
-                Ui.RenderText(tostring(math.ceil(xtarg.PctAggro() or 0)))
+                Ui.RenderText(tostring(math.ceil(xtarg.ID() or 0)))
             end,
         },
         {
@@ -969,20 +1007,21 @@ function Ui.RenderForceTargetList(showPopout)
         },
     }
 
-    if not Ui.TempSettings.SortedXT then
-        Ui.TempSettings.SortedXT = {}
-        Ui.TempSettings.SortedXTIDs = Set.new({})
-    end
-
-    Ui.RenderTableData("XTargs", tableColumns, function(sort_specs)
-            if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) then
+    Ui.RenderTableData("XTargs", tableColumns,
+        bit32.bor(ImGuiTableFlags.NoBordersInBody, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags
+            .Hideable,
+            ImGuiTableFlags.Reorderable),
+        function(sort_specs)
+            if Targeting.CrossDiffXTHaterIDs(Ui.TempSettings.SortedXTIDs:toList(), true) or true then
                 Ui.TempSettings.SortedXT = {}
+                Ui.TempSettings.SortedXTIDToSlot = {}
                 Ui.TempSettings.SortedXTIDs = Targeting.GetXTHaterIDsSet(true)
                 local xtCount = mq.TLO.Me.XTarget() or 0
                 for i = 1, xtCount do
                     local xtarg = mq.TLO.Me.XTarget(i)
-                    if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceCombatID) then
+                    if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID) then
                         table.insert(Ui.TempSettings.SortedXT, xtarg)
+                        Ui.TempSettings.SortedXTIDToSlot[xtarg.ID()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
                     end
                 end
                 if sort_specs then sort_specs.SpecsDirty = true end
@@ -1007,22 +1046,69 @@ function Ui.RenderForceTargetList(showPopout)
             sort_specs.SpecsDirty = false
         end,
         function()
+            local cellPadding = ImGui.GetStyle().CellPadding
+            local windowPadding = ImGui.GetStyle().WindowPadding
+            if ImGui.TableSetColumnIndex(0) then
+                ImGui.SameLine()
+                ImGui.Text("     ")
+                Ui.Tooltip("Click here to set forced target.")
+            end
+
+            if ImGui.TableSetColumnIndex(1) then
+                ImGui.SameLine()
+                ImGui.Text("     ")
+                Ui.Tooltip("Click here to ignore this target.")
+                ImGui.TableNextRow()
+            end
+
+            local style = ImGui.GetStyle()
+            local scrollbarW = style.ScrollbarSize + style.ItemSpacing.x
+            local win_pos = ImGui.GetWindowPosVec()
+            local win_min = win_pos
+            local win_max = win_pos + ImGui.GetWindowSizeVec()
+            local hasScrollbar = ImGui.GetScrollMaxY() > 0
+            local effectiveWidth = win_max.x - (hasScrollbar and scrollbarW or 0)
+
             for i, xtarg in ipairs(Ui.TempSettings.SortedXT) do
                 ImGui.PushID(string.format("##xtarg_%d", i))
                 if xtarg.ID() > 0 then
-                    for _, colData in ipairs(tableColumns) do
+                    local checked = Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID()
+                    ImGui.TableNextRow()
+
+                    local rowStartX, rowStartY
+                    for colIdx, colData in ipairs(tableColumns) do
                         ImGui.TableNextColumn()
+                        if colIdx == 1 then
+                            local screenPosVec = ImGui.GetCursorScreenPosVec()
+                            rowStartX = screenPosVec.x
+                            rowStartY = screenPosVec.y - cellPadding.y
+                        end
+
                         colData.render(xtarg, i)
+                    end
+
+                    if checked and rowStartX then
+                        local draw_list = ImGui.GetForegroundDrawList()
+
+                        local min = ImVec2(rowStartX, rowStartY)
+                        local max = ImVec2(
+                            rowStartX + (ImGui.GetWindowWidth() - ((windowPadding.x * 2))),
+                            rowStartY + ImGui.GetTextLineHeight() + (cellPadding.y * 2)
+                        )
+
+                        win_max.x = effectiveWidth
+                        draw_list:PushClipRect(win_min, win_max, true)
+                        draw_list:AddRect(min, max, ImGui.GetColorU32(Globals.Constants.Colors.FTHighlight), 0.0, 0, 1.5)
+                        draw_list:PopClipRect()
                     end
                 end
                 ImGui.PopID()
             end
-        end
-    )
+        end)
 end
 
-function Ui.RenderTableData(tableName, tableColumns, sortFn, rowFn)
-    if ImGui.BeginTable(tableName, #tableColumns, bit32.bor(bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable))) then
+function Ui.RenderTableData(tableName, tableColumns, tableFlags, sortFn, rowFn)
+    if ImGui.BeginTable(tableName, #tableColumns, tableFlags) then
         for id, data in ipairs(tableColumns) do
             ImGui.TableSetupColumn(data.name, data.flags, data.width, id - 1)
         end
@@ -1065,13 +1151,13 @@ function Ui.RenderZoneNamed()
                 end
                 ImGui.TableNextColumn()
                 if named.Spawn() and named.Spawn.PctHPs() > 0 then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
                     ImGui.Text(Icons.FA_SMILE_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(math.ceil(named.Distance)))
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
                     ImGui.Text(Icons.FA_FROWN_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
@@ -1155,19 +1241,19 @@ function Ui.RenderRotationTableKey()
         ImGui.Text(Icons.MD_CLOSE .. ": Rotation was Skipped (Conditions Not Met)")
 
         ImGui.TableNextColumn()
-        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
         ImGui.Text(Icons.FA_SMILE_O .. ": Entry Effect was Active")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
-        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
         ImGui.Text(Icons.MD_CHECK .. ": Entry Conditions Passed")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
-        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
         ImGui.Text(Icons.FA_EXCLAMATION .. ": Entry Conditions Failed")
 
         ImGui.PopStyleColor()
@@ -1225,7 +1311,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             ImGui.Text(tostring(idx))
             if rotationState > 0 then
                 ImGui.TableNextColumn()
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
                 if idx == rotationState then
                     ImGui.Text(Icons.FA_DOT_CIRCLE_O)
                 end
@@ -1246,13 +1332,13 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             end
 
             if active == true then
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
                 ImGui.Text(Icons.FA_SMILE_O)
             elseif pass == true then
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
                 ImGui.Text(Icons.MD_CHECK)
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
                 ImGui.Text(Icons.FA_EXCLAMATION)
             end
             ImGui.PopStyleColor()
@@ -1726,24 +1812,44 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
     return setting, new_loadout, any_pressed
 end
 
-function Ui.RenderPopAndSettings(moduleName)
+function Ui.RenderSettingsButton(moduleName)
     if ImGui.SmallButton(Icons.MD_SETTINGS) then
         Config:OpenOptionsUIAndHighlightModule(moduleName)
     end
     Ui.Tooltip(string.format("Open the RGMercs Options with %s settings highlighted.", moduleName))
+end
 
+function Ui.RenderPopAndSettings(moduleName)
+    -- The size wont change so I don't want to use CalcTextSize every frame
+    local style = ImGui.GetStyle()
+    local scrollBarVis = ImGui.GetScrollMaxY() > 0
+
+    local paddingNeeded = 35 + style.FramePadding.x + (scrollBarVis and style.ScrollbarSize or 0)
+
+    local cursorPos = ImGui.GetCursorPosVec()
     if Config:HaveSetting(moduleName .. "_Popped") then
-        ImGui.SameLine()
-
         if not Config:GetSetting(moduleName .. "_Popped") then
+            paddingNeeded = paddingNeeded + style.ItemSpacing.x + 35
+            ImGui.SetCursorPos(ImVec2(cursorPos.x + (ImGui.GetWindowWidth() - paddingNeeded), cursorPos.y))
+            Ui.RenderSettingsButton(moduleName)
+            ImGui.SameLine()
             if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
                 Config:SetSetting(moduleName .. "_Popped", not Config:GetSetting(moduleName .. "_Popped"))
                 Config:GetSetting('EnableOptionsUI')
             end
             Ui.Tooltip(string.format("Pop the %s tab out into its own window.", moduleName))
             ImGui.NewLine()
+        else
+            ImGui.SetCursorPos(ImVec2(cursorPos.x + (ImGui.GetWindowWidth() - paddingNeeded), cursorPos.y))
+            Ui.RenderSettingsButton(moduleName)
         end
+        ImGui.SetCursorPos(cursorPos)
+    else
+        ImGui.SetCursorPos(ImVec2(cursorPos.x + (ImGui.GetWindowWidth() - paddingNeeded), cursorPos.y))
+        Ui.RenderSettingsButton(moduleName)
     end
+
+    return paddingNeeded
 end
 
 function Ui.RenderThemeConfigElement(id, themeElement)
@@ -2425,6 +2531,19 @@ function Ui.GetAssistWarningString()
     end
 
     Config.TempSettings.AssistWarning = warningString
+end
+
+function Ui.InvisibleWithButtonText(id, text, size, callbackFn)
+    local buttonPos = ImGui.GetCursorPosVec()
+    if ImGui.InvisibleButton(id, size or ImVec2(0, 0)) then
+        if callbackFn then
+            callbackFn()
+        end
+    end
+
+    ImGui.SetCursorPos(buttonPos)
+
+    ImGui.Text(text)
 end
 
 return Ui

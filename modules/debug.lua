@@ -127,6 +127,7 @@ function Module:Exec(scriptText)
     locals.mq          = setmetatable({}, { __index = mq, })
     locals.Config      = setmetatable({}, { __index = Config, })
     locals.Core        = setmetatable({}, { __index = Core, })
+    locals.Globals     = setmetatable({}, { __index = Globals, })
     locals.Targeting   = setmetatable({}, { __index = require('utils.targeting'), })
     locals.Casting     = setmetatable({}, { __index = require('utils.casting'), })
     locals.Combat      = setmetatable({}, { __index = require('utils.combat'), })
@@ -292,7 +293,7 @@ end
 
 function Module:Render()
     Ui.RenderPopAndSettings(self._name)
-
+    ImGui.NewLine()
     if self.ModuleLoaded then
         self:RenderEditor()
         self:RenderToolbar()

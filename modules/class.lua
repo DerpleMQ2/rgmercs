@@ -500,12 +500,10 @@ function Module:RenderQueuedAbilities()
         end
         if #self.TempSettings.QueuedAbilities > 0 then
             if ImGui.BeginTable("QueuedAbilities", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-                ImGui.PushStyleColor(ImGuiCol.Text, Config.Constantquers.Colors.Purple)
                 ImGui.TableSetupColumn('Time in Queue', (ImGuiTableColumnFlags.WidthFixed), 40.0)
                 ImGui.TableSetupColumn('Type', (ImGuiTableColumnFlags.WidthFixed), 20.0)
                 ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthFixed), 100.0)
                 ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 150.0)
-                ImGui.PopStyleColor()
                 ImGui.TableHeadersRow()
 
                 for _, queueData in pairs(self.TempSettings.QueuedAbilities) do
@@ -1019,7 +1017,7 @@ function Module:HealById(id)
 
     local healTarget = mq.TLO.Spawn(id)
 
-    if not healTarget or not healTarget() or healTarget.PctHPs() <= 0 or healTarget.PctHPs() == 100 then
+    if not healTarget or not healTarget() or Targeting.GetTargetPctHPs(healTarget) <= 0 or Targeting.GetTargetPctHPs(healTarget) == 100 then
         Logger.log_verbose("\ayHealById(%d):: Target is dead fully healed or in another zone bailing!", id)
         return
     end
@@ -1552,7 +1550,7 @@ function Module:GiveTime(combat_state)
 
         for i = 1, xtCount do
             local xtSpawn = mq.TLO.Me.XTarget(i)
-            if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and not xtSpawn.Fleeing() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceCombatID) and Globals.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
+            if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and not xtSpawn.Fleeing() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceTargetID) and Globals.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
                 Logger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(), (xtSpawn.Heading.Degrees() or 0))
                 if os.clock() - Movement:GetLastStickTimer() < 0.5 then

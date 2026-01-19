@@ -277,23 +277,21 @@ function Module:Render()
         if ImGui.CollapsingHeader("CC Target List") then
             ImGui.Indent()
             if ImGui.BeginTable("MezzedList", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
                 ImGui.TableSetupColumn('Duration', (ImGuiTableColumnFlags.WidthFixed), 150.0)
                 ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
                 ImGui.TableSetupColumn('Spell', (ImGuiTableColumnFlags.WidthStretch), 150.0)
-                ImGui.PopStyleColor()
                 ImGui.TableHeadersRow()
                 for id, data in pairs(self.TempSettings.MezTracker) do
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(id))
                     ImGui.TableNextColumn()
                     if data.duration > 30000 then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Green)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
                     elseif data.duration > 15000 then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Yellow)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionMidColor)
                     else
-                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Red)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
                     end
                     ImGui.Text(tostring(Strings.FormatTime(math.max(0, data.duration / 1000))))
                     ImGui.PopStyleColor()
@@ -312,10 +310,8 @@ function Module:Render()
         if ImGui.CollapsingHeader("Immune Target List") then
             ImGui.Indent()
             if ImGui.BeginTable("Immune", 2, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
-                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
                 ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 250.0)
-                ImGui.PopStyleColor()
                 ImGui.TableHeadersRow()
                 for id, data in pairs(self.TempSettings.MezImmune) do
                     ImGui.TableNextColumn()
@@ -569,9 +565,11 @@ function Module:AEMezCheck()
     -- Call MezNow and pass the AE flag and allow it to use the AA if the Spell isn't ready.
     Logger.log_debug("\awNOTICE:\ax Re-targeting to our main assist's mob.")
 
-    if Combat.FindBestAutoTargetCheck() then
+    if not Globals.BackOffFlag then
         Combat.FindBestAutoTarget()
-        self:MezNow(Globals.AutoTargetID, true, true)
+        if Globals.AutoTargetID > 0 then
+            self:MezNow(Globals.AutoTargetID, true, true)
+        end
     end
 
     mq.doevents('ImmuneMez')

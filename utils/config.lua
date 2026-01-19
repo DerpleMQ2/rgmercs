@@ -65,12 +65,12 @@ Config.FAQ                                               = {
     },
     [3] = {
         Question = "How do I force auto combat on a target that isn't aggressive or isn't hostile?",
-        Answer = "This is accomplished with the /rgl forcecombat <id?> command:\n\n" ..
+        Answer = "This is accomplished with the /rgl forcetarget <id?> command:\n\n" ..
             "The command accepts a target ID, and will fall back to your current target's ID if one is not supplied.\n\n" ..
-            "When commanded, the MA will add the target to the first XT slot and immediately force target.\n\n" ..
-            "The force combat state will be broadcasted to peers via actors, and will allow the target to check as valid even when the 'Target Non-Aggressives' setting is disabled." ..
+            "When commanded, the PC will add the target to the first XT slot and immediately force target.\n\n" ..
+            "The force target state can be issued to any PC, but if issued by the MA, it will be broadcasted to peers via actors, and will allow the target to check as valid even when the 'Target Non-Aggressives' setting is disabled." ..
             " Actors may need to be configured in MQ if all peers are not on the same PC. As an alternative, the setting above can be enabled temporarily.\n\n" ..
-            "Only one Force Combat target can be directed at a time, and the state will be cleared automatically. It can be cleared manually with the /rgl forcecombatclear command.",
+            "Only one Force Target can be directed at a time, and the state will be cleared automatically. It can be cleared manually with the /rgl forcetargetclear command.",
         Settings_Used = "",
     },
 }
@@ -584,7 +584,7 @@ Config.DefaultConfig                                     = {
         Category = "Targeting Behavior",
         Index = 4,
         Tooltip =
-        "Allow targeting of NPCs that are not aggressive (hostile) if they are targeted by our MA.\nNote: If combat has been forced on the target (by the MA via the forcecombat command), the target will also be allowed.",
+        "Allow targeting of NPCs that are not aggressive (hostile) if they are targeted by our MA.\nNote: If combat has been forced on the target (via a forcetarget command by this PC or the MA), the target will also be allowed.",
         Default = false,
         ConfigType = "Advanced",
     },
@@ -1458,7 +1458,7 @@ Config.DefaultConfig                                     = {
 
 
     -- [ UI ] --
-    ['DisplayManualTarget']         = {
+    ['DisplayManualTarget']  = {
         DisplayName = "Display Manual Target",
         Group = "General",
         Header = "Interface",
@@ -1467,7 +1467,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
         Default = false,
     },
-    ['AlwaysShowMiniButton']        = {
+    ['AlwaysShowMiniButton'] = {
         DisplayName = "Always Show Mini Button",
         Group = "General",
         Header = "Interface",
@@ -1477,7 +1477,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Normal",
     },
-    ['EscapeMinimizes']             = {
+    ['EscapeMinimizes']      = {
         DisplayName = "Escape Closes Main Window",
         Group = "General",
         Header = "Interface",
@@ -1487,7 +1487,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Normal",
     },
-    ['ShowDebugTiming']             = {
+    ['ShowDebugTiming']      = {
         DisplayName = "Show Rotation Debug Timing",
         Group = "General",
         Header = "Interface",
@@ -1497,7 +1497,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Enable displaying the timing of each rotation step.",
         Default = false,
     },
-    ['BgOpacity']                   = {
+    ['BgOpacity']            = {
         DisplayName = "Background Opacity",
         Group = "General",
         Header = "Interface",
@@ -1508,7 +1508,7 @@ Config.DefaultConfig                                     = {
         Min = 20,
         Max = 100,
     },
-    ['FrameEdgeRounding']           = {
+    ['FrameEdgeRounding']    = {
         DisplayName = "Frame Edge Rounding",
         Group = "General",
         Header = "Interface",
@@ -1519,7 +1519,7 @@ Config.DefaultConfig                                     = {
         Min = 0,
         Max = 50,
     },
-    ['ScrollBarRounding']           = {
+    ['ScrollBarRounding']    = {
         DisplayName = "Scroll Bar Rounding",
         Group = "General",
         Header = "Interface",
@@ -1530,7 +1530,7 @@ Config.DefaultConfig                                     = {
         Min = 0,
         Max = 50,
     },
-    ['WarnCombatPaused']            = {
+    ['WarnCombatPaused']     = {
         DisplayName = "Warn on Combat While Paused",
         Group = "General",
         Header = "Interface",
@@ -1539,233 +1539,273 @@ Config.DefaultConfig                                     = {
         Tooltip = "If we gain aggro while paused, display a warning in the chat window.",
         Default = true,
     },
-    ['Red']                         = {
-        DisplayName = "UI Color - Red",
+    ['ShowFTControls']       = {
+        DisplayName = "Show ForceTarget Controls",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 10,
+        Tooltip = "Show ForceTarget controls to clear/set forced targets.",
+        Default = false, -- defaulted to false just to annoy Algar
+    },
+
+
+    -- [ UI Colors ] --
+    ['MainButtonUnpausedColor']     = {
+        DisplayName = "Main Button Unpaused",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 11,
-        Tooltip = "Red component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Red),
+        Tooltip = "Color used for the main button when RGMercs is unpaused.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.MainButtonUnpausedColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['LightRed']                    = {
-        DisplayName = "UI Color - Light Red",
+    ['MainButtonPausedColor']       = {
+        DisplayName = "Main Button Paused",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 12,
-        Tooltip = "Red component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightRed),
+        Tooltip = "Color used for the main button when RGMercs is paused.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.MainButtonPausedColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['Green']                       = {
-        DisplayName = "UI Color - Green",
+    ['ConditionPassColor']          = {
+        DisplayName = "Condition Pass",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 13,
-        Tooltip = "Green component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Green),
+        Tooltip = "Color used to display a passing condition",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.ConditionPassColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['LightGreen']                  = {
-        DisplayName = "UI Color - Light Green",
+    ['ConditionMidColor']           = {
+        DisplayName = "Condition Mid (between pass/fail)",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 14,
-        Tooltip = "Green component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightGreen),
+        Tooltip = "Color used to display an unevaluated condition",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.ConditionMidColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['Blue']                        = {
-        DisplayName = "UI Color - Blue",
+    ['ConditionFailColor']          = {
+        DisplayName = "Condition Fail",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 15,
-        Tooltip = "Blue component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Blue),
+        Tooltip = "Color used to display a failing condition",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.ConditionFailColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['LightBlue']                   = {
-        DisplayName = "UI Color - Light Blue",
+    ['ConditionDisabledColor']      = {
+        DisplayName = "Condition Disabled",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 16,
-        Tooltip = "Blue component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightBlue),
+        Tooltip = "Color used to display a disabled condition",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.ConditionDisabledColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['Yellow']                      = {
-        DisplayName = "UI Color - Yellow",
+    ['MainCombatColor']             = {
+        DisplayName = "Combat",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 17,
-        Tooltip = "Yellow component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Yellow),
+        Tooltip = "Color used for the UI elements when in combat.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.MainCombatColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['LightYellow']                 = {
-        DisplayName = "UI Color - Light Yellow",
+    ['MainDowntimeColor']           = {
+        DisplayName = "Downtime",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 18,
-        Tooltip = "Yellow component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightYellow),
+        Tooltip = "Color used for the main window border when out of combat.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.MainDowntimeColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['Purple']                      = {
-        DisplayName = "UI Color - Purple",
+
+    ['SearchHighlightColor']        = {
+        DisplayName = "Search Highlight",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 19,
-        Tooltip = "Purple component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Purple),
+        Tooltip = "Color used to highlight search terms in various windows.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.SearchHighlightColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['LightPurple']                 = {
-        DisplayName = "UI Color - Light Purple",
+    ['AssistSpawnCloseColor']       = {
+        DisplayName = "Assist Spawn Text If Close",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 20,
-        Tooltip = "Purple component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightPurple),
+        Tooltip = "Color used to display an assist spawn that is close to us.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.AssistSpawnCloseColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['Orange']                      = {
-        DisplayName = "UI Color - Orange",
+    ['AssistSpawnFarColor']         = {
+        DisplayName = "Assist Spawn Text If Far",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 21,
-        Tooltip = "Orange component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Orange),
+        Tooltip = "Color used to display an assist spawn that is far from us.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.AssistSpawnFarColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['LightOrange']                 = {
-        DisplayName = "UI Color - Light Orange",
+    ['BurnFlashColorOne']           = {
+        DisplayName = "Burn Burn Flash Color One",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 22,
-        Tooltip = "Orange component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightOrange),
+        Tooltip = "First of two colors to use when flashing burn status message.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.BurnFlashColorOne),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['Grey']                        = {
-        DisplayName = "UI Color - Grey",
+    ['BurnFlashColorTwo']           = {
+        DisplayName = "Burn Burn Flash Color Two",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 23,
-        Tooltip = "Grey component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Grey),
+        Tooltip = "Second of two colors to use when flashing burn status message.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.BurnFlashColorTwo),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['LightGrey']                   = {
-        DisplayName = "UI Color - Light Grey",
+    ['FTHighlight']                 = {
+        DisplayName = "ForceTarget Highlight",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 24,
-        Tooltip = "Grey component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.LightGrey),
+        Tooltip = "Force Target Highlight border in the Force Target Window.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.FTHighlight),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['Cyan']                        = {
-        DisplayName = "UI Color - Cyan",
+    ['CharmReasonColor']            = {
+        DisplayName = "Charm Immune Reason Text",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 25,
-        Tooltip = "Cyan component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Cyan),
+        Tooltip = "Color used to display the reason we cannot charm a target.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.CharmReasonColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['White']                       = {
-        DisplayName = "UI Color - White",
+    ['FAQCmdQuestionColor']         = {
+        DisplayName = "FAQ Command / Question Text",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 26,
-        Tooltip = "White component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.White),
+        Tooltip = "Color used to display commands in the FAQ section of the Help Window.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.FAQCmdQuestionColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
-    ['Black']                       = {
-        DisplayName = "UI Color - Black",
+    ['FAQUsageAnswerColor']         = {
+        DisplayName = "FAQ Usage / Answer Text",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
         Index = 27,
-        Tooltip = "Black component of the main UI color.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.Black),
+        Tooltip = "Color used to display usage and answer text in the FAQ section of the Help Window.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.FAQUsageAnswerColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
         end,
     },
+    ['FAQDescColor']                = {
+        DisplayName = "FAQ Description Text",
+        Group = "General",
+        Header = "Interface",
+        Category = "Default Colors",
+        Index = 28,
+        Tooltip = "Color used to display description text in the FAQ section of the Help Window.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.FAQDescColor),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['FAQLinkColor']                = {
+        DisplayName = "FAQ Link Text",
+        Group = "General",
+        Header = "Interface",
+        Category = "Default Colors",
+        Index = 29,
+        Tooltip = "Color used to display link text in the FAQ section of the Help Window.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.FAQLinkColor),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+
     ['UserThemeOverrideClassTheme'] = {
         DisplayName = "Override Class Theme",
         Group = "General",
         Header = "Interface",
         Category = "User Theme",
-        Index = 28,
+        Index = 40,
         Tooltip = "User the user theme even if a class theme is defined.",
         Default = true,
         Type = "Custom",
@@ -1775,7 +1815,7 @@ Config.DefaultConfig                                     = {
         Group = "General",
         Header = "Interface",
         Category = "User Theme",
-        Index = 29,
+        Index = 41,
         Tooltip = "Override any ImGui style settings with a custom theme.",
         Default = {},
         Type = "Custom",
@@ -3000,23 +3040,14 @@ function Config.ShouldPriorityFollow()
 end
 
 function Config.CacheCustomColors()
-    Globals.Constants.Colors.Red         = Tables.TableToImVec4(Config:GetSetting("Red")) or Globals.Constants.DefaultColors.Red
-    Globals.Constants.Colors.LightRed    = Tables.TableToImVec4(Config:GetSetting("LightRed")) or Globals.Constants.DefaultColors.LightRed
-    Globals.Constants.Colors.Green       = Tables.TableToImVec4(Config:GetSetting("Green")) or Globals.Constants.DefaultColors.Green
-    Globals.Constants.Colors.LightGreen  = Tables.TableToImVec4(Config:GetSetting("LightGreen")) or Globals.Constants.DefaultColors.LightGreen
-    Globals.Constants.Colors.Blue        = Tables.TableToImVec4(Config:GetSetting("Blue")) or Globals.Constants.DefaultColors.Blue
-    Globals.Constants.Colors.LightBlue   = Tables.TableToImVec4(Config:GetSetting("LightBlue")) or Globals.Constants.DefaultColors.LightBlue
-    Globals.Constants.Colors.Yellow      = Tables.TableToImVec4(Config:GetSetting("Yellow")) or Globals.Constants.DefaultColors.Yellow
-    Globals.Constants.Colors.LightYellow = Tables.TableToImVec4(Config:GetSetting("LightYellow")) or Globals.Constants.DefaultColors.LightYellow
-    Globals.Constants.Colors.Purple      = Tables.TableToImVec4(Config:GetSetting("Purple")) or Globals.Constants.DefaultColors.Purple
-    Globals.Constants.Colors.LightPurple = Tables.TableToImVec4(Config:GetSetting("LightPurple")) or Globals.Constants.DefaultColors.LightPurple
-    Globals.Constants.Colors.Orange      = Tables.TableToImVec4(Config:GetSetting("Orange")) or Globals.Constants.DefaultColors.Orange
-    Globals.Constants.Colors.LightOrange = Tables.TableToImVec4(Config:GetSetting("LightOrange")) or Globals.Constants.DefaultColors.LightOrange
-    Globals.Constants.Colors.Grey        = Tables.TableToImVec4(Config:GetSetting("Grey")) or Globals.Constants.DefaultColors.Grey
-    Globals.Constants.Colors.LightGrey   = Tables.TableToImVec4(Config:GetSetting("LightGrey")) or Globals.Constants.DefaultColors.LightGrey
-    Globals.Constants.Colors.Cyan        = Tables.TableToImVec4(Config:GetSetting("Cyan")) or Globals.Constants.DefaultColors.Cyan
-    Globals.Constants.Colors.White       = Tables.TableToImVec4(Config:GetSetting("White")) or Globals.Constants.DefaultColors.White
-    Globals.Constants.Colors.Black       = Tables.TableToImVec4(Config:GetSetting("Black")) or Globals.Constants.DefaultColors.Black
+    for k, v in pairs(Globals.Constants.DefaultColors) do
+        Globals.Constants.Colors[k] = Tables.TableToImVec4(Config:GetSetting(k)) or v
+    end
+
+    -- Add here for completeness even though it is a duplicate of BasicColors
+    for c, v in pairs(Globals.Constants.BasicColors) do
+        Globals.Constants.Colors[c] = v
+    end
 
     for i, v in ipairs(Globals.Constants.ConColors) do
         Globals.Constants.ConColorsNameToVec4[v:upper()] = Globals.Constants.Colors[Globals.Constants.ConColors[i]:gsub(" ", "")] or Globals.Constants.Colors.White
