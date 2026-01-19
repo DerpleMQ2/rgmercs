@@ -1024,31 +1024,6 @@ function Ui.RenderForceTargetList(showPopout)
                         Ui.TempSettings.SortedXTIDToSlot[xtarg.ID()] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtarg.ID(), }
                     end
                 end
-                --[[ TEST DATA REMOVE LATER
-                table.insert(Ui.TempSettings.SortedXT, mq.TLO.Me)
-                table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(2))
-                table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(1))
-                table.insert(Ui.TempSettings.SortedXT, mq.TLO.NearestSpawn(3))
-                Ui.TempSettings.SortedXTIDToSlot[mq.TLO.Me.ID()] = { Name = mq.TLO.Me.CleanName() or "None", Slot = #Ui.TempSettings.SortedXT + 1, ID = mq.TLO.Me.ID(), }
-                Ui.TempSettings.SortedXTIDToSlot[mq.TLO.NearestSpawn(2).ID()] = {
-                    Name = mq.TLO.NearestSpawn(2).CleanName() or "None",
-                    Slot = #Ui.TempSettings.SortedXT + 1,
-                    ID =
-                        mq.TLO.NearestSpawn(2).ID(),
-                }
-                Ui.TempSettings.SortedXTIDToSlot[mq.TLO.NearestSpawn(1).ID()] = {
-                    Name = mq.TLO.NearestSpawn(1).CleanName() or "None",
-                    Slot = #Ui.TempSettings.SortedXT + 1,
-                    ID =
-                        mq.TLO.NearestSpawn(1).ID(),
-                }
-                Ui.TempSettings.SortedXTIDToSlot[mq.TLO.NearestSpawn(3).ID()] = {
-                    Name = mq.TLO.NearestSpawn(3).CleanName() or "None",
-                    Slot = #Ui.TempSettings.SortedXT + 1,
-                    ID =
-                        mq.TLO.NearestSpawn(3).ID(),
-                }
-                ]] --
                 if sort_specs then sort_specs.SpecsDirty = true end
             end
 
