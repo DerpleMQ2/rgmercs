@@ -1457,7 +1457,7 @@ _ClassConfig      = {
                 name = "AllianceBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Targeting.IsNamed(target) and not Casting.TargetHasBuff(spell) and
+                    return Globals.AutoTargetIsNamed and not Casting.TargetHasBuff(spell) and
                         Config:GetSetting('DoAlliance') and Casting.CanAlliance()
                 end,
             },
@@ -1615,7 +1615,7 @@ _ClassConfig      = {
             --       name = "AllianceBuff",
             --       type = "Spell",
             --      cond = function(self, spell, target)
-            --           return Targeting.IsNamed(target) and not Casting.TargetHasBuff(spell) and
+            --           return Globals.AutoTargetIsNamed and not Casting.TargetHasBuff(spell) and
             --               Config:GetSetting('DoAlliance') and Casting.CanAlliance()
             --       end,
             --    },

@@ -345,7 +345,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return Targeting.GetXTHaterCount() > 0 and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
@@ -376,7 +376,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                return combat_state == "Combat" and not Targeting.IsNamed(Targeting.GetAutoTarget()) and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+                return combat_state == "Combat" and not Globals.AutoTargetIsNamed and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
         {
@@ -443,7 +443,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('AggroFeign') then return false end
-                    return (Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 99) or (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Targeting.IHaveAggro(100))
+                    return (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99) or (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Targeting.IHaveAggro(100))
                 end,
             },
             {
@@ -552,7 +552,7 @@ local _ClassConfig = {
                 name = "PoisonDotDD",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Targeting.IsNamed(target) then return false end
+                    if Globals.AutoTargetIsNamed then return false end
                     return Casting.DotSpellCheck(spell, target)
                 end,
             },
@@ -588,7 +588,7 @@ local _ClassConfig = {
                 name = "PoisonDotDD",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Targeting.IsNamed(target) then return false end
+                    if not Globals.AutoTargetIsNamed then return false end
                     return Casting.DotSpellCheck(spell, target)
                 end,
             },
@@ -675,7 +675,7 @@ local _ClassConfig = {
                 name = "Focus of Arcanum",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.SelfBuffAACheck(aaName) and Targeting.IsNamed(target)
+                    return Casting.SelfBuffAACheck(aaName) and Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -684,7 +684,7 @@ local _ClassConfig = {
                 end,
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return mq.TLO.SpawnCount("corpse radius 100")() >= Config:GetSetting('WakeDeadCorpseCnt') and Targeting.IsNamed(target)
+                    return mq.TLO.SpawnCount("corpse radius 100")() >= Config:GetSetting('WakeDeadCorpseCnt') and Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -724,14 +724,14 @@ local _ClassConfig = {
             {
                 name = "Gathering Dusk",
                 type = "AA",
-                cond = function(self, aaName, target) return Targeting.IsNamed(target) and Targeting.GetAutoTargetPctHPs() < 85 and mq.TLO.Me.PctAggro() <= 25 end,
+                cond = function(self, aaName, target) return Globals.AutoTargetIsNamed and Targeting.GetAutoTargetPctHPs() < 85 and mq.TLO.Me.PctAggro() <= 25 end,
             },
             {
                 name = "Life Burn",
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoLifeBurn') end,
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() <= 25
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() <= 25
                 end,
             },
             {

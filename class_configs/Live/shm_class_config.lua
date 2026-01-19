@@ -1,5 +1,6 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
+local Globals      = require("utils.globals")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
@@ -1101,7 +1102,7 @@ local _ClassConfig = {
                 name = "Focus of Arcanum",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -1304,7 +1305,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoDiseaseDot') end,
                 cond = function(self, spell, target)
-                    return Targeting.IsNamed(target) and Casting.DotSpellCheck(spell)
+                    return Globals.AutoTargetIsNamed and Casting.DotSpellCheck(spell)
                 end,
             },
             { -- Calling "GetFirstMapItem" in a function so we don't need an entry for each of the below items... it simply chooses the "best"

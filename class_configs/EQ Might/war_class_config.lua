@@ -1,5 +1,6 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
+local Globals      = require("utils.globals")
 local Core         = require("utils.core")
 local Targeting    = require("utils.Targeting")
 local Casting      = require("utils.casting")
@@ -253,7 +254,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Targeting.IsNamed(Targeting.GetAutoTarget()) or
+                return combat_state == "Combat" and (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Globals.AutoTargetIsNamed or
                     self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
             end,
         },
@@ -321,14 +322,14 @@ local _ClassConfig = {
                 name = "Ageless Enmity",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return (Targeting.IsNamed(target) or Targeting.GetAutoTargetPctHPs() < 90) and Targeting.LostAutoTargetAggro()
+                    return (Globals.AutoTargetIsNamed or Targeting.GetAutoTargetPctHPs() < 90) and Targeting.LostAutoTargetAggro()
                 end,
             },
             { --used to jumpstart hatred on named from the outset and prevent early rips from burns
                 name = "Attention",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -357,7 +358,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
         },
@@ -420,7 +421,7 @@ local _ClassConfig = {
                 end,
                 cond = function()
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -432,7 +433,7 @@ local _ClassConfig = {
                 end,
                 cond = function()
                     if mq.TLO.Me.Bandolier("DW").Active() then return false end
-                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('EquipDW') and not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('EquipDW') and not (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("DW") end,
             },

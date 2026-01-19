@@ -1,6 +1,7 @@
 local mq           = require('mq')
 local ItemManager  = require("utils.item_manager")
 local Config       = require('utils.config')
+local Globals      = require("utils.globals")
 local Core         = require("utils.core")
 local Ui           = require("utils.ui")
 local Targeting    = require("utils.targeting")
@@ -834,7 +835,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
                 ---@diagnostic disable-next-line: undefined-field -- doesn't like secondarypct
-                return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget()))
+                return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Globals.AutoTargetIsNamed)
             end,
         },
         { --Actions that establish or maintain hatred
@@ -889,7 +890,7 @@ local _ClassConfig = {
             load_cond = function() return Core.IsTanking() end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Targeting.IsNamed(Targeting.GetAutoTarget()) or
+                return combat_state == "Combat" and (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Globals.AutoTargetIsNamed or
                     self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
             end,
         },
@@ -911,7 +912,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                return combat_state == "Combat" and not Targeting.IsNamed(Targeting.GetAutoTarget()) and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+                return combat_state == "Combat" and not Globals.AutoTargetIsNamed and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
@@ -1234,7 +1235,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.Acrimony,
                 cond = function(self, discSpell, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             --used to reinforce hatred on named
@@ -1244,7 +1245,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.VeilofDarkness,
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
+                    return Globals.AutoTargetIsNamed and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
                 end,
             },
             {
@@ -1253,7 +1254,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ProjectionofDoom,
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Globals.AutoTargetIsNamed and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
             {
@@ -1355,7 +1356,7 @@ local _ClassConfig = {
                 type = "Item",
                 tooltip = Tooltips.Epic,
                 cond = function(self, itemName, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -1715,7 +1716,7 @@ local _ClassConfig = {
                 type = "CustomFunc",
                 cond = function(self, target)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -1725,7 +1726,7 @@ local _ClassConfig = {
                 cond = function()
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
                     return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and
-                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("2Hand") end,
             },

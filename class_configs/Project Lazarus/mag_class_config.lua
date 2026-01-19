@@ -1275,7 +1275,7 @@ _ClassConfig      = {
             {
                 name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName, target) return Targeting.IsNamed(target) end,
+                cond = function(self, aaName, target) return Globals.AutoTargetIsNamed end,
             },
             {
                 name = "Improved Twincast",
@@ -1397,7 +1397,7 @@ _ClassConfig      = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoSwarmPet') > 1 end,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke() and not (Config:GetSetting('DoSwarmPet') == 2 and not Targeting.IsNamed(target))
+                    return Casting.HaveManaToNuke() and not (Config:GetSetting('DoSwarmPet') == 2 and not Globals.AutoTargetIsNamed)
                 end,
             },
             {

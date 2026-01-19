@@ -1,5 +1,6 @@
 local mq        = require('mq')
 local Config    = require('utils.config')
+local Globals   = require("utils.globals")
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
@@ -102,7 +103,7 @@ return {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return Targeting.GetXTHaterCount() > 0 and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {

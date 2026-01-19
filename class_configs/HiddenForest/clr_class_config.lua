@@ -702,7 +702,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoHealStun') end,
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target) and not Casting.StunImmuneTarget(target)
+                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Globals.AutoTargetIsNamed and not Casting.StunImmuneTarget(target)
                 end,
             },
             {
@@ -712,7 +712,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     local targetLevel = Targeting.GetAutoTargetLevel()
                     if targetLevel == 0 or targetLevel > 55 then return false end
-                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
+                    return Casting.HaveManaToNuke(true) and Targeting.TargetNotStunned() and not Globals.AutoTargetIsNamed
                 end,
             },
             {

@@ -495,7 +495,7 @@ local _ClassConfig = {
                     return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
                 pre_activate = function(self) --Epic is MGB capable on EQM
-                    if Casting.AAReady("Mass Group Buff") and Targeting.IsNamed(Targeting.GetAutoTarget()) then
+                    if Casting.AAReady("Mass Group Buff") and Globals.AutoTargetIsNamed then
                         Casting.UseAA("Mass Group Buff", Globals.AutoTargetID)
                     end
                 end,

@@ -1,5 +1,6 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
+local Globals      = require('utils.globals')
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
@@ -960,7 +961,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.OkayToNotHeal() and not Targeting.IsNamed(Targeting.GetAutoTarget()) and
+                return combat_state == "Combat" and Core.OkayToNotHeal() and not Globals.AutoTargetIsNamed and
                     Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
@@ -1025,7 +1026,7 @@ local _ClassConfig = {
                 name = "HordeDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DotSpellCheck(spell) and (Casting.GOMCheck() or Targeting.IsNamed(target))
+                    return Casting.DotSpellCheck(spell) and (Casting.GOMCheck() or Globals.AutoTargetIsNamed)
                 end,
             },
             {
@@ -1069,7 +1070,7 @@ local _ClassConfig = {
                 name = "StunDD",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.OkayToNuke(true) and Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
+                    return Casting.OkayToNuke(true) and Targeting.TargetNotStunned() and not Globals.AutoTargetIsNamed
                 end,
             },
             {

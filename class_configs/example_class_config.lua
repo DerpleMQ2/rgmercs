@@ -300,7 +300,7 @@ local _ClassConfig = {
                 -- The diagnostic disable discussed above, followed by...
                 -- The return conditions... basically, this rotation will "return" true and process if all of these conditions are met
                 ---@diagnostic disable-next-line: undefined-field -- doesn't like secondarypct
-                return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget()))
+                return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Globals.AutoTargetIsNamed)
                 -- This is a complex check, which returns true under varying conditions (as the entries themselves are each used in specific scenarios).
                 -- I must editorialize and disclaim that most conditions aren't this convoluted. Please refer to the above and below rotations!
                 -- The following must be true for this rotation to process

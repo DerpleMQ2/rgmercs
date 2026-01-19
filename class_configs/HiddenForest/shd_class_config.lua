@@ -1,6 +1,7 @@
 local mq           = require('mq')
 local ItemManager  = require("utils.item_manager")
 local Config       = require('utils.config')
+local Globals      = require("utils.globals")
 local Core         = require("utils.core")
 local Ui           = require("utils.ui")
 local Targeting    = require("utils.targeting")
@@ -457,7 +458,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Targeting.IsNamed(Targeting.GetAutoTarget()) or
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Globals.AutoTargetIsNamed or
                     self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true)
             end,
         },
@@ -469,7 +470,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                return combat_state == "Combat" and not Targeting.IsNamed(Targeting.GetAutoTarget()) and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+                return combat_state == "Combat" and not Globals.AutoTargetIsNamed and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
@@ -718,7 +719,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.AgelessEnmity,
                 cond = function(self, aaName, target)
-                    return (Targeting.IsNamed(target) or Targeting.GetAutoTargetPctHPs() < 90) and Targeting.LostAutoTargetAggro()
+                    return (Globals.AutoTargetIsNamed or Targeting.GetAutoTargetPctHPs() < 90) and Targeting.LostAutoTargetAggro()
                 end,
             },
             { --pull does not work on Laz, it is just a hate tool
@@ -730,7 +731,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ProjectionofDoom,
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target)
+                    return Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -797,7 +798,7 @@ local _ClassConfig = {
             --     name = "Incarnadine Breastplate (Tier 1)",
             --     type = "Item",
             --     cond = function(self, aaName, target)
-            --         return Targeting.IsNamed(target)
+            --         return Globals.AutoTargetIsNamed
             --     end,
             -- },
             {
@@ -819,7 +820,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Skin,
                 cond = function(self, spell, target)
-                    if not Core.IsTanking() or not Targeting.IsNamed(target) then return false end
+                    if not Core.IsTanking() or not Globals.AutoTargetIsNamed then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -866,7 +867,7 @@ local _ClassConfig = {
                 type = "Item",
                 tooltip = Tooltips.Epic,
                 cond = function(self, itemName, target)
-                    return self.ClassConfig.HelperFunctions.LeechCheck(self) or Targeting.IsNamed(target)
+                    return self.ClassConfig.HelperFunctions.LeechCheck(self) or Globals.AutoTargetIsNamed
                 end,
             },
             {
@@ -925,7 +926,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.BondTap,
                 load_cond = function(self) return Config:GetSetting('DoBondTap') end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.HaveManaToDot() and Casting.SelfBuffCheck(spell) -- use for recourse --Casting.DotSpellCheck(spell)
                 end,
             },
@@ -950,7 +951,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.PoisonDot,
                 load_cond = function(self) return Config:GetSetting('DoPoisonDot') end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -960,7 +961,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.DireDot,
                 load_cond = function(self) return Config:GetSetting('DoDireDot') end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target) then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -1017,7 +1018,7 @@ local _ClassConfig = {
                 type = "CustomFunc",
                 cond = function(self, target)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -1027,7 +1028,7 @@ local _ClassConfig = {
                 cond = function()
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
                     return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc() ~= "Deflection Discipline" and
-                        not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                        not (Globals.AutoTargetIsNamed and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("2Hand") end,
             },

@@ -150,7 +150,7 @@ function Combat.EngageTarget(autoTargetId)
             else
                 Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Targeting.GetTargetCleanName())
 
-                if not Config:GetSetting('DoMelee') and Config:GetSetting("BellyCastStick") and Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Body.Name() == "Dragon" and Targeting.IsNamed(target) then
+                if not Config:GetSetting('DoMelee') and Config:GetSetting("BellyCastStick") and Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Body.Name() == "Dragon" and Globals.AutoTargetIsNamed then
                     Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Dragon Named detected, sticking for belly cast.", Targeting.GetTargetCleanName())
                     Movement:DoStickCmd("pin 40")
                 end
@@ -432,8 +432,12 @@ function Combat.FindBestAutoTarget(validateFn)
 
     -- FollowMarkTarget causes RG to have allow RG toons focus on who the group has marked. We'll exit early if this is the case.
     if Config:GetSetting('FollowMarkTarget') then
-        if mq.TLO.Me.GroupMarkNPC(1).ID() and Globals.AutoTargetID ~= mq.TLO.Me.GroupMarkNPC(1).ID() then
-            Globals.AutoTargetID = mq.TLO.Me.GroupMarkNPC(1).ID()
+        local markNPC = mq.TLO.Me.GroupMarkNPC(1)
+        if markNPC and markNPC() and markNPC.ID() > 0 and Globals.AutoTargetID ~= markNPC.ID() then
+            Globals.AutoTargetID = markNPC.ID()
+            Globals.AutoTargetIsNamed = Targeting.IsNamed(markNPC)
+            Logger.log_debug("FindAutoTarget(): Following Marked Target: \ag%s\ax [ID: \ag%d\ax] Named(%s)", markNPC.CleanName() or "None", markNPC.ID(),
+                Strings.BoolToColorString(Globals.AutoTargetIsNamed))
             return
         end
     end
@@ -449,7 +453,7 @@ function Combat.FindBestAutoTarget(validateFn)
             if forceSpawn and forceSpawn() and not forceSpawn.Dead() then
                 if Globals.AutoTargetID ~= Globals.ForceTargetID then
                     Globals.AutoTargetID = Globals.ForceTargetID
-                    Logger.log_info("FindAutoTarget(): Forced Targeting: \ag%s\ax [ID: \ag%d\ax]", forceSpawn.CleanName() or "None", forceSpawn.ID())
+                    Logger.log_debug("FindAutoTarget(): Forced Targeting: \ag%s\ax [ID: \ag%d\ax]", forceSpawn.CleanName() or "None", forceSpawn.ID())
                 end
             else
                 Globals.ForceTargetID = 0
@@ -465,7 +469,7 @@ function Combat.FindBestAutoTarget(validateFn)
             if not Config:GetSetting('DoAutoTarget') then
                 -- Manual targeting (or pull targeting) let the manual user target any npc or npcpet.
                 if Globals.AutoTargetID ~= target.ID() and targetValid then
-                    Logger.log_info("FindAutoTarget(): Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName() or "None", target.ID())
+                    Logger.log_debug("FindAutoTarget(): Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName() or "None", target.ID())
                     Globals.AutoTargetID = target.ID()
                 end
             else
@@ -584,7 +588,9 @@ function Combat.FindBestAutoTarget(validateFn)
         end
     end
 
-    Logger.log_verbose("FindAutoTarget(): FoundTargetID(%d), myTargetId(%d)", Globals.AutoTargetID or 0,
+    Globals.AutoTargetIsNamed = Targeting.IsNamed(mq.TLO.Spawn(Globals.AutoTargetID))
+
+    Logger.log_verbose("FindAutoTarget(): FoundTargetID(%d) - Named(%s), myTargetId(%d)", Globals.AutoTargetID or 0, Strings.BoolToColorString(Globals.AutoTargetIsNamed),
         mq.TLO.Target.ID())
 
     if Config:GetSetting('DoAutoTarget') then

@@ -99,7 +99,7 @@ return {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return Targeting.GetXTHaterCount() > 0 and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         { --Keep things from running
@@ -109,7 +109,7 @@ return {
             load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Targeting.IsNamed(Targeting.GetAutoTarget()) and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+                return combat_state == "Combat" and not Globals.AutoTargetIsNamed and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
         {
@@ -333,7 +333,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     if not Config:GetSetting('DoStun') then return false end
-                    return Targeting.TargetNotStunned() and not Targeting.IsNamed(target)
+                    return Targeting.TargetNotStunned() and not Globals.AutoTargetIsNamed
                 end,
             },
         },
