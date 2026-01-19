@@ -137,11 +137,17 @@ function Module:Render()
     ImGui.Text("Make any mob \"named\" for burns by adding it to your MQ2SpawnMaster list!")
     ImGui.NewLine()
 
-    ImGui.SeparatorText("Known Named in Zone")
-    Ui.RenderZoneNamed()
+    if ImGui.CollapsingHeader("Known Named in Zone") then
+        ImGui.Indent()
+        Ui.RenderZoneNamed()
+        ImGui.Unindent()
+    end
     ImGui.NewLine()
-    ImGui.SeparatorText("Named Selection")
-    Ui.RenderZoneMobsNamedSelector()
+    if ImGui.CollapsingHeader("Named Selection") then
+        ImGui.Indent()
+        Ui.RenderZoneMobsNamedSelector()
+        ImGui.Unindent()
+    end
 
     ---@type boolean|nil
     local pressed
