@@ -854,7 +854,9 @@ function Ui.RenderForceTargetList(showPopout)
         end
     end
 
-    local iconWidth = ImGui.CalcTextSizeVec(Icons.MD_DO_NOT_DISTURB).x + ImGui.GetStyle().ItemInnerSpacing.x * 2
+    -- flashy highlights
+    local hlColorOne = Globals.Constants.Colors.FTHighlight
+    local hlColorTwo = ImVec4(hlColorOne.x * .8, hlColorOne.y * .8, hlColorOne.z * .8, hlColorOne.w)
 
     local tableColumns = {
         {
@@ -1098,7 +1100,7 @@ function Ui.RenderForceTargetList(showPopout)
 
                         win_max.x = effectiveWidth
                         draw_list:PushClipRect(win_min, win_max, true)
-                        draw_list:AddRect(min, max, ImGui.GetColorU32(Globals.Constants.Colors.FTHighlight), 0.0, 0, 1.5)
+                        draw_list:AddRect(min, max, ImGui.GetColorU32(os.time() % 2 == 1 and hlColorOne or hlColorTwo), 0.0, 0, 1.5)
                         draw_list:PopClipRect()
                     end
                 end
