@@ -27,6 +27,7 @@ Ui.TempSettings         = {
     SortedXT = {},
     SortedXTIDToSlot = {},
     SortedXTIDs = Set.new({}),
+    SortedZoneMobsNamed = {},
 }
 
 Ui.ModalText            = ""
@@ -1134,7 +1135,7 @@ end
 function Ui.RenderZoneNamed()
     Ui.ShowDownNamed, _ = Ui.RenderOptionToggle("ShowDown", "Show Downed Named", Ui.ShowDownNamed)
 
-    if ImGui.BeginTable("Zone Named", 4, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("Zone Named", 4, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
         ImGui.TableSetupColumn('Up', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
@@ -1172,6 +1173,106 @@ function Ui.RenderZoneNamed()
 
         ImGui.EndTable()
     end
+end
+
+--- Renders a table of the named creatures of the current zone.
+---
+--- This function retrieves and displays the name of the current zone in the game.
+---
+function Ui.RenderZoneMobsNamedSelector()
+    local tableColumns = {
+        {
+            name = 'Named',
+            flags = ImGuiTableColumnFlags.WidthFixed,
+            width = 25.0,
+            sort = function(a, b)
+                local isNamedA = Modules:ExecModule("Named", "IsNamed", a) and 1 or 0
+                local isNamedB = Modules:ExecModule("Named", "IsNamed", b) and 1 or 0
+                return isNamedA, isNamedB
+            end,
+            render = function(spawn, idx)
+                local isNamed = Modules:ExecModule("Named", "IsNamed", spawn)
+                local state, pressed = Ui.RenderOptionToggle("##named_select_" .. tostring(idx), "", isNamed, true)
+                if pressed then
+                    Logger.log_error("\arNOT IMPLEMENTED: \awToggling \amNamed\aw State for \at%s\aw to \ag%s", spawn.CleanName() or "None", tostring(state))
+                end
+            end,
+        },
+        {
+            name = 'Name',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultSort),
+            width = 60.0,
+            sort = function(a, b)
+                return a.CleanName() or "None", b.CleanName() or "None"
+            end,
+            render = function(spawn, _)
+                ImGui.TextColored(ImVec4(Ui.GetConColorBySpawn(spawn)), spawn.CleanName() or "None")
+            end,
+        },
+        {
+            name = 'ID',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 20.0,
+            sort = function(a, b)
+                return a.ID(), b.ID()
+            end,
+            render = function(spawn, _)
+                ImGui.Text(tostring(spawn.ID()))
+            end,
+        },
+        {
+            name = 'Level',
+            flags = ImGuiTableColumnFlags.WidthStretch,
+            width = 20.0,
+            sort = function(a, b)
+                return a.Level() or 0, b.Level() or 0
+            end,
+            render = function(spawn, _)
+                ImGui.Text(tostring(spawn.ID() > 0 and spawn.Level() or 0))
+            end,
+        },
+    }
+
+
+    Ui.RenderTableData("Zone Mobs Named Table", tableColumns,
+        bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Hideable, ImGuiTableFlags.Sortable),
+        function(sort_specs)
+            local spawnList = mq.getAllSpawns()
+
+            if #Ui.TempSettings.SortedZoneMobsNamed ~= #spawnList then
+                Ui.TempSettings.SortedZoneMobsNamed = spawnList
+                if sort_specs then sort_specs.SpecsDirty = true end
+            end
+
+            if sort_specs and sort_specs.SpecsDirty then
+                table.sort(Ui.TempSettings.SortedZoneMobsNamed, function(a, b)
+                    local spec = sort_specs:Specs(1) -- single-column sort
+
+                    local av, bv = tableColumns[spec.ColumnIndex + 1].sort(a, b)
+
+                    if spec.SortDirection == ImGuiSortDirection.Ascending then
+                        return (av or 0) < (bv or 0)
+                    else
+                        return (av or 0) > (bv or 0)
+                    end
+                end)
+
+                sort_specs.SpecsDirty = false
+            end
+        end,
+        function()
+            local spawnList = Ui.TempSettings.SortedZoneMobsNamed
+            for idx, spawn in ipairs(spawnList) do
+                if spawn and spawn.ID() > 0 and spawn.Type() == "NPC" then
+                    ImGui.PushID(string.format("##zone_mob_named_%d", idx))
+                    for _, colData in ipairs(tableColumns) do
+                        ImGui.TableNextColumn()
+                        colData.render(spawn, idx)
+                    end
+                    ImGui.PopID()
+                end
+            end
+        end)
 end
 
 --- Draws an inspectable spell icon.
