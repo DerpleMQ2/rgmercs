@@ -288,6 +288,8 @@ end
 function Module:IsNamed(spawn)
     if not spawn or not spawn() then return false end
 
+    if Targeting.ForceNamed then return true end
+
     if Globals.CurServer == "EQ Might" then
         for _, name in ipairs(self.EQMightNamed) do
             if spawn and spawn() and (spawn.CleanName() or ""):find(name) then
@@ -300,13 +302,12 @@ function Module:IsNamed(spawn)
 
     if self.NamedList[spawn.Name()] or self.NamedList[spawn.CleanName()] then return true end
 
-    --- @diagnostic disable-next-line: undefined-field
-    if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil then
-        --- @diagnostic disable-next-line: undefined-field
-        return mq.TLO.SpawnMaster.HasSpawn(spawn.ID())()
+    if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() then
+        ---@diagnostic disable-next-line: undefined-field
+        return mq.TLO.SpawnMaster.HasSpawn(spawn.ID())() or false
     end
 
-    return Targeting.ForceNamed
+    return false
 end
 
 function Module:OnZone()
