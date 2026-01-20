@@ -106,7 +106,7 @@ local _ClassConfig = {
             "Tarew's Aquatic Ayre", --Level 16
         },
         ['AriaSong'] = {
-            "Severyn's Aria",
+            "Aria of Kenburk",
             "Aria of Tenisbre", -- 125
             "Aria of Pli Xin Liako",
             "Aria of Margidor",
@@ -330,7 +330,8 @@ local _ClassConfig = {
             "Anthem de Arms",
         },
         ['FireBuffSong'] = {
-            -- CasterAriaSong - Level Range 72 - 113
+            -- CasterAriaSong - Level Range 72+
+            "Severyn's Aria",
             "Flariton's Aria", -- 125
             "Constance's Aria",
             "Sontalak's Aria",
