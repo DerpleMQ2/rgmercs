@@ -289,6 +289,23 @@ return {
             "Jarring Shock",
             "Jarring Impact",
         },
+        ['SnareDisc'] = {
+            "Tendon Slice",
+            "Tendon Shred",
+            "Tendon Rip",
+            "Tendon Rupture",
+            "Tendon Tear",
+            "Tendon Gash",
+            "Tendon Slash",
+            "Tendon Lacerate",
+            "Tendon Shear",
+            "Tendon Sever",
+            "Tendon Cleave",
+            "Crippling Strike",
+            "Leg Slice",
+            "Leg Cut",
+            "Leg Strike",
+        },
     },
     ['RotationOrder']   = {
         -- Downtime doesn't have state because we run the whole rotation at once.
@@ -298,6 +315,16 @@ return {
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     Casting.OkayToBuff() and Casting.AmIBuffable()
+            end,
+        },
+        { --Keep things from running
+            name = 'Snare',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('Timer10Disc') == 2 end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
         {
@@ -394,6 +421,7 @@ return {
                         { name = 'Daxethrow', count_name = 'AutoAxeCount', },
                         { name = 'Daxeof',    count_name = 'AutoAxeCount', },
                         { name = 'Dicho',     count_name = 'DichoAxeCount', },
+                        { name = 'SnareDisc', count_name = 'AutoAxeCount', },
                     }
 
                     local summonNeededItem = function(summonSkill, itemId, count)
@@ -468,6 +496,15 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.SelfBuffCheck(discSpell)
+                end,
+            },
+        },
+        ['Snare'] = {
+            {
+                name = "SnareDisc",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.DetSpellCheck(discSpell) and Targeting.MobHasLowHP(target) and not Casting.SnareImmuneTarget(target)
                 end,
             },
         },
@@ -649,6 +686,7 @@ return {
             {
                 name = "Daxethrow",
                 type = "Disc",
+                load_cond = function(self) return Config:GetSetting('Timer10Disc') == 1 end,
             },
             {
                 name = "SharedBuff",
@@ -904,6 +942,31 @@ return {
             Category = "Self",
             Tooltip = "Enable using Disconcerting Discipline",
             Default = true,
+        },
+        ['Timer10Disc']     = {
+            DisplayName = "Timer 10 Disc Choice",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 101,
+            Tooltip = "Choose between your Axe Throw Disc or Snare Disc (Leg/Tendon line). The timer is shared.",
+            Type = "Combo",
+            ComboOptions = { 'Throw Disc', 'Snare Disc', },
+            Default = 1,
+            Min = 1,
+            Max = 2,
+            RequiresLoadoutChange = true,
+        },
+        ['SnareCount']      = {
+            DisplayName = "Snare Max Mob Count",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Snare",
+            Index = 101,
+            Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
+            Default = 3,
+            Min = 1,
+            Max = 99,
         },
     },
     ['ClassFAQ']        = {
