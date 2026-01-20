@@ -38,24 +38,19 @@ local _ClassConfig = {
     },
     ['AbilitySets']     = {
         --Commented any currently unused spell lines
-        ['TwincastAura'] = {
-            "Twincast Aura",
-        },
+        -- ['TwincastAura'] = {
+        --     "Twincast Aura",
+        -- },
         ['SpellProcAura'] = {
             "Illusionist's Aura",
             "Beguiler's Aura",
         },
-        ['VisageAura'] = {
-            "Aura of Endless Glamour",
-        },
-        ['GroupHasteBuff'] = {
+        ['HasteBuff'] = {
             "Hastening of Salik",
-            "Vallon's Quickening",
-            "Speed of the Brood",
-        },
-        ['SingleHasteBuff'] = {
             "Speed of Salik",
-            "Speed of Vallon",
+            "Vallon's Quickening",
+            -- "Speed of Vallon",
+            "Speed of the Brood",
             "Visions of Grandeur",
             "Wondrous Rapidity",
             "Aanya's Quickening",
@@ -322,15 +317,9 @@ local _ClassConfig = {
         --     "Instill",
         --     "Root",
         -- },
-        ['HasteManaCombo'] = {
-            "Unified Alacrity",
-        },
         -- ['ColoredNuke'] = {
         --     "Colored Chaos",
         -- },
-        ['Chromaburst'] = {
-            "Chromaburst",
-        },
         ['Minionskin'] = { --EQM Custom: HP/Regen/mitigation (May need to block druid HP buff line on pet)
             "Major Minionskin",
             "Greater Minionskin",
@@ -535,7 +524,6 @@ local _ClassConfig = {
             {
                 name = "SpellProcAura",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('UseAura') == 1 end,
                 active_cond = function(self, spell)
                     local aura = string.sub(spell.Name() or "", 1, 8)
                     return Casting.AuraActiveByName(aura)
@@ -552,49 +540,50 @@ local _ClassConfig = {
                     return not Casting.AuraActiveByName(aura)
                 end,
             },
+            -- {
+            --     name = "TwincastAura",
+            --     type = "Spell",
+            --     active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
+            --     pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
+            --         if not Casting.AuraActiveByName(spell.Name()) then
+            --             ---@diagnostic disable-next-line: undefined-field
+            --             mq.TLO.Me.Aura(1).Remove()
+            --         end
+            --     end,
+            --     cond = function(self, spell)
+            --         return not Casting.AuraActiveByName(spell.Name())
+            --     end,
+            -- },
             {
-                name = "TwincastAura",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting('UseAura') == 2 end,
-                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
-                pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
-                    if not Casting.AuraActiveByName(spell.Name()) then
-                        ---@diagnostic disable-next-line: undefined-field
-                        mq.TLO.Me.Aura(1).Remove()
-                    end
-                end,
-                cond = function(self, spell)
-                    return not Casting.AuraActiveByName(spell.Name())
-                end,
-            },
-            {
-                name = "VisageAura",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting('UseAura') == 3 end,
-                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
-                pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
-                    if not Casting.AuraActiveByName(spell.Name()) then
-                        ---@diagnostic disable-next-line: undefined-field
-                        mq.TLO.Me.Aura(1).Remove()
-                    end
-                end,
-                cond = function(self, spell)
-                    return not Casting.AuraActiveByName(spell.Name())
-                end,
-            },
-            {
-                name = "Auroria Mastery",
+                name = "Azure Mind Crystal",
                 type = "AA",
-                load_cond = function() return Config:GetSetting('UseAura') == 4 end,
-                active_cond = function(self) return Casting.AuraActiveByName("Aura of Bedazzlement") end,
-                pre_activate = function(self) -- remove the old aura if we leveled up, otherwise we will be spammed because of no focus.
-                    if not Casting.AuraActiveByName("Aura of Bedazzlement") then
-                        ---@diagnostic disable-next-line: undefined-field
-                        mq.TLO.Me.Aura(1).Remove()
+                load_cond = function() return Config:GetSetting('SummonAzure') end,
+                cond = function(self, aaName, target)
+                    local crystalAA = mq.TLO.Me.AltAbility(aaName)
+                    if not crystalAA and crystalAA() then return false end
+                    local crystal = crystalAA.Spell.Base(1)()
+                    return not mq.TLO.FindItem(string.format("id %s", crystal))()
+                end,
+                post_activate = function(self, aaName, success)
+                    if success then
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.StashCrystal(aaName))
                     end
                 end,
-                cond = function(self, aaName)
-                    return not Casting.AuraActiveByName("Aura of Bedazzlement")
+            },
+            {
+                name = "Sanguine Mind Crystal",
+                type = "AA",
+                load_cond = function() return Config:GetSetting('SummonSanguine') end,
+                cond = function(self, aaName, target)
+                    local crystalAA = mq.TLO.Me.AltAbility(aaName)
+                    if not crystalAA and crystalAA() then return false end
+                    local crystal = crystalAA.Spell.Base(1)()
+                    return not mq.TLO.FindItem(string.format("id %s", crystal))()
+                end,
+                post_activate = function(self, aaName, success)
+                    if success then
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.StashCrystal(aaName))
+                    end
                 end,
             },
         },
@@ -628,10 +617,10 @@ local _ClassConfig = {
         },
         ['PetBuff']       = {
             {
-                name = "SingleHasteBuff",
+                name = "HasteBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.ID()).ID() end,
-                cond = function(self, spell) return Casting.PetBuffCheck(spell) and Casting.PetBuffCheck(mq.TLO.Spell("Unified Alacrity")) end,
+                cond = function(self, spell) return Casting.PetBuffCheck(spell) end,
             },
             {
                 name = "Fortify Companion",
@@ -639,13 +628,6 @@ local _ClassConfig = {
                 active_cond = function(self, aaName) return mq.TLO.Me.PetBuff(aaName)() ~= nil end,
                 cond = function(self, aaName)
                     return Casting.PetBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Crystalized Soul Gem", -- This isn't a typo
-                type = "Item",
-                cond = function(self, itemName)
-                    return Casting.PetBuffItemCheck(itemName)
                 end,
             },
             {
@@ -658,31 +640,21 @@ local _ClassConfig = {
         },
         ['GroupBuff']     = {
             {
-                name = "HasteManaCombo",
-                type = "Spell",
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target)
-                    return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-            {
                 name = "ManaRegen",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if self:GetResolvedActionMapItem('HasteManaCombo') or not Targeting.TargetIsACaster(target) then return false end
+                    if not Targeting.TargetIsACaster(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
-                name_func = function(self)
-                    return Casting.GetFirstMapItem({ "GroupHasteBuff", "SingleHasteBuff", })
-                end,
+                name = "HasteBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if self:GetResolvedActionMapItem('HasteManaCombo') or not Targeting.TargetIsAMelee(target) then return false end
-                    return Casting.GroupBuffCheck(spell, target) and Casting.GroupBuffCheck(mq.TLO.Spell("Unified Alacrity"), target) -- Fixes bad stacking check
+                    if not Targeting.TargetIsAMelee(target) then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -776,36 +748,6 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-            {
-                name = "Azure Mind Crystal",
-                type = "AA",
-                load_cond = function() return Config:GetSetting('SummonAzure') end,
-                cond = function(self, aaName, target)
-                    if not Targeting.GroupedWithTarget(target) then return false end
-                    local crystal = mq.TLO.Spell(aaName).RankName.Base(1)()
-                    return crystal and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", crystal), 1000) == "0" and (mq.TLO.Cursor.ID() or 0) == 0
-                end,
-                post_activate = function(self, aaName, success)
-                    if success then
-                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.StashCrystal(aaName))
-                    end
-                end,
-            },
-            {
-                name = "Sanguine Mind Crystal",
-                type = "AA",
-                load_cond = function() return Config:GetSetting('SummonSanguine') end,
-                cond = function(self, aaName, target)
-                    if not Targeting.GroupedWithTarget(target) then return false end
-                    local crystal = mq.TLO.Spell(aaName).RankName.Base(1)()
-                    return crystal and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", crystal), 1000) == "0" and (mq.TLO.Cursor.ID() or 0) == 0
-                end,
-                post_activate = function(self, aaName, success)
-                    if success then
-                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.StashCrystal(aaName))
-                    end
                 end,
             },
         },
@@ -950,22 +892,6 @@ local _ClassConfig = {
             },
         },
         ['DPS']           = {
-            { -- This triggers two nukes so we cast it whether the dot is up or not. Treat is as a nuke.
-                name = "MindDot",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting("DoMindDot") end,
-                cond = function(self, spell, target)
-                    return Casting.OkayToNuke()
-                end,
-            },
-            {
-                name = "Chromaburst",
-                type = "Spell",
-                load_cond = function() return Config:GetSetting("DoChroma") end,
-                cond = function(self)
-                    return Casting.OkayToNuke()
-                end,
-            },
             {
                 name = "Epic",
                 type = "Item",
@@ -987,6 +913,15 @@ local _ClassConfig = {
                 name = "StrangleDot",
                 type = "Spell",
                 load_cond = function() return Config:GetSetting("DoStrangleDot") end,
+                cond = function(self, spell, target)
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
+                end,
+            },
+            {
+                name = "MindDot",
+                type = "Spell",
+                load_cond = function() return Config:GetSetting("DoMindDot") end,
                 cond = function(self, spell, target)
                     if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
@@ -1120,10 +1055,9 @@ local _ClassConfig = {
                 { name = "TankIllusionBuff", cond = function(self) return Config:GetSetting('DoTankIllusionBuff') end, },
                 { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
                 { name = "Dispel",           cond = function(self) return Config:GetSetting('DoDispel') end, },
-                { name = "Chromaburst",      cond = function(self) return Config:GetSetting('DoChroma') end, },
                 { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') end, },
-                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') end, },
                 { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') end, },
                 { name = "PetHealSpell",     cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "HateBuff",         cond = function(self) return Config:GetSetting('DoHateBuff') end, },
                 { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
@@ -1174,20 +1108,6 @@ local _ClassConfig = {
         },
 
         --Buffs
-        ['UseAura']            = {
-            DisplayName = "Aura Selection:",
-            Group = "Abilities",
-            Header = "Buffs",
-            Category = "Group",
-            Index = 101,
-            Tooltip = "Select the Aura to be used, if any.",
-            Type = "Combo",
-            ComboOptions = { 'Spell Proc', 'Twincast', 'Visage', 'Auroria', 'None', },
-            RequiresLoadoutChange = true,
-            Default = 1,
-            Min = 1,
-            Max = 5,
-        },
         ['RuneChoice']         = {
             DisplayName = "Rune Selection:",
             Group = "Abilities",
@@ -1405,16 +1325,6 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
         },
-        ['DoChroma']           = {
-            DisplayName = "Chromaburst",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "Direct",
-            Index = 103,
-            Tooltip = "Use the Chromaburst magic nuke.",
-            RequiresLoadoutChange = true,
-            Default = true,
-        },
         ['DoStrangleDot']      = {
             DisplayName = "Strangle Dot",
             Group = "Abilities",
@@ -1431,7 +1341,7 @@ local _ClassConfig = {
             Header = "Damage",
             Category = "Over Time",
             Index = 102,
-            Tooltip = "Use your mana drain/magic damage (Mind Line) Dot on Named.",
+            Tooltip = "Use your mana drain/magic damage (Mind Line) Dot.",
             RequiresLoadoutChange = true,
             Default = true,
         },
