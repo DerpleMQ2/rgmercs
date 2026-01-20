@@ -992,10 +992,10 @@ function Ui.RenderForceTargetList(showPopout)
             flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
             width = 80.0,
             sort = function(a, b)
-                return math.ceil(a.ID() or 0), math.ceil(b.ID() or 0)
+                return math.ceil(a.PctAggro() or 0), math.ceil(b.PctAggro() or 0)
             end,
             render = function(xtarg, _)
-                Ui.RenderText(tostring(math.ceil(xtarg.ID() or 0)))
+                Ui.RenderText(tostring(math.ceil(xtarg.PctAggro() or 0)))
             end,
         },
         {
