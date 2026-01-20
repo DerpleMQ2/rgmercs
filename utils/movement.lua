@@ -15,8 +15,6 @@ Movement.LastDoNavCmd   = ""
 --- Sticks the player to the specified target.
 --- @param targetId number The ID of the target to stick to.
 function Movement:DoStick(targetId)
-    if not Config:GetSetting('EnableAutoMovement') then return end
-
     if os.clock() - self.LastDoStick < 1 then
         Logger.log_debug(
             "\ayIgnoring DoStick because we just stuck a second ago - let's give it some time.")
@@ -36,6 +34,7 @@ function Movement:DoStick(targetId)
 end
 
 function Movement:DoStickCmd(params, ...)
+    if not Config:GetSetting('DoAutoStick') then return end
     local formatted = params
     if ... ~= nil then formatted = string.format(params, ...) end
     Core.DoCmd("/stick %s", formatted)
@@ -102,7 +101,7 @@ end
 --- @param bDontStick boolean Whether to avoid sticking to the target.
 function Movement:NavInCombat(targetId, distance, bDontStick)
     if not Config:GetSetting('DoAutoEngage') then return end
-    if not Config:GetSetting('EnableAutoMovement') then return end
+    if not Config:GetSetting('DoAutoNav') then return end
 
     if mq.TLO.Stick.Active() then
         self:DoStickCmd("off")
