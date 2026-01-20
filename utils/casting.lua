@@ -586,9 +586,8 @@ function Casting.GetBuffableGroupIDs()
         for i = 1, count do
             local rezSearch = string.format("pccorpse =%s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
             if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
-                groupIds = {}
                 Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
-                break
+                return {}
             else
                 table.insert(groupIds, mq.TLO.Group.Member(i).ID())
             end
