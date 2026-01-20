@@ -874,6 +874,17 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
+    ['EnableManualMovement']   = {
+        DisplayName = "Enable Manual Movement",
+        Group = "Combat",
+        Header = "Positioning",
+        Category = "General Positioning",
+        Index = 8,
+        Tooltip = "Disables RGMercs from issuing Navigation Commands in Combat. Useful if you wish to manually control movement.",
+        Default = false,
+        ConfigType = "Advanced",
+    },
+
     -- Positioning/Tank
     ['MovebackWhenTank']       = {
         DisplayName = "Moveback as Tank",

@@ -1665,8 +1665,8 @@ local _ClassConfig = {
                     Core.DoCmd('/squelch face fast')
                     Movement:DoStickCmd("10 moveback")
                 elseif tooFar or forceMove then
-                    Core.DoCmd("/squelch /nav id %d distance=%d lineofsight=on", Globals.AutoTargetID, Config:GetSetting('BowNavDistance'))
-                    Core.DoCmd('/squelch face fast')
+                    Movement:DoNav(true, "id %d distance=%d lineofsight=on", Globals.AutoTargetID, Config:GetSetting('BowNavDistance'))
+                    Core.DoCmd('/squelch /face fast')
                 end
             end
         end,

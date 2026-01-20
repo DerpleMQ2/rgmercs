@@ -19,6 +19,7 @@ mq.event("CantSee", "You cannot see your target.", function()
     Logger.log_debug("CantSee: Event Detected")
     if Globals.BackOffFlag then return end
     if Globals.PauseMain then return end
+    if Config:GetSetting('EnableManualMovement') then return end
     local target = mq.TLO.Target
     if mq.TLO.Stick.Active() then
         Movement:DoStickCmd("off")
@@ -27,7 +28,7 @@ mq.event("CantSee", "You cannot see your target.", function()
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         Logger.log_debug("CantSee: \ayWe are in Pull_State PULLING and Cannot see our target!")
-        Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.5)
+        Movement:DoNav(false, "id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     elseif Modules:ExecModule("Pull", "IsPullState", "PULL_RETURN_TO_CAMP") then
         Logger.log_debug("CantSee event detected, but we are pulling and currently returning to camp.")
@@ -83,6 +84,7 @@ end)
 
 mq.event("TooClose", "Your target is too close to use a ranged weapon!", function()
     Logger.log_debug("TooClose: Event Detected")
+    if Config:GetSetting('EnableManualMovement') then return end
     -- Check if we're in the middle of a pull and use a backup.
     if Config:GetSetting('DoPull') and Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         Logger.log_debug("TooClose: Pull Mode Detected.")
@@ -93,14 +95,14 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
         else
             if Casting.AbilityReady("Taunt") then
                 Logger.log_debug("TooCloseHandler: Naving to target to use Taunt.")
-                Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
+                Movement:DoNav(false, "id %d distance=%d lineofsight=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Taunt")
                 Logger.log_debug("TooClose: Attempting to Taunt.")
             end
             if Casting.AbilityReady("Kick") then
                 Logger.log_debug("TooCloseHandler: Naving to target to use Kick.")
-                Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
+                Movement:DoNav(false, "id %d distance=%d lineofsight=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Kick")
                 Logger.log_debug("TooClose: Attempting to Kick.")
@@ -138,6 +140,8 @@ local function tooFarHandler()
     Logger.log_debug("TooFar: Event Detected")
     if Globals.BackOffFlag then return end
     if Globals.PauseMain then return end
+    if Config:GetSetting('EnableManualMovement') then return end
+
     if mq.TLO.Stick.Active() then
         Movement:DoStickCmd("off")
         Movement:ClearLastStickTimer()
@@ -148,7 +152,7 @@ local function tooFarHandler()
         Logger.log_debug("TooFar: \ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
             Targeting.GetTargetCleanName(),
             Targeting.GetTargetDistance())
-        Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.7)
+        Movement:DoNav(false, "id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.7)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     elseif Modules:ExecModule("Pull", "IsPullState", "PULL_RETURN_TO_CAMP") then
         Logger.log_debug("CantSee event detected, but we are pulling and currently returning to camp.")

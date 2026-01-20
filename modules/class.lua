@@ -1640,7 +1640,7 @@ end
 
 function Module:OnDeath()
     Targeting.ClearTarget()
-    Core.DoCmd("/nav stop")
+    Movement:DoNav(false, "stop")
     Movement:DoStickCmd("off")
 end
 

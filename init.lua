@@ -374,7 +374,7 @@ local function Main()
 
     -- sometimes nav gets interupted this will try to reset it.
     if Config:GetTimeSinceLastMove() > 5 and mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() == 0 then
-        Core.DoCmd("/nav stop")
+        Movement:DoNav(false, "stop")
     end
 
     if Targeting.GetXTHaterCount(true) > 0 then

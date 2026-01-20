@@ -1949,7 +1949,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
     mq.TLO.Me.Stand()
 
-    Core.DoCmd("/nav locyxz %s, log=off", loc)
+    Movement:DoNav(false, "locyxz %s, log=off", loc)
     mq.delay(1000, function() return mq.TLO.Navigation.Active() end)
 
     local maxMove = Config:GetSetting('MaxMoveTime') * 1000
@@ -1958,7 +1958,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
         if Targeting.GetXTHaterCount() > 0 and not ignoreAggro then
             if mq.TLO.Navigation.Active() then
-                Core.DoCmd("/nav stop log=off")
+                Movement:DoNav(false, "stop log=off")
             end
             return false
         end
@@ -1966,7 +1966,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
         if mq.TLO.Navigation.Velocity() == 0 then
             Logger.log_warn("NavToWaypoint Velocity is 0 - Are we stuck?")
             if mq.TLO.Navigation.Paused() then
-                Core.DoCmd("/nav pause log=off")
+                Movement:DoNav(false, "pause log=off")
             end
         end
 
@@ -2090,7 +2090,7 @@ function Module:GiveTime(combat_state)
                 local distanceToCampSq = Math.GetDistanceSquared(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampY, campData.campSettings.AutoCampX)
                 if distanceToCampSq > (Config:GetSetting('AutoCampRadius') ^ 2) then
                     Logger.log_debug("Distance to camp is %d and radius is %d - going closer.", math.sqrt(distanceToCampSq), Config:GetSetting('AutoCampRadius'))
-                    Core.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
+                    Movement:DoNav(false, "locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
                 end
             end
         end
@@ -2235,7 +2235,7 @@ function Module:GiveTime(combat_state)
 
     Core.DoCmd("/squelch /attack off")
 
-    Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
+    Movement:DoNav(false, "id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
 
     mq.delay(1000, function() return mq.TLO.Navigation.Active() end)
 
@@ -2348,7 +2348,7 @@ function Module:GiveTime(combat_state)
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on face pull to finish...")
 
-                    Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
+                    Movement:DoNav(false, "id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
 
                     if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         Logger.log_debug("\arXtargs changed heading back to camp!")
@@ -2375,7 +2375,7 @@ function Module:GiveTime(combat_state)
                     Logger.log_super_verbose("Waiting on ranged pull to finish... %s", Strings.BoolToColorString(successFn()))
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
-                        Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        Movement:DoNav(false, "id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
@@ -2405,7 +2405,7 @@ function Module:GiveTime(combat_state)
                     Core.DoCmd("/attack")
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
-                        Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        Movement:DoNav(false, "id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
@@ -2428,11 +2428,11 @@ function Module:GiveTime(combat_state)
 
                     if mq.TLO.Target.FeetWet() ~= mq.TLO.Me.FeetWet() then
                         Logger.log_debug("\ar ALERT: Feet wet mismatch - Moving around\ax")
-                        Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, Targeting.GetTargetDistance() * 0.9, requireLOS)
+                        Movement:DoNav(false, "id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, Targeting.GetTargetDistance() * 0.9, requireLOS)
                     end
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
-                        Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        Movement:DoNav(false, "id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay(500, function() return mq.TLO.Navigation.Active() end)
                         mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
@@ -2478,7 +2478,7 @@ function Module:GiveTime(combat_state)
         end
     else
         Logger.log_debug("\arNOTICE:\ax Pull Aborted!")
-        Core.DoCmd("/nav stop log=off")
+        Movement:DoNav(false, "stop log=off")
         mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
     end
 
@@ -2486,7 +2486,7 @@ function Module:GiveTime(combat_state)
         -- Nav back to camp.
         self:SetPullState(PullStates.PULL_RETURN_TO_CAMP, string.format("Camp Loc: %0.2f %0.2f %0.2f", start_y, start_x, start_z))
 
-        Core.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, Config:GetSetting('PullBackwards') and "facing=backward" or "")
+        Movement:DoNav(false, "locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, Config:GetSetting('PullBackwards') and "facing=backward" or "")
         mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
 
         while mq.TLO.Navigation.Active() and (combat_state == "Downtime" or Targeting.GetXTHaterCount() > 0) do
@@ -2494,12 +2494,12 @@ function Module:GiveTime(combat_state)
             if mq.TLO.Me.State():lower() == "feign" or mq.TLO.Me.Sitting() then
                 Logger.log_debug("Standing up to Engage Target")
                 mq.TLO.Me.Stand()
-                Core.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, Config:GetSetting('PullBackwards') and "facing=backward" or "")
+                Movement:DoNav(false, "locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, Config:GetSetting('PullBackwards') and "facing=backward" or "")
                 mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
             end
 
             if mq.TLO.Navigation.Paused() then
-                Core.DoCmd("/nav pause")
+                Movement:DoNav(false, "pause")
             end
             mq.doevents()
             Events.DoEvents()
@@ -2616,7 +2616,7 @@ function Module:StopNavAfterFailedMovingCheck()
     --if we were navigating during a rescan, cancel it.
     if self.TempSettings.PullState == PullStates.PULL_MOVING_CHECKS and mq.TLO.Navigation.Active() then
         Logger.log_debug("\arNOTICE:\ax Moving Checks failed! Aborting nav.")
-        Core.DoCmd("/nav stop log=off")
+        Movement:DoNav(false, "stop log=off")
         mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
     end
 end

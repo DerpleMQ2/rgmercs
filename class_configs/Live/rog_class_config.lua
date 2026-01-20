@@ -2,6 +2,7 @@ local mq        = require('mq')
 local Config    = require('utils.config')
 local Globals   = require("utils.globals")
 local Core      = require("utils.core")
+local Movement  = require("utils.movement")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
 local Strings   = require("utils.strings")
@@ -652,13 +653,13 @@ return {
                             ---@diagnostic disable-next-line: undefined-field
                         elseif mq.TLO.Me.Moving() and mq.TLO.Nav.Active() and not mq.TLO.Nav.Paused() then
                             -- let's get crazy: if we are naving, quickly pause and "sneak" a hide in
-                            Core.DoCmd("/nav pause")
+                            Movement:DoNav(false, "pause")
                             mq.delay(200, function() return not mq.TLO.Me.Moving() end)
                             mq.delay((2 * mq.TLO.EverQuest.Ping()) or 200) --addl delay to avoid "must be perfectly still..." server desync
                             Core.DoCmd("/doability hide")
                             mq.delay(100, function() return (mq.TLO.Me.AbilityTimer("Hide")() or 0) > 0 end)
                             ---@diagnostic disable-next-line: undefined-field
-                            if mq.TLO.Nav.Paused() then Core.DoCmd("/nav pause") end
+                            if mq.TLO.Nav.Paused() then Movement:DoNav(false, "pause") end
                         end
                     end
                 end,

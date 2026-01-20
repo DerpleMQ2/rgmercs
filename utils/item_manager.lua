@@ -1,5 +1,6 @@
 local mq            = require('mq')
 local Targeting     = require("utils.targeting")
+local Movement      = require("utils.movement")
 local Config        = require("utils.config")
 local Core          = require("utils.core")
 local Logger        = require("utils.logger")
@@ -24,7 +25,7 @@ function ItemManager.GiveTo(toId, itemName, count)
 
     if mq.TLO.Target.Distance3D() >= 25 then
         Logger.log_debug("\arGiveTo but Target is too far away - moving closer!")
-        Core.DoCmd("/nav id %d |log=off dist=10")
+        Movement:DoNav(false, "id %d |log=off dist=10")
 
         mq.delay("10s", function() return mq.TLO.Navigation.Active() end)
     end

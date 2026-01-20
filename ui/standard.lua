@@ -202,6 +202,9 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
                         (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"),
                         (mq.TLO.Stick.Active() and Movement:GetLastStickCmd() or "N/A"),
                         Movement:GetTimeSinceLastStick() or "0"))
+                    ImGui.Text(string.format("Last Nav: %s <%s ago>",
+                        Movement:GetLastNavCmd() or "N/A",
+                        Movement:GetTimeSinceLastNav() or "0s"))
 
                     if ImGui.CollapsingHeader("Assist List") then
                         ImGui.Indent()

@@ -9,10 +9,14 @@ local Movement          = { _version = '1.0', _name = "Movement", _author = 'Der
 Movement.__index        = Movement
 Movement.LastDoStick    = 0
 Movement.LastDoStickCmd = ""
+Movement.LastDoNav      = os.clock()
+Movement.LastDoNavCmd   = "None"
 
 --- Sticks the player to the specified target.
 --- @param targetId number The ID of the target to stick to.
 function Movement:DoStick(targetId)
+    if Config:GetSetting('EnableManualMovement') then return end
+
     if os.clock() - self.LastDoStick < 1 then
         Logger.log_debug(
             "\ayIgnoring DoStick because we just stuck a second ago - let's give it some time.")
@@ -37,6 +41,18 @@ function Movement:DoStickCmd(params, ...)
     Core.DoCmd("/stick %s", formatted)
     self:SetLastStickTimer(os.clock())
     self.LastDoStickCmd = formatted
+end
+
+function Movement:DoNav(squelch, params, ...)
+    local formatted = params
+    if ... ~= nil then formatted = string.format(params, ...) end
+    Core.DoCmd("%s/nav %s", squelch and "/squelch " or "", formatted)
+    self.LastDoNav = os.clock()
+    self.LastDoNavCmd = formatted
+end
+
+function Movement:GetLastNavCmd()
+    return self.LastDoNavCmd
 end
 
 -- Gets the last stick timer.
@@ -68,19 +84,24 @@ function Movement:GetTimeSinceLastStick()
     return string.format("%ds", os.clock() - self.LastDoStick)
 end
 
+function Movement:GetTimeSinceLastNav()
+    return string.format("%ds", os.clock() - self.LastDoNav)
+end
+
 --- Navigates to a target during combat.
 --- @param targetId number The ID of the target to navigate to.
 --- @param distance number The distance to maintain from the target.
 --- @param bDontStick boolean Whether to avoid sticking to the target.
 function Movement:NavInCombat(targetId, distance, bDontStick)
     if not Config:GetSetting('DoAutoEngage') then return end
+    if Config:GetSetting('EnableManualMovement') then return end
 
     if mq.TLO.Stick.Active() then
         self:DoStickCmd("off")
     end
 
     if mq.TLO.Navigation.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
-        Core.DoCmd("/nav id %d distance=%d log=off lineofsight=on", targetId, distance or 15)
+        Movement:DoNav(false, "id %d distance=%d log=off lineofsight=on", targetId, distance or 15)
         while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
             mq.delay(100)
             mq.doevents()
@@ -143,7 +164,7 @@ function Movement:NavAroundCircle(target, radius)
                 -- Make sure it's a valid loc...
                 if mq.TLO.EverQuest.ValidLoc(string.format("%0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z))() then
                     Logger.log_debug(" \ag--> Found Valid Circling Loc: %0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z)
-                    Core.DoCmd("/nav locyxz %0.2f %0.2f %0.2f facing=backward", tgt_y, tgt_x, spawn_z)
+                    Movement:DoNav(false, "locyxz %0.2f %0.2f %0.2f facing=backward", tgt_y, tgt_x, spawn_z)
                     mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                     mq.delay("10s", function() return not mq.TLO.Navigation.Active() end)
                     Core.DoCmd("/squelch /face fast")

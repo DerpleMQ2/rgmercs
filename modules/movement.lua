@@ -375,7 +375,7 @@ function Module:ChaseOff()
     Logger.log_info("\ayNo longer chasing \at%s\ay.", Config:GetSetting('ChaseTarget') or "None")
     Config:SetSetting('ChaseOn', false)
     Config:SetSetting('ChaseTarget', "")
-    Core.DoCmd("/squelch /nav stop")
+    Movement:DoNav(true, "stop")
     self:SaveSettings(false)
 end
 
@@ -756,9 +756,8 @@ function Module:GiveTime(combat_state)
                     local requireLoS = Config:GetSetting('RequireLoS') and "on" or "off"
 
                     if Nav.PathExists(navPathString)() then
-                        local navCmd = string.format("/squelch /nav %s log=critical dist=%d lineofsight=%s", navPathString, stopDist, requireLoS)
-                        Logger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - naving :: %s", chaseTarg, navCmd)
-                        self:RunCmd(navCmd)
+                        Logger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - naving", chaseTarg)
+                        Movement:DoNav(true, "%s log=critical dist=%d lineofsight=%s", navPathString, stopDist, requireLoS)
                         mq.delay("1s", function() return mq.TLO.Navigation.Active() end)
                     else
                         -- Assuming no line of site problems.

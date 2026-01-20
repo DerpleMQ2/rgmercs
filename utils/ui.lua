@@ -2,6 +2,7 @@ local mq          = require('mq')
 local Config      = require('utils.config')
 local Globals     = require('utils.globals')
 local Modules     = require("utils.modules")
+local Movement    = require("utils.movement")
 local Logger      = require("utils.logger")
 local Core        = require("utils.core")
 local Comms       = require("utils.comms")
@@ -2415,7 +2416,7 @@ function Ui.NavEnabledLoc(loc)
     ImGui.PopStyleColor(3)
     if loc ~= "0,0,0" then
         if navLoc and ImGui.IsMouseDoubleClicked(0) then
-            Core.DoCmd('/nav locYXZ %s', loc)
+            Movement:DoNav(false, "locYXZ %s", loc)
         end
 
         Ui.Tooltip("Double click to Nav")

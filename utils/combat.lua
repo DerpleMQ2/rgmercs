@@ -116,7 +116,7 @@ function Combat.EngageTarget(autoTargetId)
                 else
                     Logger.log_verbose("EngageTarget(): Target is in range moving to combat")
                     if mq.TLO.Navigation.Active() then
-                        Core.DoCmd("/nav stop log=off")
+                        Movement:DoNav(false, "stop log=off")
                     end
                     if mq.TLO.Stick.Status():lower() == "off" or (mq.TLO.Stick.StickTarget() or autoTargetId) ~= autoTargetId then
                         Movement:DoStick(autoTargetId)
@@ -833,7 +833,7 @@ function Combat.AutoCampCheck(tempConfig)
     if distanceToCamp > 5 then
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
         if mq.TLO.Navigation.PathExists(navTo)() then
-            Core.DoCmd("/nav %s", navTo)
+            Movement:DoNav(false, "%s", navTo)
             mq.delay("2s", function() return mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 end)
             while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
                 mq.delay(10)
@@ -851,7 +851,7 @@ function Combat.AutoCampCheck(tempConfig)
     end
 
     if mq.TLO.Navigation.Active() then
-        Core.DoCmd("/nav stop")
+        Movement:DoNav(false, "stop")
     end
 end
 
@@ -879,7 +879,7 @@ function Combat.CombatCampCheck(tempConfig)
     if distanceToCampSq > 25 then
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
         if mq.TLO.Navigation.PathExists(navTo)() then
-            Core.DoCmd("/nav %s", navTo)
+            Movement:DoNav(false, "%s", navTo)
             mq.delay("2s", function() return mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 end)
             while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
                 mq.delay(10)
@@ -897,7 +897,7 @@ function Combat.CombatCampCheck(tempConfig)
     end
 
     if mq.TLO.Navigation.Active() then
-        Core.DoCmd("/nav stop")
+        Movement:DoNav(false, "stop")
     end
 end
 
