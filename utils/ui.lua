@@ -677,6 +677,19 @@ function Ui.RenderMercsStatus(showPopout)
 
         },
         {
+            name = 'LOS',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide, ImGuiTableColumnFlags.NoSort),
+            width = 20.0,
+            sort = function(mercs, a, b)
+                return a, b
+            end,
+            render = function(peer, data)
+                local los = mq.TLO.Spawn(data.Data.ID).LineOfSight()
+                ImGui.TextColored(los and Colors.ConditionPassColor or Colors.ConditionFailColor, string.format("%s", los and Icons.FA_EYE or Icons.FA_EYE_SLASH))
+            end,
+
+        },
+        {
             name = 'Pet',
             flags = ImGuiTableColumnFlags.WidthFixed,
             width = 80.0,
@@ -1004,6 +1017,18 @@ function Ui.RenderForceTargetList(showPopout)
             end,
             render = function(xtarg, _)
                 ImGui.Text(tostring(math.ceil(xtarg.ID() or 0)))
+            end,
+
+        },
+        {
+            name = "Level",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 40.0,
+            sort = function(a, b)
+                return a.Level() or 0, b.Level() or 0
+            end,
+            render = function(xtarg, _)
+                ImGui.Text(tostring(math.ceil(xtarg.Level() or 0)))
             end,
 
         },
