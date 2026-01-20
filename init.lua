@@ -291,7 +291,8 @@ local function RGInit(...)
         Core.DoCmd("/squelch /dnet commandecho off")
     end
 
-    Movement:DoStickCmd("set breakontarget on")
+    -- Don't pass this through the DoStickCmd system so our timing isn't affected.
+    Core.DoCmd("/squelch /stick set breakontarget on")
 
     initPctComplete = 70
     initMsg = "Closing down Macro..."

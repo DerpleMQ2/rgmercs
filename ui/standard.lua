@@ -191,20 +191,53 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
             if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
                 ImGui.SetItemDefaultFocus()
                 if ImGui.BeginTabItem("RGMercsMain") then
-                    ImGui.Text("Current State: " .. Globals.CurrentState)
-                    ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
+                    ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
+
+                    ImGui.Text("Current State: ")
+                    ImGui.SameLine()
+                    Ui.RenderColoredText(Globals.CurrentState == "Combat" and Globals.Constants.Colors.MainCombatColor or Globals.Constants.Colors.MainDowntimeColor,
+                        "%s", Globals.CurrentState or "N/A")
+                    ImGui.Text("Hater Count: ")
+                    ImGui.SameLine()
+                    Ui.RenderColoredText((Targeting.GetXTHaterCount() or 0) > 0 and Globals.Constants.Colors.ConditionMidColor or Globals.Constants.Colors.ConditionPassColor, "%d",
+                        Targeting.GetXTHaterCount() or 0)
+                    ImGui.Text("MA: ")
+                    ImGui.SameLine()
+
                     if Config.TempSettings.AssistWarning and Core.IAmMA() then
-                        ImGui.Text("MA: %s (Fallback Mode)", (Core.GetMainAssistSpawn().CleanName() or "None"))
+                        Ui.RenderColoredText(Globals.Constants.Colors.ConditionMidColor, "%s (Fallback Mode)", (Core.GetMainAssistSpawn().CleanName() or "None"))
                     else
-                        ImGui.Text("MA: %s", (Core.GetMainAssistSpawn().CleanName() or "None"))
+                        Ui.RenderColoredText(Globals.Constants.Colors.ConditionPassColor, "%s", (Core.GetMainAssistSpawn().CleanName() or "None"))
                     end
-                    ImGui.Text(string.format("Stuck To: %s [%s] <%s ago>",
-                        (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"),
-                        (mq.TLO.Stick.Active() and Movement:GetLastStickCmd() or "N/A"),
-                        Movement:GetTimeSinceLastStick() or "0"))
-                    ImGui.Text(string.format("Last Nav: %s <%s ago>",
-                        Movement:GetLastNavCmd() or "N/A",
-                        Movement:GetTimeSinceLastNav() or "0s"))
+
+                    ImGui.Text("Stuck To: ")
+                    ImGui.SameLine()
+                    Ui.RenderColoredText(mq.TLO.Stick.Active() and ImVec4(Ui.GetConColorBySpawn(mq.TLO.Spawn(mq.TLO.Stick.StickTarget()))) or ImVec4(1, 1, 1, 1),
+                        "%s ", (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
+                    ImGui.SameLine()
+                    ImGui.Text("[")
+                    ImGui.SameLine()
+                    Ui.RenderColoredText(mq.TLO.Stick.Active() and Globals.Constants.Colors.ConditionPassColor or Globals.Constants.Colors.ConditionDisabledColor,
+                        "%s", (mq.TLO.Stick.Active() and Movement:GetLastStickCmd() or "N/A"))
+                    ImGui.SameLine()
+                    ImGui.Text("] ")
+                    ImGui.SameLine()
+                    ImGui.Text("<")
+                    ImGui.SameLine()
+                    Ui.RenderColoredText(Globals.Constants.Colors.LightBlue, "%s", Movement:GetTimeSinceLastStick() or "0s")
+                    ImGui.SameLine()
+                    ImGui.Text(">")
+
+                    ImGui.Text("Last Nav: ")
+                    ImGui.SameLine()
+                    Ui.RenderColoredText(Globals.Constants.Colors.ConditionPassColor, "%s ", Movement:GetLastNavCmd() or "N/A")
+                    ImGui.SameLine()
+                    ImGui.Text("<")
+                    ImGui.SameLine()
+                    Ui.RenderColoredText(Globals.Constants.Colors.LightBlue, "%s", Movement:GetTimeSinceLastNav() or "0s")
+                    ImGui.SameLine()
+                    ImGui.Text(">")
+                    ImGui.PopStyleVar(1)
 
                     if ImGui.CollapsingHeader("Assist List") then
                         ImGui.Indent()

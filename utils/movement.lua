@@ -9,8 +9,8 @@ local Movement          = { _version = '1.0', _name = "Movement", _author = 'Der
 Movement.__index        = Movement
 Movement.LastDoStick    = 0
 Movement.LastDoStickCmd = ""
-Movement.LastDoNav      = os.clock()
-Movement.LastDoNavCmd   = "None"
+Movement.LastDoNav      = 0
+Movement.LastDoNavCmd   = ""
 
 --- Sticks the player to the specified target.
 --- @param targetId number The ID of the target to stick to.
@@ -81,10 +81,18 @@ end
 -- Gets the time since last stick a stirng.
 --- @return string Formatted time since last stick.
 function Movement:GetTimeSinceLastStick()
+    if self.LastDoStickCmd == "" then
+        return "N/A"
+    end
+
     return string.format("%ds", os.clock() - self.LastDoStick)
 end
 
 function Movement:GetTimeSinceLastNav()
+    if self.LastDoNavCmd == "" then
+        return "N/A"
+    end
+
     return string.format("%ds", os.clock() - self.LastDoNav)
 end
 
