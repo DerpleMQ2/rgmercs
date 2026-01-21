@@ -56,9 +56,11 @@ Config.FAQ                                               = {
     [2] = {
         Question = "I want to manually control my driver and choose my own targets. What do I need to adjust?",
         Answer = "The following settings may require adjustment to drive yourself:\n\n" ..
-            "Targeting:\nAuto Target (controls scanning for combat targets and changing targets to them).\n\n" ..
-            "Assisting:\nAuto Engage (controls navigating to targets, sticking, and using melee if enabled).\n\n" ..
+            "Targeting:\nAuto Target (controls scanning for and autotargeting combat targets).\n\n" ..
+            "Assisting:\nAuto Engage (controls moving to a target, automatically initiating combat, and taking offensive actions).\n\n" ..
             "Positioning:\nFace Target In Combat (Mercs will still assume you are facing properly for abilities that require it!)\n\n" ..
+            "Positioning:\nAuto Navigation (controls /nav commands used in combat to close with the target)\n\n" ..
+            "Positioning:\nAuto Stick (controls /stick commands used in combat to stay near the target)\n\n" ..
             "Mercs will still manage the action, and we should return to the target you had if needed after a heal, buff, item use, etc. You can pause mercs to take full control." ..
             "These settings and interactions have been recently adjusted, and feedback is requested if you see something not quite right!",
         Settings_Used = "",

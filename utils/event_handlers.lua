@@ -163,10 +163,9 @@ local function tooFarHandler()
                 elseif Config:GetSetting('DoMelee') then
                     Logger.log_debug("TooFar: \ayWe are in COMBAT and too far from our target!")
                     if Config:GetSetting('DoAutoEngage') and Combat.OkToEngage(target.ID() or 0) then
-                        Core.DoCmd("/squelch /face fast")
-
                         if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then --not sure if this is necessary or still happening since we changed distance to use 3D.
                             Logger.log_debug("TooFar: Too Far from Target (%s [%d]). Possible flyer detected. Moving back 10.", target.CleanName() or "", target.ID() or 0)
+                            Core.DoCmd("/squelch /face fast")
                             Movement:DoStickCmd("10 moveback uw")
                             -- wait to start moving, make our movement, turn stick off to yield to our original stick settings. If our original settings are bad, this could cause a loop
                             mq.delay(100, function() return mq.TLO.Stick.Active() end)
