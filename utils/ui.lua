@@ -337,6 +337,7 @@ function Ui.RenderMercsStatus(showPopout)
 
     local Colors = Globals.Constants.Colors
     local ConColorsNameToVec4 = Globals.Constants.ConColorsNameToVec4
+    local assistRange = Config:GetSetting('AssistRange')
 
     if not Ui.TempSettings.SortedMercs then
         Ui.TempSettings.SortedMercs = {}
@@ -601,8 +602,8 @@ function Ui.RenderMercsStatus(showPopout)
                 local distString = distance == 999 and "" or string.format("%6.2f", distance)
                 ImGui.PushStyleColor(ImGuiCol.Text,
                     distance == 999 and Colors.ConditionDisabledColor or
-                    distance > 75 and Colors.ConditionFailColor or
-                    distance > 35 and Colors.ConditionMidColor or
+                    distance > assistRange and Colors.ConditionFailColor or
+                    distance > assistRange / 2 and Colors.ConditionMidColor or
                     Colors.ConditionPassColor
 
                 )
