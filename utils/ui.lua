@@ -357,26 +357,36 @@ function Ui.RenderMercsStatus(showPopout)
                 end
 
                 local name, _ = Comms.GetCharAndServerFromPeer(peer)
-
-                ImGui.SmallButton(name or "Unknown")
-
                 if name then
-                    if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
-                        local peerSpawn = mq.TLO.Spawn("=" .. name)
-                        if peerSpawn.ID() > 0 then
-                            peerSpawn.DoTarget()
-                            if (mq.TLO.Cursor.ID() or 0) > 0 and peerSpawn.Distance() <= 15 then
-                                Core.DoCmd("/timed 1 /click left target")
-                                Core.DoCmd('/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
-                                Comms.SendPeerDoCmd(peer, '/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
-                            end
-                        end
-                    elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
-                        Comms.SendPeerDoCmd(peer, "/foreground")
+                    local displayName = data.Data.Invis and "(" .. name .. ")" or name
+                    if data.Data.Invis then
+                        ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionDisabledColor)
                     end
-                end
-                if data.Data.Zone ~= mq.TLO.Zone.Name() then
-                    ImGui.PopStyleColor()
+
+                    ImGui.SmallButton(displayName)
+
+                    if data.Data.Invis then
+                        ImGui.PopStyleColor()
+                    end
+
+                    if name then
+                        if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
+                            local peerSpawn = mq.TLO.Spawn("=" .. name)
+                            if peerSpawn.ID() > 0 then
+                                peerSpawn.DoTarget()
+                                if (mq.TLO.Cursor.ID() or 0) > 0 and peerSpawn.Distance() <= 15 then
+                                    Core.DoCmd("/timed 1 /click left target")
+                                    Core.DoCmd('/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
+                                    Comms.SendPeerDoCmd(peer, '/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
+                                end
+                            end
+                        elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
+                            Comms.SendPeerDoCmd(peer, "/foreground")
+                        end
+                    end
+                    if data.Data.Zone ~= mq.TLO.Zone.Name() then
+                        ImGui.PopStyleColor()
+                    end
                 end
             end,
         },
