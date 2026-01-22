@@ -1,14 +1,34 @@
-local mq           = require('mq')
-local Config       = require('utils.config')
-local Globals      = require("utils.globals")
-local Logger       = require("utils.logger")
-local Core         = require("utils.core")
-local Modules      = require("utils.modules")
-local Targeting    = require("utils.targeting")
-local Casting      = require("utils.casting")
+local mq              = require('mq')
+local Config          = require('utils.config')
+local Globals         = require("utils.globals")
+local Logger          = require("utils.logger")
+local Core            = require("utils.core")
+local Modules         = require("utils.modules")
+local Targeting       = require("utils.targeting")
+local Casting         = require("utils.casting")
 
-local _ClassConfig = {
-    _version            = "1.4 - Live",
+-- Provide a valid aura name to check as they are named differently then the spells
+-- -- Only use the first word(s) of the aura name, they are all unique (enough)
+local auraSpellToName = {
+    ["Mana Recursion Aura XI"] = "Mana Recursion",
+    ["Mana Ripple Aura"] = "Mana Ripple",
+    ["Mana Radix Aura"] = "Mana Radix",                 -- "Mana Radix Aura"
+    ["Mana Replication Aura"] = "Mana Replication",     -- "Mana Replication Aura"
+    ["Mana Repetition Aura"] = "Mana Repetition",       -- "Mana Repetition Aura"
+    ["Mana Reciprocation Aura"] = "Mana Reciprocation", -- "Mana Reciprocation Aura"
+    ["Mana Reverberation Aura"] = "Mana Rev",           -- "Mana Rev. Aura"
+    ["Mana Repercussion Aura"] = "Mana Rep",            -- "Mana Rep. Aura"
+    ["Mana Reiteration Aura"] = "Mana Recursion",       -- "Mana Recursion Aura"
+    ["Mana Reiterate Aura"] = "Mana Reiterate",         -- "Mana Reiterate Aura"
+    ["Mana Resurgence Aura"] = "Mana Resurgence",       -- "Mana Resurgence Aura"
+    ["Mystifier's Aura"] = "Mystifier",                 -- "Mystifier's Aura"
+    ["Entrancer's Aura"] = "Entrancer",                 -- "Entrancer's Aura"
+    ["Illusionist's Aura"] = "Illusionist",             -- "Illusionist's Aura"
+    ["Beguiler's Aura"] = "Beguiler",                   -- "Beguiler's Aura"
+}
+
+local _ClassConfig    = {
+    _version            = "1.5 - Live",
     _author             = "Derple, Grimmier, Algar",
     ['ModeChecks']      = {
         CanMez     = function() return true end,
@@ -42,6 +62,7 @@ local _ClassConfig = {
             "Mana Reiteration Aura",
             "Mana Reiterate Aura",
             "Mana Resurgence Aura",
+            -- Use mana regen aura until spell proc is available
             "Mystifier's Aura",
             "Entrancer's Aura",
             "Illusionist's Aura",
@@ -1022,6 +1043,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
                 pre_activate = function(self) self.ClassConfig.HelperFunctions.AuraCheck() end,
                 cond = function(self, spell)
+                    -- don't use this if we selected learners and don't have two auras
                     if Config:GetSetting('DoLearners') and not Casting.CanUseAA('Auroria Mastery') then return false end
                     return not Casting.AuraActiveByName(spell.Name())
                 end,
@@ -1030,13 +1052,19 @@ local _ClassConfig = {
                 name = "SpellProcAura",
                 type = "Spell",
                 active_cond = function(self, spell)
-                    local aura = string.sub(spell.Name() or "", 1, 8)
+                    local aura = spell and auraSpellToName[spell.Name()] or "None"
                     return Casting.AuraActiveByName(aura)
                 end,
                 pre_activate = function(self) self.ClassConfig.HelperFunctions.AuraCheck() end,
                 cond = function(self, spell)
-                    if (Config:GetSetting('DoLearners') and self:GetResolvedActionMapItem('LearnersAura')) or (self:GetResolvedActionMapItem('TwincastAura') and not Casting.CanUseAA('Auroria Mastery')) then return false end
-                    local aura = string.sub(spell.Name() or "", 1, 8)
+                    -- don't use this if we have learner's selected, whether one aura or two
+                    local useLearnersInstead = Config:GetSetting('DoLearners') and Core.GetResolvedActionMapItem('LearnersAura')
+                    -- don't use this if we don't have Twincast Aura up unless we don't have Twincast Aura or can use two auras
+                    local useTwinCastInstead = Core.GetResolvedActionMapItem('TwincastAura') and not Casting.CanUseAA('Auroria Mastery')
+
+                    if not spell or not spell() or useLearnersInstead or useTwinCastInstead then return false end
+                    -- get the proper aura name. Don't use rankname, the table doesn't support it. We are only searching the first word of the aura name.
+                    local aura = auraSpellToName[spell.Name()]
                     return not Casting.AuraActiveByName(aura)
                 end,
             },
