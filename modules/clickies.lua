@@ -1248,6 +1248,8 @@ function Module:RenderClickiesWithConditions(type, clickies)
         self:InsertDefaultClickies()
     end
     Ui.Tooltip("Add server-specific default clickies to the end of the list.")
+
+    ImGui.Separator()
     if #clickies > 0 then
         for clickyIdx, clicky in ipairs(clickies) do
             if clicky.itemName:len() > 0 then
@@ -1341,10 +1343,6 @@ function Module:RenderClickiesWithConditions(type, clickies)
             end
         end
     end
-
-    --    ImGui.Unindent()
-    ImGui.Separator()
-    -- end
 end
 
 function Module:RenderClickyData(clicky, clickyIdx)
