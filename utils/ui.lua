@@ -359,16 +359,7 @@ function Ui.RenderMercsStatus(showPopout)
                 local name, _ = Comms.GetCharAndServerFromPeer(peer)
                 if name then
                     local displayName = data.Data.Invis and "(" .. name .. ")" or name
-                    if data.Data.Invis then
-                        ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionDisabledColor)
-                    end
-
                     ImGui.SmallButton(displayName)
-
-                    if data.Data.Invis then
-                        ImGui.PopStyleColor()
-                    end
-
                     if name then
                         if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
                             local peerSpawn = mq.TLO.Spawn("=" .. name)
