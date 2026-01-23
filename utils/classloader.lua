@@ -129,7 +129,9 @@ function ClassLoader.writeCustomConfig(class)
         return
     end
 
-    custom_file:write(content)
+    local customInserted = content:gsub('(_version%s*=%s*")', '%1(CUSTOM) Source: ')
+
+    custom_file:write(customInserted)
     custom_file:close()
 
     Logger.log_info("Custom Class Config Written: %s", customFile)
