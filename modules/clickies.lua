@@ -1382,9 +1382,17 @@ function Module:GetMatchingClickies(searchFilter)
     for _, clicky in ipairs(clickies or {}) do
         if clicky.itemName:lower():find(searchLower) then
             table.insert(matchingClickies, clicky)
+        elseif clicky.combat_state:lower():find(searchLower) then
+            table.insert(matchingClickies, clicky)
+        elseif clicky.target:lower():find(searchLower) then
+            table.insert(matchingClickies, clicky)
         else
             for _, cond in ipairs(clicky.conditions or {}) do
                 if cond.type:lower():find(searchLower) then
+                    table.insert(matchingClickies, clicky)
+                    break
+                end
+                if cond.target and cond.target:lower():find(searchLower) then
                     table.insert(matchingClickies, clicky)
                     break
                 end
