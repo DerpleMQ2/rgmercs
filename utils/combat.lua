@@ -527,6 +527,8 @@ function Combat.FindBestAutoTarget(validateFn)
         if assistId == 0 then
             -- if we have a target and are staying on target, use it
             if Config:GetSetting('StayOnTarget') and Globals.AutoTargetID > 0 and not Combat.ShouldKillTargetReset() then
+                -- make sure nothing changed our actual target.
+                Targeting.SetTarget(Globals.AutoTargetID)
                 -- We are good.
                 return
             end
