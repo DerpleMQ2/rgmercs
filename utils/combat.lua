@@ -525,6 +525,12 @@ function Combat.FindBestAutoTarget(validateFn)
 
         -- if we aren't directly forcing a target, then lets use the more traditional methods of getting an autotarget from the MA
         if assistId == 0 then
+            -- if we have a target and are staying on target, use it
+            if Config:GetSetting('StayOnTarget') and Globals.AutoTargetID > 0 and not Combat.ShouldKillTargetReset() then
+                -- We are good.
+                return
+            end
+
             local assistTarget = nil
             -- We're not the main assist so we need to choose our target based on our main assist.
             -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
