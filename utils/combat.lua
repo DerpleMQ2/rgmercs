@@ -495,8 +495,8 @@ function Combat.FindBestAutoTarget(validateFn)
                             Globals.AutoTargetID, mq.TLO.Spawn(Globals.AutoTargetID).CleanName() or "None")
                     end
                 end
-                -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
-                -- Only be turned off by tank modes. -- Jokes on you, guy who wrote this... I have this off on all of my characters and have for months. - Algar
+
+                -- rescan our auto target unless we are forced to stay on one
                 if not Config:GetSetting('StayOnTarget') then
                     Globals.AutoTargetID = Combat.MATargetScan(Config:GetSetting('AssistRange'),
                         Config:GetSetting('MAScanZRange'))
@@ -511,28 +511,22 @@ function Combat.FindBestAutoTarget(validateFn)
     else
         local assistId = 0
 
-        -- check if we are currently forcing a target, use it as the assistId to validate if so
-        -- clear the ForceTargetID if its dead
-        if Globals.ForceTargetID ~= 0 then
-            local forceSpawn = mq.TLO.Spawn(Globals.ForceTargetID)
-            if forceSpawn and forceSpawn() and not forceSpawn.Dead() then
-                assistId = Globals.ForceTargetID
-                Logger.log_info("FindAutoTarget(): Forced Targeting: \ag%s\ax [ID: \ag%d\ax]", forceSpawn.CleanName() or "None", forceSpawn.ID())
-            else
-                Globals.ForceTargetID = 0
-            end
+        -- check if we are currently forcing a target, use it as the assistId to validate if so, clear the ForceTargetID if its dead.
+        if Combat.ValidCombatTarget(Globals.ForceTargetID) then
+            assistId = Globals.ForceTargetID
+            Logger.log_verbose("\ayFindAutoTarget(): Forced target detected (%s).", Globals.ForceTargetID)
+        else
+            Globals.ForceTargetID = 0
         end
 
-        -- if we aren't directly forcing a target, then lets use the more traditional methods of getting an autotarget from the MA
-        if assistId == 0 then
-            -- if we have a target and are staying on target, use it
-            if Config:GetSetting('StayOnTarget') and Globals.AutoTargetID > 0 and not Combat.ShouldKillTargetReset() then
-                -- make sure nothing changed our actual target.
-                Targeting.SetTarget(Globals.AutoTargetID)
-                -- We are good.
-                return
-            end
+        -- If we have a target and are staying on target, use it (unless we have a force target)
+        if Config:GetSetting('StayOnTarget') and assistId == 0 and Combat.ValidCombatTarget(Globals.AutoTargetID) then
+            assistId = Globals.AutoTargetID
+            Logger.log_verbose("\ayFindAutoTarget(): Stay On Target enabled, staying on our original targetid (%s).", Globals.AutoTargetID)
+        end
 
+        -- if we aren't forcing or staying on a target, then lets get an autotarget from the MA
+        if assistId == 0 then
             local assistTarget = nil
             -- We're not the main assist so we need to choose our target based on our main assist.
             -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
@@ -781,14 +775,14 @@ function Combat.PetAttack(targetId, sendSwarm)
     end
 end
 
---- Determines whether the target should be reset for killing.
+--- Determines whether the target is valid for combat
 ---
---- @return boolean True if the target should be reset, false otherwise.
-function Combat.ShouldKillTargetReset()
-    local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", Globals.AutoTargetID))
-    local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", Globals.AutoTargetID))
-    return (((not killSpawn() or killSpawn.Dead()) or killCorpse()) and Globals.AutoTargetID > 0) and true or
-        false
+--- @return boolean True if the target is present and alive, false if not.
+function Combat.ValidCombatTarget(targetId)
+    if not targetId or targetId <= 0 then return false end
+    local targetSpawn = mq.TLO.Spawn(string.format("targetable id %d", targetId))
+    local targetCorpse = mq.TLO.Spawn(string.format("corpse id %d", targetId))
+    return targetSpawn() ~= nil and not targetSpawn.Dead() and not targetCorpse()
 end
 
 --- Checks if we should be doing our camping functionality

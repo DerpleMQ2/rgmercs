@@ -499,7 +499,7 @@ local function Main()
         Casting.ClickModRod()
     end
 
-    if Combat.ShouldKillTargetReset() then
+    if not Combat.ValidCombatTarget(Globals.AutoTargetID) then
         Globals.AutoTargetID = 0
     end
 

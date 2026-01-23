@@ -565,7 +565,7 @@ Config.DefaultConfig                                     = {
         Header = "Targeting",
         Category = "Targeting Behavior",
         Index = 2,
-        Tooltip = "Don't change combat targets when the MA changes its Mercs autotarget. Stay on the original enemy.",
+        Tooltip = "Once an autotarget is assigned, do not change that target.\n(Note: This will greatly interfere with MA Target Scan capability.)",
         Default = false,
         ConfigType = "Advanced",
     },
