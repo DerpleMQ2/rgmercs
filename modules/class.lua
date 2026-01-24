@@ -65,22 +65,32 @@ Module.TempSettings.ImmuneTargets            = {}
 
 Module.FAQ                                   = {
     [1] = {
-        Question = "How do I add, remove, or change what spells, AA, items or disciplines I am using or memorizing?",
+        Question = "How do I add, remove, or change what spells, AA, items or disciplines are being used?",
         Answer = "  RGMercs is designed to choose actions automatically based on the currently loaded 'Class Config'.\n\n" ..
             "  In addition to being able to adjust common settings, the default class configs generally offer some options to enable, disable, or fine-tune action use. These are generally found in (Options > Abililties).\n\n" ..
             "  If you open the options menu from the Class tab, all options added by the class config will have highlighting added.\n\n" ..
             "  Some default configs may also offer different role-based modes, such as a Shaman having a Healing Mode or Hybrid mode, or a Paladin having a Tank Mode and a DPS Mode. These modes can be selected on the Class tab.\n\n" ..
-            "  If you find that the options or loadouts do not meet your needs, we support a system to allow the use of 'Custom Configs' that can be freely edited by the user.",
+            "  If you find that the options or loadouts do not meet your needs, we support a system to allow the use of 'Custom Configs' that can be freely edited by the user (see FAQs on custom configs).",
         Settings_Used = "",
     },
     [2] = {
+        Question = "There isn't a setting to change the use of spell, AA, item or discipline, how do I stop it from being used in a rotation?",
+        Answer =
+            "  A rotation or rotation entry may be disabled using the GUI or CLI:\n\n" ..
+            "    GUI: Use the toggle found in the rotation list on the class tab. \n\n" ..
+            "    CLI: Use the rotation or rotation entry disable commands (search for 'rotation' and check the command list). \n\n" ..
+            "  Please note that there is no performance benefit to disabling unused or unmapped entries, it is suggested that you simply ignore them... your experience or (class) performance may be (negatively) impacted when you do receive the ability.",
+
+        Settings_Used = "",
+    },
+    [3] = {
         Question = "How do I create a Custom Class Config?",
         Answer = "  The GUI can be found on the Class Tab. Near the config load area, you will find a button to create the custom config.\n\n" ..
             "  The final destination will vary by server, but all files will be created in the (MQconfigdir)/rgmercs/class_configs directory. If you are currently on Live or Test, look for the 'Live folder there, otherwise, on emu, look for a server-specifc folder.\n\n" ..
             "  The process will copy the currently loaded config, so ensure you have selected the config you wish to use as a base before hitting the button. If the currently loaded config is *already* a custom config, it will be backed up with a date/time append on the old config.",
         Settings_Used = "",
     },
-    [3] = {
+    [4] = {
         Question = "How do I change which Class Config is loaded, or, how do I use my new Custom Class Config?",
         Answer = "  The GUI to change your currently loaded config can be found on the Class Tab.\n\n" ..
             "  The drop-down selection box can be used to choose which config you have loaded. Any configs found for your class (both default and custom) will be displayed.",
