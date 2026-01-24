@@ -353,7 +353,7 @@ Binds.Handlers    = {
         handler = function()
             Globals.PauseMain = false
             Core.DoCmd("/squelch /dge /rgl unpause")
-            Logger.log_info("\agAll clients paused!")
+            Logger.log_info("\agAll clients unpaused!")
         end,
     },
     ['rescanloadout'] = {
