@@ -240,7 +240,6 @@ local _ClassConfig = {
         ['SelfManaRegen'] = {
             "Mask of the Wild",
             "Mask of the Forest",
-            "Mask of the Hunter",
             "Mask of the Stalker",
         },
         ['HPTypeOneGroup'] = {
