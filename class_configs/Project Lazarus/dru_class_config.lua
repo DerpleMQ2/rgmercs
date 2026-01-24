@@ -1435,7 +1435,7 @@ local _ClassConfig = {
         },
     },
     ['ClassFAQ']          = {
-        [1] = {
+        {
             Question = "What is the current status of this class config?",
             Answer = "This class config is a current release customized specifically for Project Lazarus server.\n\n" ..
                 "  This config should perform admirably from start to endgame.\n\n" ..
@@ -1444,7 +1444,7 @@ local _ClassConfig = {
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
-        [2] = {
+        {
             Question = "Why would I only want to nuke on an 'Epic Proc'",
             Answer = "Epic 1.5, 2,0, and 2.5 worn foci have the chance to proc 'Wrath of the Wilderness', which makes your next nuke an instant cast.",
             Settings_Used = "",

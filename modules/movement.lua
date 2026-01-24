@@ -71,7 +71,7 @@ for t, _ in pairs(Module.Constants.CampfireNameToKit) do table.insert(Module.Con
 table.sort(Module.Constants.CampfireTypes)
 
 Module.FAQ             = {
-    [1] = {
+    {
         Question = "How do I move my PCs or have them follow my driver?",
         Answer = "Enable \"Chase\" on the Movement tab (or via Command-Line) and adjust settings in the Following category (Movement Options) to your liking.\n" ..
             "  There are two commonly used forms of following in MQ currently: \"Nav\" and \"A(dvanced)Follow\".\n\n" ..
@@ -80,7 +80,7 @@ Module.FAQ             = {
             "  There are times when Chase(Nav) and Afollow both have advantages, so situationally using both is common.",
         Settings_Used = "",
     },
-    [2] = {
+    {
         Question = "What is a camp in RGMercs? How do I use one?",
         Answer = "Camping is setting a tether to a particular location.\n\n" ..
             "  Rather than chasing/following another PC, you will continually return to the vicinity of the camp location you've set.\n\n" ..

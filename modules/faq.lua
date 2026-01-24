@@ -34,7 +34,7 @@ Module.CommandHandlers = {
 }
 
 Module.FAQ             = {
-	[1] = {
+	{
 		Question = "How do I broadcast commands to other PCs on my network?",
 		Answer = "  In short, however you would prefer to.\n\n" ..
 			"  While it is typical to use MQ2DanNet (or \"DanNet\" for short, a networking plugin included with MQ), other broadcasting solutions (such as EQBCS or E3BCA) should function without issue.\n\n" ..
@@ -43,7 +43,7 @@ Module.FAQ             = {
 			"  This feature is used sparingly, to allow users agency over what is broadcasted to their PCs.",
 		Settings_Used = "",
 	},
-	[2] = {
+	{
 		Question = "How do I assign a Main Assist in RGMercs?",
 		Answer = "There are multiple ways to choose an assist in RGMercs:\n\n" ..
 			"  If you are in a group, and have set the Main Assist role in the EQ group window, no further action is required.\n\n" ..
@@ -53,7 +53,7 @@ Module.FAQ             = {
 			"As soon as a valid MA is identified, the PC will seamlessly change to assisting them again.",
 		Settings_Used = "",
 	},
-	[3] = {
+	{
 		Question = "How do I use the Assist List?",
 		Answer = "First, find the Assist List UI on the Main tab, or familiarize yourself with related commands in the command list above.\n\n" ..
 			"  Add characters as you see fit to this list. RGMercs will check the list in order and use the first valid PC it finds as the Main Assist. \n\n" ..

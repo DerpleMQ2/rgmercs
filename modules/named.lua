@@ -53,7 +53,7 @@ Module.CommandHandlers = {
 }
 
 Module.FAQ             = {
-    [1] = {
+    {
         Question = "Why am I not taking any special actions on a Named, boss, or mission mob?",
         Answer =
             "  RGMercs default class configs fully support burning, using defenses, or other special actions on Named mobs, however, your target must be indentified as such. There are two methods for doing so:\n\n" ..

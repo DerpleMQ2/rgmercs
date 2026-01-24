@@ -1223,7 +1223,7 @@ local _ClassConfig = {
         },
     },
     ['ClassFAQ']        = {
-        [1] = {
+        {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
                 "  This class config has not received much attention, and has not been playtested, but should work well until level 70.\n\n" ..

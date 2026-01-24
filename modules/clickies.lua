@@ -18,7 +18,7 @@ local animItems                         = mq.FindTextureAnimation("A_DragItem")
 local Module                            = { _version = '0.1a', _name = "Clickies", _author = 'Derple', }
 Module.__index                          = Module
 Module.FAQ                              = {
-    [1] = {
+    {
         Question = "How do I set RGmercs up to use a clicky item?",
         Answer = "  Using the GUI on the Clickies tab, you can add, remove and organize clickies you would like your PCs to use, under customizable conditions.\n\n" ..
             "  If we don't currently support the clicky by default***, you can use the GUI to add items and conditions as you see fit.\nCan't quite find the right conditions in the Clickies Logic Blocks? Feedback is highly welcome. Please bear in mind that some conditions are restricted due to technical limitations.\n\n" ..

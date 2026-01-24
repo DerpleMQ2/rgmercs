@@ -904,7 +904,7 @@ return {
         },
     },
     ['ClassFAQ']        = {
-        [1] = {
+        {
             Question = "What is the current status of this class config?",
             Answer = "This class config is a current release aimed at official servers.\n\n" ..
                 "  This config should perform well from from start to endgame, but a TLP or emu player may find it to be lacking exact customization for a specific era.\n\n" ..

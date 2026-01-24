@@ -48,12 +48,12 @@ Config.Globals                                           = Globals
 Config.Constants                                         = Globals.Constants
 
 Config.FAQ                                               = {
-    [1] = {
+    {
         Question = "What do Announcements do?",
         Answer = "  Announcments are used to broadcast the selected options to the DanNet channel. The Group Announce optios will output the announcement to /gsay.",
         Settings_Used = "",
     },
-    [2] = {
+    {
         Question = "I want to manually control my driver and choose my own targets. What do I need to adjust?",
         Answer = "The following settings may require adjustment to drive yourself:\n\n" ..
             "Targeting:\nAuto Target (controls scanning for and autotargeting combat targets).\n\n" ..
@@ -65,7 +65,7 @@ Config.FAQ                                               = {
             "These settings and interactions have been recently adjusted, and feedback is requested if you see something not quite right!",
         Settings_Used = "",
     },
-    [3] = {
+    {
         Question = "How do I force auto combat on a target that isn't aggressive or isn't hostile?",
         Answer = "This is accomplished with the /rgl forcetarget <id?> command:\n\n" ..
             "The command accepts a target ID, and will fall back to your current target's ID if one is not supplied.\n\n" ..
@@ -75,7 +75,7 @@ Config.FAQ                                               = {
             "Only one Force Target can be directed at a time, and the state will be cleared automatically. It can be cleared manually with the /rgl forcetargetclear command.",
         Settings_Used = "",
     },
-    [4] = {
+    {
         Question = "How do I get help or support with a question, concern or issue, or, how do I provide feedback?",
         Answer = "Please make a basic attempt to search for the answer using the (searchable!) in-game FAQs, settings and command lists." ..
             "Still need help? No problem! You can find us in a few spots:\n\n" ..

@@ -70,7 +70,7 @@ Module.DefaultConfig     = {
 }
 
 Module.FAQ               = {
-	[1] = {
+	{
 		Question = "How can I get help with SmartLoot?",
 		Answer = "  SmartLoot (aka SL, Smart Loot) integration is offered by RGMercs on the basis of convenience'.\n\n" ..
 			"  All SL issues not revolving around that integration should be addressed to the author.\n\n" ..

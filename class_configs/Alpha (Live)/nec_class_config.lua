@@ -1418,7 +1418,7 @@ local _ClassConfig = {
         },
     },
     ['ClassFAQ']        = {
-        [1] = {
+        {
             Question = "What is the current status of this class config?",
             Answer = "This class config is an Alpha config aimed at late game live.\n\n" ..
                 "  It should perform well in a group, but may be lacking typical options or configuration.\n\n" ..

@@ -23,7 +23,7 @@ Module.ModuleLoaded      = false
 Module.TempSettings      = {}
 
 Module.FAQ               = {
-	[1] = {
+	{
 		Question = "How can I loot corpses on emu servers?",
 		Answer = "RGMercs offers a Loot Module to direct and integrate LootNScoot (LNS), an emu loot management script." ..
 			"Refer to the RG forums or the LNS github for installation or usage instructions, settings here are simply to control how RGMercs interacts with it." ..

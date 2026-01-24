@@ -1102,7 +1102,7 @@ return {
         },
     },
     ['ClassFAQ']        = {
-        [1] = {
+        {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
                 "  Up until T1 progression, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
