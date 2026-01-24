@@ -804,6 +804,25 @@ function Ui.RenderMercsStatus(showPopout)
             end,
 
         },
+        {
+            name = 'Free Inv',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 15.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.FreeInventory or 0, data_b.Data.FreeInventory or 0
+            end,
+            render = function(peer, data)
+                ImGui.PushStyleColor(ImGuiCol.Text,
+                    data.Data.FreeInventory >= 20 and Colors.ConditionPassColor or
+                    data.Data.FreeInventory >= 5 and Colors.ConditionMidColor or
+                    Colors.ConditionFailColor)
+                ImGui.Text(string.format("%d", data.Data.FreeInventory or 0))
+                ImGui.PopStyleColor()
+            end,
+
+        },
     }
 
     Ui.RenderTableData("MercStatusTable", tableColumns,

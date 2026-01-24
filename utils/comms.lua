@@ -133,6 +133,7 @@ function Comms.SendHeartbeat(assist, chase)
         State         = Globals.PauseMain and "Paused" or Globals.CurrentState,
         Chase         = chase,
         Invis         = mq.TLO.Me.Invis(),
+        FreeInventory = mq.TLO.Me.FreeInventory(3)(),
     }
     Comms.BroadcastMessage("RGMercs", "Heartbeat", heartBeat)
     -- update our own heartbeat too
