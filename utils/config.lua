@@ -75,6 +75,16 @@ Config.FAQ                                               = {
             "Only one Force Target can be directed at a time, and the state will be cleared automatically. It can be cleared manually with the /rgl forcetargetclear command.",
         Settings_Used = "",
     },
+    [4] = {
+        Question = "How do I get help or support with a question, concern or issue, or, how do I provide feedback?",
+        Answer = "Please make a basic attempt to search for the answer using the (searchable!) in-game FAQs, settings and command lists." ..
+            "Still need help? No problem! You can find us in a few spots:\n\n" ..
+            "    The #rg-mercs discord channel on the RedGuides discord...\n\n" ..
+            "    The RGMercs general forum (for questions/feedback) or the RGMercs support forum (for issues) on the RedGuides forums at redguides.com..." ..
+            "    Any 'MQ' style discord channel for a server we have a default config for (i.e, EQ Might, Project Lazarus).\n\n" ..
+            "Please do NOT DM, PM or otherwise privately contact RGMercs devs without personal invitation.",
+        Settings_Used = "",
+    },
 }
 -- Defaults
 Config.DefaultConfig                                     = {
