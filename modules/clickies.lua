@@ -1353,16 +1353,31 @@ function Module:RenderClickyData(clicky, clickyIdx)
         ImGui.TableHeadersRow()
 
         if clicky.itemName:len() > 0 then
-            local lastUsed = self.TempSettings.ClickyState[clicky.itemName] and (self.TempSettings.ClickyState[clicky.itemName].lastUsed or 0) or 0
-            local item = self.TempSettings.ClickyState[clicky.itemName] and
-                (self.TempSettings.ClickyState[clicky.itemName].item and self.TempSettings.ClickyState[clicky.itemName].item.Clicky.Spell.RankName.Name() or "None")
-                or "None"
+            local clickyState = self.TempSettings.ClickyState[clicky.itemName] or {}
+            local item = clickyState.item
+            local itemSpell = item and item.Clicky and item.Clicky.Spell
+            local spellName = itemSpell and itemSpell.Name() or (item and "No Clicky Spell or Missing Item" or "Item Not Found")
+            local lastUsed = clickyState.lastUsed or 0
+
             ImGui.TableNextColumn()
             ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.clock() - lastUsed)) or "Never")
             ImGui.TableNextColumn()
             ImGui.Text(clicky.itemName)
             ImGui.TableNextColumn()
-            ImGui.Text(item)
+            if itemSpell and itemSpell() then
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.LightOrange)
+                ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.NearBlack)
+                local _, clicked = ImGui.Selectable(spellName)
+                if clicked then
+                    itemSpell.Inspect()
+                end
+                ImGui.PopStyleColor(2)
+                Ui.Tooltip(string.format("Clicky Spell: %s (click to inspect)", spellName))
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Grey)
+                ImGui.Text(spellName)
+                ImGui.PopStyleColor()
+            end
         end
 
         ImGui.EndTable()

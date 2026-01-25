@@ -1402,7 +1402,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             if mappedAction then
                 if entry.type:lower() == "spell" then
                     ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.NearBlack)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -1412,7 +1412,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     Ui.Tooltip(string.format("Spell: %s (click to inspect)", rankSpell() or "Unknown"))
                 elseif entry.type:lower() == "song" then
                     ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.NearBlack)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -1422,7 +1422,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     Ui.Tooltip(string.format("Song: %s (click to inspect)", rankSpell() or "Unknown"))
                 elseif entry.type:lower() == "disc" then
                     ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Purple)
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.NearBlack)
                     local rankSpell = mappedAction.RankName
                     local _, clicked = ImGui.Selectable(rankSpell())
                     if clicked then
@@ -1434,7 +1434,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     local item = mq.TLO.FindItem("=" .. mappedAction)
                     if item() and item.Clicky() then
                         ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.LightOrange)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.NearBlack)
                         local _, clicked = ImGui.Selectable(mappedAction)
                         local clickySpell = item.Clicky.Spell
                         if clickySpell() and clicked then
@@ -1484,7 +1484,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     local aaPurchased = mq.TLO.Me.AltAbility(entry.name)() ~= nil
                     if aaPurchased then
                         ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.LightBlue)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.NearBlack)
                         local _, clicked = ImGui.Selectable(entry.name)
                         local aaSpell = mq.TLO.Me.AltAbility(entry.name).Spell
                         if aaSpell() and clicked then
@@ -1501,7 +1501,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     local item = mq.TLO.FindItem("=" .. entry.name)
                     if item() and item.Clicky() then
                         ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Yellow)
-                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.NearBlack)
                         local _, clicked = ImGui.Selectable(entry.name)
                         local clickySpell = item.Clicky.Spell
                         if clickySpell() and clicked then
