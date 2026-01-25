@@ -430,7 +430,7 @@ end
 --- @param slot number The slot number to reset.
 function Targeting.ResetXTSlot(slot)
     Core.DoCmd("/xtarget set %d ET", slot)
-    mq.delay(200, function() return (mq.TLO.Me.XTarget(slot).TargetType():lower() or "empty target") == "empty target" end)
+    mq.delay(500, function() return (mq.TLO.Me.XTarget(slot).TargetType():lower() or "empty target") == "empty target" end)
     Core.DoCmd("/xtarget set %d autohater", slot)
 end
 
