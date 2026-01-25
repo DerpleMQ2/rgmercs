@@ -456,6 +456,9 @@ function Combat.FindBestAutoTarget(validateFn)
                     Logger.log_debug("FindAutoTarget(): Forced Targeting: \ag%s\ax [ID: \ag%d\ax]", forceSpawn.CleanName() or "None", forceSpawn.ID())
                 end
             else
+                if mq.TLO.Me.XTarget(1).ID() == Globals.ForceTargetID then
+                    Targeting.ResetXTSlot(1)
+                end
                 Globals.ForceTargetID = 0
             end
         else

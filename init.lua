@@ -451,8 +451,8 @@ local function Main()
                 Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
                 Targeting.ClearTarget()
             end
-        elseif mq.TLO.Me.Combat() and (Config:GetSetting('AutoAttackSafety') or not mq.TLO.Target()) then
-            Logger.log_debug("\ayTurning off attack because we don't have a target or we are not OkToEngage!")
+        elseif mq.TLO.Me.Combat() and (Config:GetSetting('AutoAttackSafetyCheck') or not mq.TLO.Target()) then
+            Logger.log_debug("\ayTurning off attack because we don't have a target or we are not OkToEngage the current target!")
             Core.DoCmd("/attack off")
         end
     end

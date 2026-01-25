@@ -128,7 +128,7 @@ Binds.Handlers    = {
         "Alias for /rgl forcetarget. Will force the current target or <id> to be your autotarget no matter what until it is no longer valid. Can force combat on non-hostiles.",
         handler = function(targetId)
             local forcedTarget = targetId and mq.TLO.Spawn(targetId) or mq.TLO.Target
-            if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget)) then
+            if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget) or Targeting.TargetIsType("object", forcedTarget)) then
                 Globals.ForceTargetID = forcedTarget.ID()
                 Logger.log_info("\awForced Target: %s", forcedTarget.CleanName() or "None")
             end
@@ -150,7 +150,7 @@ Binds.Handlers    = {
         about = "Will force the current target or <id> to be your autotarget no matter what until it is no longer valid. Can force combat on non-hostiles.",
         handler = function(targetId)
             local forcedTarget = targetId and mq.TLO.Spawn(targetId) or mq.TLO.Target
-            if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget)) then
+            if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget) or Targeting.TargetIsType("object", forcedTarget)) then
                 Globals.ForceTargetID = forcedTarget.ID()
                 Logger.log_info("\awForced Target: %s", forcedTarget.CleanName() or "None")
             end
