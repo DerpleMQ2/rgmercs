@@ -1500,6 +1500,8 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             FAQ = "I want to use my Lich spells, how do I do that?",
+            Answer = "To use Lich spells, enable the 'Cast Lich' option in the Abilities section of the config. " ..
+                "You can also set the HP and Mana percentages at which the bot will cancel your Lich spell to help manage your survivability and mana consumption.",
         },
         ['StopLichHP']        = {
             DisplayName = "Stop Lich HP",
