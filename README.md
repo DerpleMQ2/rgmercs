@@ -1,4 +1,6 @@
+<p align="center">
 <img width="256" height="379" alt="image" src="https://github.com/user-attachments/assets/d99e3638-b188-4c70-bf37-bd1ad740b7a8" />
+</p>
 
 **RGMercs** is designed to transform your group from a jumbled mix of ***suspect social hotkeys***, ***asinine alt-tabbing*** and ***carpal-tunnel clicking*** into a **HIGH-FUNCTIONING SLAUGHTER MACHINE**.
 
