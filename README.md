@@ -82,4 +82,5 @@ To make a suggestion, or ask a question, find us on the RG Discord (in our #rg-m
 
 ***A special thanks to our contributors, users, and to those who have given us advice, feedback or assistance along the way!***
 
-<img width="334" height="421" alt="image" src="https://github.com/user-attachments/assets/3d902d28-04f7-4108-af7e-b5366a07a655" />
+<img width="366" height="411" alt="image" src="https://github.com/user-attachments/assets/c209e459-de42-45e0-9b4e-661a86a198bd" />
+
