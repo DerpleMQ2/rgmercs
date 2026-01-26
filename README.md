@@ -81,4 +81,5 @@ Getting settled in? Asking "why is that doing (that thing you don't like)?" RGMe
 To make a suggestion, or ask a question, find us on the RG Discord (in our #rg-mercs channel), the RG Forums, or any "MQ" discord channel for our supported emu servers.
 
 ***A special thanks to our contributors, users, and to those who have given us advice, feedback or assistance along the way!***
+
 <img width="334" height="421" alt="image" src="https://github.com/user-attachments/assets/3d902d28-04f7-4108-af7e-b5366a07a655" />
