@@ -42,7 +42,7 @@
 <img width="367" height="196" alt="image" src="https://github.com/user-attachments/assets/6a29a94f-8eb2-437c-bfd8-1d221d6af262" />
 
 
-*Searchable Options Window, Clicky Window, Pull Window*
+*Pull Window, Searchable Options Window, Clicky Window*
 
 &nbsp;
 
