@@ -1490,7 +1490,7 @@ Config.DefaultConfig                                     = {
 
 
     -- [ UI ] --
-    ['DisplayManualTarget']  = {
+    ['DisplayManualTarget']              = {
         DisplayName = "Display Manual Target",
         Group = "General",
         Header = "Interface",
@@ -1499,7 +1499,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
         Default = false,
     },
-    ['AlwaysShowMiniButton'] = {
+    ['AlwaysShowMiniButton']             = {
         DisplayName = "Always Show Mini Button",
         Group = "General",
         Header = "Interface",
@@ -1509,7 +1509,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Normal",
     },
-    ['EscapeMinimizes']      = {
+    ['EscapeMinimizes']                  = {
         DisplayName = "Escape Closes Main Window",
         Group = "General",
         Header = "Interface",
@@ -1519,7 +1519,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Normal",
     },
-    ['ShowDebugTiming']      = {
+    ['ShowDebugTiming']                  = {
         DisplayName = "Show Rotation Debug Timing",
         Group = "General",
         Header = "Interface",
@@ -1529,7 +1529,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Enable displaying the timing of each rotation step.",
         Default = false,
     },
-    ['BgOpacity']            = {
+    ['BgOpacity']                        = {
         DisplayName = "Background Opacity",
         Group = "General",
         Header = "Interface",
@@ -1540,7 +1540,7 @@ Config.DefaultConfig                                     = {
         Min = 20,
         Max = 100,
     },
-    ['FrameEdgeRounding']    = {
+    ['FrameEdgeRounding']                = {
         DisplayName = "Frame Edge Rounding",
         Group = "General",
         Header = "Interface",
@@ -1551,7 +1551,7 @@ Config.DefaultConfig                                     = {
         Min = 0,
         Max = 50,
     },
-    ['ScrollBarRounding']    = {
+    ['ScrollBarRounding']                = {
         DisplayName = "Scroll Bar Rounding",
         Group = "General",
         Header = "Interface",
@@ -1562,7 +1562,7 @@ Config.DefaultConfig                                     = {
         Min = 0,
         Max = 50,
     },
-    ['WarnCombatPaused']     = {
+    ['WarnCombatPaused']                 = {
         DisplayName = "Warn on Combat While Paused",
         Group = "General",
         Header = "Interface",
@@ -1571,7 +1571,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "If we gain aggro while paused, display a warning in the chat window.",
         Default = true,
     },
-    ['ShowFTControls']       = {
+    ['ShowFTControls']                   = {
         DisplayName = "Show ForceTarget Controls",
         Group = "General",
         Header = "Interface",
@@ -1580,10 +1580,51 @@ Config.DefaultConfig                                     = {
         Tooltip = "Show ForceTarget controls to clear/set forced targets.",
         Default = false, -- defaulted to false just to annoy Algar
     },
-
+    ['StatusLeftClickAction']            = {
+        DisplayName = "Mercs Status Left-Click Action",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 11,
+        Tooltip = "Action to perform when left-clicking a name in the Mercs Status Window",
+        Type = "Combo",
+        ComboOptions = { 'Target', 'Switch To', 'Do Nothing', },
+        Default = 1,
+        Min = 1,
+        Max = 3,
+        ConfigType = "Advaced",
+    },
+    ['StatusLeftClickCursorClickAction'] = {
+        DisplayName = "Mercs Status Cursor+Left-Click Action",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 12,
+        Tooltip = "Action to perform when left-clicking a name in the Mercs Status Window while having an item on your cursor.",
+        Type = "Combo",
+        ComboOptions = { 'Trade', 'Ignore Cursor Item', },
+        Default = 1,
+        Min = 1,
+        Max = 2,
+        ConfigType = "Advaced",
+    },
+    ['StatusRightClickAction']           = {
+        DisplayName = "Mercs Status Right-Click Action",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 13,
+        Tooltip = "Action to perform when right-clicking a name in the Mercs Status Window",
+        Type = "Combo",
+        ComboOptions = { 'Target', 'Switch To', 'Do Nothing', },
+        Default = 2,
+        Min = 1,
+        Max = 3,
+        ConfigType = "Advaced",
+    },
 
     -- [ UI Colors ] --
-    ['MainButtonUnpausedColor']     = {
+    ['MainButtonUnpausedColor']          = {
         DisplayName = "Main Button Unpaused",
         Group = "General",
         Header = "Interface",
@@ -1596,7 +1637,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['MainButtonPausedColor']       = {
+    ['MainButtonPausedColor']            = {
         DisplayName = "Main Button Paused",
         Group = "General",
         Header = "Interface",
@@ -1609,7 +1650,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['ConditionPassColor']          = {
+    ['ConditionPassColor']               = {
         DisplayName = "Condition Pass",
         Group = "General",
         Header = "Interface",
@@ -1622,7 +1663,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['ConditionMidColor']           = {
+    ['ConditionMidColor']                = {
         DisplayName = "Condition Mid (between pass/fail)",
         Group = "General",
         Header = "Interface",
@@ -1635,7 +1676,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['ConditionFailColor']          = {
+    ['ConditionFailColor']               = {
         DisplayName = "Condition Fail",
         Group = "General",
         Header = "Interface",
@@ -1648,7 +1689,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['ConditionDisabledColor']      = {
+    ['ConditionDisabledColor']           = {
         DisplayName = "Condition Disabled",
         Group = "General",
         Header = "Interface",
@@ -1661,7 +1702,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['MainCombatColor']             = {
+    ['MainCombatColor']                  = {
         DisplayName = "Combat",
         Group = "General",
         Header = "Interface",
@@ -1674,7 +1715,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['MainDowntimeColor']           = {
+    ['MainDowntimeColor']                = {
         DisplayName = "Downtime",
         Group = "General",
         Header = "Interface",
@@ -1688,7 +1729,7 @@ Config.DefaultConfig                                     = {
         end,
     },
 
-    ['SearchHighlightColor']        = {
+    ['SearchHighlightColor']             = {
         DisplayName = "Search Highlight",
         Group = "General",
         Header = "Interface",
@@ -1701,7 +1742,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['AssistSpawnCloseColor']       = {
+    ['AssistSpawnCloseColor']            = {
         DisplayName = "Assist Spawn Text If Close",
         Group = "General",
         Header = "Interface",
@@ -1714,7 +1755,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['AssistSpawnFarColor']         = {
+    ['AssistSpawnFarColor']              = {
         DisplayName = "Assist Spawn Text If Far",
         Group = "General",
         Header = "Interface",
@@ -1727,7 +1768,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['BurnFlashColorOne']           = {
+    ['BurnFlashColorOne']                = {
         DisplayName = "Burn Burn Flash Color One",
         Group = "General",
         Header = "Interface",
@@ -1740,7 +1781,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['BurnFlashColorTwo']           = {
+    ['BurnFlashColorTwo']                = {
         DisplayName = "Burn Burn Flash Color Two",
         Group = "General",
         Header = "Interface",
@@ -1753,7 +1794,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['FTHighlight']                 = {
+    ['FTHighlight']                      = {
         DisplayName = "ForceTarget Highlight",
         Group = "General",
         Header = "Interface",
@@ -1766,7 +1807,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['CharmReasonColor']            = {
+    ['CharmReasonColor']                 = {
         DisplayName = "Charm Immune Reason Text",
         Group = "General",
         Header = "Interface",
@@ -1779,7 +1820,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['FAQCmdQuestionColor']         = {
+    ['FAQCmdQuestionColor']              = {
         DisplayName = "FAQ Command / Question Text",
         Group = "General",
         Header = "Interface",
@@ -1792,7 +1833,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['FAQUsageAnswerColor']         = {
+    ['FAQUsageAnswerColor']              = {
         DisplayName = "FAQ Usage / Answer Text",
         Group = "General",
         Header = "Interface",
@@ -1805,7 +1846,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['FAQDescColor']                = {
+    ['FAQDescColor']                     = {
         DisplayName = "FAQ Description Text",
         Group = "General",
         Header = "Interface",
@@ -1818,7 +1859,7 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
-    ['FAQLinkColor']                = {
+    ['FAQLinkColor']                     = {
         DisplayName = "FAQ Link Text",
         Group = "General",
         Header = "Interface",
@@ -1832,7 +1873,7 @@ Config.DefaultConfig                                     = {
         end,
     },
 
-    ['UserThemeOverrideClassTheme'] = {
+    ['UserThemeOverrideClassTheme']      = {
         DisplayName = "Override Class Theme",
         Group = "General",
         Header = "Interface",
@@ -1842,7 +1883,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         Type = "Custom",
     },
-    ['UserTheme']                   = {
+    ['UserTheme']                        = {
         DisplayName = "User Theme",
         Group = "General",
         Header = "Interface",
@@ -1854,7 +1895,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- [Internals] --
-    ['LogLevel']                    = {
+    ['LogLevel']                         = {
         DisplayName = "Log Level",
         Category = "Internals",
         Type = "Custom",
@@ -1862,13 +1903,13 @@ Config.DefaultConfig                                     = {
         Min = 1,
         Max = 6,
     },
-    ['LogToFile']                   = {
+    ['LogToFile']                        = {
         DisplayName = "Log To File",
         Category = "Internals",
         Type = "Custom",
         Default = false,
     },
-    ['EnableDebugging']             = {
+    ['EnableDebugging']                  = {
         DisplayName = "Enable Debugging",
         Category = "Internals",
         Index = 0,
@@ -1877,7 +1918,7 @@ Config.DefaultConfig                                     = {
         ConfigType = "Advanced",
     },
 
-    ['RunCoroutinesDuringLoops']    = {
+    ['RunCoroutinesDuringLoops']         = {
         DisplayName = "Run Coroutines During Loops",
         Category = "Internals",
         Index = 1,
@@ -1887,7 +1928,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Cross client comms
-    ['ActorPeerTimeout']            = {
+    ['ActorPeerTimeout']                 = {
         DisplayName = "Actor Peer Timeout",
         Group = "General",
         Header = "Interface",
@@ -1899,7 +1940,7 @@ Config.DefaultConfig                                     = {
         Max = 120,
     },
 
-    ['LootModuleType']              = {
+    ['LootModuleType']                   = {
         DisplayName = "Loot Module Type",
         Group = "General",
         Header = "Loot(Emu)",
@@ -1932,7 +1973,7 @@ Config.DefaultConfig                                     = {
     },
 
     --Deprecated/Need Adjusted to Custom/Etc
-    ['FullUI']                      = {
+    ['FullUI']                           = {
         DisplayName = "Use Full UI",
         Group = "General",
         Header = "Interface",
@@ -1940,7 +1981,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Toggle between Full UI and a Simple UI [Experimental]",
         Default = true,
     },
-    ['EnableOptionsUI']             = {
+    ['EnableOptionsUI']                  = {
         DisplayName = "Enable Options UI",
         Type = "Custom",
         Group = "General",
@@ -1949,7 +1990,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Show the experimental Options UI window",
         Default = false,
     },
-    ['EnableAFUI']                  = {
+    ['EnableAFUI']                       = {
         DisplayName = "Enable Very Special UI",
         Type = "Custom",
         Group = "General",

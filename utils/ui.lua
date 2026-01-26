@@ -326,6 +326,22 @@ function Ui.RenderConfigSelector()
     end
 end
 
+function Ui.HandleStatusClickAction(peer, action)
+    local name, _ = Comms.GetCharAndServerFromPeer(peer)
+    if name then
+        local peerSpawn = mq.TLO.Spawn("=" .. name)
+        if peerSpawn.ID() > 0 then
+            if action == 1 then
+                peerSpawn.DoTarget()
+            elseif action == 2 then
+                Comms.SendPeerDoCmd(peer, "/foreground")
+            elseif action == 3 then
+                -- nothing
+            end
+        end
+    end
+end
+
 function Ui.RenderMercsStatus(showPopout)
     if showPopout then
         if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
@@ -364,15 +380,19 @@ function Ui.RenderMercsStatus(showPopout)
                         if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
                             local peerSpawn = mq.TLO.Spawn("=" .. name)
                             if peerSpawn.ID() > 0 then
-                                peerSpawn.DoTarget()
-                                if (mq.TLO.Cursor.ID() or 0) > 0 and peerSpawn.Distance() <= 15 then
-                                    Core.DoCmd("/timed 1 /click left target")
-                                    Core.DoCmd('/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
-                                    Comms.SendPeerDoCmd(peer, '/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
+                                if (mq.TLO.Cursor.ID() or 0) > 0 and Config:GetSetting('StatusLeftClickCursorClickAction') == 1 then
+                                    if peerSpawn.Distance() <= 15 then
+                                        peerSpawn.DoTarget()
+                                        Core.DoCmd("/timed 1 /click left target")
+                                        Core.DoCmd('/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
+                                        Comms.SendPeerDoCmd(peer, '/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
+                                    end
+                                else
+                                    Ui.HandleStatusClickAction(peer, Config:GetSetting('StatusLeftClickAction'))
                                 end
                             end
                         elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
-                            Comms.SendPeerDoCmd(peer, "/foreground")
+                            Ui.HandleStatusClickAction(peer, Config:GetSetting('StatusRightClickAction'))
                         end
                     end
                     if data.Data.Zone ~= mq.TLO.Zone.Name() then
