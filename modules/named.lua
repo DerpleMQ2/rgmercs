@@ -5,42 +5,24 @@ local Globals          = require("utils.globals")
 local Targeting        = require("utils.targeting")
 local Ui               = require("utils.ui")
 local Comms            = require("utils.comms")
-local Files            = require("utils.files")
 local Logger           = require("utils.logger")
 local Strings          = require("utils.strings")
-local Set              = require("mq.Set")
-local Nameds           = require("utils.nameds")
+local NamedDefault     = require("utils.named_default")
+local NamedEQMight     = require("utils.named_eqmight")
 
-local Module           = { _version = '0.1a', _name = "Named", _author = 'Grimmier', }
+local Module           = { _version = '1.1', _name = "Named", _author = 'Derple, Algar, Grimmier', }
 Module.__index         = Module
 Module.DefaultConfig   = {}
 Module.CachedNamedList = {}
 Module.SaveRequested   = nil
 
 Module.NamedList       = {}
-Module.NamedAM         = {}
-Module.NamedSM         = {}
-Module.CurSelection    = 1
-Module.namesLoaded     = false
 Module.LastNamedCheck  = 0
 
-Module.DefNamed        = Nameds or {}
-Module.EQMightNamed    = { "Fabled", "Ultrafabled", "Timeless", }
+Module.DefNamed        = Globals.CurServer == "EQ Might" and (NamedEQMight or {}) or (NamedDefault or {})
 
 
 Module.DefaultConfig   = {
-    ['NamedTable'] = {
-        DisplayName = "Named Table",
-        Tooltip = "Enables loading a different Named List",
-        Type = "Custom",
-        Default = 1,
-        Min = 1,
-        Max = 3,
-        FAQ = "Why do we have different options for the named list?",
-        Answer =
-            "RGMercs has a built-in named list that is suitable for official EQ servers. However, other servers may change or add named mobs. In that case, you can replace the default list by loading your Alert Master or MQ2SpawnMaster list instead.\n" ..
-            "Please note that regardless of which list you choose, we will use the MQ2SpawnMaster TLO (if loaded) to check that list for the purposes of when to burn or use certain abilities.",
-    },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Type = "Custom",
@@ -90,7 +72,7 @@ end
 
 function Module:LoadSettings()
     self.NamedList = {}
-    Logger.log_debug("Named Combat Module Loading Settings for: %s.", Globals.CurLoadedChar)
+    Logger.log_debug("Named Module Loading Settings for: %s.", Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
     local settings = {}
     local firstSaveRequired = false
@@ -105,13 +87,6 @@ function Module:LoadSettings()
     end
 
     Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-
-    self.CurSelection = Config:GetSetting('NamedTable')
-
-    self.NamedAM = self:LoadNamed("AlertMaster.ini")
-    self.NamedSM = self:LoadNamed("MQ2SpawnMaster.ini")
-
-    self:RefreshNamedTable()
 end
 
 function Module.New()
@@ -137,72 +112,6 @@ function Module:Render()
     ImGui.Text("Make any mob \"named\" for burns by adding it to your MQ2SpawnMaster list!")
     ImGui.NewLine()
     Ui.RenderZoneNamed()
-
-    ---@type boolean|nil
-    local pressed
-
-    ImGui.SetNextItemWidth(150)
-    local namedTable = Config:GetSetting('NamedTable')
-
-    namedTable, pressed = ImGui.Combo("Named Table", namedTable, { 'RGMercs', 'Alert Master', 'MQ2SpawnMaster', })
-    if pressed then
-        if namedTable ~= self.CurSelection then
-            Config:SetSetting('NamedTable', namedTable)
-            self:RefreshNamedTable()
-            self.CurSelection = namedTable
-        end
-    end
-    Ui.Tooltip(
-        "RGMercs has a built-in named list that is suitable for official EQ servers. However, other servers may change or add named mobs. In that case, you can replace the default list by loading your Alert Master or MQ2SpawnMaster list instead.\n" ..
-        "Please note that regardless of which list you choose, we will use the MQ2SpawnMaster TLO (if loaded) to check that list for the purposes of when to burn or use certain abilities.")
-    ImGui.SameLine()
-    if ImGui.SmallButton("Reload from INI") then
-        if Config:GetSetting('NamedTable') == 2 then
-            self.NamedAM = self:LoadNamed("AlertMaster.ini", true)
-        elseif Config:GetSetting('NamedTable') == 3 then
-            self.NamedSM = self:LoadNamed("MQ2SpawnMaster.ini", true)
-        end
-        self:RefreshNamedTable()
-    end
-end
-
----comment
----@param fileName any @ The file name to load mq.configDir/ is appended to the front of the file name
----@param forced boolean|nil @ Should re reload the ini if already loaded?
----@return table
-function Module:LoadNamed(fileName, forced)
-    forced = forced ~= nil and forced or false
-    if self.namesLoaded and not forced then
-        if fileName == "AlertMaster.ini" then
-            return self.NamedAM
-        elseif fileName == "MQ2SpawnMaster.ini" then
-            return self.NamedSM
-        end
-    end
-
-    fileName = mq.configDir .. "/" .. fileName
-    if not Files.file_exists(fileName) then
-        return {}
-    end
-
-    local file = assert(io.open(fileName, 'r'), 'Error loading file : ' .. fileName);
-    local data = {};
-    local section;
-    for line in file:lines() do
-        local tempSection = line:match('^%[([^%[%]]+)%]');
-        if (tempSection) then
-            section = tempSection:lower();
-            data[section] = data[section] or {};
-        end
-        local param, value = line:match("^([%w|_'.%s-]+)=%s-(.+)$");
-        if (section ~= nil and param ~= 'OnSpawnCommand' and param ~= 'Enabled' and param ~= nil and value ~= nil) then
-            data[section][param] = value;
-        end
-    end
-    file:close();
-    self.namesLoaded = true;
-
-    return data;
 end
 
 function Module:GiveTime(combat_state)
@@ -217,32 +126,6 @@ function Module:OnDeath()
     -- Death Handler
 end
 
-function Module:RefreshNamedTable()
-    Nameds = {}
-    if Config:GetSetting('NamedTable') > 1 then
-        if Config:GetSetting('NamedTable') == 2 then
-            self.NamedList = self.NamedAM
-        elseif Config:GetSetting('NamedTable') == 3 then
-            self.NamedList = self.NamedSM
-        end
-        local zoneName = mq.TLO.Zone.Name():lower()
-        local shortZone = mq.TLO.Zone.ShortName():lower()
-        for zone, data in pairs(self.NamedList) do
-            if zone:lower() == zoneName or zone:lower() == shortZone then
-                Nameds[shortZone] = {}
-                for _, spawnName in pairs(data) do
-                    table.insert(Nameds[shortZone], spawnName)
-                end
-            end
-        end
-    else
-        Nameds = self.DefNamed
-    end
-    -- Force a refresh of the named cache so the UI updates
-    self.LastZoneID = -1
-    self:RefreshNamedCache()
-end
-
 --- Caches the named list in the zone
 function Module:RefreshNamedCache()
     if self.LastZoneID ~= mq.TLO.Zone.ID() then
@@ -250,13 +133,13 @@ function Module:RefreshNamedCache()
         self.NamedList = {}
         local zoneName = mq.TLO.Zone.Name():lower()
 
-        for _, n in ipairs(Nameds[zoneName] or {}) do
+        for _, n in ipairs(self.DefNamed[zoneName] or {}) do
             self.NamedList[n] = true
         end
 
         zoneName = mq.TLO.Zone.ShortName():lower()
 
-        for _, n in ipairs(Nameds[zoneName] or {}) do
+        for _, n in ipairs(self.DefNamed[zoneName] or {}) do
             self.NamedList[n] = true
         end
     end
@@ -290,14 +173,6 @@ function Module:IsNamed(spawn)
 
     if Targeting.ForceNamed then return true end
 
-    if Globals.CurServer == "EQ Might" then
-        for _, name in ipairs(self.EQMightNamed) do
-            if spawn and spawn() and (spawn.CleanName() or ""):find(name) then
-                return true
-            end
-        end
-    end
-
     self:RefreshNamedCache()
 
     if self.NamedList[spawn.Name()] or self.NamedList[spawn.CleanName()] then return true end
@@ -311,7 +186,7 @@ function Module:IsNamed(spawn)
 end
 
 function Module:OnZone()
-    self:RefreshNamedTable()
+    self:RefreshNamedCache()
 end
 
 function Module:OnCombatModeChanged()
