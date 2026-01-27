@@ -144,6 +144,7 @@ function Module:Exec(scriptText)
     locals.Tables       = setmetatable({}, { __index = require('utils.tables'), })
     locals.ConfigShare  = setmetatable({}, { __index = require('utils.rg_config_share'), })
     locals.Set          = setmetatable({}, { __index = require('mq.set'), })
+    locals.DanNet       = setmetatable({}, { __index = require('lib.dannet.helpers'), })
 
 
     locals.print   = function(...)
