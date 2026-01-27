@@ -650,6 +650,8 @@ return {
         "Supernatural Guardian",
         "Terris Thule",
         "Saryrn",
+        "Vallon Zek",
+        "Tallon Zek",
         "Bertoxxulous",
         "Cazic Thule",
         "Innoruuk",
