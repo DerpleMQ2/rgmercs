@@ -1248,19 +1248,19 @@ return {
         "Legend of Bloodied Quarries",
     },
 
-    ["mmcd"] = {
-        "Bloodstice",
-        "Count Drakvish",
-        "Madame Chiasa",
-        "Nightrage Sanguinarch",
-        "Scion Radical",
-        "Shade of Chiasa",
-        "Shade of Sage of Death",
-        "The Sage of Death",
-        "Trysta the Dark Tutor",
-        "Vaelin Grimlore the Dead",
-        "The Silent Pianist",
-        "Queen Vaelrosa Nyxfang",
+    ["mmcd"] = { -- there is a space in front of all of these names.
+        " Bloodstice",
+        " Count Drakvish",
+        " Madame Chiasa",
+        " Nightrage Sanguinarch",
+        " Scion Radical",
+        " Shade of Chiasa",
+        " Shade of Sage of Death",
+        " The Sage of Death",
+        " Trysta the Dark Tutor",
+        " Vaelin Grimlore the Dead",
+        " The Silent Pianist",
+        " Queen Vaelrosa Nyxfang",
     },
 
     ["taka"] = {
