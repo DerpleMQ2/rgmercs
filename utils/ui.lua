@@ -1210,30 +1210,32 @@ function Ui.RenderZoneNamed()
 
         local namedList = Modules:ExecModule("Named", "GetNamedList")
         for _, named in ipairs(namedList) do
-            if Ui.ShowDownNamed or (named.Spawn() and named.Spawn.ID() > 0) then
+            local namedSpawn = named.Spawn
+            local spawnExists = namedSpawn and namedSpawn()
+
+            if spawnExists and namedSpawn.PctHPs() > 0 then
                 ImGui.TableNextColumn()
                 local _, clicked = ImGui.Selectable(named.Name, false)
                 if clicked then
-                    if named.Spawn() and named.Spawn.ID() then
-                        mq.TLO.Spawn(named.Spawn.ID()).DoTarget()
-                    end
+                    namedSpawn.DoTarget()
                 end
                 ImGui.TableNextColumn()
-                if named.Spawn() and named.Spawn.PctHPs() > 0 then
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
-                    ImGui.Text(Icons.FA_SMILE_O)
-                    ImGui.PopStyleColor()
-                    ImGui.TableNextColumn()
-                    ImGui.Text(tostring(math.ceil(named.Distance)))
-                else
-                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
-                    ImGui.Text(Icons.FA_FROWN_O)
-                    ImGui.PopStyleColor()
-                    ImGui.TableNextColumn()
-                    ImGui.Text("0")
-                end
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
+                ImGui.Text(Icons.FA_SMILE_O)
+                ImGui.PopStyleColor()
                 ImGui.TableNextColumn()
-                Ui.NavEnabledLoc(named.Spawn.LocYXZ() or "0,0,0")
+                ImGui.Text(tostring(math.ceil(named.Distance)))
+                ImGui.TableNextColumn()
+                Ui.NavEnabledLoc(named.Loc)
+            elseif spawnExists or Ui.ShowDownNamed then
+                ImGui.TableNextColumn()
+                ImGui.Text(named.Name)
+                ImGui.TableNextColumn()
+                ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionFailColor)
+                ImGui.Text(Icons.FA_FROWN_O)
+                ImGui.PopStyleColor()
+                ImGui.TableNextColumn()
+                ImGui.TableNextColumn()
             end
         end
 

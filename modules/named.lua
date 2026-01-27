@@ -150,8 +150,9 @@ function Module:CheckZoneNamed()
 
     local tmpTbl = {}
     for name, _ in pairs(self.NamedList) do
-        local spawn = mq.TLO.Spawn(string.format("NPC %s", name))
-        table.insert(tmpTbl, { Name = name, Distance = spawn.Distance() or 9999, Spawn = spawn, })
+        local spawnList = mq.getFilteredSpawns(function(spawn) return spawn.CleanName() == name and spawn.Type() == "NPC" end)
+        local spawn = spawnList[1]
+        table.insert(tmpTbl, { Name = name, Spawn = spawn, Distance = spawn and spawn.Distance() or 9999, Loc = spawn and spawn.LocYXZ() or "0,0,0", })
     end
 
     table.sort(tmpTbl, function(a, b)
