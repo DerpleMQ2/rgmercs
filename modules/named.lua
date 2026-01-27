@@ -7,8 +7,8 @@ local Ui               = require("utils.ui")
 local Comms            = require("utils.comms")
 local Logger           = require("utils.logger")
 local Strings          = require("utils.strings")
-local NamedDefault     = require("utils.named_default")
-local NamedEQMight     = require("utils.named_eqmight")
+local NamedDefault     = require("namedlist.named_default")
+local NamedEQMight     = require("namedlist.named_eqmight")
 
 local Module           = { _version = '1.1', _name = "Named", _author = 'Derple, Algar, Grimmier', }
 Module.__index         = Module

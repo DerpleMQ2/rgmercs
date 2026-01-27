@@ -4440,4 +4440,81 @@ return {
         "Zarek",
     },
 
+    --SOR
+
+    ["embattledpogrowth"] = {
+        "Adralydia Stormraven",
+        "Ashbark",
+        "Blood-soaked Pack Leader",
+        "Bonesplinter",
+        "Grimclaw",
+        "Nu`Kul",
+        "Vallina",
+        "Ik`Drun",
+        "Telthel the Wretched",
+        "Trung",
+        "Fiflip Hopemender",
+        "Magmus Flame Eater",
+        "Deathbringer Colossus",
+    },
+
+    ["candlemakers"] = {
+        "Caiser the Lava Dweller",
+        "Captain Foley",
+        "Everburning Candle Master",
+        "Flame Devourer",
+        "Furok the Firestarter",
+        "Haywired Creation",
+        "Loken the Rabid",
+        "Melted Monstrosity",
+        "Scragen the Vicious",
+        "The Great Shell",
+    },
+
+    ["arcstoneruins"] = {
+        "a manasheen plaguebloom",
+        "Ash Harbinger",
+        "Broj the Devourer",
+        "Dravok the Rootbinder",
+        "Fire Maw",
+        "Irdrath the Withered",
+        "Orvain the Mooncaller",
+        "Velith the Cinderfang",
+    },
+
+    ["ruinedrelic"] = {
+        "living marble",
+        "Marith the Fireborn",
+        "Pfath of the Wind",
+        "Raw Meat",
+        "Sharosh the Lost",
+        "Vosk the Terrakin",
+        "Whisper",
+        "Windshear",
+    },
+
+    ["vortex"] = {
+        "Azureflutter",
+        "Chromaire",
+        "Corax the Nethercharged",
+        "Forlien the Abyss Speaker",
+        "Iridesca",
+        "NeuroKraken",
+        "OctoXecutor",
+        "Stormstomper",
+        "Torrentclaw",
+    },
+
+    ["spite"] = {
+        "Chirid",
+        "Coagulation of Spite",
+        "Drendre Gnarledgear",
+        "Husk Devourer",
+        "Lherre, the Silkwhisperer",
+        "Matriarch of Enmity",
+        "Mite",
+        "Scorned Weeper",
+        "The Headsman",
+    },
+
 }
