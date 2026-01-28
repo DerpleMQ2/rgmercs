@@ -608,7 +608,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     if self:GetResolvedActionMapItem('HasteManaCombo') or not Targeting.TargetIsAMelee(target) then return false end
-                    return Casting.GroupBuffCheck(spell, target) and Casting.GroupBuffCheck(mq.TLO.Spell("Unified Alacrity"), target) -- Fixes bad stacking check
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
