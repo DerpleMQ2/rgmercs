@@ -206,9 +206,22 @@ Module.DefaultConfig   = {
         Default = true,
         ConfigType = "Advanced",
     },
+    ['AttemptToFixStuckTimer']                 = {
+        DisplayName = "Stuck Fix Timer",
+        Group = "Movement",
+        Header = "Following",
+        Category = "Chase",
+        Index = 10,
+        Tooltip = "The number of seconds we must be stuck before attempting to fix it.",
+        Default = 5,
+        Min = 1,
+        Max = 600,
+        ConfigType = "Advanced",
+    },
+
 
     -- Camp
-    ['AutoCampRadius']                         = {
+    ['AutoCampRadius']   = {
         DisplayName = "Camp Radius",
         Group = "Movement",
         Header = "Following",
@@ -220,7 +233,7 @@ Module.DefaultConfig   = {
         Max = 300,
         OnChange = function(self) Movement.UpdateMapRadii() end,
     },
-    ['CampHard']                               = {
+    ['CampHard']         = {
         DisplayName = "Camp Hard",
         Group = "Movement",
         Header = "Following",
@@ -229,7 +242,7 @@ Module.DefaultConfig   = {
         Tooltip = "Return to the exact camp location whenever possible, even if we are within the Camp Radius.",
         Default = false,
     },
-    ['MaintainCampfire']                       = {
+    ['MaintainCampfire'] = {
         DisplayName = "Maintain Campfire",
         Group = "Movement",
         Header = "Following",
@@ -242,7 +255,7 @@ Module.DefaultConfig   = {
         Min = 1,
         Max = #Module.Constants.CampfireTypes,
     },
-    ['DoFellow']                               = {
+    ['DoFellow']         = {
         DisplayName = "Enable Fellowship Insignia",
         Group = "Movement",
         Header = "Following",
@@ -787,7 +800,7 @@ function Module:GiveTime(combat_state)
                         Module.TempSettings.StuckAtTime = os.time()
                     end
 
-                    if os.time() - Module.TempSettings.StuckAtTime > 5 then
+                    if os.time() - Module.TempSettings.StuckAtTime >= Config:GetSetting('AttemptToFixStuckTimer') then
                         Logger.log_warning("\awWARNING:\ax Navigation appears to be stuck while chasing %s", chaseTarg)
                         -- is autosize loaded?
                         if mq.TLO.Plugin("MQ2AutoSize").IsLoaded() then
