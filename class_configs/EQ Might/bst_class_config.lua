@@ -430,7 +430,7 @@ return {
                 name = "SlowSpell",
                 type = "Spell",
                 load_cond = function(self)
-                    return mq.TLO.Me.Level() < 68 or not (Core.GetResolvedActionMapItem('SlowSpell').Level() or 99) < 70 or not mq.TLO.FindItem("=Legendary Armband of Muada")()
+                    return mq.TLO.Me.Level() < 68 or (Core.GetResolvedActionMapItem('SlowSpell').Level() or 99) >= 70 or not mq.TLO.FindItem("=Legendary Armband of Muada")()
                 end,
                 cond = function(self, spell, target)
                     return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and not Casting.SlowImmuneTarget(target)
@@ -812,7 +812,7 @@ return {
                     cond = function(self)
                         return Config:GetSetting('DoSlow') and
                             -- use this unless we don't have the armband, can't use the armband, or have a spell that casts faster than the armband
-                            (mq.TLO.Me.Level() < 68 or (Core.GetResolvedActionMapItem('SlowSpell').Level() or 0) < 70 or not mq.TLO.FindItem("=Legendary Armband of Muada")())
+                            (mq.TLO.Me.Level() < 68 or (Core.GetResolvedActionMapItem('SlowSpell').Level() or 99) >= 70 or not mq.TLO.FindItem("=Legendary Armband of Muada")())
                     end,
                 },
                 { name = "Icelance1", },
