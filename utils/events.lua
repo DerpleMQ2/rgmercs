@@ -71,6 +71,8 @@ function Events.DoEvents(force)
         else
             Events.CreateHeartBeat()
         end
+    else
+        Events.CreateHeartBeat()
     end
 
     Modules:ExecAll("DoEvents")

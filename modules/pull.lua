@@ -183,6 +183,7 @@ Module.DefaultConfig                   = {
         Tooltip = "Enable pulling",
         Default = false,
         Type = "Custom",
+        OnChange = function(self) Movement.UpdateMapRadii() end,
     },
     ['PullAbility']                            = {
         DisplayName = "Pull Ability",

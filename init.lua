@@ -246,9 +246,6 @@ local function RGInit(...)
         end
     end
 
-    -- send heartbeat to peers.
-    Events.CreateHeartBeat()
-
     initPctComplete = 10
     initMsg = "Scanning for Configurations..."
     Core.ScanConfigDirs()
