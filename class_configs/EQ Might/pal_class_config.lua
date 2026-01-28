@@ -779,7 +779,7 @@ return {
                 load_cond = function() return Config:GetSetting('AegoSymbol') == 3 or Config:GetSetting('AegoSymbol') == 3 end,
                 cond = function(self, spell, target)
                     if (spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId() then return false end
-                    return Casting.GroupBuffCheck(spell, target) and Casting.GroupBuffCheck(mq.TLO.Spell(3047), target) -- don't try to overwrite Kazad's Mark
+                    return Casting.GroupBuffCheck(spell, target) and Casting.PeerBuffCheck(3047, target, true) -- don't try to overwrite Kazad's Mark
                 end,
             },
             {

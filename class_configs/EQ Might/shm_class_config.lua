@@ -704,7 +704,7 @@ local _ClassConfig = {
                         (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 999) < 70
                 end,
                 cond = function(self, itemName, target)
-                    return Globals.AutoTargetIsNamed and Casting.DotItemCheck(itemName, target)
+                    return Casting.GroupBuffItemCheck(itemName, target) and Casting.PeerBuffCheck(9975, target, true) --Panther Rk. II
                 end,
             },
             {
@@ -715,8 +715,8 @@ local _ClassConfig = {
                         (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 0) == 70
                 end,
                 cond = function(self, spell, target)
-                    if not Casting.CastReady(spell) then return false end                                          --avoid constant group buff checks
-                    return Casting.GroupBuffCheck(spell, target) and not Casting.PeerBuffCheck(9975, target, true) --Panther Rk. II
+                    if not Casting.CastReady(spell) then return false end                                      --avoid constant group buff checks
+                    return Casting.GroupBuffCheck(spell, target) and Casting.PeerBuffCheck(9975, target, true) --Panther Rk. II
                 end,
             },
             {
@@ -1065,11 +1065,25 @@ local _ClassConfig = {
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
+            {
+                name = "Artifact of the Champion",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Artifact of the Champion")() and mq.TLO.Me.Level() >= 68 end,
+                cond = function(self, itemName, target)
+                    return Casting.GroupBuffItemCheck(itemName, target)
+                        -- Don't try to overwrite Champion with Ferine Avatar
+                        and Casting.PeerBuffCheck(5417, target, true)
+                end,
+            },
             { --Fix this, some priests will want this, adjust options
                 name = "LowLvlAtkBuff",
                 type = "Spell",
+                load_cond = function(self) return not mq.TLO.FindItem("=Artifact of the Champion")() or mq.TLO.Me.Level() < 68 end,
                 cond = function(self, spell, target)
-                    return Targeting.TargetIsAMelee(target) and Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
+                    if (spell.TargetType() or ""):lower() == "single" and not Targeting.TargetIsAMelee(target) then return false end
+                    return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
+                        -- Don't try to overwrite Champion with Ferine Avatar
+                        and Casting.PeerBuffCheck(5417, target, true)
                 end,
             },
             {
@@ -1105,6 +1119,17 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if (spell.TargetType() or ""):lower() ~= "group v2" and not (Targeting.TargetIsATank(target) or Targeting.TargetIsMyself(target)) then return false end
                     return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "Artifact of the Leopard",
+                type = "Item",
+                load_cond = function(self)
+                    return mq.TLO.FindItem("=Artifact of the Leopard")() and mq.TLO.Me.Level() >= 65 and
+                        (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 999) < 70
+                end,
+                cond = function(self, itemName, target)
+                    return Casting.GroupBuffItemCheck(itemName, target) and Casting.PeerBuffCheck(9975, target, true) --Panther Rk. II
                 end,
             },
             {
@@ -1199,7 +1224,7 @@ local _ClassConfig = {
                     end,
                 },
                 { name = "SlowProcBuff", },
-                { name = "LowLvlAtkBuff", },
+                { name = "LowLvlAtkBuff", cond = function(self) return not mq.TLO.FindItem("=Artifact of the Champion")() or mq.TLO.Me.Level() < 68 end, },
                 { name = "ColdNuke",      cond = function(self) return Config:GetSetting('DoColdNuke') end, },
                 { name = "PoisonNuke",    cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
                 { name = "CurseDot",      cond = function(self) return Config:GetSetting('DoCurseDot') end, },
@@ -1227,7 +1252,7 @@ local _ClassConfig = {
                         return (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 0) == 70 or not mq.TLO.FindItem("=Artifact of the Leopard")() or mq.TLO.Me.Level() < 65
                     end,
                 }, { name = "SlowProcBuff", },
-                { name = "LowLvlAtkBuff", },
+                { name = "LowLvlAtkBuff",   cond = function(self) return not mq.TLO.FindItem("=Artifact of the Champion")() or mq.TLO.Me.Level() < 68 end, },
                 { name = "ColdNuke",        cond = function(self) return Config:GetSetting('DoColdNuke') end, },
                 { name = "PoisonNuke",      cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
                 { name = "CurseDot",        cond = function(self) return Config:GetSetting('DoCurseDot') end, },
