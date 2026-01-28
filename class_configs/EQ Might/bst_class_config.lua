@@ -419,8 +419,19 @@ return {
         },
         ['Slow']           = {
             {
+                name = "Legendary Armband of Muada",
+                type = "Item",
+                load_cond = function(self)
+                    return mq.TLO.Me.Level() >= 68 and (Core.GetResolvedActionMapItem('SlowSpell').Level() or 99) < 70 and mq.TLO.FindItem("=Legendary Armband of Muada")()
+                end,
+
+            },
+            {
                 name = "SlowSpell",
                 type = "Spell",
+                load_cond = function(self)
+                    return mq.TLO.Me.Level() < 68 or not (Core.GetResolvedActionMapItem('SlowSpell').Level() or 99) < 70 or not mq.TLO.FindItem("=Legendary Armband of Muada")()
+                end,
                 cond = function(self, spell, target)
                     return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and not Casting.SlowImmuneTarget(target)
                 end,
@@ -796,11 +807,18 @@ return {
             spells = {
                 { name = "HealSpell",    cond = function(self) return Config:GetSetting('DoHeals') end, },
                 { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
-                { name = "SlowSpell",    cond = function(self) return Config:GetSetting('DoSlow') end, },
+                {
+                    name = "SlowSpell",
+                    cond = function(self)
+                        return Config:GetSetting('DoSlow') and
+                            -- use this unless we don't have the armband, can't use the armband, or have a spell that casts faster than the armband
+                            (mq.TLO.Me.Level() < 68 or (Core.GetResolvedActionMapItem('SlowSpell').Level() or 0) < 70 or not mq.TLO.FindItem("=Legendary Armband of Muada")())
+                    end,
+                },
                 { name = "Icelance1", },
                 { name = "Icelance2", },
-                { name = "BloodDot",     cond = function(self) return Config:GetSetting('DoDot') end, },
-                { name = "EndemicDot",   cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "BloodDot",   cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "EndemicDot", cond = function(self) return Config:GetSetting('DoDot') end, },
                 { name = "SwarmPet", },
                 { name = "AtkBuff", cond = function(self) return mq.TLO.Me.Level() < 67 or not mq.TLO.FindItem("=Artifact of Irionu")() end,
                 },

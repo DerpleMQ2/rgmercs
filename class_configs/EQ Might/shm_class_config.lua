@@ -1251,7 +1251,8 @@ local _ClassConfig = {
                     cond = function(self)
                         return (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 0) == 70 or not mq.TLO.FindItem("=Artifact of the Leopard")() or mq.TLO.Me.Level() < 65
                     end,
-                }, { name = "SlowProcBuff", },
+                },
+                { name = "SlowProcBuff", },
                 { name = "LowLvlAtkBuff",   cond = function(self) return not mq.TLO.FindItem("=Artifact of the Champion")() or mq.TLO.Me.Level() < 68 end, },
                 { name = "ColdNuke",        cond = function(self) return Config:GetSetting('DoColdNuke') end, },
                 { name = "PoisonNuke",      cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
