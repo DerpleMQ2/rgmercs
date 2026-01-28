@@ -795,12 +795,12 @@ function Module:GiveTime(combat_state)
                     Module.TempSettings.StuckAtTime = 0 -- not stuck
                 end
 
-                if Config:GetSetting('AttemptToFixStuck') and Nav.Active() and Nav.Velocity() == 0 then
+                if Config:GetSetting('AttemptToFixStuck') and Nav.Active() and (Nav.Velocity() == 0 or Config:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer')) then
                     if Module.TempSettings.StuckAtTime == 0 then
                         Module.TempSettings.StuckAtTime = os.time()
                     end
 
-                    if os.time() - Module.TempSettings.StuckAtTime >= Config:GetSetting('AttemptToFixStuckTimer') then
+                    if ((os.time() - Module.TempSettings.StuckAtTime) >= Config:GetSetting('AttemptToFixStuckTimer')) or Config:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer') then
                         Logger.log_warning("\awWARNING:\ax Navigation appears to be stuck while chasing %s", chaseTarg)
                         -- is autosize loaded?
                         if mq.TLO.Plugin("MQ2AutoSize").IsLoaded() then

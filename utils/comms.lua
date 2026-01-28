@@ -110,7 +110,7 @@ function Comms.SendHeartbeat(assist, chase)
         Curse         = tostring(mq.TLO.Me.Cursed.ID()),
         ---@diagnostic disable-next-line: undefined-field
         Mezzed        = tostring(mq.TLO.Me.Mezzed.ID()),
-        Corruption    = tostring(mq.TLO.Me.Diseased.ID()),
+        Corruption    = tostring(mq.TLO.Me.Corrupted.ID()),
         Stunned       = mq.TLO.Me.Stunned(),
         HPs           = mq.TLO.Me.Dead() and 0 or mq.TLO.Me.PctHPs(),
         Mana          = useMana and mq.TLO.Me.PctMana() or nil,
