@@ -910,8 +910,18 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Legendary Armband of Mithaniel",
+                type = "Item",
+                load_cond = function() return mq.TLO.Me.Level() >= 68 and mq.TLO.FindItem("=Legendary Armband of Mithaniel")() end,
+                cond = function(self, itemName, target)
+                    if Config:GetSetting('AegoSymbol') == (1 or 4) then return false end
+                    return Casting.GroupBuffItemCheck(itemName, target)
+                end,
+            },
+            {
                 name = "GroupSymbolBuff",
                 type = "Spell",
+                load_cond = function() return mq.TLO.Me.Level() < 68 or not mq.TLO.FindItem("=Legendary Armband of Mithaniel")() end,
                 cond = function(self, spell, target)
                     if Config:GetSetting('AegoSymbol') == (1 or 4) or ((spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId()) then return false end
                     return Casting.GroupBuffCheck(spell, target)
