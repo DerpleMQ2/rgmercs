@@ -2902,7 +2902,7 @@ end
 
 -- this function only considers actual movement, not combat state.
 function Config:GetTimeSinceLastPositionChange()
-    return os.clock() - Globals.LastMove.TimeAtPositionChange
+    return os.clock() - (Globals.LastMove.TimeAtPositionChange or 0)
 end
 
 function Config:GetCommandHandlers()
