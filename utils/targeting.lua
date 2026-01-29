@@ -217,6 +217,28 @@ function Targeting.GetTargetAggroPct()
     return (mq.TLO.Target.PctAggro() or 0)
 end
 
+--- Retrieves the aggro percentage of the current autotarget.
+--- @return number The aggro percentage of the current autotarget.
+function Targeting.GetAutoTargetAggroPct()
+    if Globals.AutoTargetID == 0 then return 0 end
+
+    if mq.TLO.Target.ID() == Globals.AutoTargetID then
+        return mq.TLO.Target.PctAggro() or 0
+    end
+
+    local xtCount = mq.TLO.Me.XTarget()
+
+    for i = 1, xtCount do
+        local xtSpawn = mq.TLO.Me.XTarget(i)
+
+        if xtSpawn() and (xtSpawn.ID() or 0) == Globals.AutoTargetID then
+            return xtSpawn.PctAggro() or 0
+        end
+    end
+
+    return 0
+end
+
 --- Determines the type of the given target.
 --- @param target MQSpawn|MQTarget|groupmember? The target whose type is to be determined.
 --- @return string The type of the target as a string.

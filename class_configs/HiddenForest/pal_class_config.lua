@@ -615,8 +615,13 @@ return {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Globals.AutoTargetIsNamed or
-                    self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                return combat_state == "Combat" and Targeting.IHaveAggro(100) and
+                    -- we are under our defense start HP
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or
+                        -- we have met our defense count threshold
+                        self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true) or
+                        -- we are fighting a named and we are (presumably) tanking it
+                        (Globals.AutoTargetIsNamed and Targeting.GetAutoTargetAggroPct() >= 100))
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
