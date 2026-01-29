@@ -54,7 +54,7 @@ jobs:
             RANGE="HEAD"
           fi
 
-          git log $RANGE --pretty=format:"* %s (%h) ~%an" >> rg_release_notes.md
+          git log $RANGE --pretty=format:"* %s (%h)%n%nNotes: %n%b%n~%an%n" >> rg_release_notes.md
 
           cat rg_release_notes.md
 
