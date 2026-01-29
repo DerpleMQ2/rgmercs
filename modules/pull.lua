@@ -26,6 +26,7 @@ Module.TempSettings.BuffCount             = 0
 Module.TempSettings.LastPullOrCombatEnded = os.clock()
 Module.TempSettings.TargetSpawnID         = 0
 Module.TempSettings.CurrentWP             = 1
+Module.TempSettings.ReachedWP             = false
 Module.TempSettings.PullTargets           = {}
 Module.TempSettings.PullTargetsMetaData   = {}
 Module.TempSettings.PullIgnoreTargets     = {}
@@ -2145,6 +2146,7 @@ function Module:GiveTime(combat_state)
                 self:SetPullState(PullStates.PULL_NAV_INTERRUPT, "")
                 return
             else
+                self.TempSettings.ReachedWP = true
                 self:SetPullState(PullStates.PULL_IDLE, "")
             end
             self:SetPullState(PullStates.PULL_IDLE, "")
@@ -2176,7 +2178,10 @@ function Module:GiveTime(combat_state)
 
     if self.TempSettings.PullID == 0 and self:IsPullMode("Farm") then
         -- move to next WP
-        self:IncrementWpId()
+        if self.TempSettings.ReachedWP then
+            self:IncrementWpId()
+            self.TempSettings.ReachedWP = false
+        end
         -- Here we want to nav to our current waypoint. If we engage an enemy while
         -- we are currently traveling to our waypoint, we need to set our state to
         -- PULL_NAVINTERRUPT so that when Pulling re-engages after combat, we continue
@@ -2191,8 +2196,7 @@ function Module:GiveTime(combat_state)
             self:SetPullState(PullStates.PULL_NAV_INTERRUPT, "")
             return
         else
-            -- TODO: AtWP()
-            --/if (${SubDefined[${Zone.ShortName}_AtWaypoint_${Pull_FarmWPNum}]}) /call ${Zone.ShortName}_AtWaypoint_${Pull_FarmWPNum}
+            self.TempSettings.ReachedWP = true
         end
 
         self:SetPullState(PullStates.PULL_IDLE, "")
