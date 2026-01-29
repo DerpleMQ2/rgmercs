@@ -266,12 +266,23 @@ Module.DefaultConfig                   = {
         Min = 1,
         Max = 300,
     },
+    ['WaypointDelay']                          = {
+        DisplayName = "Waypoint Delay",
+        Group = "Movement",
+        Header = "Pulling",
+        Category = "Pull Rules",
+        Index = 2,
+        Tooltip = "Farm mode: Wait for x seconds before moving to the next WP. Timer resets if a pull target is found at the current WP.",
+        Default = 0,
+        Min = 0,
+        Max = 3000,
+    },
     ['AutoSetRoles']                           = {
         DisplayName = "Auto Set Group Roles",
         Group = "Movement",
         Header = "Pulling",
         Category = "Pull Rules",
-        Index = 2,
+        Index = 3,
         Tooltip =
         "As the group leader, automatically update MA and Puller group roles when pulling is enabled. We will set ourselves as puller, and attempt to set the assigned RGMercs MA as the group MA.",
         Default = true,
@@ -281,7 +292,7 @@ Module.DefaultConfig                   = {
         Group = "Movement",
         Header = "Pulling",
         Category = "Pull Rules",
-        Index = 3,
+        Index = 4,
         Tooltip = "Pull in spite of being debuffed (Not ignored: Rez Sickness, Root.)",
         Default = false,
         ConfigType = "Advanced",
@@ -291,7 +302,7 @@ Module.DefaultConfig                   = {
         Group = "Movement",
         Header = "Pulling",
         Category = "Pull Rules",
-        Index = 4,
+        Index = 5,
         Tooltip = "Allow pulling mobs that are in water. Check your EB effects if enabled!.",
         Default = false,
     },
@@ -300,7 +311,7 @@ Module.DefaultConfig                   = {
         Group = "Movement",
         Header = "Pulling",
         Category = "Pull Rules",
-        Index = 5,
+        Index = 6,
         Tooltip = "When moving back to camp, back up and continually face your target. (Prevents stuns, etc.)",
         Default = true,
     },
@@ -309,7 +320,7 @@ Module.DefaultConfig                   = {
         Group = "Movement",
         Header = "Pulling",
         Category = "Pull Rules",
-        Index = 6,
+        Index = 7,
         Tooltip = "Number of mobs in chain pull mode on xtarg before we stop pulling",
         Default = 3,
         FAQ = "How do I pull using the Chain mode? What is the Chain Count?",
@@ -323,7 +334,7 @@ Module.DefaultConfig                   = {
         Group = "Movement",
         Header = "Pulling",
         Category = "Pull Rules",
-        Index = 7,
+        Index = 8,
         Tooltip = "How long we will attempt to pull a target before adding it to an ignore list.",
         Default = 15,
         Min = 5,
@@ -338,7 +349,7 @@ Module.DefaultConfig                   = {
         Group = "Movement",
         Header = "Pulling",
         Category = "Pull Rules",
-        Index = 8,
+        Index = 9,
         Tooltip = "Disable Pulling once you have died (even if you are rezzed).",
         Default = true,
     },
@@ -1313,6 +1324,7 @@ function Module:IncrementWpId()
     else
         self.TempSettings.CurrentWP = 1
     end
+    Logger.log_verbose("Pull: Incrementing farm waypoint to %d", self.TempSettings.CurrentWP)
 end
 
 ---@param id number
@@ -1959,7 +1971,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
     local maxMove = Config:GetSetting('MaxMoveTime') * 1000
     while mq.TLO.Navigation.Active() do
-        Logger.log_verbose("NavToWaypoint Aggro Count: %d", Targeting.GetXTHaterCount())
+        Logger.log_verbose("NavToWaypoint Waypoint: %d Aggro Count: %d", self.GetCurrentWpId(self), Targeting.GetXTHaterCount())
 
         if Targeting.GetXTHaterCount() > 0 and not ignoreAggro then
             if mq.TLO.Navigation.Active() then
@@ -1987,6 +1999,12 @@ function Module:NavToWaypoint(loc, ignoreAggro)
             -- in this way, nav will continue towards the original target while we rescan
             return false
         end
+    end
+
+    local distanceToWP = mq.TLO.Math.Distance(loc)()
+    if distanceToWP > 50 then
+        Logger.log_verbose("NavToWaypoint Waypoint: Something went wrong. Current distance to WP: %d. (Possible manual interruption or conflicting nav command.)", distanceToWP)
+        return false
     end
 
     return true
@@ -2118,8 +2136,6 @@ function Module:GiveTime(combat_state)
         self:SetPullState(PullStates.PULL_IDLE, "")
     end
 
-    self:SetLastPullOrCombatEndedTimer()
-
     -- We're ready to pull, but first, check if we're in farm mode and if we were interrupted
     if self:IsPullMode("Farm") then
         local currentWpId = self:GetCurrentWpId()
@@ -2142,11 +2158,15 @@ function Module:GiveTime(combat_state)
 
             self:SetPullState(PullStates.PULL_MOVING_TO_WP, string.format("WP Id: %d", currentWpId))
             -- TODO: PreNav Actions
-            if not self:NavToWaypoint(self:GetWPById(currentWpId)) then
+            local wpData = self:GetWPById(currentWpId)
+            if not self:NavToWaypoint(string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z)) then
                 self:SetPullState(PullStates.PULL_NAV_INTERRUPT, "")
+                self.TempSettings.ReachedWP = false
                 return
             else
+                Logger.log_verbose("Pull: Reached Farm Waypoint %d.", currentWpId)
                 self.TempSettings.ReachedWP = true
+                self:SetLastPullOrCombatEndedTimer()
                 self:SetPullState(PullStates.PULL_IDLE, "")
             end
             self:SetPullState(PullStates.PULL_IDLE, "")
@@ -2177,8 +2197,21 @@ function Module:GiveTime(combat_state)
     end
 
     if self.TempSettings.PullID == 0 and self:IsPullMode("Farm") then
+        -- if we are idle, wait a bit if we have a waypoint delay set (interrupt: bypass this, we aren't at the WP)
+        if self.TempSettings.PullState == PullStates.PULL_IDLE and (os.clock() - self.TempSettings.LastPullOrCombatEnded) < Config:GetSetting('WaypointDelay') then
+            Logger.log_verbose("PULL: Waiting for farm waypoint delay, next attempt in %d seconds.",
+                Config:GetSetting('WaypointDelay') - (os.clock() - self.TempSettings.LastPullOrCombatEnded))
+            return
+        end
+
         -- move to next WP
         if self.TempSettings.ReachedWP then
+            -- if we are idle, wait a bit if we have a waypoint delay set (interrupt: bypass this, we aren't at the WP)
+            if (os.clock() - self.TempSettings.LastPullOrCombatEnded) < Config:GetSetting('WaypointDelay') then
+                Logger.log_verbose("PULL: Waiting for farm waypoint delay, next attempt in %d seconds.",
+                    Config:GetSetting('WaypointDelay') - (os.clock() - self.TempSettings.LastPullOrCombatEnded))
+                return
+            end
             self:IncrementWpId()
             self.TempSettings.ReachedWP = false
         end
@@ -2190,13 +2223,18 @@ function Module:GiveTime(combat_state)
         -- TODO: PreNav()
         --/if (${SubDefined[${Zone.ShortName}_PreNav_${Pull_FarmWPNum}]}) /call ${Zone.ShortName}_PreNav_${Pull_FarmWPNum}
 
-        local wpData = self:GetWPById(self:GetCurrentWpId())
+        local currentWP = self:GetCurrentWpId()
+        local wpData = self:GetWPById(currentWP)
+
         self:SetPullState(PullStates.PULL_MOVING_TO_WP, string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z))
         if not self:NavToWaypoint(string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z)) then
             self:SetPullState(PullStates.PULL_NAV_INTERRUPT, "")
+            self.TempSettings.ReachedWP = false
             return
         else
+            Logger.log_verbose("Pull: Reached Farm Waypoint %d.", currentWP)
             self.TempSettings.ReachedWP = true
+            self:SetLastPullOrCombatEndedTimer()
         end
 
         self:SetPullState(PullStates.PULL_IDLE, "")
@@ -2545,6 +2583,7 @@ function Module:GiveTime(combat_state)
         -- TODO PostPullCampFunc()
     end
 
+    self:SetLastPullOrCombatEndedTimer()
     self.TempSettings.TargetSpawnID = 0
     self:SetPullState(PullStates.PULL_IDLE, "")
 end
