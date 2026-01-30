@@ -71,38 +71,63 @@ end
 --- @return boolean True if the PC checking should cast the buff, false otherwise.
 function Casting.LocalBuffCheck(spellId, checkPet)
     if not spellId then return false end
+
+    local spell = mq.TLO.Spell(spellId)
+    if not spell or not spell() then return false end
+    local spellName = spell.Name()
+
     if checkPet and mq.TLO.Me.Pet.ID() == 0 then return false end
 
     local me = mq.TLO.Me
-    local spellName = mq.TLO.Spell(spellId).Name()
 
-    if (checkPet and me.BlockedPetBuff(spellName)() == spellName or me.BlockedBuff(spellName)() == spellName) then
+    local function spellBlocked()
+        if checkPet then
+            return me.BlockedPetBuff(spellName)() == spellName
+        end
+        return me.BlockedBuff(spellName)() == spellName
+    end
+
+    local function spellActive(checkId, checkName)
+        if checkPet then
+            return me.Pet.Buff(checkName)() ~= nil
+        end
+        return me.FindBuff("id " .. checkId)() ~= nil
+    end
+
+    local function spellStacks(spell)
+        if checkPet then
+            return spell.StacksPet()
+        end
+        return spell.Stacks()
+    end
+
+    if spellBlocked() then
         Logger.log_verbose("LocalBuffCheck: %s(ID:%d) is on the blocked spell list, aborting check.", spellName, spellId)
         return false
     end
 
-    if (checkPet and not me.Pet.Buff(spellName)() or not me.FindBuff("id " .. spellId)()) then
+    if not spellActive(spellId, spellName) then
         Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, let's check for triggers.", spellName, spellId)
-        local numEffects = mq.TLO.Spell(spellId).NumEffects()
+        local numEffects = spell.NumEffects()
         local triggerCount = 0
         local triggerFound = 0
         for i = 1, numEffects do
-            local triggerSpell = mq.TLO.Spell(spellId).Trigger(i)
+            local triggerSpell = spell.Trigger(i)
             --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
             if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
                 local triggerName = triggerSpell.Name()
-                local triggerID = triggerSpell.ID()
-                if (checkPet and not me.Pet.Buff(triggerName)() or not me.FindBuff("id " .. triggerID)()) then
-                    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, checking stacking.", triggerName, triggerID)
-                    if (checkPet and triggerSpell.StacksPet() or triggerSpell.Stacks()) then
-                        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) seems to stack, let's do it!", triggerName, triggerID)
+                local triggerId = triggerSpell.ID()
+                if not spellActive(triggerId, triggerName) then
+                    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, checking stacking.", triggerName, triggerId)
+                    if spellStacks(triggerSpell) then
+                        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) seems to stack, let's do it!", triggerName, triggerId)
                         return true
                     else
-                        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) does not stack, moving on.", triggerName, triggerID)
+                        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) does not stack, moving on.", triggerName, triggerId)
                         triggerFound = triggerFound + 1
                     end
                 else
-                    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) found, moving on.", triggerName, triggerID)
+                    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) found, moving on.", triggerName, triggerId)
                     triggerFound = triggerFound + 1
                 end
                 triggerCount = triggerCount + 1
@@ -119,8 +144,7 @@ function Casting.LocalBuffCheck(spellId, checkPet)
         Logger.log_verbose("LocalBuffCheck: %s(ID:%d) found, ending check.", spellName, spellId)
         return false
     end
-    local spellStacks = checkPet and mq.TLO.Spell(spellId).StacksPet() or mq.TLO.Spell(spellId).Stacks()
-    if spellStacks then
+    if spellStacks(spell) then
         Logger.log_verbose("LocalBuffCheck: %s(ID:%d) seems to stack, let's do it!", spellName, spellId)
         return true
     end
