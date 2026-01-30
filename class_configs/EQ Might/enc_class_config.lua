@@ -620,7 +620,9 @@ local _ClassConfig = {
                 name = "HasteBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.ID()).ID() end,
-                cond = function(self, spell) return Casting.PetBuffCheck(spell) end,
+                cond = function(self, spell)
+                    return Casting.PetBuffCheck(spell) and Casting.LocalBuffCheck(5521, true) -- Don't cast if we have Hastening of Salik
+                end,
             },
             {
                 name = "Fortify Companion",
@@ -649,12 +651,21 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Artifact of Salik",
+                type = "Item",
+                load_cond = function() return mq.TLO.Me.Level() >= 67 and mq.TLO.FindItem("=Artifact of Salik")() end,
+                cond = function(self, itemName, target)
+                    return Casting.GroupBuffItemCheck(itemName, target)
+                end,
+            },
+            {
                 name = "HasteBuff",
                 type = "Spell",
+                load_cond = function() return mq.TLO.Me.Level() < 67 or not mq.TLO.FindItem("=Artifact of Salik")() end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     if not Targeting.TargetIsAMelee(target) then return false end
-                    return Casting.GroupBuffCheck(spell, target)
+                    return Casting.GroupBuffCheck(spell, target) and Casting.PeerBuffCheck(5521, target, true) -- Don't cast if we have Hastening of Salik
                 end,
             },
             {
