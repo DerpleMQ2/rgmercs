@@ -678,6 +678,8 @@ function Module:GiveTime(combat_state)
         return
     end
 
+    self:FixStuck()
+
     if not self:InCampZone() and Config:GetSetting("ReturnToCamp") then
         Config:SetSetting("ReturnToCamp", false)
     end
@@ -790,61 +792,6 @@ function Module:GiveTime(combat_state)
                         self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseId, Config:GetSetting('ChaseDistance'))
                     end
                 end
-                -- are we stuck?
-                if Nav.Active() and Nav.Velocity() > 0 then
-                    Module.TempSettings.StuckAtTime = 0 -- not stuck
-                end
-
-                if Config:GetSetting('AttemptToFixStuck') and Nav.Active() and (Nav.Velocity() == 0 or Config:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer')) then
-                    if Module.TempSettings.StuckAtTime == 0 then
-                        Module.TempSettings.StuckAtTime = os.time()
-                    end
-
-                    if ((os.time() - Module.TempSettings.StuckAtTime) >= Config:GetSetting('AttemptToFixStuckTimer')) or Config:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer') then
-                        Logger.log_warning("\awWARNING:\ax Navigation appears to be stuck while chasing %s", chaseTarg)
-                        -- is autosize loaded?
-                        if mq.TLO.Plugin("MQ2AutoSize").IsLoaded() then
-                            Logger.log_warning("\awWARNING:\ax Attempting to unstick via MQ2AutoSize")
-                            ---@diagnostic disable-next-line: undefined-field
-                            local startingSize = mq.TLO.AutoSize.SizeSelf()
-                            ---@diagnostic disable-next-line: undefined-field
-                            local startingToggleEnabled = mq.TLO.AutoSize.Enabled()
-                            ---@diagnostic disable-next-line: undefined-field
-                            local startingToggleSelf = mq.TLO.AutoSize.ResizeSelf()
-
-                            if not startingToggleEnabled then
-                                Logger.log_warning("\awWARNING:\ax Enabling AutoSize to unstick")
-                                Core.DoCmd("/squelch /autosize on")
-                            end
-
-                            if not startingToggleSelf then
-                                Logger.log_warning("\awWARNING:\ax Enabling AutoSize Self to unstick")
-                                Core.DoCmd("/squelch /autosize self on")
-                            end
-
-                            local cycleSizes = { startingSize * 2, 1, startingSize * 1.5, 1, startingSize * 3, 1, }
-                            for _, size in ipairs(cycleSizes) do
-                                Logger.log_warning("\awWARNING:\ax Setting size to %d to unstick", size)
-                                Core.DoCmd("/squelch /autosize sizeself %d", size)
-                                mq.delay("2s", function() return mq.TLO.Navigation.Velocity() > 0 end)
-                                if mq.TLO.Navigation.Velocity() > 0 then
-                                    Logger.log_warning("\agUnstuck successful!\ax Resuming chase.")
-                                    break
-                                end
-                            end
-                            Core.DoCmd("/squelch /autosize sizeself %d", startingSize) -- ensure we end back at starting size
-                            if not startingToggleSelf then
-                                Core.DoCmd("/squelch /autosize self off")
-                            end
-                            if not startingToggleEnabled then
-                                Core.DoCmd("/squelch /autosize off")
-                            end
-                            Module.TempSettings.StuckAtTime = 0
-                        else
-                            Logger.log_warning("\awWARNING:\ax MQ2AutoSize not loaded, cannot unstuck.")
-                        end
-                    end
-                end
             elseif chaseSpawnDist < 400 then -- Algarnote I left this alone, legacy code, not sure if this value is signifigant or arbitrary
                 Logger.log_warning("\awWARNING:\ax Chase Target %s but no nav mesh - using afollow instead", chaseTarg)
                 self:RunCmd("/squelch /afollow spawn %d", chaseId)
@@ -855,6 +802,87 @@ function Module:GiveTime(combat_state)
                 if (chaseSpawn.Distance() or 0) < stopDist then
                     self:RunCmd("/squelch /afollow off")
                 end
+            end
+        end
+    end
+end
+
+function Module:IAmStuck()
+    local Nav = mq.TLO.Navigation
+    Logger.log_debug("IAmStuck(): Nav.Active(): %s, Nav.Velocity(): %d, TimeSinceLastPositionChange(): %d, AttemptToFixStuckTimer(): %d, LastNavCmd: %s",
+        tostring(Nav.Active()), Nav.Velocity(), Config:GetTimeSinceLastPositionChange(), Config:GetSetting('AttemptToFixStuckTimer'), Movement:GetTimeSinceLastNav())
+
+    return Nav.Active() and not Nav.Paused() and Movement:GetSecondsSinceLastNav() > Config:GetSetting('AttemptToFixStuckTimer') and
+        (Nav.Velocity() == 0 or Config:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer'))
+end
+
+function Module:FixStuck()
+    local Nav = mq.TLO.Navigation
+
+    if not Nav.Active() then
+        Module.TempSettings.StuckAtTime = 0 -- not stuck
+        return
+    end
+
+    -- are we stuck?
+    if not self:IAmStuck() then
+        Module.TempSettings.StuckAtTime = 0 -- not stuck
+        return
+    end
+
+    if Config:GetSetting('AttemptToFixStuck') and self:IAmStuck() then
+        if Module.TempSettings.StuckAtTime == 0 then
+            Module.TempSettings.StuckAtTime = os.time()
+        end
+
+        if ((os.time() - Module.TempSettings.StuckAtTime) >= Config:GetSetting('AttemptToFixStuckTimer')) or Config:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer') then
+            Logger.log_warning("\awWARNING:\ax Navigation appears to be stuck")
+            -- is autosize loaded?
+            if mq.TLO.Plugin("MQ2AutoSize").IsLoaded() then
+                Logger.log_warning("\awWARNING:\ax Attempting to unstick via MQ2AutoSize")
+                ---@diagnostic disable-next-line: undefined-field
+                local startingSize = mq.TLO.AutoSize.SizeSelf()
+                ---@diagnostic disable-next-line: undefined-field
+                local startingToggleEnabled = mq.TLO.AutoSize.Enabled()
+                ---@diagnostic disable-next-line: undefined-field
+                local startingToggleSelf = mq.TLO.AutoSize.ResizeSelf()
+
+                if not startingToggleEnabled then
+                    Logger.log_warning("\awWARNING:\ax Enabling AutoSize to unstick")
+                    Core.DoCmd("/squelch /autosize on")
+                end
+
+                if not startingToggleSelf then
+                    Logger.log_warning("\awWARNING:\ax Enabling AutoSize Self to unstick")
+                    Core.DoCmd("/squelch /autosize self on")
+                end
+
+                local startingLoc
+                local cycleSizes = { startingSize * 2, 1, startingSize * 1.5, 1, startingSize * 3, 1, }
+                for _, size in ipairs(cycleSizes) do
+                    Logger.log_warning("\awWARNING:\ax Setting size to %d to unstick", size)
+                    Core.DoCmd("/squelch /autosize sizeself %d", size)
+
+                    mq.delay("2s", function()
+                        Config:StoreLastMove()
+                        return not self:IAmStuck()
+                    end)
+
+                    if not self:IAmStuck() then
+                        Logger.log_warning("\agUnstuck successful!\ax Resuming chase.")
+                        break
+                    end
+                end
+                Core.DoCmd("/squelch /autosize sizeself %d", startingSize) -- ensure we end back at starting size
+                if not startingToggleSelf then
+                    Core.DoCmd("/squelch /autosize self off")
+                end
+                if not startingToggleEnabled then
+                    Core.DoCmd("/squelch /autosize off")
+                end
+                Module.TempSettings.StuckAtTime = 0
+            else
+                Logger.log_warning("\awWARNING:\ax MQ2AutoSize not loaded, cannot unstuck.")
             end
         end
     end

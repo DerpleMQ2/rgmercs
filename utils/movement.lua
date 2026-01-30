@@ -95,6 +95,14 @@ function Movement:GetTimeSinceLastNav()
     return string.format("%ds", os.clock() - self.LastDoNav)
 end
 
+function Movement:GetSecondsSinceLastNav()
+    if self.LastDoNavCmd == "" then
+        return 0
+    end
+
+    return os.clock() - self.LastDoNav
+end
+
 --- Navigates to a target during combat.
 --- @param targetId number The ID of the target to navigate to.
 --- @param distance number The distance to maintain from the target.
