@@ -56,7 +56,6 @@ function Movement:DoNav(squelch, params, ...)
     Core.DoCmd("%s/nav %s", squelch and "/squelch " or "", formatted)
     self.LastDoNav = Globals.GetTimeSeconds()
     self.LastDoNavCmd = formatted
-    mq.delay(1000, function() return mq.TLO.Navigation.Active() end)
     self:StoreLastMove()
 end
 
