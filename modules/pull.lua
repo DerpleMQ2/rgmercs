@@ -23,7 +23,7 @@ Module.__index                            = Module
 Module.ModuleLoaded                       = false
 Module.TempSettings                       = {}
 Module.TempSettings.BuffCount             = 0
-Module.TempSettings.LastPullOrCombatEnded = os.time()
+Module.TempSettings.LastPullOrCombatEnded = Globals.GetTimeSeconds()
 Module.TempSettings.TargetSpawnID         = 0
 Module.TempSettings.CurrentWP             = 1
 Module.TempSettings.ReachedWP             = false
@@ -40,7 +40,7 @@ Module.TempSettings.HuntX                 = 0
 Module.TempSettings.HuntY                 = 0
 Module.TempSettings.HuntZ                 = 0
 Module.TempSettings.MyPaths               = {}
-Module.TempSettings.LastGroupUpdateTime   = os.time()
+Module.TempSettings.LastGroupUpdateTime   = Globals.GetTimeSeconds()
 Module.TempSettings.SelectedPath          = "None"
 Module.TempSettings.PullAttemptStarted    = 0
 Module.TempSettings.PullRadius            = 0
@@ -773,7 +773,7 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -785,7 +785,7 @@ function Module:WriteSettings()
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
 
     self.SaveRequested = nil
 end
@@ -826,9 +826,9 @@ function Module:getPullAbilityDisplayName(id)
 end
 
 function Module:SetValidPullAbilities()
-    if os.time() - self.TempSettings.LastPullAbilityCheck < 10 then return end
+    if Globals.GetTimeSeconds() - self.TempSettings.LastPullAbilityCheck < 10 then return end
 
-    self.TempSettings.LastPullAbilityCheck = os.time()
+    self.TempSettings.LastPullAbilityCheck = Globals.GetTimeSeconds()
     local tmpValidPullAbilities = {}
     local tmpPullAbilityIDToName = {}
 
@@ -1079,7 +1079,7 @@ function Module:Render()
             end
         end
 
-        local nextPull = Config:GetSetting('PullDelay') - (os.time() - self.TempSettings.LastPullOrCombatEnded)
+        local nextPull = Config:GetSetting('PullDelay') - (Globals.GetTimeSeconds() - self.TempSettings.LastPullOrCombatEnded)
         if nextPull < 0 then nextPull = 0 end
         if ImGui.BeginTable("PullState", 2, bit32.bor(ImGuiTableFlags.Borders)) then
             ImGui.TableNextColumn()
@@ -1107,7 +1107,7 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text("Last Pull Attempt")
             ImGui.TableNextColumn()
-            ImGui.Text(Strings.FormatTime((os.time() - self.TempSettings.LastPullOrCombatEnded)))
+            ImGui.Text(Strings.FormatTime((Globals.GetTimeSeconds() - self.TempSettings.LastPullOrCombatEnded)))
             ImGui.TableNextColumn()
             ImGui.Text("Next Pull Attempt")
             ImGui.TableNextColumn()
@@ -1433,10 +1433,10 @@ function Module:ShouldPull(campData)
 
     if Config:GetSetting('PullWaitCorpse') then
         if mq.TLO.SpawnCount("pccorpse group radius 100 zradius 50")() > 0 then
-            self.TempSettings.LastFoundGroupCorpse = os.time()
+            self.TempSettings.LastFoundGroupCorpse = Globals.GetTimeSeconds()
             Logger.log_verbose("\ay::PULL:: \arAborted!\ax %d group corpses in-range.", mq.TLO.SpawnCount("pccorpse group radius 100 zradius 50")())
             return false, string.format("Group Corpse Detected")
-        elseif os.time() - self.TempSettings.LastFoundGroupCorpse < Config:GetSetting('WaitAfterRez') then
+        elseif Globals.GetTimeSeconds() - self.TempSettings.LastFoundGroupCorpse < Config:GetSetting('WaitAfterRez') then
             Logger.log_verbose("\ay::PULL:: \arAborted!\ax Giving time for rebuffs after a groupmember was rezzed.")
             return false, string.format("Groupmember Recently Rezzed")
         end
@@ -1541,8 +1541,8 @@ end
 function Module:RefreshGroupNames()
     -- Update the display names for the group watch members
 
-    if os.time() - self.TempSettings.LastGroupUpdateTime < 10 then return end
-    self.TempSettings.LastGroupUpdateTime = os.time()
+    if Globals.GetTimeSeconds() - self.TempSettings.LastGroupUpdateTime < 10 then return end
+    self.TempSettings.LastGroupUpdateTime = Globals.GetTimeSeconds()
 
     local groupWatch = {
         'GroupWatchF2',
@@ -1672,8 +1672,8 @@ function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
 end
 
 function Module:FixPullerMerc()
-    if os.time() - self.TempSettings.LastPullerMercCheck < 15 then return end
-    self.TempSettings.LastPullerMercCheck = os.time()
+    if Globals.GetTimeSeconds() - self.TempSettings.LastPullerMercCheck < 15 then return end
+    self.TempSettings.LastPullerMercCheck = Globals.GetTimeSeconds()
 
     if mq.TLO.Group.Leader() ~= mq.TLO.Me.DisplayName() then return end
 
@@ -1925,7 +1925,7 @@ function Module:CheckForAbort(pullID, bNavigating)
             return true
         end
 
-        if not bNavigating and os.time() - self.TempSettings.PullAttemptStarted >= Config:GetSetting('PullIgnoreTime') then
+        if not bNavigating and Globals.GetTimeSeconds() - self.TempSettings.PullAttemptStarted >= Config:GetSetting('PullIgnoreTime') then
             Logger.log_debug("\ar ALERT: Aborting due to timeout, adding mob to Pull Ignore List! \ax")
             table.insert(self.TempSettings.PullIgnoreTargets, mq.TLO.Spawn(pullID))
             return true
@@ -2030,9 +2030,9 @@ function Module:GiveTime(combat_state)
         Logger.log_verbose("PULL:GiveTime() we are in %s, not ready for pulling.", combat_state)
         return
     end
-    if (os.time() - self.TempSettings.LastPullOrCombatEnded) < Config:GetSetting('PullDelay') then
+    if (Globals.GetTimeSeconds() - self.TempSettings.LastPullOrCombatEnded) < Config:GetSetting('PullDelay') then
         Logger.log_verbose("PULL:GiveTime() waiting for Pull Delay, next attempt in %d seconds.",
-            Config:GetSetting('PullDelay') - (os.time() - self.TempSettings.LastPullOrCombatEnded))
+            Config:GetSetting('PullDelay') - (Globals.GetTimeSeconds() - self.TempSettings.LastPullOrCombatEnded))
         return
     end
 
@@ -2197,18 +2197,18 @@ function Module:GiveTime(combat_state)
 
     if self.TempSettings.PullID == 0 and self:IsPullMode("Farm") then
         -- if we are idle, wait a bit if we have a waypoint delay set (interrupt: bypass this, we aren't at the WP)
-        if self.TempSettings.PullState == PullStates.PULL_IDLE and (os.time() - self.TempSettings.LastPullOrCombatEnded) < Config:GetSetting('WaypointDelay') then
+        if self.TempSettings.PullState == PullStates.PULL_IDLE and (Globals.GetTimeSeconds() - self.TempSettings.LastPullOrCombatEnded) < Config:GetSetting('WaypointDelay') then
             Logger.log_verbose("PULL: Waiting for farm waypoint delay, next attempt in %d seconds.",
-                Config:GetSetting('WaypointDelay') - (os.time() - self.TempSettings.LastPullOrCombatEnded))
+                Config:GetSetting('WaypointDelay') - (Globals.GetTimeSeconds() - self.TempSettings.LastPullOrCombatEnded))
             return
         end
 
         -- move to next WP
         if self.TempSettings.ReachedWP then
             -- if we are idle, wait a bit if we have a waypoint delay set (interrupt: bypass this, we aren't at the WP)
-            if (os.time() - self.TempSettings.LastPullOrCombatEnded) < Config:GetSetting('WaypointDelay') then
+            if (Globals.GetTimeSeconds() - self.TempSettings.LastPullOrCombatEnded) < Config:GetSetting('WaypointDelay') then
                 Logger.log_verbose("PULL: Waiting for farm waypoint delay, next attempt in %d seconds.",
-                    Config:GetSetting('WaypointDelay') - (os.time() - self.TempSettings.LastPullOrCombatEnded))
+                    Config:GetSetting('WaypointDelay') - (Globals.GetTimeSeconds() - self.TempSettings.LastPullOrCombatEnded))
                 return
             end
             self:IncrementWpId()
@@ -2363,7 +2363,7 @@ function Module:GiveTime(combat_state)
 
             if Config:GetSetting('PullAbility') == PullAbilityIDToName.PetPull then -- PetPull
                 Combat.PetAttack(self.TempSettings.PullID, false)
-                self.TempSettings.PullAttemptStarted = os.time()
+                self.TempSettings.PullAttemptStarted = Globals.GetTimeSeconds()
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on pet pull to finish...")
                     Combat.PetAttack(self.TempSettings.PullID, false)
@@ -2389,7 +2389,7 @@ function Module:GiveTime(combat_state)
                 Core.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
-                self.TempSettings.PullAttemptStarted = os.time()
+                self.TempSettings.PullAttemptStarted = Globals.GetTimeSeconds()
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
@@ -2417,7 +2417,7 @@ function Module:GiveTime(combat_state)
                 Core.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
-                self.TempSettings.PullAttemptStarted = os.time()
+                self.TempSettings.PullAttemptStarted = Globals.GetTimeSeconds()
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
@@ -2451,7 +2451,7 @@ function Module:GiveTime(combat_state)
                 Core.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
-                self.TempSettings.PullAttemptStarted = os.time()
+                self.TempSettings.PullAttemptStarted = Globals.GetTimeSeconds()
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
@@ -2479,7 +2479,7 @@ function Module:GiveTime(combat_state)
                     Events.DoEvents()
                 end
             else -- AA/Spell/Ability pull
-                self.TempSettings.PullAttemptStarted = os.time()
+                self.TempSettings.PullAttemptStarted = Globals.GetTimeSeconds()
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on ability pull to finish...%s", Strings.BoolToColorString(successFn()))
                     Targeting.SetTarget(self.TempSettings.PullID, true)
@@ -2673,8 +2673,8 @@ function Module:GetFAQ()
 end
 
 function Module:SetLastPullOrCombatEndedTimer()
-    self.TempSettings.LastPullOrCombatEnded = os.time()
-    Logger.log_verbose("Last Pull or Combat Ended: %s", os.time())
+    self.TempSettings.LastPullOrCombatEnded = Globals.GetTimeSeconds()
+    Logger.log_verbose("Last Pull or Combat Ended: %s", Globals.GetTimeSeconds())
 end
 
 function Module:StopNavAfterFailedMovingCheck()

@@ -75,7 +75,7 @@ function HudUI:RenderToggleHud()
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 if Globals.LastBurnCheck then
-                    ImGui.TextColored(IM_COL32(200, math.floor(os.time() % 2) == 1 and 52 or 200, 52, 255),
+                    ImGui.TextColored(IM_COL32(200, math.floor(Globals.GetTimeSeconds() % 2) == 1 and 52 or 200, 52, 255),
                         string.format("RGMercs is BURNING!\nClick to open the main window."))
                 else
                     ImGui.Text("RGMercs is Running.\n Click to open the main window.")

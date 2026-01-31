@@ -53,7 +53,7 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -65,7 +65,7 @@ function Module:WriteSettings()
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
 
     self.SaveRequested = nil
 end

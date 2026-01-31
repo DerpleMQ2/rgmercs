@@ -676,7 +676,7 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
 
     Casting.Memorizing = true
 
-    local startMem = mq.gettime()
+    local startMem = Globals.GetTimeSeconds()
     while (me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not me.SpellReady(gem)())) and maxWait > 0 do
         Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         if (me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100)) or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
@@ -698,7 +698,7 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
         maxWait = maxWait - 100
     end
 
-    Logger.log_info("\agMemorizeSpell: \awFinished waiting for '\at%s\aw' to load in slot \am%d\aw. Time taken: \ay%d\aws", spell, gem, (mq.gettime() - startMem) / 1000)
+    Logger.log_info("\agMemorizeSpell: \awFinished waiting for '\at%s\aw' to load in slot \am%d\aw. Time taken: \ay%d\aws", spell, gem, (Globals.GetTimeSeconds() - startMem) / 1000)
 
     Casting.Memorizing = false
 end
@@ -1643,7 +1643,7 @@ end
 function Casting.WaitCastReady(spell, maxWait, ignoreCombat)
     if not ignoreCombat then ignoreCombat = false end
     while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
-        local startTime = mq.gettime()
+        local startTime = Globals.GetTimeSeconds()
         mq.delay(1)
         mq.doevents()
         Events.DoEvents()
@@ -1655,7 +1655,7 @@ function Casting.WaitCastReady(spell, maxWait, ignoreCombat)
             Logger.log_debug("I was trying to cast %s as my persona was changed, aborting.", spell)
             return
         end
-        local endTime = mq.gettime()
+        local endTime = Globals.GetTimeSeconds()
         local elapsed = endTime - startTime
 
         maxWait = maxWait - elapsed

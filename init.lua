@@ -178,11 +178,11 @@ local function RGMercsGUI()
             local flashingWarning = Globals.PauseMain and Targeting.GetXTHaterCount(false) > 0 and Config:GetSetting('WarnCombatPaused')
 
             if flashingWarning then
-                if os.time() % 3 == 0 then
+                if Globals.GetTimeSeconds() % 3 == 0 then
                     Comms.PopUpColor(15, 1, "RGMercs Warning: You have aggro while paused!")
                 end
 
-                ImGui.PushStyleColor(ImGuiCol.WindowBg, os.time() % 2 == 0 and
+                ImGui.PushStyleColor(ImGuiCol.WindowBg, Globals.GetTimeSeconds() % 2 == 0 and
                     ImVec4(0.7, 0.1, 0.1, Config:GetMainOpacity()) or
                     ImVec4(0.3, 0.1, 0.1, Config:GetMainOpacity()))
             end
@@ -454,8 +454,8 @@ local function Main()
 
     -- Handles state for when we're in combat
     if Globals.CurrentState == "Combat" then
-        if ((os.time() - Globals.LastPetCmd) > 2) then
-            Globals.LastPetCmd = os.time()
+        if ((Globals.GetTimeSeconds() - Globals.LastPetCmd) > 2) then
+            Globals.LastPetCmd = Globals.GetTimeSeconds()
             if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
                 Combat.PetAttack(Globals.AutoTargetID, true)
             end

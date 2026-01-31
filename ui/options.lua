@@ -338,8 +338,8 @@ function OptionsUI:ApplySearchFilter()
         OptionsUI.GroupsNameToIDs[group.Name] = id
     end
 
-    self.lastSortTime = os.time()
-    self.lastHighlightTime = os.time()
+    self.lastSortTime = Globals.GetTimeSeconds()
+    self.lastHighlightTime = Globals.GetTimeSeconds()
 end
 
 function OptionsUI:RenderGroupPanel(groupLabel, groupName)

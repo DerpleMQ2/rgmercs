@@ -109,7 +109,7 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-	self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+	self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -120,7 +120,7 @@ function Module:WriteSettings()
 		Comms.BroadcastUpdate(self._name, "LoadSettings")
 	end
 
-	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
 
 	self.SaveRequested = nil
 end
@@ -288,7 +288,7 @@ function Module:DoLoot()
 	end
 
 	-- Mark that we've initiated looting
-	self.TempSettings.LootStartTime = mq.gettime()
+	self.TempSettings.LootStartTime = Globals.GetTimeSeconds()
 	self.TempSettings.Looting = true
 
 	return true
@@ -301,11 +301,11 @@ function Module:ProcessLooting()
 	end
 
 	local timeoutMs = Config:GetSetting('LootingTimeoutSL') * 1000
-	local startTime = self.TempSettings.LootStartTime or mq.gettime()
+	local startTime = self.TempSettings.LootStartTime or Globals.GetTimeSeconds()
 
 	-- Hold focus in loot module while SmartLoot is working
 	while self.TempSettings.Looting do
-		local elapsed = mq.gettime() - startTime
+		local elapsed = Globals.GetTimeSeconds() - startTime
 
 		-- Check for timeout
 		if elapsed > timeoutMs then

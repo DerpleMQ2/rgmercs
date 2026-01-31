@@ -48,7 +48,7 @@ Module.TempSettings.RotationTable            = {}
 Module.TempSettings.HealRotationTable        = {}
 Module.TempSettings.RotationTimers           = {}
 Module.TempSettings.RezTimers                = {}
-Module.TempSettings.CureCheckTimer           = os.time() -- set this out a bit so we have time to get actor data.
+Module.TempSettings.CureCheckTimer           = Globals.GetTimeSeconds() -- set this out a bit so we have time to get actor data.
 Module.TempSettings.ShowFailedSpells         = false
 Module.TempSettings.ResolvingActions         = true
 Module.TempSettings.CombatModeSet            = false
@@ -295,7 +295,7 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -310,7 +310,7 @@ function Module:WriteSettings()
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
 
     self.SaveRequested = nil
 end
@@ -470,7 +470,7 @@ function Module:RenderQueuedAbilities()
 
                 for _, queueData in pairs(self.TempSettings.QueuedAbilities) do
                     ImGui.TableNextColumn()
-                    ImGui.Text(Strings.FormatTime((os.time() - queueData.queuedTime)))
+                    ImGui.Text(Strings.FormatTime((Globals.GetTimeSeconds() - queueData.queuedTime)))
                     ImGui.TableNextColumn()
                     ImGui.Text(queueData.type)
                     ImGui.TableNextColumn()
@@ -886,9 +886,9 @@ function Module:SelfCheckAndRez(combat_state)
                     if Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                         Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                             rezSpawn.ID() or 0)
-                    elseif (os.time() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                    elseif (Globals.GetTimeSeconds() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                         Core.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
-                        self.TempSettings.RezTimers[rezSpawn.ID()] = os.time()
+                        self.TempSettings.RezTimers[rezSpawn.ID()] = Globals.GetTimeSeconds()
                         self:ResetRotationTimer("GroupBuff")
                     end
                 end
@@ -917,9 +917,9 @@ function Module:IGCheckAndRez(combat_state)
                 elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
-                elseif (os.time() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                elseif (Globals.GetTimeSeconds() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Logger.log_debug("\atIGCheckAndRez(): Attempting to Res: %s", rezSpawn.CleanName())
-                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.time()
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = Globals.GetTimeSeconds()
                     if Core.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName) then
                         self:ResetRotationTimer("GroupBuff")
                         -- make sure we process other healing/etc instead of chain rezzing
@@ -952,8 +952,8 @@ function Module:OOGCheckAndRez(combat_state)
                 elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atOOGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
-                elseif (os.time() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
-                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.time()
+                elseif (Globals.GetTimeSeconds() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = Globals.GetTimeSeconds()
                     if Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName) then
                         self:ResetRotationTimer("GroupBuff")
                         -- make sure we process other healing/etc instead of chain rezzing
@@ -1265,8 +1265,8 @@ end
 
 function Module:RunCureRotation(combat_state)
     if combat_state == "Downtime" then -- check freely in combat and the first frame of downtime; then avoid spamming
-        if (os.time() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
-        self.TempSettings.CureCheckTimer = os.time()
+        if (Globals.GetTimeSeconds() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
+        self.TempSettings.CureCheckTimer = Globals.GetTimeSeconds()
     end
 
     Logger.log_verbose("\ao[Cures] Checking for curables...")
@@ -1415,7 +1415,7 @@ function Module:QueueAbility(type, name, targetId)
         targetId = targetId,
         target = mq.TLO.Spawn(targetId),
         type = type,
-        queuedTime = os.time(),
+        queuedTime = Globals.GetTimeSeconds(),
     })
 end
 
@@ -1526,11 +1526,11 @@ function Module:GiveTime(combat_state)
             if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and not xtSpawn.Fleeing() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceTargetID) and Globals.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
                 Logger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(), (xtSpawn.Heading.Degrees() or 0))
-                if os.time() - Movement:GetLastStickTimer() < 0.5 then
+                if Globals.GetTimeSeconds() - Movement:GetLastStickTimer() < 0.5 then
                     Logger.log_debug("\ayIgnoring moveback because we just stuck a second ago - let's give it some time.")
                 else
                     Movement:DoStickCmd("moveback %d", Config:GetSetting('MovebackDistance'))
-                    Movement:SetLastStickTimer(os.time())
+                    Movement:SetLastStickTimer(Globals.GetTimeSeconds())
                 end
             end
         end
@@ -1553,13 +1553,13 @@ function Module:GiveTime(combat_state)
         else
             self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
             if r.timer then -- see if we've waited the rotation timer out.
-                timeCheckPassed = ((os.time() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
+                timeCheckPassed = ((Globals.GetTimeSeconds() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
             else            -- default to only processing Downtime rotations once per second if no timer is specified.
-                timeCheckPassed = self.CombatState ~= "Downtime" and true or ((os.time() - self.TempSettings.RotationTimers[r.name]) >= 1)
+                timeCheckPassed = self.CombatState ~= "Downtime" and true or ((Globals.GetTimeSeconds() - self.TempSettings.RotationTimers[r.name]) >= 1)
             end
 
             if timeCheckPassed then
-                local start = string.format("%.03f", mq.gettime() / 1000)
+                local start = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
                 local targetTable = Core.SafeCallFunc("Rotation Target Table", r.targetId)
                 if targetTable ~= false then
                     for _, targetId in ipairs(targetTable) do
@@ -1574,21 +1574,21 @@ function Module:GiveTime(combat_state)
                                     Config:GetSetting('EnabledRotationEntries') or {})
 
                                 if r.state then r.state = newState end
-                                self.TempSettings.RotationTimers[r.name] = os.time()
+                                self.TempSettings.RotationTimers[r.name] = Globals.GetTimeSeconds()
                             else
                                 r.lastCondCheck = false
                             end
                         end
                     end
                 end
-                local stop = string.format("%.03f", mq.gettime() / 1000)
+                local stop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
 
                 r.lastTimeSpent = stop - start
             else
                 Logger.log_verbose(
                     "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
-                    Strings.FormatTime(os.time() - self.TempSettings.RotationTimers[r.name]),
-                    Strings.FormatTime((r.timer or 1) - (os.time() - self.TempSettings.RotationTimers[r.name])))
+                    Strings.FormatTime(Globals.GetTimeSeconds() - self.TempSettings.RotationTimers[r.name]),
+                    Strings.FormatTime((r.timer or 1) - (Globals.GetTimeSeconds() - self.TempSettings.RotationTimers[r.name])))
                 if r.timer then r.lastCondCheck = false end --update rotation UI when rotation doesn't fire due to timer check
             end
         end

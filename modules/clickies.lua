@@ -803,7 +803,7 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -815,7 +815,7 @@ function Module:WriteSettings()
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
 
     self.SaveRequested = nil
 end
@@ -1360,7 +1360,7 @@ function Module:RenderClickyData(clicky, clickyIdx)
             local lastUsed = clickyState.lastUsed or 0
 
             ImGui.TableNextColumn()
-            ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.time() - lastUsed)) or "Never")
+            ImGui.Text(lastUsed > 0 and Strings.FormatTime((Globals.GetTimeSeconds() - lastUsed)) or "Never")
             ImGui.TableNextColumn()
             ImGui.Text(clicky.itemName)
             ImGui.TableNextColumn()
@@ -1573,7 +1573,7 @@ function Module:GiveTime(combat_state)
                                     maxClickiesPerFrame, self.ClickyRotationIndex)
                                 break
                             end
-                            self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.time()
+                            self.TempSettings.ClickyState[clicky.itemName].lastUsed = Globals.GetTimeSeconds()
                             break --ensure we stop after we process a single clicky to allow rotations to continue
                         else
                             if not buffCheckPassed then

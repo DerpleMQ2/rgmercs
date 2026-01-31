@@ -29,7 +29,7 @@ Config.SettingsLoadComplete                              = false
 
 Config.TempSettings                                      = {}
 Config.TempSettings.lastModuleRegisteredTime             = 0
-Config.TempSettings.lastHighlightTime                    = os.time()
+Config.TempSettings.lastHighlightTime                    = Globals.GetTimeSeconds()
 Config.TempSettings.SettingToModuleCache                 = {}
 Config.TempSettings.SettingsLowerToNameCache             = {}
 Config.TempSettings.SettingsCategoryToSettingMapping     = {}
@@ -2064,15 +2064,15 @@ end
 
 function Config:UpdateCommandHandlers()
     self.CommandHandlers = {}
-    local startTime = mq.gettime()
+    local startTime = Globals.GetTimeSeconds()
     local submoduleDefaults = self:GetAllModuleDefaultSettings()
 
     for moduleName, moduleSettings in pairs(Config.moduleSettings) do
-        local modstartTime = mq.gettime()
+        local modstartTime = Globals.GetTimeSeconds()
         for setting, _ in pairs(moduleSettings or {}) do
-            local setstartTime = mq.gettime()
+            local setstartTime = Globals.GetTimeSeconds()
             local handled, usageString = self:GetUsageText(setting or "", true, submoduleDefaults[moduleName] or {})
-            local setendTime = mq.gettime()
+            local setendTime = Globals.GetTimeSeconds()
             Logger.log_super_verbose("\ag[Config] \ayGetUsageText() took %.3f seconds for %s.%s", (setendTime - setstartTime) / 1000, moduleName, setting)
 
             if handled then
@@ -2086,11 +2086,11 @@ function Config:UpdateCommandHandlers()
                 }
             end
         end
-        local modendTime = mq.gettime()
+        local modendTime = Globals.GetTimeSeconds()
         Logger.log_debug("\ag[Config] \ayGeting all Settings took %.3f seconds to process module %s.", (modendTime - modstartTime) / 1000, moduleName)
     end
 
-    local endTime = mq.gettime()
+    local endTime = Globals.GetTimeSeconds()
 
     Logger.log_debug("\ag[Config] \ayUpdateCommandHandlers() took %.3f seconds to execute for %d modules.", (endTime - startTime) / 1000, #Config.moduleSettings)
 end
@@ -2610,7 +2610,7 @@ function Config:RegisterModuleSettings(module, settings, defaultSettings, faq, f
         self:SaveModuleSettings(module, settings)
     end
 
-    self.TempSettings.lastModuleRegisteredTime = os.time()
+    self.TempSettings.lastModuleRegisteredTime = Globals.GetTimeSeconds()
 
     Logger.log_debug("\agModule %s - registered settings!", module)
 end
@@ -2780,7 +2780,7 @@ function Config:UpdatePeerSettings(data)
         self:PeerRegisterCategoryToSettingMapping(peer, setting)
     end
 
-    self.TempSettings.LastPeerConfigReceivedTime = os.time()
+    self.TempSettings.LastPeerConfigReceivedTime = Globals.GetTimeSeconds()
 end
 
 function Config:GetPeerLastConfigReceivedTime(peer)
@@ -2915,7 +2915,7 @@ end
 
 function Config:ClearAllHighlightedModules()
     self.TempSettings.HighlightedModules = Set.new({})
-    self.lastHighlightTime = os.time()
+    self.lastHighlightTime = Globals.GetTimeSeconds()
 end
 
 function Config:OpenOptionsUIAndHighlightModule(module)
@@ -2927,13 +2927,13 @@ function Config:HighlightModule(module)
     -- only allow for 1 at a time for now but later we might enhance this.
     self.TempSettings.HighlightedModules = Set.new({})
     self.TempSettings.HighlightedModules:add(module)
-    self.lastHighlightTime = os.time()
+    self.lastHighlightTime = Globals.GetTimeSeconds()
 end
 
 function Config:UnhighlightModule(module)
     self.TempSettings.HighlightedModules = self.TempSettings.HighlightedModules or Set.new({})
     self.TempSettings.HighlightedModules:remove(module)
-    self.lastHighlightTime = os.time()
+    self.lastHighlightTime = Globals.GetTimeSeconds()
 end
 
 ---@param config string

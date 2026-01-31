@@ -187,4 +187,13 @@ Globals.Constants.DebuffChoice      = { "Never", "Based on Con Color", "Always",
 
 Globals.Constants.ScanNamedPriority = { "Named", "No Preference", "Non-Named", }
 Globals.Constants.ScanHPPriority    = { "Lowest HP%", "No Preference", "Highest HP%", }
+
+function Globals.GetTimeSeconds()
+    return mq.gettime() / 1000
+end
+
+function Globals.GetTimeMS()
+    return mq.gettime()
+end
+
 return Globals

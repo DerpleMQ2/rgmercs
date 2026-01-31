@@ -89,12 +89,12 @@ function Comms.SendAllPeersDoCmd(inZoneOnly, includeSelf, cmd, ...)
 end
 
 function Comms.SendHeartbeat(assist, chase)
-    --if os.time() - Comms.LastHeartbeat < 1 then return end
+    --if Globals.GetTimeSeconds() - Comms.LastHeartbeat < 1 then return end
     local useMana = Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName())
     local useEnd = Globals.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName())
     local curAutoTarget = mq.TLO.Spawn(string.format("id %d", Globals.AutoTargetID))
 
-    Comms.LastHeartbeat = os.time()
+    Comms.LastHeartbeat = Globals.GetTimeSeconds()
     local heartBeat = {
         From          = Comms.GetPeerName(),
         Server        = mq.TLO.EverQuest.Server(),
@@ -179,7 +179,7 @@ end
 function Comms.UpdatePeerHeartbeat(peer, data)
     Comms.Peers:add(peer)
     Comms.PeersHeartbeats[peer] = Comms.PeersHeartbeats[peer] or {}
-    Comms.PeersHeartbeats[peer].LastHeartbeat = os.time()
+    Comms.PeersHeartbeats[peer].LastHeartbeat = Globals.GetTimeSeconds()
     Comms.PeersHeartbeats[peer].Data = data or {}
 end
 
@@ -187,7 +187,7 @@ function Comms.ValidatePeers(timeout)
     Logger.log_super_verbose("\ayValidating peers heartbeats for timeouts: \n  :: %s\n  :: %s", Strings.TableToString(Comms.PeersHeartbeats, 512),
         Strings.TableToString(Comms.Peers:toList(), 512))
     for peer, heartbeat in pairs(Comms.PeersHeartbeats) do
-        if os.time() - (heartbeat.LastHeartbeat or 0) > timeout then
+        if Globals.GetTimeSeconds() - (heartbeat.LastHeartbeat or 0) > timeout then
             Logger.log_debug("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
             Comms.Peers:remove(peer)
             Comms.PeersHeartbeats[peer] = nil

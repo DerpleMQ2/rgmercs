@@ -316,7 +316,7 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -328,7 +328,7 @@ function Module:WriteSettings()
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
 
     self.SaveRequested = nil
 end
@@ -849,10 +849,10 @@ function Module:CheckStuck()
 
     if Config:GetSetting('AttemptToFixStuck') and self:IAmStuck() then
         if Module.TempSettings.StuckAtTime == 0 then
-            Module.TempSettings.StuckAtTime = os.time()
+            Module.TempSettings.StuckAtTime = Globals.GetTimeSeconds()
         end
 
-        if ((os.time() - Module.TempSettings.StuckAtTime) >= Config:GetSetting('AttemptToFixStuckTimer')) or Movement:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer') then
+        if ((Globals.GetTimeSeconds() - Module.TempSettings.StuckAtTime) >= Config:GetSetting('AttemptToFixStuckTimer')) or Movement:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer') then
             Logger.log_warning("\awWARNING:\ax Navigation appears to be stuck")
             -- is autosize loaded?
             if mq.TLO.Plugin("MQ2AutoSize").IsLoaded() then

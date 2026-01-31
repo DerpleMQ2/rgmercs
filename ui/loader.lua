@@ -1,13 +1,17 @@
-local mq         = require('mq')
-local ImGui      = require('ImGui')
-local ImagesUI   = require('ui.images')
-local Config     = require('utils.config')
+local mq             = require('mq')
+local ImGui          = require('ImGui')
+local ImagesUI       = require('ui.images')
+local Config         = require('utils.config')
 
-local LoaderUI   = { _version = '1.0', _name = "LoaderUI", _author = 'Derple', }
-LoaderUI.__index = LoaderUI
+local LoaderUI       = { _version = '1.0', _name = "LoaderUI", _author = 'Derple', }
+LoaderUI.__index     = LoaderUI
+LoaderUI.Initialized = false
 
 function LoaderUI:RenderLoader(initPctComplete, initMsg)
-    ImagesUI:InitLoader()
+    if not self.Initialized then
+        ImagesUI:InitLoader()
+        self.Initialized = true
+    end
 
     ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 15)
     ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 15)

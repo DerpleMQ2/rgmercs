@@ -2,6 +2,7 @@ local Config           = require('utils.config')
 local Set              = require("mq.Set")
 local Ui               = require("utils.ui")
 local Logger           = require("utils.logger")
+local Globals          = require("utils.globals")
 
 local Module           = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
 Module.__index         = Module
@@ -13,7 +14,7 @@ Module.FAQ             = {}
 Module.SaveRequested   = nil
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -42,11 +43,11 @@ function Module:RenderName(name)
     local length = name:len()
 
     self.ColorWheel[name] = self.ColorWheel[name] or math.random(10000)
-    self.ColorWheelTimer[name] = self.ColorWheelTimer[name] or os.time()
+    self.ColorWheelTimer[name] = self.ColorWheelTimer[name] or Globals.GetTimeSeconds()
 
-    if os.time() - self.ColorWheelTimer[name] > 0.25 then
+    if Globals.GetTimeSeconds() - self.ColorWheelTimer[name] > 0.25 then
         self.ColorWheel[name] = self.ColorWheel[name] + 1 --math.random(500)
-        self.ColorWheelTimer[name] = os.time()
+        self.ColorWheelTimer[name] = Globals.GetTimeSeconds()
     end
 
     for i = 1, length do

@@ -208,7 +208,7 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
+    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -220,7 +220,7 @@ function Module:WriteSettings()
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
 
     self.SaveRequested = nil
 end
@@ -600,7 +600,7 @@ function Module:AddCCTarget(mobId)
     self.TempSettings.MezTracker[mobId] = {
         name = mq.TLO.Target.CleanName(),
         duration = mq.TLO.Target.Mezzed.Duration() or 0,
-        last_check = os.time() * 1000,
+        last_check = Globals.GetTimeMS(),
         mez_spell = mq.TLO
             .Target.Mezzed() or "None",
     }
@@ -819,11 +819,11 @@ end
 
 function Module:UpdateTimings()
     for _, data in pairs(self.TempSettings.MezTracker) do
-        local timeDelta = (os.time() * 1000) - data.last_check
+        local timeDelta = (Globals.GetTimeMS()) - data.last_check
 
         data.duration = data.duration - timeDelta
 
-        data.last_check = os.time() * 1000
+        data.last_check = Globals.GetTimeMS()
     end
 end
 

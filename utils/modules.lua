@@ -1,5 +1,6 @@
 local mq            = require("mq")
 local Logger        = require("utils.logger")
+local Globals       = require("utils.globals")
 
 local Modules       = { _version = '0.1a', _author = 'Derple', }
 Modules.__index     = Modules
@@ -103,14 +104,14 @@ end
 function Modules:ExecAll(fn, ...)
     local ret = {}
     for _, name in pairs(self.ModuleOrder) do
-        local startTime = os.time() * 1000
+        local startTime = Globals.GetTimeSeconds() * 1000
         local module = self.ModuleList[name]
         if module and module[fn] then
             ret[name] = module[fn](module, ...)
 
             if fn == "GiveTime" then
                 if self.ModuleList.Perf then
-                    self.ModuleList.Perf:OnFrameExec(name, (os.time() * 1000) - startTime)
+                    self.ModuleList.Perf:OnFrameExec(name, (Globals.GetTimeSeconds() * 1000) - startTime)
                 end
             end
         end

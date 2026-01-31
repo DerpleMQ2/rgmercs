@@ -473,7 +473,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 local stateColor =
-                    (data.Data.Burning and (os.time() % 2 == 0 and Colors.BurnFlashColorOne or Colors.BurnFlashColorTwo)) or
+                    (data.Data.Burning and (Globals.GetTimeSeconds() % 2 == 0 and Colors.BurnFlashColorOne or Colors.BurnFlashColorTwo)) or
                     (data.Data.State == "Paused" and Colors.MainButtonPausedColor) or
                     (data.Data.State == "Combat" and Colors.MainCombatColor) or
                     Colors.MainDowntimeColor
@@ -820,7 +820,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.LastUpdate or 0, data_b.Data.LastUpdate or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%ds", os.time() - (data.LastHeartbeat or 0)))
+                ImGui.Text(string.format("%ds", Globals.GetTimeSeconds() - (data.LastHeartbeat or 0)))
             end,
 
         },
@@ -935,7 +935,7 @@ function Ui.RenderForceTargetList(showPopout)
                 if not checked then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.time() % 2) == 1 and 52 or 200, 255))
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(Globals.GetTimeSeconds() % 2) == 1 and 52 or 200, 255))
                 end
 
                 Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.FA_ARROW_RIGHT, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
@@ -1167,7 +1167,7 @@ function Ui.RenderForceTargetList(showPopout)
 
                         win_max.x = effectiveWidth
                         draw_list:PushClipRect(win_min, win_max, true)
-                        draw_list:AddRect(min, max, ImGui.GetColorU32(os.time() % 2 == 1 and hlColorOne or hlColorTwo), 0.0, 0, 1.5)
+                        draw_list:AddRect(min, max, ImGui.GetColorU32(Globals.GetTimeSeconds() % 2 == 1 and hlColorOne or hlColorTwo), 0.0, 0, 1.5)
                         draw_list:PopClipRect()
                     end
                 end
@@ -1630,7 +1630,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
     local final_knob_col = ImGui.GetColorU32(knob_color)
 
     if pulse_on_hover and is_hovered then
-        local pulse_strength = 0.5 + 0.5 * math.sin(os.time() * 4)
+        local pulse_strength = 0.5 + 0.5 * math.sin(Globals.GetTimeSeconds() * 4)
         if knob_color.x == 1 and knob_color.y == 1 and knob_color.z == 1 then
             -- Special case: white glows warm yellow
             local new_color = ImVec4(
@@ -1800,7 +1800,7 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         local itemName = type == "ClickyItemWithConditions" and setting.itemName or setting
         local nameLen = itemName:len()
         local maxStart = (nameLen - displayCharCount) + 1
-        local startDisp = maxStart > 0 and (os.time() % maxStart) + 1 or 0
+        local startDisp = maxStart > 0 and (Globals.GetTimeSeconds() % maxStart) + 1 or 0
 
         ImGui.PushID(id .. "__btn")
         if ImGui.SmallButton(nameLen > 0 and itemName:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
@@ -2232,7 +2232,7 @@ function Ui.RenderLogo(textureId)
     ImGui.Dummy(ImVec2(60, 60))
 
     if afConfig then
-        local t = Ui.TempSettings.LogoMOTime and (mq.gettime() / 100 - Ui.TempSettings.LogoMOTime) or 0
+        local t = Ui.TempSettings.LogoMOTime and (Globals.GetTimeSeconds() / 100 - Ui.TempSettings.LogoMOTime) or 0
         t = t % 120
         local delta
         if t <= 59 then
@@ -2253,7 +2253,7 @@ function Ui.RenderLogo(textureId)
 
         if ImGui.IsItemHovered() then
             if not Ui.TempSettings.LogoMOTime then
-                Ui.TempSettings.LogoMOTime = mq.gettime() / 100
+                Ui.TempSettings.LogoMOTime = Globals.GetTimeSeconds() / 100
             end
         else
             Ui.TempSettings.LogoMOTime = nil
