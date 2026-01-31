@@ -2895,16 +2895,6 @@ function Config:ConvertAssistNameToID(arg1)
     return 0
 end
 
--- this function considers being in combat as movement so that buff checks only happen in downtime.
-function Config:GetTimeSinceLastMove()
-    return os.clock() - Globals.LastMove.TimeAtMove
-end
-
--- this function only considers actual movement, not combat state.
-function Config:GetTimeSinceLastPositionChange()
-    return os.clock() - (Globals.LastMove.TimeAtPositionChange or 0)
-end
-
 function Config:GetCommandHandlers()
     return { module = "Config", CommandHandlers = self.CommandHandlers, }
 end
@@ -3043,34 +3033,6 @@ function Config:HandleTempSet(config, value)
     end
 
     return handled
-end
-
-function Config:StoreLastMove()
-    local me = mq.TLO.Me
-
-    if not Globals.LastMove or
-        math.abs(Globals.LastMove.X - me.X()) > 1 or
-        math.abs(Globals.LastMove.Y - me.Y()) > 1 or
-        math.abs(Globals.LastMove.Z - me.Z()) > 1 or
-        math.abs(Globals.LastMove.Heading - me.Heading.Degrees()) > 1 or
-        me.Combat() or
-        me.CombatState():lower() == "combat" or
-        me.Sitting() ~= Globals.LastMove.Sitting then
-        Globals.LastMove = Globals.LastMove or {}
-        Globals.LastMove.X = me.X()
-        Globals.LastMove.Y = me.Y()
-        Globals.LastMove.Z = me.Z()
-        Globals.LastMove.Heading = me.Heading.Degrees()
-        Globals.LastMove.Sitting = me.Sitting()
-        Globals.LastMove.TimeAtMove = os.clock()
-    end
-
-    -- only look at actual movement.
-    if math.abs(Globals.LastMove.X - me.X()) > 1 or
-        math.abs(Globals.LastMove.Y - me.Y()) > 1 or
-        math.abs(Globals.LastMove.Z - me.Z()) > 1 then
-        Globals.LastMove.TimeAtPositionChange = os.clock()
-    end
 end
 
 ---@return number

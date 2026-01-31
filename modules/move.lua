@@ -678,7 +678,7 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    self:FixStuck()
+    self:CheckStuck()
 
     if not self:InCampZone() and Config:GetSetting("ReturnToCamp") then
         Config:SetSetting("ReturnToCamp", false)
@@ -808,15 +808,32 @@ function Module:GiveTime(combat_state)
 end
 
 function Module:IAmStuck()
+    Movement:StoreLastMove()
     local Nav = mq.TLO.Navigation
-    Logger.log_debug("IAmStuck(): Nav.Active(): %s, Nav.Velocity(): %d, TimeSinceLastPositionChange(): %d, AttemptToFixStuckTimer(): %d, LastNavCmd: %s",
-        tostring(Nav.Active()), Nav.Velocity(), Config:GetTimeSinceLastPositionChange(), Config:GetSetting('AttemptToFixStuckTimer'), Movement:GetTimeSinceLastNav())
+    local stuck = Nav.Active() and not Nav.Paused() and Movement:GetSecondsSinceLastNav() >= Config:GetSetting('AttemptToFixStuckTimer') and
+        (
+            (Nav.Velocity() == 0) or
+            (Movement:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer'))
+        )
 
-    return Nav.Active() and not Nav.Paused() and Movement:GetSecondsSinceLastNav() > Config:GetSetting('AttemptToFixStuckTimer') and
-        (Nav.Velocity() == 0 or Config:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer'))
+    if stuck then
+        Logger.log_debug(
+            "\ayIAmStuck\aw(): \atStuck\aw: %s, \atNav.Active()\aw: %s, \amNav.Velocity()\aw: \ao%d\aw, \amTimeSinceLastPositionChange()\aw: \ao%d\aw, \amAttemptToFixStuckTimer()\aw: \ao%d\aw, \amLastNavCmdTime\aw: \ao%s, \amLastNavCmd\aw: \at%s",
+            Strings.BoolToColorString(stuck), Strings.BoolToColorString(Nav.Active()), Nav.Velocity(), Movement:GetTimeSinceLastPositionChange(),
+            Config:GetSetting('AttemptToFixStuckTimer'),
+            Movement:GetTimeSinceLastNav(), Movement:GetLastNavCmd())
+    else
+        Logger.log_verbose(
+            "\ayIAmStuck\aw(): \atStuck\aw: %s, \atNav.Active()\aw: %s, \amNav.Velocity()\aw: \ao%d\aw, \amTimeSinceLastPositionChange()\aw: \ao%d\aw, \amAttemptToFixStuckTimer()\aw: \ao%d\aw, \amLastNavCmdTime\aw: \ao%s, \amLastNavCmd\aw: \at%s",
+            Strings.BoolToColorString(stuck), Strings.BoolToColorString(Nav.Active()), Nav.Velocity(), Movement:GetTimeSinceLastPositionChange(),
+            Config:GetSetting('AttemptToFixStuckTimer'),
+            Movement:GetTimeSinceLastNav(), Movement:GetLastNavCmd())
+    end
+
+    return stuck
 end
 
-function Module:FixStuck()
+function Module:CheckStuck()
     local Nav = mq.TLO.Navigation
 
     if not Nav.Active() then
@@ -835,7 +852,7 @@ function Module:FixStuck()
             Module.TempSettings.StuckAtTime = os.time()
         end
 
-        if ((os.time() - Module.TempSettings.StuckAtTime) >= Config:GetSetting('AttemptToFixStuckTimer')) or Config:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer') then
+        if ((os.time() - Module.TempSettings.StuckAtTime) >= Config:GetSetting('AttemptToFixStuckTimer')) or Movement:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer') then
             Logger.log_warning("\awWARNING:\ax Navigation appears to be stuck")
             -- is autosize loaded?
             if mq.TLO.Plugin("MQ2AutoSize").IsLoaded() then
@@ -857,19 +874,17 @@ function Module:FixStuck()
                     Core.DoCmd("/squelch /autosize self on")
                 end
 
-                local startingLoc
                 local cycleSizes = { startingSize * 2, 1, startingSize * 1.5, 1, startingSize * 3, 1, }
                 for _, size in ipairs(cycleSizes) do
                     Logger.log_warning("\awWARNING:\ax Setting size to %d to unstick", size)
                     Core.DoCmd("/squelch /autosize sizeself %d", size)
 
                     mq.delay("2s", function()
-                        Config:StoreLastMove()
                         return not self:IAmStuck()
                     end)
 
                     if not self:IAmStuck() then
-                        Logger.log_warning("\agUnstuck successful!\ax Resuming chase.")
+                        Logger.log_warning("\agUnstuck successful!\ax Resuming Navigation.")
                         break
                     end
                 end

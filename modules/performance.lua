@@ -21,7 +21,7 @@ Module.xAxes              = {}
 Module.SettingsLoaded     = false
 Module.FrameTimingData    = {}
 Module.MaxFrameTime       = 0
-Module.LastExtentsCheck   = os.clock()
+Module.LastExtentsCheck   = os.time()
 Module.FAQ                = {}
 Module.SaveRequested      = nil
 
@@ -125,14 +125,14 @@ function Module:Render()
     local pressed
     if not self.SettingsLoaded then return end
 
-    if os.clock() - self.LastExtentsCheck > 0.01 then
+    if os.time() - self.LastExtentsCheck > 0.01 then
         self.GoalMaxFrameTime = 0
-        self.LastExtentsCheck = os.clock()
+        self.LastExtentsCheck = os.time()
         for _, data in pairs(self.FrameTimingData) do
             for idx, time in ipairs(data.frameTimes.DataY) do
                 -- is this entry visible?
-                local visible = data.frameTimes.DataX[idx] > os.clock() - Config:GetSetting('SecondsToStore') and
-                    data.frameTimes.DataX[idx] < os.clock()
+                local visible = data.frameTimes.DataX[idx] > os.time() - Config:GetSetting('SecondsToStore') and
+                    data.frameTimes.DataX[idx] < os.time()
                 if visible and time > self.GoalMaxFrameTime then
                     self.GoalMaxFrameTime = math.ceil(time / self.MaxFrameStep) * self.MaxFrameStep
                 end
@@ -146,7 +146,7 @@ function Module:Render()
 
     if ImPlot.BeginPlot("Frame Times for RGMercs Modules") then
         ImPlot.SetupAxes("Time (s)", "Frame Time (ms)")
-        ImPlot.SetupAxisLimits(ImAxis.X1, os.clock() - Config:GetSetting('SecondsToStore'), os.clock(), ImGuiCond.Always)
+        ImPlot.SetupAxisLimits(ImAxis.X1, os.time() - Config:GetSetting('SecondsToStore'), os.time(), ImGuiCond.Always)
         ImPlot.SetupAxisLimits(ImAxis.Y1, 1, self.CurMaxMaxFrameTime, ImGuiCond.Always)
 
         for _, module in pairs(Modules:GetModuleOrderedNames()) do
@@ -179,14 +179,14 @@ function Module:OnFrameExec(module, frameTime)
     if not self.FrameTimingData[module] then
         self.FrameTimingData[module] = {
             mutexLock = false,
-            lastFrame = os.clock(),
+            lastFrame = os.time(),
             frameTimes =
                 ScrollingPlotBuffer:new(),
         }
     end
 
-    self.FrameTimingData[module].lastFrame = os.clock()
-    self.FrameTimingData[module].frameTimes:AddPoint(os.clock(), frameTime)
+    self.FrameTimingData[module].lastFrame = os.time()
+    self.FrameTimingData[module].frameTimes:AddPoint(os.time(), frameTime)
 end
 
 function Module:OnDeath()

@@ -472,7 +472,7 @@ function Module:AddCCTarget(mobId)
 		duration = mq.TLO.Target.Charmed.Duration() or 0,
 		level = spawn.Level() or 0,
 		body = spawn.Body() or "Unknown",
-		last_check = os.clock() * 1000,
+		last_check = os.time() * 1000,
 		charm_spell = mq.TLO
 			.Target.Charmed() or "None",
 	}
@@ -686,11 +686,11 @@ end
 
 function Module:UpdateTimings()
 	for _, data in pairs(self.TempSettings.CharmTracker) do
-		local timeDelta = (os.clock() * 1000) - data.last_check
+		local timeDelta = (os.time() * 1000) - data.last_check
 
 		data.duration = data.duration - timeDelta
 
-		data.last_check = os.clock() * 1000
+		data.last_check = os.time() * 1000
 	end
 end
 

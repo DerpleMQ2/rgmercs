@@ -28,7 +28,7 @@ function Modules:load(lootModule)
         table.insert(self.ModuleOrder, lootModule)
     end
     self.ModuleList = {
-        Movement     = require("modules.movement").New(),
+        Movement     = require("modules.move").New(),
         Travel       = require("modules.travel").New(),
         Clickies     = require("modules.clickies").New(),
         Class        = require("modules.class").New(),
@@ -103,14 +103,14 @@ end
 function Modules:ExecAll(fn, ...)
     local ret = {}
     for _, name in pairs(self.ModuleOrder) do
-        local startTime = os.clock() * 1000
+        local startTime = os.time() * 1000
         local module = self.ModuleList[name]
         if module and module[fn] then
             ret[name] = module[fn](module, ...)
 
             if fn == "GiveTime" then
                 if self.ModuleList.Perf then
-                    self.ModuleList.Perf:OnFrameExec(name, (os.clock() * 1000) - startTime)
+                    self.ModuleList.Perf:OnFrameExec(name, (os.time() * 1000) - startTime)
                 end
             end
         end

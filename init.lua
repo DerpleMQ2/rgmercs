@@ -321,7 +321,7 @@ local function RGInit(...)
     -- store initial positioning data.
     initPctComplete = 90
     initMsg = "Storing Initial Positioning Data..."
-    Config:StoreLastMove()
+    Movement:StoreLastMove()
 
     initMsg = "Done!"
     initPctComplete = 100
@@ -371,7 +371,7 @@ local function Main()
     end
 
     -- sometimes nav gets interupted this will try to reset it.
-    if Config:GetTimeSinceLastMove() > 5 and mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() == 0 then
+    if Movement:GetTimeSinceLastMove() > 5 and mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() == 0 then
         Movement:DoNav(false, "stop")
     end
 
@@ -382,9 +382,7 @@ local function Main()
         end
 
         Globals.CurrentState = "Combat"
-        --if os.clock() - Globals.LastFaceTime > 6 then
         if Config:GetSetting('FaceTarget') and not Targeting.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
-            --Globals.LastFaceTime = os.clock()
             Core.DoCmd("/squelch /face fast")
         end
 
@@ -423,7 +421,7 @@ local function Main()
         ClassLoader.changeLoadedClass()
     end
 
-    Config:StoreLastMove()
+    Movement:StoreLastMove()
 
     if mq.TLO.Me.Hovering() then Events.HandleDeath() end
 
@@ -456,8 +454,8 @@ local function Main()
 
     -- Handles state for when we're in combat
     if Globals.CurrentState == "Combat" then
-        if ((os.clock() - Globals.LastPetCmd) > 2) then
-            Globals.LastPetCmd = os.clock()
+        if ((os.time() - Globals.LastPetCmd) > 2) then
+            Globals.LastPetCmd = os.time()
             if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
                 Combat.PetAttack(Globals.AutoTargetID, true)
             end

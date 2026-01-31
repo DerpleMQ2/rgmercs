@@ -48,7 +48,7 @@ Module.TempSettings.RotationTable            = {}
 Module.TempSettings.HealRotationTable        = {}
 Module.TempSettings.RotationTimers           = {}
 Module.TempSettings.RezTimers                = {}
-Module.TempSettings.CureCheckTimer           = os.clock() -- set this out a bit so we have time to get actor data.
+Module.TempSettings.CureCheckTimer           = os.time() -- set this out a bit so we have time to get actor data.
 Module.TempSettings.ShowFailedSpells         = false
 Module.TempSettings.ResolvingActions         = true
 Module.TempSettings.CombatModeSet            = false
@@ -203,13 +203,7 @@ Module.CommandHandlers                       = {
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
             Logger.log_debug("\atQueueing Cast: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
 
-            table.insert(self.TempSettings.QueuedAbilities, {
-                name = spell,
-                targetId = targetId,
-                target = mq.TLO.Spawn(targetId),
-                type = "spell",
-                queuedTime = os.clock(),
-            })
+            self:QueueAbility("spell", spell, targetId)
 
             return true
         end,
@@ -222,13 +216,7 @@ Module.CommandHandlers                       = {
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
             Logger.log_debug("\atUsing AA: \aw\"\am%s\aw\" on targetId(\am%d\aw)", aaname, tonumber(targetId) or mq.TLO.Target.ID())
 
-            table.insert(self.TempSettings.QueuedAbilities, {
-                name = aaname,
-                targetId = targetId,
-                target = mq.TLO.Spawn(targetId),
-                type = "aa",
-                queuedTime = os.clock(),
-            })
+            self:QueueAbility("aa", aaname, targetId)
 
             return true
         end,
@@ -241,13 +229,7 @@ Module.CommandHandlers                       = {
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
             Logger.log_debug("\atUsing Item: \aw\"\am%s\aw\" on targetId(\am%d\aw)", itemName, tonumber(targetId) or mq.TLO.Target.ID())
 
-            table.insert(self.TempSettings.QueuedAbilities, {
-                name = itemName,
-                targetId = targetId,
-                target = mq.TLO.Spawn(targetId),
-                type = "item",
-                queuedTime = os.clock(),
-            })
+            self:QueueAbility("item", itemName, targetId)
 
             return true
         end,
@@ -267,49 +249,19 @@ Module.CommandHandlers                       = {
 
             local actionHandlers = {
                 spell = function(self)
-                    table.insert(self.TempSettings.QueuedAbilities, {
-                        name = action.RankName(),
-                        targetId = targetId,
-                        target = mq.TLO.Spawn(targetId),
-                        type = "spell",
-                        queuedTime = os.clock(),
-                    })
+                    self:QueueAbility("spell", action.RankName(), targetId)
                 end,
                 song = function(self)
-                    table.insert(self.TempSettings.QueuedAbilities, {
-                        name = action.RankName(),
-                        targetId = targetId,
-                        target = mq.TLO.Spawn(targetId),
-                        type = "song",
-                        queuedTime = os.clock(),
-                    })
+                    self:QueueAbility("song", action.RankName(), targetId)
                 end,
                 aa = function(self)
-                    table.insert(self.TempSettings.QueuedAbilities, {
-                        name = action,
-                        targetId = targetId,
-                        target = mq.TLO.Spawn(targetId),
-                        type = "aa",
-                        queuedTime = os.clock(),
-                    })
+                    self:QueueAbility("aa", action, targetId)
                 end, --AFAIK we don't have any AA mapped, but, future proof.
                 item = function(self)
-                    table.insert(self.TempSettings.QueuedAbilities, {
-                        name = action,
-                        targetId = targetId,
-                        target = mq.TLO.Spawn(targetId),
-                        type = "item",
-                        queuedTime = os.clock(),
-                    })
+                    self:QueueAbility("item", action, targetId)
                 end,
                 disc = function(self)
-                    table.insert(self.TempSettings.QueuedAbilities, {
-                        name = action,
-                        targetId = targetId,
-                        target = mq.TLO.Spawn(targetId),
-                        type = "disc",
-                        queuedTime = os.clock(),
-                    })
+                    self:QueueAbility("disc", action, targetId)
                 end,
             }
 
@@ -518,7 +470,7 @@ function Module:RenderQueuedAbilities()
 
                 for _, queueData in pairs(self.TempSettings.QueuedAbilities) do
                     ImGui.TableNextColumn()
-                    ImGui.Text(Strings.FormatTime((os.clock() - queueData.queuedTime)))
+                    ImGui.Text(Strings.FormatTime((os.time() - queueData.queuedTime)))
                     ImGui.TableNextColumn()
                     ImGui.Text(queueData.type)
                     ImGui.TableNextColumn()
@@ -934,9 +886,9 @@ function Module:SelfCheckAndRez(combat_state)
                     if Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                         Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                             rezSpawn.ID() or 0)
-                    elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                    elseif (os.time() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                         Core.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
-                        self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                        self.TempSettings.RezTimers[rezSpawn.ID()] = os.time()
                         self:ResetRotationTimer("GroupBuff")
                     end
                 end
@@ -965,9 +917,9 @@ function Module:IGCheckAndRez(combat_state)
                 elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
-                elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                elseif (os.time() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Logger.log_debug("\atIGCheckAndRez(): Attempting to Res: %s", rezSpawn.CleanName())
-                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.time()
                     if Core.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName) then
                         self:ResetRotationTimer("GroupBuff")
                         -- make sure we process other healing/etc instead of chain rezzing
@@ -1000,8 +952,8 @@ function Module:OOGCheckAndRez(combat_state)
                 elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atOOGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
-                elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
-                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                elseif (os.time() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.time()
                     if Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID(), ownerName) then
                         self:ResetRotationTimer("GroupBuff")
                         -- make sure we process other healing/etc instead of chain rezzing
@@ -1313,8 +1265,8 @@ end
 
 function Module:RunCureRotation(combat_state)
     if combat_state == "Downtime" then -- check freely in combat and the first frame of downtime; then avoid spamming
-        if (os.clock() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
-        self.TempSettings.CureCheckTimer = os.clock()
+        if (os.time() - self.TempSettings.CureCheckTimer) < Config:GetSetting('CureInterval') then return end
+        self.TempSettings.CureCheckTimer = os.time()
     end
 
     Logger.log_verbose("\ao[Cures] Checking for curables...")
@@ -1456,6 +1408,17 @@ function Module:ProcessQueuedEvents()
     return #self.TempSettings.QueuedAbilities > 0
 end
 
+function Module:QueueAbility(type, name, targetId)
+    Logger.log_debug("\ayQueuing %s: %s on %s", type, name, targetId)
+    table.insert(self.TempSettings.QueuedAbilities, {
+        name = name,
+        targetId = targetId,
+        target = mq.TLO.Spawn(targetId),
+        type = type,
+        queuedTime = os.time(),
+    })
+end
+
 function Module:GiveTime(combat_state)
     if not self.ClassConfig or not self.ModuleLoaded then return end
     local enabledRotations = Config:GetSetting('EnabledRotations') or {}
@@ -1563,11 +1526,11 @@ function Module:GiveTime(combat_state)
             if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and not xtSpawn.Fleeing() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and (xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater" or xtSpawn.ID() == Globals.ForceTargetID) and Globals.Constants.RGNotMezzedAnims:contains(xtSpawn.Animation()) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
                 Logger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(), (xtSpawn.Heading.Degrees() or 0))
-                if os.clock() - Movement:GetLastStickTimer() < 0.5 then
+                if os.time() - Movement:GetLastStickTimer() < 0.5 then
                     Logger.log_debug("\ayIgnoring moveback because we just stuck a second ago - let's give it some time.")
                 else
                     Movement:DoStickCmd("moveback %d", Config:GetSetting('MovebackDistance'))
-                    Movement:SetLastStickTimer(os.clock())
+                    Movement:SetLastStickTimer(os.time())
                 end
             end
         end
@@ -1590,9 +1553,9 @@ function Module:GiveTime(combat_state)
         else
             self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
             if r.timer then -- see if we've waited the rotation timer out.
-                timeCheckPassed = ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
+                timeCheckPassed = ((os.time() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
             else            -- default to only processing Downtime rotations once per second if no timer is specified.
-                timeCheckPassed = self.CombatState ~= "Downtime" and true or ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= 1)
+                timeCheckPassed = self.CombatState ~= "Downtime" and true or ((os.time() - self.TempSettings.RotationTimers[r.name]) >= 1)
             end
 
             if timeCheckPassed then
@@ -1611,7 +1574,7 @@ function Module:GiveTime(combat_state)
                                     Config:GetSetting('EnabledRotationEntries') or {})
 
                                 if r.state then r.state = newState end
-                                self.TempSettings.RotationTimers[r.name] = os.clock()
+                                self.TempSettings.RotationTimers[r.name] = os.time()
                             else
                                 r.lastCondCheck = false
                             end
@@ -1624,8 +1587,8 @@ function Module:GiveTime(combat_state)
             else
                 Logger.log_verbose(
                     "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
-                    Strings.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
-                    Strings.FormatTime((r.timer or 1) - (os.clock() - self.TempSettings.RotationTimers[r.name])))
+                    Strings.FormatTime(os.time() - self.TempSettings.RotationTimers[r.name]),
+                    Strings.FormatTime((r.timer or 1) - (os.time() - self.TempSettings.RotationTimers[r.name])))
                 if r.timer then r.lastCondCheck = false end --update rotation UI when rotation doesn't fire due to timer check
             end
         end

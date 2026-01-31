@@ -42,11 +42,11 @@ function Module:RenderName(name)
     local length = name:len()
 
     self.ColorWheel[name] = self.ColorWheel[name] or math.random(10000)
-    self.ColorWheelTimer[name] = self.ColorWheelTimer[name] or os.clock()
+    self.ColorWheelTimer[name] = self.ColorWheelTimer[name] or os.time()
 
-    if os.clock() - self.ColorWheelTimer[name] > 0.25 then
+    if os.time() - self.ColorWheelTimer[name] > 0.25 then
         self.ColorWheel[name] = self.ColorWheel[name] + 1 --math.random(500)
-        self.ColorWheelTimer[name] = os.clock()
+        self.ColorWheelTimer[name] = os.time()
     end
 
     for i = 1, length do

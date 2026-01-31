@@ -205,7 +205,7 @@ end
 ---
 --- @return boolean True if actions should happen.
 function Combat.DoCombatActions()
-    if not Globals.LastMove then return false end
+    if not Movement.LastMove then return false end
     if Globals.AutoTargetID == 0 then return false end
     if Targeting.GetXTHaterCount() == 0 then return false end
 

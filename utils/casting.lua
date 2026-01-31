@@ -7,6 +7,7 @@ local Modules      = require("utils.modules")
 local Comms        = require("utils.comms")
 local Targeting    = require("utils.targeting")
 local DanNet       = require('lib.dannet.helpers')
+local Movement     = require('utils.movement')
 local Logger       = require("utils.logger")
 local Combat       = require("utils.combat")
 local Tables       = require("utils.tables")
@@ -563,7 +564,7 @@ end
 function Casting.CheckOkayToBuff()
     local visible = not mq.TLO.Me.Invis()
     local safe = Targeting.GetXTHaterCount() == 0 and Globals.AutoTargetID == 0
-    local stationary = not (Config:GetSetting('BuffWaitMoveTimer') > Config:GetTimeSinceLastMove() or mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active())
+    local stationary = not (Config:GetSetting('BuffWaitMoveTimer') > Movement:GetTimeSinceLastMove() or mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active())
     local able = not (Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10)
 
     return visible and safe and stationary and able
@@ -1723,9 +1724,9 @@ function Casting.AutoMed()
     end
 
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
-    if Targeting.GetXTHaterCount() == 0 and Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) then return end
+    if Targeting.GetXTHaterCount() == 0 and Movement:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) then return end
 
-    Config:StoreLastMove()
+    Movement:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
     if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then

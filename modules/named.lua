@@ -116,8 +116,8 @@ end
 
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
-    if os.clock() - self.LastNamedCheck > 1 then
-        self.LastNamedCheck = os.clock()
+    if os.time() - self.LastNamedCheck > 1 then
+        self.LastNamedCheck = os.time()
         self:CheckZoneNamed()
     end
 end

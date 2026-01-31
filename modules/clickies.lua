@@ -1360,7 +1360,7 @@ function Module:RenderClickyData(clicky, clickyIdx)
             local lastUsed = clickyState.lastUsed or 0
 
             ImGui.TableNextColumn()
-            ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.clock() - lastUsed)) or "Never")
+            ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.time() - lastUsed)) or "Never")
             ImGui.TableNextColumn()
             ImGui.Text(clicky.itemName)
             ImGui.TableNextColumn()
@@ -1573,7 +1573,7 @@ function Module:GiveTime(combat_state)
                                     maxClickiesPerFrame, self.ClickyRotationIndex)
                                 break
                             end
-                            self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
+                            self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.time()
                             break --ensure we stop after we process a single clicky to allow rotations to continue
                         else
                             if not buffCheckPassed then

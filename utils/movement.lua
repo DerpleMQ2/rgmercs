@@ -1,21 +1,28 @@
-local mq                = require('mq')
-local Config            = require('utils.config')
-local Events            = require('utils.events')
-local Logger            = require("utils.logger")
-local Core              = require("utils.core")
-local Modules           = require("utils.modules")
+local mq                     = require('mq')
+local Config                 = require('utils.config')
+local Events                 = require('utils.events')
+local Logger                 = require("utils.logger")
+local Core                   = require("utils.core")
+local Modules                = require("utils.modules")
 
-local Movement          = { _version = '1.0', _name = "Movement", _author = 'Derple', }
-Movement.__index        = Movement
-Movement.LastDoStick    = 0
-Movement.LastDoStickCmd = ""
-Movement.LastDoNav      = 0
-Movement.LastDoNavCmd   = ""
+local Movement               = { _version = '1.0', _name = "Movement", _author = 'Derple', }
+Movement.__index             = Movement
+Movement.LastDoStick         = 0
+Movement.LastDoStickCmd      = ""
+Movement.LastDoNav           = 0
+Movement.LastDoNavCmd        = ""
+Movement.LastMove            = {}
+Movement.LastMove.X          = mq.TLO.Me.X()
+Movement.LastMove.Y          = mq.TLO.Me.Y()
+Movement.LastMove.Z          = mq.TLO.Me.Z()
+Movement.LastMove.Heading    = mq.TLO.Me.Heading.Degrees()
+Movement.LastMove.Sitting    = mq.TLO.Me.Sitting()
+Movement.LastMove.TimeAtMove = os.time()
 
 --- Sticks the player to the specified target.
 --- @param targetId number The ID of the target to stick to.
 function Movement:DoStick(targetId)
-    if os.clock() - self.LastDoStick < 1 then
+    if os.time() - self.LastDoStick < 1 then
         Logger.log_debug(
             "\ayIgnoring DoStick because we just stuck a second ago - let's give it some time.")
         return
@@ -38,7 +45,7 @@ function Movement:DoStickCmd(params, ...)
     local formatted = params
     if ... ~= nil then formatted = string.format(params, ...) end
     Core.DoCmd("/stick %s", formatted)
-    self:SetLastStickTimer(os.clock())
+    self:SetLastStickTimer(os.time())
     self.LastDoStickCmd = formatted
 end
 
@@ -46,8 +53,10 @@ function Movement:DoNav(squelch, params, ...)
     local formatted = params
     if ... ~= nil then formatted = string.format(params, ...) end
     Core.DoCmd("%s/nav %s", squelch and "/squelch " or "", formatted)
-    self.LastDoNav = os.clock()
+    self.LastDoNav = os.time()
     self.LastDoNavCmd = formatted
+    mq.delay(1000, function() return mq.TLO.Navigation.Active() end)
+    self:StoreLastMove()
 end
 
 function Movement:GetLastNavCmd()
@@ -84,7 +93,7 @@ function Movement:GetTimeSinceLastStick()
         return "N/A"
     end
 
-    return string.format("%ds", os.clock() - self.LastDoStick)
+    return string.format("%ds", os.time() - self.LastDoStick)
 end
 
 function Movement:GetTimeSinceLastNav()
@@ -92,7 +101,7 @@ function Movement:GetTimeSinceLastNav()
         return "N/A"
     end
 
-    return string.format("%ds", os.clock() - self.LastDoNav)
+    return string.format("%ds", os.time() - self.LastDoNav)
 end
 
 function Movement:GetSecondsSinceLastNav()
@@ -100,7 +109,7 @@ function Movement:GetSecondsSinceLastNav()
         return 0
     end
 
-    return os.clock() - self.LastDoNav
+    return os.time() - self.LastDoNav
 end
 
 --- Navigates to a target during combat.
@@ -205,6 +214,43 @@ function Movement.UpdateMapRadii()
     else
         Core.DoCmd("/squelch /mapfilter campradius off")
         Core.DoCmd("/squelch /mapfilter pullradius off")
+    end
+end
+
+-- this function considers being in combat as movement so that buff checks only happen in downtime.
+function Movement:GetTimeSinceLastMove()
+    return os.time() - self.LastMove.TimeAtMove
+end
+
+-- this function only considers actual movement, not combat state.
+function Movement:GetTimeSinceLastPositionChange()
+    return os.time() - (self.LastMove.TimeAtPositionChange or 0)
+end
+
+function Movement:StoreLastMove()
+    local me = mq.TLO.Me
+
+    -- only look at actual movement.
+    if math.abs(self.LastMove.X - me.X()) > 1 or
+        math.abs(self.LastMove.Y - me.Y()) > 1 or
+        math.abs(self.LastMove.Z - me.Z()) > 1 then
+        self.LastMove.TimeAtPositionChange = os.time()
+    end
+
+    if math.abs(self.LastMove.X - me.X()) > 1 or
+        math.abs(self.LastMove.Y - me.Y()) > 1 or
+        math.abs(self.LastMove.Z - me.Z()) > 1 or
+        math.abs(self.LastMove.Heading - me.Heading.Degrees()) > 1 or
+        me.Combat() or
+        me.CombatState():lower() == "combat" or
+        me.Sitting() ~= self.LastMove.Sitting then
+        self.LastMove = self.LastMove or {}
+        self.LastMove.X = me.X()
+        self.LastMove.Y = me.Y()
+        self.LastMove.Z = me.Z()
+        self.LastMove.Heading = me.Heading.Degrees()
+        self.LastMove.Sitting = me.Sitting()
+        self.LastMove.TimeAtMove = os.time()
     end
 end
 

@@ -33,7 +33,7 @@ end
 
 function StandardUI:RenderTarget()
     if Config.TempSettings.AssistWarning then
-        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255), Config.TempSettings.AssistWarning)
+        ImGui.TextColored(IM_COL32(200, math.floor(os.time() % 2) == 1 and 52 or 200, 52, 255), Config.TempSettings.AssistWarning)
     end
 
     local assistSpawn = Targeting.GetAutoTarget()
@@ -73,7 +73,7 @@ function StandardUI:RenderTarget()
         end
         if Globals.LastBurnCheck and assistSpawn.ID() > 0 then
             ImGui.SameLine()
-            ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
+            ImGui.TextColored(IM_COL32(200, math.floor(os.time() % 2) == 1 and 52 or 200, 52, 255),
                 string.format("**BURNING**"))
         end
         Ui.RenderProgressBar(ratioHPs, -1, 25)

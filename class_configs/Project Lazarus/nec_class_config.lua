@@ -913,13 +913,7 @@ local _ClassConfig = {
 
             if lichSpell and lichSpell() then
                 local targetId = mq.TLO.Me.ID()
-                table.insert(self.TempSettings.QueuedAbilities, {
-                    name = lichSpell,
-                    targetId = targetId,
-                    target = mq.TLO.Spawn(targetId),
-                    type = "spell",
-                    queuedTime = os.clock(),
-                })
+                self:QueueAbility("spell", lichSpell, targetId)
             end
         end,
     },

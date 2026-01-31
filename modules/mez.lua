@@ -600,7 +600,7 @@ function Module:AddCCTarget(mobId)
     self.TempSettings.MezTracker[mobId] = {
         name = mq.TLO.Target.CleanName(),
         duration = mq.TLO.Target.Mezzed.Duration() or 0,
-        last_check = os.clock() * 1000,
+        last_check = os.time() * 1000,
         mez_spell = mq.TLO
             .Target.Mezzed() or "None",
     }
@@ -819,11 +819,11 @@ end
 
 function Module:UpdateTimings()
     for _, data in pairs(self.TempSettings.MezTracker) do
-        local timeDelta = (os.clock() * 1000) - data.last_check
+        local timeDelta = (os.time() * 1000) - data.last_check
 
         data.duration = data.duration - timeDelta
 
-        data.last_check = os.clock() * 1000
+        data.last_check = os.time() * 1000
     end
 end
 

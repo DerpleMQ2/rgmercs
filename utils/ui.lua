@@ -935,7 +935,7 @@ function Ui.RenderForceTargetList(showPopout)
                 if not checked then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.time() % 2) == 1 and 52 or 200, 255))
                 end
 
                 Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.FA_ARROW_RIGHT, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
@@ -1630,7 +1630,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
     local final_knob_col = ImGui.GetColorU32(knob_color)
 
     if pulse_on_hover and is_hovered then
-        local pulse_strength = 0.5 + 0.5 * math.sin(os.clock() * 4)
+        local pulse_strength = 0.5 + 0.5 * math.sin(os.time() * 4)
         if knob_color.x == 1 and knob_color.y == 1 and knob_color.z == 1 then
             -- Special case: white glows warm yellow
             local new_color = ImVec4(
@@ -1800,7 +1800,7 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         local itemName = type == "ClickyItemWithConditions" and setting.itemName or setting
         local nameLen = itemName:len()
         local maxStart = (nameLen - displayCharCount) + 1
-        local startDisp = maxStart > 0 and (os.clock() % maxStart) + 1 or 0
+        local startDisp = maxStart > 0 and (os.time() % maxStart) + 1 or 0
 
         ImGui.PushID(id .. "__btn")
         if ImGui.SmallButton(nameLen > 0 and itemName:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
