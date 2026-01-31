@@ -2617,4 +2617,30 @@ function Ui.InvisibleWithButtonText(id, text, size, callbackFn)
     ImGui.Text(text)
 end
 
+function Ui.RenderModulesPopped()
+    if not Config:SettingsLoaded() then return end
+
+    for _, name in ipairs(Modules:GetModuleOrderedNames()) do
+        if Config:GetSetting(name .. "_Popped", true) then
+            if Modules:ExecModule(name, "ShouldRender") then
+                local flags = bit32.bor(ImGuiWindowFlags.None)
+
+                if Config:GetSetting('PopoutWindowsLockWithMain') and Config:GetSetting('MainWindowLocked') then
+                    flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
+                end
+
+                local open, show = ImGui.Begin(name, true, flags)
+                if show then
+                    Modules:ExecModule(name, "Render")
+                end
+                ImGui.End()
+
+                if not open then
+                    Config:SetSetting(name .. "_Popped", false)
+                end
+            end
+        end
+    end
+end
+
 return Ui

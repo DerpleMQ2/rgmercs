@@ -1622,6 +1622,15 @@ Config.DefaultConfig                                     = {
         Max = 3,
         ConfigType = "Advaced",
     },
+    ['PopoutWindowsLockWithMain']        = {
+        DisplayName = "Lock Popout Windows with Main",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 14,
+        Tooltip = "Popout windows will lock/unlock when the main window is locked/unlocked.",
+        Default = true,
+    },
 
     -- [ UI Colors ] --
     ['MainButtonUnpausedColor']          = {

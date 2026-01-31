@@ -58,25 +58,6 @@ local ConsoleUI       = require("ui.console")
 local LoaderUI        = require("ui.loader")
 local HudUI           = require("ui.hud")
 
-local function renderModulesPopped()
-    if not Config:SettingsLoaded() then return end
-
-    for _, name in ipairs(Modules:GetModuleOrderedNames()) do
-        if Config:GetSetting(name .. "_Popped", true) then
-            if Modules:ExecModule(name, "ShouldRender") then
-                local open, show = ImGui.Begin(name, true)
-                if show then
-                    Modules:ExecModule(name, "Render")
-                end
-                ImGui.End()
-                if not open then
-                    Config:SetSetting(name .. "_Popped", false)
-                end
-            end
-        end
-    end
-end
-
 local function Alive()
     return mq.TLO.NearestSpawn('pc')() ~= nil
 end
@@ -135,8 +116,15 @@ local function RGMercsGUI()
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Config:GetMainOpacity()) -- Main window opacity.
             ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, Config:GetSetting('ScrollBarRounding'))
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Config:GetSetting('FrameEdgeRounding'))
+            local flags = bit32.bor(ImGuiWindowFlags.None)
+
+            if Config:GetSetting('PopoutWindowsLockWithMain') and Config:GetSetting('MainWindowLocked') then
+                flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
+            end
+
             if Config:GetSetting('PopOutForceTarget') then
-                local openFT, showFT = ImGui.Begin("Force Target", Config:GetSetting('PopOutForceTarget'))
+                local openFT, showFT = ImGui.Begin("Force Target", Config:GetSetting('PopOutForceTarget'), flags)
+
                 if showFT then
                     Ui.RenderForceTargetList()
                 end
@@ -147,18 +135,19 @@ local function RGMercsGUI()
                 end
             end
             if Config:GetSetting('PopOutMercsStatus') then
-                local openFT, showFT = ImGui.Begin("Mercs Status", Config:GetSetting('PopOutMercsStatus'))
-                if showFT then
+                local openMS, showMS = ImGui.Begin("Mercs Status", Config:GetSetting('PopOutMercsStatus'), flags)
+
+                if showMS then
                     Ui.RenderMercsStatus()
                 end
                 ImGui.End()
-                if not openFT then
+                if not openMS then
                     Config:SetSetting('PopOutMercsStatus', false)
-                    showFT = false
+                    showMS = false
                 end
             end
             if Config:GetSetting('PopOutConsole') then
-                local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", Config:GetSetting('PopOutConsole'))
+                local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", Config:GetSetting('PopOutConsole'), flags)
                 if showConsole then
                     ConsoleUI:DrawConsole()
                 end
@@ -169,7 +158,7 @@ local function RGMercsGUI()
                 end
             end
 
-            renderModulesPopped()
+            Ui.RenderModulesPopped()
 
             if Config:GetSetting("AlwaysShowMiniButton") or Globals.Minimized then
                 HudUI:RenderToggleHud()
