@@ -1574,8 +1574,11 @@ function Module:GiveTime(combat_state)
                     if item then
                         target = mq.TLO.Me
                         local buffCheckPassed = true
+                        local targetId = nil
+
                         if clicky.target == "Self" then
                             target = mq.TLO.Me
+
                             buffCheckPassed = Casting.SelfBuffItemCheck(clicky.itemName)
                         elseif clicky.target == "Pet" then
                             ---@diagnostic disable-next-line: cast-local-type
@@ -1591,9 +1594,18 @@ function Module:GiveTime(combat_state)
                             buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
                         end
 
+                        if not clicky.no_target_change then
+                            targetId = target.ID()
+                        end
+
                         if buffCheckPassed and Casting.ItemReady(item()) then
+                            printf(clicky.itemName ..
+                                " " .. tostring(type(clicky.no_target_change)) .. "Clicky Target: " .. tostring(targetId))
+
+
+
                             Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                            Casting.UseItem(item.Name(), clicky.no_target_change and nil or target.ID(), true)
+                            Casting.UseItem(item.Name(), targetId, true)
                             clickiesUsedThisFrame = clickiesUsedThisFrame + 1
                             if maxClickiesPerFrame > 0 and clickiesUsedThisFrame >= maxClickiesPerFrame then
                                 Logger.log_debug("\ayClicky: \a-tMax Clickies Per Frame of \am%d\a-t reached, stopping for this frame and picking up with %d next frame.",
