@@ -10,6 +10,7 @@ local Movement                            = require("utils.movement")
 local Targeting                           = require("utils.targeting")
 local Ui                                  = require("utils.ui")
 local Comms                               = require("utils.comms")
+local Tables                              = require("utils.tables")
 local Modules                             = require("utils.modules")
 local Strings                             = require("utils.strings")
 local Files                               = require("utils.files")
@@ -44,6 +45,7 @@ Module.TempSettings.LastGroupUpdateTime   = Globals.GetTimeSeconds()
 Module.TempSettings.SelectedPath          = "None"
 Module.TempSettings.PullAttemptStarted    = 0
 Module.TempSettings.PullRadius            = 0
+Module.TempSettings.WayPointsToDelete     = Set.new({})
 Module.TempSettings.PausePulls            = false
 Module.FAQ                                = {}
 Module.SaveRequested                      = nil
@@ -1208,7 +1210,7 @@ function Module:Render()
                     ImGui.TableNextColumn()
                     ImGui.PushID("##_small_btn_delete_wp_" .. tostring(idx))
                     if ImGui.SmallButton(Icons.FA_TRASH) then
-                        self:DeleteWayPoint(idx)
+                        self:AddWPToDeleteList(idx)
                     end
                     ImGui.PopID()
                     ImGui.SameLine()
@@ -1363,8 +1365,22 @@ function Module:CreateWayPointHere()
         mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
 end
 
+function Module:AddWPToDeleteList(idx)
+    self.TempSettings.WayPointsToDelete:add(idx)
+end
+
+function Module:ProcessDeleteWPs()
+    local wpToDelete = self.TempSettings.WayPointsToDelete:toList()
+    while #wpToDelete > 0 do
+        local wpId = table.remove(wpToDelete, 1)
+        self:DeleteWayPoint(wpId)
+    end
+
+    self.TempSettings.WayPointsToDelete = Set.new({})
+end
+
 function Module:DeleteWayPoint(idx)
-    local farmWayPoints = Config:GetSetting('FarmWayPoints')
+    local farmWayPoints = Tables.DeepCopy(Config:GetSetting('FarmWayPoints'))
 
     if idx <= #farmWayPoints[mq.TLO.Zone.ShortName()] then
         Logger.log_info("\axWaypoint \at%d\ax at location \ag%s\ax - \arDeleted!\ax", idx, farmWayPoints[mq.TLO.Zone.ShortName()][idx].Loc)
@@ -1372,6 +1388,10 @@ function Module:DeleteWayPoint(idx)
         Config:SetSetting('FarmWayPoints', farmWayPoints)
     else
         Logger.log_error("\ar%d is not a valid waypoint ID!", idx)
+    end
+
+    while self.TempSettings.CurrentWP > #farmWayPoints[mq.TLO.Zone.ShortName()] do
+        self.TempSettings.CurrentWP = self.TempSettings.CurrentWP - 1
     end
 end
 
@@ -1973,6 +1993,12 @@ function Module:NavToWaypoint(loc, ignoreAggro)
     while mq.TLO.Navigation.Active() do
         Logger.log_verbose("NavToWaypoint Waypoint: %d Aggro Count: %d", self.GetCurrentWpId(self), Targeting.GetXTHaterCount())
 
+        if self.TempSettings.WayPointsToDelete:contains(self:GetCurrentWpId()) then
+            Logger.log_debug("\ar NOTICE:\ax Deleting waypoint %d while naving to it.", self:GetCurrentWpId())
+            Movement:DoNav(false, "stop log=off")
+            return false
+        end
+
         if Targeting.GetXTHaterCount() > 0 and not ignoreAggro then
             if mq.TLO.Navigation.Active() then
                 Movement:DoNav(false, "stop log=off")
@@ -2026,6 +2052,8 @@ end
 function Module:GiveTime(combat_state)
     self:RefreshGroupNames()
 
+    self:ProcessDeleteWPs()
+
     if combat_state ~= "Downtime" and not self:IsPullMode("Chain") then
         Logger.log_verbose("PULL:GiveTime() we are in %s, not ready for pulling.", combat_state)
         return
@@ -2046,7 +2074,7 @@ function Module:GiveTime(combat_state)
     self:SetValidPullAbilities()
     self:FixPullerMerc()
     if Config:GetSetting('DoPull') then
-        for _, v in pairs(Config:GetSetting('PullSafeZones')) do
+        for _, v in pairs({}) do --Config:GetSetting('PullSafeZones')) do
             if v == mq.TLO.Zone.ShortName() then
                 local safeZone = mq.TLO.Zone.ShortName()
                 Logger.log_debug("\ar ALERT: In a safe zone \at%s \ax-\ar Disabling Pulling. \ax", safeZone)
