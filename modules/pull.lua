@@ -699,7 +699,9 @@ Module.CommandHandlers                 = {
         usage = "/rgl pulldeny \"<name>\"",
         about = "Adds <name> to the Pull Deny List. Ensure quotes are used on multi-word mob names!",
         handler = function(self, name)
-            self:AddMobToList("PullDenyList", name)
+            if not self:IsMobInList("PullDenyList", name) then
+                self:AddMobToList("PullDenyList", name)
+            end
             return true
         end,
     },
@@ -707,7 +709,9 @@ Module.CommandHandlers                 = {
         usage = "/rgl pullallow \"<name>\"",
         about = "Adds <name> to the Pull Allow List. Ensure quotes are used on multi-word mob names!",
         handler = function(self, name)
-            self:AddMobToList("PullAllowList", name)
+            if not self:IsMobInList("PullAllowList", name) then
+                self:AddMobToList("PullAllowList", name)
+            end
             return true
         end,
     },
@@ -1280,6 +1284,9 @@ end
 ---@param list string
 ---@param mobName string
 function Module:AddMobToList(list, mobName)
+    Logger.log_debug("Adding \ag%s\ax to Pull %s for zone \ay%s\ax.", mobName, list == "PullAllowList" and "Allow List" or "Deny List",
+        mq.TLO.Zone.ShortName())
+
     local listConfig = Config:GetSetting(list)
     listConfig[mq.TLO.Zone.ShortName()] = listConfig[mq.TLO.Zone.ShortName()] or {}
     table.insert(listConfig[mq.TLO.Zone.ShortName()], mobName)
@@ -2723,18 +2730,18 @@ function Module:HandleBind(cmd, ...)
 
     if self.CommandHandlers[cmd:lower()] ~= nil then
         self.CommandHandlers[cmd:lower()].handler(self, params)
-        handled = true
+        return true
     end
 
     -- try to process as a substring
     for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
         if Strings.StartsWith(bindCmd, cmd) then
             bindData.handler(self, params)
-            handled = true
+            return true
         end
     end
 
-    return handled
+    return false
 end
 
 function Module:Shutdown()

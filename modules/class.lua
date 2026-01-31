@@ -1710,7 +1710,6 @@ end
 ---@param ... string
 ---@return boolean
 function Module:HandleBind(cmd, ...)
-    local handled = false
     -- /rglua cmd handler
     if self.ClassConfig.CommandHandlers and self.ClassConfig.CommandHandlers[cmd] then
         return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), self.ClassConfig.CommandHandlers[cmd].handler, self, ...)
@@ -1733,7 +1732,7 @@ function Module:HandleBind(cmd, ...)
         end
     end
 
-    return handled
+    return false
 end
 
 function Module:ResetRotationTimer(rotation)

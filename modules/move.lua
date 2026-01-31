@@ -924,22 +924,21 @@ end
 ---@return boolean
 function Module:HandleBind(cmd, ...)
     local params = ...
-    local handled = false
 
     if self.CommandHandlers[cmd:lower()] ~= nil then
         self.CommandHandlers[cmd:lower()].handler(self, params)
-        handled = true
+        return true
     end
 
     -- try to process as a substring
     for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
         if Strings.StartsWith(bindCmd, cmd) then
             bindData.handler(self, params)
-            handled = true
+            return true
         end
     end
 
-    return handled
+    return false
 end
 
 function Module:Shutdown()
