@@ -977,13 +977,14 @@ end
 --- Uses a specified spell on a target.
 ---
 --- @param spellName string The name of the spell to be used.
---- @param targetId number The ID of the target on which the spell will be cast.
+--- @param targetId? number The ID of the target on which the spell will be cast.
 --- @param bAllowMem boolean Whether to allow the spell to be memorized if not already.
 --- @param bAllowDead boolean? Whether to allow casting the spell on a dead target.
 --- @param retryCount number? The number of times to retry casting the spell if it fails.
 --- @return boolean Returns true if the spell was successfully cast, false otherwise.
 function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount)
     local me = mq.TLO.Me
+    if not targetId then targetId = mq.TLO.Target.ID() end
     -- Immediately send bards to the song handler.
     if me.Class.ShortName():lower() == "brd" then
         return Casting.UseSong(spellName, targetId, bAllowMem)
@@ -1138,13 +1139,15 @@ end
 --- Uses a specified song on a target.
 ---
 --- @param songName string The name of the song to be used.
---- @param targetId number The ID of the target on which the song will be used.
+--- @param targetId? number The ID of the target on which the song will be used.
 --- @param bAllowMem boolean A flag indicating whether memorization is allowed.
 --- @param retryCount number? The number of times to retry using the song if it fails.
 --- @return boolean True if we were able to sing the song, false otherwise
 function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
     if not songName then return false end
     local me = mq.TLO.Me
+    if not targetId then targetId = mq.TLO.Target.ID() end
+
     Logger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, Strings.BoolToColorString(bAllowMem))
 
     if songName then
@@ -1292,10 +1295,11 @@ end
 
 --- Uses a discipline spell on a specified target.
 --- @param discSpell MQSpell The name of the discipline spell to use.
---- @param targetId number The ID of the target on which to use the discipline spell.
+--- @param targetId? number The ID of the target on which to use the discipline spell.
 --- @return boolean True if we were able to fire the Disc false otherwise.
 function Casting.UseDisc(discSpell, targetId)
     local me = mq.TLO.Me
+    if not targetId then targetId = mq.TLO.Target.ID() end
 
     if not discSpell or not discSpell() then return false end
 
@@ -1320,6 +1324,20 @@ function Casting.UseDisc(discSpell, targetId)
                 end
             end
 
+            local oldTargetId = mq.TLO.Target.ID()
+            if targetId > 0 and targetId ~= oldTargetId then
+                local targetSpawn = mq.TLO.Spawn(targetId)
+                if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
+                    Logger.log_debug("\awUseDisc():NOTICE:\ax Turning off autoattack to cast on a PC.")
+                    Core.DoCmd("/attack off")
+                    mq.delay("2s", function() return not me.Combat() end)
+                end
+
+                Logger.log_debug("\awUseDisc():NOTICE:\ax Swapping target to %s [%d] to use %s", targetSpawn.DisplayName(), targetId, discSpell.RankName.Name())
+
+                Targeting.SetTarget(targetId, true)
+            end
+
             Core.DoCmd("/squelch /doability \"%s\"", discSpell.RankName.Name())
 
             mq.delay(discSpell.MyCastTime() or 1000,
@@ -1332,6 +1350,11 @@ function Casting.UseDisc(discSpell, targetId)
 
             Logger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName.Name())
 
+            if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+                Logger.log_debug("UseDisc(): Retargeting previous target after AA use.")
+                Targeting.SetTarget(oldTargetId, true)
+            end
+
             return true
         end
     end
@@ -1339,10 +1362,11 @@ end
 
 --- Uses the specified Alternate Advancement (AA) ability on a given target.
 --- @param aaName string The name of the AA ability to use.
---- @param targetId number The ID of the target on which to use the AA ability.
+--- @param targetId? number The ID of the target on which to use the AA ability.
 --- @return boolean True if the AA ability was successfully used, false otherwise.
 function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     local me = mq.TLO.Me
+    if not targetId then targetId = mq.TLO.Target.ID() end
 
     local aaAbility = mq.TLO.Me.AltAbility(aaName)
 
@@ -1442,7 +1466,7 @@ end
 
 --- Uses an item on a specified target.
 --- @param itemName string The name of the item to be used.
---- @param targetId number The ID of the target on which the item will be used.
+--- @param targetId? number The ID of the target on which the item will be used. If empty use implied target.
 --- @param forceTarget? boolean Whether to force targeting even if the item does not require it - even if self.
 --- @return boolean
 function Casting.UseItem(itemName, targetId, forceTarget)
@@ -1495,18 +1519,21 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         return false
     end
 
-
-    local targetSpawn = mq.TLO.Spawn(targetId)
     local oldTargetId = mq.TLO.Target.ID()
-    if targetId > 0 and targetId ~= oldTargetId and (forceTarget or targetId ~= mq.TLO.Me.ID()) then
-        if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
-            Logger.log_debug("\awUseItem():NOTICE:\ax Turning off autoattack to cast on a PC.")
-            Core.DoCmd("/attack off")
-            mq.delay("2s", function() return not me.Combat() end)
-        end
 
-        Logger.log_debug("\awUseItem():NOTICE:\ax Swapping target to %s [%d] to use %s", targetSpawn.DisplayName(), targetId, itemName)
-        Targeting.SetTarget(targetId, true)
+    if targetId then
+        local targetSpawn = mq.TLO.Spawn(targetId)
+
+        if targetId > 0 and targetId ~= oldTargetId and (forceTarget or targetId ~= mq.TLO.Me.ID()) then
+            if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
+                Logger.log_debug("\awUseItem():NOTICE:\ax Turning off autoattack to cast on a PC.")
+                Core.DoCmd("/attack off")
+                mq.delay("2s", function() return not me.Combat() end)
+            end
+
+            Logger.log_debug("\awUseItem():NOTICE:\ax Swapping target to %s [%d] to use %s", targetSpawn.DisplayName(), targetId, itemName)
+            Targeting.SetTarget(targetId, true)
+        end
     end
 
     Logger.log_debug("\awUseItem(\ag%s\aw): Using Item!", itemName)

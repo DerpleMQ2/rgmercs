@@ -803,7 +803,7 @@ local function getConfigFileName()
 end
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
+    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
 end
 
 function Module:WriteSettings()
@@ -815,7 +815,7 @@ function Module:WriteSettings()
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
+    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
 
     self.SaveRequested = nil
 end
@@ -898,6 +898,10 @@ function Module:LoadSettings()
                     self:SaveSettings(false)
                 end
             end
+        end
+        if clicky.no_target_change == nil then
+            clicky.no_target_change = false
+            self:SaveSettings(false)
         end
     end
 
@@ -1079,7 +1083,7 @@ end
 
 function Module:RenderClickyTargetCombo(clicky, clickyIdx)
     if ImGui.BeginTable("##clicky_target_table_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
-        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 100)
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 140)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         ImGui.TableNextColumn()
         ImGui.Text("Target")
@@ -1105,9 +1109,29 @@ function Module:RenderClickyTargetCombo(clicky, clickyIdx)
     end
 end
 
+function Module:RenderClickyNoTargetChangeToggle(clicky, clickyIdx)
+    if ImGui.BeginTable("##clicky_target_no_change_table_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 140)
+        ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
+        ImGui.TableNextColumn()
+        ImGui.Text("Don't Change Target")
+        ImGui.TableNextColumn()
+        local new_no_target_change, clicked = Ui.RenderOptionToggle("##clicky_no_target_change_" .. clickyIdx, "",
+            clicky.no_target_change)
+
+        if clicked then
+            clicky.no_target_change = new_no_target_change
+            Config:SetSetting('Clickies', Config:GetSetting('Clickies'))
+            self:SaveSettings(false)
+        end
+        Ui.Tooltip("If enabled, we will not change targets to use this clicky.")
+        ImGui.EndTable()
+    end
+end
+
 function Module:RenderClickyCombatStateCombo(clicky, clickyIdx)
     if ImGui.BeginTable("##clicky_combat_state_table_" .. clickyIdx, 2, bit32.bor(ImGuiTableFlags.None)) then
-        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 100)
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 140)
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0)
         ImGui.TableNextColumn()
         ImGui.Text("Combat State")
@@ -1266,8 +1290,11 @@ function Module:RenderClickiesWithConditions(type, clickies)
                         ImGui.BeginDisabled(true)
                     end
                     ImGui.Indent()
+
                     self:RenderClickyCombatStateCombo(clicky, clickyIdx)
                     self:RenderClickyTargetCombo(clicky, clickyIdx)
+                    self:RenderClickyNoTargetChangeToggle(clicky, clickyIdx)
+
                     ImGui.SeparatorText("Usage Info")
                     self:RenderClickyData(clicky, clickyIdx)
                     ImGui.SeparatorText("Conditions");
@@ -1360,7 +1387,7 @@ function Module:RenderClickyData(clicky, clickyIdx)
             local lastUsed = clickyState.lastUsed or 0
 
             ImGui.TableNextColumn()
-            ImGui.Text(lastUsed > 0 and Strings.FormatTime((Globals.GetTimeSeconds() - lastUsed)) or "Never")
+            ImGui.Text(lastUsed > 0 and Strings.FormatTime((os.clock() - lastUsed)) or "Never")
             ImGui.TableNextColumn()
             ImGui.Text(clicky.itemName)
             ImGui.TableNextColumn()
@@ -1501,6 +1528,10 @@ function Module:GiveTime(combat_state)
             self.ClickyRotationIndex = (clickyIdx % numClickies) + 1
             Logger.log_super_verbose("\ayClicky: \awChecking clicky entry: \ay%s\aw[\at%d\aw]", clicky.itemName, clickyIdx)
 
+            local item = mq.TLO.FindItem(clicky.itemName)
+            self.TempSettings.ClickyState[clicky.itemName] = self.TempSettings.ClickyState[clicky.itemName] or {}
+            self.TempSettings.ClickyState[clicky.itemName].item = item
+
             if clicky.combat_state == "Any" or clicky.combat_state == combat_state then
                 local target = mq.TLO.Me
                 local allConditionsMet = true
@@ -1538,9 +1569,6 @@ function Module:GiveTime(combat_state)
                 clicky.conditionsCache = conditionsCache
 
                 if allConditionsMet then
-                    self.TempSettings.ClickyState[clicky.itemName] = self.TempSettings.ClickyState[clicky.itemName] or {}
-
-                    local item = mq.TLO.FindItem(clicky.itemName)
                     Logger.log_verbose("\ayClicky: \awLooking for clicky item: \am%s \awfound: %s", clicky.itemName, Strings.BoolToColorString(item() ~= nil))
 
                     if item then
@@ -1563,17 +1591,16 @@ function Module:GiveTime(combat_state)
                             buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
                         end
 
-                        self.TempSettings.ClickyState[clicky.itemName].item = item
                         if buffCheckPassed and Casting.ItemReady(item()) then
                             Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                            Casting.UseItem(item.Name(), target.ID(), true)
+                            Casting.UseItem(item.Name(), clicky.no_target_change and nil or target.ID(), true)
                             clickiesUsedThisFrame = clickiesUsedThisFrame + 1
                             if maxClickiesPerFrame > 0 and clickiesUsedThisFrame >= maxClickiesPerFrame then
                                 Logger.log_debug("\ayClicky: \a-tMax Clickies Per Frame of \am%d\a-t reached, stopping for this frame and picking up with %d next frame.",
                                     maxClickiesPerFrame, self.ClickyRotationIndex)
                                 break
                             end
-                            self.TempSettings.ClickyState[clicky.itemName].lastUsed = Globals.GetTimeSeconds()
+                            self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
                             break --ensure we stop after we process a single clicky to allow rotations to continue
                         else
                             if not buffCheckPassed then
