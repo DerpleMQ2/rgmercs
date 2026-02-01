@@ -1599,11 +1599,6 @@ function Module:GiveTime(combat_state)
                         end
 
                         if buffCheckPassed and Casting.ItemReady(item()) then
-                            printf(clicky.itemName ..
-                                " " .. tostring(type(clicky.no_target_change)) .. "Clicky Target: " .. tostring(targetId))
-
-
-
                             Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
                             Casting.UseItem(item.Name(), targetId, true)
                             clickiesUsedThisFrame = clickiesUsedThisFrame + 1

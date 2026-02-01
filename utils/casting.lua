@@ -1472,9 +1472,6 @@ end
 function Casting.UseItem(itemName, targetId, forceTarget)
     local me = mq.TLO.Me
 
-    printf("DEBUG: Casting.UseItem(%s, %s, %s)", tostring(itemName), tostring(targetId), tostring(forceTarget))
-
-
     if not itemName then
         Logger.log_debug("\awUseItem(\ag%s\aw): \arGiven item name is nil!")
         return false
