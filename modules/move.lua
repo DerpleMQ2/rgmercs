@@ -855,7 +855,8 @@ function Module:CheckStuck()
         if ((Globals.GetTimeSeconds() - Module.TempSettings.StuckAtTime) >= Config:GetSetting('AttemptToFixStuckTimer')) or Movement:GetTimeSinceLastPositionChange() >= Config:GetSetting('AttemptToFixStuckTimer') then
             Logger.log_warning("\awWARNING:\ax Navigation appears to be stuck")
             -- is autosize loaded?
-            if mq.TLO.Plugin("MQ2AutoSize").IsLoaded() then
+            ---@diagnostic disable-next-line: undefined-field
+            if mq.TLO.Plugin("MQ2AutoSize").IsLoaded() and mq.TLO.AutoSize ~= nil then
                 Logger.log_warning("\awWARNING:\ax Attempting to unstick via MQ2AutoSize")
                 ---@diagnostic disable-next-line: undefined-field
                 local startingSize = mq.TLO.AutoSize.SizeSelf()
