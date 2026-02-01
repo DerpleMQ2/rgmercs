@@ -1672,6 +1672,7 @@ local _ClassConfig = {
         end,
 
         PreEngage = function(target)
+            if not target or not target() then return end
             local openerAbility = Core.GetResolvedActionMapItem('ArrowOpener')
 
             if not Config:GetSetting("DoOpener") or not openerAbility then return end
