@@ -418,19 +418,21 @@ function Module:MezNow(mezId, useAE, useAA)
             else
                 Logger.log_verbose("Mez: Our AEMez Spell (%s) or AA does not appear to be ready.", aeMezSpell)
             end
+        end
 
-            if Casting.SpellReady(aeMezSpell) then
-                Comms.HandleAnnounce(
-                    Comms.FormatChatEvent("Mez", "AoE Around " .. (mq.TLO.Spawn(mezId).CleanName() or "Unknown"), aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
-                    Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
+        -- we might have waited.
+        if Casting.SpellReady(aeMezSpell) then
+            Comms.HandleAnnounce(
+                Comms.FormatChatEvent("Mez", "AoE Around " .. (mq.TLO.Spawn(mezId).CleanName() or "Unknown"), aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
+                Config:GetSetting('MezAnnounce'), Config:GetSetting('AnnounceToRaidIfInRaid'))
 
-                if Core.MyClassIs("brd") then
-                    Casting.UseSong(aeMezSpell.RankName(), mezId, false, 2)
-                else
-                    Casting.UseSpell(aeMezSpell.RankName(), mezId, false, true, 2)
-                end
+            if Core.MyClassIs("brd") then
+                Casting.UseSong(aeMezSpell.RankName(), mezId, false, 2)
+            else
+                Casting.UseSpell(aeMezSpell.RankName(), mezId, false, true, 2)
             end
         end
+
         -- In case they're mez immune
         mq.doevents('ImmuneMez')
     else
@@ -487,6 +489,7 @@ function Module:MezNow(mezId, useAE, useAA)
             end
         end
 
+        -- we might have waited.
         if Casting.SpellReady(mezSpell) then
             if Core.MyClassIs("brd") then
                 -- TODO SongNow MezSpell
