@@ -385,18 +385,7 @@ local _ClassConfig = {
     ['HealRotations']     = {
         ['BigHealPoint'] = {
             {
-                name = "Protection of Direwood",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.TargetIsMyself(target)
-                end,
-            },
-            {
                 name = "Convergence of Spirits",
-                type = "AA",
-            },
-            {
-                name = "Spirit of the Bear",
                 type = "AA",
             },
             {
@@ -407,14 +396,6 @@ local _ClassConfig = {
                 name = "Mask of the Ancients",
                 type = "Item",
                 load_cond = function(self) return mq.TLO.FindItem("=Mask of the Ancients")() end,
-            },
-            { --Let's make the mainheal autocrit since we have nothing better
-                name = "Nature's Blessing",
-                type = "AA",
-            },
-            { --if we hit this we need spells back ASAP
-                name = "Forceful Rejuvenation",
-                type = "AA",
             },
         },
         ['GroupHealPoint'] = {
