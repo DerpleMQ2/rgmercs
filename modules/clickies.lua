@@ -1258,6 +1258,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                 itemName = mq.TLO.Cursor.Name(),
                 target = 'Self',
                 combat_state = 'Any',
+                no_target_change = false,
                 conditions = {},
             })
             Config:SetSetting('Clickies', clickies)
