@@ -380,6 +380,7 @@ return {
     },
     ['HelperFunctions'] = {
         PreEngage = function(target)
+            if not target or not target() then return end
             local openerAbility = Core.GetResolvedActionMapItem('SneakAttack')
 
             if not Config:GetSetting("DoOpener") or not openerAbility then return end
@@ -387,7 +388,7 @@ return {
             Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
             if mq.TLO.Me.CombatAbilityReady(openerAbility)() and not mq.TLO.Me.AbilityReady("Hide")() and mq.TLO.Me.AbilityTimer("Hide")() <= math.max(0, mq.TLO.Me.AbilityTimerTotal("Hide")() - 4000) and mq.TLO.Me.Invis() then
-                Casting.UseDisc(openerAbility, target)
+                Casting.UseDisc(openerAbility, target.ID())
                 Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
                 Logger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Hide Ready = %s, Hide Timer = %d, Invis = %s", openerAbility or "None",
