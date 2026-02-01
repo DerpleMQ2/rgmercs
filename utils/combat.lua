@@ -585,7 +585,7 @@ function Combat.FindBestAutoTarget(validateFn)
             end
         end
 
-        if assistId > 0 and (validateFn and validateFn(assistId)) then
+        if assistId > 0 and (validateFn == nil or validateFn(assistId)) then
             targetValidated = true
             Globals.AutoTargetID = assistId
         else
@@ -600,7 +600,7 @@ function Combat.FindBestAutoTarget(validateFn)
 
     if Config:GetSetting('DoAutoTarget') then
         local autoTargetId = Globals.AutoTargetID or 0
-        if autoTargetId > 0 and (targetValidated or (validateFn and validateFn(autoTargetId))) then
+        if autoTargetId > 0 and (targetValidated or (validateFn == nil or validateFn(autoTargetId))) then
             if mq.TLO.Target.ID() ~= autoTargetId then
                 Targeting.SetTarget(autoTargetId)
             end
