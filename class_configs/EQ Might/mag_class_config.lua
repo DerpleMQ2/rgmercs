@@ -342,7 +342,7 @@ _ClassConfig      = {
             name = 'Malo',
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('DoMalo') end, -- or Config:GetSetting('DoAEMalo') end,
+            load_cond = function() return Config:GetSetting('DoMalo') or Config:GetSetting('DoMaloAA') end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -934,7 +934,7 @@ _ClassConfig      = {
             {
                 name = "Malosinete",
                 type = "AA",
-                load_cond = function() return Casting.CanUseAA("Malosinete") end,
+                load_cond = function() return Config:GetSetting('DoMaloAA') and Casting.CanUseAA("Malosinete") end,
                 cond = function(self, aaName)
                     return Casting.DetAACheck(aaName)
                 end,
@@ -942,7 +942,7 @@ _ClassConfig      = {
             {
                 name = "MaloDebuff",
                 type = "Spell",
-                load_cond = function() return not Casting.CanUseAA("Malosinete") end,
+                load_cond = function() return Config:GetSetting('DoMalo') and (not Casting.CanUseAA("Malosinete") or not Config:GetSetting('DoMaloAA')) end,
                 cond = function(self, spell)
                     return Casting.DetSpellCheck(spell)
                 end,
@@ -1085,7 +1085,7 @@ _ClassConfig      = {
                 { name = "EpicPetOrb",       cond = function(self) return Config:GetSetting('UseEpicPet') and not mq.TLO.FindItem("=Ornate Orb of Mastery")() end, },
                 { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
                 { name = "PBAE2",            cond = function(self) return Core.IsModeActive("PBAE") end, },
-                { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
+                { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and (not Config:GetSetting('DoMaloAA') or not Casting.CanUseAA("Malosinete")) end, },
                 { name = "PetHealSpell",     cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "FireOrbSummon", },
                 -- { name = "GroupCotH", },
@@ -1269,7 +1269,17 @@ _ClassConfig      = {
             Header = "Debuffs",
             Category = "Resist",
             Index = 101,
-            Tooltip = "Do Malo Spells/AAs",
+            Tooltip = "Use your Malo line spell.",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = true,
+        },
+        ['DoMaloAA']       = {
+            DisplayName = "Cast Malo AA",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Resist",
+            Index = 102,
+            Tooltip = "If available, prefer the AA version of Malo (slight trade in debuff strength for less chance to be resisted).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
         },
