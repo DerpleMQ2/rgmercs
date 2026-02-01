@@ -781,11 +781,11 @@ local _ClassConfig = {
                 { name = "ColdBuffSong",    cond = function(self) return Config:GetSetting('UseColdBuff') > 1 end, },
                 { name = "DotBuffSong",     cond = function(self) return Config:GetSetting('UseDotBuff') > 1 end, },
                 -- healer songs
-                { name = "AccelerandoSong", cond = function(self) return Config:GetSetting('UseAccelerando') end, },
+                { name = "AccelerandoSong", cond = function(self) return Config:GetSetting('UseAccelerando') > 1 end, },
                 { name = "RecklessSong",    cond = function(self) return Config:GetSetting('UseReckless') > 1 end, },
                 -- tank songs
                 { name = "SpitefulSong",    cond = function(self) return Config:GetSetting('UseSpiteful') > 1 end, },
-                { name = "SprySong",        cond = function(self) return Config:GetSetting('UseSpry') > 1 end, },
+                { name = "SprySonataSong",  cond = function(self) return Config:GetSetting('UseSpry') > 1 end, },
                 { name = "ResistSong",      cond = function(self) return Config:GetSetting('UseResist') > 1 end, },
                 -- filler
                 { name = "CalmSong",        cond = function(self) return true end, }, -- condition not needed, for uniformity
