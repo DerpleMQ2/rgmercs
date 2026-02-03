@@ -245,7 +245,7 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
                         ImGui.Unindent()
                     end
 
-                    if Core.IAmMA() and not Config:GetSetting('PopOutForceTarget') then
+                    if not Config:GetSetting('PopOutForceTarget') then
                         if ImGui.CollapsingHeader("Force Target") then
                             ImGui.Indent()
                             Ui.RenderForceTargetList(true)
