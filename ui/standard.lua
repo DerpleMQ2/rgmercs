@@ -32,8 +32,14 @@ function StandardUI:renderModulesTabs()
 end
 
 function StandardUI:RenderTarget()
-    if Config.TempSettings.AssistWarning then
-        ImGui.TextColored(IM_COL32(200, math.floor(Globals.GetTimeSeconds() % 2) == 1 and 52 or 200, 52, 255), Config.TempSettings.AssistWarning)
+    local warningMessage = Config.TempSettings.AssistWarning
+
+    if mq.TLO.Plugin("MQ2AdvPath").IsLoaded() and mq.TLO.AdvPath ~= nil and mq.TLO.AdvPath.Following() then
+        warningMessage = 'AFOLLOW ("FOLLOW ME") ENGAGED - THIS WILL INTERFERE WITH RGMERCS!'
+    end
+
+    if warningMessage then
+        ImGui.TextColored(IM_COL32(200, math.floor(Globals.GetTimeSeconds() % 2) == 1 and 52 or 200, 52, 255), warningMessage)
     end
 
     local assistSpawn = Targeting.GetAutoTarget()

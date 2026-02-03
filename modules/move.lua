@@ -74,11 +74,12 @@ table.sort(Module.Constants.CampfireTypes)
 Module.FAQ             = {
     {
         Question = "How do I move my PCs or have them follow my driver?",
-        Answer = "Enable \"Chase\" on the Movement tab (or via Command-Line) and adjust settings in the Following category (Movement Options) to your liking.\n" ..
+        Answer =
+            "Enable \"Chase\" on the Movement tab (or via Command-Line, refer to the command list) and adjust settings in the Following category (Movement Options) to your liking.\n" ..
             "  There are two commonly used forms of following in MQ currently: \"Nav\" and \"A(dvanced)Follow\".\n\n" ..
             "  Nav uses the MQ2Nav plugin to check zone geometry to move from point-to-point. This is the type of movement that RGMercs uses by default.\n\n" ..
             "  Afollow, which is a feature of MQ2AdvPath, uses recording and playback of player movement to mimic the PC being followed. This is the type of nav typically seen on \"Follow Me\" buttons in the group window.\n\n" ..
-            "  There are times when Chase(Nav) and Afollow both have advantages, so situationally using both is common.",
+            "  There are times when Chase(Nav) and Afollow both have advantages, so situationally using both is common. Please note that using Afollow may interfere with RGMercs movement, meditation, or casting while it is enabled!",
         Settings_Used = "",
     },
     {
@@ -270,7 +271,7 @@ Module.DefaultConfig   = {
 Module.CommandHandlers = {
     chaseon = {
         usage = "/rgl chaseon <name?>",
-        about = "Chase <name> (If no name is supplied, this will use your current target, or fallback to the MA). Clears your camp.",
+        about = "Chase <name>. If no name is supplied, it will fall back in order: (Last Used Chase Target > Main Assist). Clears your camp.",
         handler = function(self, params)
             self:ChaseOn(params)
         end,
@@ -364,11 +365,7 @@ function Module:Init()
 end
 
 function Module:ChaseOn(target)
-    local chaseTarget = Core.GetMainAssistSpawn()
-
-    if not chaseTarget or not chaseTarget() then
-        chaseTarget = mq.TLO.Target
-    end
+    local chaseTarget = Config:GetSetting('ChaseTarget'):len() > 0 and Config:GetSetting('ChaseTarget') or Core.GetMainAssistSpawn()
 
     if target then
         chaseTarget = mq.TLO.Spawn("pc =" .. target)
@@ -551,10 +548,23 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if ImGui.Button(Config:GetSetting('ChaseOn') and "Chase Off" or "Chase On", ImGui.GetWindowWidth() * .3, 25) then
-            self:RunCmd("/rgl chase%s", Config:GetSetting('ChaseOn') and "off" or "on")
+        if ImGui.Button(Config:GetSetting('ChaseOn') and "Turn Chase Off" or "Turn Chase On", ImGui.GetWindowWidth() * .3, 25) then
+            Config:SetSetting('ChaseOn', not Config:GetSetting('ChaseOn'))
         end
-        Ui.Tooltip("Find more information about Chasing by checking the Command List or FAQs in the Options Window.")
+        Ui.Tooltip(
+            "If Chase is enabled without a valid chase target, your Main Assist will be used.\nFind more information about Chasing by checking the Command List or FAQs in the Options Window.")
+
+        ImGui.SameLine()
+
+        local buttonDisabled = mq.TLO.Target() == nil or mq.TLO.Target.Type() ~= "PC"
+        ImGui.BeginDisabled(buttonDisabled)
+        local chaseTargetText = buttonDisabled and "Select a PC to Chase" or string.format("Set %s as Chase Target", mq.TLO.Target.DisplayName() or "Error")
+        if ImGui.Button(chaseTargetText, ImGui.GetWindowWidth() * .3, 25) then
+            Config:SetSetting("ChaseTarget", mq.TLO.Target.DisplayName() or "Error")
+        end
+        ImGui.EndDisabled()
+
+
 
         local haveChaseTarget = self:ValidChaseTarget() and chaseSpawn() and chaseSpawn.ID() > 0
 
