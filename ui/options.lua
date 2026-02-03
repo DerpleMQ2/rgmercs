@@ -487,6 +487,12 @@ function OptionsUI:RenderCategorySettings(category)
 
                     if settingDefaults.Type ~= "Custom" then
                         --
+                        local hasWarning, warningText = false, ""
+
+                        if settingDefaults.Warning then
+                            hasWarning, warningText = settingDefaults.Warning()
+                        end
+
                         if idx % numCols == 1 then
                             ImGui.TableNextRow(ImGuiTableRowFlags.None, ImGui.GetFrameHeightWithSpacing())
                         end
@@ -495,12 +501,14 @@ function OptionsUI:RenderCategorySettings(category)
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.SearchHighlightColor)
                         end
+
                         local text_height = ImGui.GetTextLineHeightWithSpacing()
                         local row_height  = ImGui.GetFrameHeightWithSpacing()
 
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ((row_height - text_height) / 2))
 
                         ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
+
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PopStyleColor(1)
                         end
@@ -512,6 +520,13 @@ function OptionsUI:RenderCategorySettings(category)
                             settingTooltip,
                             settingName,
                             tostring(defaultValue)))
+
+                        if hasWarning then
+                            ImGui.SameLine()
+                            ImGui.TextColored(Globals.Constants.Colors.ConditionFailColor, Icons.MD_WARNING)
+                            Ui.Tooltip(warningText)
+                        end
+
                         ImGui.TableNextColumn()
                         local typeOfSetting = type(settingDefaults.Type) == 'string' and settingDefaults.Type or type(setting)
                         if (settingDefaults.Type or ""):find("Array") then

@@ -143,6 +143,12 @@ Module.DefaultConfig   = {
         Default = 25,
         Min = 5,
         Max = 100,
+        Warning = function()
+            if Config:GetSetting('ChaseStopDistance') > Config:GetSetting('ChaseDistance') then
+                return true, "Warning: ChaseStopDistance exceeds ChaseDistance this will cause chase to fail."
+            end
+            return false, ""
+        end,
     },
     ['ChaseStopDistance']                      = {
         DisplayName = "Chase Stop Distance",
@@ -154,6 +160,12 @@ Module.DefaultConfig   = {
         Default = 25,
         Min = 5,
         Max = 100,
+        Warning = function()
+            if Config:GetSetting('ChaseStopDistance') > Config:GetSetting('ChaseDistance') then
+                return true, "Warning: ChaseStopDistance exceeds ChaseDistance this will cause chase to fail."
+            end
+            return false, ""
+        end,
     },
     ['RequireLoS']                             = {
         DisplayName = "Require LOS",
@@ -232,6 +244,12 @@ Module.DefaultConfig   = {
         Default = (Globals.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60),
         Min = 10,
         Max = 300,
+        Warning = function()
+            if Config:GetSetting('AssistRange') > Config:GetSetting('AutoCampRadius') then
+                return true, "Warning: AssistRange exceeds AutoCampRadius - this might cause your characters to run out of camp to assist."
+            end
+            return false, ""
+        end,
         OnChange = function(self) Movement.UpdateMapRadii() end,
     },
     ['CampHard']         = {

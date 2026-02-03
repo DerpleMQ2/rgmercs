@@ -716,6 +716,12 @@ Config.DefaultConfig                                     = {
         Min = 0,
         Max = 300,
         ConfigType = "Advanced",
+        Warning = function()
+            if Config:GetSetting('AssistRange') > Config:GetSetting('AutoCampRadius') then
+                return true, "Warning: AssistRange exceeds AutoCampRadius - this might cause your characters to run out of camp to assist."
+            end
+            return false, ""
+        end,
     },
     ['DoMelee']                = {
         DisplayName = "Enable Melee Combat",
