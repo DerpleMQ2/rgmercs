@@ -53,6 +53,12 @@ end
 function Movement:DoNav(squelch, params, ...)
     local formatted = params
     if ... ~= nil then formatted = string.format(params, ...) end
+
+    if formatted == self.LastDoNavCmd then
+        Logger.log_verbose("\ayIgnoring DoNav (%s) because the last nav command is the same - let's not spam it.", formatted)
+        return
+    end
+
     Core.DoCmd("%s/nav %s", squelch and "/squelch " or "", formatted)
     self.LastDoNav = Globals.GetTimeSeconds()
     self.LastDoNavCmd = formatted
