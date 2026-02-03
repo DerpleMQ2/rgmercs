@@ -991,11 +991,11 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
     ImGui.SetCursorPos(startingPosVec)
 end
 
-function Module:RenderConditionControls(clickyIdx, idx, conditionsTable, headerPos)
+function Module:RenderConditionControls(clickyIdx, idx, conditionsTable)
     local startingPosVec = ImGui.GetCursorPosVec()
     local offset = 110
 
-    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset, headerPos.y)
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset, startingPosVec.y + 2)
 
     ImGui.PushID("##_small_btn_up_wp_" .. tostring(clickyIdx) .. "_" .. tostring(idx))
     if idx == 1 then
@@ -1313,7 +1313,10 @@ function Module:RenderClickiesWithConditions(type, clickies)
 
                     for condIdx, cond in ipairs(clicky.conditions or {}) do
                         if self:GetLogicBlockByType(cond.type) then
-                            local headerPos = ImGui.GetCursorPosVec()
+                            -- only render configs if we are not filtered
+                            ImGui.BeginDisabled(filterApplied)
+                            self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions)
+                            ImGui.EndDisabled()
 
                             if clicky.conditionsCache and clicky.conditionsCache[condIdx] == true then
                                 ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionPassColor)
@@ -1343,11 +1346,6 @@ function Module:RenderClickiesWithConditions(type, clickies)
                                 ImGui.PopStyleColor(1)
                                 Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
                             end
-
-                            -- only render configs if we are not filtered
-                            ImGui.BeginDisabled(filterApplied)
-                            self:RenderConditionControls(clickyIdx, condIdx, clicky.conditions, headerPos)
-                            ImGui.EndDisabled()
                         end
                     end
 
