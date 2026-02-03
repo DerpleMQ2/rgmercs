@@ -54,7 +54,7 @@ function Movement:DoNav(squelch, params, ...)
     local formatted = params
     if ... ~= nil then formatted = string.format(params, ...) end
 
-    if formatted == self.LastDoNavCmd then
+    if mq.TLO.Nav.Active() and formatted == self.LastDoNavCmd then
         Logger.log_verbose("\ayIgnoring DoNav (%s) because the last nav command is the same - let's not spam it.", formatted)
         return
     end
