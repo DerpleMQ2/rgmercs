@@ -1247,9 +1247,8 @@ function Module:RenderClickyHeaderIcon(clicky, headerPos)
 end
 
 function Module:RenderClickiesWithConditions(type, clickies)
-    if not mq.TLO.Cursor() then
-        ImGui.BeginDisabled(true)
-    end
+    ImGui.BeginDisabled(not mq.TLO.Cursor())
+
     local filterApplied = #clickies ~= #Config:GetSetting('Clickies')
 
     if ImGui.SmallButton(mq.TLO.Cursor.Name() and string.format("%s Add %s to %s", Icons.FA_PLUS, mq.TLO.Cursor.Name() or "N/A", type) or "Pickup an Item To Add") then
@@ -1265,9 +1264,9 @@ function Module:RenderClickiesWithConditions(type, clickies)
             self:SaveSettings(false)
         end
     end
-    if not mq.TLO.Cursor() then
-        ImGui.EndDisabled()
-    end
+
+    ImGui.EndDisabled()
+
     ImGui.SameLine()
     if ImGui.SmallButton("Add Server Defaults") then
         self:InsertDefaultClickies()
@@ -1287,9 +1286,8 @@ function Module:RenderClickiesWithConditions(type, clickies)
 
                 ImGui.PushID("##clicky_header_" .. clickyIdx)
                 if ImGui.CollapsingHeader("             " .. clicky.itemName) then
-                    if clicky.enabled == false then
-                        ImGui.BeginDisabled(true)
-                    end
+                    ImGui.BeginDisabled(clicky.enabled == false)
+
                     ImGui.Indent()
 
                     self:RenderClickyCombatStateCombo(clicky, clickyIdx)
@@ -1353,9 +1351,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                         end
                     end
 
-                    if clicky.enabled == false then
-                        ImGui.EndDisabled()
-                    end
+                    ImGui.EndDisabled()
 
                     ImGui.EndChild()
                     ImGui.PopStyleVar(1)

@@ -131,6 +131,9 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
 
         ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
 
+        ImGui.BeginChild("##RGMercsMainHeader", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY),
+            bit32.bor(ImGuiWindowFlags.NoScrollbar, ImGuiWindowFlags.AlwaysAutoResize))
+
         if shouldDrawGUI then
             local imgDisplayed = Globals.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
             Ui.RenderLogo(imgDisplayed:GetTextureID())
@@ -178,15 +181,20 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
                 pauseLabel = pauseLabel .. " [Backoff]"
             end
 
-            if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imgui_style.ScrollbarSize) - imgui_style.WindowPadding.x), 40) then
+            if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - imgui_style.WindowPadding.x), 40) then
                 Globals.PauseMain = not Globals.PauseMain
             end
             ImGui.PopStyleColor()
 
             self:RenderTarget()
 
-            ImGui.NewLine()
+            ImGui.EndChild()
+
             ImGui.Separator()
+
+            ImGui.BeginChild("##RGMercsMainBody", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.None), bit32.bor(ImGuiWindowFlags.None))
+
+            ImGui.NewLine()
 
             if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
                 ImGui.SetItemDefaultFocus()
@@ -274,6 +282,8 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
                     ConsoleUI:DrawConsole(true)
                 end
             end
+
+            ImGui.EndChild()
         end
 
         ImGui.PopID()
