@@ -132,7 +132,7 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
         ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
 
         ImGui.BeginChild("##RGMercsMainHeader", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY),
-            bit32.bor(ImGuiWindowFlags.NoScrollbar, ImGuiWindowFlags.AlwaysAutoResize))
+            bit32.bor(ImGuiWindowFlags.NoScrollbar))
 
         if shouldDrawGUI then
             local imgDisplayed = Globals.LastBurnCheck and ImageUI.burnImg or ImageUI.derpImg
