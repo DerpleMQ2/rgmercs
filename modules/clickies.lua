@@ -1351,10 +1351,11 @@ function Module:RenderClickiesWithConditions(type, clickies)
                         end
                     end
 
-                    ImGui.EndDisabled()
-
                     ImGui.EndChild()
+
                     ImGui.PopStyleVar(1)
+
+                    ImGui.EndDisabled()
 
                     ImGui.Unindent()
                 end
