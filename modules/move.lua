@@ -382,20 +382,22 @@ function Module:Init()
     return { self = self, defaults = self.DefaultConfig, }
 end
 
-function Module:ChaseOn(target)
-    local chaseTarget = Config:GetSetting('ChaseTarget'):len() > 0 and Config:GetSetting('ChaseTarget') or Core.GetMainAssistSpawn()
+function Module:ChaseOn(nameParam)
+    local currentChase = Config:GetSetting('ChaseTarget')
 
-    if target then
-        chaseTarget = mq.TLO.Spawn("pc =" .. target)
-    end
+    -- if no name passed, use current chase target
+    local targetName = nameParam or (currentChase ~= "" and currentChase)
 
-    if chaseTarget() and chaseTarget.ID() > 0 and Targeting.TargetIsType("PC", chaseTarget) then
+    -- if no current chase target, use MA
+    local chaseTarget = targetName and mq.TLO.Spawn("pc =" .. targetName) or Core.GetMainAssistSpawn()
+
+    if chaseTarget and chaseTarget() and chaseTarget.ID() > 0 then
         self:CampOff()
         Config:SetSetting('ChaseOn', true)
         Config:SetSetting('ChaseTarget', chaseTarget.CleanName())
         Logger.log_info("\aoNow Chasing \ag%s", chaseTarget.CleanName())
     else
-        Logger.log_warn("\ayWarning:\ax Not a valid chase target!")
+        Logger.log_warn("\ayWarning:\ax No valid chase target!")
     end
 end
 
@@ -566,8 +568,13 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if ImGui.Button(Config:GetSetting('ChaseOn') and "Turn Chase Off" or "Turn Chase On", ImGui.GetWindowWidth() * .3, 25) then
-            Config:SetSetting('ChaseOn', not Config:GetSetting('ChaseOn'))
+        local chaseOn = Config:GetSetting('ChaseOn')
+        if ImGui.Button(chaseOn and "Turn Chase Off" or "Turn Chase On", ImGui.GetWindowWidth() * .3, 25) then
+            if chaseOn then
+                self:ChaseOff()
+            else
+                self:ChaseOn()
+            end
         end
         Ui.Tooltip(
             "If Chase is enabled without a valid chase target, your Main Assist will be used.\nFind more information about Chasing by checking the Command List or FAQs in the Options Window.")
