@@ -864,7 +864,7 @@ function Casting.SongReady(songSpell, skipGemTimer)
     if not songSpell or not songSpell() then return false end
 
     local ready = mq.TLO.Me.SpellReady(songSpell.RankName.Name())()
-    local bookCheck = mq.TLO.Me.Book(songSpell.RankName.Name())()
+    local bookCheck = mq.TLO.Me.Book(songSpell.RankName.Name())() ~= nil
     local silenced = mq.TLO.Me.Silenced() ~= nil
 
     Logger.log_verbose("SongReady for %s(%d): Silenced (%s), BookCheck(%s), ReadyCheck(%s), Memorization Allowed (%s).", songSpell.RankName(), songSpell.ID(),
@@ -1274,7 +1274,33 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
         if mq.TLO.Me.Casting() then
             -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
             local clipDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('SongClipDelayFact')
-            mq.delay(clipDelay, function() return Casting.IHaveBuff(spell) end) --callback for buffs. not perfect, but should help
+
+            -- for performance, lets check for the buffs on buffsongs and exit this delay early if possible.
+            -- -- If it is targeting me but doesn't have a buff (or doesn't have a properly detected buff), we are no worse off than the static delay.
+            if targetId == mq.TLO.Me.ID() then
+                -- For expediency, just check for the base rank in case they are f2p without unlockers and rk2 spells scribed. If we need the exact spell later, GetUseableSpellId will check their unlocker status and get the correct ID
+                local buffName = spell.BaseName()
+                local durWindow = spell.DurationWindow()
+                local duration = spell.MyDuration.TotalSeconds() -- this doesn't factor in Quick Time, but as long as you aren't only singing one-two songs this shouldn't matter.
+
+                while clipDelay > 0 do
+                    -- check for the buff in the correct window (want to cache this but can't)
+                    local spellBuff = durWindow == 1 and mq.TLO.Me.Song(buffName) or mq.TLO.Me.Buff(buffName)
+                    --ensure we aren't catching the old song if we are resinging. Ensure the song is at least 4 seconds older than max duration, meaning it has to be new.
+                    -- -- This number was tested and is not arbitrary, due to sever communication/etc in testing setting this any lower occasionally caused songs to be clipped from detecting an old buff
+                    if spellBuff and spellBuff() and spellBuff.Duration.TotalSeconds() >= (duration - 4) then
+                        Logger.log_verbose("UseSong: New buff detected, bypassing remaining clip delay of %d ms.", clipDelay)
+                        break
+                    end
+                    mq.delay(10)
+                    mq.doevents()
+                    clipDelay = clipDelay - 10
+                end
+            else
+                -- Algarnote 2/3/26: for insults, mezzes, etc, lets just use a static delay. I'm not sure whats possible and feel like it would add 800 more lines of code. I'll keep thinking about it.
+                -- -- In my testing, buffs were generally detected in half to 3/4 of my ping, (Delay 170, buffs detected on average 100-120ms remaining on clip), so we might be able to squeak a tiny bit more performance at a later date
+                mq.delay(clipDelay)
+            end
             Core.DoCmd("/stopsong")
         end
 
