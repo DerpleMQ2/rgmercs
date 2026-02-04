@@ -350,18 +350,13 @@ local function Main()
         mq.doevents()
         Events.DoEvents()
         if Config:GetSetting('RunMovePaused') then
-            Modules:ExecModule("Movement", "GiveTime", Globals.CurrentState)
+            Modules:ExecModule("Movement", "GiveTime")
         end
-        Modules:ExecModule("Drag", "GiveTime", Globals.CurrentState)
-        Modules:ExecModule("Debug", "GiveTime", Globals.CurrentState)
+        Modules:ExecModule("Drag", "GiveTime")
+        Modules:ExecModule("Debug", "GiveTime")
         Modules:ExecModule("Clickies", "ValidateClickies")
         Modules:ExecAll("WriteSettings") -- this needs to happen even when paused.
         return
-    end
-
-    -- sometimes nav gets interupted this will try to reset it.
-    if Movement:GetTimeSinceLastMove() > 5 and mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() == 0 then
-        Movement:DoNav(false, "stop")
     end
 
     if Targeting.GetXTHaterCount(true) > 0 then
@@ -501,7 +496,7 @@ local function Main()
         end
     end
 
-    Modules:ExecAll("GiveTime", Globals.CurrentState)
+    Modules:ExecAll("GiveTime")
     Modules:ExecAll("WriteSettings")
 
     mq.doevents()

@@ -15,6 +15,16 @@ local Events    = require("utils.events")
 local Combat    = { _version = '1.0', _name = "Combat", _author = 'Derple', }
 Combat.__index  = Combat
 
+-- actual combat state right now
+function Combat.GetCombatState()
+    return Targeting.GetXTHaterCount(true) > 0 and "Combat" or "Downtime"
+end
+
+-- this is what combat state was during the last main loop frame
+function Combat.GetCachedCombatState()
+    return Globals.CurrentState
+end
+
 --- This function is responsible for designating the main assist.
 ---
 function Combat.SetMainAssist()

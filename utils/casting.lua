@@ -1241,7 +1241,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             -- while the casting window is open, still do movement if not paused or if movement enabled during pause.
             while mq.TLO.Window("CastingWindow").Open() do
                 if not Globals.PauseMain or Config:GetSetting('RunMovePaused') then
-                    Modules:ExecModule("Movement", "GiveTime", "Combat")
+                    Modules:ExecModule("Movement", "GiveTime")
                 end
 
                 if cancelWait <= 0 then

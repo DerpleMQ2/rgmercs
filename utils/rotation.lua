@@ -2,6 +2,7 @@ local mq         = require('mq')
 local Set        = require("mq.Set")
 local Config     = require("utils.config")
 local Globals    = require("utils.globals")
+local Combat     = require("utils.combat")
 local Core       = require("utils.core")
 local Logger     = require("utils.logger")
 local Casting    = require("utils.casting")
@@ -302,7 +303,7 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
                 if fnRotationCond then
                     local start = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
 
-                    if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, Globals.CurrentState) then
+                    if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, Combat.GetCachedCombatState()) then
                         Logger.log_verbose("\arStopping Rotation Due to condition check failure!")
                         break
                     end

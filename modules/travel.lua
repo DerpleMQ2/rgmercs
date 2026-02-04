@@ -296,7 +296,7 @@ function Module:Pop()
     Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
     -- Main Module logic goes here.
     if self.TempSettings.ShouldRequest then
         self.TempSettings.ShouldRequest = false

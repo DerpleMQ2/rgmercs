@@ -702,7 +702,9 @@ function Module:DoCombatCampCheck()
     Combat.CombatCampCheck(self.TempSettings)
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
+    local combat_state = Combat.GetCachedCombatState()
+
     if mq.TLO.Me.Hovering() and Config:GetSetting('ChaseOn') then
         if Config:GetSetting('BreakOnDeath') then
             Logger.log_warn("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",

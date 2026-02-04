@@ -2056,7 +2056,9 @@ function Module:GetPullStateTargetInfo()
     return string.format("%s(%d) Dist(%d)", Targeting.GetTargetCleanName(), Targeting.GetTargetID(), Targeting.GetTargetDistance())
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
+    local combat_state = Combat.GetCachedCombatState()
+
     self:RefreshGroupNames()
 
     self:ProcessDeleteWPs()

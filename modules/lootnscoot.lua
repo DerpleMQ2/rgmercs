@@ -3,6 +3,7 @@ local mq                 = require('mq')
 local Config             = require('utils.config')
 local Globals            = require('utils.globals')
 local Core               = require("utils.core")
+local Combat             = require("utils.combat")
 local Casting            = require("utils.casting")
 local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
@@ -194,12 +195,12 @@ function Module:Pop()
 	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
-function Module.DoLooting(combat_state)
+function Module.DoLooting()
 	if not Module.TempSettings.Looting then return end
 
 	local maxWait = Config:GetSetting('LootingTimeoutLNS') * 1000
 	while Module.TempSettings.Looting do
-		if combat_state == "Combat" and not Config:GetSetting('CombatLooting') then
+		if Combat.GetCombatState() == "Combat" and not Config:GetSetting('CombatLooting') then
 			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")
 			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
 			Module.TempSettings.Looting = false
@@ -253,7 +254,9 @@ function Module:CheckChaseTargetInRange()
 	return true
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
+	local combat_state = Combat.GetCachedCombatState()
+
 	if not Config:GetSetting('DoLoot') then return end
 	if Globals.PauseMain then return end
 	if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
@@ -293,7 +296,7 @@ function Module:GiveTime(combat_state)
 
 	if self.TempSettings.Looting then
 		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
-		Module.DoLooting(combat_state)
+		Module.DoLooting()
 	end
 end
 

@@ -1419,7 +1419,9 @@ function Module:QueueAbility(type, name, targetId)
     })
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
+    local combat_state = Combat.GetCachedCombatState()
+
     if not self.ClassConfig or not self.ModuleLoaded then return end
     local enabledRotations = Config:GetSetting('EnabledRotations') or {}
 

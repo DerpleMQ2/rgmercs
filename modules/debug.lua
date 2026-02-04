@@ -324,7 +324,7 @@ function Module:DoEvents()
     end
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
     self:DoEvents()
 
     if self.luaBuffer:HasFlag(Zep.BufferFlags.Dirty) then

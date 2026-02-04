@@ -830,7 +830,9 @@ function Module:UpdateTimings()
     end
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
+    local combat_state = Combat.GetCachedCombatState()
+
     if not Core.IsMezzing() then return end
 
     -- dead... whoops

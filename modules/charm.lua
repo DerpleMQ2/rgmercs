@@ -4,6 +4,7 @@ local Config    = require('utils.config')
 local Globals   = require('utils.globals')
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
+local Combat    = require("utils.combat")
 local Casting   = require("utils.casting")
 local Ui        = require("utils.ui")
 local Comms     = require("utils.comms")
@@ -694,7 +695,9 @@ function Module:UpdateTimings()
 	end
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
+	local combat_state = Combat.GetCachedCombatState()
+
 	if not Core.IsCharming() then return end
 
 	-- dead... whoops

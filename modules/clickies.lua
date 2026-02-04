@@ -1509,7 +1509,9 @@ function Module:InsertDefaultClickies()
     end
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
+    local combat_state = mq.TLO.Me.CombatState()
+
     -- Main Module logic goes here.
     self:ValidateClickies()
 

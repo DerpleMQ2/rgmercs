@@ -91,7 +91,7 @@ function Module:Render()
 
 end
 
-function Module:GiveTime(combat_state)
+function Module:GiveTime()
     -- Main Module logic goes here.
 end
 

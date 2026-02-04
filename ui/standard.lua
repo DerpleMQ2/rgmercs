@@ -11,6 +11,7 @@ local ImageUI       = require('ui.images')
 local Core          = require('utils.core')
 local Targeting     = require('utils.targeting')
 local Casting       = require('utils.casting')
+local Combat        = require('utils.combat')
 local Modules       = require('utils.modules')
 local Movement      = require('utils.movement')
 local ConsoleUI     = require('ui.console')
@@ -95,11 +96,10 @@ function StandardUI:RenderTarget()
 end
 
 function StandardUI:RenderWindowControls()
-    --local draw_list = ImGui.GetWindowDrawList()
     local position = ImGui.GetCursorPosVec()
     local smallButtonSize = 32
 
-    local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 3), smallButtonSize)
+    local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 3), 0)
     ImGui.SetCursorPos(windowControlPos)
 
     if ImGui.SmallButton(Icons.MD_SETTINGS) then
@@ -209,8 +209,8 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI)
 
                     ImGui.Text("Current State: ")
                     ImGui.SameLine()
-                    Ui.RenderColoredText(Globals.CurrentState == "Combat" and Globals.Constants.Colors.MainCombatColor or Globals.Constants.Colors.MainDowntimeColor,
-                        "%s", Globals.CurrentState or "N/A")
+                    Ui.RenderColoredText(Combat.GetCachedCombatState() == "Combat" and Globals.Constants.Colors.MainCombatColor or Globals.Constants.Colors.MainDowntimeColor,
+                        "%s", Combat.GetCachedCombatState() or "N/A")
                     ImGui.Text("Hater Count: ")
                     ImGui.SameLine()
                     Ui.RenderColoredText((Targeting.GetXTHaterCount() or 0) > 0 and Globals.Constants.Colors.ConditionMidColor or Globals.Constants.Colors.ConditionPassColor, "%d",
