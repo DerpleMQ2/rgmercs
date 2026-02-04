@@ -807,6 +807,7 @@ local _ClassConfig = {
             name = 'Melody',
             state = 1,
             steps = 1,
+            timer = 0,
             doFullRotation = true,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
@@ -1008,6 +1009,14 @@ local _ClassConfig = {
                     if not Config:GetSetting('DoAEDamage') then return false end
                     return ((Config:GetSetting('UseShout') == 3 and mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct')) or (Config:GetSetting('UseShout') == 2 and Casting.BurnCheck())) and
                         self.ClassConfig.HelperFunctions.AETargetCheck(true) and Casting.DetAACheck(aaName)
+                end,
+            },
+            {
+                name = "Rallying Solo", --Rallying Call theoretically possible but problematic, needs own rotation akin to Focused Paragon, etc
+                type = "AA",
+                load_cond = function(self) return Casting.CanUseAA('Rallying Solo') end,
+                cond = function(self, aaName)
+                    return (mq.TLO.Me.PctEndurance() < 30 or mq.TLO.Me.PctMana() < 30)
                 end,
             },
             {
@@ -1316,14 +1325,6 @@ local _ClassConfig = {
                 cond = function(self, songSpell)
                     if Globals.InMedState then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
-                end,
-            },
-            {
-                name = "Rallying Solo", --Rallying Call theoretically possible but problematic, needs own rotation akin to Focused Paragon, etc
-                type = "AA",
-                load_cond = function(self) return Casting.CanUseAA('Rallying Solo') end,
-                cond = function(self, aaName)
-                    return (mq.TLO.Me.PctEndurance() < 30 or mq.TLO.Me.PctMana() < 30)
                 end,
             },
             {
