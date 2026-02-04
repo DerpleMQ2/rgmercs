@@ -1049,7 +1049,8 @@ Config.DefaultConfig                                     = {
         Header = "Common",
         Category = "Under the Hood",
         Index = 3,
-        Tooltip = "Wait Ping * [n] ms to allow songs to take effect before singing the next.",
+        Tooltip =
+        "Wait Ping * [n] ms to allow songs to take effect before singing the next. If this is set too low, the server may not register the song completion before we /stopsong.\nSetting this lower will not increase performance, as we will stop delaying as soon as the song buff is detected. This is strictly to solve for song clipping for those with high latency!",
         Default = 2,
         Min = 1,
         Max = 10,
