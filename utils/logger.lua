@@ -83,7 +83,7 @@ local function log(logLevel, output, ...)
 
 	if (... ~= nil) then output = string.format(output, ...) end
 
-	local now = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+	local now = string.format("%.03f", Globals.GetTimeMS() / 1000)
 
 	-- only log out warnings and errors
 	if logLevels[logLevel].level <= 2 or logToFileAlways then
