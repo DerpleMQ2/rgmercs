@@ -2160,6 +2160,12 @@ function Module:GiveTime(combat_state)
             Logger.log_verbose("PULL:GiveTime() - GroupWatch Failed")
             Module:StopNavAfterFailedMovingCheck()
             self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
+            local me = mq.TLO.Me
+            if me.Standing() and not me.Moving() and (me.PctHPs() < Config:GetSetting('HPMedPctStop') or me.PctMana() < Config:GetSetting('ManaMedPctStop') or me.PctEndurance() < Config:GetSetting('EndMedPctStop')) then
+                Logger.log_verbose(
+                    "PULL:GiveTime() - We are waiting for GroupWatch and we are below med stop levels, lets sit down ourselves! Note: Does not interface with medstate.")
+                me.Sit()
+            end
             return
         end
     end
