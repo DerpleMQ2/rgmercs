@@ -352,6 +352,7 @@ local _ClassConfig = {
             name = 'Melody',
             state = 1,
             steps = 1,
+            timer = 0,
             doFullRotation = true,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
