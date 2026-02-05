@@ -54,7 +54,7 @@ function Movement:DoNav(squelch, params, ...)
     local formatted = params
     if ... ~= nil then formatted = string.format(params, ...) end
 
-    if mq.TLO.Nav.Active() and formatted == self.LastDoNavCmd then
+    if mq.TLO.Navigation.Active() and formatted == self.LastDoNavCmd then
         Logger.log_verbose("\ayIgnoring DoNav (%s) because the last nav command is the same - let's not spam it.", formatted)
         return
     end
@@ -122,7 +122,10 @@ end
 --- @param targetId number The ID of the target to navigate to.
 --- @param distance number The distance to maintain from the target.
 --- @param bDontStick boolean Whether to avoid sticking to the target.
-function Movement:NavInCombat(targetId, distance, bDontStick)
+--- @param bCalledFromInsideEvent? boolean Whether to avoid processing events during navigation.
+function Movement:NavInCombat(targetId, distance, bDontStick, bCalledFromInsideEvent)
+    if bCalledFromInsideEvent == nil then bCalledFromInsideEvent = false end
+
     if not Config:GetSetting('DoAutoEngage') then return end
     if not Config:GetSetting('DoAutoNav') then return end
 
@@ -134,15 +137,19 @@ function Movement:NavInCombat(targetId, distance, bDontStick)
         Movement:DoNav(false, "id %d distance=%d log=off lineofsight=on", targetId, distance or 15)
         while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
             mq.delay(100)
-            mq.doevents()
-            Events.DoEvents()
+            if not bCalledFromInsideEvent then
+                mq.doevents()
+                Events.DoEvents()
+            end
         end
     else
         Core.DoCmd("/moveto id %d uw mdist %d", targetId, distance)
         while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveUtils.Stuck() do
             mq.delay(100)
-            mq.doevents()
-            Events.DoEvents()
+            if not bCalledFromInsideEvent then
+                mq.doevents()
+                Events.DoEvents()
+            end
         end
     end
 

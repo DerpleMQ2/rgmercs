@@ -822,7 +822,10 @@ end
 
 --- Checks if the auto camp feature should be activated based on the provided temporary configuration.
 --- @param tempConfig table: A table containing temporary configuration settings for the auto camp feature.
-function Combat.AutoCampCheck(tempConfig)
+--- @param bCalledFromInsideEvent? boolean: A flag indicating whether the function is called from within an event.
+function Combat.AutoCampCheck(tempConfig, bCalledFromInsideEvent)
+    if not bCalledFromInsideEvent then bCalledFromInsideEvent = false end
+
     if not Config:GetSetting('ReturnToCamp') then return end
 
     if mq.TLO.Me.Casting() and not Core.MyClassIs("brd") then return end
@@ -864,15 +867,19 @@ function Combat.AutoCampCheck(tempConfig)
             mq.delay("2s", function() return mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 end)
             while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
                 mq.delay(10)
-                mq.doevents()
-                Events.DoEvents()
+                if not bCalledFromInsideEvent then
+                    mq.doevents()
+                    Events.DoEvents()
+                end
             end
         else
             Core.DoCmd("/moveto loc %d %d|on", tempConfig.AutoCampY, tempConfig.AutoCampX)
             while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveTo.Stopped() do
                 mq.delay(10)
-                mq.doevents()
-                Events.DoEvents()
+                if not bCalledFromInsideEvent then
+                    mq.doevents()
+                    Events.DoEvents()
+                end
             end
         end
     end

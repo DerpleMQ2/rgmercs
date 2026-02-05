@@ -62,7 +62,7 @@ mq.event("CantSee", "You cannot see your target.", function()
                             end
 
                             Logger.log_debug("CantSee: Can't See target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID(), desiredDistance)
-                            Movement:NavInCombat(target.ID(), desiredDistance, false)
+                            Movement:NavInCombat(target.ID(), desiredDistance, false, true)
                         end
                     end
                 end
@@ -175,7 +175,7 @@ local function tooFarHandler()
                         else
                             Logger.log_debug("TooFar: Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
                                 (target.MaxRangeTo() or 0) * 0.7)
-                            Movement:NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.7, false)
+                            Movement:NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.7, false, true)
                         end
                     else
                         Logger.log_debug("TooFar event detected, but we are not ok to engage or autoengage is disabled.")
@@ -488,7 +488,7 @@ end)
 mq.event('Summoned', "You have been summoned!", function(_)
     if Config:GetSetting('DoAutoEngage') and not Config:GetSetting('DoMelee') and not Core.IAmMA() and Config:GetSetting('ReturnToCamp') then
         Comms.PrintGroupMessage("%s was just summoned -- returning to camp!", Globals.CurLoadedChar)
-        Modules:ExecModule("Movement", "DoAutoCampCheck")
+        Modules:ExecModule("Movement", "DoAutoCampCheck", true)
     end
 end)
 

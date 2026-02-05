@@ -694,8 +694,8 @@ function Module:OnZone()
     self:CampOff()
 end
 
-function Module:DoAutoCampCheck()
-    Combat.AutoCampCheck(self.TempSettings)
+function Module:DoAutoCampCheck(bCalledFromInsideEvent)
+    Combat.AutoCampCheck(self.TempSettings, bCalledFromInsideEvent)
 end
 
 function Module:DoCombatCampCheck()
