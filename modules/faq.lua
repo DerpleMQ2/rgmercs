@@ -376,21 +376,6 @@ function Module:RenderFAQRow(q, a)
 end
 
 function Module:RenderConfig(search)
-	ImGui.Spacing()
-	ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.FAQLinkColor)
-	ImGui.Text("Local FAQ Browser Link")
-	ImGui.PopStyleColor()
-	local url = "file:///" .. mq.luaDir .. "/rgmercs/doc/index.html"
-	url = url:gsub("\\", "/")
-	if ImGui.IsItemHovered() then
-		if ImGui.IsMouseClicked(ImGuiMouseButton.Left) then
-			os.execute(('start "" "%s"'):format(url))
-		end
-		ImGui.BeginTooltip()
-		ImGui.Text('%s', url)
-		ImGui.EndTooltip()
-	end
-
 	if not Globals.SubmodulesLoaded then
 		return
 	end
