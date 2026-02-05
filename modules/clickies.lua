@@ -3,6 +3,7 @@ local mq                                = require('mq')
 local Config                            = require('utils.config')
 local Globals                           = require('utils.globals')
 local Core                              = require('utils.core')
+local Combat                            = require('utils.combat')
 local Casting                           = require("utils.casting")
 local Strings                           = require("utils.strings")
 local Ui                                = require("utils.ui")
@@ -1510,7 +1511,7 @@ function Module:InsertDefaultClickies()
 end
 
 function Module:GiveTime()
-    local combat_state = mq.TLO.Me.CombatState()
+    local combat_state = Combat.GetCachedCombatState()
 
     -- Main Module logic goes here.
     self:ValidateClickies()
