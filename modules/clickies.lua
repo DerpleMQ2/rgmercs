@@ -614,7 +614,7 @@ Module.LogicBlocks                      = {
                 return isNamed
             end
         end,
-        tooltip = "Only use when RGMercs or SpawnMaster has (not) identified the RGMercs combat auto target as Named. (Optional Negate)",
+        tooltip = "Only use when RGMercs has (not) identified the RGMercs combat auto target as Named (see Named tab). (Optional Negate)",
         render_header_text = function(self, cond)
             return string.format("Auto Target is %s", cond.args[1] and "not Named" or "Named")
         end,
