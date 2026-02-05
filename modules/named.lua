@@ -38,10 +38,11 @@ Module.FAQ             = {
     {
         Question = "Why am I not taking any special actions on a Named, boss, or mission mob?",
         Answer =
-            "  RGMercs default class configs fully support burning, using defenses, or other special actions on Named mobs, however, your target must be indentified as such. There are two methods for doing so:\n\n" ..
-            "  1) The Spawn Master TLO: If the MQ2SpawnMaster plugin is loeaded (highly recommended), you can simply add a mob to its watch list (see '/spawnmaster help'). We will query SpawnMaster via built-in data reporting (TLO), and if the mob is present, treat it as a named.\n\n" ..
-            "  Using this method, it is very easy to treat mission bosses as named, without adding them to the Named List, which is typically aimed at typical PH/rare spawn style mobs.\n\n" ..
-            "  2) The Named List: RGMercs will consult the built-in Named List. If the mob is found on the list, it will be treated as a Named. It is also possible to use an external Named List, such as the Alert Master or MQ2SpawnMaster list (see other FAQs).\n\n" ..
+            "  RGMercs default class configs fully support burning, using defenses, or other special actions on Named mobs, however, your target must be indentified as such. There are three methods for doing so:\n\n" ..
+            "  1) The Named List: RGMercs will consult the built-in Named List. If the mob is found on the list, it will be treated as a Named.\n\n" ..
+            "  2) The SpawnMaster TLO: If the 'Check SM For Named' setting is enabled, and the MQ2SpawnMaster plugin is loaded (highly recommended), you can simply add a mob to the watch list (see '/spawnmaster help'). We will query SpawnMaster via built-in data reporting (TLO), and if the mob is present, treat it as a named.\n\n" ..
+            "  3) The Alert Master TLO: If the 'Check AM For Named' setting is enabled, and the Alert Master script is loaded, you can simply add a mob to the alert list (see '/alertmaster help'). We will query Alert Master via built-in data reporting (TLO), and if the mob is present, treat it as a named.\n\n" ..
+            "  Using these methods, it is very easy to treat mission bosses as named, even if they are not on the named list, whose source was typically aimed at typical PH/rare spawn style mobs.\n\n" ..
             "  Specific feedback on missing, incorrect, or otherwise erroneous entries on the RGMercs Named List is always welcome!\n\n",
         Settings_Used = "",
     },
@@ -109,7 +110,7 @@ function Module:Render()
     Ui.RenderPopAndSettings(self._name)
 
     ImGui.SameLine()
-    ImGui.Text("Make any mob \"named\" for burns by adding it to your MQ2SpawnMaster list!")
+    ImGui.Text("Make any mob \"named\" for burns by adding it to your MQ2SpawnMaster or Alert Master list! See burn settings.")
     ImGui.NewLine()
     Ui.RenderZoneNamed()
 end
@@ -178,10 +179,11 @@ function Module:IsNamed(spawn)
 
     if self.NamedList[spawn.Name()] or self.NamedList[spawn.CleanName()] then return true end
 
-    if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() then
-        ---@diagnostic disable-next-line: undefined-field
-        return mq.TLO.SpawnMaster.HasSpawn(spawn.ID())() or false
-    end
+    ---@diagnostic disable-next-line: undefined-field
+    if Config:GetSetting('CheckSMForNamed') and mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster ~= nil and mq.TLO.SpawnMaster.HasSpawn(spawn.ID())() then return true end
+
+    ---@diagnostic disable-next-line: undefined-field
+    if Config:GetSetting('CheckAMForNamed') and mq.TLO.AlertMaster ~= nil and mq.TLO.AlertMaster.IsNamed(spawn.DisplayName())() then return true end
 
     return false
 end

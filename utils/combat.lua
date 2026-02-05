@@ -454,6 +454,7 @@ function Combat.FindBestAutoTarget(validateFn)
 
     local target = mq.TLO.Target
     local targetValidated = false
+    local assistTargetIsNamed = false
 
     -- Now handle normal situations where we need to choose a target because we don't have one.
     if Core.IAmMA() then
@@ -556,6 +557,10 @@ function Combat.FindBestAutoTarget(validateFn)
                     assistTarget = mq.TLO.Spawn(forceTargId)
                     Logger.log_verbose("\ayFindAutoTarget Assist's Forced Target via Actors :: %s (%s). Ignoring mob aggressiveness.",
                         assistTarget.CleanName() or "None", forceTargId)
+                    if heartbeat.Data.TargetIsNamed then
+                        Globals.AutoTargetIsNamed = true
+                        assistTargetIsNamed = true
+                    end
                 else -- reset force combat ID if the MA is no longer forcing that target
                     Globals.ForceCombatID = 0
                 end
@@ -570,6 +575,10 @@ function Combat.FindBestAutoTarget(validateFn)
                             assistTarget = mq.TLO.Spawn(targetID)
                             Logger.log_verbose("\ayFindAutoTarget Assist's Target via Actors :: %s (%s)",
                                 assistTarget.CleanName() or "None", targetID)
+                        end
+                        if heartbeat.Data.TargetIsNamed then
+                            Globals.AutoTargetIsNamed = true
+                            assistTargetIsNamed = true
                         end
                     elseif mq.TLO.DanNet(Globals.MainAssist)() then
                         local queryResult = DanNet.query(Globals.MainAssist, "Target.ID", 1000)
@@ -600,10 +609,13 @@ function Combat.FindBestAutoTarget(validateFn)
             Globals.AutoTargetID = assistId
         else
             Globals.AutoTargetID = 0
+            assistTargetIsNamed = false
         end
     end
 
-    Globals.AutoTargetIsNamed = Targeting.IsNamed(mq.TLO.Spawn(Globals.AutoTargetID))
+    if Globals.AutoTargetID > 0 then
+        Globals.AutoTargetIsNamed = assistTargetIsNamed or Targeting.IsNamed(mq.TLO.Spawn(Globals.AutoTargetID))
+    end
 
     Logger.log_verbose("FindAutoTarget(): FoundTargetID(%d) - Named(%s), myTargetId(%d)", Globals.AutoTargetID or 0, Strings.BoolToColorString(Globals.AutoTargetIsNamed),
         mq.TLO.Target.ID())

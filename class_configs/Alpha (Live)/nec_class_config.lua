@@ -1378,7 +1378,7 @@ local _ClassConfig = {
             Header = "Utility",
             Category = "Emergency",
             Index = 102,
-            Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
+            Tooltip = "Use your Feign AA when you have aggro at low health or aggro on mobs detected as 'named' by RGMercs (see Named tab).",
             Default = true,
         },
         ['DoLifeBurn']        = {

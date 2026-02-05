@@ -118,6 +118,7 @@ function Comms.SendHeartbeat(assist, chase)
         Target        = mq.TLO.Target.DisplayName() or "None",
         TargetID      = mq.TLO.Target.ID() or 0,
         ForceTargetID = Globals.ForceTargetID,
+        TargetIsNamed = Globals.AutoTargetIsNamed,
         Casting       = mq.TLO.Me.Casting.ID() ~= 0 and mq.TLO.Me.Casting.RankName() or "None",
         Burning       = Globals.LastBurnCheck,
         PetID         = mq.TLO.Me.Pet.ID() or 0,
