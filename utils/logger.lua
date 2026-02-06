@@ -1,25 +1,28 @@
 --- @type Mq
-local mq              = require('mq')
-local Strings         = require("utils.strings")
-local Console         = require("utils.console")
-local Globals         = require("utils.globals")
+local mq                     = require('mq')
+local Strings                = require("utils.strings")
+local Console                = require("utils.console")
+local Globals                = require("utils.globals")
 
-local actions         = {}
-local logDir          = mq.TLO.MacroQuest.Path("Logs")()
-local logFileOpened   = nil
-local logLeaderStart  = '\ar[\ax\agRGMercs'
-local logLeaderEnd    = '\ar]\ax\aw >>>'
+local actions                = {}
+local logDir                 = mq.TLO.MacroQuest.Path("Logs")()
+local logFileOpened          = nil
+local logLeaderStart         = '\ar[\ax\agRGMercs'
+local logLeaderEnd           = '\ar]\ax\aw >>>'
 
 --- @type number
-local currentLogLevel = 3
-local logToFileAlways = false
-local filters         = {}
+local currentLogLevel        = 3
+local logToFileAlways        = false
+local filters                = {}
+local logTimestampsToConsole = false
 
-local logFileHandle   = nil
+local logFileHandle          = nil
 
 function actions.get_log_level() return currentLogLevel end
 
 function actions.set_log_level(level) currentLogLevel = level end
+
+function actions.set_log_timestamps_to_console(value) logTimestampsToConsole = value end
 
 function actions.set_log_to_file(logToFile)
 	if logToFileAlways ~= logToFile then
@@ -111,7 +114,7 @@ local function log(logLevel, output, ...)
 	local RGMercsConsole = Console:GetConsole("##RGMercs")
 
 	if RGMercsConsole ~= nil then
-		local consoleText = string.format('[%s] %s', logLevels[logLevel].header, output)
+		local consoleText = string.format('[%s%s] %s', logLevels[logLevel].header, logTimestampsToConsole and " \aw<\at" .. now .. ">\aw" or "", output)
 		RGMercsConsole:AppendText(consoleText)
 	end
 

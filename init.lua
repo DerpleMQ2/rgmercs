@@ -18,6 +18,7 @@ Config:LoadSettings()
 local Logger = require("utils.logger")
 Logger.set_log_level(Config:GetSetting('LogLevel'))
 Logger.set_log_to_file(Config:GetSetting('LogToFile'))
+Logger.set_log_timestamps_to_console(Config:GetSetting('LogTimeStampsToConsole'))
 
 local Binds = require('utils.binds')
 require('utils.event_handlers')

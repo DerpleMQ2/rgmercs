@@ -1934,16 +1934,26 @@ Config.DefaultConfig                                     = {
     ['LogLevel']                         = {
         DisplayName = "Log Level",
         Category = "Internals",
-        Type = "Custom",
+        Type = "Combo",
+        ComboOptions = Globals.Constants.LogLevels,
         Default = 3,
         Min = 1,
-        Max = 6,
+        Max = #Globals.Constants.LogLevels,
     },
     ['LogToFile']                        = {
         DisplayName = "Log To File",
         Category = "Internals",
-        Type = "Custom",
+        --Type = "Custom",
         Default = false,
+    },
+    ['LogTimeStampsToConsole']           = {
+        DisplayName = "Log Timestamps To RGMercs Console",
+        Category = "Internals",
+        --Type = "Custom",
+        Default = false,
+        OnChange = function(_, newValue)
+            Logger.set_log_timestamps_to_console(newValue)
+        end,
     },
     ['EnableDebugging']                  = {
         DisplayName = "Enable Debugging",

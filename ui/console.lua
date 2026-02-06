@@ -24,8 +24,10 @@ function ConsoleUI:DrawConsole(showPopout)
 
         local changed
         if ImGui.BeginTable("##debugoptions", 2, ImGuiTableFlags.None) then
-            ImGui.TableSetupColumn("Opt Name", bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoResize), 100)
+            ImGui.TableSetupColumn("Opt Name", bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoResize), 150)
             ImGui.TableSetupColumn("Opt Value", ImGuiTableColumnFlags.WidthStretch)
+            ImGui.TableNextColumn()
+            ImGui.Text("Log to File")
             ImGui.TableNextColumn()
             local logToFile = Config:GetSetting('LogToFile')
             logToFile, changed = Ui.RenderOptionToggle("##log_to_file",
@@ -34,16 +36,19 @@ function ConsoleUI:DrawConsole(showPopout)
                 Config:SetSetting('LogToFile', logToFile)
             end
             ImGui.TableNextColumn()
-            ImGui.Text("Log to File")
+            ImGui.Text("Show Timestamps")
+            ImGui.TableNextColumn()
+            local logTimestamps = Config:GetSetting('LogTimeStampsToConsole')
+            logTimestamps, changed = Ui.RenderOptionToggle("##show_timestamps",
+                "", logTimestamps)
+            if changed then
+                Config:SetSetting('LogTimeStampsToConsole', logTimestamps)
+            end
             ImGui.TableNextColumn()
             ImGui.Text("Debug Level")
             ImGui.TableNextColumn()
             local logLevel = Config:GetSetting('LogLevel')
-
-            logLevel, changed = ImGui.Combo("##Debug Level",
-                logLevel, Globals.Constants.LogLevels,
-                #Globals.Constants.LogLevels)
-
+            logLevel, _, changed = Ui.RenderOption("Combo", logLevel, 0, false, Globals.Constants.LogLevels)
             if changed then
                 Config:SetSetting('LogLevel', logLevel)
             end
