@@ -1274,6 +1274,11 @@ function Module:RenderClickiesWithConditions(type, clickies)
     end
     Ui.Tooltip("Add server-specific default clickies to the end of the list.")
 
+    ImGui.SameLine()
+    ImGui.Text(Icons.MD_INFO_OUTLINE .. " Special Note on Clickies " .. Icons.MD_INFO_OUTLINE)
+    Ui.Tooltip(
+        "All clickies have inherent presence and stacking checks built in; that is to say, we will only use a clicky if we detect that the effect is absent (and would stack) on its intended target.\n\nAdding conditions to check for the clicky's effect is generally not required or performant, be it buff, debuff or otherwise.")
+
     ImGui.Separator()
     if #clickies > 0 then
         for clickyIdx, clicky in ipairs(clickies) do
