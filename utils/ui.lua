@@ -1957,7 +1957,14 @@ function Ui.RenderThemeConfigElement(id, themeElement)
             themeElement.value = type(currentValue) == 'number' and currentValue or Tables.ImVec2ToTable(currentValue)
         end
 
-        local settingStyle, _, pressed = Ui.RenderOption(type(themeElement.value) == 'number' and 'number' or 'ImVec2', themeElement.value, id .. "_style")
+        local elementType = type(themeElement.value)
+        if elementType ~= 'number' and elementType ~= 'table' then
+            ImGui.Text("Unsupported Type: %s", elementType)
+            Logger.log_error("Unsupported theme element type '%s' for element '%s' %s", elementType, id, ImGui.GetStyle())
+            return any_pressed, delete_pressed
+        end
+
+        local settingStyle, _, pressed = Ui.RenderOption(elementType == 'number' and 'number' or 'ImVec2', themeElement.value, id .. "_style")
         any_pressed = any_pressed or (pressed or false)
         if any_pressed then
             local userConfig = Config:GetSetting('UserTheme')
