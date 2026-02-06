@@ -224,6 +224,11 @@ Module.DefaultConfig                    = {
 Module.CombatTargetTypes                = { 'Self', 'Pet', 'Main Assist', 'Auto Target', }
 Module.NonCombatTargetTypes             = { 'Self', 'Pet', 'Main Assist', }
 Module.CombatStates                     = { 'Downtime', 'Combat', 'Any', }
+Module.ImpliedCondition                 = {
+    render_header_text = function(_, _)
+        return "Not already active and will stack on the target"
+    end,
+}
 
 -- each of these becomes a condition you can set per clickie
 Module.LogicBlocks                      = {
@@ -1247,6 +1252,33 @@ function Module:RenderClickyHeaderIcon(clicky, headerPos)
     draw_list:AddTextureAnimation(animItems, ImVec2(headerPos.x + offset, headerPos.y), ImVec2(20, 20))
 end
 
+function Module:RenderCondition(clickyIdx, condIdx, cond)
+    if condIdx == 0 then
+        ImGui.SetNextItemOpen(false, ImGuiCond.Always);
+        ImGui.TreeNodeEx(cond.render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx, ImGuiTreeNodeFlags.NoTreePushOnOpen)
+    elseif ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
+        ImGui.PopStyleColor(1)
+        Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
+
+        self:RenderConditionTypesCombo(cond, condIdx)
+
+        ImGui.Indent()
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
+        ImGui.BeginChild("##clicky_cond_child_" .. clickyIdx .. "_" .. condIdx, ImVec2(0, 0),
+            bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
+            bit32.bor(ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
+        self:RenderConditionTargetCombo(cond, condIdx)
+        self:RenderConditionArgs(cond, condIdx, clickyIdx)
+        ImGui.EndChild()
+        ImGui.PopStyleVar(1)
+        ImGui.Unindent()
+        ImGui.TreePop()
+    else
+        ImGui.PopStyleColor(1)
+        Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
+    end
+end
+
 function Module:RenderClickiesWithConditions(type, clickies)
     ImGui.BeginDisabled(not mq.TLO.Cursor())
 
@@ -1317,6 +1349,8 @@ function Module:RenderClickiesWithConditions(type, clickies)
                         bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
                         bit32.bor(ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
 
+                    self:RenderCondition(clickyIdx, 0, self.ImpliedCondition)
+
                     for condIdx, cond in ipairs(clicky.conditions or {}) do
                         if self:GetLogicBlockByType(cond.type) then
                             -- only render configs if we are not filtered
@@ -1331,27 +1365,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                             else
                                 ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.ConditionMidColor)
                             end
-
-                            if ImGui.TreeNode(self:GetLogicBlockByType(cond.type).render_header_text(self, cond) .. "###clicky_cond_tree_" .. clickyIdx .. "_" .. condIdx) then
-                                ImGui.PopStyleColor(1)
-                                Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
-
-                                self:RenderConditionTypesCombo(cond, condIdx)
-                                ImGui.Indent()
-                                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
-                                ImGui.BeginChild("##clicky_cond_child_" .. clickyIdx .. "_" .. condIdx, ImVec2(0, 0),
-                                    bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
-                                    bit32.bor(ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
-                                self:RenderConditionTargetCombo(cond, condIdx)
-                                self:RenderConditionArgs(cond, condIdx, clickyIdx)
-                                ImGui.EndChild()
-                                ImGui.PopStyleVar(1)
-                                ImGui.Unindent()
-                                ImGui.TreePop()
-                            else
-                                ImGui.PopStyleColor(1)
-                                Ui.Tooltip(self:GetLogicBlockByType(cond.type).tooltip or "No Tooltip Available.")
-                            end
+                            self:RenderCondition(clickyIdx, condIdx, cond)
                         end
                     end
 
