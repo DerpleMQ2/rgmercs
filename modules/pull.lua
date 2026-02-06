@@ -2521,7 +2521,7 @@ function Module:GiveTime()
                     mq.doevents()
                     Events.DoEvents()
                 end
-            else -- AA/Spell/Ability pull
+            elseif pullAbility then -- AA/Spell/Ability pull
                 self.TempSettings.PullAttemptStarted = Globals.GetTimeSeconds()
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on ability pull to finish...%s", Strings.BoolToColorString(successFn()))
@@ -2579,6 +2579,8 @@ function Module:GiveTime()
                     mq.doevents()
                     Events.DoEvents()
                 end
+            else
+                Logger.log_error("\arInvalid PullAbility: \at%d\ar - Please Select a valid Pull Ability\ax", Config:GetSetting('PullAbility'))
             end
         end
     else
