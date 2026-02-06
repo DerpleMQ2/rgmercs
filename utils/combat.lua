@@ -985,8 +985,9 @@ function Combat.FindWorstHurtGroupMember(minHPs)
         if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
             if not healTarget.Dead() and (healTarget.PctHPs() or 101) < worstPct then
                 Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                worstPct = healTarget.PctHPs()
-                worstId = healTarget.ID()
+                -- this looks weird but it guards against a possible yield between the if above and this line where the healtarget might have died.
+                worstPct = (healTarget.PctHPs() or worstPct)
+                worstId = (healTarget.PctHPs() and healTarget.ID() or worstId)
             end
 
             if Config:GetSetting('DoPetHeals') and (healTarget.Pet.ID() or 0) > 0 then
@@ -994,8 +995,9 @@ function Combat.FindWorstHurtGroupMember(minHPs)
                 if petHP < worstPct and petHP < Config:GetSetting('PetHealPoint') then
                     Logger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
                         healTarget.Pet.DisplayName())
-                    worstPct = healTarget.Pet.PctHPs()
-                    worstId = healTarget.Pet.ID()
+                    -- this looks weird but it guards against a possible yield between the if above and this line where the healtarget might have died.
+                    worstPct = (healTarget.Pet.PctHPs() or worstPct)
+                    worstId = (healTarget.Pet.PctHPs() and healTarget.Pet.ID() or worstId)
                 end
             end
         end
@@ -1027,8 +1029,8 @@ function Combat.FindWorstHurtManaXT(minMana)
             if Globals.Constants.RGCasters:contains(healTarget.Class.ShortName()) then -- berzerkers have special handing
                 if not healTarget.Dead() and healTarget.PctMana() < worstPct then
                     Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                    worstPct = healTarget.PctMana()
-                    worstId = healTarget.ID()
+                    worstPct = healTarget.PctMana() or worstPct
+                    worstId = healTarget.PctMana() and healTarget.ID() or worstId
                 end
             end
         end
