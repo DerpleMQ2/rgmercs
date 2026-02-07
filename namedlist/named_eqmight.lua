@@ -954,7 +954,6 @@ return {
     },
 
     ["ragea"] = {
-        "a raging lupine hunter",
         "Ghost, Guardian of Razorthorn",
         "Snowtail, Guardian of Razorthorn",
         "Sullon Zek, Mistress of Rage",
@@ -986,17 +985,17 @@ return {
     },
 
     ["rage"] = {
-        "Restrained Cereton",
-        "Vaslaghul Bonelord",
-        "The Skulltaker",
+        " Restrained Cereton",
+        " Vaslaghul Bonelord",
+        " The Skulltaker",
         "Yoon the Gleener",
-        "Ar`yer the Warlord",
-        "Mengalor",
-        "Nezark, the Undying Spirit",
-        "Jarl Hedmar",
-        "Jarl Pinvul",
-        "Jarl Ytarin",
-        "Savage Fury Grogmaul",
+        " Ar`yer the Warlord",
+        " Mengalor",
+        " Nezark, the Undying Spirit",
+        " Jarl Hedmar",
+        " Jarl Pinvul",
+        " Jarl Ytarin",
+        " Savage Fury Grogmaul",
     },
 
     ["elddar"] = {
