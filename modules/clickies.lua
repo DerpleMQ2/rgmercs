@@ -424,7 +424,7 @@ Module.LogicBlocks                      = {
         name = "I Have A Pet",
         cond = function(self, _, negate)
             if negate then
-                return not mq.TLO.Me.Pet.ID() > 0
+                return mq.TLO.Me.Pet.ID() == 0
             else
                 return mq.TLO.Me.Pet.ID() > 0
             end
