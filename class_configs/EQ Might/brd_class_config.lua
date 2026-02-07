@@ -195,6 +195,7 @@ local _ClassConfig = {
         },
         ['ResistSong'] = {
             "Psalm of Veeshan",
+            "Elemental Chorus",
         },
         ['MezSong'] = {
             "Aelfric's Last Lullaby",
@@ -236,6 +237,7 @@ local _ClassConfig = {
         ['ResistDebuff'] = {
             "Ancient: Chaos Chant", -- EQM: -15 all resists
             "Harmony of Sound",
+            "Occlusion of Sound",
         },
         ['MitigationSong'] = {
             "Verse of Vesagran",
