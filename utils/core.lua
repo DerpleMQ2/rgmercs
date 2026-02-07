@@ -142,12 +142,21 @@ function Core.UnCheckPlugins(t)
     for _, p in pairs(t) do
         if mq.TLO.Plugin(p)() then
             Core.DoCmd("/squelch /plugin %s unload noauto", p)
-            Logger.log_info("\ar %s detected! \aw Unloading it due to known conflicts with RGMercs!", p)
+            Logger.log_warning("\ar %s detected! \aw Unloading it due to known conflicts with RGMercs!", p)
             table.insert(r, p)
         end
     end
 
     return r
+end
+
+function Core.CheckSpawnMasterVersion()
+    if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() then
+        ---@diagnostic disable-next-line: undefined-field
+        if mq.TLO.SpawnMaster == nil or mq.TLO.SpawnMaster.HasSpawn == nil then
+            Logger.log_warning("\ar MQ2SpawnMaster issue detected! \aw Plugin out of date or from a non-RG build! Named funcionality may be impeded.")
+        end
+    end
 end
 
 --- Retrieves the ID of the main assist in the group.

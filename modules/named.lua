@@ -180,7 +180,7 @@ function Module:IsNamed(spawn)
     if self.NamedList[spawn.Name()] or self.NamedList[spawn.CleanName()] then return true end
 
     ---@diagnostic disable-next-line: undefined-field
-    if Config:GetSetting('CheckSMForNamed') and mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster ~= nil and mq.TLO.SpawnMaster.HasSpawn(spawn.ID())() then return true end
+    if Config:GetSetting('CheckSMForNamed') and mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil and mq.TLO.SpawnMaster.HasSpawn(spawn.ID())() then return true end
 
     ---@diagnostic disable-next-line: undefined-field
     if Config:GetSetting('CheckAMForNamed') and mq.TLO.AlertMaster ~= nil and mq.TLO.AlertMaster.IsNamed(spawn.DisplayName())() then return true end
