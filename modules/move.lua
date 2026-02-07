@@ -388,6 +388,12 @@ function Module:ChaseOn(nameParam)
     -- if no name passed, use current chase target
     local targetName = nameParam or (currentChase ~= "" and currentChase)
 
+    -- if we end up chasing our tails then use the MA.
+    if targetName == mq.TLO.Me.CleanName() then
+        Logger.log_warn("\ayWarning: Attempting to chase yourself, defaulting to Main Assist.")
+        targetName = Core.GetGroupMainAssistName()
+    end
+
     -- if no current chase target, use MA
     local chaseTarget = targetName and mq.TLO.Spawn("pc =" .. targetName) or Core.GetMainAssistSpawn()
 
