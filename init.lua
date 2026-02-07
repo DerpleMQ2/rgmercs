@@ -222,6 +222,8 @@ local function RGInit(...)
 
     unloadedPlugins = Core.UnCheckPlugins({ "MQ2Melee", "MQ2Twist", })
 
+    Core.CheckSpawnMasterVersion()
+
     initPctComplete = 0
     initMsg = "Initializing RGMercs..."
     local args = { ..., }
