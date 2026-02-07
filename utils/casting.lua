@@ -1125,7 +1125,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
         until Globals.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
         Globals.LastUsedSpell = spellName
-        if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+        if mq.TLO.Target.ID() ~= oldTargetId and Combat.ValidCombatTarget(oldTargetId) and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
             Logger.log_debug("UseSpell(): Retargeting previous target after spell use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1308,7 +1308,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             classConfig.HelperFunctions.SwapInst("Weapon")
         end
 
-        if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+        if mq.TLO.Target.ID() ~= oldTargetId and Combat.ValidCombatTarget(oldTargetId) and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
             Logger.log_debug("UseSong(): Retargeting previous target after song use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1376,7 +1376,7 @@ function Casting.UseDisc(discSpell, targetId)
 
             Logger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName.Name())
 
-            if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+            if mq.TLO.Target.ID() ~= oldTargetId and Combat.ValidCombatTarget(oldTargetId) and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
                 Logger.log_debug("UseDisc(): Retargeting previous target after AA use.")
                 Targeting.SetTarget(oldTargetId, true)
             end
@@ -1471,7 +1471,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     else
         Core.DoCmd(cmd)
         mq.delay(5)
-        if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+        if mq.TLO.Target.ID() ~= oldTargetId and Combat.ValidCombatTarget(oldTargetId) and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
             Logger.log_debug("UseAA(): Retargeting previous target after AA use.")
             Targeting.SetTarget(oldTargetId, true)
         end
@@ -1604,7 +1604,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
         Core.DoCmd("/autoinv")
     end
 
-    if oldTargetId > 0 and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) and mq.TLO.Target.ID() ~= oldTargetId then
+    if mq.TLO.Target.ID() ~= oldTargetId and Combat.ValidCombatTarget(oldTargetId) and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
         Logger.log_debug("UseItem(): Retargeting previous target after item use.")
         Targeting.SetTarget(oldTargetId, true)
     end
