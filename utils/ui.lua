@@ -926,7 +926,7 @@ function Ui.RenderForceTargetList(showPopout)
             render = function(xtarg, i)
                 local checked = Globals.ForceTargetID > 0 and Globals.ForceTargetID == xtarg.ID()
 
-                if (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
+                if not Config:GetSetting('FTHPOverlay') and (Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() then
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, Ui.GetConHighlightBySpawn(xtarg))
                 end
 
@@ -1169,6 +1169,28 @@ function Ui.RenderForceTargetList(showPopout)
                         win_max.x = effectiveWidth
                         draw_list:PushClipRect(win_min, win_max, true)
                         draw_list:AddRect(min, max, ImGui.GetColorU32(Globals.GetTimeSeconds() % 2 == 1 and hlColorOne or hlColorTwo), 0.0, 0, 1.5)
+                        draw_list:PopClipRect()
+                    end
+
+                    -- hp overlay
+                    if Config:GetSetting('FTHPOverlay') then
+                        local draw_list = ImGui.GetForegroundDrawList()
+
+                        local min = ImVec2(rowStartX, rowStartY)
+                        local max = ImVec2(
+                            rowStartX + ((ImGui.GetWindowWidth() - ((windowPadding.x * 2)))) * (Targeting.GetTargetPctHPs(xtarg) / 100),
+                            rowStartY + ImGui.GetTextLineHeight() + (cellPadding.y * 2)
+                        )
+
+                        win_max.x = effectiveWidth
+                        draw_list:PushClipRect(win_min, win_max, true)
+                        local r, g, b, a = Ui.GetConHighlightBySpawn(xtarg)
+
+                        draw_list:AddRectFilled(
+                            min,
+                            max,
+                            IM_COL32(r * 255, g * 255, b * 255, a * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or 40))
+                        )
                         draw_list:PopClipRect()
                     end
                 end

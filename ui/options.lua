@@ -115,7 +115,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.MD_RESTAURANT_MENU,
         IconImage = OptionsUI.LoadIcon("themeicon"),
         Headers = {
-            { Name = 'Interface', Categories = { "Interface", "Default Colors", }, },
+            { Name = 'Interface', Categories = { "Interface", "Main Panel", "ForceTarget Window", "Mercs Status Window", "Default Colors", }, },
             {
                 Name = 'User Theme',
                 RenderCategories = {
