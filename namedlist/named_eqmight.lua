@@ -796,7 +796,7 @@ return {
         "Vipera Ashenheart",
         "Vilria the Keeper",
         "Warden Hanvar",
-        "Overlord Muta Muram",
+        "Overlord Mata Muram",
     },
 
     ["provinggrounds"] = {

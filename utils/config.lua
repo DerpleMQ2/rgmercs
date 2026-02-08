@@ -1370,6 +1370,18 @@ Config.DefaultConfig                                     = {
         Max = 30,
         ConfigType = "Advanced",
     },
+    ['StaggerGroupAACures']    = {
+        DisplayName = "Stagger Group AA Cures",
+        Group = "Abilities",
+        Header = "Recovery",
+        Category = "Curing",
+        Index = 4,
+        Tooltip = "If you detect an actor peer already casting Radiant Cure or Group Purify Soul on a groupmate, do not check if cures are needed until they are finished.\n" ..
+            "This is a 'best-effort' setting that tries to avoid multiple healers using group AA cures at once on the same effect. It does not check for other spells. It is not foolproof.",
+        Default = true,
+        ConfigType = "Advanced",
+    },
+
     --Recovery/Rezzing
     ['DoRez']                  = {
         DisplayName = "Do Rez",
