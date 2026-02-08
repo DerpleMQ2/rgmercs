@@ -535,3 +535,12 @@ mq.event('AlreadyRezzed', "This corpse has already accepted a resurrection.", fu
     end
 end)
 -- [ END EMU REZ HANDLERS] --
+
+-- [ Character Flag Events ] --
+mq.event('Flagged1', "You receive a character flag!", function()
+    Comms.HandleAnnounce(Comms.FormatChatEvent("Character Flag", mq.TLO.Target.CleanName() or "", mq.TLO.Me.DisplayName()),
+        Config:GetSetting('CharacterFlagAnnounceGroup'),
+        Config:GetSetting('CharacterFlagAnnounce'),
+        Config:GetSetting('AnnounceToRaidIfInRaid'))
+end)
+-- [ END Character Flag Events] --

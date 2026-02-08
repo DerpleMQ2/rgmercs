@@ -90,49 +90,49 @@ Config.FAQ                                               = {
 Config.DefaultConfig                                     = {
 
     -- Custom: These use custom UI elements and do not display in normal settings windows.
-    ['ClassConfigDir']         = {
+    ['ClassConfigDir']             = {
         DisplayName = "Class Config Dir",
         Type = "Custom",
         Default = (Globals.BuildType:lower() == "emu" and Globals.Constants.SupportedEmuServers:contains(Globals.CurServer)) and Globals.CurServer or "Live",
     },
-    ['UseAssistList']          = {
+    ['UseAssistList']              = {
         DisplayName = "Assist Outside of Group",
         Type = "Custom",
         Default = false,
     },
-    ['AssistList']             = {
+    ['AssistList']                 = {
         DisplayName = "List of User-Defined Assists",
         Type = "Custom",
         Default = {},
     },
-    ['ShowAdvancedOpts']       = {
+    ['ShowAdvancedOpts']           = {
         DisplayName = "Show Advanced Options",
         Type = "Custom",
         Default = false,
     },
-    ['PopOutForceTarget']      = {
+    ['PopOutForceTarget']          = {
         DisplayName = "Pop Out Force Target",
         Type = "Custom",
         Default = false,
     },
-    ['PopOutMercsStatus']      = {
+    ['PopOutMercsStatus']          = {
         DisplayName = "Pop Out Mercs Status",
         Type = "Custom",
         Default = false,
     },
-    ['PopOutConsole']          = {
+    ['PopOutConsole']              = {
         DisplayName = "Pop Out Console",
         Type = "Custom",
         Default = false,
     },
-    ['MainWindowLocked']       = {
+    ['MainWindowLocked']           = {
         DisplayName = "Main Window Locked",
         Default = false,
         Type = "Custom",
     },
 
     -- Announcements
-    ['AnnounceToRaidIfInRaid'] = {
+    ['AnnounceToRaidIfInRaid']     = {
         DisplayName = "Announce to Raid if In Raid",
         Group = "General",
         Header = "Announcements",
@@ -143,7 +143,7 @@ Config.DefaultConfig                                     = {
         ConfigType = "Advanced",
     },
 
-    ['AnnounceTarget']         = {
+    ['AnnounceTarget']             = {
         DisplayName = "Announce Target",
         Group = "General",
         Header = "Announcements",
@@ -153,7 +153,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['AnnounceTargetGroup']    = {
+    ['AnnounceTargetGroup']        = {
         DisplayName = "Announce Target to Group",
         Group = "General",
         Header = "Announcements",
@@ -163,7 +163,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['MezAnnounce']            = {
+    ['MezAnnounce']                = {
         DisplayName = "Mez Announce",
         Group = "General",
         Header = "Announcements",
@@ -173,7 +173,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces mez use.",
         ConfigType = "Advanced",
     },
-    ['MezAnnounceGroup']       = {
+    ['MezAnnounceGroup']           = {
         DisplayName = "Mez Announce to Group",
         Group = "General",
         Header = "Announcements",
@@ -183,7 +183,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces mez use to /gsay.",
         ConfigType = "Advanced",
     },
-    ['CharmAnnounce']          = {
+    ['CharmAnnounce']              = {
         DisplayName = "Charm Announce",
         Group = "General",
         Header = "Announcements",
@@ -193,7 +193,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces charm use.",
         ConfigType = "Advanced",
     },
-    ['CharmAnnounceGroup']     = {
+    ['CharmAnnounceGroup']         = {
         DisplayName = "Charm Announce to Group",
         Group = "General",
         Header = "Announcements",
@@ -203,7 +203,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces charm use to /gsay.",
         ConfigType = "Advanced",
     },
-    ['HealAnnounce']           = {
+    ['HealAnnounce']               = {
         DisplayName = "Heal Announce",
         Group = "General",
         Header = "Announcements",
@@ -213,7 +213,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces heal spell use.",
         ConfigType = "Advanced",
     },
-    ['HealAnnounceGroup']      = {
+    ['HealAnnounceGroup']          = {
         DisplayName = "Heal Announce to Group",
         Group = "General",
         Header = "Announcements",
@@ -223,7 +223,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces heal spell use to /gsay.",
         ConfigType = "Advanced",
     },
-    ['CureAnnounce']           = {
+    ['CureAnnounce']               = {
         DisplayName = "Cure Announce",
         Group = "General",
         Header = "Announcements",
@@ -233,7 +233,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces cure use.",
         ConfigType = "Advanced",
     },
-    ['CureAnnounceGroup']      = {
+    ['CureAnnounceGroup']          = {
         DisplayName = "Cure Announce to Group",
         Group = "General",
         Header = "Announcements",
@@ -243,7 +243,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces cure use to /gsay.",
         ConfigType = "Advanced",
     },
-    ['ReagentAnnounce']        = {
+    ['ReagentAnnounce']            = {
         DisplayName = "Reagent Announce",
         Group = "General",
         Header = "Announcements",
@@ -253,7 +253,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces an aborted cast due to missing spell reagent.",
         ConfigType = "Advanced",
     },
-    ['ReagentAnnounceGroup']   = {
+    ['ReagentAnnounceGroup']       = {
         DisplayName = "Reagent Announce to Group",
         Group = "General",
         Header = "Announcements",
@@ -263,7 +263,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announces an aborted cast due to missing spell reagent to /gsay. (Warning: Often spammy.)",
         ConfigType = "Advanced",
     },
-    ['PullAnnounce']           = {
+    ['PullAnnounce']               = {
         DisplayName = "Pull Announce",
         Group = "General",
         Header = "Announcements",
@@ -273,7 +273,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announce pull-related messages.",
         ConfigType = "Advanced",
     },
-    ['PullAnnounceGroup']      = {
+    ['PullAnnounceGroup']          = {
         DisplayName = "Pull Announce to Group",
         Group = "General",
         Header = "Announcements",
@@ -283,7 +283,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announce pull-related messages in /gsay. (Warning: Often spammy.)",
         ConfigType = "Advanced",
     },
-    ['BurnAnnounce']           = {
+    ['BurnAnnounce']               = {
         DisplayName = "Burn Announce",
         Group = "General",
         Header = "Announcements",
@@ -293,7 +293,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announce burn-related messages.",
         ConfigType = "Advanced",
     },
-    ['BurnAnnounceGroup']      = {
+    ['BurnAnnounceGroup']          = {
         DisplayName = "Burn Announce to Group",
         Group = "General",
         Header = "Announcements",
@@ -303,9 +303,29 @@ Config.DefaultConfig                                     = {
         Tooltip = "Announce burn-related messages in /gsay. (Warning: Often spammy.)",
         ConfigType = "Advanced",
     },
+    ['CharacterFlagAnnounce']      = {
+        DisplayName = "Character Flag Announce",
+        Group = "General",
+        Header = "Announcements",
+        Category = "Announcements",
+        Index = 17,
+        Default = false,
+        Tooltip = "Announces when a character flag is received.",
+        ConfigType = "Advanced",
+    },
+    ['CharacterFlagAnnounceGroup'] = {
+        DisplayName = "Character Flag Announce to Group",
+        Group = "General",
+        Header = "Announcements",
+        Category = "Announcements",
+        Index = 17,
+        Default = false,
+        Tooltip = "Announces when a character flag is received.",
+        ConfigType = "Advanced",
+    },
 
     --Misc
-    ['InstantRelease']         = { --Algarnote: Wondering who uses this? I can't imagine a usecase that doesn't involve scripts or afk and this could be handled in those scripts
+    ['InstantRelease']             = { --Algarnote: Wondering who uses this? I can't imagine a usecase that doesn't involve scripts or afk and this could be handled in those scripts
         DisplayName = "Instant Release",
         Group = "General",
         Header = "Misc",
@@ -317,7 +337,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Meditation/Med Rules
-    ['DoMed']                  = {
+    ['DoMed']                      = {
         DisplayName = "Do Meditate",
         Group = "Movement",
         Header = "Meditation",
@@ -331,7 +351,7 @@ Config.DefaultConfig                                     = {
         Max = 3,
         ConfigType = "Normal",
     },
-    ['StandWhenDone']          = {
+    ['StandWhenDone']              = {
         DisplayName = "Stand When Done Medding",
         Group = "Movement",
         Header = "Meditation",
@@ -340,7 +360,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Force a stand to end meditation when thresholds are reached.",
         Default = Globals.CurLoadedClass == "BRD",
     },
-    ['AfterCombatMedDelay']    = {
+    ['AfterCombatMedDelay']        = {
         DisplayName = "After Combat Med Delay",
         Group = "Movement",
         Header = "Meditation",
@@ -352,7 +372,7 @@ Config.DefaultConfig                                     = {
         Max = 60,
         ConfigType = "Advanced",
     },
-    ['MedAggroCheck']          = {
+    ['MedAggroCheck']              = {
         DisplayName = "Med Aggro Check",
         Group = "Movement",
         Header = "Meditation",
@@ -362,7 +382,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['MedAggroPct']            = {
+    ['MedAggroPct']                = {
         DisplayName = "Med Aggro Percent",
         Group = "Movement",
         Header = "Meditation",
@@ -376,7 +396,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Meditation/Med Thresholds
-    ['HPMedPct']               = {
+    ['HPMedPct']                   = {
         DisplayName = "Med Start HP%",
         Group = "Movement",
         Header = "Meditation",
@@ -388,7 +408,7 @@ Config.DefaultConfig                                     = {
         Max = 99,
         ConfigType = "Advanced",
     },
-    ['HPMedPctStop']           = {
+    ['HPMedPctStop']               = {
         DisplayName = "Med Stop HP%",
         Group = "Movement",
         Header = "Meditation",
@@ -400,7 +420,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['ManaMedPct']             = {
+    ['ManaMedPct']                 = {
         DisplayName = "Med Start Mana%",
         Group = "Movement",
         Header = "Meditation",
@@ -412,7 +432,7 @@ Config.DefaultConfig                                     = {
         Max = 99,
         ConfigType = "Advanced",
     },
-    ['ManaMedPctStop']         = {
+    ['ManaMedPctStop']             = {
         DisplayName = "Med Stop Mana%",
         Group = "Movement",
         Header = "Meditation",
@@ -424,7 +444,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['EndMedPct']              = {
+    ['EndMedPct']                  = {
         DisplayName = "Med Start End%",
         Group = "Movement",
         Header = "Meditation",
@@ -436,7 +456,7 @@ Config.DefaultConfig                                     = {
         Max = 99,
         ConfigType = "Advanced",
     },
-    ['EndMedPctStop']          = {
+    ['EndMedPctStop']              = {
         DisplayName = "Med Stop End%",
         Group = "Movement",
         Header = "Meditation",
@@ -450,7 +470,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Clickies(Pre-Configured)
-    ['ModRodUse']              = {
+    ['ModRodUse']                  = {
         DisplayName = "Mod Rod Use:",
         Group = "Items",
         Header = "Clickies",
@@ -463,7 +483,7 @@ Config.DefaultConfig                                     = {
         Min = 1,
         Max = 3,
     },
-    ['ModRodManaPct']          = {
+    ['ModRodManaPct']              = {
         DisplayName = "Mod Rod Mana %",
         Group = "Items",
         Header = "Clickies",
@@ -475,7 +495,7 @@ Config.DefaultConfig                                     = {
         Max = 99,
         ConfigType = "Advanced",
     },
-    ['DoMount']                = {
+    ['DoMount']                    = {
         DisplayName = "Summon Mount:",
         Group = "Items",
         Header = "Clickies",
@@ -489,7 +509,7 @@ Config.DefaultConfig                                     = {
         Max = 3,
         ConfigType = "Normal",
     },
-    ['MountItem']              = {
+    ['MountItem']                  = {
         DisplayName = "Mount Item",
         Group = "Items",
         Header = "Clickies",
@@ -500,7 +520,7 @@ Config.DefaultConfig                                     = {
         Default = "",
         ConfigType = "Normal",
     },
-    ['DoShrink']               = {
+    ['DoShrink']                   = {
         DisplayName = "Do Shrink",
         Group = "Items",
         Header = "Clickies",
@@ -510,7 +530,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Normal",
     },
-    ['ShrinkItem']             = {
+    ['ShrinkItem']                 = {
         DisplayName = "Shrink Item",
         Group = "Items",
         Header = "Clickies",
@@ -523,7 +543,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Pet/Pet Summoning
-    ['DoPet']                  = {
+    ['DoPet']                      = {
         DisplayName = "Summon Pet",
         Group = "Abilities",
         Header = "Pet",
@@ -535,7 +555,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Pet/Pet Buffs
-    ['DoShrinkPet']            = {
+    ['DoShrinkPet']                = {
         DisplayName = "Do Pet Shrink",
         Group = "Abilities",
         Header = "Pet",
@@ -545,7 +565,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Normal",
     },
-    ['ShrinkPetItem']          = {
+    ['ShrinkPetItem']              = {
         DisplayName = "Shrink Pet Item",
         Group = "Abilities",
         Header = "Pet",
@@ -558,7 +578,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Targeting
-    ['DoAutoTarget']           = {
+    ['DoAutoTarget']               = {
         DisplayName = "Auto Target",
         Group = "Combat",
         Header = "Targeting",
@@ -569,7 +589,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['StayOnTarget']           = {
+    ['StayOnTarget']               = {
         DisplayName = "Stay On Target",
         Group = "Combat",
         Header = "Targeting",
@@ -579,7 +599,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['SafeTargeting']          = {
+    ['SafeTargeting']              = {
         DisplayName = "Use Safe Targeting",
         Group = "Combat",
         Header = "Targeting",
@@ -589,7 +609,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['TargetNonAggressives']   = {
+    ['TargetNonAggressives']       = {
         DisplayName = "Target Non-Aggressives",
         Group = "Combat",
         Header = "Targeting",
@@ -600,7 +620,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['StopAttackForPCs']       = {
+    ['StopAttackForPCs']           = {
         DisplayName = "Stop Attack for PCs",
         Group = "Combat",
         Header = "Targeting",
@@ -610,7 +630,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['AutoAttackSafetyCheck']  = {
+    ['AutoAttackSafetyCheck']      = {
         DisplayName = "Auto Attack Safety Check",
         Group = "Combat",
         Header = "Targeting",
@@ -620,7 +640,7 @@ Config.DefaultConfig                                     = {
         Default = false,
     },
 
-    ['ScanNamedPriority']      = {
+    ['ScanNamedPriority']          = {
         DisplayName = "Scan Priority:",
         Group = "Combat",
         Header = "Targeting",
@@ -634,7 +654,7 @@ Config.DefaultConfig                                     = {
         Max = #Globals.Constants.ScanNamedPriority,
         ConfigType = "Advanced",
     },
-    ['ScanHPPriority']         = {
+    ['ScanHPPriority']             = {
         DisplayName = "Scan HP% Priority:",
         Group = "Combat",
         Header = "Targeting",
@@ -649,7 +669,7 @@ Config.DefaultConfig                                     = {
         Max = #Globals.Constants.ScanHPPriority,
         ConfigType = "Advanced",
     },
-    ['AreaScanFallback']       = {
+    ['AreaScanFallback']           = {
         DisplayName = "Area Scan Fallback",
         Group = "Combat",
         Header = "Targeting",
@@ -659,7 +679,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['MAScanZRange']           = {
+    ['MAScanZRange']               = {
         DisplayName = "Main Assist Scan ZRange",
         Group = "Combat",
         Header = "Targeting",
@@ -671,7 +691,7 @@ Config.DefaultConfig                                     = {
         Max = 200,
         ConfigType = "Advanced",
     },
-    ['MAScanAggro']            = {
+    ['MAScanAggro']                = {
         DisplayName = "Scan for Aggro",
         Group = "Combat",
         Header = "Targeting",
@@ -683,7 +703,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Assisting
-    ['DoAutoEngage']           = {
+    ['DoAutoEngage']               = {
         DisplayName = "Auto Engage",
         Group = "Combat",
         Header = "Assisting",
@@ -693,7 +713,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['AutoAssistAt']           = {
+    ['AutoAssistAt']               = {
         DisplayName = "Auto Assist Percent",
         Group = "Combat",
         Header = "Assisting",
@@ -705,7 +725,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['AssistRange']            = {
+    ['AssistRange']                = {
         DisplayName = "Assist Range",
         Group = "Combat",
         Header = "Assisting",
@@ -723,7 +743,7 @@ Config.DefaultConfig                                     = {
             return false, ""
         end,
     },
-    ['DoMelee']                = {
+    ['DoMelee']                    = {
         DisplayName = "Enable Melee Combat",
         Group = "Combat",
         Header = "Assisting",
@@ -733,7 +753,7 @@ Config.DefaultConfig                                     = {
         Default = Globals.CurLoadedClass ~= "RNG" and Globals.Constants.RGMelee:contains(Globals.CurLoadedClass),
         ConfigType = "Normal",
     },
-    ['AllowMezBreak']          = {
+    ['AllowMezBreak']              = {
         DisplayName = "Allow Mez Break",
         Group = "Combat",
         Header = "Assisting",
@@ -743,7 +763,7 @@ Config.DefaultConfig                                     = {
         Default = (Globals.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
         ConfigType = "Advanced",
     },
-    ['DoPetCommands']          = {
+    ['DoPetCommands']              = {
         DisplayName = "Pet Control",
         Group = "Combat",
         Header = "Assisting",
@@ -753,7 +773,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['PetEngagePct']           = {
+    ['PetEngagePct']               = {
         DisplayName = "Pet Assist Percent",
         Group = "Combat",
         Header = "Assisting",
@@ -765,7 +785,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['DoMercenary']            = {
+    ['DoMercenary']                = {
         DisplayName = "Merc Control",
         Group = "Combat",
         Header = "Assisting",
@@ -775,7 +795,7 @@ Config.DefaultConfig                                     = {
         Default = (Globals.BuildType ~= 'Emu'),
         ConfigType = "Normal",
     },
-    ['FollowMarkTarget']       = {
+    ['FollowMarkTarget']           = {
         DisplayName = "Follow Mark Target",
         Group = "Combat",
         Header = "Assisting",
@@ -785,7 +805,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['RaidAssistTarget']       = {
+    ['RaidAssistTarget']           = {
         DisplayName = "Raid Assist Target",
         Group = "Combat",
         Header = "Assisting",
@@ -799,7 +819,7 @@ Config.DefaultConfig                                     = {
         Max = 3,
         ConfigType = "Normal",
     },
-    ['SelfAssistFallback']     = {
+    ['SelfAssistFallback']         = {
         DisplayName = "Self-Assist Fallback",
         Group = "Combat",
         Header = "Assisting",
@@ -815,7 +835,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Positioning/General
-    ['FaceTarget']             = {
+    ['FaceTarget']                 = {
         DisplayName = "Face Target in Combat",
         Group = "Combat",
         Header = "Positioning",
@@ -825,7 +845,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['StickHow']               = {
+    ['StickHow']                   = {
         DisplayName = "Stick How",
         Group = "Combat",
         Header = "Positioning",
@@ -841,7 +861,7 @@ Config.DefaultConfig                                     = {
             "* - Optional moveback flag (if 'Moveback As Tank' is enabled).\n" ..
             "** - On larger targets this value becomes 20.",
     },
-    ['BellyCastStick']         = {
+    ['BellyCastStick']             = {
         DisplayName = "Stick for Belly Cast",
         Group = "Combat",
         Header = "Positioning",
@@ -851,7 +871,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['AutoStandFD']            = {
+    ['AutoStandFD']                = {
         DisplayName = "Stand from FD in Combat",
         Group = "Combat",
         Header = "Positioning",
@@ -861,7 +881,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Normal",
     },
-    ['HandleCantSeeTarget']    = {
+    ['HandleCantSeeTarget']        = {
         DisplayName = "Handle Cannot See Target",
         Group = "Combat",
         Header = "Positioning",
@@ -871,7 +891,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['HandleTooClose']         = {
+    ['HandleTooClose']             = {
         DisplayName = "Handle Too Close",
         Group = "Combat",
         Header = "Positioning",
@@ -881,7 +901,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['HandleTooFar']           = {
+    ['HandleTooFar']               = {
         DisplayName = "Handle Too Far",
         Group = "Combat",
         Header = "Positioning",
@@ -891,7 +911,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['DoAutoNav']              = {
+    ['DoAutoNav']                  = {
         DisplayName = "Enable Auto Navigation",
         Group = "Combat",
         Header = "Positioning",
@@ -901,7 +921,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['DoAutoStick']            = {
+    ['DoAutoStick']                = {
         DisplayName = "Enable Auto Stick",
         Group = "Combat",
         Header = "Positioning",
@@ -913,7 +933,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Positioning/Tank
-    ['MovebackWhenTank']       = {
+    ['MovebackWhenTank']           = {
         DisplayName = "Moveback as Tank",
         Group = "Combat",
         Header = "Positioning",
@@ -923,7 +943,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['MovebackWhenBehind']     = {
+    ['MovebackWhenBehind']         = {
         DisplayName = "Moveback if Mob Behind",
         Group = "Combat",
         Header = "Positioning",
@@ -933,7 +953,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['MovebackDistance']       = {
+    ['MovebackDistance']           = {
         DisplayName = "Units to Moveback",
         Group = "Combat",
         Header = "Positioning",
@@ -947,7 +967,7 @@ Config.DefaultConfig                                     = {
     },
 
     --Common/Rules
-    ['MobLowHP']               = {
+    ['MobLowHP']                   = {
         DisplayName = "Mob Low HP%",
         Group = "Abilities",
         Header = "Common",
@@ -959,7 +979,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['NamedLowHP']             = {
+    ['NamedLowHP']                 = {
         DisplayName = "Named Low HP%",
         Group = "Abilities",
         Header = "Common",
@@ -971,7 +991,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['AggroThrottling']        = {
+    ['AggroThrottling']            = {
         DisplayName = "Use Aggro Throttling",
         Group = "Abilities",
         Header = "Common",
@@ -981,7 +1001,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['MobMaxAggro']            = {
+    ['MobMaxAggro']                = {
         DisplayName = "Start Aggro Throttle:",
         Group = "Abilities",
         Header = "Common",
@@ -993,7 +1013,7 @@ Config.DefaultConfig                                     = {
         Max = 999,
         ConfigType = "Advanced",
     },
-    ['LastGemRemem']           = {
+    ['LastGemRemem']               = {
         DisplayName = "Remem After Buff:",
         Group = "Abilities",
         Header = "Common",
@@ -1010,7 +1030,7 @@ Config.DefaultConfig                                     = {
         ComboOptions = Globals.Constants.LastGemRemem,
         ConfigType = "Advanced",
     },
-    ['IgnoreLevelCheck']       = {
+    ['IgnoreLevelCheck']           = {
         DisplayName = "Ignore Spell Level Checks",
         Group = "Abilities",
         Header = "Common",
@@ -1021,7 +1041,7 @@ Config.DefaultConfig                                     = {
         ConfigType = "Advanced",
     },
     -- Common/Under the Hood
-    ['UseExactSpellNames']     = {
+    ['UseExactSpellNames']         = {
         DisplayName = "Use Exact Spell Names",
         Group = "Abilities",
         Header = "Common",
@@ -1031,7 +1051,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['CastReadyDelayFact']     = {
+    ['CastReadyDelayFact']         = {
         DisplayName = "Cast Ready Delay Factor",
         Group = "Abilities",
         Header = "Common",
@@ -1043,7 +1063,7 @@ Config.DefaultConfig                                     = {
         Max = 10,
         ConfigType = "Advanced",
     },
-    ['SongClipDelayFact']      = {
+    ['SongClipDelayFact']          = {
         DisplayName = "Song Clip Delay Factor",
         Group = "Abilities",
         Header = "Common",
@@ -1058,7 +1078,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Damage/Direct
-    ['ManaToNuke']             = {
+    ['ManaToNuke']                 = {
         DisplayName = "Mana to Nuke",
         Group = "Abilities",
         Header = "Damage",
@@ -1072,7 +1092,7 @@ Config.DefaultConfig                                     = {
         ConfigType = "Advanced",
     },
     --Damage/Over Time
-    ['ManaToDot']              = {
+    ['ManaToDot']                  = {
         DisplayName = "Mana to Dot",
         Group = "Abilities",
         Header = "Damage",
@@ -1087,7 +1107,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Debuffs
-    ['ManaToDebuff']           = {
+    ['ManaToDebuff']               = {
         DisplayName = "Mana to Debuff",
         Group = "Abilities",
         Header = "Debuffs",
@@ -1099,7 +1119,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['DebuffMinCon']           = {
+    ['DebuffMinCon']               = {
         DisplayName = "Debuff Min Con",
         Group = "Abilities",
         Header = "Debuffs",
@@ -1113,7 +1133,7 @@ Config.DefaultConfig                                     = {
         ComboOptions = Globals.Constants.ConColors,
         ConfigType = "Advanced",
     },
-    ['MobDebuff']              = {
+    ['MobDebuff']                  = {
         DisplayName = "Mob Debuffing:",
         Group = "Abilities",
         Header = "Debuffs",
@@ -1127,7 +1147,7 @@ Config.DefaultConfig                                     = {
         ComboOptions = Globals.Constants.DebuffChoice,
         ConfigType = "Advanced",
     },
-    ['NamedDebuff']            = {
+    ['NamedDebuff']                = {
         DisplayName = "Named Debuffing:",
         Group = "Abilities",
         Header = "Debuffs",
@@ -1143,7 +1163,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Emergency
-    ['StandFailedFD']          = {
+    ['StandFailedFD']              = {
         DisplayName = "Stand on Failed FD",
         Group = "Abilities",
         Header = "Utility",
@@ -1155,7 +1175,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Buffs/Rules
-    ['DoBuffs']                = {
+    ['DoBuffs']                    = {
         DisplayName = "Do Downtime/Group Buffs",
         Group = "Abilities",
         Header = "Buffs",
@@ -1165,7 +1185,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['BuffWaitMoveTimer']      = {
+    ['BuffWaitMoveTimer']          = {
         DisplayName = "After-Move Buff Delay",
         Group = "Abilities",
         Header = "Buffs",
@@ -1177,7 +1197,7 @@ Config.DefaultConfig                                     = {
         Max = 60,
         ConfigType = "Advanced",
     },
-    ['BuffRezables']           = {
+    ['BuffRezables']               = {
         DisplayName = "Buff Rezables",
         Group = "Abilities",
         Header = "Buffs",
@@ -1188,7 +1208,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['UseCounterActions']      = {
+    ['UseCounterActions']          = {
         DisplayName = "Use Aureate's Bane", --this can be freely changed later if another system is added. Avoiding confusion for now.
         Group = "Abilities",
         Header = "Buffs",
@@ -1198,7 +1218,7 @@ Config.DefaultConfig                                     = {
         "Automatically use counter actions (such as the Aureate's Bane AA to counter Curse of Subjugation in TOB zones.",
         Default = (mq.TLO.MacroQuest.BuildName() or ""):lower() ~= "emu",
     },
-    ['BreakInvisForSay']       = {
+    ['BreakInvisForSay']           = {
         DisplayName = "Break Invis for Say Commands",
         Group = "Abilities",
         Header = "Buffs",
@@ -1208,7 +1228,7 @@ Config.DefaultConfig                                     = {
         Default = false,
     },
     -- Buffs/Self
-    ['DoAlliance']             = {
+    ['DoAlliance']                 = {
         DisplayName = "Do Alliance",
         Group = "Abilities",
         Header = "Buffs",
@@ -1220,7 +1240,7 @@ Config.DefaultConfig                                     = {
     },
 
     --Recovery/General
-    ['DoPetHeals']             = {
+    ['DoPetHeals']                 = {
         DisplayName = "Heal Pets as PCs",
         Group = "Abilities",
         Header = "Recovery",
@@ -1232,7 +1252,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['BreakInvisForHealing']   = {
+    ['BreakInvisForHealing']       = {
         DisplayName = "Break Invis",
         Group = "Abilities",
         Header = "Recovery",
@@ -1242,7 +1262,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['HealOutside']            = {
+    ['HealOutside']                = {
         DisplayName = "Heal Outside",
         Group = "Abilities",
         Header = "Recovery",
@@ -1253,7 +1273,7 @@ Config.DefaultConfig                                     = {
         ConfigType = "Advanced",
     },
     -- Recovery/Thresholds
-    ['MaxHealPoint']           = {
+    ['MaxHealPoint']               = {
         DisplayName = "Healing Threshold",
         Group = "Abilities",
         Header = "Recovery",
@@ -1265,7 +1285,7 @@ Config.DefaultConfig                                     = {
         Max = 99,
         ConfigType = "Advanced",
     },
-    ['LightHealPoint']         = {
+    ['LightHealPoint']             = {
         DisplayName = "Light Heal Point",
         Group = "Abilities",
         Header = "Recovery",
@@ -1277,7 +1297,7 @@ Config.DefaultConfig                                     = {
         Max = 99,
         ConfigType = "Advanced",
     },
-    ['MainHealPoint']          = {
+    ['MainHealPoint']              = {
         DisplayName = "Main Heal Point",
         Group = "Abilities",
         Header = "Recovery",
@@ -1289,7 +1309,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['BigHealPoint']           = {
+    ['BigHealPoint']               = {
         DisplayName = "Big Heal Point",
         Group = "Abilities",
         Header = "Recovery",
@@ -1301,7 +1321,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['GroupHealPoint']         = {
+    ['GroupHealPoint']             = {
         DisplayName = "Group Heal Point",
         Group = "Abilities",
         Header = "Recovery",
@@ -1313,7 +1333,7 @@ Config.DefaultConfig                                     = {
         Max = 100,
         ConfigType = "Advanced",
     },
-    ['GroupInjureCnt']         = {
+    ['GroupInjureCnt']             = {
         DisplayName = "Group Injured Count",
         Group = "Abilities",
         Header = "Recovery",
@@ -1325,7 +1345,7 @@ Config.DefaultConfig                                     = {
         Max = 5,
         ConfigType = "Advanced",
     },
-    ['PetHealPoint']           = {
+    ['PetHealPoint']               = {
         DisplayName = "Pet Heal Point",
         Group = "Abilities",
         Header = "Recovery",
@@ -1338,7 +1358,7 @@ Config.DefaultConfig                                     = {
         ConfigType = "Advanced",
     },
     --Recovery/Curing
-    ['DoCureSpells']           = {
+    ['DoCureSpells']               = {
         DisplayName = "Do Cure Spells",
         Group = "Abilities",
         Header = "Recovery",
@@ -1348,7 +1368,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['DoCureAA']               = {
+    ['DoCureAA']                   = {
         DisplayName = "Do Cure AA",
         Group = "Abilities",
         Header = "Recovery",
@@ -1358,7 +1378,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['CureInterval']           = {
+    ['CureInterval']               = {
         DisplayName = "Downtime Cure Check Interval",
         Group = "Abilities",
         Header = "Recovery",
@@ -1370,7 +1390,7 @@ Config.DefaultConfig                                     = {
         Max = 30,
         ConfigType = "Advanced",
     },
-    ['StaggerGroupAACures']    = {
+    ['StaggerGroupAACures']        = {
         DisplayName = "Stagger Group AA Cures",
         Group = "Abilities",
         Header = "Recovery",
@@ -1383,7 +1403,7 @@ Config.DefaultConfig                                     = {
     },
 
     --Recovery/Rezzing
-    ['DoRez']                  = {
+    ['DoRez']                      = {
         DisplayName = "Do Rez",
         Group = "Abilities",
         Header = "Recovery",
@@ -1393,7 +1413,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['DoBattleRez']            = {
+    ['DoBattleRez']                = {
         DisplayName = "Do Battle Rez",
         Group = "Abilities",
         Header = "Recovery",
@@ -1403,7 +1423,7 @@ Config.DefaultConfig                                     = {
         Default = mq.TLO.Me.Class.ShortName():lower() == "clr",
         ConfigType = "Advanced",
     },
-    ['RezOutside']             = {
+    ['RezOutside']                 = {
         DisplayName = "Rez Outside",
         Group = "Abilities",
         Header = "Recovery",
@@ -1413,7 +1433,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['RetryRezDelay']          = {
+    ['RetryRezDelay']              = {
         DisplayName = "Retry Rez Delay",
         Group = "Abilities",
         Header = "Recovery",
@@ -1425,7 +1445,7 @@ Config.DefaultConfig                                     = {
         Max = 60,
         ConfigType = "Advanced",
     },
-    ['RezInZonePC']            = {
+    ['RezInZonePC']                = {
         DisplayName = "Rez In-Zone PCs",
         Group = "Abilities",
         Header = "Recovery",
@@ -1438,7 +1458,7 @@ Config.DefaultConfig                                     = {
         Answer = "Emu servers have various rules, such as no xp loss on death, or not dropping items to your corpse\n" ..
             "Depending in the server, various combinations of rez settings may be required for the best play experience.",
     },
-    ['ConCorpseForRez']        = {
+    ['ConCorpseForRez']            = {
         DisplayName = "Check for Previous Rez",
         Group = "Abilities",
         Header = "Recovery",
@@ -1452,7 +1472,7 @@ Config.DefaultConfig                                     = {
     },
 
     -- Burning
-    ['BurnAuto']               = {
+    ['BurnAuto']                   = {
         DisplayName = "Use Auto Burn",
         Group = "Combat",
         Header = "Burning",
@@ -1462,7 +1482,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Normal",
     },
-    ['BurnAlways']             = {
+    ['BurnAlways']                 = {
         DisplayName = "Auto Burn: Always",
         Group = "Combat",
         Header = "Burning",
@@ -1472,7 +1492,7 @@ Config.DefaultConfig                                     = {
         Default = false,
         ConfigType = "Advanced",
     },
-    ['BurnMobCount']           = {
+    ['BurnMobCount']               = {
         DisplayName = "Auto Burn: Mob Threshold",
         Group = "Combat",
         Header = "Burning",
@@ -1484,7 +1504,7 @@ Config.DefaultConfig                                     = {
         Max = 10,
         ConfigType = "Advanced",
     },
-    ['BurnNamed']              = {
+    ['BurnNamed']                  = {
         DisplayName = "Auto Burn: Named",
         Group = "Combat",
         Header = "Burning",
@@ -1494,7 +1514,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['NamedMinLevel']          = {
+    ['NamedMinLevel']              = {
         DisplayName = "Named Min Level",
         Group = "Combat",
         Header = "Burning",
@@ -1506,7 +1526,7 @@ Config.DefaultConfig                                     = {
         Max = 150,
         ConfigType = "Advanced",
     },
-    ['CheckSMForNamed']        = {
+    ['CheckSMForNamed']            = {
         DisplayName = "Check SM For Named",
         Group = "Combat",
         Header = "Burning",
@@ -1516,7 +1536,7 @@ Config.DefaultConfig                                     = {
         Default = true,
         ConfigType = "Advanced",
     },
-    ['CheckAMForNamed']        = {
+    ['CheckAMForNamed']            = {
         DisplayName = "Check AM For Named",
         Group = "Combat",
         Header = "Burning",
