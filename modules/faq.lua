@@ -218,7 +218,7 @@ function Module:ExportFAQToWiki()
 				for _, data in pairs(info.FAQ) do
 					if data.Question == 'None' then data.Question = data.Settings_Used or 'TODO' end
 					fileContent = fileContent .. "=== " .. (data.Question or 'TODO') .. " ===\n"
-					fileContent = fileContent .. "* Answer:\n  " .. (data.Answer:gsub("\n", " ") or "TODO") .. "\n\n"
+					fileContent = fileContent .. "* Answer:\n  " .. ((data.Answer or "TODO"):gsub("\n", " ") or "TODO") .. "\n\n"
 					fileContent = fileContent .. "* Settings Used:\n  " .. (data.Settings_Used or "None") .. "\n\n"
 				end
 
@@ -267,7 +267,7 @@ function Module:ExportFAQToWiki()
 		for k, v in pairs(configFaq.Config) do
 			if v.Question == 'None' then v.Question = v.Settings_Used or 'TODO' end
 			fileContent = fileContent .. "=== " .. (v.Question or 'TODO') .. " ===\n"
-			fileContent = fileContent .. "* Answer:\n  " .. (v.Answer:gsub("\n", " ") or "TODO") .. "\n\n"
+			fileContent = fileContent .. "* Answer:\n  " .. ((v.Answer or "TODO"):gsub("\n", " ") or "TODO") .. "\n\n"
 			fileContent = fileContent .. "* Settings Used:\n  " .. (v.Settings_Used or "None") .. "\n\n"
 		end
 		local configFileName = mq.configDir .. "/WIKI/Default_Config_FAQ.txt"
@@ -292,7 +292,7 @@ function Module:ExportFAQToWiki()
 				for _, data in pairs(info.FAQ) do
 					if data.Question == 'None' then data.Question = data.Settings_Used or 'TODO' end
 					fileContent = fileContent .. "=== " .. (data.Question or 'TODO') .. " ===\n"
-					fileContent = fileContent .. "* Answer:\n  " .. (data.Answer:gsub("\n", " ") or "TODO") .. "\n\n"
+					fileContent = fileContent .. "* Answer:\n  " .. ((data.Answer or "TODO"):gsub("\n", " ") or "TODO") .. "\n\n"
 					fileContent = fileContent .. "* Settings Used:\n  " .. (data.Settings_Used or "None") .. "\n\n"
 				end
 
