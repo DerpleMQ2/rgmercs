@@ -159,8 +159,8 @@ function Module:Init()
                         Name = spell.RankName(),
                         Type = spell.TargetType(),
                         Level = spell.Level(),
-                        TeleportText = string.format("Teleports %s to %d, %d, %d in %s facing %s %s", spell.TargetType(), spell.Base(1)() or 0, spell.Base(2)() or 0,
-                            spell.Base(3)() or 0, spell.Extra(), Globals.Constants.Headings[heading] or "Unknown", heading),
+                        TeleportText = string.format("Teleports %s to %d, %d, %d in %s facing %s", spell.TargetType(), spell.Base(1)() or 0, spell.Base(2)() or 0,
+                            spell.Base(3)() or 0, spell.Extra(), Globals.Constants.Headings[heading] or "Unknown"),
 
                         SearchFields = string.format("%s,%s,%s,%s", spell.RankName(), spell.TargetType(), subCat, spell.Extra()):lower(),
                     })
@@ -284,8 +284,9 @@ function Module:Render()
                         end
                         ImGui.PopStyleColor(2)
                         Ui.MultilineTooltipWithColors({
-                            { text = string.format("Spell: %s", sv.Name),  color = Globals.Constants.Colors.FAQCmdQuestionColor, },
-                            { text = string.format("Level: %d", sv.Level), color = Globals.Constants.Colors.FAQUsageAnswerColor, },
+                            { text = string.format("Spell: %s", sv.Name),  color = Globals.Constants.Colors.FAQUsageAnswerColor, },
+                            { text = string.format("Level: %d", sv.Level), color = Globals.Constants.Colors.ConditionPassColor, },
+                            { text = "",                                   color = Globals.Constants.Colors.FAQDescColor, },
                             { text = sv.TeleportText,                      color = Globals.Constants.Colors.FAQDescColor, },
                         })
                     end
