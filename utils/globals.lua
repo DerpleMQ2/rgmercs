@@ -171,6 +171,45 @@ Globals.Constants.DefaultColors       = {
     MainDowntimeColor       = Globals.Constants.BasicColors.Green,
 }
 
+Globals.Constants.HeadingsShort       = {
+    "N",
+    "NNE",
+    "NE",
+    "ENE",
+    "E",
+    "ESE",
+    "SE",
+    "SSE",
+    "S",
+    "SSW",
+    "SW",
+    "WSW",
+    "W",
+    "WNW",
+    "NW",
+    "NNW",
+
+}
+
+Globals.Constants.Headings            = {
+    "North",
+    "North-Northeast",
+    "Northeast",
+    "East-Northeast",
+    "East",
+    "East-Southeast",
+    "Southeast",
+    "South-Southeast",
+    "South",
+    "South-Southwest",
+    "Southwest",
+    "West-Southwest",
+    "West",
+    "West-Northwest",
+    "Northwest",
+    "North-Northwest",
+}
+
 Globals.Constants.Colors              = {}
 
 Globals.Constants.ConColors           = {

@@ -153,10 +153,15 @@ function Module:Init()
                     spell.TargetType())
                 local subCat = spell.Subcategory()
                 self.TransportSpells[Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[Globals.CurLoadedChar].Tabs[subCat] or {}
+                local heading = math.floor(((((512 - spell.Base(4)()) % 512) / 32) + 1))
                 table.insert(self.TransportSpells[Globals.CurLoadedChar].Tabs[subCat],
                     {
                         Name = spell.RankName(),
                         Type = spell.TargetType(),
+                        Level = spell.Level(),
+                        TeleportText = string.format("Teleports %s to %d, %d, %d in %s facing %s %s", spell.TargetType(), spell.Base(1)() or 0, spell.Base(2)() or 0,
+                            spell.Base(3)() or 0, spell.Extra(), Globals.Constants.Headings[heading] or "Unknown", heading),
+
                         SearchFields = string.format("%s,%s,%s,%s", spell.RankName(), spell.TargetType(), subCat, spell.Extra()):lower(),
                     })
             end
@@ -278,7 +283,11 @@ function Module:Render()
                             Core.DoCmd(cmd)
                         end
                         ImGui.PopStyleColor(2)
-                        Ui.Tooltip(sv.Name)
+                        Ui.MultilineTooltipWithColors({
+                            { text = string.format("Spell: %s", sv.Name),  color = Globals.Constants.Colors.FAQCmdQuestionColor, },
+                            { text = string.format("Level: %d", sv.Level), color = Globals.Constants.Colors.FAQUsageAnswerColor, },
+                            { text = sv.TeleportText,                      color = Globals.Constants.Colors.FAQDescColor, },
+                        })
                     end
                     ImGui.EndTable()
                     ImGui.EndTabItem()
