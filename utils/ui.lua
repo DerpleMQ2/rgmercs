@@ -330,14 +330,15 @@ function Ui.HandleStatusClickAction(peer, action)
     local name, _ = Comms.GetCharAndServerFromPeer(peer)
     if name then
         local peerSpawn = mq.TLO.Spawn("=" .. name)
-        if peerSpawn.ID() > 0 then
-            if action == 1 then
+
+        if action == 1 then
+            if peerSpawn.ID() > 0 then
                 peerSpawn.DoTarget()
-            elseif action == 2 then
-                Comms.SendPeerDoCmd(peer, "/foreground")
-            elseif action == 3 then
-                -- nothing
             end
+        elseif action == 2 then
+            Comms.SendPeerDoCmd(peer, "/foreground")
+        elseif action == 3 then
+            -- nothing
         end
     end
 end
@@ -378,18 +379,18 @@ function Ui.RenderMercsStatus(showPopout)
                     ImGui.SmallButton(displayName)
                     if name then
                         if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
-                            local peerSpawn = mq.TLO.Spawn("=" .. name)
-                            if peerSpawn.ID() > 0 then
-                                if (mq.TLO.Cursor.ID() or 0) > 0 and Config:GetSetting('StatusLeftClickCursorClickAction') == 1 then
+                            if (mq.TLO.Cursor.ID() or 0) > 0 and Config:GetSetting('StatusLeftClickCursorClickAction') == 1 then
+                                local peerSpawn = mq.TLO.Spawn("=" .. name)
+                                if peerSpawn.ID() > 0 then
                                     if peerSpawn.Distance() <= 15 then
                                         peerSpawn.DoTarget()
                                         Core.DoCmd("/timed 1 /click left target")
                                         Core.DoCmd('/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
                                         Comms.SendPeerDoCmd(peer, '/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
                                     end
-                                else
-                                    Ui.HandleStatusClickAction(peer, Config:GetSetting('StatusLeftClickAction'))
                                 end
+                            else
+                                Ui.HandleStatusClickAction(peer, Config:GetSetting('StatusLeftClickAction'))
                             end
                         elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
                             Ui.HandleStatusClickAction(peer, Config:GetSetting('StatusRightClickAction'))
