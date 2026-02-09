@@ -62,6 +62,7 @@ Module.TempSettings.NeedCuresList            = {}
 Module.TempSettings.NeedCuresListMutex       = false
 Module.TempSettings.CureChecksStale          = false
 Module.TempSettings.ImmuneTargets            = {}
+Module.TempSettings.RotationClickies         = Set.new({})
 
 Module.FAQ                                   = {
     {
@@ -1475,6 +1476,7 @@ function Module:GiveTime()
                 Core.SafeCallFunc("GetCureSpells", self.ClassConfig.Cures.GetCureSpells, self)
             end
         end
+        self:SetRotationClickies()
         self.TempSettings.NewCombatMode = false
         self.TempSettings.CombatModeSet = true
 
@@ -1803,6 +1805,43 @@ function Module:TargetIsImmune(effect, targetId)
         return effectSet:contains(targetId)
     end
     return false
+end
+
+function Module:SetRotationClickies()
+    -- clear list for loadout rescan
+    self.TempSettings.RotationClickies = Set.new({})
+
+    -- Check rotations for clickies, either by checking items that were resolved from the maps, or checking strings for item entries without a map
+    for _, rotation in pairs(self.TempSettings.RotationTable) do
+        for _, entry in ipairs(rotation) do
+            if entry.type:lower() == "item" then
+                local resolvedMap = self.ResolvedActionMap[entry.name]
+                if resolvedMap and mq.TLO.FindItem(string.format("=%s", resolvedMap))() then
+                    self.TempSettings.RotationClickies:add(resolvedMap)
+                elseif type(entry.name) == "string" and mq.TLO.FindItem(string.format("=%s", entry.name))() then
+                    self.TempSettings.RotationClickies:add(entry.name)
+                end
+            end
+        end
+    end
+
+    -- do it again for heal rotation
+    for _, rotation in pairs(self.TempSettings.HealRotationTable or {}) do
+        for _, entry in ipairs(rotation) do
+            if entry.type:lower() == "item" then
+                local resolvedMap = self.ResolvedActionMap[entry.name]
+                if resolvedMap and mq.TLO.FindItem(string.format("=%s", resolvedMap))() then
+                    self.TempSettings.RotationClickies:add(resolvedMap)
+                elseif type(entry.name) == "string" and mq.TLO.FindItem(string.format("=%s", entry.Name))() then
+                    self.TempSettings.RotationClickies:add(entry.name)
+                end
+            end
+        end
+    end
+end
+
+function Module:GetRotationClickies()
+    return self.TempSettings.RotationClickies or Set.new({})
 end
 
 function Module:Shutdown()
