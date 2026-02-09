@@ -13,6 +13,7 @@ local Targeting                         = require("utils.targeting")
 local Files                             = require("utils.files")
 local Tables                            = require("utils.tables")
 local Set                               = require("mq.Set")
+local Modules                           = require("utils.modules")
 local Icons                             = require('mq.ICONS')
 local animItems                         = mq.FindTextureAnimation("A_DragItem")
 
@@ -984,6 +985,22 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
     else
         ImGui.SameLine()
         ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
+    end
+
+    if clickies[clickyIdx] then
+        local rotationClickies = Modules:ExecModule("Class", "GetRotationClickies")
+        local hasWarning = rotationClickies:contains(clickies[clickyIdx].itemName)
+        if hasWarning then
+            ImGui.SameLine()
+            ImGui.TextColored(Globals.Constants.Colors.ConditionFailColor, Icons.MD_WARNING)
+            if not preRender then
+                Ui.MultilineTooltipWithColors({
+                    { text = "! WARNING !",                                                                                color = Globals.Constants.Colors.ConditionFailColor, },
+                    { text = "",                                                                                           color = Globals.Constants.Colors.ConditionFailColor, },
+                    { text = "This clicky is in use in your current class config rotation. Check for possible conflicts!", color = Globals.Constants.Colors.FAQCmdQuestionColor, },
+                })
+            end
+        end
     end
 
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - offset_trash, headerCursorPos.y + yOffset)
