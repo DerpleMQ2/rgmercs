@@ -614,14 +614,14 @@ function Module:IsValidMezTarget(mobId)
 
     if Targeting.IsTempPet(spawn) then
         Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d as it is a temp PC pet.",
-            spawn.ID(), spawn.CleanName(), spawn.Level())
+            spawn.ID(), spawn.CleanName(), spawn.Level() or 0)
         return false
     end
 
     -- Is the mob ID in our mez immune list? If so, skip.
     if self:IsMezImmune(mobId) then
         Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d as it is in our immune list.",
-            spawn.ID(), spawn.CleanName(), spawn.Level())
+            spawn.ID(), spawn.CleanName(), spawn.Level() or 0)
         return false
     end
     -- Here's where we can add a necro check to see if the spawn is undead or not. If it's not
@@ -637,19 +637,19 @@ function Module:IsValidMezTarget(mobId)
 
     if spawn and not spawn.LineOfSight() then
         Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - No LOS.", spawn.ID(),
-            spawn.CleanName(), spawn.Level())
+            spawn.CleanName(), spawn.Level() or 0)
         return false
     end
 
     if (spawn.PctHPs() or 0) < Config:GetSetting('MezStopHPs') then
         Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID(),
-            spawn.CleanName(), spawn.Level())
+            spawn.CleanName(), spawn.Level() or 0)
         return false
     end
 
     if (spawn.Distance() or 999) > Config:GetSetting('MezRadius') then
         Logger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - Out of Mez Radius",
-            spawn.ID(), spawn.CleanName(), spawn.Level())
+            spawn.ID(), spawn.CleanName(), spawn.Level() or 0)
         return false
     end
 

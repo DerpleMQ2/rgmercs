@@ -1189,7 +1189,8 @@ function Ui.RenderForceTargetList(showPopout)
                         draw_list:AddRectFilled(
                             min,
                             max,
-                            IM_COL32(r * 255, g * 255, b * 255, a * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or 40))
+                            IM_COL32(r * 255, g * 255, b * 255, a * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or (255 * Config:GetSetting('FTHPOverlayAlpha') / 100)))
+
                         )
                         draw_list:PopClipRect()
                     end
