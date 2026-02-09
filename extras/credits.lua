@@ -16,5 +16,6 @@ return {
         "mackal",
         "guest01",
         "Fargrim",
+        "gennro",
     },
 }
