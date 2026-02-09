@@ -497,7 +497,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Targeting.GroupedWithTarget(target) then return false end
-                    return Targeting.TargetIsMA(target)
+                    return Targeting.TargetIsATank(target)
                 end,
             },
             {
@@ -516,7 +516,7 @@ local _ClassConfig = {
                 type = "Item",
                 cond = function(self, itemName, target)
                     if not Targeting.GroupedWithTarget(target) then return false end
-                    return Targeting.TargetIsMA(target)
+                    return Targeting.TargetIsATank(target)
                 end,
             },
             {
@@ -538,14 +538,14 @@ local _ClassConfig = {
                 name = "Focused Celestial Regeneration",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.TargetIsMA(target)
+                    return Targeting.TargetIsATank(target)
                 end,
             },
             {
                 name = "Blessing of Sanctuary",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return target.ID() == (mq.TLO.Target.AggroHolder.ID() and not Targeting.TargetIsMA(target))
+                    return target.ID() == (mq.TLO.Target.AggroHolder.ID() and not Targeting.TargetIsATank(target))
                 end,
             },
             { --The stuff above is down, lets make mainhealpoint faster.
@@ -585,7 +585,7 @@ local _ClassConfig = {
                 name = "CompleteHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting("DoCompleteHeal") or not Targeting.TargetIsMA(target) then return false end
+                    if not Config:GetSetting("DoCompleteHeal") or not Targeting.TargetIsATank(target) then return false end
                     return (target.PctHPs() or 999) <= Config:GetSetting('CompleteHealPct')
                 end,
             },
@@ -593,7 +593,7 @@ local _ClassConfig = {
                 name = "HealingLight",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return not (Config:GetSetting("DoCompleteHeal") and Targeting.TargetIsMA(target))
+                    return not (Config:GetSetting("DoCompleteHeal") and Targeting.TargetIsATank(target))
                 end,
             },
         },
@@ -897,7 +897,7 @@ local _ClassConfig = {
                 name = "Divine Guardian",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not Targeting.TargetIsMA(target) then return false end
+                    if not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
@@ -947,7 +947,7 @@ local _ClassConfig = {
                 name = "SingleVieBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoVieBuff') or self:GetResolvedActionMapItem('GroupVieBuff') or not Targeting.TargetIsMA(target) then return false end
+                    if not Config:GetSetting('DoVieBuff') or self:GetResolvedActionMapItem('GroupVieBuff') or not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -955,7 +955,7 @@ local _ClassConfig = {
                 name = "DivineBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDivineBuff') or not Targeting.TargetIsMA(target) then return false end
+                    if not Config:GetSetting('DoDivineBuff') or not Targeting.TargetIsATank(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },

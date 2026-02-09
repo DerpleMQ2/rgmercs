@@ -616,7 +616,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoHateBuff') end,
                 cond = function(self, spell, target)
-                    if not Targeting.TargetIsMA(target) then return false end
+                    if not Targeting.TargetIsATank(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
