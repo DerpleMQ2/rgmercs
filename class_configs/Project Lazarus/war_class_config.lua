@@ -61,7 +61,7 @@ local _ClassConfig = {
             "Mock",
         },
         ['EndRegen'] = {
-            "Third Wind", -- also does HP
+            "Third Wind Discipline", -- also does HP
             "Second Wind",
         },
         ['AuraBuff'] = {

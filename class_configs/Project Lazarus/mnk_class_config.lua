@@ -25,7 +25,7 @@ local _ClassConfig = {
     },
     ['AbilitySets']     = {
         ['EndRegen'] = {
-            "Third Wind",
+            "Third Wind Discipline",
             --"Second Wind",
         },
         ['MonkAura'] = {
@@ -60,6 +60,9 @@ local _ClassConfig = {
             "Crystalpalm Discipline",
             "Hundred Fists Discipline",
             "Innerflame Discipline",
+        },
+        ['Voiddance'] = {
+            "Voiddance Discipline",
         },
         -- ['ResistantDisc'] = {
         --     "Dreamwalk Discipline",
@@ -177,10 +180,17 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Voiddance",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return mq.TLO.Me.PctHPs() < 35
+                end,
+            },
+            {
                 name = "MeleeMit",
                 type = "Disc",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() < 35
+                cond = function(self, discSpell)
+                    return mq.TLO.Me.PctHPs() < 35 and not mq.TLO.Me.Buff("Voiddance Effect")()
                 end,
             },
             {
@@ -188,7 +198,7 @@ local _ClassConfig = {
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() < 35
+                    return mq.TLO.Me.PctHPs() < 35 and not mq.TLO.Me.Buff("Voiddance Effect")()
                 end,
             },
             {
