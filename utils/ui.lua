@@ -510,6 +510,10 @@ function Ui.RenderMercsStatus(showPopout)
                     { text = string.format("%0.2f%%", data.Data.PctExp) or "0%", color = Colors.LightYellow, sameLine = true, },
                     { text = "Unspent AA:",                                      color = Colors.White, },
                     { text = data.Data.UnSpentAA or "None",                      color = Colors.Orange,      sameLine = true, },
+                    { text = "Stringspent AA:",                                  color = Colors.White, },
+                    { text = data.Data.SpentAA or "None",                        color = Colors.Orange,      sameLine = true, },
+                    { text = "Total AA:",                                        color = Colors.White, },
+                    { text = data.Data.TotalAA or "None",                        color = Colors.Orange,      sameLine = true, },
                 })
             end,
 
@@ -539,6 +543,32 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 ImGui.Text(string.format("%d", data.Data.UnSpentAA or 0))
+            end,
+        },
+        {
+            name = 'Spent AA',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 40.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.SpentAA or 0, data_b.Data.SpentAA or 0
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%d", data.Data.SpentAA or 0))
+            end,
+        },
+        {
+            name = 'Total AA',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 40.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.TotalAA or 0, data_b.Data.TotalAA or 0
+            end,
+            render = function(peer, data)
+                ImGui.Text(string.format("%d", data.Data.TotalAA or 0))
             end,
         },
         {
@@ -1189,7 +1219,8 @@ function Ui.RenderForceTargetList(showPopout)
                         draw_list:AddRectFilled(
                             min,
                             max,
-                            IM_COL32(r * 255, g * 255, b * 255, a * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or (255 * Config:GetSetting('FTHPOverlayAlpha') / 100)))
+                            IM_COL32(r * 255, g * 255, b * 255,
+                                a * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or (255 * Config:GetSetting('FTHPOverlayAlpha') / 100)))
 
                         )
                         draw_list:PopClipRect()
