@@ -993,7 +993,13 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
         if hasWarning then
             ImGui.SameLine()
             ImGui.TextColored(Globals.Constants.Colors.ConditionFailColor, Icons.MD_WARNING)
-            Ui.Tooltip("This clicky is in use in your current class config loadout. Check for possible conflicts!")
+            if not preRender then
+                Ui.MultilineTooltipWithColors({
+                    { text = "! WARNING !",                                                                                color = Globals.Constants.Colors.ConditionFailColor, },
+                    { text = "",                                                                                           color = Globals.Constants.Colors.ConditionFailColor, },
+                    { text = "This clicky is in use in your current class config rotation. Check for possible conflicts!", color = Globals.Constants.Colors.FAQCmdQuestionColor, },
+                })
+            end
         end
     end
 
