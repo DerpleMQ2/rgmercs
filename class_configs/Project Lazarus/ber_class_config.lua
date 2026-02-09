@@ -23,7 +23,7 @@ return {
     },
     ['AbilitySets']     = {
         ['EndRegen'] = {
-            "Third Wind",
+            "Third Wind Discipline",
             --"Second Wind",
         },
         ['BerAura'] = {
@@ -77,6 +77,9 @@ return {
         },
         ['DmgModProc'] = {
             "Unpredictable Rage Discipline",
+        },
+        ['BattleFocus'] = {
+            "Battle Focus Discipline",
         },
     },
     ['RotationOrder']   = {
@@ -174,11 +177,18 @@ return {
         },
         ['Emergency'] = {
             {
+                name = "BattleFocus",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return mq.TLO.Me.PctHPs() < 35
+                end,
+            },
+            {
                 name = "Armor of Experience",
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() < 35
+                    return mq.TLO.Me.PctHPs() < 35 and not mq.TLO.Me.Buff("Battle Focus Effect")()
                 end,
             },
             {

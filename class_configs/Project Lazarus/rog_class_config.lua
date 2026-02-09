@@ -59,7 +59,7 @@ return {
             "Pinpoint Vulnerability", -- Level 69 on Laz
         },
         ['EndRegen'] = {
-            "Third Wind",
+            "Third Wind Discipline",
             --"Second Wind",
         },
         ["CADisc"] = {
@@ -71,6 +71,10 @@ return {
         ['Precision'] = {
             "Deadly Precision Discipline",
         },
+        ['Nimble'] = {
+            "Nimble Discipline",
+        },
+
     },
     ['RotationOrder']   = {
         {
@@ -272,11 +276,18 @@ return {
         },
         ['Emergency'] = {
             {
+                name = "Nimble",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return mq.TLO.Me.PctHPs() < 35
+                end,
+            },
+            {
                 name = "Armor of Experience",
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() < 35
+                    return mq.TLO.Me.PctHPs() < 35 and not mq.TLO.Me.Buff("Nimble Effect")()
                 end,
             },
             {
