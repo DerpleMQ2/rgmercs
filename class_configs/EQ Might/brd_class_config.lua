@@ -205,6 +205,7 @@ local _ClassConfig = {
             "Lullaby of Morell",
             "Dreams of Terris",
             "Dreams of Thule",
+            "Ancient: Lullaby of Shadow",
             "Dreams of Ayonae",
             "Song of Twilight",
             "Sionachie's Dreams",
