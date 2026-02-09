@@ -59,7 +59,6 @@ _ClassConfig      = {
         ['SwarmPet'] = {
             "Raging Servant",
             "Restrained Raging Servant",
-            "Rage of Zomm",
         },
         -- ['ChaoticNuke'] = {
         --     -- Chaotic Nuke with Beneficial Effect >= LVL69
@@ -83,6 +82,7 @@ _ClassConfig      = {
             "Bolt of Jerikor",
             "Ancient: Chaos Vortex",
             "Firebolt of Tallon",
+            "Ancient: Shock of Sun",
             "Seeking Flame of Seukor",
         },
         ['MagicDD'] = { -- Magic does not have any faster casts like Fire, we have only these.
@@ -164,6 +164,7 @@ _ClassConfig      = {
             "Burnout VI",
             "Elemental Fury",
             "Burnout V",
+            "Ancient: Burnout Blaze",
             "Burnout IV",
             "Elemental Empathy",
             "Burnout III",
