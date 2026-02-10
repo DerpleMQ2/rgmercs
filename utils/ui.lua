@@ -371,7 +371,6 @@ function Ui.RenderAAOverlay()
                     Ui.RenderHyperText(string.format("%d - %s (%s)", i, aaName, costNum == 999 and "Maxed" or cost), color, highlightColor, function()
                         aaSelection.Select(i)
                     end)
-                    --                    ImGui.TextColored(color, "%d - %s (%s)", i, aaName, costNum == 999 and "Maxed" or cost)
                 end
             end
 
