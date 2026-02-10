@@ -1721,6 +1721,15 @@ Config.DefaultConfig                                     = {
         Tooltip = "Popout windows will lock/unlock when the main window is locked/unlocked.",
         Default = true,
     },
+    ['EnableAAOverlay']                  = {
+        DisplayName = "Enable AA Overlay",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 19,
+        Tooltip = "Show an overlay on the AA window that tells you which AAs are used by RGMercs rotations.",
+        Default = true,
+    },
 
     -- [ UI Colors ] --
     ['MainButtonUnpausedColor']          = {

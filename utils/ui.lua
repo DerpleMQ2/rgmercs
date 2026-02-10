@@ -326,6 +326,62 @@ function Ui.RenderConfigSelector()
     end
 end
 
+function Ui.RenderAAOverlay()
+    if not Config:GetSetting('EnableAAOverlay') then return end
+
+    local aaWnd = mq.TLO.Window("AAwindow")
+    if aaWnd.Open() then
+        -- get the aa list
+        local aaSubWindows = aaWnd.Child("AAW_SubWindows")
+        local selectedTab = aaSubWindows.CurrentTab
+        local tabText = selectedTab.Text()
+        local aaSelection = selectedTab.FirstChild
+        local aaList = selectedTab.FirstChild.List
+        local aaCount = selectedTab.FirstChild.Items()
+
+        ImGui.SetNextWindowPos(aaWnd.X() + aaWnd.Width(), aaWnd.Y())
+
+        ImGui.SetNextWindowSize(300, aaWnd.Height())
+
+        local _, shouldDrawGUI = ImGui.Begin('MercsAAOverlay', true, bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoCollapse))
+
+        if shouldDrawGUI then
+            ImGui.BeginChild("##aa_list_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.None), bit32.bor(ImGuiWindowFlags.HorizontalScrollbar))
+
+            ImGui.Text("%s AAs Used by RGMercs:", tabText)
+            ImGui.Separator()
+            for i = 1, aaCount do
+                local aaName = aaList(i)()
+                local cost = aaList(i, 3)()
+                local costNum = tonumber(cost) or 999
+
+                if Core.AAUsedInRotation(aaName) then
+                    local color = Globals.Constants.Colors.ConditionPassColor
+
+                    if costNum == 999 then
+                        color = Globals.Constants.Colors.ConditionPassColor
+                    elseif costNum > mq.TLO.Me.AAPoints() then
+                        color = Globals.Constants.Colors.ConditionFailColor
+                    else
+                        color = Globals.Constants.Colors.ConditionMidColor
+                    end
+
+                    local highlightColor = Globals.Constants.Colors.LightBlue
+
+                    Ui.RenderHyperText(string.format("%d - %s (%s)", i, aaName, costNum == 999 and "Maxed" or cost), color, highlightColor, function()
+                        aaSelection.Select(i)
+                    end)
+                    --                    ImGui.TextColored(color, "%d - %s (%s)", i, aaName, costNum == 999 and "Maxed" or cost)
+                end
+            end
+
+            ImGui.EndChild()
+        end
+
+        ImGui.End()
+    end
+end
+
 function Ui.HandleStatusClickAction(peer, action)
     local name, _ = Comms.GetCharAndServerFromPeer(peer)
     if name then

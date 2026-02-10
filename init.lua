@@ -187,13 +187,14 @@ local function RGMercsGUI()
                 ImGui.PopStyleColor()
             end
 
+            Ui.RenderAAOverlay()
+
             if Config:GetSetting('EnableOptionsUI') then
                 local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, true)
                 if not openOptionsUI then
                     Config:SetSetting('EnableOptionsUI', false)
                 end
             end
-
 
             ImGui.PopStyleVar(3)
 

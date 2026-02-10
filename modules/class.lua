@@ -63,6 +63,7 @@ Module.TempSettings.NeedCuresListMutex       = false
 Module.TempSettings.CureChecksStale          = false
 Module.TempSettings.ImmuneTargets            = {}
 Module.TempSettings.RotationClickies         = Set.new({})
+Module.TempSettings.RotationAAs              = Set.new({})
 
 Module.FAQ                                   = {
     {
@@ -1477,6 +1478,7 @@ function Module:GiveTime()
             end
         end
         self:SetRotationClickies()
+        self:SetRotationAAs()
         self.TempSettings.NewCombatMode = false
         self.TempSettings.CombatModeSet = true
 
@@ -1840,8 +1842,34 @@ function Module:SetRotationClickies()
     end
 end
 
+function Module:SetRotationAAs()
+    self.TempSettings.RotationAAs = Set.new({})
+
+    -- Check rotations for clickies, either by checking items that were resolved from the maps, or checking strings for item entries without a map
+    for _, rotation in pairs(self.TempSettings.RotationTable) do
+        for _, entry in ipairs(rotation) do
+            if entry.type:lower() == "aa" then
+                self.TempSettings.RotationAAs:add(entry.name)
+            end
+        end
+    end
+
+    -- do it again for heal rotation
+    for _, rotation in pairs(self.TempSettings.HealRotationTable or {}) do
+        for _, entry in ipairs(rotation) do
+            if entry.type:lower() == "aa" then
+                self.TempSettings.RotationAAs:add(entry.name)
+            end
+        end
+    end
+end
+
 function Module:GetRotationClickies()
     return self.TempSettings.RotationClickies or Set.new({})
+end
+
+function Module:GetRotationAAs()
+    return self.TempSettings.RotationAAs or Set.new({})
 end
 
 function Module:Shutdown()

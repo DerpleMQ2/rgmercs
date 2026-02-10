@@ -5,6 +5,7 @@ local Comms   = require("utils.comms")
 local Modules = require("utils.modules")
 local DanNet  = require('lib.dannet.helpers')
 local Logger  = require("utils.logger")
+local Strings = require("utils.strings")
 local LuaFS   = require('lfs')
 
 local Core    = { _version = '1.0', _name = "Core", _author = 'Derple', }
@@ -245,6 +246,11 @@ function Core.GetMainAssistPctHPs()
     if ret and type(ret) == 'number' then return ret end
 
     return mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist)).PctHPs() or 100
+end
+
+function Core.AAUsedInRotation(aaName)
+    local rotationAAs = Modules:ExecModule("Class", "GetRotationAAs")
+    return rotationAAs:contains(aaName)
 end
 
 --- Checks if a given mode is active.
