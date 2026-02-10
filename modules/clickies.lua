@@ -33,6 +33,75 @@ Module.FAQ                              = {
 Module.SaveRequested                    = nil
 Module.ClickyRotationIndex              = 1
 
+Module.CommandHandlers                  = {
+    enableclicky = {
+        usage = "/rgl enableclicky <clicky name|idx>",
+        about = "Enables the clicky item with the specified name or index.",
+        handler =
+            function(self, clickyName)
+                local clickies = Config:GetSetting('Clickies')
+                local clickyFound = false
+
+                local index = tonumber(clickyName)
+
+                if index and (index < 1 or index > #clickies) then
+                    Logger.log_error("Invalid clicky index: %d. Valid range is 1 to %d.", index, #clickies)
+                    return true
+                end
+
+                if index then
+                    clickies[index].enabled = true
+                    clickyFound = true
+                else
+                    for clickyIdx, clicky in ipairs(clickies) do
+                        if (index and clickyIdx == index) or clicky.itemName:lower() == clickyName:lower() then
+                            clickyFound = true
+                            clicky.enabled = true
+                            -- dont break because there might be more than 1
+                        end
+                    end
+                end
+                if clickyFound then
+                    Config:SetSetting('Clickies', clickies)
+                end
+                return true
+            end,
+    },
+    disableclicky = {
+        usage = "/rgl disableclicky <clicky name|idx>",
+        about = "Disables the clicky item with the specified name or index.",
+        handler =
+            function(self, clickyName)
+                local clickies = Config:GetSetting('Clickies')
+                local clickyFound = false
+
+                local index = tonumber(clickyName)
+
+                if index and (index < 1 or index > #clickies) then
+                    Logger.log_error("Invalid clicky index: %d. Valid range is 1 to %d.", index, #clickies)
+                    return true
+                end
+
+                if index then
+                    clickies[index].enabled = false
+                    clickyFound = true
+                else
+                    for clickyIdx, clicky in ipairs(clickies) do
+                        if (index and clickyIdx == index) or clicky.itemName:lower() == clickyName:lower() then
+                            clickyFound = true
+                            clicky.enabled = false
+                            -- dont break because there might be more than 1
+                        end
+                    end
+                end
+                if clickyFound then
+                    Config:SetSetting('Clickies', clickies)
+                end
+                return true
+            end,
+    },
+}
+
 Module.TempSettings                     = {}
 Module.TempSettings.ClickyState         = {}
 Module.TempSettings.CombatClickiesTimer = 0
@@ -1699,10 +1768,19 @@ end
 ---@param ... string
 ---@return boolean
 function Module:HandleBind(cmd, ...)
-    local params = ...
-    local handled = false
     -- /rglua cmd handler
-    return handled
+    if self.CommandHandlers and self.CommandHandlers[cmd] then
+        return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), self.CommandHandlers[cmd].handler, self, ...)
+    end
+
+    -- try to process as a substring
+    for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
+        if Strings.StartsWith(bindCmd, cmd) then
+            return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), bindData.handler, self, ...)
+        end
+    end
+
+    return false
 end
 
 function Module:Shutdown()
