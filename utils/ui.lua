@@ -342,7 +342,7 @@ function Ui.RenderAAOverlay()
         if aaSubWindows() == "TRUE" and selectedTab() == "TRUE" and aaSelection() == "TRUE" then
             ImGui.SetNextWindowPos(aaWnd.X() + aaWnd.Width(), aaWnd.Y())
 
-            ImGui.SetNextWindowSize(350, aaWnd.Height())
+            ImGui.SetNextWindowSize(450, aaWnd.Height())
 
             local _, shouldDrawGUI = ImGui.Begin('MercsAAOverlay', true, bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoCollapse))
 
@@ -352,30 +352,176 @@ function Ui.RenderAAOverlay()
                 ImGui.Text("%s AAs Used by RGMercs:", tabText)
 
                 ImGui.Separator()
-                for i = 1, aaCount do
-                    local aaName = aaList(i)()
-                    local cost = aaList(i, 3)()
-                    local costNum = tonumber(cost) or 999
 
-                    if Core.AAUsedInRotation(aaName) then
-                        local color = Globals.Constants.Colors.ConditionPassColor
+                local tableColumns = {
+                    {
+                        name = '#',
+                        flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultSort),
+                        width = 20.0,
+                        sort = function(a, b)
+                            return a.TableIndex, b.TableIndex
+                        end,
+                        render = function(entry)
+                            ImGui.Text(entry.TableIndex)
+                        end,
+                    },
+                    {
+                        name = 'Inspect',
+                        flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoSort),
+                        width = 15,
+                        sort = function(a, b)
+                            return 0, 0
+                        end,
+                        render = function(entry)
+                            if entry.AA.Spell.Name() then
+                                Ui.DrawInspectableSpellIcon(entry.AA.Spell.SpellIcon() or 0, entry.AA.Spell)
+                            else
+                                ImGui.Text(" " .. Icons.MD_DO_NOT_DISTURB)
+                            end
+                        end,
+                    },
+                    {
+                        name = 'Name',
+                        flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
+                        width = 100.0,
+                        sort = function(a, b)
+                            return a.Name or "", b.Name or ""
+                        end,
+                        render = function(entry)
+                            -- can buy it
+                            local color = Globals.Constants.Colors.ConditionPassColor
 
-                        if costNum == 999 then
-                            color = Globals.Constants.Colors.ConditionPassColor
-                        elseif costNum > mq.TLO.Me.AAPoints() then
-                            color = Globals.Constants.Colors.ConditionFailColor
-                        else
-                            color = Globals.Constants.Colors.ConditionMidColor
+                            -- cant buy
+                            if not entry.AA.CanTrain() then
+                                -- options:
+                                -- 1. not high enough level = we have the points but still cannot buy it => Red
+                                -- 2. not enough points => yellow
+                                -- 3. no more ranks => Green
+                                -- Note: This isn't perfect apparently MQ has no way for us to acutally calcualate the next AA Spells min level.
+
+                                if entry.CostNum <= mq.TLO.Me.AAPoints() then    -- too low level?
+                                    color = Globals.Constants.Colors.ConditionFailColor
+                                elseif entry.CostNum > mq.TLO.Me.AAPoints() then -- more ranks?
+                                    color = Globals.Constants.Colors.ConditionMidColor
+                                else
+                                    color = Globals.Constants.Colors.ConditionPassColor
+                                end
+                            end
+
+                            local highlightColor = Globals.Constants.Colors.LightBlue
+
+                            Ui.RenderHyperText(
+                                entry.AA.Spell.RankName.Name() or entry.Name,
+                                color,
+                                highlightColor, function()
+                                    aaSelection.Select(entry.TableIndex)
+                                end)
+                        end,
+                    },
+                    {
+                        name = 'Cost',
+                        flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch),
+                        width = 40.0,
+                        sort = function(a, b)
+                            return a.CostNum, b.CostNum
+                        end,
+                        render = function(entry)
+                            local color = Globals.Constants.Colors.ConditionPassColor
+
+                            if entry.CostNum == 999 then
+                                color = Globals.Constants.Colors.ConditionPassColor
+                            elseif entry.CostNum > mq.TLO.Me.AAPoints() then
+                                color = Globals.Constants.Colors.ConditionFailColor
+                            else
+                                color = Globals.Constants.Colors.ConditionPassColor
+                            end
+
+                            ImGui.TextColored(color, entry.CostNum == 999 and Icons.MD_CHECK or entry.Cost)
+                        end,
+                    },
+                    {
+                        name = 'Index',
+                        flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
+                        width = 20.0,
+                        sort = function(a, b)
+                            return a.AA.Index() or 0, b.AA.Index() or 0
+                        end,
+                        render = function(entry)
+                            ImGui.Text(tostring(entry.AA.Index() or 0))
+                        end,
+                    },
+                    {
+                        name = 'ID',
+                        flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed),
+                        width = 40.0,
+                        sort = function(a, b)
+                            return a.AA.ID() or 0, b.AA.ID() or 0
+                        end,
+                        render = function(entry)
+                            ImGui.Text(tostring(entry.AA.ID() or 0))
+                        end,
+                    },
+                }
+                Ui.RenderTableData("AAOverylayTable", tableColumns,
+                    bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg, ImGuiTableFlags.Sortable, ImGuiTableFlags.Hideable,
+                        ImGuiTableFlags.Reorderable),
+                    function(sort_specs)
+                        if aaCount > 0 then
+                            Ui.TempSettings.LastCombatModeChangeTime = Ui.TempSettings.LastCombatModeChangeTime or 0
+                            Ui.TempSettings.SortedAAOverlayTab = Ui.TempSettings.SortedAAOverlayTab or aaSubWindows.CurrentTabIndex()
+                            local tabChanged = Ui.TempSettings.SortedAAOverlayTab ~= aaSubWindows.CurrentTabIndex()
+                            local combatModeChange = Ui.TempSettings.LastCombatModeChangeTime < Core.GetLastCombatModeChangeTime()
+
+                            Ui.TempSettings.SortedAAOverlay = Ui.TempSettings.SortedAAOverlay or {}
+
+                            if Ui.TempSettings.SortedAAOverlayCount ~= aaCount or combatModeChange or tabChanged then
+                                Ui.TempSettings.SortedAAOverlay = {}
+                                for i = 1, aaCount do
+                                    local aaName = aaList(i)()
+                                    local cost = aaList(i, 3)()
+                                    local costNum = tonumber(cost) or 999
+                                    local aa = mq.TLO.Me.AltAbility(aaName).Spell() and mq.TLO.Me.AltAbility(aaName) or mq.TLO.AltAbility(aaName)
+
+                                    if Core.AAUsedInRotation(aaName) then
+                                        table.insert(Ui.TempSettings.SortedAAOverlay, { Name = aaName, TableIndex = i, Cost = cost, CostNum = costNum, AA = aa, })
+                                    end
+
+                                    if sort_specs then
+                                        sort_specs.SpecsDirty = true
+                                    end
+                                end
+
+                                Ui.TempSettings.LastCombatModeChangeTime = Core.GetLastCombatModeChangeTime()
+                                Ui.TempSettings.SortedAAOverlayTab       = aaSubWindows.CurrentTabIndex()
+                            end
+
+                            if sort_specs and sort_specs.SpecsDirty then
+                                table.sort(Ui.TempSettings.SortedAAOverlay, function(a, b)
+                                    local spec = sort_specs:Specs(1) -- single-column sort
+
+                                    local av, bv = tableColumns[spec.ColumnIndex + 1].sort(a, b)
+
+                                    if spec.SortDirection == ImGuiSortDirection.Ascending then
+                                        return (av or 0) < (bv or 0)
+                                    else
+                                        return (av or 0) > (bv or 0)
+                                    end
+                                end)
+
+                                sort_specs.SpecsDirty = false
+                            end
                         end
-
-                        local highlightColor = Globals.Constants.Colors.LightBlue
-
-                        Ui.RenderHyperText(string.format("%d - %s (%s)", i, aaName, costNum == 999 and "Maxed" or cost), color, highlightColor, function()
-                            aaSelection.Select(i)
-                        end)
-                    end
-                end
-
+                    end,
+                    function()
+                        for _, entry in ipairs(Ui.TempSettings.SortedAAOverlay) do
+                            ImGui.PushID(string.format("##aa_overlay_table_entry_%s", entry.TableIndex))
+                            for _, colData in ipairs(tableColumns) do
+                                ImGui.TableNextColumn()
+                                colData.render(entry)
+                            end
+                            ImGui.PopID()
+                        end
+                    end)
                 ImGui.EndChild()
             end
 
@@ -1370,8 +1516,8 @@ function Ui.DrawInspectableSpellIcon(iconID, spell)
 
     ImGui.SetCursorPos(cursor_x, cursor_y)
 
-    ImGui.PushID(tostring(iconID) .. spell.Name() .. "_invis_btn")
-    ImGui.InvisibleButton(spell.Name(), ImVec2(ICON_SIZE, ICON_SIZE),
+    ImGui.PushID(tostring(iconID) .. (spell.Name() or "?") .. "_invis_btn")
+    ImGui.InvisibleButton(spell.Name() or "?", ImVec2(ICON_SIZE, ICON_SIZE),
         bit32.bor(ImGuiButtonFlags.MouseButtonLeft))
     if ImGui.IsItemHovered() and ImGui.IsMouseReleased(ImGuiMouseButton.Left) then
         spell.Inspect()

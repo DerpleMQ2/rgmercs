@@ -253,6 +253,10 @@ function Core.AAUsedInRotation(aaName)
     return rotationAAs:contains(aaName)
 end
 
+function Core.GetLastCombatModeChangeTime(aaName)
+    return Modules:ExecModule("Class", "GetLastCombatModeChangeTime")
+end
+
 --- Checks if a given mode is active.
 --- @param mode string The mode to check.
 --- @return boolean Returns true if the mode is active, false otherwise.

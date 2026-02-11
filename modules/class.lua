@@ -53,6 +53,7 @@ Module.TempSettings.ShowFailedSpells         = false
 Module.TempSettings.ResolvingActions         = true
 Module.TempSettings.CombatModeSet            = false
 Module.TempSettings.NewCombatMode            = false
+Module.TempSettings.CombatModeChangeTime     = 0
 Module.TempSettings.MissingSpells            = {}
 Module.TempSettings.MissingSpellsHighestOnly = true
 Module.TempSettings.CorpsesAlreadyRezzed     = {}
@@ -1481,6 +1482,7 @@ function Module:GiveTime()
         self:SetRotationAAs()
         self.TempSettings.NewCombatMode = false
         self.TempSettings.CombatModeSet = true
+        self.TempSettings.CombatModeChangeTime = Globals.GetTimeSeconds()
 
         -- update our peers about our new state.
         Config:BroadcastConfigs()
@@ -1870,6 +1872,10 @@ end
 
 function Module:GetRotationAAs()
     return self.TempSettings.RotationAAs or Set.new({})
+end
+
+function Module:GetLastCombatModeChangeTime()
+    return self.TempSettings.CombatModeChangeTime
 end
 
 function Module:Shutdown()
