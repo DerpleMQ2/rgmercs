@@ -339,45 +339,48 @@ function Ui.RenderAAOverlay()
         local aaList = selectedTab.FirstChild.List
         local aaCount = selectedTab.FirstChild.Items()
 
-        ImGui.SetNextWindowPos(aaWnd.X() + aaWnd.Width(), aaWnd.Y())
+        if aaSubWindows() == "TRUE" and selectedTab() == "TRUE" and aaSelection() == "TRUE" then
+            ImGui.SetNextWindowPos(aaWnd.X() + aaWnd.Width(), aaWnd.Y())
 
-        ImGui.SetNextWindowSize(300, aaWnd.Height())
+            ImGui.SetNextWindowSize(350, aaWnd.Height())
 
-        local _, shouldDrawGUI = ImGui.Begin('MercsAAOverlay', true, bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoCollapse))
+            local _, shouldDrawGUI = ImGui.Begin('MercsAAOverlay', true, bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoCollapse))
 
-        if shouldDrawGUI then
-            ImGui.BeginChild("##aa_list_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.None), bit32.bor(ImGuiWindowFlags.HorizontalScrollbar))
+            if shouldDrawGUI then
+                ImGui.BeginChild("##aa_list_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.None), bit32.bor(ImGuiWindowFlags.HorizontalScrollbar))
 
-            ImGui.Text("%s AAs Used by RGMercs:", tabText)
-            ImGui.Separator()
-            for i = 1, aaCount do
-                local aaName = aaList(i)()
-                local cost = aaList(i, 3)()
-                local costNum = tonumber(cost) or 999
+                ImGui.Text("%s AAs Used by RGMercs:", tabText)
 
-                if Core.AAUsedInRotation(aaName) then
-                    local color = Globals.Constants.Colors.ConditionPassColor
+                ImGui.Separator()
+                for i = 1, aaCount do
+                    local aaName = aaList(i)()
+                    local cost = aaList(i, 3)()
+                    local costNum = tonumber(cost) or 999
 
-                    if costNum == 999 then
-                        color = Globals.Constants.Colors.ConditionPassColor
-                    elseif costNum > mq.TLO.Me.AAPoints() then
-                        color = Globals.Constants.Colors.ConditionFailColor
-                    else
-                        color = Globals.Constants.Colors.ConditionMidColor
+                    if Core.AAUsedInRotation(aaName) then
+                        local color = Globals.Constants.Colors.ConditionPassColor
+
+                        if costNum == 999 then
+                            color = Globals.Constants.Colors.ConditionPassColor
+                        elseif costNum > mq.TLO.Me.AAPoints() then
+                            color = Globals.Constants.Colors.ConditionFailColor
+                        else
+                            color = Globals.Constants.Colors.ConditionMidColor
+                        end
+
+                        local highlightColor = Globals.Constants.Colors.LightBlue
+
+                        Ui.RenderHyperText(string.format("%d - %s (%s)", i, aaName, costNum == 999 and "Maxed" or cost), color, highlightColor, function()
+                            aaSelection.Select(i)
+                        end)
                     end
-
-                    local highlightColor = Globals.Constants.Colors.LightBlue
-
-                    Ui.RenderHyperText(string.format("%d - %s (%s)", i, aaName, costNum == 999 and "Maxed" or cost), color, highlightColor, function()
-                        aaSelection.Select(i)
-                    end)
                 end
+
+                ImGui.EndChild()
             end
 
-            ImGui.EndChild()
+            ImGui.End()
         end
-
-        ImGui.End()
     end
 end
 
@@ -1275,8 +1278,8 @@ function Ui.RenderForceTargetList(showPopout)
                         draw_list:AddRectFilled(
                             min,
                             max,
-                            IM_COL32(r * 255, g * 255, b * 255,
-                                a * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or (255 * Config:GetSetting('FTHPOverlayAlpha') / 100)))
+                            IM_COL32((r or 1) * 255, (g or 1) * 255, (b or 1) * 255,
+                                (a or 1) * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or (255 * Config:GetSetting('FTHPOverlayAlpha') / 100)))
 
                         )
                         draw_list:PopClipRect()
