@@ -573,7 +573,7 @@ function OptionsUI:RenderCurrentTab()
     self:RenderOptionsPanel(self.selectedGroup)
 end
 
-function OptionsUI:RenderMainWindow(_, openGUI)
+function OptionsUI:RenderMainWindow(_, openGUI, flags)
     local shouldDrawGUI = true
 
     if self.FirstRender or self.lastSortTime < Config:GetLastModuleRegisteredTime() or self.lastHighlightTime < Config:GetLastHighlightChangeTime() then
@@ -583,8 +583,6 @@ function OptionsUI:RenderMainWindow(_, openGUI)
         self.FirstRender = false
     end
 
-    local flags = ImGuiWindowFlags.None
-
     if Config.TempSettings.ResetOptionsUIPosition then
         ImGui.SetNextWindowPos(ImVec2(100, 100), ImGuiCond.Always)
         Config.TempSettings.ResetOptionsUIPosition = false
@@ -593,7 +591,7 @@ function OptionsUI:RenderMainWindow(_, openGUI)
     ImGui.SetNextWindowSize(ImVec2(700, 500), ImGuiCond.FirstUseEver)
     ImGui.SetNextWindowSizeConstraints(ImVec2(400, 300), ImVec2(2000, 2000))
 
-    openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs Options%s###rgmercsOptionsUI'):format(Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+    openGUI, shouldDrawGUI = ImGui.Begin(Ui.GetWindowTitle(("RGMercs Options%s"):format(Globals.PauseMain and " [Paused]" or ""), 'rgmercsOptionsUI'), openGUI, flags)
 
     if shouldDrawGUI then
         ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)

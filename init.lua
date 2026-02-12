@@ -117,14 +117,16 @@ local function RGMercsGUI()
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Config:GetMainOpacity()) -- Main window opacity.
             ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, Config:GetSetting('ScrollBarRounding'))
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Config:GetSetting('FrameEdgeRounding'))
-            local flags = bit32.bor(ImGuiWindowFlags.None)
+            local flags = bit32.bor(ImGuiWindowFlags.NoFocusOnAppearing)
 
             if Config:GetSetting('PopoutWindowsLockWithMain') and Config:GetSetting('MainWindowLocked') then
                 flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
             end
 
             if Config:GetSetting('PopOutForceTarget') then
-                local openFT, showFT = ImGui.Begin("Force Target", Config:GetSetting('PopOutForceTarget'), flags)
+                local openFT, showFT = ImGui.Begin(
+                    Ui.GetWindowTitle("Force Target"),
+                    Config:GetSetting('PopOutForceTarget'), flags)
 
                 if showFT then
                     Ui.RenderForceTargetList()
@@ -136,7 +138,8 @@ local function RGMercsGUI()
                 end
             end
             if Config:GetSetting('PopOutMercsStatus') then
-                local openMS, showMS = ImGui.Begin("Mercs Status", Config:GetSetting('PopOutMercsStatus'), flags)
+                local openMS, showMS = ImGui.Begin(Ui.GetWindowTitle("Mercs Status"),
+                    Config:GetSetting('PopOutMercsStatus'), flags)
 
                 if showMS then
                     Ui.RenderMercsStatus()
@@ -148,7 +151,8 @@ local function RGMercsGUI()
                 end
             end
             if Config:GetSetting('PopOutConsole') then
-                local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", Config:GetSetting('PopOutConsole'), flags)
+                local openConsole, showConsole = ImGui.Begin(Ui.GetWindowTitle("Debug Console"),
+                    Config:GetSetting('PopOutConsole'), flags)
                 if showConsole then
                     ConsoleUI:DrawConsole()
                 end
@@ -159,7 +163,7 @@ local function RGMercsGUI()
                 end
             end
 
-            Ui.RenderModulesPopped()
+            Ui.RenderModulesPopped(flags)
 
             if Config:GetSetting("AlwaysShowMiniButton") or Globals.Minimized then
                 HudUI:RenderToggleHud()
@@ -178,9 +182,9 @@ local function RGMercsGUI()
             end
 
             if Config:GetSetting('FullUI') then
-                openGUI = StandardUI:RenderMainWindow(imGuiStyle, openGUI)
+                openGUI = StandardUI:RenderMainWindow(imGuiStyle, openGUI, flags)
             else
-                openGUI = SimpleUI:RenderMainWindow(imGuiStyle, openGUI)
+                openGUI = SimpleUI:RenderMainWindow(imGuiStyle, openGUI, flags)
             end
 
             if flashingWarning then
@@ -190,7 +194,7 @@ local function RGMercsGUI()
             Ui.RenderAAOverlay()
 
             if Config:GetSetting('EnableOptionsUI') then
-                local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, true)
+                local openOptionsUI = OptionsUI:RenderMainWindow(imGuiStyle, true, flags)
                 if not openOptionsUI then
                     Config:SetSetting('EnableOptionsUI', false)
                 end

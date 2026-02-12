@@ -19,7 +19,8 @@ function LoaderUI:RenderLoader(initPctComplete, initMsg)
     ImGui.SetNextWindowSize(ImVec2(400, 80), ImGuiCond.Always)
     ImGui.SetNextWindowPos(ImVec2(ImGui.GetIO().DisplaySize.x / 2 - 200, ImGui.GetIO().DisplaySize.y / 3 - 75), ImGuiCond.Always)
 
-    ImGui.Begin("RGMercs Loader", nil, bit32.bor(ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoScrollbar))
+    ImGui.Begin("RGMercs Loader", nil,
+        bit32.bor(ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoScrollbar, ImGuiWindowFlags.NoFocusOnAppearing))
 
     -- Display the selected image (picked only once)
     ImGui.Image(ImagesUI.imgDisplayed:GetTextureID(), ImVec2(60, 60))

@@ -123,17 +123,17 @@ function StandardUI:RenderWindowControls()
     ImGui.SetCursorPos(position)
 end
 
-function StandardUI:RenderMainWindow(imgui_style, openGUI)
+function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
     local shouldDrawGUI = true
 
     if not Globals.Minimized then
-        local flags = ImGuiWindowFlags.None
-
         if Config:GetSetting('MainWindowLocked') then
             flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
         end
 
-        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+        ImGui.SetNextWindowSize(ImVec2(600, 400), ImGuiCond.FirstUseEver)
+
+        openGUI, shouldDrawGUI = ImGui.Begin(Ui.GetWindowTitle(('RGMercs%s'):format(Globals.PauseMain and " [Paused]" or ""), 'rgmercsui'), openGUI, flags)
 
         ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
 

@@ -1599,6 +1599,15 @@ Config.DefaultConfig                                     = {
         Min = 20,
         Max = 100,
     },
+    ['SavePositionPerCharacter']         = {
+        DisplayName = "Save Window Position per Char",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 6,
+        Tooltip = "Save window positions separately for each character.",
+        Default = false,
+    },
     ['FrameEdgeRounding']                = {
         DisplayName = "Frame Edge Rounding",
         Group = "General",

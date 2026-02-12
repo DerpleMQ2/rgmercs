@@ -344,7 +344,7 @@ function Ui.RenderAAOverlay()
 
             ImGui.SetNextWindowSize(450, aaWnd.Height())
 
-            local _, shouldDrawGUI = ImGui.Begin('MercsAAOverlay', true, bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoCollapse))
+            local _, shouldDrawGUI = ImGui.Begin(Ui.GetWindowTitle('MercsAAOverlay'), true, bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoCollapse))
 
             if shouldDrawGUI then
                 ImGui.BeginChild("##aa_list_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.None), bit32.bor(ImGuiWindowFlags.HorizontalScrollbar))
@@ -2884,19 +2884,17 @@ function Ui.InvisibleWithButtonText(id, text, size, callbackFn)
     ImGui.Text(text)
 end
 
-function Ui.RenderModulesPopped()
+function Ui.RenderModulesPopped(flags)
     if not Config:SettingsLoaded() then return end
 
     for _, name in ipairs(Modules:GetModuleOrderedNames()) do
         if Config:GetSetting(name .. "_Popped", true) then
             if Modules:ExecModule(name, "ShouldRender") then
-                local flags = bit32.bor(ImGuiWindowFlags.None)
-
                 if Config:GetSetting('PopoutWindowsLockWithMain') and Config:GetSetting('MainWindowLocked') then
                     flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
                 end
 
-                local open, show = ImGui.Begin(name, true, flags)
+                local open, show = ImGui.Begin(Ui.GetWindowTitle(name), true, flags)
                 if show then
                     Modules:ExecModule(name, "Render")
                 end
@@ -2908,6 +2906,14 @@ function Ui.RenderModulesPopped()
             end
         end
     end
+end
+
+function Ui.GetWindowTitle(title, idOverride)
+    if Config:GetSetting('SavePositionPerCharacter') then
+        return string.format("%s###%s__%s_%s", title, idOverride or title, Globals.CurServer, Globals.CurLoadedChar)
+    end
+
+    return string.format("%s%s", title, idOverride and ('###' .. idOverride) or "")
 end
 
 return Ui

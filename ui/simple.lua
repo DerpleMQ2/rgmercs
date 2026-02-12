@@ -15,17 +15,15 @@ function SimpleUI:RenderSimplePanelOption(optionLabel, optionName)
     end
 end
 
-function SimpleUI:RenderMainWindow(_, openGUI)
+function SimpleUI:RenderMainWindow(_, openGUI, flags)
     local shouldDrawGUI = true
 
     if not Globals.Minimized then
-        local flags = ImGuiWindowFlags.None
-
         if Config:GetSetting('MainWindowLocked') then
             flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
         end
 
-        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercssimpleui'):format(Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+        openGUI, shouldDrawGUI = ImGui.Begin(Ui.GetWindowTitle(('RGMercs%s'):format(Globals.PauseMain and " [Paused]" or ""), 'rgmercssimpleui'), openGUI, flags)
 
         ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
 
