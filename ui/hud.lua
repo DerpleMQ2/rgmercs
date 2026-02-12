@@ -120,6 +120,7 @@ function HudUI:RenderToggleHud()
         local pull_toggle, pull_toggle_changed = Ui.RenderFancyToggle("##rgmercs_hud_toggle_pulls", lbl, Config:GetSetting('DoPull'), nil,
             Globals.Constants.Colors.MainButtonUnpausedColor, Globals.Constants.Colors.MainButtonPausedColor, nil, true)
         ImGui.SetCursorPos(cursorPosAfter)
+        ImGui.Dummy(ImVec2(0, 0))
 
         if pull_toggle_changed then
             Config:SetSetting('DoPull', not pull_toggle)
@@ -135,6 +136,7 @@ function HudUI:RenderToggleHud()
             ImGui.Separator()
             for k, displayName in pairs(self.Settings) do
                 ImGui.SetCursorPosX(toggleXPos)
+
                 local newTog, changeTog = Ui.RenderFancyToggle("##rgmercs_hud_toggle_" .. k, displayName, Config:GetSetting(k), nil,
                     Globals.Constants.Colors.MainButtonUnpausedColor, Globals.Constants.Colors.MainButtonPausedColor, nil, true)
 
