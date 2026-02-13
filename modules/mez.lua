@@ -272,6 +272,8 @@ end
 function Module:Render()
     Ui.RenderPopAndSettings(self._name)
 
+    ImGui.NewLine()
+
     if self.ModuleLoaded then
         -- CCEd targets
         if ImGui.CollapsingHeader("CC Target List") then
