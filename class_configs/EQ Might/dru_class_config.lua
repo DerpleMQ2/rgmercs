@@ -10,9 +10,11 @@ local _ClassConfig = {
     _version              = "2.1 - EQ Might",
     _author               = "Algar",
     ['ModeChecks']        = {
-        IsHealing = function() return true end,
-        IsCuring = function() return Config:GetSetting('DoCureAA') or Config:GetSetting('DoCureSpells') end,
-        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
+        IsHealing  = function() return true end,
+        IsCuring   = function() return Config:GetSetting('DoCureAA') or Config:GetSetting('DoCureSpells') end,
+        IsRezing   = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
+        CanCharm   = function() return true end,
+        IsCharming = function() return Config:GetSetting('CharmOn') end,
     },
     ['Modes']             = {
         'Heal',
