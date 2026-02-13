@@ -793,6 +793,7 @@ local _ClassConfig = {
             {
                 name = "BladeDisc",
                 type = "Disc",
+                load_cond = function(self) return Config:GetSetting('BladeDiscUse') > 1 end,
                 cond = function(self, discSpell)
                     return Config:GetSetting('DoAEDamage')
                 end,
