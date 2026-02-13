@@ -1864,6 +1864,16 @@ function Module:SetRotationAAs()
             end
         end
     end
+
+    -- add static spells this is hacky and it sucks but one day I will make it better. promise.
+    self.TempSettings.RotationAAs:add("Radiant Cure")
+    self.TempSettings.RotationAAs:add("Dire Charm")
+    self.TempSettings.RotationAAs:add("Group Purify Soul")
+    self.TempSettings.RotationAAs:add("Aureate's Bane")
+    self.TempSettings.RotationAAs:add("Companion's Discipline")
+    self.TempSettings.RotationAAs:add("Pet Discipline")
+    self.TempSettings.RotationAAs:add("Beam of Slumber")
+    self.TempSettings.RotationAAs:add("Dire of the Sleepwalker")
 end
 
 function Module:GetRotationClickies()
