@@ -1397,8 +1397,10 @@ function Module:DeleteWayPoint(idx)
         Logger.log_error("\ar%d is not a valid waypoint ID!", idx)
     end
 
-    while self.TempSettings.CurrentWP > #farmWayPoints[mq.TLO.Zone.ShortName()] do
-        self.TempSettings.CurrentWP = self.TempSettings.CurrentWP - 1
+    local wpCount = #Config:GetSetting('FarmWayPoints')[mq.TLO.Zone.ShortName()]
+
+    if self.TempSettings.CurrentWP > wpCount then
+        self.TempSettings.CurrentWP = ((wpCount > 0) and wpCount or 1)
     end
 end
 
