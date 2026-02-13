@@ -1873,7 +1873,7 @@ function Module:SetRotationAAs()
     self.TempSettings.RotationAAs:add("Companion's Discipline")
     self.TempSettings.RotationAAs:add("Pet Discipline")
     self.TempSettings.RotationAAs:add("Beam of Slumber")
-    self.TempSettings.RotationAAs:add("Dire of the Sleepwalker")
+    self.TempSettings.RotationAAs:add("Dirge of the Sleepwalker")
 end
 
 function Module:GetRotationClickies()
