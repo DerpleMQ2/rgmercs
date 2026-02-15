@@ -186,6 +186,8 @@ local _ClassConfig = {
             "Blood of Pain", -- Level 41
             "Blood of Hate",
             "Blood of Discord",
+        },
+        ['AEPoisonDot'] = {
             "Blood of Inruku",
         },
         ['SpearNuke'] = {
@@ -918,21 +920,12 @@ local _ClassConfig = {
         },
         ['Combat'] = {
             {
-                name = "BondTap",
-                type = "Spell",
-                tooltip = Tooltips.BondTap,
-                load_cond = function(self) return Config:GetSetting('DoBondTap') end,
-                cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
-                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
-                end,
-            },
-            {
                 name = "AESpearNuke",
                 type = "Spell",
                 tooltip = Tooltips.AESpearNuke,
+                load_cond = function(self) return Config:GetSetting('DoAESpearNuke') and Core.GetResolvedActionMapItem('AESpearNuke') end,
                 cond = function(self, spell, target)
-                    if not (Config:GetSetting('DoAESpearNuke') and Config:GetSetting('DoAEDamage')) then return false end
+                    if not Config:GetSetting('DoAEDamage') then return false end
                     return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
@@ -940,18 +933,40 @@ local _ClassConfig = {
                 name = "SpearNuke",
                 type = "Spell",
                 tooltip = Tooltips.SpearNuke,
+                load_cond = function(self) return not Config:GetSetting('DoAESpearNuke') or not Core.GetResolvedActionMapItem('AESpearNuke') end,
                 cond = function(self, spell, target)
                     return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "AEPoisonDot",
+                type = "Spell",
+                tooltip = Tooltips.PoisonDot,
+                load_cond = function(self) return Config:GetSetting('DoPoisonDot') and Core.GetResolvedActionMapItem('AEPoisonDot') end,
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
             {
                 name = "PoisonDot",
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
-                load_cond = function(self) return Config:GetSetting('DoPoisonDot') end,
+                load_cond = function(self) return Config:GetSetting('DoPoisonDot') and not Core.GetResolvedActionMapItem('AEPoisonDot') end,
                 cond = function(self, spell, target)
                     if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
+                end,
+            },
+            {
+                name = "BondTap",
+                type = "Spell",
+                tooltip = Tooltips.BondTap,
+                load_cond = function(self) return Config:GetSetting('DoBondTap') end,
+                cond = function(self, spell, target)
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
+                    return Casting.HaveManaToDot() and Casting.SelfBuffCheck(spell) -- use for recourse --Casting.DotSpellCheck(spell)
                 end,
             },
             {

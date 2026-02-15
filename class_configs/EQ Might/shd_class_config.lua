@@ -935,16 +935,6 @@ local _ClassConfig = {
         },
         ['Combat'] = {
             {
-                name = "BondTap",
-                type = "Spell",
-                tooltip = Tooltips.BondTap,
-                load_cond = function(self) return Config:GetSetting('DoBondTap') end,
-                cond = function(self, spell, target)
-                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
-                    return Casting.HaveManaToDot() and Casting.SelfBuffCheck(spell) -- use for recourse --Casting.DotSpellCheck(spell)
-                end,
-            },
-            {
                 name = "SpearNuke",
                 type = "Spell",
                 tooltip = Tooltips.SpearNuke,
@@ -958,6 +948,16 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('BladeDiscUse') == 3 and Core.GetResolvedActionMapItem('BladeDisc') end,
                 cond = function(self, discSpell)
                     return Config:GetSetting('DoAEDamage') and mq.TLO.Me.PctEndurance() >= Config:GetSetting("ManaToNuke") -- save endurance for emergency discs
+                end,
+            },
+            {
+                name = "BondTap",
+                type = "Spell",
+                tooltip = Tooltips.BondTap,
+                load_cond = function(self) return Config:GetSetting('DoBondTap') end,
+                cond = function(self, spell, target)
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
+                    return Casting.HaveManaToDot() and Casting.SelfBuffCheck(spell) -- use for recourse --Casting.DotSpellCheck(spell)
                 end,
             },
             {
