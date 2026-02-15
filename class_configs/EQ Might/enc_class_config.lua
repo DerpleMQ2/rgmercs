@@ -642,8 +642,17 @@ local _ClassConfig = {
         },
         ['GroupBuff']     = {
             {
+                name = "Ancient Artifact of Clairvoyance",
+                type = "Item",
+                load_cond = function() return mq.TLO.Me.Level() >= 68 and mq.TLO.FindItem("=Ancient Artifact of Clairvoyance")() end,
+                cond = function(self, itemName, target)
+                    return Casting.GroupBuffItemCheck(itemName, target)
+                end,
+            },
+            {
                 name = "ManaRegen",
                 type = "Spell",
+                load_cond = function() return mq.TLO.Me.Level() < 68 or not mq.TLO.FindItem("=Ancient Artifact of Clairvoyance")() end,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     if not Targeting.TargetIsACaster(target) then return false end

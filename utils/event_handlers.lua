@@ -163,7 +163,9 @@ local function tooFarHandler()
                 elseif Config:GetSetting('DoMelee') then
                     Logger.log_debug("TooFar: \ayWe are in COMBAT and too far from our target!")
                     if Config:GetSetting('DoAutoEngage') and Combat.OkToEngage(target.ID() or 0) then
-                        if Targeting.GetTargetDistance() < (10 and (target.MaxRangeTo() or 10)) then --not sure if this is necessary or still happening since we changed distance to use 3D.
+                        local maxRange = (target.MaxRangeTo() or 999) < 30 and target.MaxRangeTo() or 10 -- account for some mobs like giant elementals that have a maxrangeto of 70
+                        local distance = Targeting.GetTargetDistance()
+                        if distance < 10 and distance < maxRange then                                    --not sure if this is necessary or still happening since we changed distance to use 3D.
                             Logger.log_debug("TooFar: Too Far from Target (%s [%d]). Possible flyer detected. Moving back 10.", target.CleanName() or "", target.ID() or 0)
                             Core.DoCmd("/squelch /face fast")
                             Movement:DoStickCmd("10 moveback uw")
@@ -173,9 +175,9 @@ local function tooFarHandler()
                             Movement:DoStickCmd("off")
                             Movement:ClearLastStickTimer()
                         else
-                            Logger.log_debug("TooFar: Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
-                                (target.MaxRangeTo() or 0) * 0.7)
-                            Movement:NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.7, false, true)
+                            local navDist = maxRange * 0.7
+                            Logger.log_debug("TooFar: Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0, navDist)
+                            Movement:NavInCombat(target.ID(), navDist, false, true)
                         end
                     else
                         Logger.log_debug("TooFar event detected, but we are not ok to engage or autoengage is disabled.")

@@ -597,7 +597,7 @@ function OptionsUI:RenderMainWindow(_, openGUI, flags)
         ImGui.PushID("##RGMercsUI_" .. Globals.CurLoadedChar)
         local _, y = ImGui.GetContentRegionAvail()
 
-        if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Border) then
+        if ImGui.BeginChild("left##RGmercsOptions", math.min(ImGui.GetWindowContentRegionWidth() * .3, 205), y - 1, ImGuiChildFlags.Borders) then
             local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.ScrollY)
             local textChanged = false
             local inputBoxPosX = ImGui.GetCursorPosX()
@@ -687,7 +687,7 @@ function OptionsUI:RenderMainWindow(_, openGUI, flags)
         local x, _ = ImGui.GetContentRegionAvail()
 
         local right_start = ImGui.GetCursorPosVec()
-        if ImGui.BeginChild("right##RGmercsOptionsBG", x, y - 1, ImGuiChildFlags.Border) then
+        if ImGui.BeginChild("right##RGmercsOptionsBG", x, y - 1, ImGuiChildFlags.Borders) then
             local cr_min       = ImGui.GetWindowContentRegionMinVec()
             local cr_max       = ImGui.GetWindowContentRegionMaxVec()
             local wp           = ImGui.GetCursorScreenPosVec()
@@ -714,7 +714,7 @@ function OptionsUI:RenderMainWindow(_, openGUI, flags)
         ImGui.EndChild()
 
         ImGui.SetCursorPos(right_start)
-        if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Border) then
+        if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Borders) then
             flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
             if self.selectedCharacter ~= Comms.GetPeerName() and Config:GetPeerLastConfigReceivedTime(self.selectedCharacter) == 0 then
                 ImGui.TextColored(0.2, 0.2, 0.8, 1.0, "Waiting for configuration from " .. self.selectedCharacter .. "...")

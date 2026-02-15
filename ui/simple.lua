@@ -29,7 +29,7 @@ function SimpleUI:RenderMainWindow(_, openGUI, flags)
 
         if shouldDrawGUI then
             local _, y = ImGui.GetContentRegionAvail()
-            if ImGui.BeginChild("left##RGmercsSimplePanel", ImGui.GetWindowContentRegionWidth() * .3, y - 1, ImGuiChildFlags.Border) then
+            if ImGui.BeginChild("left##RGmercsSimplePanel", ImGui.GetWindowContentRegionWidth() * .3, y - 1, ImGuiChildFlags.Borders) then
                 local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersV, ImGuiTableFlags.ScrollY)
                 if ImGui.BeginTable('configmenu##RGmercsSimplePanel', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
@@ -47,7 +47,7 @@ function SimpleUI:RenderMainWindow(_, openGUI, flags)
             ImGui.EndChild()
             ImGui.SameLine()
             local x, _ = ImGui.GetContentRegionAvail()
-            if ImGui.BeginChild("right##RGmercsSimplePanel", x, y - 1, ImGuiChildFlags.Border) then
+            if ImGui.BeginChild("right##RGmercsSimplePanel", x, y - 1, ImGuiChildFlags.Borders) then
                 local flags = bit32.bor(ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersInner)
                 if ImGui.BeginTable('rightpanelTable##RGmercsSimplePanel', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
