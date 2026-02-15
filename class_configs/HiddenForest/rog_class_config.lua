@@ -349,7 +349,7 @@ return {
                         if not mq.TLO.Me.Moving() or (mq.TLO.Me.AltAbility("Nimble Evasion").Rank() or 0) == 5 then
                             Core.DoCmd("/doability hide")
                             mq.delay(100, function() return (mq.TLO.Me.AbilityTimer("Hide")() or 0) > 0 end)
-                            ---@diagnostic disable-next-line: undefined-field
+                            ---@diagnostic disable-next-line: undefined-field --Nav defs not added
                         elseif mq.TLO.Me.Moving() and mq.TLO.Nav.Active() and not mq.TLO.Nav.Paused() then
                             -- let's get crazy: if we are naving, quickly pause and "sneak" a hide in
                             Movement:DoNav(false, "pause")
@@ -357,7 +357,7 @@ return {
                             mq.delay((2 * mq.TLO.EverQuest.Ping()) or 200) --addl delay to avoid "must be perfectly still..." server desync
                             Core.DoCmd("/doability hide")
                             mq.delay(100, function() return (mq.TLO.Me.AbilityTimer("Hide")() or 0) > 0 end)
-                            ---@diagnostic disable-next-line: undefined-field
+                            ---@diagnostic disable-next-line: undefined-field --nav defs not added
                             if mq.TLO.Nav.Paused() then Movement:DoNav(false, "pause") end
                         end
                     end

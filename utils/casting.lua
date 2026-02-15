@@ -173,7 +173,6 @@ end
 
 function Casting.PetBuffCheck(spell)
     if not (spell and spell()) then return false end
-    ---@diagnostic disable-next-line: undefined-field
     return Casting.LocalBuffCheck(Casting.GetUseableSpellId(spell), true)
 end
 
@@ -800,7 +799,6 @@ end
 function Casting.DetSpellCheck(spell, target)
     if not (spell and spell()) then return false end
     if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
-    ---@diagnostic disable-next-line: undefined-field
     return Casting.TargetBuffCheck(Casting.GetUseableSpellId(spell), target)
 end
 
@@ -938,7 +936,6 @@ function Casting.ItemReady(itemName)
     local clicky = mq.TLO.FindItem("=" .. itemName).Clicky
     local levelCheck = me.Level() >= (clicky.RequiredLevel() or 0)
     local movingCheck = Core.MyClassIs("brd") or not (me.Moving() and (clicky.CastTime() or -1) > 0)
-    ---@diagnostic disable-next-line: undefined-field -- Feared is a valid data member
     local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed() or me.Mezzed())
 
     Logger.log_verbose("ItemReady for %s: LevelCheck(%s) MovingCheck(%s) ControlCheck(%s)", itemName, Strings.BoolToColorString(levelCheck),
@@ -964,7 +961,6 @@ function Casting.CastCheck(spell, bAllowMove, bAllowCast)
     local manaCheck = spell.Mana() == 0 or currentMana >= spell.Mana()
     local endCheck = spell.EnduranceCost() == 0 or currentEnd >= spell.EnduranceCost()
 
-    ---@diagnostic disable-next-line: undefined-field -- Feared is a valid data member
     local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed() or me.Mezzed())
 
     Logger.log_verbose("CastCheck for %s (%d): CastingCheck(%s), MovingCheck(%s), ManaCheck(%s), EndCheck(%s), ControlCheck(%s)", spell.Name(), spell.ID(),
@@ -1944,7 +1940,6 @@ function Casting.GetUseableSpellId(spell)
     if not spell and not spell() then return 0 end
 
     -- first check if *we* have the spell
-    ---@diagnostic disable-next-line: undefined-field
     local mySpell = mq.TLO.Me.Spell
     local baseName = spell.BaseName()
 

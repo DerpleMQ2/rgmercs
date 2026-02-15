@@ -541,7 +541,6 @@ return {
                 name = "Nature's Salve",
                 type = "AA",
                 cond = function(self, aaName)
-                    ---@diagnostic disable-next-line: undefined-field
                     return mq.TLO.Me.TotalCounters() > 0
                 end,
             },

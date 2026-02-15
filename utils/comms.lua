@@ -108,7 +108,6 @@ function Comms.SendHeartbeat(assist, chase)
         Poison        = tostring(mq.TLO.Me.Poisoned.ID()),
         Disease       = tostring(mq.TLO.Me.Diseased.ID()),
         Curse         = tostring(mq.TLO.Me.Cursed.ID()),
-        ---@diagnostic disable-next-line: undefined-field
         Mezzed        = tostring(mq.TLO.Me.Mezzed.ID()),
         Corruption    = tostring(mq.TLO.Me.Corrupted.ID()),
         Stunned       = mq.TLO.Me.Stunned(),

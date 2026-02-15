@@ -873,7 +873,6 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.PurityofDeath,
                 cond = function(self)
-                    ---@diagnostic disable-next-line: undefined-field
                     return mq.TLO.Me.TotalCounters() > 0
                 end,
             },

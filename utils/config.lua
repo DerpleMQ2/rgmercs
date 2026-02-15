@@ -2237,7 +2237,6 @@ function Config:GetUsageText(config, showUsageText, defaults, valueOnly)
         handledType = true
     elseif type(configData.Default) == 'boolean' then
         rangeText = string.format("\aw[%s\ax]", Strings.PadString(string.format("\a-yType : \a-yon\aw|\a-yoff"), 15, false))
-        ---@diagnostic disable-next-line: param-type-mismatch
         defaultText = string.format("[\a-tDefault: %s\ax]", Strings.PadString(Strings.BoolToString(configData.Default), 8, false))
         currentText = (string.format("%s", Strings.BoolToString(Config:GetSetting(config))))
         handledType = true

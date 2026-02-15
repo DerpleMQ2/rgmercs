@@ -765,7 +765,6 @@ function Module:ProcessMezList()
 
                         --mez the thing, if it isn't (an AE mez or someone else's mez may have hit it before we got to it). If it is, we will update timer below.
                         Targeting.SetTarget(id)
-                        ---@diagnostic disable-next-line: undefined-field -- [Doesn't like the .ID on group assist target, but it is valid]
                         if Config:GetSetting('DoAEMez') and not mq.TLO.Target.Mezzed() and mq.TLO.Me.GroupAssistTarget.ID() ~= id then
                             --lets make sure we didn't have more mobs dogpile on, making an AE mez more appropriate
                             local aeMezSpell = self:GetAEMezSpell()

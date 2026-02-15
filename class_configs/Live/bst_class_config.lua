@@ -1016,7 +1016,7 @@ return {
                 cond = function(self, spell, target)
                     --This checks to see if the Growl portion is up on the pet (or about to expire) before using this, those who prefer the swarm pets can use the actual swarm pet spell in conjunction with this for mana savings.
                     --There are some instances where the Growl isn't needed, but that is a giant TODO and of minor benefit.
-                    ---@diagnostic disable-next-line: undefined-field
+                    ---@diagnostic disable-next-line: undefined-field -- total seconds not recognized for buffduration
                     return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10
                 end,
             },
@@ -1179,7 +1179,6 @@ return {
                 name = "Nature's Salve",
                 type = "AA",
                 cond = function(self, aaName)
-                    ---@diagnostic disable-next-line: undefined-field
                     return mq.TLO.Me.TotalCounters() > 0
                 end,
             },
