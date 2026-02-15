@@ -722,6 +722,7 @@ function OptionsUI:RenderMainWindow(_, openGUI, flags)
                 if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
                     self:RenderCurrentTab()
+                    ImGui.Dummy(ImVec2(0, 0))
                     ImGui.EndTable()
                 end
             end
