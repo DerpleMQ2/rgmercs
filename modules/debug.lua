@@ -351,7 +351,7 @@ function Module:DoGetState()
 end
 
 function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = {}, }
+    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
 end
 
 function Module:GetFAQ()

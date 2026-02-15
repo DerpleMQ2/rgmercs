@@ -2248,7 +2248,7 @@ function Ui.RenderImportThemez()
         return
     end
 
-    ImGui.BeginChild("##themez_importer_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY, ImGuiChildFlags.Border),
+    ImGui.BeginChild("##themez_importer_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY, ImGuiChildFlags.Borders),
         ImGuiWindowFlags.None)
     ImGui.Text("Import from Themez: ")
     ImGui.SameLine()
@@ -2316,7 +2316,7 @@ function Ui.RenderPopupModal()
 end
 
 function Ui.RenderImportMercThemes()
-    ImGui.BeginChild("##mercs_themes_importer_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY, ImGuiChildFlags.Border),
+    ImGui.BeginChild("##mercs_themes_importer_child", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.AutoResizeY, ImGuiChildFlags.Borders),
         ImGuiWindowFlags.None)
     ImGui.Text("Import from File: ")
     ImGui.SameLine()
@@ -2508,6 +2508,7 @@ function Ui.RenderLogo(textureId)
             delta = -(119 - t)
         end
         cx, cy = cx + w * 0.5, cy + h * 0.5
+        ---@diagnostic disable-next-line: deprecated --LuaJIT is based off of 5.1
         local angle = math.atan2(my - cy, mx - cx)
 
         w, h = math.max(1, w + delta), math.max(1, h + delta)

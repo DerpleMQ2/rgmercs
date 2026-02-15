@@ -1351,7 +1351,7 @@ function Module:RenderCondition(clickyIdx, condIdx, cond)
         ImGui.Indent()
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
         ImGui.BeginChild("##clicky_cond_child_" .. clickyIdx .. "_" .. condIdx, ImVec2(0, 0),
-            bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
+            bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Borders, ImGuiChildFlags.AutoResizeY),
             bit32.bor(ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
         self:RenderConditionTargetCombo(cond, condIdx)
         self:RenderConditionArgs(cond, condIdx, clickyIdx)
@@ -1432,7 +1432,7 @@ function Module:RenderClickiesWithConditions(type, clickies)
                     ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0)
 
                     ImGui.BeginChild("##clicky_conditions_child_" .. clickyIdx, ImVec2(0, 0),
-                        bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Border, ImGuiChildFlags.AutoResizeY),
+                        bit32.bor(ImGuiChildFlags.AlwaysAutoResize, ImGuiChildFlags.Borders, ImGuiChildFlags.AutoResizeY),
                         bit32.bor(ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoTitleBar))
 
                     self:RenderCondition(clickyIdx, 0, self.ImpliedCondition)
@@ -1658,6 +1658,7 @@ function Module:GiveTime()
                         Logger.log_super_verbose("\ayClicky: \awTesting Condition: \at%s\aw on target: \at%s (%s)", cond.type, target and (target.CleanName() or "None") or "None",
                             cond.target or "Self")
 
+                        ---@diagnostic disable-next-line: deprecated --LuaJIT is based off of 5.1
                         if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
                             Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \arFailed!")
                             allConditionsMet = false
@@ -1757,7 +1758,7 @@ function Module:DoGetState()
 end
 
 function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = {}, }
+    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
 end
 
 function Module:GetFAQ()

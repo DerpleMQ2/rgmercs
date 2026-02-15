@@ -3010,7 +3010,7 @@ function Config:ConvertAssistNameToID(arg1)
 end
 
 function Config:GetCommandHandlers()
-    return { module = "Config", CommandHandlers = self.CommandHandlers, }
+    return { module = "Config", CommandHandlers = self.CommandHandlers or {}, }
 end
 
 function Config:GetFAQ()
