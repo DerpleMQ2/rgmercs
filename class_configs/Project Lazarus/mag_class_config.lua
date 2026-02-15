@@ -51,109 +51,15 @@ _ClassConfig      = {
     ['AbilitySets']       = {
         --- Nukes
         ['SwarmPet'] = {
-            -- Swarm Pet* >= LVL 70
-            -- "Ravening Servant",
-            -- "Roiling Servant",
-            -- "Riotous Servant",
-            -- "Reckless Servant",
-            -- "Remorseless Servant",
-            -- "Relentless Servant",
-            -- "Ruthless Servant",
-            -- "Ruinous Servant",
-            -- "Rumbling Servant",
-            -- "Rancorous Servant",
-            -- "Rampaging Servant",
             "Raging Servant",
-            "Rage of Zomm",
         },
         ['SpearNuke'] = {
             -- Spear Nuke* >= LVL 70
             "Spear of Ro",
         },
         ['ChaoticNuke'] = {
-            -- Chaotic Nuke with Beneficial Effect >= LVL69
-            -- "Fickle Inferno",
             "Fickle Fire",
         },
-        -- ['FireNuke'] = {
-        --     -- Fire Nuke 1 <= LVL <= 70
-        --     "Cremating Sands",
-        --     "Ravaging Sands",
-        --     "Incinerating Sands",
-        --     "Crash of Sand",
-        --     "Blistering Sands",
-        --     "Searing Sands",
-        --     "Broiling Sands",
-        --     "Blast of Sand",
-        --     "Burning Sands",
-        --     "Burst of Sand",
-        --     "Strike of Sand",
-        --     "Torrid Sands",
-        --     "Scorching Sands",
-        --     "Scalding Sands",
-        --     "Sun Vortex",
-        --     "Star Strike", -- Changed to another spell on Lazarus
-        --     "Ancient: Nova Strike",
-        --     "Burning Sand",
-        --     "Shock of Fiery Blades",
-        --     "Char",
-        --     "Blaze",
-        --     "Shock of Flame",
-        --     "Burn",
-        --     "Burst of Flame",
-        -- },
-        -- ['FireBoltNuke'] = {
-        --     -- Fire Bolt Nukes
-        --     "Bolt of Molten Dacite",
-        --     "Bolt of Molten Olivine",
-        --     "Bolt of Molten Komatiite",
-        --     "Bolt of Skyfire",
-        --     "Bolt of Molten Shieldstone",
-        --     "Bolt of Molten Magma",
-        --     "Bolt of Molten Steel",
-        --     "Bolt of Rhyolite",
-        --     "Bolt of Molten Scoria",
-        --     "Bolt of Molten Dross",
-        --     "Bolt of Molten Slag",
-        --     "Bolt of Jerikor",
-        --     "Firebolt of Tallon",
-        --     "Seeking Flame of Seukor",
-        --     "Scars of Sigil",
-        --     "Lava Bolt",
-        --     "Cinder Bolt",
-        --     "Bolt of Flame",
-        --     "Flame Bolt",
-        -- },
-        -- ['MagicNuke'] = {
-        --     -- Nuke 1 <= LVL <= 69
-        --     "Shock of Memorial Steel",
-        --     "Shock of Carbide Steel",
-        --     "Shock of Burning Steel",
-        --     "Shock of Arcronite Steel",
-        --     "Shock of Darksteel",
-        --     "Shock of Blistersteel",
-        --     "Shock of Argathian Steel",
-        --     "Shock of Ethereal Steel",
-        --     "Shock of Discordant Steel",
-        --     "Shock of Cineral Steel",
-        --     "Shock of Silvered Steel",
-        --     "Blade Strike",
-        --     "Rock of Taelosia",
-        --     "Black Steel",
-        --     "Shock of Steel",
-        --     "Shock of Swords",
-        --     "Shock of Spikes",
-        --     "Shock of Blades",
-        -- },
-        -- ['MagicBolt'] = {
-        --     -- Magic Bolt Nukes
-        --     "Voidstone Bolt",
-        --     "Luclinite Bolt",
-        --     "Komatiite Bolt",
-        --     "Korascian Bolt",
-        --     "Meteoric Bolt",
-        --     "Iron Bolt",
-        -- },
         ['FireDD'] = { --Mix of Fire Nukes and Bolts appropriate for use at lower levels.
             "Burning Sand",
             "Scars of Sigil",
@@ -171,87 +77,18 @@ _ClassConfig      = {
             "Seeking Flame of Seukor",
         },
         ['MagicDD'] = { -- Magic does not have any faster casts like Fire, we have only these.
-            "Blade Strike",
             "Rock of Taelosia",
-            "Black Steel",
             "Shock of Steel",
             "Shock of Swords",
             "Shock of Spikes",
             "Shock of Blades",
         },
+        ['QuickMagicDD'] = {
+            "Blade Strike",
+            "Black Steel",
+        },
         ['TwinCast'] = {
             "Twincast",
-        },
-        ['BeamNuke'] = {
-            -- Beam Frontal AOE Spell*
-            "Beam of Molten Dacite",
-            "Beam of Molten Olivine",
-            "Beam of Molten Komatiite",
-            "Beam of Molten Rhyolite",
-            "Beam of Molten Shieldstone",
-            "Beam of Brimstone",
-            "Beam of Molten Steel",
-            "Beam of Rhyolite",
-            "Beam of Molten Scoria",
-            "Beam of Molten Dross",
-            "Beam of Molten Slag",
-        },
-        ['RainNuke'] = {
-            --- Rain AOE Spell*
-            "Rain of Molten Dacite",
-            "Rain of Molten Olivine",
-            "Rain of Molten Komatiite",
-            "Rain of Molten Rhyolite",
-            "Coronal Rain",
-            "Rain of Blistersteel",
-            "Rain of Molten Steel",
-            "Rain of Rhyolite",
-            "Rain of Molten Scoria",
-            "Rain of Molten Dross",
-            "Rain of Molten Slag",
-            "Rain of Jerikor",
-            "Sun Storm",
-            "Sirocco",
-            "Rain of Lava",
-            "Rain of Fire",
-        },
-        ['MagicRainNuke'] = {
-            -- Magic Rain
-            "rain of Kukris",
-            "Rain of Falchions",
-            "Rain of Blades",
-            "Rain of Spikes",
-            "Rain Of Swords",
-            "ManaStorm",
-            "Maelstrom of Electricity",
-            "Maelstrom of Thunder",
-        },
-        ['VolleyNuke'] = {
-            -- Volley Nuke - Pet buff*
-            "Fusillade of Many",
-            "Barrage of Many",
-            "Shockwave of Many",
-            "Volley of Many",
-            "Storm of Many",
-            "Salvo of Many",
-            "Strike of Many",
-            "Clash of Many",
-            "Jolt of Many",
-            "Shock of Many",
-        },
-        ['SummonedNuke'] = {
-            -- Unnatural Nukes >70
-            "Dismantle the Unnatural",
-            "Unmend the Unnatural",
-            "Obliterate the Unnatural",
-            "Repudiate the Unnatural",
-            "Eradicate the Unnatural",
-            "Exterminate the Unnatural",
-            "Abolish the Divergent",
-            "Annihilate the Divergent",
-            "Annihilate the Anomalous",
-            "Annihilate the Aberrant",
-            "Annihilate the Unnatural",
         },
         ['MaloNuke'] = {
             -- Shock/Malo Combo Line
@@ -1060,7 +897,7 @@ _ClassConfig      = {
             if not itemSource and itemSource() then return false end
             if not scope then return false end
 
-            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Spell(itemSource).RankName.Base(1)() end)
+            mq.delay("2s", function() return mq.TLO.Cursor() ~= nil and mq.TLO.Cursor.ID() == mq.TLO.Spell(itemSource).RankName.Base(1)() end)
 
             if not mq.TLO.Cursor() then
                 Logger.log_debug("No valid item found on cursor, item handling aborted.")
@@ -1405,6 +1242,10 @@ _ClassConfig      = {
                 type = "Spell",
             },
             {
+                name = "QuickMagicDD",
+                type = "Spell",
+            },
+            {
                 name = "ChaoticNuke",
                 type = "Spell",
             },
@@ -1429,6 +1270,10 @@ _ClassConfig      = {
             },
         },
         ['DPS(1-69)'] = {
+            {
+                name = "QuickMagicDD",
+                type = "Spell",
+            },
             {
                 name = "BigFireDD",
                 type = "Spell",
@@ -1633,6 +1478,7 @@ _ClassConfig      = {
                 { name = "FireDD", },
                 { name = "BigFireDD", },
                 { name = "MagicDD", },
+                { name = "QuickMagicDD", },
                 { name = "Bladegusts", },
                 { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
                 { name = "PBAE2",            cond = function(self) return Core.IsModeActive("PBAE") end, },
@@ -1654,6 +1500,7 @@ _ClassConfig      = {
                 { name = "ChaoticNuke", },
                 { name = "SwarmPet", },
                 { name = "Bladegusts", },
+                { name = "QuickMagicDD", },
                 { name = "Myriad", },
                 { name = "PBAE1",            cond = function(self) return Core.IsModeActive("PBAE") end, },
                 { name = "PBAE2",            cond = function(self) return Core.IsModeActive("PBAE") end, },
