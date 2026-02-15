@@ -834,7 +834,6 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
-                ---@diagnostic disable-next-line: undefined-field -- doesn't like secondarypct
                 return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Globals.AutoTargetIsNamed)
             end,
         },
@@ -1244,7 +1243,6 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.VeilofDarkness,
                 cond = function(self, aaName, target)
-                    ---@diagnostic disable-next-line: undefined-field
                     return Globals.AutoTargetIsNamed and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
                 end,
             },
@@ -1253,7 +1251,6 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ProjectionofDoom,
                 cond = function(self, aaName, target)
-                    ---@diagnostic disable-next-line: undefined-field
                     return Globals.AutoTargetIsNamed and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
@@ -1272,7 +1269,6 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('DoTerror') == 3 or (Config:GetSetting('DoTerror') == 2 and not Core.GetResolvedActionMapItem('ForPower')) end,
                 cond = function(self, spell, target)
                     if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                    ---@diagnostic disable-next-line: undefined-field
                     return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
             },
@@ -1283,7 +1279,6 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('DoTerror') == 3 or (Config:GetSetting('DoTerror') == 2 and not Core.GetResolvedActionMapItem('ForPower')) end,
                 cond = function(self, spell, target)
                     if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
-                    ---@diagnostic disable-next-line: undefined-field
                     return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
             },
@@ -1602,7 +1597,6 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.PurityofDeath,
                 cond = function(self, aaName)
-                    ---@diagnostic disable-next-line: undefined-field
                     return mq.TLO.Me.TotalCounters() > 0
                 end,
             },

@@ -163,7 +163,6 @@ function Module:GiveTime()
         if Config:GetSetting('DoDanNetDrag') then
             local dannetPeers = mq.TLO.DanNet.PeerCount()
             for i = 1, dannetPeers do
-                ---@diagnostic disable-next-line: redundant-parameter
                 local peer = DanNet.getPeer(i)
 
                 if peer and peer:len() > 0 then

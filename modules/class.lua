@@ -1458,11 +1458,9 @@ function Module:GiveTime()
     local enabledRotations = Config:GetSetting('EnabledRotations') or {}
 
     local me               = mq.TLO.Me
-    ---@diagnostic disable-next-line: undefined-field
     if me.Hovering() or me.Stunned() or me.Charmed() or me.Mezzed() or me.Feared() then
         Logger.log_super_verbose("Class GiveTime aborted, we aren't in control of ourselves. Hovering(%s) Stunned(%s) Charmed(%s) Feared(%s) Mezzed(%s)",
             Strings.BoolToColorString(me.Hovering()), Strings.BoolToColorString(me.Stunned()), Strings.BoolToColorString(me.Charmed() ~= nil),
-            ---@diagnostic disable-next-line: undefined-field
             Strings.BoolToColorString(me.Mezzed() ~= nil), Strings.BoolToColorString(me.Feared() ~= nil))
         return
     end
@@ -1782,7 +1780,6 @@ end
 function Module:SetPetHold()
     if Config:GetSetting('DoPetCommands') and mq.TLO.Me.Pet.ID() > 0 then
         if Casting.CanUseAA("Companion's Discipline") or Casting.CanUseAA("Pet Discipline") then
-            ---@diagnostic disable-next-line: undefined-field --GHold not listed in defs
             if not mq.TLO.Me.Pet.GHold() then
                 Core.DoCmd("/pet ghold on")
             end

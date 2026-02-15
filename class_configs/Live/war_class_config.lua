@@ -511,7 +511,6 @@ local _ClassConfig = {
                 name = "Blast of Anger",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    ---@diagnostic disable-next-line: undefined-field
                     return Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
                 end,
             },
@@ -527,7 +526,6 @@ local _ClassConfig = {
                 name = "Projection of Fury",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    ---@diagnostic disable-next-line: undefined-field
                     return Globals.AutoTargetIsNamed and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
@@ -829,7 +827,6 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoBattleLeap') then return false end
-                    ---@diagnostic disable-next-line: undefined-field --Defs are not updated with HeadWet
                     return not mq.TLO.Me.HeadWet() --Stops Leap from launching us above the water's surface
                 end,
             },

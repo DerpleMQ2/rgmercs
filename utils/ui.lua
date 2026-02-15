@@ -2188,7 +2188,6 @@ function Ui.RenderThemeConfigElement(id, themeElement)
     local any_pressed, delete_pressed = false, false
 
     if themeElement.color ~= nil then
-        ---@diagnostic disable-next-line: cast-local-type
         local settingNum, _, pressed = Ui.RenderOption("Combo", Ui.GetImGuiColorId(setting) + 1, id, false, Ui.ImGuiColorVars, "<Unused>")
         any_pressed = any_pressed or (pressed or false)
 
@@ -2204,7 +2203,6 @@ function Ui.RenderThemeConfigElement(id, themeElement)
             Config:SetSetting('UserTheme', userConfig)
         end
     else
-        ---@diagnostic disable-next-line: cast-local-type
         local settingNum, _, pressed = Ui.RenderOption("Combo", Ui.GetImGuiStyleId(setting) + 1, id, false, Ui.ImGuiStyleVars, "<Unused>")
         any_pressed = any_pressed or (pressed or false)
 
@@ -2800,7 +2798,6 @@ function Ui.MultiColorSmallButton(lines, addSpaces)
     local max_x, max_y = ImGui.GetItemRectMax()
     local draw_list    = ImGui.GetWindowDrawList()
 
-    ---@diagnostic disable-next-line: param-type-mismatch
     local defaultColor = ImGui.GetStyleColorVec4(ImGuiCol.Text)
 
     -- Background

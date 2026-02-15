@@ -329,7 +329,6 @@ local _ClassConfig = {
                 name = "Projection of Fury",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    ---@diagnostic disable-next-line: undefined-field
                     return Globals.AutoTargetIsNamed
                 end,
             },
@@ -527,7 +526,6 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoBattleLeap') then return false end
                     return not Casting.IHaveBuff(aaName) and not Casting.IHaveBuff('Group Bestial Alignment')
-                        ---@diagnostic disable-next-line: undefined-field --Defs are not updated with HeadWet
                         and not mq.TLO.Me.HeadWet() --Stops Leap from launching us above the water's surface
                 end,
             },

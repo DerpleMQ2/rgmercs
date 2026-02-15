@@ -46,7 +46,6 @@ function helpers.getPeer(peerIdx)
 end
 
 function helpers.getAllPeers()
-    ---@diagnostic disable-next-line: redundant-parameter
     local peers = Strings.split(mq.TLO.DanNet.Peers() or "", "|")
     Logger.log_verbose('\ayGetting All Peers - mq.TLO.DanNet.Peers() = %s', Strings.TableToString(peers, 512))
     return peers

@@ -291,15 +291,11 @@ local _ClassConfig = {
             -- Please note that there are many other ways to correctly write these! Lua is Lua. However, you will commonly see the below styling and copying it should be simple enough!
             -- While not required, we sometimes use "early out" conditional checks so that we don't make complex checks if a simple setting is disabled, etc.
             -- In this instance, you will see that we won't even bother checking anything else if our HP is in the critical HP range, as we need to skip this rotation to get to our emergency stuff to fix that!
-            -- After that, you will see that we have a wierd message about diagnostics: If you are using mq-defs, there are times where it doesn't recognize a TLO/data type because you screwed up.
-            -- However, there are times where it doesn't recognize it because it hasn't been added. This line is basically disabling that check in the following line for error suppression.
             cond = function(self, combat_state)
                 -- The early out conditional statement discussed above.
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
 
-                -- The diagnostic disable discussed above, followed by...
                 -- The return conditions... basically, this rotation will "return" true and process if all of these conditions are met
-                ---@diagnostic disable-next-line: undefined-field -- doesn't like secondarypct
                 return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Globals.AutoTargetIsNamed)
                 -- This is a complex check, which returns true under varying conditions (as the entries themselves are each used in specific scenarios).
                 -- I must editorialize and disclaim that most conditions aren't this convoluted. Please refer to the above and below rotations!
