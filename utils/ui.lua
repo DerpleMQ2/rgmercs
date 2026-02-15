@@ -2898,6 +2898,7 @@ function Ui.RenderModulesPopped(flags)
                 local open, show = ImGui.Begin(Ui.GetWindowTitle(name), true, flags)
                 if show then
                     Modules:ExecModule(name, "Render")
+                    ImGui.Dummy(ImVec2(0, 0))
                 end
                 ImGui.End()
 
