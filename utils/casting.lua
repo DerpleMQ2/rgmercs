@@ -318,7 +318,9 @@ function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
 
     local targetName = target.CleanName()
     local targetId = target.ID()
-    local spellName = mq.TLO.Spell(spellId).Name()
+    local spellName = mq.TLO.Spell(spellId).Name() or mq.TLO.Spell(spellId)()
+
+    if not spellName then return false end
 
     if not mq.TLO.DanNet(mq.TLO.Spawn(targetId).CleanName())() then
         Logger.log_error("PeerBuffCheck: Tried to check a peer's buff, but that peer isn't found! If this behavior continues, please report this. Spell:%s(ID:%d), Target:%s(ID:%d)",
@@ -343,7 +345,7 @@ function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
     local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spellId), 1000)
     if (spellResult or "null"):lower() == "null" then
         Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellId, targetName, targetId)
-        local numEffects = mq.TLO.Spell(spellName).NumEffects()
+        local numEffects = mq.TLO.Spell(spellId).NumEffects()
         local triggerCount = 0
         local triggerFound = 0
         for i = 1, numEffects do
