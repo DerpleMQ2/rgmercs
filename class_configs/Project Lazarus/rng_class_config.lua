@@ -169,7 +169,7 @@ return {
             "Swarm of Pain",
             "Stinging Swarm",
         },
-        ['Snapkick'] = { -- 2-hit kick attack
+        ['KickDisc'] = { -- 2-hit kick attack
             "Jolting Snapkicks",
         },
         ['Bullseye'] = {
@@ -594,7 +594,7 @@ return {
                 type = "Ability",
             },
             {
-                name = "Snapkick",
+                name = "KickDisc",
                 type = "Disc",
                 cond = function(self, discName, target)
                     return mq.TLO.Me.PctEndurance() >= Config:GetSetting("ManaToNuke")

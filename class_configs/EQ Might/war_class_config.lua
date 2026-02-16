@@ -36,8 +36,9 @@ local _ClassConfig = {
         },
     },
     ['AbilitySets']     = {
-        ['StandDisc'] = {           -- Timer 2
-            "Stonewall Discipline", -- no lost movement on laz, more mitigation than defensive
+        ['StandDisc'] = { -- Timer 1
+            "Final Stand Discipline",
+            -- "Stonewall Discipline",
             "Defensive Discipline",
             "Evasive Discipline",
         },
@@ -895,7 +896,7 @@ local _ClassConfig = {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 65, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
                 "  After level 65, expect performance to degrade somewhat as not all EQMight custom spells or items are added, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",

@@ -95,6 +95,7 @@ local _ClassConfig = {
             "Minor Shielding",
         },
         ['SelfRune'] = {
+            "WraitSkin",
             "Dull Pain",
             "Force Shield",
             "Manaskin",
@@ -130,6 +131,7 @@ local _ClassConfig = {
             "Lifetap",
         },
         ['DurationTap'] = {
+            "Dyn`leth's Grasp",
             "Ancient: Chiasa's Kiss",
             -- "Fang of Death",
             -- "Night's Beckon",
@@ -153,6 +155,7 @@ local _ClassConfig = {
             "Shock of Poison",
         },
         ['FireDot'] = {
+            "Pyre of the Fallen",
             "Dread Pyre",
             "Pyre of Mori",
             "Night Fire",
@@ -163,11 +166,16 @@ local _ClassConfig = {
             "Heat Blood",
         },
         ['FireDot2'] = {
+            "Pyre of the Fallen",
+            "Dread Pyre",
             "Pyre of Mori",
             "Night Fire",
             "Funeral Pyre of Kelador",
         },
         ['FireDot3'] = {
+            "Pyre of the Fallen",
+            "Dread Pyre",
+            "Pyre of Mori",
             "Night Fire",
             "Funeral Pyre of Kelador",
         },
@@ -175,6 +183,7 @@ local _ClassConfig = {
         --     "Splurt",
         -- },
         ['CurseDot'] = {
+            "Curse of Mortality",     -- Timer 4
             "Ancient: Curse of Mori", -- Timer 5
             "Dark Nightmare",         -- Timer 4
             "Horror",
@@ -182,7 +191,9 @@ local _ClassConfig = {
             "Dark Soul",
         },
         ['CurseDot2'] = {
-            "Dark Nightmare",
+            "Curse of Mortality",     -- Timer 4
+            "Ancient: Curse of Mori", -- Timer 5
+            "Dark Nightmare",         -- Timer 4
             "Horror",
         },
         ['PlagueDot'] = {
@@ -226,6 +237,7 @@ local _ClassConfig = {
         },
         ['ScentDebuff2'] = {
             "Scent of Midnight",
+            "Scent of Twilight",
         },
         ['LichSpell'] = {
             "Dark Possession",
@@ -266,6 +278,7 @@ local _ClassConfig = {
             "Cavorting Bones",
         },
         ['PetHaste'] = {
+            "Sigil of the Unnatural",
             "Glyph of Darkness",
             "Rune of Death",
             "Augmentation of Death",
@@ -294,7 +307,8 @@ local _ClassConfig = {
         --     "Guard of Calliav",
         --     "Ward of Calliav",
         -- },
-        ['PetHealSpell'] = {      -- Also has cure effect for pet
+        ['PetHealSpell'] = { -- Also has cure effect for pet
+            "Chiling Renewal",
             "Dark Salve",
             "Renewal of Lucifer", -- EQM Custom
             "Touch of Death",
@@ -1168,8 +1182,8 @@ local _ClassConfig = {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

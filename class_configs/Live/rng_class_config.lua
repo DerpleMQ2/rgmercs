@@ -792,6 +792,7 @@ local _ClassConfig = {
             "Jolting Axe Kicks",
             "Jolting Roundhouse Kicks",
             "Jolting Drop Kicks",
+            "Jolting Kicks",
         },
         ["AEBlades"] = {
             "Storm of Blades VII",
@@ -1495,7 +1496,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.JoltingKicks,
                 cond = function(self)
-                    return Casting.NoDiscActive() and Targeting.GetTargetDistance() <= 50
+                    return Targeting.GetTargetDistance() <= 50
                 end,
             },
             {

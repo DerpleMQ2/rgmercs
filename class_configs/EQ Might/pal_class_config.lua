@@ -118,20 +118,20 @@ return {
         },
         ["UndeadProc"] = {
             --- Undead Proc Strike : does not stack with Fury Proc, will be used until Fury is available even if setting not enabled.
-            "Instrument of Nife",      -- Level 26, 243pt
-            "Ward of Nife",            -- Level 62, 500pt
-            "Silvered Fury",           -- Level 67, 750pt
+            "Instrument of Nife", -- Level 26, 243pt
+            "Ward of Nife",       -- Level 62, 500pt
+            "Silvered Fury",      -- Level 67, 750pt
         },
-        ["StunTimer5"] = {             -- mq.TLO.Target.ID() == target and not mq.TLO.Spawn(target).Stunned()
-            "Desist",                  -- Level 13 - Not Timer 5, use for TLP Low Level Stun
+        ["StunTimer5"] = {
+            "Desist",                  -- Level 13 - Not Timer 5, filler
             "Stun",                    -- Level 28
             "Force of Akera",          -- Level 53
             "Ancient: Force of Chaos", -- Level 65
             "Ancient: Force of Jeron", -- Level 70
         },
         ["StunTimer4"] = {
-            "Cease",           -- Level 7 - Not Timer 4, use for TLP Low Level Stun
-            "Force",           -- Level 52 - Not Timer 4, use for TLP Low Level Stun
+            "Cease",           -- Level 7 - Not Timer 4, filler
+            "Force",           -- Level 52 - Not Timer 4, filler
             "Force of Akilae", -- Level 62
             "Force of Piety",  -- Level 66
             "Sacred Force",    -- EQM Custom
@@ -179,6 +179,7 @@ return {
             "Wave of Life",
         },
         ["Cleansing"] = {
+            "Sacred Cleansing",    -- Level 71
             "Pious Cleansing",     -- Level 69
             "Supernal Cleansing",  -- Level 64
             "Celestial Cleansing", -- Level 59
@@ -186,9 +187,10 @@ return {
         },
         ["ArmorSelfBuff"] = {
             --- Self Buff Armor Line Ac/Hp/Mana regen
-            "Armor of the Divine",   -- Level 60
-            "Aura of the Crusader",  -- Level 64
-            "Armor of the Champion", -- Level 69
+            "Armor of the Divine",        -- Level 60
+            "Aura of the Crusader",       -- Level 64
+            "Armor of the Champion",      -- Level 69
+            "Armor of Unrelenting Faith", -- Level 71
         },
         ["SymbolBuff"] = {
             "Jeron's Mark",
@@ -204,6 +206,7 @@ return {
             "Quellious' Word of Tranquility", -- Level 54
             "Quellious' Word of Serenity",    -- Level 64
             "Serene Command",                 -- Level 68
+            "Lesson of Penitence",
         },
         ["TouchHeal"] = {
             -- Target Light Heal
@@ -223,6 +226,7 @@ return {
             "Light of Nife",  -- Level 63
             "Light of Order", -- Level 65
             "Light of Piety", -- Level 68
+            "Gleaming Light", -- Level 71
         },
         ["LightHeal2"] = {
             -- ToT Light Heal
@@ -230,6 +234,10 @@ return {
             "Light of Nife",  -- Level 63
             "Light of Order", -- Level 65
             "Light of Piety", -- Level 68
+            "Gleaming Light", -- Level 71
+        },
+        ['BurstHeal'] = {
+            "Burst of Sunlight",
         },
         -- ["Pacify"] = {
         --     "Pacify",
@@ -295,6 +303,7 @@ return {
         --     "Justice of Marr",
         -- },
         ['GuardDisc'] = {
+            "Armor of Righteousness",
             "Ancient: Guard of Chivalry",
             "Guard of Righteousness",
             "Guard of Humility",
@@ -319,6 +328,9 @@ return {
         ['SpellResistBuff'] = {
             "Silent Piety",
         },
+        ["ForHonor"] = { -- Hate Over Time with small absorb recourse
+            "Challenge for Honor",
+        },
     },
     ['SpellList']         = {
         {
@@ -331,8 +343,10 @@ return {
                 { name = "WaveHeal",        cond = function(self) return Config:GetSetting('DoWaveHeal') < 3 end, },
                 { name = "WaveHeal2",       cond = function(self) return Config:GetSetting('DoWaveHeal') == 2 end, },
                 { name = "SelfHeal", },
+                { name = "BurstHeal", },
                 { name = "Cleansing",       cond = function(self) return Config:GetSetting('DoCleansing') < 3 end, },
                 { name = "SereneStun",      cond = function(self) return Config:GetSetting('DoSereneStun') end, },
+                { name = "ForHonor",        cond = function(self) return Core.IsTanking() end, },
                 { name = "StunTimer4",      cond = function(self) return Core.IsTanking() end, },
                 { name = "StunTimer5",      cond = function(self) return Core.IsTanking() end, },
                 { name = "PBAEStun",        cond = function(self) return Config:GetSetting('AEStunUse') > 1 end, },
@@ -512,6 +526,10 @@ return {
                     if not Targeting.GroupedWithTarget(target) then return false end
                     return self.CombatState == "Combat" and (Targeting.TargetIsMyself(target) or Targeting.GetTargetPctHPs() < Config:GetSetting('HPCritical'))
                 end,
+            },
+            {
+                name = "BurstHeal",
+                type = "Spell",
             },
             {
                 name = "Mantle of the Wyrmguard",
@@ -865,6 +883,13 @@ return {
                 type = "AA",
             },
             {
+                name = "ForHonor",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell)
+                end,
+            },
+            {
                 name = "StunTimer5",
                 type = "Spell",
             },
@@ -993,6 +1018,15 @@ return {
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoAEDamage') then return false end
                     return self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                end,
+            },
+            {
+                name = "ForHonor",
+                type = "Spell",
+                load_cond = function(self) return Core.IsTanking() end,
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoForPower') then return false end
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1386,7 +1420,7 @@ return {
             Tooltip = "Choose how many ToT heals (\"Light of\" line) to keep memorized, if any.",
             RequiresLoadoutChange = true,
             Type = "Combo",
-            ComboOptions = { 'Current Tier', 'Current Tier + Last Tier', 'Never', },
+            ComboOptions = { 'Current Tier', 'Current Tier + Last Tier', 'None', },
             Default = 2,
             Min = 1,
             Max = 3,
@@ -1602,8 +1636,8 @@ return {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
