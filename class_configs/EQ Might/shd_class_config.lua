@@ -126,6 +126,7 @@ local _ClassConfig = {
     ['AbilitySets']     = {
         --Laz spells to look into: Fickle Shadows
         ['Mantle'] = {
+            "Soul Carapace",
             "Ancient: Guard of Chivalry", -- EQM Custom
             "Soul Shield",
             "Soul Guard",
@@ -153,21 +154,23 @@ local _ClassConfig = {
             "Leering Corpse,",
         },
         ['PetHaste'] = {
+            "Amplify Death",
             "Rune of Decay",
             "Augmentation of Death",
             "Augment Death",
             "Strengthen Death",
         },
-        ['Horror'] = {             -- HP Tap Proc
-            "Marrowthirst Horror", -- EQM Added
-            "Shroud of Discord",   -- Level 67 -- Buff Slot 1 <
-            "Black Shroud",        -- Level 65
-            "Shroud of Chaos",     -- Level 63
-            "Shroud of Death",     -- Level 55
+        ['Horror'] = {                 -- HP Tap Proc
+            "Shroud of the Nightborn", -- Level 71
+            "Marrowthirst Horror",     -- EQM Added
+            "Shroud of Discord",       -- Level 67 -- Buff Slot 1 <
+            "Black Shroud",            -- Level 65
+            "Shroud of Chaos",         -- Level 63
+            "Shroud of Death",         -- Level 55
         },
-        ['Mental'] = {             -- Mana Tap Proc
-            "Mental Horror",       -- Level 65 --Buff Slot 1 >
-            "Mental Corruption",   -- Level 52
+        ['Mental'] = {                 -- Mana Tap Proc
+            "Mental Horror",           -- Level 65 --Buff Slot 1 >
+            "Mental Corruption",       -- Level 52
         },
         ['Skin'] = {
             "Decrepit Skin", -- Level 70
@@ -187,7 +190,8 @@ local _ClassConfig = {
             "Dread Gaze", -- Level 69
         },
         ['PoisonDot'] = {
-            "Blood of Pain", -- Level 41
+            "Blood of the Blacktalon", -- Level 71
+            "Blood of Pain",           -- Level 41
             "Blood of Hate",
             "Blood of Discord",
             "Blood of Inruku",
@@ -257,6 +261,7 @@ local _ClassConfig = {
         -- },
         ['BiteTap'] = {
             "Zevfeer's Bite", -- Level 62
+            "Ancient: Bite of Chaos",
             "Inruku's Bite",
             "Ancient: Bite of Muram",
             "Blacktalon Bite", -- EQM Added
@@ -335,6 +340,9 @@ local _ClassConfig = {
         },
         ['Protective'] = {
             "Protective Discipline",
+        },
+        ['ForPower'] = {
+            "Challenge for Power",
         },
         -- pact of decay ... is this a lich? level 69
     },
@@ -934,6 +942,15 @@ local _ClassConfig = {
             },
         },
         ['Combat'] = {
+            {
+                name = "ForPower",
+                type = "Spell",
+                tooltip = Tooltips.ForPower,
+                load_cond = function(self) return Core.IsTanking() end,
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell, target)
+                end,
+            },
             {
                 name = "SpearNuke",
                 type = "Spell",
@@ -1564,8 +1581,8 @@ local _ClassConfig = {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

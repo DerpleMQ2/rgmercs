@@ -148,6 +148,7 @@ local _ClassConfig = {
             "Ro's Fiery Sundering",
         },
         ['ColdDebuff'] = { -- Cold/AC Debuff
+            "Icefall Breath",
             "Glacier Breath",
             "E`ci's Frosty Breath",
             "Twilight Breath",
@@ -157,6 +158,7 @@ local _ClassConfig = {
             "Skin of the Serpent", -- EQM Custom
         },
         ['SwarmDot'] = {           -- Magic Dot, 54s
+            "Swarm of Fireants",
             "Wasp Swarm",
             "Swarming Death",
             "Winged Death",
@@ -200,6 +202,7 @@ local _ClassConfig = {
             "Tangling Weeds",
         },
         ['FireNuke'] = {
+            "Winter's Flame", -- start to add cold damage in as well
             "Solstice Strike",
             "Sylvan Fire",
             "Summer's Flame",
@@ -230,6 +233,7 @@ local _ClassConfig = {
             "Cascade of Hail",
         },
         ['SelfDS'] = {
+            "Viridicoat",
             "Nettlecoat",
             "Brackencoat",
             "Bladecoat",
@@ -1423,8 +1427,8 @@ local _ClassConfig = {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

@@ -65,6 +65,7 @@ _ClassConfig      = {
         --     "Fickle Fire",
         -- },
         ['FireDD'] = { -- Mix of Fire Nukes and Bolts appropriate for use at lower levels.
+            "Scalding Sands",
             "Burning Earth",
             "Burning Sand",
             "Scars of Sigil",
@@ -86,6 +87,7 @@ _ClassConfig      = {
             "Seeking Flame of Seukor",
         },
         ['MagicDD'] = { -- Magic does not have any faster casts like Fire, we have only these.
+            "Shock of Silvered Steel",
             "Blade Strike",
             "Rock of Taelosia",
             "Black Steel",
@@ -130,6 +132,7 @@ _ClassConfig      = {
             "Shield of Fire",
         },
         ['ManaRegenBuff'] = {
+            "Phantasmal Warden",
             "Phantom Shield",
             "Xegony's Phantasmal Guard",
             "Transon's Phantasmal Protection",
@@ -145,7 +148,7 @@ _ClassConfig      = {
         },
         -- Pet Spells Pets & Spells Affecting them
         ['PetHealSpell'] = {
-            -- Pet Heal*
+            "Renewal of Aenda",
             "Renewal of Jerikor",
             "Renewal of Lucifer", -- EQM Custom
             "Planar Renewal",
@@ -192,7 +195,7 @@ _ClassConfig      = {
             "Elementalkin: Earth",
         },
         ['WaterPetSpell'] = {
-            ----- Water Pet*
+            "Essence of Water",
             "Child of Water",
             "Servant of Marr",
             "Greater Vocaration: Water",
@@ -262,6 +265,7 @@ _ClassConfig      = {
         },
         ['ManaRodSummon'] = {
             --- ManaRodSummon - Focuses on group mana rod summon for ease. _
+            -- "Wand of Elemental Transvergence",
             "Mass Mystical Transvergence",
             "Modulating Rod",
         },
@@ -568,7 +572,7 @@ _ClassConfig      = {
             if not itemSource and itemSource() then return false end
             if not scope then return false end
 
-            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Spell(itemSource).RankName.Base(1)() end)
+            mq.delay("2s", function() return mq.TLO.Cursor() ~= nil and mq.TLO.Cursor.ID() == mq.TLO.Spell(itemSource).RankName.Base(1)() end)
 
             if not mq.TLO.Cursor() then
                 Logger.log_debug("No valid item found on cursor, item handling aborted.")
@@ -1398,8 +1402,8 @@ _ClassConfig      = {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

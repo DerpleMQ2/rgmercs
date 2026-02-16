@@ -62,6 +62,7 @@ return {
             "Cry Havoc",
         },
         ['StunStrike'] = {
+            "Temple Blow",
             "Mind Strike",
             "Head Crush",
             "Head Pummel",
@@ -81,6 +82,9 @@ return {
             "Rejuvenating Will Discipline",
             "Healing Determination Discipline",
             "Healing Will Discipline",
+        },
+        ['Scream'] = { -- Throwing/Archery Dmg taken debuff
+            "Unsettling Scream",
         },
     },
     ['RotationOrder']   = {
@@ -239,6 +243,13 @@ return {
                 type = "Disc",
             },
             {
+                name = "Scream",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.DetSpellCheck(discSpell, target)
+                end,
+            },
+            {
                 name = "Blinding Fury",
                 type = "AA",
             },
@@ -258,6 +269,7 @@ return {
                 name = "Reckless Abandon",
                 type = "AA",
             },
+
         },
         ['DPS'] = {
             {
@@ -481,7 +493,7 @@ return {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
                 "  After level 65, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",

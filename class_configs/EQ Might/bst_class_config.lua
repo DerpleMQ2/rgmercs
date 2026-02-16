@@ -54,11 +54,12 @@ return {
             "Glacier Spear",   -- Level 69 - Timer 11
         },
         ['EndemicDot'] = {
-            -- Disease DoT Instant Cast
+            -- Disease DoT
             "Sicken",           -- Level 14
             "Malaria",          -- Level 40
             "Plague",           -- Level 65
             "Festering Malady", -- Level 70
+            "Fever Spike",      -- Level 71
         },
         ['BloodDot'] = {
             -- Poison DoT Instant Cast
@@ -88,6 +89,7 @@ return {
             "Chloroblast",       -- Level 59
             "Trushar's Mending", -- Level 65
             "Muada's Mending",   -- Level 67
+            "Minohten Mending",  -- Level 71
         },
         ['PetHealSpell'] = {
             "Sharik's Replenishing",   -- Level 9
@@ -118,6 +120,7 @@ return {
             "Spirit of Rashara",   -- Level 70
         },
         ['PetHaste'] = {
+            "Unparalleled Voracity",
             "Yekan's Quickening",
             "Bond of The Wild",
             "Omakin's Alacrity",
@@ -178,6 +181,7 @@ return {
             "Focus of Amilan", -- EQM Group
         },
         ['AtkHPBuff'] = {
+            "Spiritual Vim",
             "Spiritual Vitality",
             "Spiritual Vigor",
             "Spiritual Brawn",
@@ -208,6 +212,9 @@ return {
         },
         ['Rake'] = {
             "Rake",
+        },
+        ['BiteNuke'] = {
+            "Bite of the Empress",
         },
     },
     ['HealRotationOrder'] = {
@@ -529,6 +536,13 @@ return {
             {
                 name = "SwarmPet",
                 type = "Spell",
+            },
+            {
+                name = "PoiBite",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke()
+                end,
             },
             {
                 name = "Icelance1",
@@ -1100,8 +1114,8 @@ return {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

@@ -157,6 +157,7 @@ return {
             "Lesser Evacuate",
         },
         ['HarvestSpell'] = {
+            "Patient Harvest",
             "Harvest",
         },
         ['JoltSpell'] = {
@@ -216,11 +217,12 @@ return {
         --     "Tears of Arlyxir",
         -- },
         ['PBTimer4'] = {
-            "Circle of Thunder", -- Level 70, Magic
-            "Circle of Fire",    -- Level 67, Fire
-            "Winds of Gelid",    -- Level 60, Ice
-            "Supernova",         -- Level 45, Fire
-            "Thunderclap",       -- Level 30, Magic
+            "Magmaraug's Presence", -- Level 71, Fire
+            "Circle of Thunder",    -- Level 70, Magic
+            "Circle of Fire",       -- Level 67, Fire
+            "Winds of Gelid",       -- Level 60, Ice
+            "Supernova",            -- Level 45, Fire
+            "Thunderclap",          -- Level 30, Magic
         },
         ['FireJyll'] = {
             "Jyll's Wave of Heat", -- Level 59

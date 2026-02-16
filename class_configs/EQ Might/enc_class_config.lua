@@ -38,14 +38,15 @@ local _ClassConfig = {
     },
     ['AbilitySets']     = {
         --Commented any currently unused spell lines
-        -- ['TwincastAura'] = {
-        --     "Twincast Aura",
-        -- },
+        ['TwincastAura'] = {
+            "Entrancer's Aura",
+        },
         ['SpellProcAura'] = {
             "Illusionist's Aura",
             "Beguiler's Aura",
         },
         ['HasteBuff'] = {
+            "Speed of Ellowind",
             "Hastening of Salik",
             "Speed of Salik",
             "Vallon's Quickening",
@@ -60,6 +61,7 @@ local _ClassConfig = {
             "Quickness",
         },
         ['ManaRegen'] = {
+            "Seer's Intuition",
             "Ancient: Blessing of Clairvoyance",
             "Voice of Clairvoyance",
             "Clairvoyance",
@@ -121,6 +123,7 @@ local _ClassConfig = {
             "Haunting Visage",
         },
         -- ['SingleSpellShield'] = {
+        -- "Aegist of Alendar",
         --     "Wall of Alendar",
         --     "Bulwark of Alendar",
         --     "Protection of Alendar",
@@ -131,6 +134,7 @@ local _ClassConfig = {
             "Circle of Alendar",
         },
         ['SpellProcBuff'] = {
+            "Mana Recursion",
             "Mana Flare",
         },
         ['PBAEStunSpell'] = {
@@ -145,6 +149,7 @@ local _ClassConfig = {
             "Whirl Till You Hurl",
         },
         ['CharmSpell'] = {
+            "Coax",
             "Ancient: Voice of Muram",
             "True Name",
             "Compel",
@@ -200,6 +205,7 @@ local _ClassConfig = {
         --     "Mana Sieve",
         -- },
         ['StrangleDot'] = {
+            "Thin Air",
             "Arcane Noose",
             "Strangle",
             "Asphyxiate",
@@ -213,6 +219,7 @@ local _ClassConfig = {
             "Mind Shatter",
         },
         ['MagicNuke'] = {
+            "Polychromatic Assault",
             "Ancient: Neurosis",
             "Psychosis",
             "Ancient: Chaos Madness",
@@ -266,6 +273,7 @@ local _ClassConfig = {
         --     "Wonderment",
         -- },
         ['MezSpell'] = {
+            "Bewilderment",
             "Perplexing Flash",
             "Euphoria",
             "Echoing Madness",
@@ -540,20 +548,21 @@ local _ClassConfig = {
                     return not Casting.AuraActiveByName(aura)
                 end,
             },
-            -- {
-            --     name = "TwincastAura",
-            --     type = "Spell",
-            --     active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
-            --     pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
-            --         if not Casting.AuraActiveByName(spell.Name()) then
-            --             ---@diagnostic disable-next-line: undefined-field
-            --             mq.TLO.Me.Aura(1).Remove()
-            --         end
-            --     end,
-            --     cond = function(self, spell)
-            --         return not Casting.AuraActiveByName(spell.Name())
-            --     end,
-            -- },
+            {
+                name = "TwincastAura",
+                type = "Spell",
+                load_cond = function(self) return Casting.CanUseAA('Auroria Mastery') end,
+                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
+                pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
+                    if not Casting.AuraActiveByName(spell.Name()) then
+                        ---@diagnostic disable-next-line: undefined-field
+                        mq.TLO.Me.Aura(1).Remove()
+                    end
+                end,
+                cond = function(self, spell)
+                    return not Casting.AuraActiveByName(spell.Name())
+                end,
+            },
             {
                 name = "Azure Mind Crystal",
                 type = "AA",
@@ -1084,6 +1093,7 @@ local _ClassConfig = {
                 { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
                 { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
                 { name = "KoadicRune", },
+                -- todo: Add PBAE Mez for filler (manual use, script doesnt use it)
             },
         },
     },
@@ -1443,8 +1453,8 @@ local _ClassConfig = {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },

@@ -132,6 +132,7 @@ local _ClassConfig = {
             "Holy Light",
             "Pious Light",
             "Ancient: Hallowed Light",
+            "Sacred Light",
         },
         ['RemedyHeal'] = { -- Not great until 96/RoF (Graceful)
             "Remedy",
@@ -184,6 +185,7 @@ local _ClassConfig = {
             "Holy Armor",
         },
         ['SingleVieBuff'] = {
+            "Aegis of Vie",
             "Panoply of Vie",
             "Bulwark of Vie",
             "Protection of Vie",
@@ -229,6 +231,7 @@ local _ClassConfig = {
             "Reanimation",
         },
         ['SingleElixir'] = {
+            "Sacred Elixir",
             "Pious Elixir",
             "Holy Elixir",
             "Supernal Elixir",
@@ -242,6 +245,8 @@ local _ClassConfig = {
             "Ethereal Elixir",
         },
         ['SpellBlessing'] = {
+            "Aura of Purpose",
+            "Blessing of Purpose",
             "Aura of Devotion",
             "Blessing of Devotion",
             "Aura of Reverence",
@@ -281,6 +286,7 @@ local _ClassConfig = {
             "Yaulp V",           -- Level 56, first rank with haste/mana regen. We won't use it before this.
         },
         ['StunTimer6'] = {       -- Timer 6 Stun, Fast Cast, Level 63+ (with ToT Heal 88+)
+            "Sound of Zeal",     -- works up to level 75
             "Sound of Divinity", -- works up to level 70
             "Sound of Might",
             --Filler before this
@@ -305,6 +311,7 @@ local _ClassConfig = {
             "Ward Undead",
         },
         ['MagicNuke'] = {
+            "Reproval",
             "Chromastrike",
             "Reproach",
             "Order",
@@ -336,6 +343,9 @@ local _ClassConfig = {
         ['PBAEStun'] = { --This isn't worthwhile before these spells come around. The stun won't land in many cases (level) but the damage is okay.
             "Silent Dictation",
             "The Silent Command",
+        },
+        ['PromisedHeal'] = {
+            "Promised Renewal",
         },
     }, -- end AbilitySets
     ['HelperFunctions']   = {
@@ -994,6 +1004,7 @@ local _ClassConfig = {
                 { name = "PBAEStun",      cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
                 { name = "PBAENuke",      cond = function(self) return Config:GetSetting('DoPBAENuke') end, },
                 { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
+                { name = "PromisedHeal", }, -- filler, for manual use only, the config does not use it automatically
                 { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
@@ -1372,8 +1383,8 @@ local _ClassConfig = {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is currently a Work-In-Progress that was originally based off of the Project Lazarus config.\n\n" ..
-                "  Up until level 70, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
-                "  After level 67, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
+                "  Up until level 71, it should work quite well, but may need some clickies managed on the clickies tab.\n\n" ..
+                "  After level 68, however, there hasn't been any playtesting... some AA may need to be added or removed still, and some Laz-specific entries may remain.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
