@@ -1306,11 +1306,9 @@ return {
             {
                 name = "Hobble of Spirits",
                 type = "AA",
-                load_cond = function(self) return Config:GetSetting('PetProcChoice') == 3 end,
+                load_cond = function(self) return Config:GetSetting('PetProcChoice') == 2 end,
                 cond = function(self, aaName, target)
-                    local slowProc = self.ResolvedActionMap['PetSlowProc']
-                    return (slowProc and slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
-                        mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name())() == nil
+                    return Casting.PetBuffAACheck(aaName)
                 end,
             },
             {
@@ -1348,7 +1346,7 @@ return {
             {
                 name = "PetSlowProc",
                 type = "Spell",
-                load_cond = function(self) return Config:GetSetting('PetProcChoice') == 2 end,
+                load_cond = function(self) return Config:GetSetting('PetProcChoice') == 1 end,
                 cond = function(self, spell)
                     return Casting.PetBuffCheck(spell)
                 end,
@@ -1363,7 +1361,6 @@ return {
             {
                 name = "PetDamageProc",
                 type = "Spell",
-                load_cond = function(self) return Config:GetSetting('PetProcChoice') == 1 end,
                 cond = function(self, spell)
                     return Casting.PetBuffCheck(spell)
                 end,
@@ -1610,10 +1607,10 @@ return {
             Index = 102,
             Tooltip = "Select your preferred pet proc buff type.",
             Type = "Combo",
-            ComboOptions = { 'Damage', 'Slow', 'Snare', },
-            Default = 3,
+            ComboOptions = { 'Slow', 'Snare', },
+            Default = 1,
             Min = 1,
-            Max = 3,
+            Max = 2,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
         },
