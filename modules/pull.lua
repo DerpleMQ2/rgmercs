@@ -880,7 +880,10 @@ function Module:RenderMobList(displayName, settingName)
         if mq.TLO.Target() and Targeting.TargetIsType("NPC") then
             ImGui.PushID("##_small_btn_allow_target_" .. settingName)
             if ImGui.SmallButton(string.format("Add Target To %s", displayName)) then
-                self:AddMobToList(settingName, mq.TLO.Target.CleanName())
+                local targetName = mq.TLO.Target.CleanName()
+                if not self:IsMobInList(settingName, targetName, false) then
+                    self:AddMobToList(settingName, targetName)
+                end
             end
             ImGui.PopID()
         end
@@ -892,7 +895,7 @@ function Module:RenderMobList(displayName, settingName)
             ImGui.TableSetupColumn('Controls', (ImGuiTableColumnFlags.WidthFixed), 80.0)
             ImGui.TableHeadersRow()
 
-            for idx, mobName in pairs(Config:GetSetting(settingName)[mq.TLO.Zone.ShortName()] or {}) do
+            for idx, mobName in ipairs(Config:GetSetting(settingName)[mq.TLO.Zone.ShortName()] or {}) do
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(idx))
                 ImGui.TableNextColumn()
@@ -1303,7 +1306,7 @@ end
 function Module:DeleteMobFromList(list, idx)
     local listConfig = Config:GetSetting(list)
     listConfig[mq.TLO.Zone.ShortName()] = listConfig[mq.TLO.Zone.ShortName()] or {}
-    listConfig[mq.TLO.Zone.ShortName()][idx] = nil
+    table.remove(listConfig[mq.TLO.Zone.ShortName()], idx)
     Config:SetSetting(list, listConfig)
 
     -- if we are pulling start over.
