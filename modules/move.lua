@@ -1,29 +1,30 @@
 -- Sample Basic Class Module
-local mq                           = require('mq')
-local Config                       = require('utils.config')
-local Globals                      = require('utils.globals')
-local Math                         = require('utils.math')
-local Combat                       = require('utils.combat')
-local Core                         = require("utils.core")
-local Targeting                    = require("utils.targeting")
-local Movement                     = require("utils.movement")
-local Casting                      = require("utils.casting")
-local Ui                           = require("utils.ui")
-local Comms                        = require("utils.comms")
-local Files                        = require("utils.files")
-local Logger                       = require("utils.logger")
-local Strings                      = require("utils.strings")
-local Set                          = require("mq.Set")
-local Icons                        = require('mq.ICONS')
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Globals   = require('utils.globals')
+local Math      = require('utils.math')
+local Combat    = require('utils.combat')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Movement  = require("utils.movement")
+local Casting   = require("utils.casting")
+local Ui        = require("utils.ui")
+local Comms     = require("utils.comms")
+local Files     = require("utils.files")
+local Logger    = require("utils.logger")
+local Strings   = require("utils.strings")
+local Set       = require("mq.Set")
+local Base      = require("modules.base")
+local Icons     = require('mq.ICONS')
 
-local Module                       = { _version = '0.1a', _name = "Movement", _author = 'Derple', }
-Module.__index                     = Module
-Module.ModuleLoaded                = false
+local Module    = { _version = '0.1a', _name = "Movement", _author = 'Derple', }
+Module.__index  = Module
+setmetatable(Module, { __index = Base, })
+
 Module.TempSettings                = {}
 Module.TempSettings.CampZoneId     = 0
 Module.TempSettings.LastCmd        = ""
 Module.TempSettings.StuckAtTime    = 0
-Module.SaveRequested               = nil
 
 Module.Constants                   = {}
 Module.Constants.GGHZones          = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
@@ -317,69 +318,8 @@ Module.CommandHandlers = {
     },
 }
 
-local function getConfigFileName()
-    local oldFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-    local newFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
-
-    if Files.file_exists(newFile) then
-        return newFile
-    end
-
-    Files.copy_file(oldFile, newFile)
-
-    return newFile
-end
-
-function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-    if not self.SaveRequested then return end
-
-    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-    if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastMessage(self._name, "LoadSettings")
-    end
-
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-    self.SaveRequested = nil
-end
-
-function Module:LoadSettings()
-    Logger.log_debug("Chase Module Loading Settings for: %s.", Globals.CurLoadedChar)
-    local settings_pickle_path = getConfigFileName()
-    local settings = {}
-    local firstSaveRequired = false
-
-    local config, err = loadfile(settings_pickle_path)
-    if err or not config then
-        Logger.log_error("\ay[Basic]: Unable to load global settings file(%s), creating a new one!",
-            settings_pickle_path)
-        firstSaveRequired = true
-    else
-        settings = config()
-    end
-
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-end
-
-function Module.New()
-    local newModule = setmetatable({}, Module)
-    return newModule
-end
-
-function Module:Init()
-    Logger.log_debug("Chase Module Loaded.")
-    self:LoadSettings()
-    self.ModuleLoaded = true
-    return { self = self, defaults = self.DefaultConfig, }
+function Module:New()
+    return Base.New(self)
 end
 
 function Module:ChaseOn(nameParam)
@@ -562,7 +502,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopAndSettings(self._name)
+    Base.Render(self)
 
     if self.ModuleLoaded and Globals.SubmodulesLoaded then
         ImGui.Text("Chase Distance: %d", Config:GetSetting('ChaseDistance'))
@@ -677,10 +617,6 @@ function Module:Render()
             ImGui.EndTable()
         end
     end
-end
-
-function Module:Pop()
-    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:OnDeath()
@@ -945,48 +881,6 @@ function Module:CheckStuck()
             end
         end
     end
-end
-
-function Module:OnCombatModeChanged()
-end
-
-function Module:DoGetState()
-    -- Reture a reasonable state if queried
-    return "Running..."
-end
-
-function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-    local params = ...
-
-    if self.CommandHandlers[cmd:lower()] ~= nil then
-        self.CommandHandlers[cmd:lower()].handler(self, params)
-        return true
-    end
-
-    -- try to process as a substring
-    for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
-        if Strings.StartsWith(bindCmd, cmd) then
-            bindData.handler(self, params)
-            return true
-        end
-    end
-
-    return false
-end
-
-function Module:Shutdown()
-    Logger.log_debug("Chase Module Unloaded.")
 end
 
 return Module

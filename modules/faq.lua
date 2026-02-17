@@ -1,19 +1,19 @@
 -- Sample FAQ Class Module
-local mq               = require('mq')
-local Config           = require('utils.config')
-local Globals          = require('utils.globals')
-local Ui               = require('utils.ui')
-local Comms            = require("utils.comms")
-local Logger           = require("utils.logger")
-local Binds            = require("utils.binds")
-local Modules          = require("utils.modules")
-local Strings          = require("utils.strings")
+local mq            = require('mq')
+local Config        = require('utils.config')
+local Globals       = require('utils.globals')
+local Ui            = require('utils.ui')
+local Comms         = require("utils.comms")
+local Logger        = require("utils.logger")
+local Binds         = require("utils.binds")
+local Modules       = require("utils.modules")
+local Strings       = require("utils.strings")
+local Base          = require("modules.base")
 
-local Module           = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }
-Module.__index         = Module
-Module.DefaultConfig   = {}
-Module.TempSettings    = {}
-Module.SaveRequested   = nil
+local Module        = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }
+Module.__index      = Module
+Module.TempSettings = {}
+setmetatable(Module, { __index = Base, })
 
 Module.DefaultConfig   = {
 	[string.format("%s_Popped", Module._name)] = {
@@ -65,57 +65,8 @@ Module.FAQ             = {
 	},
 }
 
-local function getConfigFileName()
-	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-end
-
-function Module:SaveSettings(doBroadcast)
-	self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-	if not self.SaveRequested then return end
-
-	mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-	if self.SaveRequested.doBroadcast == true then
-		Comms.BroadcastMessage(self._name, "LoadSettings")
-	end
-
-	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-	self.SaveRequested = nil
-end
-
-function Module:LoadSettings()
-	Logger.log_debug("FAQ Combat Module Loading Settings for: %s.", Globals.CurLoadedChar)
-	local settings_pickle_path = getConfigFileName()
-	local settings = {}
-	local firstSaveRequired = false
-
-	local config, err = loadfile(settings_pickle_path)
-	if err or not config then
-		Logger.log_error("\ay[FAQ]: Unable to load global settings file(%s), creating a new one!",
-			settings_pickle_path)
-		firstSaveRequired = true
-	else
-		settings = config()
-	end
-
-	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-end
-
-function Module.New()
-	local newModule = setmetatable({}, Module)
-	return newModule
-end
-
-function Module:Init()
-	Logger.log_debug("FAQ Combat Module Loaded.")
-	self:LoadSettings()
-
-	return { self = self, defaults = self.DefaultConfig, }
+function Module:New()
+	return Base.New(self)
 end
 
 function Module:ShouldRender()
@@ -456,68 +407,6 @@ function Module:RenderConfig(search)
 		end
 	end
 	ImGui.EndChild()
-end
-
-function Module:Render()
-end
-
-function Module:GiveTime()
-	-- Main Module logic goes here.
-end
-
-function Module:OnDeath()
-	-- Death Handler
-end
-
-function Module:OnZone()
-	-- Zone Handler
-end
-
-function Module:OnCombatModeChanged()
-end
-
-function Module:DoGetState()
-	-- Reture a reasonable state if queried
-	return "Running..."
-end
-
-function Module:GetCommandHandlers()
-	return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:Pop()
-	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
-end
-
-function Module:GetFAQ()
-	return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-	local params = ...
-	local handled = false
-
-	if self.CommandHandlers[cmd:lower()] ~= nil then
-		self.CommandHandlers[cmd:lower()].handler(self, params)
-		return true
-	end
-
-	-- try to process as a substring
-	for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
-		if Strings.StartsWith(bindCmd, cmd) then
-			bindData.handler(self, params)
-			return true
-		end
-	end
-
-	return false
-end
-
-function Module:Shutdown()
-	Logger.log_debug("FAQ Combat Module Unloaded.")
 end
 
 return Module

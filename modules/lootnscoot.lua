@@ -11,6 +11,7 @@ local Strings            = require("utils.strings")
 local Logger             = require("utils.logger")
 local Actors             = require("actors")
 local Events             = require("utils.events")
+local Base               = require("modules.base")
 
 -- Server name formatted for LNS to recognize
 local serverLNSFormat    = mq.TLO.EverQuest.Server():gsub(" ", "_")
@@ -18,12 +19,12 @@ local warningMessageSent = false
 
 local Module             = { _version = '1.2', _name = "LootNScoot", _author = 'Derple, Grimmier, Algar', }
 Module.__index           = Module
-Module.SaveRequested     = nil
+setmetatable(Module, { __index = Base, })
 
-Module.ModuleLoaded      = false
-Module.TempSettings      = {}
+Module.ModuleLoaded  = false
+Module.TempSettings  = {}
 
-Module.FAQ               = {
+Module.FAQ           = {
 	{
 		Question = "How can I loot corpses on emu servers?",
 		Answer = "RGMercs offers a Loot Module to direct and integrate LootNScoot (LNS), an emu loot management script." ..
@@ -33,7 +34,7 @@ Module.FAQ               = {
 	},
 }
 
-Module.DefaultConfig     = {
+Module.DefaultConfig = {
 	['DoLoot']                                 = {
 		DisplayName = "Load LootNScoot",
 		Group = "General",
@@ -90,77 +91,13 @@ Module.DefaultConfig     = {
 	},
 }
 
-Module.FAQ               = {
-
-}
-
-Module.CommandHandlers   = {
-
-}
-
-local function getConfigFileName()
-	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar ..
-		"_" .. Globals.CurLoadedClass .. '.lua'
-end
-
-function Module:SaveSettings(doBroadcast)
-	self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-	if not self.SaveRequested then return end
-	mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-	if self.SettingsLoaded then
-		if Config:GetSetting('DoLoot') == true then
-			if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
-				Core.DoCmd("/lua run lootnscoot directed rgmercs")
-				warningMessageSent = false
-			end
-
-			if not self.Actor then Module:LootMessageHandler() end
-		else
-			Core.DoCmd("/lua stop lootnscoot")
-		end
-	end
-
-	if self.SaveRequested.doBroadcast == true then
-		Comms.BroadcastMessage(self._name, "LoadSettings")
-	end
-
-	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-	self.SaveRequested = nil
-end
-
-function Module:LoadSettings()
-	Logger.log_debug("\ay[LOOT]: \atLootnScoot EMU, Loot Module Loading Settings for: %s.",
-		Globals.CurLoadedChar)
-	local settings_pickle_path = getConfigFileName()
-	local settings = {}
-	local firstSaveRequired = false
-
-
-	local config, err = loadfile(settings_pickle_path)
-	if err or not config then
-		Logger.log_error("\ay[LOOT]: \aoUnable to load global settings file(%s), creating a new one!",
-			settings_pickle_path)
-		firstSaveRequired = true
-	else
-		settings = config()
-	end
-
-	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-end
-
-function Module.New()
-	local newModule = setmetatable({}, Module)
-	return newModule
+function Module:New()
+	return Base.New(self)
 end
 
 function Module:Init()
-	self:LoadSettings()
+	Base.Init(self)
+
 	self:LootMessageHandler()
 	if not Core.OnEMU() then
 		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s", Globals.BuildType)
@@ -185,14 +122,10 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	Ui.RenderPopAndSettings(self._name)
+	Base.Render(self)
 	ImGui.Text("Directed LNS looting is %s.", Config:GetSetting('DoLoot') and "ENABLED" or "DISABLED")
 	ImGui.Text(
 		"Directed control of the LootNScoot script for looting on emu servers.\nSee the Loot category in the General options for integration settings.\nPlease refer to LNS documentation for all else.")
-end
-
-function Module:Pop()
-	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module.DoLooting()
@@ -298,61 +231,6 @@ function Module:GiveTime()
 		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
 		Module.DoLooting()
 	end
-end
-
-function Module:OnDeath()
-	-- Death Handler
-end
-
-function Module:OnZone()
-	-- Zone Handler
-end
-
-function Module:OnCombatModeChanged()
-end
-
-function Module:DoGetState()
-	-- Reture a reasonable state if queried
-	return "Running..."
-end
-
-function Module:GetCommandHandlers()
-	return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-	return {
-		module = self._name,
-		FAQ = self.FAQ or {},
-	}
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-	local params = ...
-	local handled = false
-
-	if self.CommandHandlers[cmd:lower()] ~= nil then
-		self.CommandHandlers[cmd:lower()].handler(self, params)
-		return true
-	end
-
-	-- try to process as a substring
-	for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
-		if Strings.StartsWith(bindCmd, cmd) then
-			bindData.handler(self, params)
-			return true
-		end
-	end
-
-	return false
-end
-
-function Module:Shutdown()
-	Logger.log_debug("\ay[LOOT]: \axLoot(LNS) Module Unloaded.")
-	Core.DoCmd("/lua stop lootnscoot")
 end
 
 return Module

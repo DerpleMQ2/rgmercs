@@ -15,19 +15,19 @@ local Logger    = require("utils.logger")
 local Modules   = require("utils.modules")
 local Events    = require("utils.events")
 local Icons     = require('mq.ICONS')
+local Base      = require("modules.base")
 
 require('utils.datatypes')
 
-local Module                     = { _version = '0.1a', _name = "Charm", _author = 'Grimmier', }
-Module.__index                   = Module
-Module.ModuleLoaded              = false
-Module.CombatState               = "None"
-Module.SaveRequested             = nil
+local Module   = { _version = '0.1a', _name = "Charm", _author = 'Grimmier', }
+Module.__index = Module
+Module.__index = Module
+setmetatable(Module, { __index = Base, })
 
+Module.CombatState               = "None"
 Module.TempSettings              = {}
 Module.TempSettings.CharmImmune  = {}
 Module.TempSettings.CharmTracker = {}
-Module.FAQ                       = {}
 Module.ImmuneTable               = {}
 
 Module.DefaultConfig             = {
@@ -145,24 +145,8 @@ Module.DefaultConfig             = {
 	},
 }
 
-Module.FAQ                       = {
-}
-
-local function getConfigFileName()
-	local oldFile = mq.configDir ..
-		'/rgmercs/PCConfigs/' ..
-		Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-	local newFile = mq.configDir ..
-		'/rgmercs/PCConfigs/' ..
-		Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
-
-	if Files.file_exists(newFile) then
-		return newFile
-	end
-
-	Files.copy_file(oldFile, newFile)
-
-	return newFile
+function Module:New()
+	return Base.New(self)
 end
 
 local function getImmuneFileName()
@@ -171,44 +155,8 @@ local function getImmuneFileName()
 		Module._name .. "_Immune_" .. Globals.CurServer .. "_" .. Globals.CurLoadedChar .. '.lua'
 end
 
-function Module:SaveSettings(doBroadcast)
-	self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-	if not self.SaveRequested then return end
-
-	mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-	if self.SaveRequested.doBroadcast == true then
-		Comms.BroadcastMessage(self._name, "LoadSettings")
-	end
-
-	Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-	self.SaveRequested = nil
-end
-
 function Module:LoadSettings()
-	Logger.log_debug("\ar%s\ao Charm Module Loading Settings for: %s.", Globals.CurLoadedClass,
-		Globals.CurLoadedChar)
-	local settings_pickle_path = getConfigFileName()
-	local settings = {}
-	local firstSaveRequired = false
-
-	local config, err = loadfile(settings_pickle_path)
-	if err or not config then
-		Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
-			Globals.CurLoadedClass, settings_pickle_path)
-		firstSaveRequired = true
-	else
-		settings = config()
-	end
-
-	if not settings or not self.DefaultConfig then
-		Logger.log_error("\arFailed to Load Charm Config for Classs: %s", Globals.CurLoadedClass)
-		return
-	end
+	Base.LoadSettings(self)
 
 	local immune_pickle_path = getImmuneFileName()
 	local immuneConfig, immuneErr = loadfile(immune_pickle_path)
@@ -220,27 +168,16 @@ function Module:LoadSettings()
 	else
 		self.ImmuneTable = immuneConfig()
 	end
-
-	Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-end
-
-function Module.New()
-	local newModule = setmetatable({}, Module)
-	return newModule
 end
 
 function Module:Init()
-	Logger.log_debug("\agInitializing Charm Module...")
 	-- bards don't have DireCharm so hide the settings.
 	if Core.MyClassIs("BRD") then
 		self.DefaultConfig['DireCharm'] = nil
 		self.DefaultConfig['DireCharmMaxLvl'] = nil
 	end
-	self:LoadSettings()
 
-	self.ModuleLoaded = true
-
-	return { self = self, defaults = self.DefaultConfig, }
+	Base.Init(self)
 end
 
 function Module:ShouldRender()
@@ -248,7 +185,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	Ui.RenderPopAndSettings(self._name)
+	Base.Render(self)
 
 	ImGui.NewLine()
 
@@ -327,10 +264,6 @@ function Module:Render()
 			ImGui.Unindent()
 		end
 	end
-end
-
-function Module:Pop()
-	Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:AddImmuneTarget(mobId, mobData)
@@ -714,46 +647,9 @@ function Module:GiveTime()
 	self:DoCharm()
 end
 
-function Module:OnDeath()
-end
-
 function Module:OnZone()
 	self:ResetCharmStates()
 	-- Zone Handler
 end
-
-function Module:OnCombatModeChanged()
-end
-
-function Module:DoGetState()
-	-- Reture a reasonable state if queried
-	return "TODO"
-end
-
-function Module:GetCommandHandlers()
-	return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-	return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-	local params = ...
-	local handled = false
-	-- /rglua cmd handler
-	return handled
-end
-
-function Module:Shutdown()
-	Logger.log_debug("Charm Module Unloaded.")
-end
-
-mq.bind("/rgupcharm", function()
-	Modules:ExecModule("Charm", "UpdateCharmList")
-end)
 
 return Module

@@ -1,20 +1,17 @@
-local mq                         = require('mq')
-local Config                     = require('utils.config')
-local Globals                    = require("utils.globals")
-local Core                       = require("utils.core")
-local Ui                         = require("utils.ui")
-local Comms                      = require("utils.comms")
-local Logger                     = require("utils.logger")
-local Strings                    = require("utils.strings")
-local Set                        = require("mq.Set")
-local Icons                      = require('mq.ICONS')
-local Zep                        = require('Zep')
-local CHANNEL_COLOR              = IM_COL32(215, 154, 66)
+local mq            = require('mq')
+local Config        = require('utils.config')
+local Globals       = require("utils.globals")
+local Core          = require("utils.core")
+local Ui            = require("utils.ui")
+local Logger        = require("utils.logger")
+local Icons         = require('mq.ICONS')
+local Zep           = require('Zep')
+local Base          = require("modules.base")
+local CHANNEL_COLOR = IM_COL32(215, 154, 66)
 
-local Module                     = { _version = '0.1a', _name = "Debug", _author = 'Derple', }
-Module.__index                   = Module
-Module.FAQ                       = {}
-Module.SaveRequested             = nil
+local Module        = { _version = '0.1a', _name = "Debug", _author = 'Derple', }
+Module.__index      = Module
+setmetatable(Module, { __index = Base, })
 
 Module.DefaultConfig             = {
     ['script'] = {
@@ -47,62 +44,14 @@ Module.execCoroutine             = nil
 Module.status                    = "Idle..."
 Module.autoRun                   = false
 
-local function getConfigFileName()
-    return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-end
-
-function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-    if not self.SaveRequested then return end
-
-    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-    if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastMessage(self._name, "LoadSettings")
-    end
-
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-    self.SaveRequested = nil
+function Module:New()
+    return Base.New(self)
 end
 
 function Module:LoadSettings()
-    Logger.log_debug("Debug Module Loading Settings for: %s.", Globals.CurLoadedChar)
-    local settings_pickle_path = getConfigFileName()
-    local settings = {}
-    local firstSaveRequired = false
-
-
-    local config, err = loadfile(settings_pickle_path)
-    if err or not config then
-        Logger.log_error("\ay[Debug]: Unable to load global settings file(%s), creating a new one!",
-            settings_pickle_path)
-        firstSaveRequired = true
-    else
-        settings = config()
-    end
-
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
+    Base.LoadSettings(self)
 
     self.luaBuffer:SetText(Config:GetSetting('script') or "")
-end
-
-function Module.New()
-    local newModule = setmetatable({}, Module)
-    return newModule
-end
-
-function Module:Init()
-    Logger.log_debug("Debug Module Loaded.")
-    self:LoadSettings()
-
-    self.ModuleLoaded = true
-
-    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:LogTimestamp()
@@ -295,17 +244,13 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopAndSettings(self._name)
+    Base.Render(self)
     ImGui.NewLine()
     if self.ModuleLoaded then
         self:RenderEditor()
         self:RenderToolbar()
         self:RenderConsole()
     end
-end
-
-function Module:Pop()
-    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:DoEvents()
@@ -334,42 +279,9 @@ function Module:GiveTime()
     end
 end
 
-function Module:OnDeath()
-    -- Death Handler
-end
-
-function Module:OnZone()
-    -- Zone Handler
-end
-
-function Module:OnCombatModeChanged()
-end
-
 function Module:DoGetState()
     -- Reture a reasonable state if queried
     return self.status
-end
-
-function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-    local params = ...
-    local handled = false
-    -- /rglua cmd handler
-    return handled
-end
-
-function Module:Shutdown()
-    Logger.log_debug("Drag Module Unloaded.")
 end
 
 return Module

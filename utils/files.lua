@@ -1,5 +1,6 @@
 local mq      = require('mq')
 local Logger  = require("utils.logger")
+local lfs     = require("lfs")
 
 local Files   = { _version = '1.0', _name = "Files", _author = 'Derple', }
 Files.__index = Files
@@ -17,6 +18,63 @@ function Files.file_exists(path)
     end
 end
 
+function Files.make_p(path)
+    local sep = package.config:sub(1, 1)
+
+    -- normalize slashes
+    path = path:gsub("[/\\]", sep)
+
+    local drive = ""
+    local start = 1
+
+    -- Detect Windows drive letter (e.g., C:\)
+    local d = path:match("^([A-Za-z]:)" .. sep)
+    if d then
+        drive = d
+        start = #d + 2
+    end
+
+    -- Detect Unix absolute path (/...)
+    if sep == "/" and path:sub(1, 1) == "/" then
+        drive = "/"
+        start = 2
+    end
+
+    local current = drive
+
+    for part in path:sub(start):gmatch("[^" .. sep .. "]+") do
+        if current == "" or current == "/" then
+            current = current .. part
+        else
+            current = current .. sep .. part
+        end
+
+        local attr = lfs.attributes(current)
+        if not attr then
+            Logger.log_debug("Creating directory: %s", current)
+            local ok, err = lfs.mkdir(current)
+            if not ok then
+                return nil, err
+            end
+        elseif attr.mode ~= "directory" then
+            return nil, current .. " exists but is not a directory"
+        end
+    end
+
+    return true
+end
+
+function Files.make_p_for_file(filepath)
+    local sep = package.config:sub(1, 1)
+    filepath = filepath:gsub("[/\\]", sep)
+
+    -- strip filename
+    local dir = filepath:match("^(.*" .. sep .. ")")
+    if not dir then return true end
+
+    return Files.make_p(dir)
+end
+
 --- Copies a file from one path to another.
 --- @param from_path string The source file path.
 --- @param to_path string The destination file path.
@@ -27,6 +85,7 @@ function Files.copy_file(from_path, to_path)
         if file ~= nil then
             local content = file:read("*all")
             file:close()
+            Files.make_p_for_file(to_path)
             local fileNew = io.open(to_path, "w")
             if fileNew ~= nil then
                 fileNew:write(content)
@@ -40,6 +99,20 @@ function Files.copy_file(from_path, to_path)
     end
 
     return false
+end
+
+function Files.delete_file(path)
+    if Files.file_exists(path) then
+        local success, err = os.remove(path)
+        if not success then
+            Logger.log_error("\arFailed to delete file: %s. Error: %s", path, err)
+            return false
+        end
+        return true
+    else
+        Logger.log_debug("File not found for deletion: %s", path)
+        return false
+    end
 end
 
 return Files

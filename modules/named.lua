@@ -1,26 +1,26 @@
 -- Sample Named Class Module
-local mq               = require('mq')
-local Config           = require('utils.config')
-local Globals          = require("utils.globals")
-local Targeting        = require("utils.targeting")
-local Ui               = require("utils.ui")
-local Comms            = require("utils.comms")
-local Logger           = require("utils.logger")
-local Strings          = require("utils.strings")
-local NamedDefault     = require("namedlist.named_default")
-local NamedEQMight     = require("namedlist.named_eqmight")
+local mq           = require('mq')
+local Config       = require('utils.config')
+local Globals      = require("utils.globals")
+local Targeting    = require("utils.targeting")
+local Ui           = require("utils.ui")
+local Comms        = require("utils.comms")
+local Logger       = require("utils.logger")
+local Strings      = require("utils.strings")
+local NamedDefault = require("namedlist.named_default")
+local NamedEQMight = require("namedlist.named_eqmight")
+local Base         = require("modules.base")
 
-local Module           = { _version = '1.1', _name = "Named", _author = 'Derple, Algar, Grimmier', }
-Module.__index         = Module
-Module.DefaultConfig   = {}
+local Module       = { _version = '1.1', _name = "Named", _author = 'Derple, Algar, Grimmier', }
+Module.__index     = Module
+setmetatable(Module, { __index = Base, })
+
 Module.CachedNamedList = {}
-Module.SaveRequested   = nil
 
 Module.NamedList       = {}
 Module.LastNamedCheck  = 0
 
 Module.DefNamed        = Globals.CurServer == "EQ Might" and (NamedEQMight or {}) or (NamedDefault or {})
-
 
 Module.DefaultConfig   = {
     [string.format("%s_Popped", Module._name)] = {
@@ -28,10 +28,6 @@ Module.DefaultConfig   = {
         Type = "Custom",
         Default = false,
     },
-}
-
-Module.CommandHandlers = {
-
 }
 
 Module.FAQ             = {
@@ -48,66 +44,12 @@ Module.FAQ             = {
     },
 }
 
-local function getConfigFileName()
-    return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-end
-
-function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-    if not self.SaveRequested then return end
-
-    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-    if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastMessage(self._name, "LoadSettings")
-    end
-
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-    self.SaveRequested = nil
-end
-
-function Module:LoadSettings()
-    self.NamedList = {}
-    Logger.log_debug("Named Module Loading Settings for: %s.", Globals.CurLoadedChar)
-    local settings_pickle_path = getConfigFileName()
-    local settings = {}
-    local firstSaveRequired = false
-
-    local config, err = loadfile(settings_pickle_path)
-    if err or not config then
-        Logger.log_error("\ay[Named]: Unable to load Named settings file(%s), creating a new one!",
-            settings_pickle_path)
-        firstSaveRequired = true
-    else
-        settings = config()
-    end
-
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-end
-
-function Module.New()
-    local newModule = setmetatable({}, Module)
-    return newModule
-end
-
-function Module:Init()
-    Logger.log_debug("Named Combat Module Loaded.")
-    self:LoadSettings()
-
-    return { self = self, defaults = self.DefaultConfig, }
-end
-
-function Module:ShouldRender()
-    return true
+function Module:New()
+    return Base.New(self)
 end
 
 function Module:Render()
-    Ui.RenderPopAndSettings(self._name)
+    Base.Render(self)
 
     ImGui.SameLine()
     ImGui.Text("Make any mob \"named\" for burns by adding it to your MQ2SpawnMaster or Alert Master list! See burn settings.")
@@ -121,10 +63,6 @@ function Module:GiveTime()
         self.LastNamedCheck = Globals.GetTimeSeconds()
         self:CheckZoneNamed()
     end
-end
-
-function Module:OnDeath()
-    -- Death Handler
 end
 
 --- Caches the named list in the zone
@@ -186,57 +124,6 @@ function Module:IsNamed(spawn)
     if Config:GetSetting('CheckAMForNamed') and mq.TLO.AlertMaster ~= nil and mq.TLO.AlertMaster.IsNamed(spawn.DisplayName())() then return true end
 
     return false
-end
-
-function Module:OnZone()
-    self:RefreshNamedCache()
-end
-
-function Module:OnCombatModeChanged()
-end
-
-function Module:DoGetState()
-    -- Reture a reasonable state if queried
-    return "Running..."
-end
-
-function Module:Pop()
-    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
-end
-
-function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-    local params = ...
-    local handled = false
-
-    if self.CommandHandlers[cmd:lower()] ~= nil then
-        self.CommandHandlers[cmd:lower()].handler(self, params)
-        return true
-    end
-
-    -- try to process as a substring
-    for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
-        if Strings.StartsWith(bindCmd, cmd) then
-            bindData.handler(self, params)
-            return true
-        end
-    end
-
-    return false
-end
-
-function Module:Shutdown()
-    Logger.log_debug("Named Combat Module Unloaded.")
 end
 
 return Module

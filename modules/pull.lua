@@ -1,27 +1,29 @@
 -- Sample Pull Class Module
-local mq                                  = require('mq')
-local Config                              = require('utils.config')
-local Globals                             = require('utils.globals')
-local Math                                = require('utils.math')
-local Combat                              = require("utils.combat")
-local Casting                             = require("utils.casting")
-local Core                                = require("utils.core")
-local Movement                            = require("utils.movement")
-local Targeting                           = require("utils.targeting")
-local Ui                                  = require("utils.ui")
-local Comms                               = require("utils.comms")
-local Tables                              = require("utils.tables")
-local Modules                             = require("utils.modules")
-local Strings                             = require("utils.strings")
-local Files                               = require("utils.files")
-local Logger                              = require("utils.logger")
-local Events                              = require("utils.events")
-local Set                                 = require("mq.Set")
-local Icons                               = require('mq.ICONS')
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Globals   = require('utils.globals')
+local Math      = require('utils.math')
+local Combat    = require("utils.combat")
+local Casting   = require("utils.casting")
+local Core      = require("utils.core")
+local Movement  = require("utils.movement")
+local Targeting = require("utils.targeting")
+local Ui        = require("utils.ui")
+local Comms     = require("utils.comms")
+local Tables    = require("utils.tables")
+local Modules   = require("utils.modules")
+local Strings   = require("utils.strings")
+local Files     = require("utils.files")
+local Logger    = require("utils.logger")
+local Events    = require("utils.events")
+local Set       = require("mq.Set")
+local Base      = require("modules.base")
+local Icons     = require('mq.ICONS')
 
-local Module                              = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
-Module.__index                            = Module
-Module.ModuleLoaded                       = false
+local Module    = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
+Module.__index  = Module
+setmetatable(Module, { __index = Base, })
+
 Module.TempSettings                       = {}
 Module.TempSettings.BuffCount             = 0
 Module.TempSettings.LastPullOrCombatEnded = Globals.GetTimeSeconds()
@@ -47,8 +49,6 @@ Module.TempSettings.PullAttemptStarted    = 0
 Module.TempSettings.PullRadius            = 0
 Module.TempSettings.WayPointsToDelete     = Set.new({})
 Module.TempSettings.PausePulls            = false
-Module.FAQ                                = {}
-Module.SaveRequested                      = nil
 
 local PullStates                          = {
     ['PULL_IDLE']               = 1,
@@ -761,61 +761,12 @@ Module.CommandHandlers                 = {
     },
 }
 
-local function getConfigFileName()
-    local oldFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-    local newFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
-
-    if Files.file_exists(newFile) then
-        return newFile
-    end
-
-    Files.copy_file(oldFile, newFile)
-
-    return newFile
-end
-
-function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-    if not self.SaveRequested then return end
-
-    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-    if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastMessage(self._name, "LoadSettings")
-    end
-
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-    self.SaveRequested = nil
+function Module:New()
+    return Base.New(self)
 end
 
 function Module:LoadSettings()
-    Logger.log_debug("Pull Combat Module Loading Settings for: %s.", Globals.CurLoadedChar)
-    local settings_pickle_path = getConfigFileName()
-    local settings = {}
-    local firstSaveRequired = false
-
-    local config, err = loadfile(settings_pickle_path)
-    if err or not config then
-        Logger.log_error("\ay[Pull]: Unable to load global settings file(%s), creating a new one!",
-            settings_pickle_path)
-        firstSaveRequired = true
-    else
-        settings = config()
-    end
-    local pathsFile = string.format('%s/MyUI/MyPaths/MyPaths_Paths.lua', mq.configDir)
-    local pathsConfig, err = loadfile(pathsFile)
-    if not err and pathsConfig then
-        Module.TempSettings.MyPaths = pathsConfig()
-    end
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
+    Base.LoadSettings(self)
 
     -- turn off at startup for safety
     Config:SetSetting('DoPull', false)
@@ -861,18 +812,6 @@ end
 
 function Module:OnCombatModeChanged()
     self:SetValidPullAbilities()
-end
-
-function Module.New()
-    local newModule = setmetatable({}, Module)
-    return newModule
-end
-
-function Module:Init()
-    Logger.log_debug("Pull Module Loaded.")
-    self:LoadSettings()
-    self.ModuleLoaded = true
-    return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:RenderMobList(displayName, settingName)
@@ -997,7 +936,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    local controlPadding = Ui.RenderPopAndSettings(self._name)
+    local controlPadding = Base.Render(self)
 
     local pressed
 
@@ -2693,10 +2632,6 @@ function Module:OnDeath()
     end
 end
 
-function Module:Pop()
-    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
-end
-
 function Module:OnZone()
     -- Zone Handler
     if Config:GetSetting('StopPullAfterDeath') then
@@ -2713,14 +2648,6 @@ function Module:DoGetState()
     return PullStatesIDToName[self.TempSettings.PullState]
 end
 
-function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
 function Module:SetLastPullOrCombatEndedTimer()
     self.TempSettings.LastPullOrCombatEnded = Globals.GetTimeSeconds()
     Logger.log_verbose("Last Pull or Combat Ended: %s", Globals.GetTimeSeconds())
@@ -2733,33 +2660,6 @@ function Module:StopNavAfterFailedMovingCheck()
         Movement:DoNav(false, "stop log=off")
         mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
     end
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-    local params = ...
-    local handled = false
-
-    if self.CommandHandlers[cmd:lower()] ~= nil then
-        self.CommandHandlers[cmd:lower()].handler(self, params)
-        return true
-    end
-
-    -- try to process as a substring
-    for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
-        if Strings.StartsWith(bindCmd, cmd) then
-            bindData.handler(self, params)
-            return true
-        end
-    end
-
-    return false
-end
-
-function Module:Shutdown()
-    Logger.log_debug("Pull Combat Module Unloaded.")
 end
 
 return Module
