@@ -2117,7 +2117,13 @@ Config.DefaultConfig                                     = {
 
 Config.CommandHandlers                                   = {}
 
+Config.CachedConfigFileNames                             = {}
+
 function Config.GetConfigFileName(moduleName)
+    if Config.CachedConfigFileNames[moduleName] then
+        return Config.CachedConfigFileNames[moduleName]
+    end
+
     local schemas = {
         mq.configDir .. '/rgmercs/PCConfigs/' ..
         moduleName .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua',
@@ -2129,6 +2135,7 @@ function Config.GetConfigFileName(moduleName)
 
     local latestSchema = #schemas
     local latest = schemas[latestSchema]
+    Config.CachedConfigFileNames[moduleName] = latest
 
     -- If latest exists, delete all older schemas
     if Files.file_exists(latest) then
