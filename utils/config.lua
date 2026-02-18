@@ -2158,14 +2158,22 @@ function Config.GetConfigFileName(moduleName)
 end
 
 function Config:SaveSettings()
-    local configFile = Config.GetConfigFileName("RGMerc")
-    Logger.log_debug("\ag%s Module settings saved to %s.", self._name, configFile)
+    local configFile = Config.GetConfigFileName("RGMercs")
+    mq.pickle(configFile, self:GetModuleSettings("Core"))
+    Logger.log_debug("\agRGMercs settings saved to %s", configFile)
     Logger.set_log_level(Config:GetSetting('LogLevel'))
     Logger.set_log_to_file(Config:GetSetting('LogToFile'))
 end
 
 function Config:LoadSettings()
-    local configFile            = Config.GetConfigFileName("RGMerc")
+    local configFile = Config.GetConfigFileName("RGMercs")
+
+    if not Files.file_exists(configFile) then
+        local oldConfigFile = Config.GetConfigFileName("RGMerc")
+        Logger.log_info("\ayOld config file found for RGMercs, upgrading to new config file name.")
+        Files.copy_file(oldConfigFile, configFile)
+        Files.delete_file(oldConfigFile)
+    end
 
     Globals.CurLoadedChar       = mq.TLO.Me.DisplayName()
     Globals.CurLoadedClass      = mq.TLO.Me.Class.ShortName()
