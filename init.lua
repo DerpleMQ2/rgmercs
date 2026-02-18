@@ -176,9 +176,7 @@ local function RGMercsGUI()
                     Comms.PopUpColor(15, 1, "RGMercs Warning: You have aggro while paused!")
                 end
 
-                ImGui.PushStyleColor(ImGuiCol.WindowBg, Globals.GetTimeSeconds() % 2 == 0 and
-                    ImVec4(0.7, 0.1, 0.1, Config:GetMainOpacity()) or
-                    ImVec4(0.3, 0.1, 0.1, Config:GetMainOpacity()))
+                ImGui.PushStyleColor(ImGuiCol.WindowBg, Globals.GetAlternatingColor(ImVec4(0.7, 0.1, 0.1, Config:GetMainOpacity()), ImVec4(0.3, 0.1, 0.1, Config:GetMainOpacity())))
             end
 
             if Config:GetSetting('FullUI') then

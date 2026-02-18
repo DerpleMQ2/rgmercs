@@ -235,8 +235,10 @@ function Globals.GetTimeMS()
     return mq.gettime()
 end
 
-function Globals.GetWarningColor()
-    return IM_COL32(200, math.floor(Globals.GetTimeSeconds() % 2) == 1 and 52 or 200, 52, 255)
+function Globals.GetAlternatingColor(colorA, colorB)
+    colorA = colorA or IM_COL32(200, 200, 52, 255)
+    colorB = colorB or IM_COL32(200, 52, 52, 255)
+    return (math.floor(Globals.GetTimeSeconds() % 2) == 1) and colorA or colorB
 end
 
 return Globals

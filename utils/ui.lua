@@ -678,7 +678,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 local stateColor =
-                    (data.Data.Burning and (Globals.GetTimeSeconds() % 2 == 0 and Colors.BurnFlashColorOne or Colors.BurnFlashColorTwo)) or
+                    (data.Data.Burning and (Globals.GetAlternatingColor(Colors.BurnFlashColorOne, Colors.BurnFlashColorTwo))) or
                     (data.Data.State == "Paused" and Colors.MainButtonPausedColor) or
                     (data.Data.State == "Combat" and Colors.MainCombatColor) or
                     Colors.MainDowntimeColor
@@ -1170,7 +1170,7 @@ function Ui.RenderForceTargetList(showPopout)
                 if not checked then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 52, 52, 0))
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(Globals.GetTimeSeconds() % 2) == 1 and 52 or 200, 255))
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.GetAlternatingColor())
                 end
 
                 Ui.InvisibleWithButtonText("##ft_btn_" .. tostring(i), Icons.FA_ARROW_RIGHT, ImVec2(ICON_SIZE, ImGui.GetTextLineHeight()),
@@ -1403,7 +1403,7 @@ function Ui.RenderForceTargetList(showPopout)
 
                         win_max.x = effectiveWidth
                         draw_list:PushClipRect(win_min, win_max, true)
-                        draw_list:AddRect(min, max, ImGui.GetColorU32(Globals.GetTimeSeconds() % 2 == 1 and hlColorOne or hlColorTwo), 0.0, 0, 1.5)
+                        draw_list:AddRect(min, max, Globals.GetAlternatingColor(hlColorOne, hlColorTwo), 0.0, 0, 1.5)
                         draw_list:PopClipRect()
                     end
 

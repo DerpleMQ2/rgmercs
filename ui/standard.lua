@@ -40,7 +40,7 @@ function StandardUI:RenderTarget()
     end
 
     if warningMessage then
-        ImGui.TextColored(Globals.GetWarningColor(), warningMessage)
+        ImGui.TextColored(Globals.GetAlternatingColor(), warningMessage)
     end
 
     local assistSpawn = Targeting.GetAutoTarget()
@@ -80,8 +80,7 @@ function StandardUI:RenderTarget()
         end
         if Globals.LastBurnCheck and assistSpawn.ID() > 0 then
             ImGui.SameLine()
-            ImGui.TextColored(IM_COL32(200, math.floor(Globals.GetTimeSeconds() % 2) == 1 and 52 or 200, 52, 255),
-                string.format("**BURNING**"))
+            ImGui.TextColored(Globals.GetAlternatingColor(), string.format("**BURNING**"))
         end
         Ui.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
@@ -244,10 +243,10 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
 
                     ImGui.Text("Last Nav: ")
                     ImGui.SameLine()
-                    if mq.TLO.Navigation.MeshLoaded() then
+                    if not mq.TLO.Navigation.MeshLoaded() then
                         Ui.RenderColoredText(Globals.Constants.Colors.ConditionPassColor, "%s ", Movement:GetLastNavCmd() or "N/A")
                     else
-                        Ui.RenderColoredText(Globals.GetWarningColor(), "%s ", "Mesh Not Loaded")
+                        Ui.RenderColoredText(Globals.GetAlternatingColor(), "%s ", "Mesh Not Loaded")
                     end
                     ImGui.SameLine()
                     ImGui.Text("<")
