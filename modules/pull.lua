@@ -1152,7 +1152,8 @@ function Module:Render()
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(idx))
                     ImGui.TableNextColumn()
-                    ImGui.Text("[y: %0.2f, x: %0.2f, z: %0.2f]", wpData.y, wpData.x, wpData.z)
+                    Ui.NavEnabledLoc(string.format("y: %0.2f, x: %0.2f, z: %0.2f]", wpData.y, wpData.x, wpData.z),
+                        string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z))
                     ImGui.TableNextColumn()
                     ImGui.PushID("##_small_btn_delete_wp_" .. tostring(idx))
                     if ImGui.SmallButton(Icons.FA_TRASH) then
