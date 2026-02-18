@@ -423,6 +423,10 @@ return {
                     return not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
+            {
+                name = "SwarmPet",
+                type = "Spell",
+            },
         },
         ['Slow']           = {
             {
@@ -510,14 +514,6 @@ return {
                 end,
             },
             {
-                name = "Tome of Nife's Mercy",
-                type = "Item",
-                load_cond = function(self) return mq.TLO.FindItem("=Tome of Nife's Mercy")() end,
-                cond = function(self, itemName, target)
-                    return Casting.GroupLowManaCount(Config:GetSetting('ParaPct')) > 1
-                end,
-            },
-            {
                 name = "BloodDot",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -532,10 +528,6 @@ return {
                     if not Config:GetSetting('DoDot') or (Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed) then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
-            },
-            {
-                name = "SwarmPet",
-                type = "Spell",
             },
             {
                 name = "PoiBite",
