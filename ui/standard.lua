@@ -40,7 +40,7 @@ function StandardUI:RenderTarget()
     end
 
     if warningMessage then
-        ImGui.TextColored(IM_COL32(200, math.floor(Globals.GetTimeSeconds() % 2) == 1 and 52 or 200, 52, 255), warningMessage)
+        ImGui.TextColored(Globals.GetWarningColor(), warningMessage)
     end
 
     local assistSpawn = Targeting.GetAutoTarget()
@@ -244,7 +244,11 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
 
                     ImGui.Text("Last Nav: ")
                     ImGui.SameLine()
-                    Ui.RenderColoredText(Globals.Constants.Colors.ConditionPassColor, "%s ", Movement:GetLastNavCmd() or "N/A")
+                    if mq.TLO.Navigation.MeshLoaded() then
+                        Ui.RenderColoredText(Globals.Constants.Colors.ConditionPassColor, "%s ", Movement:GetLastNavCmd() or "N/A")
+                    else
+                        Ui.RenderColoredText(Globals.GetWarningColor(), "%s ", "Mesh Not Loaded")
+                    end
                     ImGui.SameLine()
                     ImGui.Text("<")
                     ImGui.SameLine()
