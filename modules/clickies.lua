@@ -866,93 +866,74 @@ function Module:New()
 end
 
 function Module:LoadSettings()
-    -- Force any pending saves.
-    self:WriteSettings()
+    Base.LoadSettings(self, nil, function(settings)
+        local settingsChanged = false
 
-    Logger.log_info("\aw[\atLoading Settings\aw] Character: \am%s \awModule: \am%s", Globals.CurLoadedChar, self._name)
-    local settings_pickle_path = Base.GetConfigFileName(self)
-    local settings = {}
-    local firstSaveRequired = false
-
-    local config, err = loadfile(settings_pickle_path)
-    if err or not config then
-        Logger.log_error("\aw[\atLoading Settings\aw] \arUnable to load global settings file(%s), creating a new one!",
-            settings_pickle_path)
-        firstSaveRequired = true
-    else
-        settings = config()
-    end
-
-    local settingsChanged = false
-
-    -- insert default server clickies on very first run per PC
-    if not settings.Clickies then
-        -- Live/Test use "Live". Emu servers use server-specific.
-        local serverType = Globals.BuildType:lower() ~= "emu" and "Live" or Globals.CurServer
-        local defaultClickyList = self.DefaultServerClickies[serverType]
-        settings.Clickies = defaultClickyList or {}
-        settingsChanged = true
-    end
-
-    for _, clicky in ipairs(settings.DowntimeClickies or {}) do
-        if type(clicky) == 'string' then
-            -- convert old clickies
-            table.insert(settings.Clickies,
-                {
-                    itemName = clicky,
-                    target = 'Self',
-                    combat_state = 'Downtime',
-                    conditions = {},
-                })
+        -- insert default server clickies on very first run per PC
+        if not settings.Clickies then
+            -- Live/Test use "Live". Emu servers use server-specific.
+            local serverType = Globals.BuildType:lower() ~= "emu" and "Live" or Globals.CurServer
+            local defaultClickyList = self.DefaultServerClickies[serverType]
+            settings.Clickies = defaultClickyList or {}
             settingsChanged = true
         end
-    end
 
-    for _, clicky in ipairs(settings.CombatClickies or {}) do
-        if type(clicky) == 'string' then
-            -- convert old clickies
-            table.insert(settings.Clickies,
-                {
-                    itemName = clicky,
-                    target = 'Self',
-                    combat_state = 'Combat',
-                    conditions = {},
-                })
-            settingsChanged = true
-        end
-    end
-
-    settings.CombatClickies = nil
-    settings.DowntimeClickies = nil
-
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
-
-    -- validate condition targets.
-    for _, clicky in ipairs(settings.Clickies or {}) do
-        for _, cond in ipairs(clicky.conditions or {}) do
-            local blockDef = self.LogicBlocks[self.LogicBlockTypeIDs[cond.type]]
-            if blockDef and blockDef.cond_targets then
-                local condTarget = cond.target or 'Self'
-                if not Tables.TableContains(blockDef.cond_targets, condTarget) then
-                    cond.target = blockDef.cond_targets[1] or 'Self'
-                    Logger.log_warn(
-                        "\ayClicky Module: \ayClicky Condition Target '%s' is invalid for Condition Type '%s', resetting to default.",
-                        cond.target, cond.type)
-                    self:SaveSettings(false)
-                end
+        for _, clicky in ipairs(settings.DowntimeClickies or {}) do
+            if type(clicky) == 'string' then
+                -- convert old clickies
+                table.insert(settings.Clickies,
+                    {
+                        itemName = clicky,
+                        target = 'Self',
+                        combat_state = 'Downtime',
+                        conditions = {},
+                    })
+                settingsChanged = true
             end
         end
-        if clicky.no_target_change == nil then
-            clicky.no_target_change = false
+
+        for _, clicky in ipairs(settings.CombatClickies or {}) do
+            if type(clicky) == 'string' then
+                -- convert old clickies
+                table.insert(settings.Clickies,
+                    {
+                        itemName = clicky,
+                        target = 'Self',
+                        combat_state = 'Combat',
+                        conditions = {},
+                    })
+                settingsChanged = true
+            end
+        end
+
+        settings.CombatClickies = nil
+        settings.DowntimeClickies = nil
+
+        if settingsChanged then
             self:SaveSettings(false)
         end
-    end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-
-    Logger.log_debug("\awClicky Module: \atLoaded \ag%d\at Clickies", #settings.Clickies or 0)
+        -- validate condition targets.
+        for _, clicky in ipairs(settings.Clickies or {}) do
+            for _, cond in ipairs(clicky.conditions or {}) do
+                local blockDef = self.LogicBlocks[self.LogicBlockTypeIDs[cond.type]]
+                if blockDef and blockDef.cond_targets then
+                    local condTarget = cond.target or 'Self'
+                    if not Tables.TableContains(blockDef.cond_targets, condTarget) then
+                        cond.target = blockDef.cond_targets[1] or 'Self'
+                        Logger.log_warn(
+                            "\ayClicky Module: \ayClicky Condition Target '%s' is invalid for Condition Type '%s', resetting to default.",
+                            cond.target, cond.type)
+                        self:SaveSettings(false)
+                    end
+                end
+            end
+            if clicky.no_target_change == nil then
+                clicky.no_target_change = false
+                self:SaveSettings(false)
+            end
+        end
+    end)
 end
 
 function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, preRender)

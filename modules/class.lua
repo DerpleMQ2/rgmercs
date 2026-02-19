@@ -294,29 +294,29 @@ function Module:WriteSettings()
 end
 
 function Module:LoadSettings()
-    -- load base configurations
-    self.ClassConfig = ClassLoader.load(Globals.CurLoadedClass)
+    Base.LoadSettings(self, function()
+        -- load base configurations
+        self.ClassConfig = ClassLoader.load(Globals.CurLoadedClass)
 
-    if not self.ClassConfig.DefaultConfig then
-        Logger.log_error("\arFailed to Load Core Class Config for Classs: %s", Globals
-            .CurLoadedClass)
-        return
-    end
+        if not self.ClassConfig.DefaultConfig then
+            Logger.log_error("\arFailed to Load Core Class Config for Classs: %s", Globals
+                .CurLoadedClass)
+            return
+        end
 
-    -- Add this to all class configs
-    self.ClassConfig.DefaultConfig['EnabledRotationEntries'] = {
-        DisplayName = "EnabledRotationEntries",
-        Type = "Custom",
-        Default = {},
-    }
+        -- Add this to all class configs
+        self.ClassConfig.DefaultConfig['EnabledRotationEntries'] = {
+            DisplayName = "EnabledRotationEntries",
+            Type = "Custom",
+            Default = {},
+        }
 
-    self.ClassConfig.DefaultConfig['EnabledRotations'] = {
-        DisplayName = "EnabledRotations",
-        Type = "Custom",
-        Default = {},
-    }
-
-    Base.LoadSettings(self)
+        self.ClassConfig.DefaultConfig['EnabledRotations'] = {
+            DisplayName = "EnabledRotations",
+            Type = "Custom",
+            Default = {},
+        }
+    end)
 
     -- for config file change
     Module.TempSettings.CombatModeSet = false

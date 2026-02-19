@@ -19,10 +19,6 @@ function Base:New()
     return newBase
 end
 
-function Base:GetConfigFileName()
-    return Config.GetConfigFileName(self._name)
-end
-
 function Base:SaveSettings(doBroadcast)
     self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
 end
@@ -34,31 +30,42 @@ end
 function Base:WriteSettings()
     if not self.SaveRequested then return end
 
-    mq.pickle(self:GetConfigFileName(), Config:GetModuleSettings(self._name))
+    local configFile = Config.GetConfigFileName(self._name)
+
+    mq.pickle(configFile, Config:GetModuleSettings(self._name))
 
     if self.SaveRequested.doBroadcast == true then
         Comms.BroadcastMessage(self._name, "LoadSettings")
     end
 
-    Logger.log_debug("\ag%s Base settings saved to %s, requested %s ago.", self._name, self:GetConfigFileName(),
+    Logger.log_debug("\ag%s Base settings saved to %s, requested %s ago.", self._name, configFile,
         Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
 
     self.SaveRequested = nil
 end
 
-function Base:LoadSettings()
-    Logger.log_info("\aw[\atLoading Settings\aw] Character: \am%s \awModule: \am%s", Globals.CurLoadedChar, self._name)
-    local settings_pickle_path = self:GetConfigFileName()
+function Base:LoadSettings(preLoadFn, postLoadFn)
+    local configFile = Config.GetConfigFileName(self._name)
+
+    Logger.log_info("\aw[\atLoading Settings\aw] Character: \am%s \awModule: \ay%s \awFile: \at%s", Globals.CurLoadedChar, self._name, configFile)
     local settings = {}
     local firstSaveRequired = false
 
-    local config, err = loadfile(settings_pickle_path)
+    if preLoadFn then
+        preLoadFn()
+    end
+
+    local config, err = loadfile(configFile)
     if err or not config then
         Logger.log_error("\aw[\atLoading Settings\aw] \arUnable to load global settings file(%s), creating a new one!",
-            settings_pickle_path)
+            configFile)
         firstSaveRequired = true
     else
         settings = config()
+    end
+
+    if postLoadFn then
+        postLoadFn(settings)
     end
 
     Config:RegisterModuleSettings(self._name, settings, self.ClassConfig and self.ClassConfig.DefaultConfig or self.DefaultConfig, self.FAQ, firstSaveRequired)
