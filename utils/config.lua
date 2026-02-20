@@ -2033,6 +2033,15 @@ Config.DefaultConfig                                     = {
             end
         end,
     },
+    ['EnableLogTracer']                  = {
+        DisplayName = "Enable Debug Tracer",
+        Category = "Internals",
+        Default = true,
+        Tooltip = "Enables the debug tracer to show file/function/line information for each log entry",
+        OnChange = function(_, newValue)
+            Logger.set_debug_tracer_enabled(newValue)
+        end,
+    },
     ['LogToFile']                        = {
         DisplayName = "Log To File",
         Category = "Internals",
