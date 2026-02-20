@@ -2021,6 +2021,18 @@ Config.DefaultConfig                                     = {
         Min = 1,
         Max = #Globals.Constants.LogLevels,
     },
+    ['LogFilter']                        = {
+        DisplayName = "Log Filter",
+        Category = "Internals",
+        Default = "",
+        OnChange = function(_, newValue)
+            if newValue:len() == 0 then
+                Logger.clear_log_filter()
+            else
+                Logger.set_log_filter(newValue)
+            end
+        end,
+    },
     ['LogToFile']                        = {
         DisplayName = "Log To File",
         Category = "Internals",

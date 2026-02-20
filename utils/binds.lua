@@ -307,14 +307,14 @@ Binds.Handlers    = {
         usage = "/rgl setlogfilter <filter|filter|filter|...>",
         about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging).",
         handler = function(text)
-            Logger.set_log_filter(text)
+            Config:SetSetting('LogFilter', text)
         end,
     },
     ['clearlogfilter'] = {
         usage = "/rgl clearlogfilter",
         about = "Clear log regex filter.",
         handler = function(...)
-            Logger.clear_log_filter()
+            Config:SetSetting('LogFilter', "")
         end,
     },
     ['togglepause'] = {
