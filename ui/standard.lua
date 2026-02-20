@@ -243,7 +243,7 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
 
                     ImGui.Text("Last Nav: ")
                     ImGui.SameLine()
-                    if not mq.TLO.Navigation.MeshLoaded() then
+                    if mq.TLO.Navigation.MeshLoaded() then
                         Ui.RenderColoredText(Globals.Constants.Colors.ConditionPassColor, "%s ", Movement:GetLastNavCmd() or "N/A")
                     else
                         Ui.RenderColoredText(Globals.GetAlternatingColor(), "%s ", "Mesh Not Loaded")
