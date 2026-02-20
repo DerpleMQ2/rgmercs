@@ -31,8 +31,8 @@ local Tooltips  = {
     UnityBuff           = "AA: Casts Highest Level of Scribed Buffs (ParryProcBuff, Hunt, Protectionbuff, Eyes)",
     Protectionbuff      = "Spell Line: Increase AC + Self Damage Shield",
     ShoutBuff           = "Spell Line: Increase Attack and Double Attack Chance",
-    AgroBuff            = "Spell Line: Harms Target HP and Hatred Increase",
-    AgroReducerBuff     = "Spell Line: Hatred Decrease Proc",
+    AggroBuff           = "Spell Line: Harms Target HP and Hatred Increase",
+    AggroReducerBuff    = "Spell Line: Hatred Decrease Proc",
     AggroKick           = "Spell Line: Two Kicks w/ Increased Accuracy that Increase Hatred",
     ParryProcBuff       = "Spell Line: Magic Nuke w/ Parry Chance Proc",
     Eyes                = "Spell Line: Increase Chance to Hit with Archery",
@@ -399,7 +399,7 @@ local _ClassConfig = {
             "Shout of the Arbor Stalker",
             "Shout of the Dusksage Stalker",
         },
-        ["AgroBuff"] = {
+        ["AggroBuff"] = {
             "Devastating Blades XII",
             "Devastating Blades",
             "Devastating Edges",
@@ -410,7 +410,7 @@ local _ClassConfig = {
             "Devastating Velium",
             "Devastating Barrage",
         },
-        ["AgroReducerBuff"] = {
+        ["AggroReducerBuff"] = {
             "Jolting Blades",
             "Jolting Strikes",
             "Jolting Swings",
@@ -1038,16 +1038,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "MoveSpells",
-                type = "Spell",
-                tooltip = Tooltips.MoveSpells,
-                active_cond = function(self, spell) Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    if not Config:GetSetting('DoRunSpeed') then return false end
-                    return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
                 name = "Cloak",
                 type = "Spell",
                 tooltip = Tooltips.Cloak,
@@ -1066,23 +1056,23 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "AgroReducerBuff",
+                name = "AggroReducerBuff",
                 type = "Spell",
-                tooltip = Tooltips.AgroReducerBuff,
+                tooltip = Tooltips.AggroReducerBuff,
                 load_cond = function(self, spell) return not Core.IsTanking() end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return Config:GetSetting('DoAgroReducerBuff') and Casting.SelfBuffCheck(spell)
+                    return Config:GetSetting('DoAggroReducerBuff') and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
-                name = "AgroBuff",
+                name = "AggroBuff",
                 type = "Spell",
-                tooltip = Tooltips.AgroBuff,
+                tooltip = Tooltips.AggroBuff,
                 load_cond = function(self, spell) return Core.IsTanking() end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return not Config:GetSetting('DoAgroReducerBuff') and Casting.SelfBuffCheck(spell)
+                    return not Config:GetSetting('DoAggroReducerBuff') and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1151,10 +1141,20 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "MoveSpells",
+                type = "Spell",
+                tooltip = Tooltips.MoveSpells,
+                load_cond = function(self) return Config:GetSetting('DoRunSpeed') end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
                 name = "RegenSpells",
                 type = "Spell",
                 tooltip = Tooltips.RegenSpells,
-                load_cond = function(self, spell) return Config:GetSetting('DoRegen') end,
+                load_cond = function(self) return Config:GetSetting('DoRegen') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
                     return Casting.GroupBuffCheck(spell, target)
@@ -1705,7 +1705,7 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig']     = {
-        ['Mode']              = {
+        ['Mode']               = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this Toon",
@@ -1722,7 +1722,7 @@ local _ClassConfig = {
                 "4. Hybrid - This mode is a combination of the other 3 and will attempt to be a jack of all trades.",
         },
         --Archery
-        ['BowNavDistance']    = {
+        ['BowNavDistance']     = {
             DisplayName = "Bow Nav Distance",
             Group = "Combat",
             Header = "Positioning",
@@ -1737,7 +1737,7 @@ local _ClassConfig = {
             Answer = "Some terrain blocks line of sight while MQ reports that the ranger has line of sight.\n" ..
                 "Reducing Bow Nav Distance to a value near the minimum or maximum may solve for some of these (not RG-Mercs) issues, as a workaround.",
         },
-        ['NavCircle']         = {
+        ['NavCircle']          = {
             DisplayName = "Nav Circle",
             Group = "Combat",
             Header = "Positioning",
@@ -1747,7 +1747,7 @@ local _ClassConfig = {
             Default = false,
             RequiresLoadoutChange = true, -- this is a load condition
         },
-        ['DoSnare']           = {
+        ['DoSnare']            = {
             DisplayName = "Cast Snares",
             Group = "Abilities",
             Header = "Debuffs",
@@ -1755,7 +1755,7 @@ local _ClassConfig = {
             Tooltip = "Enable casting Snare spells.",
             Default = true,
         },
-        ['DoDot']             = {
+        ['DoDot']              = {
             DisplayName = "Cast DOTs",
             Group = "Abilities",
             Header = "Damage",
@@ -1763,7 +1763,7 @@ local _ClassConfig = {
             Tooltip = "Enable casting Damage Over Time spells.",
             Default = true,
         },
-        ['DoHeals']           = {
+        ['DoHeals']            = {
             DisplayName = "Cast Heals",
             Group = "Abilities",
             Header = "Recovery",
@@ -1771,7 +1771,7 @@ local _ClassConfig = {
             Tooltip = "Enable casting of Healing spells.",
             Default = true,
         },
-        ['DoRegen']           = {
+        ['DoRegen']            = {
             DisplayName = "Cast Regen Spells",
             Group = "Abilities",
             Header = "Buffs",
@@ -1779,7 +1779,7 @@ local _ClassConfig = {
             Tooltip = "Enable casting of Regen spells.",
             Default = true,
         },
-        ['DoRunSpeed']        = {
+        ['DoRunSpeed']         = {
             DisplayName = "Cast Run Speed Buffs",
             Group = "Abilities",
             Header = "Buffs",
@@ -1787,7 +1787,7 @@ local _ClassConfig = {
             Tooltip = "Use Ranger Run Speed Buffs.",
             Default = true,
         },
-        ['DoMask']            = {
+        ['DoMask']             = {
             DisplayName = "Cast Mask Spell",
             Group = "Abilities",
             Header = "Buffs",
@@ -1795,7 +1795,7 @@ local _ClassConfig = {
             Tooltip = "Use Ranger Mask Spell",
             Default = false,
         },
-        ['DoFireFist']        = {
+        ['DoFireFist']         = {
             DisplayName = "Cast FireFist",
             Group = "Abilities",
             Header = "Buffs",
@@ -1803,7 +1803,7 @@ local _ClassConfig = {
             Tooltip = "Use Ranger FireFist Line of Spells",
             Default = true,
         },
-        ['DoAoE']             = {
+        ['DoAoE']              = {
             DisplayName = "Use AoEs",
             Group = "Abilities",
             Header = "Damage",
@@ -1811,7 +1811,7 @@ local _ClassConfig = {
             Tooltip = "Enable AoE abilities and spells.",
             Default = false,
         },
-        ['DoOpener']          = {
+        ['DoOpener']           = {
             DisplayName = "Use Openers",
             Group = "Abilities",
             Header = "Damage",
@@ -1819,7 +1819,7 @@ local _ClassConfig = {
             Tooltip = "Use Opening Arrow Shot Silent Shot Line.",
             Default = true,
         },
-        ['DoPoisonArrow']     = {
+        ['DoPoisonArrow']      = {
             DisplayName = "Use Poison Arrow",
             Group = "Abilities",
             Header = "Buffs",
@@ -1827,7 +1827,7 @@ local _ClassConfig = {
             Tooltip = "Enable use of Poison Arrow.",
             Default = true,
         },
-        ['DoReagentArrow']    = {
+        ['DoReagentArrow']     = {
             DisplayName = "Use Reagent Arrow",
             Group = "Abilities",
             Header = "Damage",
@@ -1835,12 +1835,12 @@ local _ClassConfig = {
             Tooltip = "Toggle usage of Spells and Openers that require Reagent arrows.",
             Default = false,
         },
-        ['DoAgroReducerBuff'] = {
-            DisplayName = "Cast Agro Reducer Buff",
+        ['DoAggroReducerBuff'] = {
+            DisplayName = "Cast Aggro Reducer Buff",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Self",
-            Tooltip = "Use Agro Reduction Buffs.",
+            Tooltip = "Use Aggro Reduction Buffs.",
             Default = true,
         },
     },

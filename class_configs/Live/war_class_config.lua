@@ -219,7 +219,7 @@ local _ClassConfig = {
             "Unrelenting Attention",
             "Unconditional Attention",
         },
-        ['AgroPet'] = {
+        ['AggroPet'] = {
             "Phantom Aggressor",
         },
         ['Onslaught'] = {
@@ -560,7 +560,7 @@ local _ClassConfig = {
                 type = "Disc",
             },
             {
-                name = "AgroPet",
+                name = "AggroPet",
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Globals.AutoTargetIsNamed
@@ -571,7 +571,7 @@ local _ClassConfig = {
             --     type = "Disc",
             --     cond = function(self, discSpell)
             --         return Core.IsModeActive("Tank") and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
-            --             Config:GetSetting('DoAEAgro')
+            --             Config:GetSetting('DoAEAggro')
             --     end,
             -- },
         },
