@@ -2154,9 +2154,7 @@ function Config.GetConfigFileName(moduleName)
         for i = 1, latestSchema - 1 do
             if Files.file_exists(schemas[i]) then
                 Logger.log_info("Removing old v%d config for %s module.", i, moduleName)
-                --TODO ADD THIS AFTER TESTING
-                --Files.delete_file(schemas[i])
-                Logger.log_warn("Would delete old config file: %s", schemas[i])
+                Files.delete_file(schemas[i])
             end
         end
         return latest

@@ -2143,7 +2143,6 @@ function Module:GiveTime()
             if mq.TLO.Me.FreeInventory() == 0 then self:FarmFullInvActions() end
 
             self:SetPullState(PullStates.PULL_MOVING_TO_WP, string.format("WP Id: %d", currentWpId))
-            -- TODO: PreNav Actions
             local wpData = self:GetWPById(currentWpId)
             if not self:NavToWaypoint(string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z)) then
                 self:SetPullState(PullStates.PULL_NAV_INTERRUPT, "")
@@ -2205,9 +2204,6 @@ function Module:GiveTime()
         -- we are currently traveling to our waypoint, we need to set our state to
         -- PULL_NAVINTERRUPT so that when Pulling re-engages after combat, we continue
         -- to travel to our next waypoint.
-
-        -- TODO: PreNav()
-        --/if (${SubDefined[${Zone.ShortName}_PreNav_${Pull_FarmWPNum}]}) /call ${Zone.ShortName}_PreNav_${Pull_FarmWPNum}
 
         local currentWP = self:GetCurrentWpId()
         local wpData = self:GetWPById(currentWP)
@@ -2319,8 +2315,6 @@ function Module:GiveTime()
 
     if not abortPull then
         mq.delay("2s", function() return not mq.TLO.Me.Moving() end)
-
-        -- TODO: PrePullTarget()
 
         Targeting.SetTarget(self.TempSettings.PullID)
 
@@ -2587,7 +2581,6 @@ function Module:GiveTime()
             mq.doevents()
             Events.DoEvents()
         end
-        -- TODO PostPullCampFunc()
     end
 
     self:SetLastPullOrCombatEndedTimer()

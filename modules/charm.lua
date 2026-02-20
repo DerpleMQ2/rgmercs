@@ -368,7 +368,6 @@ function Module:CharmNow(charmId, useAA)
 		end
 	else
 		Logger.log_debug("Performing Bard CHARM --> %d", charmId)
-		-- TODO SongNow CharmSpell
 		Casting.UseSong(charmSpell.RankName(), charmId, false, 5)
 	end
 

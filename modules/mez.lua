@@ -417,7 +417,6 @@ function Module:MezNow(mezId, useAE, useAA)
         -- we might have waited.
         if Casting.SpellReady(mezSpell) then
             if Core.MyClassIs("brd") then
-                -- TODO SongNow MezSpell
                 Casting.UseSong(mezSpell.RankName(), mezId, false, 2)
             else
                 -- This may not work for Bards but will work for NEC/ENCs
