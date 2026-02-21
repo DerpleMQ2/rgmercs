@@ -108,37 +108,43 @@ function Casting.LocalBuffCheck(spellId, checkPet)
     end
 
     if not spellActive(spellId, spellName) then
-        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, let's check for triggers.", spellName, spellId)
-        local numEffects = spell.NumEffects()
-        local triggerCount = 0
-        local triggerFound = 0
-        for i = 1, numEffects do
-            local triggerSpell = spell.Trigger(i)
-            --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
-            if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
-                local triggerName = triggerSpell.Name()
-                local triggerId = triggerSpell.ID()
-                if not spellActive(triggerId, triggerName) then
-                    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, checking stacking.", triggerName, triggerId)
-                    if spellStacks(triggerSpell) then
-                        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) seems to stack, let's do it!", triggerName, triggerId)
-                        return true
+        if spellStacks(spell) then
+            Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, let's check for triggers.", spellName, spellId)
+            local numEffects = spell.NumEffects()
+            local triggerCount = 0
+            local triggerFound = 0
+            for i = 1, numEffects do
+                local triggerSpell = spell.Trigger(i)
+                --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
+                if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
+                    local triggerName = triggerSpell.Name()
+                    local triggerId = triggerSpell.ID()
+                    if not spellActive(triggerId, triggerName) then
+                        Logger.log_verbose("LocalBuffCheck: Trigger %s(ID:%d) not found, checking stacking.", triggerName, triggerId)
+                        if spellStacks(triggerSpell) then
+                            Logger.log_verbose("LocalBuffCheck: Trigger %s(ID:%d) seems to stack, let's do it!", triggerName, triggerId)
+                            return true
+                        else
+                            Logger.log_verbose("LocalBuffCheck: Trigger %s(ID:%d) does not stack, moving on.", triggerName, triggerId)
+                            triggerFound = triggerFound + 1
+                        end
                     else
-                        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) does not stack, moving on.", triggerName, triggerId)
+                        Logger.log_verbose("LocalBuffCheck: Trigger %s(ID:%d) found, moving on.", triggerName, triggerId)
                         triggerFound = triggerFound + 1
                     end
+                    triggerCount = triggerCount + 1
                 else
-                    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) found, moving on.", triggerName, triggerId)
-                    triggerFound = triggerFound + 1
+                    Logger.log_verbose("LocalBuffCheck: We've checked every trigger for %s(ID:%d).", spellName, spellId)
+                    break
                 end
-                triggerCount = triggerCount + 1
-            else
-                Logger.log_verbose("LocalBuffCheck: We've checked every trigger for %s(ID:%d).", spellName, spellId)
-                break
             end
-        end
-        if triggerCount > 0 and triggerFound >= triggerCount then
-            Logger.log_verbose("LocalBuffCheck: Total triggers for %s(ID:%d): %d. Triggers found: %d. Ending Check.", spellName, spellId, triggerCount, triggerFound)
+
+            if triggerCount > 0 and triggerFound >= triggerCount then
+                Logger.log_verbose("LocalBuffCheck: Total triggers for %s(ID:%d): %d. Triggers found: %d. Ending Check.", spellName, spellId, triggerCount, triggerFound)
+                return false
+            end
+        else
+            Logger.log_verbose("LocalBuffCheck: %s(ID:%d) does not stack, ending check.", spellName, spellId)
             return false
         end
     else
@@ -344,39 +350,46 @@ function Casting.PeerBuffCheck(spellId, target, bSkipBlockCheck)
 
     local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spellId), 1000)
     if (spellResult or "null"):lower() == "null" then
-        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellId, targetName, targetId)
-        local numEffects = mq.TLO.Spell(spellId).NumEffects()
-        local triggerCount = 0
-        local triggerFound = 0
-        for i = 1, numEffects do
-            local triggerSpell = mq.TLO.Spell(spellId).Trigger(i)
-            --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
-            if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
-                local triggerName = triggerSpell.Name()
-                local triggerID = triggerSpell.ID()
-                local triggerResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", triggerID), 1000)
-                if (triggerResult or "null"):lower() == "null" then
-                    Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), checking stacking.", triggerName, triggerID, targetName, targetId)
-                    local triggerStackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", triggerName), 1000)
-                    if triggerStackResult:lower() == "true" then
-                        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) seems to stack on %s(ID:%d), let's do it!", triggerName, triggerID, targetName, targetId)
-                        return true
-                    else
-                        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not stack on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
+        local spellStackResult = DanNet.query(targetName, string.format("Spell[id %d].Stacks", spellId), 1000)
+        if spellStackResult:lower() == "true" then
+            Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellId, targetName, targetId)
+            local numEffects = mq.TLO.Spell(spellId).NumEffects()
+            local triggerCount = 0
+            local triggerFound = 0
+            for i = 1, numEffects do
+                local triggerSpell = mq.TLO.Spell(spellId).Trigger(i)
+                --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
+                if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
+                    local triggerName = triggerSpell.Name()
+                    local triggerID = triggerSpell.ID()
+                    local triggerResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", triggerID), 1000)
+                    if (triggerResult or "null"):lower() == "null" then
+                        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), checking stacking.", triggerName, triggerID, targetName, targetId)
+                        local triggerStackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", triggerName), 1000)
+                        if triggerStackResult:lower() == "true" then
+                            Logger.log_verbose("PeerBuffCheck: %s(ID:%d) seems to stack on %s(ID:%d), let's do it!", triggerName, triggerID, targetName, targetId)
+                            return true
+                        else
+                            Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not stack on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
+                            triggerFound = triggerFound + 1
+                        end
+                    elseif (triggerResult or "null"):lower() == triggerName:lower() then
+                        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) found on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
                         triggerFound = triggerFound + 1
                     end
-                elseif (triggerResult or "null"):lower() == triggerName:lower() then
-                    Logger.log_verbose("PeerBuffCheck: %s(ID:%d) found on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
-                    triggerFound = triggerFound + 1
+                    triggerCount = triggerCount + 1
+                else
+                    Logger.log_verbose("PeerBuffCheck: We've checked every trigger for %s(ID:%d).", spellName, spellId)
+                    break
                 end
-                triggerCount = triggerCount + 1
-            else
-                Logger.log_verbose("PeerBuffCheck: We've checked every trigger for %s(ID:%d).", spellName, spellId)
-                break
             end
-        end
-        if triggerCount > 0 and triggerFound >= triggerCount then
-            Logger.log_verbose("PeerBuffCheck: Total triggers for %s(ID:%d): %d. Present or non-stacking triggers: %d. Ending Check.", spellName, spellId, triggerCount, triggerFound)
+            if triggerCount > 0 and triggerFound >= triggerCount then
+                Logger.log_verbose("PeerBuffCheck: Total triggers for %s(ID:%d): %d. Present or non-stacking triggers: %d. Ending Check.", spellName, spellId, triggerCount,
+                    triggerFound)
+                return false
+            end
+        else
+            Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not stack on %s(ID:%d), ending check.", spellName, spellId, targetName, targetId)
             return false
         end
     elseif (spellResult or "null"):lower() == spellName:lower() then
