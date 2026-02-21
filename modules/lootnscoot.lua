@@ -97,7 +97,7 @@ end
 
 function Module:Init()
 	Base.Init(self)
-
+	local requireDelay = false
 	self:LootMessageHandler()
 	if not Core.OnEMU() then
 		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s", Globals.BuildType)
@@ -105,9 +105,10 @@ function Module:Init()
 		if Config:GetSetting('DoLoot') then
 			if mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' then
 				Core.DoCmd("/lua stop lootnscoot")
-				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
+				--mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
+				requireDelay = true
 			end
-			Core.DoCmd("/lua run lootnscoot directed rgmercs")
+			Core.DoCmd("%s/lua run lootnscoot directed rgmercs", requireDelay and "/timed 15 " or "")
 		end
 		self.TempSettings.Looting = false
 		--pass settings to lootnscoot lib

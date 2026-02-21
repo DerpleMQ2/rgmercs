@@ -63,7 +63,7 @@ end
 
 function Modules:loadModule(moduleName, filePath)
     self:unloadModule(moduleName)
-    self.ModuleList[moduleName] = require(filePath).New()
+    self.ModuleList[moduleName] = require(filePath):New()
     table.insert(self.ModuleOrder, moduleName)
     Logger.log_info("Load %s", moduleName) -- temp debug text
     Modules:ExecModule(moduleName, "Init")
