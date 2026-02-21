@@ -665,7 +665,7 @@ end
 --- @param gem number The gem slot number where the spell should be memorized.
 --- @param spell string The name of the spell to memorize.
 --- @param waitSpellReady boolean Whether to wait until the spell is ready to be memorized.
---- @param maxWait number The maximum time to wait for the spell to be ready, in seconds.
+--- @param maxWait number The maximum time to wait for the spell to be ready, in milliseconds.
 function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     local me = mq.TLO.Me
     if me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100) then
@@ -677,8 +677,8 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
 
     Casting.Memorizing = true
 
-    local startMem = Globals.GetTimeSeconds()
-    while (me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not me.SpellReady(gem)())) and maxWait > 0 do
+    local startMem = Globals.GetTimeMS()
+    while (me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not me.SpellReady(gem)())) and ((Globals.GetTimeMS() - startMem) < maxWait) do
         Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         if (me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100)) or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
             Logger.log_debug(
@@ -696,10 +696,10 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
         mq.delay(100)
         mq.doevents()
         Events.DoEvents()
-        maxWait = maxWait - 100
     end
 
-    Logger.log_info("\agMemorizeSpell: \awFinished waiting for '\at%s\aw' to load in slot \am%d\aw. Time taken: \ay%d\aws", spell, gem, (Globals.GetTimeSeconds() - startMem) / 1000)
+    Logger.log_info("\agMemorizeSpell: \awFinished waiting for '\at%s\aw' to load in slot \am%d\aw. Time taken: \ay%d\aws, maxWait(\ao%d\aws)",
+        spell, gem, (Globals.GetTimeMS() - startMem) / 1000, maxWait / 1000)
 
     Casting.Memorizing = false
 end
