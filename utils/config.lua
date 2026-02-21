@@ -2140,7 +2140,7 @@ Config.CommandHandlers                                   = {}
 
 Config.CachedConfigFileNames                             = {}
 
-function Config.GetConfigFileName(moduleName)
+function Config.GetConfigFileName(moduleName, returnExisting)
     if Config.CachedConfigFileNames[moduleName] then
         return Config.CachedConfigFileNames[moduleName]
     end
@@ -2174,6 +2174,10 @@ function Config.GetConfigFileName(moduleName)
         if Files.file_exists(schemas[i]) then
             Logger.log_info("Upgrading config from v%d to v%d for %s module.", i, latestSchema, moduleName)
 
+            if returnExisting == true then
+                return schemas[i]
+            end
+
             Files.copy_file(schemas[i], latest)
             return latest
         end
@@ -2195,7 +2199,7 @@ function Config:LoadSettings()
     local configFile = Config.GetConfigFileName("RGMercs")
 
     if not Files.file_exists(configFile) then
-        local oldConfigFile = Config.GetConfigFileName("RGMerc")
+        local oldConfigFile = Config.GetConfigFileName("RGMerc", true)
         Logger.log_info("\ayOld config file found for RGMercs, upgrading to new config file name.")
         Files.copy_file(oldConfigFile, configFile)
         Files.delete_file(oldConfigFile)
