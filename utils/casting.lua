@@ -669,28 +669,41 @@ end
 function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     local me = mq.TLO.Me
     if me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100) then
-        Logger.log_warning("\ar %s was not memorized in slot %d due to aggro! The loadout may need manual rescan after combat.", spell, gem)
+        Logger.log_warning("\atMemorizeSpell\aw():\ar %s was not memorized in slot %d due to aggro! The loadout may need manual rescan after combat.", spell, gem)
         return false
     end
-    Logger.log_info("\ag Meming \aw%s in \agslot %d", spell, gem)
-    Core.DoCmd("/memspell %d \"%s\"", gem, spell)
+    local aggressiveMem      = Config:GetSetting('AggressivelyMemorizeSpells')
+    local aggressiveMemTimer = Config:GetSetting('AggressivelyMemorizeTimer') * 1000
+    local cmd                = string.format("/memspell %d \"%s\"", gem, spell)
+
+    Logger.log_info("\atMemorizeSpell\aw():\ag Meming \aw%s in \agslot %d", spell, gem)
+    Core.DoCmd(cmd)
+    local lastMemCmd = Globals.GetTimeMS()
 
     Casting.Memorizing = true
 
     local startMem = Globals.GetTimeMS()
     while (me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not me.SpellReady(gem)())) and ((Globals.GetTimeMS() - startMem) < maxWait) do
-        Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
+        Logger.log_debug("\atMemorizeSpell\aw():\ay Waiting for '%s' to load in slot %d'...", spell, gem)
         if (me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100)) or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
             Logger.log_debug(
-                "I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s))",
+                "\atMemorizeSpell\aw():\ay I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s))",
                 spell, gem, me.CombatState(), me.Casting() or "None", Strings.BoolToColorString(me.Moving()), Strings.BoolToColorString(mq.TLO.Stick.Active()),
                 Strings.BoolToColorString(mq.TLO.Navigation.Active()), Strings.BoolToColorString(mq.TLO.MoveTo.Moving()),
                 Strings.BoolToColorString(mq.TLO.AdvPath.Following()))
             break
         end
         if not me.Book(spell)() then
-            Logger.log_debug("I was trying to memorize %s as my persona was changed, aborting.", spell)
+            Logger.log_debug("\atMemorizeSpell\aw():\ar I was trying to memorize %s as my persona was changed, aborting.", spell)
             break
+        end
+
+        if me.Gem(gem)() == nil and aggressiveMem and (Globals.GetTimeMS() - lastMemCmd) > aggressiveMemTimer then
+            Logger.log_debug(
+                "\atMemorizeSpell\aw():\ay AggressiveMemorize is enabled and it's been more than %ds since the last mem command and the gem slot is still empty, resending mem command for '%s' in slot %d.",
+                (Globals.GetTimeMS() - lastMemCmd) / 1000, spell, gem)
+            Core.DoCmd(cmd)
+            lastMemCmd = Globals.GetTimeMS()
         end
 
         mq.delay(100)
@@ -698,7 +711,7 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
         Events.DoEvents()
     end
 
-    Logger.log_info("\agMemorizeSpell: \awFinished waiting for '\at%s\aw' to load in slot \am%d\aw. Time taken: \ay%d\aws, maxWait(\ao%d\aws)",
+    Logger.log_info("\atMemorizeSpell\aw():\aw Finished waiting for '\at%s\aw' to load in slot \am%d\aw. Time taken: \ay%d\aws, maxWait(\ao%d\aws)",
         spell, gem, (Globals.GetTimeMS() - startMem) / 1000, maxWait / 1000)
 
     Casting.Memorizing = false

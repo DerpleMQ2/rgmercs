@@ -577,6 +577,28 @@ Config.DefaultConfig                                     = {
         ConfigType = "Normal",
     },
 
+    -- Behavior
+    ['AggressivelyMemorizeSpells'] = {
+        DisplayName = "Aggressively Mem Spells",
+        Group = "Abilities",
+        Header = "Behavior",
+        Category = "Spell Management",
+        Index = 1,
+        Tooltip = "If you have a very latent connection, and spell memorization gets stuck, this will attempt to fix it by resending the memspell command every x seconds.",
+        Default = false,
+        ConfigType = "Advanced",
+    },
+    ['AggressivelyMemorizeTimer']  = {
+        DisplayName = "Aggressively Mem Timer",
+        Group = "Abilities",
+        Header = "Behavior",
+        Category = "Spell Management",
+        Index = 2,
+        Tooltip = "How many seconds to wait before resending memspell commands when Aggressively Memorize Spells is enabled.",
+        Default = 1,
+        ConfigType = "Advanced",
+    },
+
     -- Targeting
     ['DoAutoTarget']               = {
         DisplayName = "Auto Target",
