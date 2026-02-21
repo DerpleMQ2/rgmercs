@@ -8,24 +8,21 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout release tag
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: "${{ github.event.release.tag_name }}"
           fetch-depth: 0
 
       - name: Build zip file
-        run: |
-          git archive --format=zip \
-            --prefix="${{ github.event.repository.name }}/" \
-            -o "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip" \
-            ${{ github.event.release.tag_name }}
+        run: git archive --format=zip --prefix="${{ github.event.repository.name }}/" -o "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip" HEAD
 
       - name: Create message from git log
+        env:
+          VERSION: "${{ github.ref_name }}"
         run: |
-          PREV=$(git describe --tags --abbrev=0 "${{ github.event.release.tag_name }}^" 2>/dev/null || echo "")
-          git log --no-merges --pretty=format:"- [%s](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H)%n%b" ${PREV:+$PREV..}${{ github.event.release.tag_name }} > rg_release_notes.md
-          cat rg_release_notes.md  # Debug: show what was generated
+          PREV=$(git describe --tags --abbrev=0 "${VERSION}^" 2>/dev/null || echo "")
+          git log --no-merges --pretty=format:"- [%s](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H)%n%b" ${PREV:+$PREV..}${VERSION} > rg_release_notes.md
 
       - name: Publish to RedGuides
         uses: RedGuides/redguides-publish@v1
@@ -33,7 +30,7 @@ jobs:
           REDGUIDES_API_KEY: ${{ secrets.REDGUIDES_API_KEY }}
         with:
           resource_id: "3040"
-          version: ${{ github.event.release.tag_name }}
-          file: ${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip
-          message: rg_release_notes.md
-          domain: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.repository.default_branch }}/
+          version: "${{ github.event.release.tag_name }}"
+          file: "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip"
+          message: "rg_release_notes.md"
+          domain: "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.repository.default_branch }}/"
