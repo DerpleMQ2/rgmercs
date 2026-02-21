@@ -150,9 +150,7 @@ function Module:New()
 end
 
 local function getImmuneFileName()
-	return mq.configDir ..
-		'/rgmercs/PCConfigs/' ..
-		Module._name .. "_Immune_" .. Globals.CurServer .. "_" .. Globals.CurLoadedChar .. '.lua'
+	return Config.GetConfigFileName(Module._name .. "_Immune")
 end
 
 function Module:LoadSettings()
