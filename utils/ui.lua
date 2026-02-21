@@ -1618,8 +1618,8 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
         ImGui.TableSetupColumn('Enable', ImGuiTableColumnFlags.WidthFixed, 30.0)
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed, 250.0)
-        --- Column 3: header will be manually drawn
-        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 250.0);
+        --- Column 5: header will be manually drawn
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 250.0);
 
         if showDebugTiming then
             ImGui.TableSetupColumn('Timing', ImGuiTableColumnFlags.WidthStretch, 250.0)
