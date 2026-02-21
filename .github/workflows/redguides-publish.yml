@@ -1,62 +1,31 @@
 name: Publish to RedGuides
 
 on:
-  workflow_run:
-    workflows: ["Publish to Github and Create Release"]
-    types:
-      - completed
+  release:
+    types: [published]
 
 jobs:
   publish:
-    if: github.repository == 'DerpleMQ2/rgmercs' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Read version
-        id: version
-        run: |
-          VERSION=$(sed -n 's/.*version *= *\([0-9]\+\).*/\1/p' extras/version.lua)
-          [ -z "$VERSION" ] && exit 1
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: "${{ github.event.release.tag_name }}"
+          fetch-depth: 0
 
       - name: Build zip file
-        run: git archive --format=zip --prefix="${{ github.event.repository.name }}/" -o "${{ github.event.repository.name }}_${{ steps.version.outputs.version }}.zip" HEAD
+        run: git archive --format=zip --prefix="${{ github.event.repository.name }}/" -o "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip" HEAD
 
-      - name: Write message from GitHub Release body
-        run: jq -r '.release.body // ""' "$GITHUB_EVENT_PATH" > rg_release_notes.md
-
-      - name: Generate RedGuides release notes
-        shell: bash
+      - name: Create message from git log
+        env:
+          VERSION: "${{ github.ref_name }}"
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          CURRENT_SHA="${{ github.sha }}"
-          DATE="$(date -u +"%b %d, %Y")"
-          DATE_SHORT="$(date -u +"%Y-%m-%d")"
-
-          # Find previous tag (if any)
-          PREV_TAG=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo "")
-
-          # Create changelog in keepachangelog format
-          echo "# Changelog" > rg_release_notes.md
-          echo >> rg_release_notes.md
-          echo "## [$VERSION] - $DATE_SHORT" >> rg_release_notes.md
-          echo >> rg_release_notes.md
-          echo "### Changed" >> rg_release_notes.md
-          echo >> rg_release_notes.md
-
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-
-          if [ -n "$PREV_TAG" ]; then
-            RANGE="$PREV_TAG..HEAD"
-          else
-            RANGE="HEAD"
-          fi
-
-          git log $RANGE --pretty=format:"* %s (%h)%n%nNotes: %n%b%n~%an%n" >> rg_release_notes.md
-
-          cat rg_release_notes.md
+          PREV=$(git describe --tags --abbrev=0 "${VERSION}^" 2>/dev/null || echo "")
+          git log --no-merges --pretty=format:"- [%s](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H)%n%b" ${PREV:+$PREV..}${VERSION} > rg_release_notes.md
 
       - name: Publish to RedGuides
         uses: RedGuides/redguides-publish@v1
@@ -64,7 +33,7 @@ jobs:
           REDGUIDES_API_KEY: ${{ secrets.REDGUIDES_API_KEY }}
         with:
           resource_id: "3040"
-          version: "${{ steps.version.outputs.version }}"
-          file: "${{ github.event.repository.name }}_${{ steps.version.outputs.version }}.zip"
+          version: "${{ github.event.release.tag_name }}"
+          file: "${{ github.event.repository.name }}_${{ github.event.release.tag_name }}.zip"
           message: "rg_release_notes.md"
           domain: "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.repository.default_branch }}/"
