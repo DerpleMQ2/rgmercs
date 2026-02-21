@@ -67,10 +67,8 @@ local function GetTheme()
     local classTheme = Modules:ExecModule("Class", "GetTheme") or {}
     local userTheme = Config:GetSetting('UserTheme') or {}
 
-    if #userTheme > 0 then
-        if #classTheme == 0 or Config:GetSetting('UserThemeOverrideClassTheme') then
-            return userTheme
-        end
+    if #classTheme == 0 or Config:GetSetting('UserThemeOverrideClassTheme') then
+        return userTheme
     end
 
     return classTheme
