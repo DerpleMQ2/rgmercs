@@ -14,6 +14,7 @@ local ClassLoader       = require('utils.classloader')
 local Math              = require('utils.math')
 local Set               = require('mq.set')
 local ImGui             = require('ImGui')
+-- TODO: Enable when launched local ImAnim            = require('ImAnim')
 
 local animSpellGems     = mq.FindTextureAnimation('A_SpellGems')
 local ICON_SIZE         = 20
@@ -29,6 +30,7 @@ Ui.TempSettings         = {
     SortedXTIDToSlot = {},
     SortedXTIDs      = Set.new({}),
     hpBarTrendState  = {},
+    hpAnimState      = {},
 }
 
 Ui.ModalText            = ""
@@ -1977,15 +1979,63 @@ function Ui.RenderProgressBar(pct, width, height)
     ImGui.SetCursorPos(end_x, end_y)
 end
 
+function Ui.GetDeltaTime()
+    local dt = ImGui.GetIO().DeltaTime
+    if dt <= 0 then dt = 1.0 / 60.0 end
+    if dt > 0.1 then dt = 0.1 end
+    return dt
+end
+
 -- Draw a horizontal gradient HP bar using ImDrawList:AddRectFilledMultiColor.
 function Ui.RenderFancyHPBar(id, hpPct, height, burning)
-    local pct = Math.Clamp(tonumber(hpPct) or 0, 0, 100)
-    local fraction = pct / 100
+    local useImAnim = false -- set to true to enable ImAnim tweening for HP changes, false will just snap to the new value without animation
+    local targetPct = Math.Clamp(tonumber(hpPct) or 0, 0, 100)
     local availX = ImGui.GetContentRegionAvailVec().x
     local width = math.max(1, tonumber(availX) or 1)
     local barHeight = height or 16
     local now = Globals.GetTimeSeconds()
     local drawList = ImGui.GetWindowDrawList()
+
+    -- Animated or direct HP percentage
+    local pct = targetPct
+    local animState = Ui.TempSettings.hpAnimState[id]
+
+    if useImAnim and ImAnim then
+        if not animState then
+            -- First render: initialize with current target
+            animState = { lastTarget = targetPct, }
+            Ui.TempSettings.hpAnimState[id] = animState
+        end
+
+        -- Detect HP changes and update animation target
+        if targetPct ~= animState.lastTarget then
+            animState.lastTarget = targetPct
+        end
+
+        -- Tween the displayed HP value using ImAnim
+        -- Using OutCubic for a smooth deceleration as it approaches target
+        local easeDesc = ImAnim.EasePreset(IamEaseType.OutCubic)
+        pct = ImAnim.TweenFloat(
+            ImHashStr(id),               -- unique id for this bar
+            ImHashStr(id .. "_channel"), -- channel for HP value
+            targetPct,                   -- target value
+            0.25,                        -- duration (seconds) - snappy but smooth
+            easeDesc,                    -- easing function
+            IamPolicy.Crossfade,         -- policy for target changes
+            Ui.GetDeltaTime(),           -- delta time
+            targetPct                    -- initial value
+        )
+    else
+        -- Fallback: direct value (no animation)
+        if not animState then
+            animState = { lastTarget = targetPct, }
+            Ui.TempSettings.hpAnimState[id] = animState
+        end
+        animState.lastTarget = targetPct
+        pct = targetPct
+    end
+
+    local fraction = pct / 100
 
     local trend = Ui.TempSettings.hpBarTrendState[id]
     if not trend then
@@ -1993,9 +2043,9 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
         Ui.TempSettings.hpBarTrendState[id] = trend
     else
         -- Use a tiny dead-zone to avoid noisy direction flips from rounding jitter.
-        if pct < (trend.lastPct - 0.05) then
+        if targetPct < (trend.lastPct - 0.05) then
             trend.direction = -1
-        elseif pct > (trend.lastPct + 0.05) then
+        elseif targetPct > (trend.lastPct + 0.05) then
             trend.direction = 1
         end
         trend.lastPct = pct
@@ -2006,6 +2056,7 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     local maxX, maxY = ImGui.GetItemRectMax()
     local barW = maxX - minX
     local barH = maxY - minY
+    local barRounding = 3.0
 
     -- Background shell
     local bgTop = IM_COL32(28, 30, 41, 247)
@@ -2023,6 +2074,7 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     )
 
     local fillWidth = barW * fraction
+
     if fillWidth > 0 then
         -- Red -> amber -> green edge color based on current HP
         local hpLow = Globals.Constants.Colors.HPLowColor
@@ -2039,47 +2091,81 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
         local topRight = ImGui.GetColorU32(edge)
         local bottomLeft = ImGui.GetColorU32(hpLow)
         local bottomRight = ImGui.GetColorU32(edge)
-        drawList:AddRectFilledMultiColor(
+        local fillMaxX = minX + fillWidth
+        local fillRounding = math.min(barRounding, barH * 0.5, fillWidth * 0.5)
+
+        -- Rounded base keeps the visible HP shape aligned with the rounded container.
+        local baseFillColor = IM_COL32(
+            (hpLow.x + edge.x) * 128,
+            (hpLow.y + edge.y) * 128,
+            (hpLow.z + edge.z) * 128,
+            244)
+
+        drawList:AddRectFilled(
             ImVec2(minX, minY),
-            ImVec2(minX + fillWidth, maxY),
-            topLeft, topRight, bottomRight, bottomLeft
+            ImVec2(fillMaxX, maxY),
+            baseFillColor,
+            fillRounding
         )
 
-        -- Gloss strip on top of the filled area.
-        drawList:AddRectFilledMultiColor(
-            ImVec2(minX, minY + 1),
-            ImVec2(minX + fillWidth, minY + math.max(2, barH * 0.45)),
-            IM_COL32(255, 255, 255, 14),
-            IM_COL32(255, 255, 255, 8),
-            IM_COL32(255, 255, 255, 2),
-            IM_COL32(255, 255, 255, 8)
-        )
+        -- Keep square-corner gradient layers slightly inset so rounded corners remain clean.
+        local innerMinX = minX + 1
+        local innerMaxX = fillMaxX - 1
+        local innerMinY = minY + 1
+        local innerMaxY = maxY - 1
+
+        if innerMaxX > innerMinX and innerMaxY > innerMinY then
+            drawList:AddRectFilledMultiColor(
+                ImVec2(innerMinX, innerMinY),
+                ImVec2(innerMaxX, innerMaxY),
+                topLeft, topRight, bottomRight, bottomLeft
+            )
+
+            -- Gloss strip on top of the filled area.
+            local glossMaxY = math.min(innerMaxY, minY + math.max(2, barH * 0.45))
+            if glossMaxY > innerMinY then
+                drawList:AddRectFilledMultiColor(
+                    ImVec2(innerMinX, innerMinY),
+                    ImVec2(innerMaxX, glossMaxY),
+                    IM_COL32(255, 255, 255, 14),
+                    IM_COL32(255, 255, 255, 8),
+                    IM_COL32(255, 255, 255, 2),
+                    IM_COL32(255, 255, 255, 8)
+                )
+            end
+        end
 
         -- Animated sheen sweep (subtle).
         if fillWidth > 12 then
-            local sweepBase = (now * 0.65) % 1
-            local sweep = trend.direction < 0 and (1.0 - sweepBase) or sweepBase
+            -- When HP is animating, sheen sweeps in direction of change
+            -- Otherwise, continuous gentle sweep
+            local isAnimating = useImAnim and ImAnim and math.abs(targetPct - pct) > 0.5
+            local sweepSpeed = isAnimating and 1.2 or 0.65
+            local sweepBase = (now * sweepSpeed) % 1
+            local sweep = (isAnimating or trend.direction < 0) and (1.0 - sweepBase) or sweepBase
             local sheenCenter = minX + (fillWidth * sweep)
             local sheenHalf = math.min(16, fillWidth * 0.22)
-            local sheenLeft = math.max(minX, sheenCenter - sheenHalf)
-            local sheenRight = math.min(minX + fillWidth, sheenCenter + sheenHalf)
+            local sheenLeft = math.max(minX + 1, sheenCenter - sheenHalf)
+            local sheenRight = math.min(fillMaxX - 1, sheenCenter + sheenHalf)
             if sheenRight > sheenLeft then
                 local sheenMid = (sheenLeft + sheenRight) * 0.5
+                -- Brighter sheen during HP animation
+                local sheenAlpha = isAnimating and 0.25 or 0.18
                 drawList:AddRectFilledMultiColor(
                     ImVec2(sheenLeft, minY),
                     ImVec2(sheenMid, maxY),
                     IM_COL32(255, 255, 255, 0),
-                    IM_COL32(255, 255, 255, 46),
-                    IM_COL32(255, 255, 255, 26),
+                    IM_COL32(255, 255, 255, sheenAlpha * 255),
+                    IM_COL32(255, 255, 255, (sheenAlpha * 0.55) * 255),
                     IM_COL32(255, 255, 255, 0)
                 )
                 drawList:AddRectFilledMultiColor(
                     ImVec2(sheenMid, minY),
                     ImVec2(sheenRight, maxY),
-                    IM_COL32(255, 255, 255, 46),
+                    IM_COL32(255, 255, 255, sheenAlpha * 255),
                     IM_COL32(255, 255, 255, 0),
                     IM_COL32(255, 255, 255, 0),
-                    IM_COL32(255, 255, 255, 26)
+                    IM_COL32(255, 255, 255, (sheenAlpha * 0.55) * 255)
                 )
             end
         end
