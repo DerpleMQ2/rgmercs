@@ -2147,6 +2147,8 @@ function Config.GetConfigFileName(moduleName, returnExisting)
 
     local schemas = {
         mq.configDir .. '/rgmercs/PCConfigs/' ..
+        moduleName .. "_" .. Globals.CurServer .. "_" .. Globals.CurLoadedChar .. '.lua',
+        mq.configDir .. '/rgmercs/PCConfigs/' ..
         moduleName .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua',
         mq.configDir .. '/rgmercs/PCConfigs/' ..
         moduleName .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua',
