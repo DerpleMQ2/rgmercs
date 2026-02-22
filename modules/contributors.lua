@@ -22,6 +22,9 @@ end
 function Module:WriteSettings()
 end
 
+function Module:LoadSettings(preLoadFn, postLoadFn)
+end
+
 function Module:ShouldRender()
     return false
 end
