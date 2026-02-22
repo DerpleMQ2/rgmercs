@@ -232,7 +232,7 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
                 pauseLabel = pauseLabel .. " [Backoff]"
             end
 
-            if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - imgui_style.WindowPadding.x), 40) then
+            if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX()), 40) then
                 Globals.PauseMain = not Globals.PauseMain
             end
             ImGui.PopStyleColor()
