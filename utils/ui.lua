@@ -14,7 +14,6 @@ local ClassLoader       = require('utils.classloader')
 local Math              = require('utils.math')
 local Set               = require('mq.set')
 local ImGui             = require('ImGui')
-local ImAnim            = require('ImAnim')
 
 local animSpellGems     = mq.FindTextureAnimation('A_SpellGems')
 local ICON_SIZE         = 20
