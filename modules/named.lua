@@ -16,6 +16,7 @@ Module.__index     = Module
 setmetatable(Module, { __index = Base, })
 
 Module.CachedNamedList = {}
+Module.CommandHandlers = {}
 
 Module.NamedList       = {}
 Module.LastNamedCheck  = 0

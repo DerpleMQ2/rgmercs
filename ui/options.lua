@@ -70,7 +70,7 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.FA_HEART,
         IconImage = OptionsUI.LoadIcon("stafficon"),
         Headers = {
-            { Name = 'Common',   Categories = { "Common Rules", "Under the Hood", }, },
+            { Name = 'Common',   Categories = { "Common Rules", "Spell Management", "Under the Hood", }, },
             { Name = 'Pet',      Categories = { "Pet Summoning", "Pet Buffs", "Swarm Pets", }, },
             { Name = 'Buffs',    Categories = { "Buff Rules", "Self", "Group", }, },
             { Name = 'Debuffs',  Categories = { "Debuff Rules", "Slow", "Stun", "Resist", "Snare", "Dispel", "Misc Debuffs", }, }, -- Resist i.e, Malo, Tash, druid

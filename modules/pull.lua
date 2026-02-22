@@ -23,6 +23,7 @@ local Icons     = require('mq.ICONS')
 local Module    = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
 Module.__index  = Module
 setmetatable(Module, { __index = Base, })
+Module.FAQ                                = {}
 
 Module.TempSettings                       = {}
 Module.TempSettings.BuffCount             = 0

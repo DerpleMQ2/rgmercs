@@ -12,7 +12,8 @@ local CHANNEL_COLOR = IM_COL32(215, 154, 66)
 local Module        = { _version = '0.1a', _name = "Debug", _author = 'Derple', }
 Module.__index      = Module
 setmetatable(Module, { __index = Base, })
-
+Module.FAQ                       = {}
+Module.CommandHandlers           = {}
 Module.DefaultConfig             = {
     ['script'] = {
         Default = "",

@@ -15,7 +15,9 @@ local Module    = { _version = '0.1a', _name = "Drag", _author = 'Derple', }
 Module.__index  = Module
 setmetatable(Module, { __index = Base, })
 
-Module.DefaultConfig = {
+Module.FAQ             = {}
+Module.CommandHandlers = {}
+Module.DefaultConfig   = {
     ['DoDrag']                                 = {
         DisplayName = "Drag Corpses",
         Group = "Movement",

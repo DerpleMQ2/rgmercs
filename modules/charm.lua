@@ -23,6 +23,8 @@ local Module   = { _version = '0.1a', _name = "Charm", _author = 'Grimmier', }
 Module.__index = Module
 Module.__index = Module
 setmetatable(Module, { __index = Base, })
+Module.FAQ                       = {}
+Module.CommandHandlers           = {}
 
 Module.CombatState               = "None"
 Module.TempSettings              = {}

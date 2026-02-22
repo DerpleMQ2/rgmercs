@@ -6,12 +6,10 @@ local Combat    = require("utils.combat")
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
-local Ui        = require("utils.ui")
 local Comms     = require("utils.comms")
 local Modules   = require("utils.modules")
 local Strings   = require("utils.strings")
 local Tables    = require("utils.tables")
-local Files     = require("utils.files")
 local Logger    = require("utils.logger")
 local Events    = require("utils.events")
 local Base      = require("modules.base")
@@ -20,6 +18,8 @@ require('utils.datatypes')
 local Module   = { _version = '0.1a', _name = "Mez", _author = 'Derple', }
 Module.__index = Module
 setmetatable(Module, { __index = Base, })
+Module.FAQ                     = {}
+Module.CommandHandlers         = {}
 
 Module.CombatState             = "None"
 

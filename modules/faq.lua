@@ -3,11 +3,10 @@ local mq            = require('mq')
 local Config        = require('utils.config')
 local Globals       = require('utils.globals')
 local Ui            = require('utils.ui')
-local Comms         = require("utils.comms")
 local Logger        = require("utils.logger")
 local Binds         = require("utils.binds")
 local Modules       = require("utils.modules")
-local Strings       = require("utils.strings")
+local Tables        = require("utils.tables")
 local Base          = require("modules.base")
 
 local Module        = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }

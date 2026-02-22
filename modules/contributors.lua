@@ -5,6 +5,10 @@ local Module   = { _version = '0.1a', _name = "Contributors", _author = 'Derple'
 Module.__index = Module
 setmetatable(Module, { __index = Base, })
 
+Module.FAQ             = {}
+Module.CommandHandlers = {}
+Module.DefaultConfig   = {}
+
 Module.Credits         = require("extras.credits")
 Module.ColorWheel      = {}
 Module.ColorWheelTimer = {}

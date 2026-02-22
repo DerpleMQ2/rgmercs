@@ -5,9 +5,7 @@ local Globals         = require('utils.globals')
 local Core            = require("utils.core")
 local Combat          = require("utils.combat")
 local Casting         = require("utils.casting")
-local Ui              = require("utils.ui")
 local Comms           = require("utils.comms")
-local Strings         = require("utils.strings")
 local Logger          = require("utils.logger")
 local Actors          = require("actors")
 local Events          = require("utils.events")
@@ -20,10 +18,11 @@ local suppressWarning = true
 local Module          = { _version = '1.2', _name = "LootNScoot", _author = 'Derple, Grimmier, Algar', }
 Module.__index        = Module
 setmetatable(Module, { __index = Base, })
+Module.CommandHandlers = {}
 
-Module.TempSettings  = {}
+Module.TempSettings    = {}
 
-Module.FAQ           = {
+Module.FAQ             = {
 	{
 		Question = "How can I loot corpses on emu servers?",
 		Answer = "RGMercs offers a Loot Module to direct and integrate LootNScoot (LNS), an emu loot management script." ..
@@ -33,7 +32,7 @@ Module.FAQ           = {
 	},
 }
 
-Module.DefaultConfig = {
+Module.DefaultConfig   = {
 	['DoLoot']                                 = {
 		DisplayName = "Load LootNScoot",
 		Group = "General",

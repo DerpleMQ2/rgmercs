@@ -12,6 +12,9 @@ local Module    = { _version = '0.1a', _name = "Travel", _author = 'Derple', }
 Module.__index  = Module
 setmetatable(Module, { __index = Base, })
 
+Module.FAQ                         = {}
+Module.CommandHandlers             = {}
+
 Module.TransportSpells             = {}
 Module.ButtonWidth                 = 150
 Module.ButtonHeight                = 25

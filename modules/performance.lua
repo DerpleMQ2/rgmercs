@@ -14,6 +14,9 @@ local Base                = require("modules.base")
 local Module              = { _version = '0.1a', _name = "Perf", _author = 'Derple', }
 Module.__index            = Module
 setmetatable(Module, { __index = Base, })
+Module.FAQ                = {}
+Module.CommandHandlers    = {}
+
 Module.MaxFrameStep       = 5.0
 Module.GoalMaxFrameTime   = 0
 Module.CurMaxMaxFrameTime = 0

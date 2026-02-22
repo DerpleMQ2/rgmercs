@@ -3128,8 +3128,7 @@ function Config:GetCommandHandlers()
 end
 
 function Config:GetFAQ()
-    return
-        self.FAQ or {}
+    return self.FAQ or {}
 end
 
 function Config:GetLastHighlightChangeTime()

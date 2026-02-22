@@ -1,18 +1,18 @@
-local mq             = require('mq')
-local Config         = require('utils.config')
-local Ui             = require("utils.ui")
-local Comms          = require("utils.comms")
-local Logger         = require("utils.logger")
-local Strings        = require("utils.strings")
-local Globals        = require("utils.globals")
+local mq           = require('mq')
+local Config       = require('utils.config')
+local Ui           = require("utils.ui")
+local Comms        = require("utils.comms")
+local Logger       = require("utils.logger")
+local Strings      = require("utils.strings")
+local Globals      = require("utils.globals")
+local Tables       = require("utils.tables")
+local Modules      = require("utils.modules")
 
-local Base           = { _version = '1.0', _name = "RGMercsBaseBaseClass", _author = 'Derple', }
-Base.__index         = Base
-Base.FAQ             = {}
-Base.SaveRequested   = nil
-Base.DefaultConfig   = {}
-Base.ModuleLoaded    = false
-Base.CommandHandlers = {}
+local Base         = { _version = '1.0', _name = "RGMercsBaseBaseClass", _author = 'Derple', }
+Base.__index       = Base
+Base.SaveRequested = nil
+Base.ModuleLoaded  = false
+-- Tables must be defined in sub classes to avoid caching issues across modules
 
 function Base:New()
     local newBase = setmetatable({}, self)
@@ -109,11 +109,11 @@ function Base:DoGetState()
 end
 
 function Base:GetCommandHandlers()
-    return { Base = self._name, CommandHandlers = self.CommandHandlers, }
+    return { Module = self._name, CommandHandlers = self.CommandHandlers, }
 end
 
 function Base:GetFAQ()
-    return { Base = self._name, FAQ = self.FAQ or {}, }
+    return { Module = self._name, FAQ = self.FAQ or {}, }
 end
 
 ---@param cmd string
