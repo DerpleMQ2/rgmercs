@@ -131,7 +131,7 @@ Ui.SelectedMercThemeImport = 1
 Ui.LoadMercThemes          = function()
     local themes, err = loadfile(mq.configDir .. '/rgmercs/themes.lua')
     if err or not themes then
-        Logger.log_warn("\ayNo Save RGMercs Themes Lua found.")
+        Logger.log_debug("\ayNo themes.lua file found in your rgmercs config directory.")
     else
         Ui.MercThemes = themes()
 
