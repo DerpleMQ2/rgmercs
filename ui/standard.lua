@@ -50,9 +50,9 @@ function StandardUI:RenderTargetInfo()
         ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
     end
 
-    ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
+    ImGui.Text("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
         assistSpawn.ID() or 0, assistSpawn.Level() or 0,
-        assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
+        assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
 
     ImGui.PopStyleColor(1)
 end
@@ -76,27 +76,25 @@ function StandardUI:RenderAutoTargetInfo()
         ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
     end
 
-    ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
+    ImGui.Text("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
         assistSpawn.ID() or 0, assistSpawn.Level() or 0,
-        assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
+        assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
 
     if Globals.AutoTargetIsNamed then
         ImGui.SameLine()
-        ImGui.TextColored(IM_COL32(52, 200, 52, 255),
-            string.format("**Named**"))
+        ImGui.TextColored(IM_COL32(52, 200, 52, 255), "**Named**")
     end
 
     if assistSpawn.ID() == Globals.ForceTargetID then
         ImGui.SameLine()
-        ImGui.TextColored(IM_COL32(52, 200, 200, 255),
-            string.format("**ForcedTarget**"))
+        ImGui.TextColored(IM_COL32(52, 200, 200, 255), "**ForcedTarget**")
     end
 
     local burning = Globals.LastBurnCheck and assistSpawn.ID() > 0
 
     if burning then
         ImGui.SameLine()
-        ImGui.TextColored(Globals.GetAlternatingColor(), string.format("**BURNING**"))
+        ImGui.TextColored(Globals.GetAlternatingColor(), "**BURNING**")
     end
 
     ImGui.PopStyleColor(1)

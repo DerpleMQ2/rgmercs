@@ -507,7 +507,7 @@ function OptionsUI:RenderCategorySettings(category)
 
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ((row_height - text_height) / 2))
 
-                        ImGui.Text(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))))
+                        ImGui.Text("%s", settingDefaults.DisplayName or (string.format("None %d", idx)))
 
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PopStyleColor(1)
@@ -558,9 +558,9 @@ function OptionsUI:RenderCategorySettings(category)
                     end
                 else
                     ImGui.TableNextColumn()
-                    ImGui.Text(string.format("\arError: Setting not found - %s\ax", settingName))
+                    ImGui.Text("\arError: Setting not found - %s\ax", settingName)
                     ImGui.TableNextColumn()
-                    ImGui.Text(string.format("\arError: Setting not found - %s\ax", settingName))
+                    ImGui.Text("\arError: Setting not found - %s\ax", settingName)
                 end
             end
             ImGui.EndTable()
@@ -717,7 +717,7 @@ function OptionsUI:RenderMainWindow(_, openGUI, flags)
         if ImGui.BeginChild("right##RGmercsOptions", x, y - 1, ImGuiChildFlags.Borders) then
             flags = bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.None)
             if self.selectedCharacter ~= Comms.GetPeerName() and Config:GetPeerLastConfigReceivedTime(self.selectedCharacter) == 0 then
-                ImGui.TextColored(0.2, 0.2, 0.8, 1.0, "Waiting for configuration from " .. self.selectedCharacter .. "...")
+                ImGui.TextColored(0.2, 0.2, 0.8, 1.0, "Waiting for configuration from %s...", self.selectedCharacter)
             else
                 if ImGui.BeginTable('rightpanelTable##RGmercsOptions', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()

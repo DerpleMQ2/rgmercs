@@ -76,8 +76,7 @@ function HudUI:RenderToggleHud()
             if ImGui.IsItemHovered() then
                 ImGui.BeginTooltip()
                 if Globals.LastBurnCheck then
-                    ImGui.TextColored(Globals.GetAlternatingColor(),
-                        string.format("RGMercs is BURNING!\nClick to open the main window."))
+                    ImGui.TextColored(Globals.GetAlternatingColor(), "RGMercs is BURNING!\nClick to open the main window.")
                 else
                     ImGui.Text("RGMercs is Running.\n Click to open the main window.")
                 end

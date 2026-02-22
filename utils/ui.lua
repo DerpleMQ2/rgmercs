@@ -1,19 +1,20 @@
-local mq          = require('mq')
-local Config      = require('utils.config')
-local Globals     = require('utils.globals')
-local Modules     = require("utils.modules")
-local Movement    = require("utils.movement")
-local Logger      = require("utils.logger")
-local Core        = require("utils.core")
-local Comms       = require("utils.comms")
-local Targeting   = require("utils.targeting")
-local Icons       = require('mq.ICONS')
-local Strings     = require("utils.strings")
-local Tables      = require("utils.tables")
-local ClassLoader = require('utils.classloader')
-local Math        = require('utils.math')
-local Set         = require('mq.set')
-
+local mq                = require('mq')
+local Config            = require('utils.config')
+local Globals           = require('utils.globals')
+local Modules           = require("utils.modules")
+local Movement          = require("utils.movement")
+local Logger            = require("utils.logger")
+local Core              = require("utils.core")
+local Comms             = require("utils.comms")
+local Targeting         = require("utils.targeting")
+local Icons             = require('mq.ICONS')
+local Strings           = require("utils.strings")
+local Tables            = require("utils.tables")
+local ClassLoader       = require('utils.classloader')
+local Math              = require('utils.math')
+local Set               = require('mq.set')
+local ImGui             = require('ImGui')
+local ImAnim            = require('ImAnim')
 
 local animSpellGems     = mq.FindTextureAnimation('A_SpellGems')
 local ICON_SIZE         = 20
@@ -642,7 +643,7 @@ function Ui.RenderMercsStatus(showPopout)
                     ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionFailColor)
                 end
 
-                ImGui.Text(string.format("%s", data.Data.Zone or "None"))
+                ImGui.Text("%s", data.Data.Zone or "None")
 
                 ImGui.PopStyleColor()
             end,
@@ -663,7 +664,7 @@ function Ui.RenderMercsStatus(showPopout)
                     ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionFailColor)
                 end
 
-                ImGui.Text(string.format("%s", data.Data.ZoneShortName or "None"))
+                ImGui.Text("%s", data.Data.ZoneShortName or "None")
 
                 ImGui.PopStyleColor()
             end,
@@ -735,7 +736,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Level or 0, data_b.Data.Level or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%d", data.Data.Level or 0))
+                ImGui.Text("%d", data.Data.Level or 0)
             end,
         },
         {
@@ -748,7 +749,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.UnSpentAA or 0, data_b.Data.UnSpentAA or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%d", data.Data.UnSpentAA or 0))
+                ImGui.Text("%d", data.Data.UnSpentAA or 0)
             end,
         },
         {
@@ -761,7 +762,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.SpentAA or 0, data_b.Data.SpentAA or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%d", data.Data.SpentAA or 0))
+                ImGui.Text("%d", data.Data.SpentAA or 0)
             end,
         },
         {
@@ -774,7 +775,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.TotalAA or 0, data_b.Data.TotalAA or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%d", data.Data.TotalAA or 0))
+                ImGui.Text("%d", data.Data.TotalAA or 0)
             end,
         },
         {
@@ -878,7 +879,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Chase or "", data_b.Data.Chase or ""
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.Chase or "None"))
+                ImGui.Text("%s", data.Data.Chase or "None")
             end,
         },
         {
@@ -891,7 +892,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Assist or "", data_b.Data.Assist or ""
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.Assist or "None"))
+                ImGui.Text("%s", data.Data.Assist or "None")
             end,
         },
         {
@@ -904,7 +905,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.AutoTarget or "", data_b.Data.AutoTarget or ""
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.AutoTarget or "None"))
+                ImGui.Text("%s", data.Data.AutoTarget or "None")
             end,
         },
         {
@@ -917,7 +918,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Target or "", data_b.Data.Target or ""
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.Target or "None"))
+                ImGui.Text("%s", data.Data.Target or "None")
             end,
 
         },
@@ -931,7 +932,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Casting or "", data_b.Data.Casting or ""
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%s", data.Data.Casting or "None"))
+                ImGui.Text("%s", data.Data.Casting or "None")
             end,
 
         },
@@ -944,7 +945,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 local los = mq.TLO.Spawn(data.Data.ID).LineOfSight()
-                ImGui.TextColored(los and Colors.ConditionPassColor or Colors.ConditionFailColor, string.format("%s", los and Icons.FA_EYE or Icons.FA_EYE_SLASH))
+                ImGui.TextColored(los and Colors.ConditionPassColor or Colors.ConditionFailColor, "%s", los and Icons.FA_EYE or Icons.FA_EYE_SLASH)
             end,
 
         },
@@ -1056,7 +1057,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.LastUpdate or 0, data_b.Data.LastUpdate or 0
             end,
             render = function(peer, data)
-                ImGui.Text(string.format("%ds", Globals.GetTimeSeconds() - (data.LastHeartbeat or 0)))
+                ImGui.Text("%ds", Globals.GetTimeSeconds() - (data.LastHeartbeat or 0))
             end,
 
         },
@@ -1074,7 +1075,7 @@ function Ui.RenderMercsStatus(showPopout)
                     data.Data.FreeInventory >= 20 and Colors.ConditionPassColor or
                     data.Data.FreeInventory >= 5 and Colors.ConditionMidColor or
                     Colors.ConditionFailColor)
-                ImGui.Text(string.format("%d", data.Data.FreeInventory or 0))
+                ImGui.Text("%d", data.Data.FreeInventory or 0)
                 ImGui.PopStyleColor()
             end,
 
@@ -1807,12 +1808,12 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             if Config:GetSetting('ShowDebugTiming') then
                 ImGui.TableNextColumn()
 
-                ImGui.Text(string.format("C: %s RC: %s E: %s PF: %s T: %s",
+                ImGui.Text("C: %s RC: %s E: %s PF: %s T: %s",
                     Strings.FormatTimeMS((entry.lastCondTimeSpent or 0) * 1000),
                     Strings.FormatTimeMS((entry.lastRotationCondTimeSpent or 0) * 1000),
                     Strings.FormatTimeMS((entry.lastExecTimeSpent or 0) * 1000),
                     Strings.FormatTimeMS((entry.lastFollowTimeSpent or 0) * 1000),
-                    Strings.FormatTimeMS((entry.lastTotalTimeSpent or 0) * 1000)))
+                    Strings.FormatTimeMS((entry.lastTotalTimeSpent or 0) * 1000))
             end
         end
 
@@ -1939,7 +1940,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
     -- Label on the right side of the toggle
     if right_label and label and label ~= "" then
         ImGui.SameLine()
-        ImGui.Text(string.format("%s", label))
+        ImGui.Text(label)
         if ImGui.IsItemClicked() then
             value = not value
             clicked = true
@@ -1981,7 +1982,7 @@ end
 function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     local pct = Math.Clamp(tonumber(hpPct) or 0, 0, 100)
     local fraction = pct / 100
-    local availX = select(1, ImGui.GetContentRegionAvail())
+    local availX = ImGui.GetContentRegionAvailVec().x
     local width = math.max(1, tonumber(availX) or 1)
     local barHeight = height or 16
     local now = Globals.GetTimeSeconds()
@@ -2008,8 +2009,8 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     local barH = maxY - minY
 
     -- Background shell
-    local bgTop = ImGui.GetColorU32(ImVec4(0.11, 0.12, 0.16, 0.97))
-    local bgBottom = ImGui.GetColorU32(ImVec4(0.04, 0.05, 0.08, 0.97))
+    local bgTop = IM_COL32(28, 30, 41, 247)
+    local bgBottom = IM_COL32(10, 13, 20, 247)
     drawList:AddRectFilledMultiColor(
         ImVec2(minX, minY),
         ImVec2(maxX, maxY),
@@ -2018,16 +2019,16 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     drawList:AddRectFilled(
         ImVec2(minX + 1, minY + 1),
         ImVec2(maxX - 1, minY + math.max(2, barH * 0.35)),
-        ImGui.GetColorU32(ImVec4(1.0, 1.0, 1.0, 0.06)),
+        IM_COL32(255, 255, 255, 14),
         2.0
     )
 
     local fillWidth = barW * fraction
     if fillWidth > 0 then
         -- Red -> amber -> green edge color based on current HP
-        local hpLow = Globals.Constants.Colors.HPLowColor   --{ 0.95, 0.12, 0.12, 0.96, }
-        local hpMid = Globals.Constants.Colors.HPMidColor   --{ 0.96, 0.72, 0.14, 0.96, }
-        local hpHigh = Globals.Constants.Colors.HPHighColor --{ 0.20, 0.88, 0.30, 0.96, }
+        local hpLow = Globals.Constants.Colors.HPLowColor
+        local hpMid = Globals.Constants.Colors.HPMidColor
+        local hpHigh = Globals.Constants.Colors.HPHighColor
         local edge
         if fraction < 0.5 then
             edge = Math.ColorLerp(hpLow, hpMid, fraction / 0.5)
@@ -2049,10 +2050,10 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
         drawList:AddRectFilledMultiColor(
             ImVec2(minX, minY + 1),
             ImVec2(minX + fillWidth, minY + math.max(2, barH * 0.45)),
-            ImGui.GetColorU32(ImVec4(1, 1, 1, 0.14)),
-            ImGui.GetColorU32(ImVec4(1, 1, 1, 0.08)),
-            ImGui.GetColorU32(ImVec4(1, 1, 1, 0.02)),
-            ImGui.GetColorU32(ImVec4(1, 1, 1, 0.08))
+            IM_COL32(255, 255, 255, 14),
+            IM_COL32(255, 255, 255, 8),
+            IM_COL32(255, 255, 255, 2),
+            IM_COL32(255, 255, 255, 8)
         )
 
         -- Animated sheen sweep (subtle).
@@ -2068,18 +2069,18 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
                 drawList:AddRectFilledMultiColor(
                     ImVec2(sheenLeft, minY),
                     ImVec2(sheenMid, maxY),
-                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.00)),
-                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.18)),
-                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.10)),
-                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.00))
+                    IM_COL32(255, 255, 255, 0),
+                    IM_COL32(255, 255, 255, 46),
+                    IM_COL32(255, 255, 255, 26),
+                    IM_COL32(255, 255, 255, 0)
                 )
                 drawList:AddRectFilledMultiColor(
                     ImVec2(sheenMid, minY),
                     ImVec2(sheenRight, maxY),
-                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.18)),
-                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.00)),
-                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.00)),
-                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.10))
+                    IM_COL32(255, 255, 255, 46),
+                    IM_COL32(255, 255, 255, 0),
+                    IM_COL32(255, 255, 255, 0),
+                    IM_COL32(255, 255, 255, 26)
                 )
             end
         end
@@ -2093,7 +2094,7 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
         drawList:AddLine(
             ImVec2(tx, minY + 1),
             ImVec2(tx, maxY - 1),
-            ImGui.GetColorU32(ImVec4(1, 1, 1, a)),
+            IM_COL32(255, 255, 255, a * 255),
             1.0
         )
     end
@@ -2105,7 +2106,7 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
         drawList:AddRect(
             ImVec2(minX - 1, minY - 1),
             ImVec2(maxX + 1, maxY + 1),
-            ImGui.GetColorU32(ImVec4(1.0, 0.20, 0.20, glowA)),
+            IM_COL32(255, 51, 51, glowA * 255),
             3.0,
             0,
             2.2
@@ -2115,7 +2116,7 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     drawList:AddRect(
         ImVec2(minX, minY),
         ImVec2(maxX, maxY),
-        ImGui.GetColorU32(ImVec4(1.0, 1.0, 1.0, 0.28)),
+        IM_COL32(255, 255, 255, 71),
         3.0,
         0,
         1.0
@@ -2125,8 +2126,8 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     local textW = ImGui.CalcTextSize(text)
     local textX = minX + ((maxX - minX - textW) * 0.5)
     local textY = minY + ((barHeight - ImGui.GetTextLineHeight()) * 0.5)
-    drawList:AddText(ImVec2(textX + 1, textY + 1), ImGui.GetColorU32(ImVec4(0, 0, 0, 0.9)), text)
-    drawList:AddText(ImVec2(textX, textY), ImGui.GetColorU32(ImVec4(1, 1, 1, 1)), text)
+    drawList:AddText(ImVec2(textX + 1, textY + 1), IM_COL32(0, 0, 0, 230), text)
+    drawList:AddText(ImVec2(textX, textY), IM_COL32(255, 255, 255, 255), text)
 
     return ImGui.IsItemClicked()
 end
