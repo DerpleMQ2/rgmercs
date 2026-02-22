@@ -316,6 +316,12 @@ function Module:LoadSettings()
             Type = "Custom",
             Default = {},
         }
+
+        self.ClassConfig.DefaultConfig[string.format("%s_Popped", self._name)] = {
+            DisplayName = self._name .. " Popped",
+            Type = "Custom",
+            Default = false,
+        }
     end)
 
     -- for config file change
