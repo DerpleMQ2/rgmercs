@@ -2025,9 +2025,9 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     local fillWidth = barW * fraction
     if fillWidth > 0 then
         -- Red -> amber -> green edge color based on current HP
-        local hpLow = { 0.95, 0.12, 0.12, 0.96, }
-        local hpMid = { 0.96, 0.72, 0.14, 0.96, }
-        local hpHigh = { 0.20, 0.88, 0.30, 0.96, }
+        local hpLow = Globals.Constants.Colors.HPLowColor   --{ 0.95, 0.12, 0.12, 0.96, }
+        local hpMid = Globals.Constants.Colors.HPMidColor   --{ 0.96, 0.72, 0.14, 0.96, }
+        local hpHigh = Globals.Constants.Colors.HPHighColor --{ 0.20, 0.88, 0.30, 0.96, }
         local edge
         if fraction < 0.5 then
             edge = Math.ColorLerp(hpLow, hpMid, fraction / 0.5)
@@ -2035,10 +2035,10 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
             edge = Math.ColorLerp(hpMid, hpHigh, (fraction - 0.5) / 0.5)
         end
 
-        local topLeft = ImGui.GetColorU32(ImVec4(hpLow[1], hpLow[2], hpLow[3], hpLow[4]))
-        local topRight = ImGui.GetColorU32(ImVec4(edge[1], edge[2], edge[3], edge[4]))
-        local bottomLeft = ImGui.GetColorU32(ImVec4(hpLow[1] * 0.58, hpLow[2] * 0.58, hpLow[3] * 0.58, hpLow[4]))
-        local bottomRight = ImGui.GetColorU32(ImVec4(edge[1] * 0.58, edge[2] * 0.58, edge[3] * 0.58, edge[4]))
+        local topLeft = ImGui.GetColorU32(hpLow)
+        local topRight = ImGui.GetColorU32(edge)
+        local bottomLeft = ImGui.GetColorU32(hpLow)
+        local bottomRight = ImGui.GetColorU32(edge)
         drawList:AddRectFilledMultiColor(
             ImVec2(minX, minY),
             ImVec2(minX + fillWidth, maxY),

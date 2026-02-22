@@ -43,12 +43,10 @@ function Math.Lerp(a, b, t)
 end
 
 function Math.ColorLerp(c1, c2, t)
-    return {
-        Math.Lerp(c1[1], c2[1], t),
-        Math.Lerp(c1[2], c2[2], t),
-        Math.Lerp(c1[3], c2[3], t),
-        Math.Lerp(c1[4], c2[4], t),
-    }
+    return ImVec4(Math.Lerp(c1.x, c2.x, t),
+        Math.Lerp(c1.y, c2.y, t),
+        Math.Lerp(c1.z, c2.z, t),
+        Math.Lerp(c1.w, c2.w, t))
 end
 
 return Math

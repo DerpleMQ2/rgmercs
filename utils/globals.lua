@@ -161,7 +161,6 @@ Globals.Constants.DefaultColors       = {
     FAQDescColor            = Globals.Constants.BasicColors.LightGreen,
     FAQLinkColor            = Globals.Constants.BasicColors.LightYellow,
     SearchHighlightColor    = Globals.Constants.BasicColors.Orange,
-    AssistSpawnCloseColor   = Globals.Constants.BasicColors.White,
     AssistSpawnFarColor     = Globals.Constants.BasicColors.LightRed,
     BurnFlashColorOne       = Globals.Constants.BasicColors.Orange,
     BurnFlashColorTwo       = Globals.Constants.BasicColors.LightOrange,
@@ -169,6 +168,9 @@ Globals.Constants.DefaultColors       = {
     MainButtonUnpausedColor = Globals.Constants.BasicColors.Green,
     MainCombatColor         = Globals.Constants.BasicColors.Red,
     MainDowntimeColor       = Globals.Constants.BasicColors.Green,
+    HPHighColor             = ImVec4(0.20, 0.88, 0.30, 0.96),
+    HPMidColor              = ImVec4(0.96, 0.72, 0.14, 0.96),
+    HPLowColor              = ImVec4(0.95, 0.12, 0.12, 0.96),
 }
 
 Globals.Constants.HeadingsShort       = {

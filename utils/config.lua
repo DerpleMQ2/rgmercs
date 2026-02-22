@@ -1789,12 +1789,51 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
+    ['HPHighColor']                      = {
+        DisplayName = "HP High",
+        Group = "General",
+        Header = "Interface",
+        Category = "Default Colors",
+        Index = 13,
+        Tooltip = "Color used to display high HP values.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.HPHighColor),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['HPMidColor']                       = {
+        DisplayName = "HP Mid",
+        Group = "General",
+        Header = "Interface",
+        Category = "Default Colors",
+        Index = 14,
+        Tooltip = "Color used to display mid HP values.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.HPMidColor),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
+    ['HPLowColor']                       = {
+        DisplayName = "HP Low",
+        Group = "General",
+        Header = "Interface",
+        Category = "Default Colors",
+        Index = 15,
+        Tooltip = "Color used to display low HP values.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.HPLowColor),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
     ['ConditionPassColor']               = {
         DisplayName = "Condition Pass",
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
-        Index = 13,
+        Index = 16,
         Tooltip = "Color used to display a passing condition",
         Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.ConditionPassColor),
         Type = "Color",
@@ -1807,7 +1846,7 @@ Config.DefaultConfig                                     = {
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
-        Index = 14,
+        Index = 17,
         Tooltip = "Color used to display an unevaluated condition",
         Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.ConditionMidColor),
         Type = "Color",
@@ -1820,7 +1859,7 @@ Config.DefaultConfig                                     = {
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
-        Index = 15,
+        Index = 18,
         Tooltip = "Color used to display a failing condition",
         Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.ConditionFailColor),
         Type = "Color",
@@ -1833,7 +1872,7 @@ Config.DefaultConfig                                     = {
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
-        Index = 16,
+        Index = 19,
         Tooltip = "Color used to display a disabled condition",
         Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.ConditionDisabledColor),
         Type = "Color",
@@ -1846,7 +1885,7 @@ Config.DefaultConfig                                     = {
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
-        Index = 17,
+        Index = 20,
         Tooltip = "Color used for the UI elements when in combat.",
         Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.MainCombatColor),
         Type = "Color",
@@ -1859,7 +1898,7 @@ Config.DefaultConfig                                     = {
         Group = "General",
         Header = "Interface",
         Category = "Default Colors",
-        Index = 18,
+        Index = 21,
         Tooltip = "Color used for the main window border when out of combat.",
         Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.MainDowntimeColor),
         Type = "Color",
@@ -1876,19 +1915,6 @@ Config.DefaultConfig                                     = {
         Index = 19,
         Tooltip = "Color used to highlight search terms in various windows.",
         Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.SearchHighlightColor),
-        Type = "Color",
-        OnChange = function(_, _)
-            Config.CacheCustomColors()
-        end,
-    },
-    ['AssistSpawnCloseColor']            = {
-        DisplayName = "Assist Spawn Text If Close",
-        Group = "General",
-        Header = "Interface",
-        Category = "Default Colors",
-        Index = 20,
-        Tooltip = "Color used to display an assist spawn that is close to us.",
-        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.AssistSpawnCloseColor),
         Type = "Color",
         OnChange = function(_, _)
             Config.CacheCustomColors()
