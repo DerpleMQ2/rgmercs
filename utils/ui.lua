@@ -25,9 +25,10 @@ Ui.ConfigFilter         = ""
 Ui.ShowDownNamed        = false
 
 Ui.TempSettings         = {
-    SortedXT = {},
+    SortedXT         = {},
     SortedXTIDToSlot = {},
-    SortedXTIDs = Set.new({}),
+    SortedXTIDs      = Set.new({}),
+    hpBarTrendState  = {},
 }
 
 Ui.ModalText            = ""
@@ -1974,6 +1975,160 @@ function Ui.RenderProgressBar(pct, width, height)
         start_y + style.ItemSpacing.y)
     ImGui.Text(text)
     ImGui.SetCursorPos(end_x, end_y)
+end
+
+-- Draw a horizontal gradient HP bar using ImDrawList:AddRectFilledMultiColor.
+function Ui.RenderFancyHPBar(id, hpPct, height, burning)
+    local pct = Math.Clamp(tonumber(hpPct) or 0, 0, 100)
+    local fraction = pct / 100
+    local availX = select(1, ImGui.GetContentRegionAvail())
+    local width = math.max(1, tonumber(availX) or 1)
+    local barHeight = height or 16
+    local now = Globals.GetTimeSeconds()
+    local drawList = ImGui.GetWindowDrawList()
+
+    local trend = Ui.TempSettings.hpBarTrendState[id]
+    if not trend then
+        trend = { lastPct = pct, direction = 1, }
+        Ui.TempSettings.hpBarTrendState[id] = trend
+    else
+        -- Use a tiny dead-zone to avoid noisy direction flips from rounding jitter.
+        if pct < (trend.lastPct - 0.05) then
+            trend.direction = -1
+        elseif pct > (trend.lastPct + 0.05) then
+            trend.direction = 1
+        end
+        trend.lastPct = pct
+    end
+
+    ImGui.InvisibleButton(id, width, barHeight)
+    local minX, minY = ImGui.GetItemRectMin()
+    local maxX, maxY = ImGui.GetItemRectMax()
+    local barW = maxX - minX
+    local barH = maxY - minY
+
+    -- Background shell
+    local bgTop = ImGui.GetColorU32(ImVec4(0.11, 0.12, 0.16, 0.97))
+    local bgBottom = ImGui.GetColorU32(ImVec4(0.04, 0.05, 0.08, 0.97))
+    drawList:AddRectFilledMultiColor(
+        ImVec2(minX, minY),
+        ImVec2(maxX, maxY),
+        bgTop, bgTop, bgBottom, bgBottom
+    )
+    drawList:AddRectFilled(
+        ImVec2(minX + 1, minY + 1),
+        ImVec2(maxX - 1, minY + math.max(2, barH * 0.35)),
+        ImGui.GetColorU32(ImVec4(1.0, 1.0, 1.0, 0.06)),
+        2.0
+    )
+
+    local fillWidth = barW * fraction
+    if fillWidth > 0 then
+        -- Red -> amber -> green edge color based on current HP
+        local hpLow = { 0.95, 0.12, 0.12, 0.96, }
+        local hpMid = { 0.96, 0.72, 0.14, 0.96, }
+        local hpHigh = { 0.20, 0.88, 0.30, 0.96, }
+        local edge
+        if fraction < 0.5 then
+            edge = Math.ColorLerp(hpLow, hpMid, fraction / 0.5)
+        else
+            edge = Math.ColorLerp(hpMid, hpHigh, (fraction - 0.5) / 0.5)
+        end
+
+        local topLeft = ImGui.GetColorU32(ImVec4(hpLow[1], hpLow[2], hpLow[3], hpLow[4]))
+        local topRight = ImGui.GetColorU32(ImVec4(edge[1], edge[2], edge[3], edge[4]))
+        local bottomLeft = ImGui.GetColorU32(ImVec4(hpLow[1] * 0.58, hpLow[2] * 0.58, hpLow[3] * 0.58, hpLow[4]))
+        local bottomRight = ImGui.GetColorU32(ImVec4(edge[1] * 0.58, edge[2] * 0.58, edge[3] * 0.58, edge[4]))
+        drawList:AddRectFilledMultiColor(
+            ImVec2(minX, minY),
+            ImVec2(minX + fillWidth, maxY),
+            topLeft, topRight, bottomRight, bottomLeft
+        )
+
+        -- Gloss strip on top of the filled area.
+        drawList:AddRectFilledMultiColor(
+            ImVec2(minX, minY + 1),
+            ImVec2(minX + fillWidth, minY + math.max(2, barH * 0.45)),
+            ImGui.GetColorU32(ImVec4(1, 1, 1, 0.14)),
+            ImGui.GetColorU32(ImVec4(1, 1, 1, 0.08)),
+            ImGui.GetColorU32(ImVec4(1, 1, 1, 0.02)),
+            ImGui.GetColorU32(ImVec4(1, 1, 1, 0.08))
+        )
+
+        -- Animated sheen sweep (subtle).
+        if fillWidth > 12 then
+            local sweepBase = (now * 0.65) % 1
+            local sweep = trend.direction < 0 and (1.0 - sweepBase) or sweepBase
+            local sheenCenter = minX + (fillWidth * sweep)
+            local sheenHalf = math.min(16, fillWidth * 0.22)
+            local sheenLeft = math.max(minX, sheenCenter - sheenHalf)
+            local sheenRight = math.min(minX + fillWidth, sheenCenter + sheenHalf)
+            if sheenRight > sheenLeft then
+                local sheenMid = (sheenLeft + sheenRight) * 0.5
+                drawList:AddRectFilledMultiColor(
+                    ImVec2(sheenLeft, minY),
+                    ImVec2(sheenMid, maxY),
+                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.00)),
+                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.18)),
+                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.10)),
+                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.00))
+                )
+                drawList:AddRectFilledMultiColor(
+                    ImVec2(sheenMid, minY),
+                    ImVec2(sheenRight, maxY),
+                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.18)),
+                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.00)),
+                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.00)),
+                    ImGui.GetColorU32(ImVec4(1, 1, 1, 0.10))
+                )
+            end
+        end
+    end
+
+    -- Segment ticks (10% each).
+    for i = 1, 9 do
+        local tx = minX + (barW * (i / 10))
+        local reached = tx <= (minX + fillWidth)
+        local a = reached and 0.14 or 0.07
+        drawList:AddLine(
+            ImVec2(tx, minY + 1),
+            ImVec2(tx, maxY - 1),
+            ImGui.GetColorU32(ImVec4(1, 1, 1, a)),
+            1.0
+        )
+    end
+
+    -- burn pulse
+    if burning == true then
+        local pulse = 0.5 + 0.5 * math.sin(now * 10.0)
+        local glowA = (0.14 + (0.22 * pulse))
+        drawList:AddRect(
+            ImVec2(minX - 1, minY - 1),
+            ImVec2(maxX + 1, maxY + 1),
+            ImGui.GetColorU32(ImVec4(1.0, 0.20, 0.20, glowA)),
+            3.0,
+            0,
+            2.2
+        )
+    end
+
+    drawList:AddRect(
+        ImVec2(minX, minY),
+        ImVec2(maxX, maxY),
+        ImGui.GetColorU32(ImVec4(1.0, 1.0, 1.0, 0.28)),
+        3.0,
+        0,
+        1.0
+    )
+
+    local text = string.format('%d%%', math.floor(pct + 0.5))
+    local textW = ImGui.CalcTextSize(text)
+    local textX = minX + ((maxX - minX - textW) * 0.5)
+    local textY = minY + ((barHeight - ImGui.GetTextLineHeight()) * 0.5)
+    drawList:AddText(ImVec2(textX + 1, textY + 1), ImGui.GetColorU32(ImVec4(0, 0, 0, 0.9)), text)
+    drawList:AddText(ImVec2(textX, textY), ImGui.GetColorU32(ImVec4(1, 1, 1, 1)), text)
+
+    return ImGui.IsItemClicked()
 end
 
 --- Renders a numerical option with a specified range and step.

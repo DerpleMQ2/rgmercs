@@ -32,6 +32,89 @@ function StandardUI:renderModulesTabs()
     end
 end
 
+function StandardUI:RenderTargetInfo()
+    ImGui.TableNextColumn()
+    ImGui.Text("Target")
+    ImGui.TableNextColumn()
+
+    local assistSpawn = mq.TLO.Target
+
+    if not assistSpawn or assistSpawn.ID() == 0 then
+        ImGui.Text("None")
+        return
+    end
+
+    if math.floor(assistSpawn.Distance() or 0) >= 350 then
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.AssistSpawnFarColor)
+    else
+        ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
+    end
+
+    ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
+        assistSpawn.ID() or 0, assistSpawn.Level() or 0,
+        assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
+
+    ImGui.PopStyleColor(1)
+end
+
+function StandardUI:RenderAutoTargetInfo()
+    ImGui.TableNextColumn()
+    ImGui.Text("Auto Target ")
+    ImGui.TableNextColumn()
+
+    local assistSpawn = Targeting.GetAutoTarget()
+    local pctHPs = assistSpawn and (assistSpawn.PctHPs() or 0) or 0
+
+    if not assistSpawn or assistSpawn.ID() == 0 then
+        ImGui.Text("None")
+        return
+    end
+
+    if math.floor(assistSpawn.Distance() or 0) >= 350 then
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.AssistSpawnFarColor)
+    else
+        ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
+    end
+
+    ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
+        assistSpawn.ID() or 0, assistSpawn.Level() or 0,
+        assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
+
+    if Globals.AutoTargetIsNamed then
+        ImGui.SameLine()
+        ImGui.TextColored(IM_COL32(52, 200, 52, 255),
+            string.format("**Named**"))
+    end
+
+    if assistSpawn.ID() == Globals.ForceTargetID then
+        ImGui.SameLine()
+        ImGui.TextColored(IM_COL32(52, 200, 200, 255),
+            string.format("**ForcedTarget**"))
+    end
+
+    local burning = Globals.LastBurnCheck and assistSpawn.ID() > 0
+
+    if burning then
+        ImGui.SameLine()
+        ImGui.TextColored(Globals.GetAlternatingColor(), string.format("**BURNING**"))
+    end
+
+    ImGui.PopStyleColor(1)
+
+    return pctHPs, burning
+end
+
+function StandardUI:RenderForceBurnButton()
+    ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.BurnFlashColorOne)
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Globals.Constants.Colors.BurnFlashColorTwo)
+    local burnLabel = (Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()) and " FORCE BURN ACTIVATED " or " FORCE BURN THIS TARGET! "
+    if ImGui.SmallButton(Icons.FA_FIRE .. burnLabel .. Icons.FA_FIRE) then
+        local assistSpawn = Targeting.GetAutoTarget()
+        Comms.SendAllPeersDoCmd(true, true, "/squelch /rgl burnnow %d", assistSpawn.ID())
+    end
+    ImGui.PopStyleColor(2)
+end
+
 function StandardUI:RenderTarget()
     local warningMessage = Config.TempSettings.AssistWarning
 
@@ -49,49 +132,12 @@ function StandardUI:RenderTarget()
         assistSpawn = mq.TLO.Target
     end
 
-    ImGui.Text("Auto Target: ")
-    ImGui.SameLine()
-    if not assistSpawn or assistSpawn.ID() == 0 then
-        ImGui.Text("None")
-        Ui.RenderProgressBar(0, -1, 25)
-        ImGui.Dummy(32, 16)
-    else
-        local pctHPs = assistSpawn.PctHPs() or 0
-        if not pctHPs then pctHPs = 0 end
-        local ratioHPs = pctHPs / 100
-        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 1 - ratioHPs, ratioHPs, 0.2, 0.7)
-        if math.floor(assistSpawn.Distance() or 0) >= 350 then
-            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.AssistSpawnFarColor)
-        else
-            ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.AssistSpawnCloseColor)
-        end
-        ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
-            assistSpawn.ID() or 0, assistSpawn.Level() or 0,
-            assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
-        if Globals.AutoTargetIsNamed then
-            ImGui.SameLine()
-            ImGui.TextColored(IM_COL32(52, 200, 52, 255),
-                string.format("**Named**"))
-        end
-        if assistSpawn.ID() == Globals.ForceTargetID then
-            ImGui.SameLine()
-            ImGui.TextColored(IM_COL32(52, 200, 200, 255),
-                string.format("**ForcedTarget**"))
-        end
-        if Globals.LastBurnCheck and assistSpawn.ID() > 0 then
-            ImGui.SameLine()
-            ImGui.TextColored(Globals.GetAlternatingColor(), string.format("**BURNING**"))
-        end
-        Ui.RenderProgressBar(ratioHPs, -1, 25)
-        ImGui.PopStyleColor(2)
-        ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.BurnFlashColorOne)
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Globals.Constants.Colors.BurnFlashColorTwo)
-        local burnLabel = (Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()) and " FORCE BURN ACTIVATED " or " FORCE BURN THIS TARGET! "
-        if ImGui.SmallButton(Icons.FA_FIRE .. burnLabel .. Icons.FA_FIRE) then
-            Comms.SendAllPeersDoCmd(true, true, "/squelch /rgl burnnow %d", assistSpawn.ID())
-        end
-        ImGui.PopStyleColor(2)
-    end
+    ImGui.BeginTable("##TargetInfoTable", 2, bit32.bor(ImGuiTableFlags.BordersInner, ImGuiTableFlags.SizingFixedFit))
+    self:RenderTargetInfo()
+    local pctHPs, burning = self:RenderAutoTargetInfo()
+    ImGui.EndTable()
+    Ui.RenderFancyHPBar("##AutoTargetHPBar", pctHPs, 25, burning)
+    self:RenderForceBurnButton()
 end
 
 function StandardUI:RenderWindowControls()
