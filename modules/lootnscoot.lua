@@ -130,8 +130,6 @@ function Module:Init()
 		--pass settings to lootnscoot lib
 		Logger.log_debug("\ay[LOOT]: \agLoot(LNS) module Loaded.")
 	end
-
-	return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
