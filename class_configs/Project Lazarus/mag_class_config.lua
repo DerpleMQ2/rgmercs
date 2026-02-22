@@ -10,34 +10,12 @@ local DanNet      = require('lib.dannet.helpers')
 local Logger      = require("utils.logger")
 
 _ClassConfig      = {
-    _version              = "1.2 - Project Lazarus",
+    _version              = "1.3 - Project Lazarus",
     _author               = "Derple, Morisato, Algar",
-    ['ModeChecks']        = {
-        IsTanking = function() return Core.IsModeActive("PetTank") end,
-    },
     ['Modes']             = {
         'DPS',
-        'PetTank',
         'PBAE',
     },
-    ['OnModeChange']      = function(self, mode)
-        if mode == "PetTank" then
-            Core.DoCmd("/pet taunt on")
-            Core.DoCmd("/pet resume on")
-            Config:SetSetting('DoPetCommands', true)
-            Config:SetSetting('AutoAssistAt', 100)
-            Config:SetSetting('StayOnTarget', false)
-            Config:SetSetting('DoAutoEngage', true)
-            Config:SetSetting('DoAutoTarget', true)
-            Config:SetSetting('AllowMezBreak', true)
-        else
-            Core.DoCmd("/pet taunt off")
-            if Config:GetSetting('AutoAssistAt') == 100 then
-                Config:SetSetting('AutoAssistAt', 98)
-            end
-            Config:SetSetting('StayOnTarget', true)
-        end
-    end,
     ['ItemSets']          = {
         ['Epic'] = {
             "Focus of Primal Elements",
@@ -721,7 +699,7 @@ _ClassConfig      = {
             name = 'DPS(70)',
             state = 1,
             steps = 1,
-            load_cond = function(self) return not Core.IsModeActive("PetTank") and self:GetResolvedActionMapItem('SpearNuke') end,
+            load_cond = function(self) return self:GetResolvedActionMapItem('SpearNuke') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Targeting.AggroCheckOkay()
@@ -731,20 +709,10 @@ _ClassConfig      = {
             name = 'DPS(1-69)',
             state = 1,
             steps = 1,
-            load_cond = function(self) return not Core.IsModeActive("PetTank") and not self:GetResolvedActionMapItem('SpearNuke') end,
+            load_cond = function(self) return not self:GetResolvedActionMapItem('SpearNuke') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Targeting.AggroCheckOkay()
-            end,
-        },
-        {
-            name = 'DPS PET',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Core.IsModeActive("PetTank") end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
             end,
         },
         {
@@ -1525,10 +1493,9 @@ _ClassConfig      = {
             RequiresLoadoutChange = true,
             Default = 1,
             Min = 1,
-            Max = 3,
+            Max = 2,
             FAQ = "What is the difference between the modes?",
             Answer = "DPS Mode performs exactly as described.\n" ..
-                "PetTank mode will Focus on keeping the Pet alive as the main tank.\n" ..
                 "PBAE Mode will use PBAE spells when configured, alongside the DPS rotation.",
         },
         ['DoPocketPet']    = {
