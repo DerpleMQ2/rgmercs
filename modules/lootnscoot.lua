@@ -95,6 +95,22 @@ function Module:New()
 	return Base.New(self)
 end
 
+function Module:WriteSettings()
+	Base.WriteSettings(self)
+	if self.SettingsLoaded then
+		if Config:GetSetting('DoLoot') == true then
+			if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
+				Core.DoCmd("/lua run lootnscoot directed rgmercs")
+				warningMessageSent = false
+			end
+
+			if not self.Actor then Module:LootMessageHandler() end
+		else
+			Core.DoCmd("/lua stop lootnscoot")
+		end
+	end
+end
+
 function Module:Init()
 	Base.Init(self)
 	local requireDelay = false
