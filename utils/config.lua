@@ -2,10 +2,10 @@ local mq                                                 = require('mq')
 local Modules                                            = require("utils.modules")
 local Tables                                             = require("utils.tables")
 local Strings                                            = require("utils.strings")
-local Files                                              = require("utils.files")
 local Logger                                             = require("utils.logger")
 local Comms                                              = require("utils.comms")
 local Set                                                = require("mq.Set")
+local Files                                              = require("utils.files")
 local Globals                                            = require("utils.globals")
 
 local Config                                             = {
@@ -2043,6 +2043,27 @@ Config.DefaultConfig                                     = {
         Min = 1,
         Max = #Globals.Constants.LogLevels,
     },
+    ['LogFilter']                        = {
+        DisplayName = "Log Filter",
+        Category = "Internals",
+        Default = "",
+        OnChange = function(_, newValue)
+            if newValue:len() == 0 then
+                Logger.clear_log_filter()
+            else
+                Logger.set_log_filter(newValue)
+            end
+        end,
+    },
+    ['EnableLogTracer']                  = {
+        DisplayName = "Enable Debug Tracer",
+        Category = "Internals",
+        Default = true,
+        Tooltip = "Enables the debug tracer to show file/function/line information for each log entry",
+        OnChange = function(_, newValue)
+            Logger.set_debug_tracer_enabled(newValue)
+        end,
+    },
     ['LogToFile']                        = {
         DisplayName = "Log To File",
         Category = "Internals",
@@ -2139,29 +2160,75 @@ Config.DefaultConfig                                     = {
 
 Config.CommandHandlers                                   = {}
 
-function Config:GetConfigFileName()
-    local oldFile = mq.configDir ..
-        '/rgmercs/PCConfigs/RGMerc_' .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-    local newFile = mq.configDir ..
-        '/rgmercs/PCConfigs/RGMerc_' .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
+Config.CachedConfigFileNames                             = {}
 
-    if Files.file_exists(newFile) then
-        return newFile
+function Config.GetConfigFileName(moduleName, returnExisting)
+    if Config.CachedConfigFileNames[moduleName] then
+        return Config.CachedConfigFileNames[moduleName]
     end
 
-    Files.copy_file(oldFile, newFile)
+    local schemas = {
+        mq.configDir .. '/rgmercs/PCConfigs/' ..
+        moduleName .. "_" .. Globals.CurServer .. "_" .. Globals.CurLoadedChar .. '.lua',
+        mq.configDir .. '/rgmercs/PCConfigs/' ..
+        moduleName .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua',
+        mq.configDir .. '/rgmercs/PCConfigs/' ..
+        moduleName .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua',
+        string.format("%s/rgmercs/PCConfigs/%s/%s/%s/%s.lua", mq.configDir, Globals.CurServerNormalized, Globals.CurLoadedChar, Globals.CurLoadedClass:lower(),
+            moduleName),
+    }
 
-    return newFile
+    local latestSchema = #schemas
+    local latest = schemas[latestSchema]
+    Config.CachedConfigFileNames[moduleName] = latest
+
+    -- If latest exists, delete all older schemas
+    if Files.file_exists(latest) then
+        for i = 1, latestSchema - 1 do
+            if Files.file_exists(schemas[i]) then
+                Logger.log_info("Removing old v%d config for %s module.", i, moduleName)
+                Files.delete_file(schemas[i])
+            end
+        end
+        return latest
+    end
+
+    -- Otherwise find newest existing older schema (from newest to oldest)
+    for i = latestSchema - 1, 1, -1 do
+        if Files.file_exists(schemas[i]) then
+            Logger.log_info("Upgrading config from v%d to v%d for %s module.", i, latestSchema, moduleName)
+
+            if returnExisting == true then
+                return schemas[i]
+            end
+
+            Files.copy_file(schemas[i], latest)
+            return latest
+        end
+    end
+
+    -- Nothing exists, return latest path
+    return latest
 end
 
 function Config:SaveSettings()
-    mq.pickle(self:GetConfigFileName(), self:GetModuleSettings("Core"))
-    Logger.log_debug("\ag%s Module settings saved to %s.", self._name, self:GetConfigFileName())
+    local configFile = Config.GetConfigFileName("RGMercs")
+    mq.pickle(configFile, self:GetModuleSettings("Core"))
+    Logger.log_debug("\agRGMercs settings saved to %s", configFile)
     Logger.set_log_level(Config:GetSetting('LogLevel'))
     Logger.set_log_to_file(Config:GetSetting('LogToFile'))
 end
 
 function Config:LoadSettings()
+    local configFile = Config.GetConfigFileName("RGMercs")
+
+    if not Files.file_exists(configFile) then
+        local oldConfigFile = Config.GetConfigFileName("RGMerc", true)
+        Logger.log_info("\ayOld config file found for RGMercs, upgrading to new config file name.")
+        Files.copy_file(oldConfigFile, configFile)
+        Files.delete_file(oldConfigFile)
+    end
+
     Globals.CurLoadedChar       = mq.TLO.Me.DisplayName()
     Globals.CurLoadedClass      = mq.TLO.Me.Class.ShortName()
     Globals.CurServer           = mq.TLO.EverQuest.Server()
@@ -2173,10 +2240,10 @@ function Config:LoadSettings()
     local settings = {}
     local firstSaveRequired = false
 
-    local config, err = loadfile(self:GetConfigFileName())
+    local config, err = loadfile(configFile)
     if err or not config then
         Logger.log_error("\ayUnable to load global settings file(%s), creating a new one!",
-            self:GetConfigFileName())
+            configFile)
         firstSaveRequired = true
     else
         settings = config()

@@ -29,21 +29,21 @@ function Modules:load(lootModule)
         table.insert(self.ModuleOrder, lootModule)
     end
     self.ModuleList = {
-        Movement     = require("modules.move").New(),
-        Travel       = require("modules.travel").New(),
-        Clickies     = require("modules.clickies").New(),
-        Class        = require("modules.class").New(),
-        Pull         = require("modules.pull").New(),
-        Drag         = require("modules.drag").New(),
-        Mez          = require("modules.mez").New(),
-        Charm        = require("modules.charm").New(),
-        Named        = require("modules.named").New(),
-        Perf         = require("modules.performance").New(),
-        Contributors = require("modules.contributors").New(),
-        FAQ          = require("modules.faq").New(),
-        Debug        = require("modules.debug").New(),
-        LootNScoot   = lootModule == "LootNScoot" and require("modules.lootnscoot").New() or nil,
-        SmartLoot    = lootModule == "SmartLoot" and require("modules.smartloot").New() or nil,
+        Movement     = require("modules.move"):New(),
+        Travel       = require("modules.travel"):New(),
+        Clickies     = require("modules.clickies"):New(),
+        Class        = require("modules.class"):New(),
+        Pull         = require("modules.pull"):New(),
+        Drag         = require("modules.drag"):New(),
+        Mez          = require("modules.mez"):New(),
+        Charm        = require("modules.charm"):New(),
+        Named        = require("modules.named"):New(),
+        Perf         = require("modules.performance"):New(),
+        Contributors = require("modules.contributors"):New(),
+        FAQ          = require("modules.faq"):New(),
+        Debug        = require("modules.debug"):New(),
+        LootNScoot   = lootModule == "LootNScoot" and require("modules.lootnscoot"):New() or nil,
+        SmartLoot    = lootModule == "SmartLoot" and require("modules.smartloot"):New() or nil,
     }
 end
 
@@ -63,7 +63,7 @@ end
 
 function Modules:loadModule(moduleName, filePath)
     self:unloadModule(moduleName)
-    self.ModuleList[moduleName] = require(filePath).New()
+    self.ModuleList[moduleName] = require(filePath):New()
     table.insert(self.ModuleOrder, moduleName)
     Logger.log_info("Load %s", moduleName) -- temp debug text
     Modules:ExecModule(moduleName, "Init")

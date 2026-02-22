@@ -19,6 +19,7 @@ local Logger = require("utils.logger")
 Logger.set_log_level(Config:GetSetting('LogLevel'))
 Logger.set_log_to_file(Config:GetSetting('LogToFile'))
 Logger.set_log_timestamps_to_console(Config:GetSetting('LogTimeStampsToConsole'))
+Logger.set_debug_tracer_enabled(Config:GetSetting('EnableLogTracer'))
 
 local Binds = require('utils.binds')
 require('utils.event_handlers')
@@ -31,8 +32,6 @@ local Casting     = require("utils.casting")
 local Events      = require("utils.events")
 local Ui          = require("utils.ui")
 local Comms       = require("utils.comms")
-local Strings     = require("utils.strings")
-local Tables      = require("utils.tables")
 local Movement    = require("utils.movement")
 local Set         = require('mq.set')
 local Globals     = require("utils.globals")
@@ -174,9 +173,7 @@ local function RGMercsGUI()
                     Comms.PopUpColor(15, 1, "RGMercs Warning: You have aggro while paused!")
                 end
 
-                ImGui.PushStyleColor(ImGuiCol.WindowBg, Globals.GetTimeSeconds() % 2 == 0 and
-                    ImVec4(0.7, 0.1, 0.1, Config:GetMainOpacity()) or
-                    ImVec4(0.3, 0.1, 0.1, Config:GetMainOpacity()))
+                ImGui.PushStyleColor(ImGuiCol.WindowBg, Globals.GetAlternatingColor(ImVec4(0.7, 0.1, 0.1, Config:GetMainOpacity()), ImVec4(0.3, 0.1, 0.1, Config:GetMainOpacity())))
             end
 
             if Config:GetSetting('FullUI') then

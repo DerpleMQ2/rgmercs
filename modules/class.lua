@@ -19,11 +19,13 @@ local Set         = require("mq.Set")
 local ClassLoader = require('utils.classloader')
 local DanNet      = require('lib.dannet.helpers')
 local Icons       = require('mq.ICONS')
+local Base        = require('modules.base')
 
 require('utils.datatypes')
 
-local Module                                 = { _version = '0.1a', _name = "Class", _author = 'Derple', }
-Module.__index                               = Module
+local Module   = { _version = '0.1a', _name = "Class", _author = 'Derple', }
+Module.__index = Module
+setmetatable(Module, { __index = Base, })
 
 Module.ModuleLoaded                          = false
 Module.SpellLoadOut                          = {}
@@ -33,7 +35,6 @@ Module.TempSettings                          = {}
 Module.CombatState                           = "None"
 Module.CurrentRotation                       = { name = "None", state = 0, }
 Module.ClassConfig                           = nil
-Module.SaveRequested                         = nil
 
 Module.Constants                             = {}
 Module.Constants.RezSearchGroup              = "pccorpse group radius 100 zradius 50"
@@ -280,85 +281,42 @@ Module.CommandHandlers                       = {
     },
 }
 
-local function getConfigFileName()
-    local oldFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-    local newFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
-
-    if Files.file_exists(newFile) then
-        return newFile
-    end
-
-    Files.copy_file(oldFile, newFile)
-
-    return newFile
-end
-
-function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
+function Module:New()
+    return Base.New(self)
 end
 
 function Module:WriteSettings()
     if not self.SaveRequested then return end
-
-    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
+    Base.WriteSettings(self)
 
     -- set dynamic names.
     self:SetDynamicNames()
-
-    if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastMessage(self._name, "LoadSettings")
-    end
-
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-    self.SaveRequested = nil
 end
 
 function Module:LoadSettings()
-    -- load base configurations
-    self.ClassConfig = ClassLoader.load(Globals.CurLoadedClass)
-    local settings = {}
-    local firstSaveRequired = false
+    Base.LoadSettings(self, function()
+        -- load base configurations
+        self.ClassConfig = ClassLoader.load(Globals.CurLoadedClass)
 
-    Logger.log_debug("\ar%s\ao Core Module Loading Settings for: %s.", Globals.CurLoadedClass,
-        Globals.CurLoadedChar)
-    Logger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author,
-        self.ClassConfig._version)
-    local settings_pickle_path = getConfigFileName()
+        if not self.ClassConfig.DefaultConfig then
+            Logger.log_error("\arFailed to Load Core Class Config for Classs: %s", Globals
+                .CurLoadedClass)
+            return
+        end
 
-    local config, err = loadfile(settings_pickle_path)
-    if err or not config then
-        Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
-            Globals.CurLoadedClass, settings_pickle_path)
-        firstSaveRequired = true
-    else
-        settings = config()
-    end
+        -- Add this to all class configs
+        self.ClassConfig.DefaultConfig['EnabledRotationEntries'] = {
+            DisplayName = "EnabledRotationEntries",
+            Type = "Custom",
+            Default = {},
+        }
 
-    if not self.ClassConfig.DefaultConfig then
-        Logger.log_error("\arFailed to Load Core Class Config for Classs: %s", Globals
-            .CurLoadedClass)
-        return
-    end
-
-    -- Add this to all class configs
-    self.ClassConfig.DefaultConfig['EnabledRotationEntries'] = {
-        DisplayName = "EnabledRotationEntries",
-        Type = "Custom",
-        Default = {},
-    }
-
-    self.ClassConfig.DefaultConfig['EnabledRotations'] = {
-        DisplayName = "EnabledRotations",
-        Type = "Custom",
-        Default = {},
-    }
-
-    Config:RegisterModuleSettings(self._name, settings, self.ClassConfig.DefaultConfig, self.FAQ, firstSaveRequired)
+        self.ClassConfig.DefaultConfig['EnabledRotations'] = {
+            DisplayName = "EnabledRotations",
+            Type = "Custom",
+            Default = {},
+        }
+    end)
 
     -- for config file change
     Module.TempSettings.CombatModeSet = false
@@ -368,27 +326,12 @@ function Module:WriteCustomConfig()
     ClassLoader.writeCustomConfig(Globals.CurLoadedClass)
 end
 
-function Module.New()
-    local newModule = setmetatable({}, Module)
-    return newModule
-end
-
 function Module:Init()
-    self.ModuleLoaded = false --reinitialize to stop class module UI render during persona switch (avoid crash conditions)
-    Logger.log_debug("\agInitializing Core Class Module...")
-    self:LoadSettings()
+    Base.Init(self)
 
     -- set dynamic names.
     self:SetDynamicNames()
-
-    self.ModuleLoaded = true
-
     self:SetPetHold()
-
-    return {
-        self = self,
-        defaults = self.ClassConfig.DefaultConfig,
-    }
 end
 
 function Module:SetDynamicNames()
@@ -451,10 +394,6 @@ end
 function Module:OnCombatModeChanged()
     -- set dynamic names.
     self:SetDynamicNames()
-end
-
-function Module:ShouldRender()
-    return true
 end
 
 function Module:RenderQueuedAbilities()
@@ -544,7 +483,7 @@ function Module:RenderRotationWithToggle(r, rotationTable)
 end
 
 function Module:Render()
-    Ui.RenderPopAndSettings(self._name)
+    Base.Render(self)
 
     ImGui.Text("Combat State: %s", self.CombatState)
     ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
@@ -1733,10 +1672,6 @@ function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = cmdHandlers, }
 end
 
-function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
 function Module:GetClassFAQ()
     return { module = "Class Config", FAQ = self.ClassConfig.ClassFAQ or {}, }
 end
@@ -1883,10 +1818,6 @@ end
 
 function Module:GetLastCombatModeChangeTime()
     return self.TempSettings.CombatModeChangeTime
-end
-
-function Module:Shutdown()
-    Logger.log_debug("Core Class Module Unloaded.")
 end
 
 return Module

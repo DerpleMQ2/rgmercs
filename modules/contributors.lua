@@ -1,42 +1,29 @@
-local Config           = require('utils.config')
-local Set              = require("mq.Set")
-local Ui               = require("utils.ui")
-local Logger           = require("utils.logger")
-local Globals          = require("utils.globals")
+local Globals  = require("utils.globals")
+local Base     = require("modules.base")
 
-local Module           = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
-Module.__index         = Module
-Module.DefaultConfig   = {}
+local Module   = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
+Module.__index = Module
+setmetatable(Module, { __index = Base, })
+
 Module.Credits         = require("extras.credits")
 Module.ColorWheel      = {}
 Module.ColorWheelTimer = {}
-Module.FAQ             = {}
-Module.SaveRequested   = nil
+
+function Module:New()
+    return Base.New(self)
+end
 
 function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
+end
+
+function Module:IsSaveRequested()
 end
 
 function Module:WriteSettings()
-    if not self.SaveRequested then return end
-
-    Logger.log_error("\ar%s Module requested to save settings bug this module has no settings!", self._name)
-
-    self.SaveRequested = nil
 end
 
-function Module:LoadSettings()
-    local settings = {}
-
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, false)
-end
-
-function Module.New()
-    local newModule = setmetatable({}, Module)
-    return newModule
-end
-
-function Module:Init()
+function Module:ShouldRender()
+    return false
 end
 
 function Module:RenderName(name)
@@ -81,55 +68,6 @@ function Module:RenderConfig()
             self:RenderName(c)
         end
     end
-end
-
-function Module:ShouldRender()
-    return false
-end
-
-function Module:Render()
-
-end
-
-function Module:GiveTime()
-    -- Main Module logic goes here.
-end
-
-function Module:OnDeath()
-    -- Death Handler
-end
-
-function Module:OnZone()
-    -- Zone Handler
-end
-
-function Module:OnCombatModeChanged()
-end
-
-function Module:DoGetState()
-    -- Reture a reasonable state if queried
-    return "Running..."
-end
-
-function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-    local params = ...
-    local handled = false
-    -- /rglua cmd handler
-    return handled
-end
-
-function Module:Shutdown()
 end
 
 return Module

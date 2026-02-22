@@ -14,20 +14,18 @@ local Tables    = require("utils.tables")
 local Files     = require("utils.files")
 local Logger    = require("utils.logger")
 local Events    = require("utils.events")
-
+local Base      = require("modules.base")
 require('utils.datatypes')
 
-local Module                   = { _version = '0.1a', _name = "Mez", _author = 'Derple', }
-Module.__index                 = Module
+local Module   = { _version = '0.1a', _name = "Mez", _author = 'Derple', }
+Module.__index = Module
+setmetatable(Module, { __index = Base, })
 
-Module.ModuleLoaded            = false
 Module.CombatState             = "None"
-Module.SaveRequested           = nil
 
 Module.TempSettings            = {}
 Module.TempSettings.MezImmune  = {}
 Module.TempSettings.MezTracker = {}
-Module.FAQ                     = {}
 
 Module.DefaultConfig           = {
     --General
@@ -190,79 +188,8 @@ Module.DefaultConfig           = {
     },
 }
 
-local function getConfigFileName()
-    local oldFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-    local newFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
-
-    if Files.file_exists(newFile) then
-        return newFile
-    end
-
-    Files.copy_file(oldFile, newFile)
-
-    return newFile
-end
-
-function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = Globals.GetTimeSeconds(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-    if not self.SaveRequested then return end
-
-    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-    if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastMessage(self._name, "LoadSettings")
-    end
-
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(Globals.GetTimeSeconds() - self.SaveRequested.time))
-
-    self.SaveRequested = nil
-end
-
-function Module:LoadSettings()
-    Logger.log_debug("\ar%s\ao Mez Module Loading Settings for: %s.", Globals.CurLoadedClass,
-        Globals.CurLoadedChar)
-    local settings_pickle_path = getConfigFileName()
-    local settings = {}
-    local firstSaveRequired = false
-
-    local config, err = loadfile(settings_pickle_path)
-    if err or not config then
-        Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
-            Globals.CurLoadedClass, settings_pickle_path)
-        firstSaveRequired = true
-    else
-        settings = config()
-    end
-
-    if not self.DefaultConfig then
-        Logger.log_error("\arFailed to Load Mez Config for Classs: %s", Globals.CurLoadedClass)
-        return
-    end
-
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-
-    self.SettingsLoaded = true
-end
-
-function Module.New()
-    local newModule = setmetatable({}, Module)
-    return newModule
-end
-
-function Module:Init()
-    Logger.log_debug("\agInitializing Mez Module...")
-    self:LoadSettings()
-
-    self.ModuleLoaded = true
-
-    return { self = self, defaults = self.DefaultConfig, }
+function Module:New()
+    return Base.New(self)
 end
 
 function Module:ShouldRender()
@@ -270,7 +197,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    Ui.RenderPopAndSettings(self._name)
+    Base.Render(self)
 
     ImGui.NewLine()
 
@@ -326,10 +253,6 @@ function Module:Render()
             ImGui.Unindent()
         end
     end
-end
-
-function Module:Pop()
-    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:HandleMezBroke(mobName, breakerName)
@@ -494,7 +417,6 @@ function Module:MezNow(mezId, useAE, useAA)
         -- we might have waited.
         if Casting.SpellReady(mezSpell) then
             if Core.MyClassIs("brd") then
-                -- TODO SongNow MezSpell
                 Casting.UseSong(mezSpell.RankName(), mezId, false, 2)
             else
                 -- This may not work for Bards but will work for NEC/ENCs
@@ -847,48 +769,6 @@ function Module:GiveTime()
 
     self:DoMez()
 end
-
-function Module:OnDeath()
-end
-
-function Module:OnZone()
-    self:ResetMezStates()
-    -- Zone Handler
-end
-
-function Module:OnCombatModeChanged()
-end
-
-function Module:DoGetState()
-    -- Reture a reasonable state if queried
-    return "TODO"
-end
-
-function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-    local params = ...
-    local handled = false
-    -- /rglua cmd handler
-    return handled
-end
-
-function Module:Shutdown()
-    Logger.log_debug("Mez Module Unloaded.")
-end
-
-mq.bind("/rgupmez", function()
-    Modules:ExecModule("Mez", "UpdateMezList")
-end)
 
 function Module:StopAttack()
     if mq.TLO.Me.Combat() then

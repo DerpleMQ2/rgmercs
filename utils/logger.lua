@@ -15,7 +15,7 @@ local currentLogLevel        = 3
 local logToFileAlways        = false
 local filters                = {}
 local logTimestampsToConsole = false
-
+local enableTracer           = true
 local logFileHandle          = nil
 
 function actions.get_log_level() return currentLogLevel end
@@ -23,6 +23,8 @@ function actions.get_log_level() return currentLogLevel end
 function actions.set_log_level(level) currentLogLevel = level end
 
 function actions.set_log_timestamps_to_console(value) logTimestampsToConsole = value end
+
+function actions.set_debug_tracer_enabled(value) enableTracer = value end
 
 function actions.set_log_to_file(logToFile)
 	if logToFileAlways ~= logToFile then
@@ -73,7 +75,7 @@ end
 local function getCallStack()
 	local info = debug.getinfo(4, "Snl")
 
-	local callerTracer = string.format("\ao%s\aw::\ao%s()\aw:\ao%-04d\ax",
+	local callerTracer = string.format(" \aw(\ao%s\aw::\ao%s()\aw:\ao%d\ax\aw)",
 		info and info.short_src and info.short_src:match("[^\\^/]*.lua$") or "unknown_file", info and info.name or "unknown_func", info and info.currentline or 0)
 
 	return callerTracer
@@ -82,7 +84,7 @@ end
 local function log(logLevel, output, ...)
 	if currentLogLevel < logLevels[logLevel].level then return end
 
-	local callerTracer = getCallStack()
+	local callerTracer = enableTracer and getCallStack() or ""
 
 	if (... ~= nil) then output = string.format(output, ...) end
 
@@ -96,7 +98,7 @@ local function log(logLevel, output, ...)
 
 		openLogFile()
 		if logFileHandle then
-			logFileHandle:write(string.format("[%s:%s(%s)] <%s> %s\n", mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
+			logFileHandle:write(string.format("[%s:%s%s] <%s> %s\n", mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
 			logFileHandle:flush() -- Ensure the output is immediately written to the file
 		end
 	end
@@ -118,7 +120,7 @@ local function log(logLevel, output, ...)
 		RGMercsConsole:AppendText(consoleText)
 	end
 
-	printf('%s\aw:%s \aw<\at%s\aw> \aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, now, callerTracer, logLeaderEnd, output)
+	printf('%s\aw:%s \aw<\at%s\aw>%s%s \ax%s', logLeaderStart, logLevels[logLevel].header, now, callerTracer, logLeaderEnd, output)
 end
 
 function actions.GenerateShortcuts()

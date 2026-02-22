@@ -171,9 +171,6 @@ function Combat.EngageTarget(autoTargetId)
                     Core.DoCmd('/autofire on')
                 end
             end
-
-            -- TODO: why are we doing this after turning stick on just now?
-            --if mq.TLO.Stick.Status():lower() == "on" then Movement:DoStickCmd("off") end
         else
             Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.",
                 Targeting.GetTargetCleanName())

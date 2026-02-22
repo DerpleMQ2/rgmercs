@@ -5,7 +5,7 @@ local Comms   = require("utils.comms")
 local Modules = require("utils.modules")
 local DanNet  = require('lib.dannet.helpers')
 local Logger  = require("utils.logger")
-local Strings = require("utils.strings")
+local Files   = require("utils.files")
 local LuaFS   = require('lfs')
 
 local Core    = { _version = '1.0', _name = "Core", _author = 'Derple', }

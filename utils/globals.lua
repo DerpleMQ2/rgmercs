@@ -235,4 +235,10 @@ function Globals.GetTimeMS()
     return mq.gettime()
 end
 
+function Globals.GetAlternatingColor(colorA, colorB)
+    colorA = colorA or IM_COL32(200, 200, 52, 255)
+    colorB = colorB or IM_COL32(200, 52, 52, 255)
+    return (math.floor(Globals.GetTimeSeconds() % 2) == 1) and ImGui.GetColorU32(colorA) or ImGui.GetColorU32(colorB)
+end
+
 return Globals

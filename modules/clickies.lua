@@ -1,24 +1,24 @@
 -- Clicky Module
-local mq                                = require('mq')
-local Config                            = require('utils.config')
-local Globals                           = require('utils.globals')
-local Core                              = require('utils.core')
-local Combat                            = require('utils.combat')
-local Casting                           = require("utils.casting")
-local Strings                           = require("utils.strings")
-local Ui                                = require("utils.ui")
-local Comms                             = require("utils.comms")
-local Logger                            = require("utils.logger")
-local Targeting                         = require("utils.targeting")
-local Files                             = require("utils.files")
-local Tables                            = require("utils.tables")
-local Set                               = require("mq.Set")
-local Modules                           = require("utils.modules")
-local Icons                             = require('mq.ICONS')
-local animItems                         = mq.FindTextureAnimation("A_DragItem")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Globals   = require('utils.globals')
+local Core      = require('utils.core')
+local Combat    = require('utils.combat')
+local Casting   = require("utils.casting")
+local Strings   = require("utils.strings")
+local Ui        = require("utils.ui")
+local Logger    = require("utils.logger")
+local Targeting = require("utils.targeting")
+local Tables    = require("utils.tables")
+local Modules   = require("utils.modules")
+local Icons     = require('mq.ICONS')
+local Base      = require("modules.base")
+local animItems = mq.FindTextureAnimation("A_DragItem")
 
-local Module                            = { _version = '0.1a', _name = "Clickies", _author = 'Derple', }
-Module.__index                          = Module
+local Module    = { _version = '0.1a', _name = "Clickies", _author = 'Derple', }
+Module.__index  = Module
+setmetatable(Module, { __index = Base, })
+
 Module.FAQ                              = {
     {
         Question = "How do I set RGmercs up to use a clicky item?",
@@ -30,7 +30,7 @@ Module.FAQ                              = {
         Settings_Used = "",
     },
 }
-Module.SaveRequested                    = nil
+
 Module.ClickyRotationIndex              = 1
 
 Module.CommandHandlers                  = {
@@ -861,147 +861,79 @@ for k, v in pairs(Module.CombatStates) do
     Module.CombatStateIDs[v] = k
 end
 
-local function getConfigFileName()
-    local oldFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. '.lua'
-    local newFile = mq.configDir ..
-        '/rgmercs/PCConfigs/' ..
-        Module._name .. "_" .. Globals.CurServerNormalized .. "_" .. Globals.CurLoadedChar .. "_" .. Globals.CurLoadedClass:lower() .. '.lua'
-
-    if Files.file_exists(newFile) then
-        return newFile
-    end
-
-    Files.copy_file(oldFile, newFile)
-
-    return newFile
-end
-
-function Module:SaveSettings(doBroadcast)
-    self.SaveRequested = { time = os.time(), broadcast = doBroadcast or false, }
-end
-
-function Module:WriteSettings()
-    if not self.SaveRequested then return end
-
-    mq.pickle(getConfigFileName(), Config:GetModuleSettings(self._name))
-
-    if self.SaveRequested.doBroadcast == true then
-        Comms.BroadcastMessage(self._name, "LoadSettings")
-    end
-
-    Logger.log_debug("\ag%s Module settings saved to %s, requested %s ago.", self._name, getConfigFileName(), Strings.FormatTime(os.time() - self.SaveRequested.time))
-
-    self.SaveRequested = nil
+function Module:New()
+    return Base.New(self)
 end
 
 function Module:LoadSettings()
-    -- Force any pending saves.
-    self:WriteSettings()
+    Base.LoadSettings(self, nil, function(settings)
+        local settingsChanged = false
 
-    Logger.log_debug("Clickies Module Loading Settings for: %s.", Globals.CurLoadedChar)
-    local settings_pickle_path = getConfigFileName()
-    local settings = {}
-    local firstSaveRequired = false
-
-    local config, err = loadfile(settings_pickle_path)
-    if err or not config then
-        Logger.log_error("\ay[Drag]: Unable to load clicky settings file(%s), creating a new one!",
-            settings_pickle_path)
-        firstSaveRequired = true
-    else
-        settings = config()
-    end
-
-    local settingsChanged = false
-
-    -- insert default server clickies on very first run per PC
-    if not settings.Clickies then
-        -- Live/Test use "Live". Emu servers use server-specific.
-        local serverType = Globals.BuildType:lower() ~= "emu" and "Live" or Globals.CurServer
-        local defaultClickyList = self.DefaultServerClickies[serverType]
-        settings.Clickies = defaultClickyList or {}
-        settingsChanged = true
-    end
-
-    for _, clicky in ipairs(settings.DowntimeClickies or {}) do
-        if type(clicky) == 'string' then
-            -- convert old clickies
-            table.insert(settings.Clickies,
-                {
-                    itemName = clicky,
-                    target = 'Self',
-                    combat_state = 'Downtime',
-                    conditions = {},
-                })
+        -- insert default server clickies on very first run per PC
+        if not settings.Clickies then
+            -- Live/Test use "Live". Emu servers use server-specific.
+            local serverType = Globals.BuildType:lower() ~= "emu" and "Live" or Globals.CurServer
+            local defaultClickyList = self.DefaultServerClickies[serverType]
+            settings.Clickies = defaultClickyList or {}
             settingsChanged = true
         end
-    end
 
-    for _, clicky in ipairs(settings.CombatClickies or {}) do
-        if type(clicky) == 'string' then
-            -- convert old clickies
-            table.insert(settings.Clickies,
-                {
-                    itemName = clicky,
-                    target = 'Self',
-                    combat_state = 'Combat',
-                    conditions = {},
-                })
-            settingsChanged = true
-        end
-    end
-
-    settings.CombatClickies = nil
-    settings.DowntimeClickies = nil
-
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
-
-    -- validate condition targets.
-    for _, clicky in ipairs(settings.Clickies or {}) do
-        for _, cond in ipairs(clicky.conditions or {}) do
-            local blockDef = self.LogicBlocks[self.LogicBlockTypeIDs[cond.type]]
-            if blockDef and blockDef.cond_targets then
-                local condTarget = cond.target or 'Self'
-                if not Tables.TableContains(blockDef.cond_targets, condTarget) then
-                    cond.target = blockDef.cond_targets[1] or 'Self'
-                    Logger.log_warn(
-                        "\ayClicky Module: \ayClicky Condition Target '%s' is invalid for Condition Type '%s', resetting to default.",
-                        cond.target, cond.type)
-                    self:SaveSettings(false)
-                end
+        for _, clicky in ipairs(settings.DowntimeClickies or {}) do
+            if type(clicky) == 'string' then
+                -- convert old clickies
+                table.insert(settings.Clickies,
+                    {
+                        itemName = clicky,
+                        target = 'Self',
+                        combat_state = 'Downtime',
+                        conditions = {},
+                    })
+                settingsChanged = true
             end
         end
-        if clicky.no_target_change == nil then
-            clicky.no_target_change = false
+
+        for _, clicky in ipairs(settings.CombatClickies or {}) do
+            if type(clicky) == 'string' then
+                -- convert old clickies
+                table.insert(settings.Clickies,
+                    {
+                        itemName = clicky,
+                        target = 'Self',
+                        combat_state = 'Combat',
+                        conditions = {},
+                    })
+                settingsChanged = true
+            end
+        end
+
+        settings.CombatClickies = nil
+        settings.DowntimeClickies = nil
+
+        if settingsChanged then
             self:SaveSettings(false)
         end
-    end
 
-    Config:RegisterModuleSettings(self._name, settings, self.DefaultConfig, self.FAQ, firstSaveRequired)
-
-    Logger.log_debug("\awClicky Module: \atLoaded \ag%d\at Clickies", #settings.Clickies or 0)
-end
-
-function Module.New()
-    local newModule = setmetatable({}, Module)
-    return newModule
-end
-
-function Module:Init()
-    Logger.log_debug("Clicky Module Loaded.")
-    self:LoadSettings()
-
-    self.ModuleLoaded = true
-
-    return { self = self, defaults = self.DefaultConfig, }
-end
-
-function Module:ShouldRender()
-    return true
+        -- validate condition targets.
+        for _, clicky in ipairs(settings.Clickies or {}) do
+            for _, cond in ipairs(clicky.conditions or {}) do
+                local blockDef = self.LogicBlocks[self.LogicBlockTypeIDs[cond.type]]
+                if blockDef and blockDef.cond_targets then
+                    local condTarget = cond.target or 'Self'
+                    if not Tables.TableContains(blockDef.cond_targets, condTarget) then
+                        cond.target = blockDef.cond_targets[1] or 'Self'
+                        Logger.log_warn(
+                            "\ayClicky Module: \ayClicky Condition Target '%s' is invalid for Condition Type '%s', resetting to default.",
+                            cond.target, cond.type)
+                        self:SaveSettings(false)
+                    end
+                end
+            end
+            if clicky.no_target_change == nil then
+                clicky.no_target_change = false
+                self:SaveSettings(false)
+            end
+        end
+    end)
 end
 
 function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, headerScreenPos, preRender)
@@ -1564,13 +1496,9 @@ function Module:RenderConfig(searchFilter)
 end
 
 function Module:Render()
-    Ui.RenderPopAndSettings(self._name)
+    Base.Render(self)
 
     self:RenderClickiesWithConditions("Clickies", Config:GetSetting('Clickies'))
-end
-
-function Module:Pop()
-    Config:SetSetting(self._name .. "_Popped", not Config:GetSetting(self._name .. "_Popped"))
 end
 
 function Module:ValidateClickies()
@@ -1733,17 +1661,6 @@ function Module:GiveTime()
     end
 end
 
-function Module:OnDeath()
-    -- Death Handler
-end
-
-function Module:OnZone()
-    -- Zone Handler
-end
-
-function Module:OnCombatModeChanged()
-end
-
 function Module:DoGetState()
     -- Reture a reasonable state if queried
     local result = string.format("\awLoaded \ag%d\at Downtime Clickies and \ag%d\at Combat Clickies\n\n", #Config:GetSetting('DowntimeClickies'),
@@ -1755,37 +1672,6 @@ function Module:DoGetState()
     end
 
     return result
-end
-
-function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = self.CommandHandlers or {}, }
-end
-
-function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ or {}, }
-end
-
----@param cmd string
----@param ... string
----@return boolean
-function Module:HandleBind(cmd, ...)
-    -- /rglua cmd handler
-    if self.CommandHandlers and self.CommandHandlers[cmd] then
-        return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), self.CommandHandlers[cmd].handler, self, ...)
-    end
-
-    -- try to process as a substring
-    for bindCmd, bindData in pairs(self.CommandHandlers or {}) do
-        if Strings.StartsWith(bindCmd, cmd) then
-            return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), bindData.handler, self, ...)
-        end
-    end
-
-    return false
-end
-
-function Module:Shutdown()
-    Logger.log_debug("clicky Module Unloaded.")
 end
 
 return Module

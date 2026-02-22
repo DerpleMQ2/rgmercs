@@ -7,7 +7,6 @@ local Logger              = require("utils.logger")
 
 local ConsoleUI           = { _version = '1.0', _name = "ConsoleUI", _author = 'Derple', }
 ConsoleUI.__index         = ConsoleUI
-ConsoleUI.logFilter       = ""
 ConsoleUI.logFilterLocked = true
 
 function ConsoleUI:DrawConsole(showPopout)
@@ -61,17 +60,14 @@ function ConsoleUI:DrawConsole(showPopout)
             ImGui.TableNextColumn()
             ImGui.BeginDisabled(self.logFilterLocked)
 
-            self.logFilter, changed = ImGui.InputText("##logfilter", self.logFilter)
+            local logFilter = Config:GetSetting('LogFilter')
+            logFilter, changed = ImGui.InputText("##logfilter", logFilter)
+            if changed and not self.logFilterLocked then
+                Config:SetSetting('LogFilter', logFilter)
+            end
 
             ImGui.EndDisabled()
 
-            if changed then
-                if self.logFilter:len() == 0 then
-                    Logger.clear_log_filter()
-                else
-                    Logger.set_log_filter(self.logFilter)
-                end
-            end
             ImGui.EndTable()
         end
 
