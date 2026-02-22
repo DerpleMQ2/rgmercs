@@ -2749,7 +2749,15 @@ function Config.ResolveDefaults(defaults, settings)
         if settings[k] == nil then settings[k] = v.Default end
 
         if type(settings[k]) ~= type(v.Default) then
-            Logger.log_info("\ayData type of setting [\am%s\ay] has been deprecated -- resetting to default.", k)
+            Logger.log_warn("\ayData type of setting [\am%s\ay] has been deprecated -- resetting to default.", k)
+            settings[k] = v.Default
+            changed = true
+        elseif v.Type == "Combo" and settings[k] > #v.ComboOptions then
+            Logger.log_warn("\aySetting value out of bounds [\am%s\ay] -- resetting to default.", k)
+            settings[k] = v.Default
+            changed = true
+        elseif type(settings[k]) == "number" and (settings[k] < (v.Min or -1) or settings[k] > (v.Max or 99999)) then
+            Logger.log_warn("\aySetting value out of bounds [\am%s\ay] -- resetting to default.", k)
             settings[k] = v.Default
             changed = true
         end
