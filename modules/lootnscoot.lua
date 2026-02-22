@@ -1,27 +1,26 @@
 -- Sample Basic Class Module
-local mq                 = require('mq')
-local Config             = require('utils.config')
-local Globals            = require('utils.globals')
-local Core               = require("utils.core")
-local Combat             = require("utils.combat")
-local Casting            = require("utils.casting")
-local Ui                 = require("utils.ui")
-local Comms              = require("utils.comms")
-local Strings            = require("utils.strings")
-local Logger             = require("utils.logger")
-local Actors             = require("actors")
-local Events             = require("utils.events")
-local Base               = require("modules.base")
+local mq              = require('mq')
+local Config          = require('utils.config')
+local Globals         = require('utils.globals')
+local Core            = require("utils.core")
+local Combat          = require("utils.combat")
+local Casting         = require("utils.casting")
+local Ui              = require("utils.ui")
+local Comms           = require("utils.comms")
+local Strings         = require("utils.strings")
+local Logger          = require("utils.logger")
+local Actors          = require("actors")
+local Events          = require("utils.events")
+local Base            = require("modules.base")
 
 -- Server name formatted for LNS to recognize
-local serverLNSFormat    = mq.TLO.EverQuest.Server():gsub(" ", "_")
-local warningMessageSent = false
+local serverLNSFormat = mq.TLO.EverQuest.Server():gsub(" ", "_")
+local suppressWarning = true
 
-local Module             = { _version = '1.2', _name = "LootNScoot", _author = 'Derple, Grimmier, Algar', }
-Module.__index           = Module
+local Module          = { _version = '1.2', _name = "LootNScoot", _author = 'Derple, Grimmier, Algar', }
+Module.__index        = Module
 setmetatable(Module, { __index = Base, })
 
-Module.ModuleLoaded  = false
 Module.TempSettings  = {}
 
 Module.FAQ           = {
@@ -43,6 +42,15 @@ Module.DefaultConfig = {
 		Index = 1,
 		Tooltip = "Load the integrated LootNScoot in directed mode. Turning this off will unload the looting script.",
 		Default = false,
+		OnChange = function(oldValue, newValue)
+			if newValue == true and mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
+				Core.DoCmd("/lua run lootnscoot directed rgmercs")
+				suppressWarning = true
+				if not Module.Actor then Module:LootMessageHandler() end
+			elseif newValue == false and mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' then
+				Core.DoCmd("/lua stop lootnscoot")
+			end
+		end,
 	},
 	['CombatLooting']                          = {
 		DisplayName = "Combat Looting",
@@ -95,22 +103,6 @@ function Module:New()
 	return Base.New(self)
 end
 
-function Module:WriteSettings()
-	Base.WriteSettings(self)
-	if self.SettingsLoaded then
-		if Config:GetSetting('DoLoot') == true then
-			if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
-				Core.DoCmd("/lua run lootnscoot directed rgmercs")
-				warningMessageSent = false
-			end
-
-			if not self.Actor then Module:LootMessageHandler() end
-		else
-			Core.DoCmd("/lua stop lootnscoot")
-		end
-	end
-end
-
 function Module:Init()
 	Base.Init(self)
 	local requireDelay = false
@@ -121,15 +113,15 @@ function Module:Init()
 		if Config:GetSetting('DoLoot') then
 			if mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' then
 				Core.DoCmd("/lua stop lootnscoot")
-				--mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 				requireDelay = true
 			end
 			Core.DoCmd("%s/lua run lootnscoot directed rgmercs", requireDelay and "/timed 15 " or "")
 		end
 		self.TempSettings.Looting = false
-		--pass settings to lootnscoot lib
 		Logger.log_debug("\ay[LOOT]: \agLoot(LNS) module Loaded.")
 	end
+
+	return { self = self, defaults = self.DefaultConfig, }
 end
 
 function Module:ShouldRender()
@@ -208,13 +200,15 @@ function Module:GiveTime()
 	if not Config:GetSetting('DoLoot') then return end
 	if Globals.PauseMain then return end
 	if mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' then
-		if not warningMessageSent then
+		if not suppressWarning then
 			Logger.log_error("\ar[LOOT]: Looting is enabled, but LNS does not appear to be running!")
 			Comms.PrintGroupMessage("%s has looting enabled, but LNS does not appear to be running!", mq.TLO.Me.CleanName())
-			warningMessageSent = true
+			suppressWarning = true
 		end
 		return
 	end
+
+	suppressWarning = false
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 
