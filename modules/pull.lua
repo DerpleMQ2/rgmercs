@@ -760,6 +760,24 @@ Module.CommandHandlers                 = {
             return true
         end,
     },
+    setwpid = {
+        usage = "/rgl setwpid <id>",
+        about = "Set the current waypoint to <id>.",
+        handler = function(self, id)
+            local wpID = tonumber(id) or 0
+
+            local farmWPs = Config:GetSetting('FarmWayPoints')
+            local zoneWPs = farmWPs[mq.TLO.Zone.ShortName()] or {}
+
+            if wpID > 0 and wpID <= #zoneWPs then
+                self.TempSettings.CurrentWP = wpID
+                Logger.log_info("Current farm waypoint set to %d", wpID)
+            else
+                Logger.log_error("Invalid waypoint ID! Please provide a number between 1 and %d", #zoneWPs)
+            end
+            return true
+        end,
+    },
 }
 
 function Module:New()
