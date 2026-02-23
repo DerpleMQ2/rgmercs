@@ -61,15 +61,11 @@ function StandardUI:RenderTargetInfo()
 end
 
 function StandardUI:RenderAutoTargetInfo()
-    ImGui.TableNextColumn()
-    ImGui.Text("Auto Target ")
-    ImGui.TableNextColumn()
-
     local assistSpawn = Targeting.GetAutoTarget()
     local pctHPs = assistSpawn and (assistSpawn.PctHPs() or 0) or 0
 
     if not assistSpawn or assistSpawn.ID() == 0 then
-        ImGui.Text("None")
+        ImGui.Text("No Auto Target")
         return
     end
 
@@ -86,15 +82,18 @@ function StandardUI:RenderAutoTargetInfo()
     ImGui.SameLine()
     local los = assistSpawn.LineOfSight()
     ImGui.TextColored(los and Globals.Constants.Colors.ConditionPassColor or Globals.Constants.Colors.ConditionFailColor, los and Icons.FA_EYE or Icons.FA_EYE_SLASH)
+    Ui.Tooltip("Line of Sight")
 
     if Globals.AutoTargetIsNamed then
         ImGui.SameLine()
         ImGui.TextColored(IM_COL32(52, 200, 52, 255), Icons.FA_ID_BADGE)
+        Ui.Tooltip("Named")
     end
 
     if assistSpawn.ID() == Globals.ForceTargetID then
         ImGui.SameLine()
         ImGui.TextColored(IM_COL32(52, 200, 200, 255), Icons.FA_BULLSEYE)
+        Ui.Tooltip("Forced Target")
     end
 
     local burning = Globals.LastBurnCheck and assistSpawn.ID() > 0
@@ -102,6 +101,7 @@ function StandardUI:RenderAutoTargetInfo()
     if burning then
         ImGui.SameLine()
         ImGui.TextColored(Globals.GetAlternatingColor(), Icons.FA_FIRE)
+        Ui.Tooltip("Burning")
     end
 
     ImGui.PopStyleColor(1)
@@ -137,9 +137,7 @@ function StandardUI:RenderTarget()
         assistSpawn = mq.TLO.Target
     end
 
-    ImGui.BeginTable("##TargetInfoTable", 2, bit32.bor(ImGuiTableFlags.BordersInner, ImGuiTableFlags.SizingFixedFit))
     local pctHPs, burning = self:RenderAutoTargetInfo()
-    ImGui.EndTable()
     Ui.RenderFancyHPBar("##AutoTargetHPBar", pctHPs, 25, burning)
     self:RenderForceBurnButton()
 end
