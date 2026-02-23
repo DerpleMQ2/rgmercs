@@ -1174,10 +1174,18 @@ function Module:Render()
                     Ui.NavEnabledLoc(string.format("y: %0.2f, x: %0.2f, z: %0.2f]", wpData.y, wpData.x, wpData.z),
                         string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z))
                     ImGui.TableNextColumn()
+                    ImGui.PushID("##_small_btn_set_wp_" .. tostring(idx))
+                    if ImGui.SmallButton(Icons.FA_FLAG_CHECKERED) then
+                        Core.DoCmd(string.format("/rgl setwpid %d", idx))
+                    end
+                    Ui.Tooltip("Set Current WP")
+                    ImGui.PopID()
+                    ImGui.SameLine()
                     ImGui.PushID("##_small_btn_delete_wp_" .. tostring(idx))
                     if ImGui.SmallButton(Icons.FA_TRASH) then
                         self:AddWPToDeleteList(idx)
                     end
+                    Ui.Tooltip("Delete Waypoint")
                     ImGui.PopID()
                     ImGui.SameLine()
                     ImGui.PushID("##_small_btn_up_wp_" .. tostring(idx))
