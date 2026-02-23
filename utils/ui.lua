@@ -26,11 +26,11 @@ Ui.ConfigFilter         = ""
 Ui.ShowDownNamed        = false
 
 Ui.TempSettings         = {
-    SortedXT         = {},
-    SortedXTIDToSlot = {},
-    SortedXTIDs      = Set.new({}),
-    hpBarTrendState  = {},
-    hpAnimState      = {},
+    SortedXT          = {},
+    SortedXTIDToSlot  = {},
+    SortedXTIDs       = Set.new({}),
+    progBarTrendState = {},
+    progBarAnimState  = {},
 }
 
 Ui.ModalText            = ""
@@ -1986,25 +1986,23 @@ function Ui.GetDeltaTime()
     return dt
 end
 
--- Draw a horizontal gradient HP bar using ImDrawList:AddRectFilledMultiColor.
-function Ui.RenderFancyHPBar(id, hpPct, height, burning)
+function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh, label)
     local useImAnim = false -- set to true to enable ImAnim tweening for HP changes, false will just snap to the new value without animation
-    local targetPct = Math.Clamp(tonumber(hpPct) or 0, 0, 100)
+    local targetPct = Math.Clamp(tonumber(barPct) or 0, 0, 100)
     local availX = ImGui.GetContentRegionAvailVec().x
     local width = math.max(1, tonumber(availX) or 1)
     local barHeight = height or 16
     local now = Globals.GetTimeSeconds()
     local drawList = ImGui.GetWindowDrawList()
 
-    -- Animated or direct HP percentage
     local pct = targetPct
-    local animState = Ui.TempSettings.hpAnimState[id]
+    local animState = Ui.TempSettings.progBarAnimState[id]
 
     if useImAnim and ImAnim then
         if not animState then
             -- First render: initialize with current target
             animState = { lastTarget = targetPct, }
-            Ui.TempSettings.hpAnimState[id] = animState
+            Ui.TempSettings.progBarAnimState[id] = animState
         end
 
         -- Detect HP changes and update animation target
@@ -2029,7 +2027,7 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
         -- Fallback: direct value (no animation)
         if not animState then
             animState = { lastTarget = targetPct, }
-            Ui.TempSettings.hpAnimState[id] = animState
+            Ui.TempSettings.progBarAnimState[id] = animState
         end
         animState.lastTarget = targetPct
         pct = targetPct
@@ -2037,10 +2035,10 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
 
     local fraction = pct / 100
 
-    local trend = Ui.TempSettings.hpBarTrendState[id]
+    local trend = Ui.TempSettings.progBarTrendState[id]
     if not trend then
         trend = { lastPct = pct, direction = 1, }
-        Ui.TempSettings.hpBarTrendState[id] = trend
+        Ui.TempSettings.progBarTrendState[id] = trend
     else
         -- Use a tiny dead-zone to avoid noisy direction flips from rounding jitter.
         if targetPct < (trend.lastPct - 0.05) then
@@ -2077,28 +2075,25 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
 
     if fillWidth > 0 then
         -- Red -> amber -> green edge color based on current HP
-        local hpLow = Globals.Constants.Colors.HPLowColor
-        local hpMid = Globals.Constants.Colors.HPMidColor
-        local hpHigh = Globals.Constants.Colors.HPHighColor
         local edge
         if fraction < 0.5 then
-            edge = Math.ColorLerp(hpLow, hpMid, fraction / 0.5)
+            edge = Math.ColorLerp(colLow, colMid, fraction / 0.5)
         else
-            edge = Math.ColorLerp(hpMid, hpHigh, (fraction - 0.5) / 0.5)
+            edge = Math.ColorLerp(colMid, colHigh, (fraction - 0.5) / 0.5)
         end
 
-        local topLeft = ImGui.GetColorU32(hpLow)
+        local topLeft = ImGui.GetColorU32(colLow)
         local topRight = ImGui.GetColorU32(edge)
-        local bottomLeft = ImGui.GetColorU32(hpLow)
+        local bottomLeft = ImGui.GetColorU32(colLow)
         local bottomRight = ImGui.GetColorU32(edge)
         local fillMaxX = minX + fillWidth
         local fillRounding = math.min(barRounding, barH * 0.5, fillWidth * 0.5)
 
         -- Rounded base keeps the visible HP shape aligned with the rounded container.
         local baseFillColor = IM_COL32(
-            (hpLow.x + edge.x) * 128,
-            (hpLow.y + edge.y) * 128,
-            (hpLow.z + edge.z) * 128,
+            (colLow.x + edge.x) * 128,
+            (colLow.y + edge.y) * 128,
+            (colLow.z + edge.z) * 128,
             244)
 
         drawList:AddRectFilled(
@@ -2184,6 +2179,39 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
         )
     end
 
+    drawList:AddRect(
+        ImVec2(minX, minY),
+        ImVec2(maxX, maxY),
+        IM_COL32(255, 255, 255, 71),
+        3.0,
+        0,
+        1.0
+    )
+
+    local text = label or string.format('%d%%', math.floor(pct + 0.5))
+    local textW = ImGui.CalcTextSize(text)
+    local textX = minX + ((maxX - minX - textW) * 0.5)
+    local textY = minY + ((barHeight - ImGui.GetTextLineHeight()) * 0.5)
+    drawList:AddText(ImVec2(textX + 1, textY + 1), IM_COL32(0, 0, 0, 230), text)
+    drawList:AddText(ImVec2(textX, textY), IM_COL32(255, 255, 255, 255), text)
+
+    return ImGui.IsItemClicked()
+end
+
+-- Draw a horizontal gradient HP bar using ImDrawList:AddRectFilledMultiColor.
+function Ui.RenderFancyHPBar(id, hpPct, height, burning)
+    local now = Globals.GetTimeSeconds()
+    local drawList = ImGui.GetWindowDrawList()
+
+    local hpLow = Globals.Constants.Colors.HPLowColor
+    local hpMid = Globals.Constants.Colors.HPMidColor
+    local hpHigh = Globals.Constants.Colors.HPHighColor
+
+    local clicked = Ui.RenderAnimatedPercentage(id, hpPct, height, hpLow, hpMid, hpHigh)
+
+    local minX, minY = ImGui.GetItemRectMin()
+    local maxX, maxY = ImGui.GetItemRectMax()
+
     -- burn pulse
     if burning == true then
         local pulse = 0.5 + 0.5 * math.sin(now * 10.0)
@@ -2198,23 +2226,11 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
         )
     end
 
-    drawList:AddRect(
-        ImVec2(minX, minY),
-        ImVec2(maxX, maxY),
-        IM_COL32(255, 255, 255, 71),
-        3.0,
-        0,
-        1.0
-    )
+    return clicked
+end
 
-    local text = string.format('%d%%', math.floor(pct + 0.5))
-    local textW = ImGui.CalcTextSize(text)
-    local textX = minX + ((maxX - minX - textW) * 0.5)
-    local textY = minY + ((barHeight - ImGui.GetTextLineHeight()) * 0.5)
-    drawList:AddText(ImVec2(textX + 1, textY + 1), IM_COL32(0, 0, 0, 230), text)
-    drawList:AddText(ImVec2(textX, textY), IM_COL32(255, 255, 255, 255), text)
-
-    return ImGui.IsItemClicked()
+function Ui.RenderFancyProgressBar(id, pctComplete, height, label)
+    return Ui.RenderAnimatedPercentage(id, pctComplete, height, Globals.Constants.Colors.LightOrange, Globals.Constants.Colors.LightBlue, Globals.Constants.Colors.Green, label)
 end
 
 --- Renders a numerical option with a specified range and step.

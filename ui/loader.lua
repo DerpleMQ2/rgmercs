@@ -2,6 +2,8 @@ local mq             = require('mq')
 local ImGui          = require('ImGui')
 local ImagesUI       = require('ui.images')
 local Config         = require('utils.config')
+local Globals        = require('utils.globals')
+local Ui             = require("utils.ui")
 
 local LoaderUI       = { _version = '1.0', _name = "LoaderUI", _author = 'Derple', }
 LoaderUI.__index     = LoaderUI
@@ -28,9 +30,8 @@ function LoaderUI:RenderLoader(initPctComplete, initMsg)
     ImGui.Text("RGMercs %s: Loading...", Config._version)
     ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 35)
     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 70)
-    ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 0.2, 0.7, 1 - (initPctComplete / 100), initPctComplete / 100)
-    ImGui.ProgressBar(initPctComplete / 100, ImVec2(310, 0), initMsg)
-    ImGui.PopStyleColor()
+    Ui.RenderAnimatedPercentage("RGMercsLoadProgressBar", initPctComplete, 16, Globals.Constants.Colors.LightBlue, Globals.Constants.Colors.LightGreen,
+        Globals.Constants.Colors.Green, initMsg)
     ImGui.PopStyleVar(3)
     ImGui.End()
 end
