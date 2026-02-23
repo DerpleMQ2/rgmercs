@@ -79,6 +79,8 @@ function StandardUI:RenderAutoTargetInfo()
         assistSpawn.ID() or 0, assistSpawn.Level() or 0,
         assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
 
+    ImGui.PopStyleColor(1)
+
     ImGui.SameLine()
     local los = assistSpawn.LineOfSight()
     ImGui.TextColored(los and Globals.Constants.Colors.ConditionPassColor or Globals.Constants.Colors.ConditionFailColor, los and Icons.FA_EYE or Icons.FA_EYE_SLASH)
@@ -103,8 +105,6 @@ function StandardUI:RenderAutoTargetInfo()
         ImGui.TextColored(Globals.GetAlternatingColor(), Icons.FA_FIRE)
         Ui.Tooltip("Burning")
     end
-
-    ImGui.PopStyleColor(1)
 
     return pctHPs, burning
 end
