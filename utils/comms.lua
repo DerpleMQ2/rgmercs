@@ -180,9 +180,7 @@ end
 
 function Comms.UpdatePeerHeartbeat(peer, data)
     Comms.Peers:add(peer)
-    Comms.PeersHeartbeats[peer] = Comms.PeersHeartbeats[peer] or {}
-    Comms.PeersHeartbeats[peer].LastHeartbeat = Globals.GetTimeSeconds()
-    Comms.PeersHeartbeats[peer].Data = data or {}
+    Comms.PeersHeartbeats[peer] = { LastHeartbeat = Globals.GetTimeSeconds(), Data = data or {}, }
 end
 
 function Comms.ValidatePeers(timeout)
