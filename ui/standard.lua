@@ -89,19 +89,19 @@ function StandardUI:RenderAutoTargetInfo()
 
     if Globals.AutoTargetIsNamed then
         ImGui.SameLine()
-        ImGui.TextColored(IM_COL32(52, 200, 52, 255), "**Named**")
+        ImGui.TextColored(IM_COL32(52, 200, 52, 255), Icons.FA_ID_BADGE)
     end
 
     if assistSpawn.ID() == Globals.ForceTargetID then
         ImGui.SameLine()
-        ImGui.TextColored(IM_COL32(52, 200, 200, 255), "**ForcedTarget**")
+        ImGui.TextColored(IM_COL32(52, 200, 200, 255), Icons.FA_BULLSEYE)
     end
 
     local burning = Globals.LastBurnCheck and assistSpawn.ID() > 0
 
     if burning then
         ImGui.SameLine()
-        ImGui.TextColored(Globals.GetAlternatingColor(), "**BURNING**")
+        ImGui.TextColored(Globals.GetAlternatingColor(), Icons.FA_FIRE)
     end
 
     ImGui.PopStyleColor(1)
