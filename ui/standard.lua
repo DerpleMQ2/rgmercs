@@ -50,10 +50,13 @@ function StandardUI:RenderTargetInfo()
         ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
     end
 
-    ImGui.Text("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
+    ImGui.Text("%s (%s) [%d %s] HP: %d%% Dist: %d ", assistSpawn.CleanName() or "",
         assistSpawn.ID() or 0, assistSpawn.Level() or 0,
         assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
 
+    ImGui.SameLine()
+    local los = assistSpawn.LineOfSight()
+    ImGui.TextColored(los and Globals.Constants.Colors.ConditionPassColor or Globals.Constants.Colors.ConditionFailColor, los and Icons.FA_EYE or Icons.FA_EYE_SLASH)
     ImGui.PopStyleColor(1)
 end
 
@@ -76,9 +79,13 @@ function StandardUI:RenderAutoTargetInfo()
         ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
     end
 
-    ImGui.Text("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
+    ImGui.Text("%s (%s) [%d %s] HP: %d%% Dist: %d ", assistSpawn.CleanName() or "",
         assistSpawn.ID() or 0, assistSpawn.Level() or 0,
         assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
+
+    ImGui.SameLine()
+    local los = assistSpawn.LineOfSight()
+    ImGui.TextColored(los and Globals.Constants.Colors.ConditionPassColor or Globals.Constants.Colors.ConditionFailColor, los and Icons.FA_EYE or Icons.FA_EYE_SLASH)
 
     if Globals.AutoTargetIsNamed then
         ImGui.SameLine()
@@ -131,7 +138,6 @@ function StandardUI:RenderTarget()
     end
 
     ImGui.BeginTable("##TargetInfoTable", 2, bit32.bor(ImGuiTableFlags.BordersInner, ImGuiTableFlags.SizingFixedFit))
-    self:RenderTargetInfo()
     local pctHPs, burning = self:RenderAutoTargetInfo()
     ImGui.EndTable()
     Ui.RenderFancyHPBar("##AutoTargetHPBar", pctHPs, 25, burning)
@@ -250,25 +256,30 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
                 if ImGui.BeginTabItem("RGMercsMain") then
                     ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
 
-                    ImGui.Text("Current State: ")
-                    ImGui.SameLine()
+                    ImGui.BeginTable("##MainInfoTable", 2, bit32.bor(ImGuiTableFlags.BordersInner, ImGuiTableFlags.SizingFixedFit))
+                    ImGui.TableNextColumn()
+                    ImGui.Text("Current State")
+                    ImGui.TableNextColumn()
                     Ui.RenderColoredText(Combat.GetCachedCombatState() == "Combat" and Globals.Constants.Colors.MainCombatColor or Globals.Constants.Colors.MainDowntimeColor,
                         "%s", Combat.GetCachedCombatState() or "N/A")
-                    ImGui.Text("Hater Count: ")
-                    ImGui.SameLine()
+                    ImGui.TableNextColumn()
+                    ImGui.Text("Hater Count")
+                    ImGui.TableNextColumn()
                     Ui.RenderColoredText((Targeting.GetXTHaterCount() or 0) > 0 and Globals.Constants.Colors.ConditionMidColor or Globals.Constants.Colors.ConditionPassColor, "%d",
                         Targeting.GetXTHaterCount() or 0)
-                    ImGui.Text("MA: ")
-                    ImGui.SameLine()
+                    ImGui.TableNextColumn()
+                    ImGui.Text("MA")
+                    ImGui.TableNextColumn()
 
                     if Config.TempSettings.AssistWarning and Core.IAmMA() then
                         Ui.RenderColoredText(Globals.Constants.Colors.ConditionMidColor, "%s (Fallback Mode)", (Core.GetMainAssistSpawn().CleanName() or "None"))
                     else
                         Ui.RenderColoredText(Globals.Constants.Colors.ConditionPassColor, "%s", (Core.GetMainAssistSpawn().CleanName() or "None"))
                     end
-
-                    ImGui.Text("Stuck To: ")
-                    ImGui.SameLine()
+                    self:RenderTargetInfo()
+                    ImGui.TableNextColumn()
+                    ImGui.Text("Stuck To")
+                    ImGui.TableNextColumn()
                     Ui.RenderColoredText(mq.TLO.Stick.Active() and ImVec4(Ui.GetConColorBySpawn(mq.TLO.Spawn(mq.TLO.Stick.StickTarget()))) or ImVec4(1, 1, 1, 1),
                         "%s ", (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     ImGui.SameLine()
@@ -284,9 +295,9 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
                     Ui.RenderColoredText(Globals.Constants.Colors.LightBlue, "%s", Movement:GetTimeSinceLastStick() or "0s")
                     ImGui.SameLine()
                     ImGui.Text(">")
-
-                    ImGui.Text("Last Nav: ")
-                    ImGui.SameLine()
+                    ImGui.TableNextColumn()
+                    ImGui.Text("Last Nav")
+                    ImGui.TableNextColumn()
                     if mq.TLO.Navigation.MeshLoaded() then
                         Ui.RenderColoredText(Globals.Constants.Colors.ConditionPassColor, "%s ", Movement:GetLastNavCmd() or "N/A")
                     else
@@ -299,6 +310,10 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
                     ImGui.SameLine()
                     ImGui.Text(">")
                     ImGui.PopStyleVar(1)
+
+                    ImGui.EndTable()
+
+                    ImGui.NewLine()
 
                     if ImGui.CollapsingHeader("Assist List") then
                         ImGui.Indent()
