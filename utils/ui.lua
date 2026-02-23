@@ -14,7 +14,7 @@ local ClassLoader       = require('utils.classloader')
 local Math              = require('utils.math')
 local Set               = require('mq.set')
 local ImGui             = require('ImGui')
--- TODO: Enable when launched local ImAnim            = require('ImAnim')
+local ImAnim            = require('ImAnim')
 
 local animSpellGems     = mq.FindTextureAnimation('A_SpellGems')
 local ICON_SIZE         = 20
@@ -1987,7 +1987,7 @@ function Ui.GetDeltaTime()
 end
 
 function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh, label)
-    local useImAnim = false -- set to true to enable ImAnim tweening for HP changes, false will just snap to the new value without animation
+    local useImAnim = true -- set to true to enable ImAnim tweening for HP changes, false will just snap to the new value without animation
     local targetPct = Math.Clamp(tonumber(barPct) or 0, 0, 100)
     local availX = ImGui.GetContentRegionAvailVec().x
     local width = math.max(1, tonumber(availX) or 1)
