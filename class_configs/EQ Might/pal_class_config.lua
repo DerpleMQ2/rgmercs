@@ -611,10 +611,9 @@ return {
         },
         {
             name = 'GroupBuff',
-            timer = 60,
-            targetId = function(self)
-                return Casting.GetBuffableGroupIDs()
-            end,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and Casting.OkayToBuff() and Core.OkayToNotHeal()
             end,
@@ -802,7 +801,7 @@ return {
                 load_cond = function() return Config:GetSetting('AegoSymbol') == 3 or Config:GetSetting('AegoSymbol') == 3 end,
                 cond = function(self, spell, target)
                     if (spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId() then return false end
-                    return Casting.GroupBuffCheck(spell, target) and Casting.PeerBuffCheck(3047, target, true) -- don't try to overwrite Kazad's Mark
+                    return Casting.GroupBuffCheck(spell, target) and Casting.AddedBuffCheck(3047, target) -- don't try to overwrite Kazad's Mark
                 end,
             },
             {

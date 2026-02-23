@@ -594,7 +594,7 @@ local _ClassConfig = {
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
             name = 'PetBuff',
-            timer = 60,
+            timer = 10,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
@@ -602,10 +602,9 @@ local _ClassConfig = {
         },
         { --Spells that should be checked on group members
             name = 'GroupBuff',
-            timer = 60,
-            targetId = function(self)
-                return Casting.GetBuffableGroupIDs()
-            end,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.OkayToBuff()
             end,
@@ -656,20 +655,27 @@ local _ClassConfig = {
             steps = 3,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and
-                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and Casting.BurnCheck() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
         {
             name = 'CombatBuff',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+            end,
+        },
+        {
+            name = 'MeleeProcBuff',
             timer = 10,
             state = 1,
             steps = 1,
-            load_cond = function(self) return self:GetResolvedActionMapItem('MeleeProcBuff') end,
-            targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
+            load_cond = function(self) return self:GetResolvedActionMapItem('MeleeProcBuff') or mq.TLO.FindItem("=Artifact of the Leopard")() end,
+            targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
         {
@@ -678,8 +684,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
         {
@@ -698,7 +703,7 @@ local _ClassConfig = {
 
     },
     ['Rotations']         = {
-        ['CombatBuff']  = {
+        ['MeleeProcBuff'] = {
             {
                 name = "Artifact of the Leopard",
                 type = "Item",
@@ -707,7 +712,7 @@ local _ClassConfig = {
                         (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 999) < 70
                 end,
                 cond = function(self, itemName, target)
-                    return Casting.GroupBuffItemCheck(itemName, target) and Casting.PeerBuffCheck(9975, target, true) --Panther Rk. II
+                    return Casting.GroupBuffItemCheck(itemName, target) and Casting.AddedBuffCheck(9975, target) --Panther Rk. II
                 end,
             },
             {
@@ -718,8 +723,35 @@ local _ClassConfig = {
                         (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 0) == 70
                 end,
                 cond = function(self, spell, target)
-                    if not Casting.CastReady(spell) then return false end                                      --avoid constant group buff checks
-                    return Casting.GroupBuffCheck(spell, target) and Casting.PeerBuffCheck(9975, target, true) --Panther Rk. II
+                    if not Casting.CastReady(spell) then return false end                                 --avoid constant group buff checks
+                    return Casting.GroupBuffCheck(spell, target) and Casting.AddedBuffCheck(9975, target) --Panther Rk. II
+                end,
+            },
+        },
+        ['CombatBuff']    = {
+            {
+                name = "Companion's Blessing",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return (mq.TLO.Me.Pet.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
+                end,
+            },
+            {
+                name = "Cannibalization",
+                type = "AA",
+                allowDead = true,
+                cond = function(self, aaName)
+                    if not (Config:GetSetting('DoAACanni') and Config:GetSetting('DoCombatCanni')) then return false end
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('AACanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('AACanniMinHP')
+                end,
+            },
+            {
+                name = "CanniSpell",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self, spell)
+                    if not (Config:GetSetting('DoSpellCanni') and Config:GetSetting('DoCombatCanni')) then return false end
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
                 end,
             },
             {
@@ -734,15 +766,8 @@ local _ClassConfig = {
                     end
                 end,
             },
-            {
-                name = "Companion's Blessing",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return (mq.TLO.Me.Pet.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
-                end,
-            },
         },
-        ['Burn']        = {
+        ['Burn']          = {
             {
                 name = "Ancestral Aid",
                 type = "AA",
@@ -782,7 +807,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Malo']        = {
+        ['Malo']          = {
             {
                 name = "AEMaloSpell",
                 type = "Spell",
@@ -808,7 +833,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Slow']        = {
+        ['Slow']          = {
             {
                 name = "Tigir's Insect Swarm",
                 type = "AA",
@@ -846,7 +871,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['PutridDecay'] = {
+        ['PutridDecay']   = {
             {
                 name = "PutridDecay",
                 type = "Spell",
@@ -855,7 +880,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Cripple']     = {
+        ['Cripple']       = {
             {
                 name = "CrippleSpell",
                 type = "Spell",
@@ -864,7 +889,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['DPS']         = {
+        ['DPS']           = {
             {
                 name = "Epic",
                 type = "Item",
@@ -898,24 +923,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Cannibalization",
-                type = "AA",
-                allowDead = true,
-                cond = function(self, aaName)
-                    if not (Config:GetSetting('DoAACanni') and Config:GetSetting('DoCombatCanni')) then return false end
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('AACanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('AACanniMinHP')
-                end,
-            },
-            {
-                name = "CanniSpell",
-                type = "Spell",
-                allowDead = true,
-                cond = function(self, spell)
-                    if not (Config:GetSetting('DoSpellCanni') and Config:GetSetting('DoCombatCanni')) then return false end
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
-                end,
-            },
-            {
                 name = "ColdNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -932,7 +939,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['DPS(AE)']     = {
+        ['DPS(AE)']       = {
             {
                 name = "PBAEPoison",
                 type = "Spell",
@@ -942,7 +949,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['PetSummon']   = {
+        ['PetSummon']     = {
             {
                 name = "Artifact of Nature Spirit",
                 type = "Item",
@@ -970,7 +977,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Downtime']    = {
+        ['Downtime']      = {
             {
                 name = "Communion of the Cheetah",
                 type = "AA",
@@ -1003,7 +1010,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['PetBuff']     = {
+        ['PetBuff']       = {
             {
                 name = "HasteBuff",
                 type = "Spell",
@@ -1029,7 +1036,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['GroupBuff']   = {
+        ['GroupBuff']     = {
             {
                 name = "Communion of the Cheetah",
                 type = "AA",
@@ -1075,7 +1082,7 @@ local _ClassConfig = {
                 cond = function(self, itemName, target)
                     return Casting.GroupBuffItemCheck(itemName, target)
                         -- Don't try to overwrite Champion with Ferine Avatar
-                        and Casting.PeerBuffCheck(5417, target, true)
+                        and Casting.AddedBuffCheck(5417, target)
                 end,
             },
             { --Fix this, some priests will want this, adjust options
@@ -1086,7 +1093,7 @@ local _ClassConfig = {
                     if (spell.TargetType() or ""):lower() == "single" and not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                         -- Don't try to overwrite Champion with Ferine Avatar
-                        and Casting.PeerBuffCheck(5417, target, true)
+                        and Casting.AddedBuffCheck(5417, target)
                 end,
             },
             {
@@ -1132,7 +1139,7 @@ local _ClassConfig = {
                         (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 999) < 70
                 end,
                 cond = function(self, itemName, target)
-                    return Casting.GroupBuffItemCheck(itemName, target) and Casting.PeerBuffCheck(9975, target, true) --Panther Rk. II
+                    return Casting.GroupBuffItemCheck(itemName, target) and Casting.AddedBuffCheck(9975, target) --Panther Rk. II
                 end,
             },
             {

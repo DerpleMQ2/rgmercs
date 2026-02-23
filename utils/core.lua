@@ -489,4 +489,76 @@ function Core.GetChaseTarget()
     return Modules:ExecModule("Movement", "GetChaseTarget")
 end
 
+function Core.UpdateBuffs()
+    Core.GetBuffTable()
+    Core.GetSongTable()
+    Core.GetBlockedTable()
+    if Config:GetSetting('DoActorPetBuffs') then
+        Core.GetPetBuffTable()
+        Core.GetPetBlockedTable()
+    end
+end
+
+function Core.GetBuffTable()
+    Globals.CurrentBuffs = {}
+
+    for i = 1, mq.TLO.Me.MaxBuffSlots() do
+        local buff = mq.TLO.Me.Buff(i)
+        if buff() and (buff.Spell.ID() or 0) > 0 then
+            table.insert(Globals.CurrentBuffs, buff.Spell.ID())
+        end
+    end
+end
+
+function Core.GetSongTable()
+    Globals.CurrentSongs = {}
+    local songSlots = Core.OnEMU() and 20 or 30
+
+    for i = 1, songSlots do
+        local song = mq.TLO.Me.Song(i)
+        if song() and (song.Spell.ID() or 0) > 0 then
+            table.insert(Globals.CurrentSongs, song.Spell.ID())
+        end
+    end
+end
+
+function Core.GetBlockedTable()
+    Globals.CurrentBlocked = {}
+
+    for i = 1, 60 do --afaik this is current max blocked buffs and that data is not exposed
+        local blocked = mq.TLO.Me.BlockedBuff(i)
+        if not blocked() then break end
+        table.insert(Globals.CurrentBlocked, blocked.ID())
+    end
+end
+
+function Core.GetPetBuffTable()
+    Logger.log_debug("Pet Buff Start")
+    Globals.CurrentPetBuffs = {}
+
+    if mq.TLO.Me.Pet.ID() > 0 then
+        for i = 1, 30 do
+            local buff = mq.TLO.Me.PetBuff(i)
+            if buff() and (buff.ID() or 0) > 0 then
+                table.insert(Globals.CurrentPetBuffs, buff.ID())
+            end
+        end
+    end
+    Logger.log_debug("Pet Buff Finish")
+end
+
+function Core.GetPetBlockedTable()
+    Logger.log_debug("Pet Block Start")
+    Globals.CurrentPetBlocked = {}
+
+    if mq.TLO.Me.Pet.ID() > 0 then
+        for i = 1, 60 do --afaik this is current max blocked buffs and that data is not exposed
+            local blocked = mq.TLO.Me.BlockedPetBuff(i)
+            if not blocked() then break end
+            table.insert(Globals.CurrentPetBlocked, blocked.ID())
+        end
+    end
+    Logger.log_debug("Pet Block Finish")
+end
+
 return Core

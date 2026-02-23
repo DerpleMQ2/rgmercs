@@ -265,10 +265,9 @@ return {
         },
         {
             name = 'GroupBuff',
-            timer = 60,
-            targetId = function(self)
-                return Casting.GetBuffableGroupIDs()
-            end,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and Casting.OkayToBuff()
             end,

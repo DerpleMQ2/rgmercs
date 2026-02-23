@@ -314,10 +314,9 @@ _ClassConfig    = {
         },
         {
             name = 'GroupBuff',
-            timer = 60, -- only run every 60 seconds top.
-            targetId = function(self)
-                return Casting.GetBuffableGroupIDs()
-            end,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and Casting.OkayToBuff()
             end,
@@ -941,8 +940,8 @@ _ClassConfig    = {
                     if not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                         -- workarounds for laz
-                        and Casting.PeerBuffCheck(19847, target, true) -- necrotic pustules
-                        and Casting.PeerBuffCheck(8484, target, true)  -- decrepit skin
+                        and Casting.AddedBuffCheck(19847, target) -- necrotic pustules
+                        and Casting.AddedBuffCheck(5521, target)  -- decrepit skin
                 end,
                 post_activate = function(self, spell, success)
                     local petName = mq.TLO.Me.Pet.CleanName() or "None"

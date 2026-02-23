@@ -229,17 +229,16 @@ return {
         },
         {
             name = 'GroupBuff',
-            timer = 60, -- only run every 60 seconds top.
-            targetId = function(self)
-                return Casting.GetBuffableGroupIDs()
-            end,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and Casting.OkayToBuff()
             end,
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
             name = 'PetBuff',
-            timer = 30,
+            timer = 10,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
@@ -612,7 +611,7 @@ return {
                     if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                         --laz specific deconflict with brell's vibrant barricade
-                        and Casting.PeerBuffCheck(40583, target, true)
+                        and Casting.AddedBuffCheck(40583, target)
                 end,
             },
             {

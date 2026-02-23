@@ -153,6 +153,11 @@ function Comms.SendHeartbeat(assist, chase)
         Chase         = chase,
         Invis         = mq.TLO.Me.Invis(),
         FreeInventory = mq.TLO.Me.FreeInventory(3)(),
+        Buffs         = Globals.CurrentBuffs,
+        Songs         = Globals.CurrentSongs,
+        Blocked       = Globals.CurrentBlocked,
+        PetBuffs      = Globals.CurrentPetBuffs,
+        PetBlocked    = Globals.CurrentPetBlocked,
     }
     Comms.BroadcastMessage("RGMercs", "Heartbeat", heartBeat)
     -- update our own heartbeat too
