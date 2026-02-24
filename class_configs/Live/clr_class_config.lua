@@ -1,11 +1,9 @@
 local mq           = require('mq')
 local Combat       = require('utils.combat')
 local Config       = require('utils.config')
-local Globals      = require("utils.globals")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
-local DanNet       = require('lib.dannet.helpers')
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
@@ -756,18 +754,6 @@ local _ClassConfig = {
             end
 
             return rezAction
-        end,
-        GetMainAssistPctMana = function()
-            local groupMember = mq.TLO.Group.Member(Globals.MainAssist)
-            if groupMember and groupMember() then
-                return groupMember.PctMana() or 0
-            end
-
-            local ret = tonumber(DanNet.query(Globals.MainAssist, "Me.PctMana", 1000))
-
-            if ret and type(ret) == 'number' then return ret end
-
-            return mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist)).PctMana() or 0
         end,
     },
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead

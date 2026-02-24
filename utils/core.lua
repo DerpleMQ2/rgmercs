@@ -5,7 +5,6 @@ local Comms   = require("utils.comms")
 local Modules = require("utils.modules")
 local DanNet  = require('lib.dannet.helpers')
 local Logger  = require("utils.logger")
-local Files   = require("utils.files")
 local LuaFS   = require('lfs')
 
 local Core    = { _version = '1.0', _name = "Core", _author = 'Derple', }
@@ -217,6 +216,79 @@ function Core.GetMainAssistSpawn()
     return Globals.MainAssist:len() > 0 and mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist)) or mq.TLO.Spawn("")
 end
 
+function Core.GetMainAssistTargetID()
+    local assistId = 0
+    local heartbeat = Comms.GetPeerHeartbeatByName(Globals.MainAssist)
+    local assistTarget = nil
+    local assistTargetIsNamed = false
+
+    -- if the MA has a force target, use it, and also force combat on this target (don't check aggressiveness on the MA's force target)
+    if heartbeat and heartbeat.Data then
+        local forceTargId = tonumber(heartbeat.Data.ForceTargetID) or 0
+        if forceTargId > 0 then
+            Globals.ForceCombatID = forceTargId
+            assistId = forceTargId
+            assistTarget = mq.TLO.Spawn(forceTargId)
+            Logger.log_verbose("\ayFindAutoTarget Assist's Forced Target via Actors :: %s (%s). Ignoring mob aggressiveness.",
+                assistTarget.CleanName() or "None", forceTargId)
+            if heartbeat.Data.TargetIsNamed then
+                Globals.AutoTargetIsNamed = true
+                assistTargetIsNamed = true
+            end
+        else -- reset force combat ID if the MA is no longer forcing that target
+            Globals.ForceCombatID = 0
+        end
+    end
+
+    -- check if the MA is an actor peer
+    if heartbeat and heartbeat.Data then
+        local targetID = tonumber(heartbeat.Data.TargetID) or 0
+        if targetID and type(targetID) == 'number' then
+            assistId = targetID
+            assistTarget = mq.TLO.Spawn(targetID)
+            Logger.log_verbose("\ayFindAutoTarget Assist's Target via Actors :: %s (%s)",
+                assistTarget.CleanName() or "None", targetID)
+        end
+        if heartbeat.Data.TargetIsNamed then
+            Globals.AutoTargetIsNamed = true
+            assistTargetIsNamed = true
+        end
+        -- check if the MA is a dannet peer
+    elseif mq.TLO.DanNet(Globals.MainAssist)() then
+        local queryResult = DanNet.query(Globals.MainAssist, "Target.ID", 1000)
+        if queryResult then
+            assistId = tonumber(queryResult) or 0
+            assistTarget = mq.TLO.Spawn(queryResult)
+            Logger.log_verbose("\ayFindAutoTarget Assist's Target via DanNet :: %s (%s)",
+                assistTarget.CleanName() or "None", queryResult)
+        end
+        -- Check for the Group/Raid Assist Target via TLO. Don't do this if we are using assist list, the assumption is we don't *want* to assist the group/raid
+    elseif not Config:GetSetting('UseAssistList') then
+        assistId = Modules:ExecModule("Combat", "GetGroupOrRaidAssistTargetId")
+        assistTarget = mq.TLO.Spawn(assistId)
+        Logger.log_verbose("\ayFindAutoTarget Assist's Target via Group/Raid TLO :: %s (%s)",
+            assistTarget.CleanName() or "None", assistId)
+    else
+        -- if we cant get a target any other way, just stay on our current one if its valid, rather then constantly retargeting an MA.
+        if Modules:ExecModule("Combat", "ValidCombatTarget", Globals.AutoTargetID) then
+            assistId = Globals.AutoTargetID
+        else
+            -- otherwise, manually target the MA to get their target of target. this is a last-ditch fallback. it would be much better to let a mercs toon be the MA.
+            -- compromise here is to leave all mercs toons assisting a mercs MA, but the mercs MA setting an outsider to the MA, so we aren't all targeting randomly.
+            local assistSpawn = Core.GetMainAssistSpawn()
+            if assistSpawn and assistSpawn() then
+                Modules:ExecModule("Targeting", "SetTarget", assistSpawn.ID(), true)
+                assistTarget = mq.TLO.Me.TargetOfTarget
+                assistId = assistTarget.ID() or 0
+                Logger.log_verbose("\ayFindAutoTarget Assist's Target via TargetOfTarget :: %s ",
+                    assistTarget.CleanName() or "None")
+            end
+        end
+    end
+
+    return assistId, assistTargetIsNamed
+end
+
 --- Retrieves the percentage of hit points (HP) of the main assist.
 ---
 --- @return number The percentage of HP of the main assist.
@@ -238,6 +310,37 @@ function Core.GetMainAssistPctHPs()
         local hpPct = tonumber(heartbeat.Data.HPs)
         if hpPct and type(hpPct) == 'number' then
             return hpPct
+        end
+    end
+
+    local ret = tonumber(DanNet.query(Globals.MainAssist, "Me.PctHPs", 1000))
+
+    if ret and type(ret) == 'number' then return ret end
+
+    return mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist)).PctHPs() or 100
+end
+
+--- Retrieves the percentage of mana (MP) of the main assist.
+---
+--- @return number The percentage of MP of the main assist.
+function Core.GetMainAssistPctMana()
+    if Globals.MainAssist:len() == 0 then return 100 end
+
+    local groupMember = mq.TLO.Group.Member(Globals.MainAssist)
+    if groupMember and groupMember() then
+        return groupMember.PctMana() or 100
+    end
+
+    local raidMember = mq.TLO.Raid.Member(Globals.MainAssist)
+    if raidMember and raidMember() then
+        return raidMember.PctMana() or 100
+    end
+
+    local heartbeat = Comms.GetPeerHeartbeatByName(Globals.MainAssist)
+    if heartbeat and heartbeat.Data and heartbeat.Data.Mana then
+        local manaPct = tonumber(heartbeat.Data.Mana)
+        if manaPct and type(manaPct) == 'number' then
+            return manaPct
         end
     end
 

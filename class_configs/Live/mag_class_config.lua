@@ -1,15 +1,14 @@
-local mq          = require('mq')
-local Config      = require('utils.config')
-local Globals     = require("utils.globals")
-local Core        = require("utils.core")
-local Targeting   = require("utils.targeting")
-local Casting     = require("utils.casting")
-local Comms       = require("utils.comms")
-local ItemManager = require("utils.item_manager")
-local DanNet      = require('lib.dannet.helpers')
-local Logger      = require("utils.logger")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Globals   = require("utils.globals")
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
+local Comms     = require("utils.comms")
+local DanNet    = require('lib.dannet.helpers')
+local Logger    = require("utils.logger")
 
-_ClassConfig      = {
+_ClassConfig    = {
     _version              = "1.2 - Live",
     _author               = "Derple, Morisato, Algar",
     ['ModeChecks']        = {

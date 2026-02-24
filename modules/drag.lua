@@ -1,13 +1,10 @@
 -- Drag Module
 local mq        = require('mq')
 local Config    = require('utils.config')
-local Globals   = require("utils.globals")
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
-local Ui        = require("utils.ui")
-local Comms     = require("utils.comms")
 local Logger    = require("utils.logger")
-local Strings   = require("utils.strings")
+local Comms     = require("utils.comms")
 local DanNet    = require('lib.dannet.helpers')
 local Base      = require("modules.base")
 
@@ -33,6 +30,15 @@ Module.DefaultConfig   = {
         Header = "Drag",
         Category = "Drag",
         Tooltip = "Use DanNet peer checks to identify corpses that should be dragged within a 95 unit radius.",
+        Index = 2,
+        Default = true,
+    },
+    ['DoActorsDrag']                           = {
+        DisplayName = "Use Actor Peers Dragging",
+        Group = "Movement",
+        Header = "Drag",
+        Category = "Drag",
+        Tooltip = "Use Actor peers checks to identify corpses that should be dragged within a 95 unit radius.",
         Index = 2,
         Default = true,
     },
@@ -115,6 +121,22 @@ function Module:GiveTime()
                         local corpse = mq.TLO.NearestSpawn(i, currentSearch)
                         self:Drag(corpse)
                     end
+                end
+            end
+        end
+
+        if Config:GetSetting('DoActorsDrag') then
+            local actors = Comms.GetPeers(true)
+            for _, peerFullName in ipairs(actors) do
+                local peer, _ = Comms.GetCharAndServerFromPeer(peerFullName)
+
+                Logger.log_debug("Searching corpses for: %s", peer)
+                local currentSearch = string.format(corpseSearch, peer)
+                local numCorpses = mq.TLO.SpawnCount(currentSearch)()
+
+                for i = numCorpses, 1, -1 do
+                    local corpse = mq.TLO.NearestSpawn(i, currentSearch)
+                    self:Drag(corpse)
                 end
             end
         end

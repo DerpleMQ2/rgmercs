@@ -5,7 +5,6 @@ local Globals      = require("utils.globals")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
-local DanNet       = require('lib.dannet.helpers')
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
@@ -338,18 +337,6 @@ local _ClassConfig = {
             end
 
             return rezAction
-        end,
-        GetMainAssistPctMana = function()
-            local groupMember = mq.TLO.Group.Member(Globals.MainAssist)
-            if groupMember and groupMember() then
-                return groupMember.PctMana() or 0
-            end
-
-            local ret = tonumber(DanNet.query(Globals.MainAssist, "Me.PctMana", 1000))
-
-            if ret and type(ret) == 'number' then return ret end
-
-            return mq.TLO.Spawn(string.format("PC =%s", Globals.MainAssist)).PctMana() or 0
         end,
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
         AETargetCheck = function(minCount, printDebug)

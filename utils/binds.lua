@@ -9,7 +9,6 @@ local Strings     = require("utils.strings")
 local Logger      = require("utils.logger")
 local ConfigShare = require("utils.rg_config_share")
 local Set         = require('mq.set')
-local DanNet      = require('lib.dannet.helpers')
 
 local Binds       = { _version = '0.1a', _name = "Binds", _author = 'Derple', }
 
@@ -385,26 +384,22 @@ Binds.Handlers    = {
         handler = function(radius)
             if not radius then radius = 15 end
 
-            local peerCount = mq.TLO.DanNet.PeerCount()
+            local peers = Comms.GetPeers(false)
+            local peerCount = #peers
             if peerCount < 1 then return end
             local angle_step = (2 * math.pi) / peerCount
 
-            --local myHeading = mq.TLO.Me.Heading.Degrees() - multiplier
-            --local baseRadian = 360 / peerCount
+            for i, peerFullName in ipairs(peers) do
+                local peer, _ = Comms.GetCharAndServerFromPeer(peerFullName)
+                local radians = (i - 1) * angle_step
+                local xMove = math.cos(radians) * (radius)
+                local yMove = math.sin(radians) * (radius)
 
-            for i = 1, peerCount do
-                local peer = DanNet.getPeer(i)
-                if peer and peer:len() > 0 then
-                    local radians = i * angle_step
-                    local xMove = math.cos(radians) * (i + radius)
-                    local yMove = math.sin(radians) * (i + radius)
+                local xOff = mq.TLO.Me.X() + math.floor(xMove)
+                local yOff = mq.TLO.Me.Y() + math.floor(yMove)
 
-                    local xOff = mq.TLO.Me.X() + math.floor(xMove)
-                    local yOff = mq.TLO.Me.Y() + math.floor(yMove)
-
-                    Core.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", peer, yOff, xOff, mq.TLO.Me.Z())
-                    Core.DoCmd("/dex %s /timed 50 /face %s", peer, mq.TLO.Me.DisplayName())
-                end
+                Core.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", peer, yOff, xOff, mq.TLO.Me.Z())
+                Core.DoCmd("/dex %s /timed 50 /face %s", peer, mq.TLO.Me.DisplayName())
             end
         end,
     },

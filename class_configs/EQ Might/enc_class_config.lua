@@ -5,7 +5,6 @@ local Comms        = require("utils.comms")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
-local DanNet       = require('lib.dannet.helpers')
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
