@@ -229,7 +229,7 @@ function Core.GetMainAssistTargetID()
             Globals.ForceCombatID = forceTargId
             assistId = forceTargId
             assistTarget = mq.TLO.Spawn(forceTargId)
-            Logger.log_verbose("\ayFindAutoTarget Assist's Forced Target via Actors :: %s (%s). Ignoring mob aggressiveness.",
+            Logger.log_verbose("\atGetMainAssistTargetID\aw() \ayFindAutoTarget Assist's Forced Target via Actors :: %s (%s). Ignoring mob aggressiveness.",
                 assistTarget.CleanName() or "None", forceTargId)
             if heartbeat.Data.TargetIsNamed then
                 Globals.AutoTargetIsNamed = true
@@ -246,7 +246,7 @@ function Core.GetMainAssistTargetID()
         if targetID and type(targetID) == 'number' then
             assistId = targetID
             assistTarget = mq.TLO.Spawn(targetID)
-            Logger.log_verbose("\ayFindAutoTarget Assist's Target via Actors :: %s (%s)",
+            Logger.log_verbose("\atGetMainAssistTargetID\aw() \ayFindAutoTarget Assist's Target via Actors :: %s (%s)",
                 assistTarget.CleanName() or "None", targetID)
         end
         if heartbeat.Data.TargetIsNamed then
@@ -259,14 +259,14 @@ function Core.GetMainAssistTargetID()
         if queryResult then
             assistId = tonumber(queryResult) or 0
             assistTarget = mq.TLO.Spawn(queryResult)
-            Logger.log_verbose("\ayFindAutoTarget Assist's Target via DanNet :: %s (%s)",
+            Logger.log_verbose("\atGetMainAssistTargetID\aw() \ayFindAutoTarget Assist's Target via DanNet :: %s (%s)",
                 assistTarget.CleanName() or "None", queryResult)
         end
         -- Check for the Group/Raid Assist Target via TLO. Don't do this if we are using assist list, the assumption is we don't *want* to assist the group/raid
     elseif not Config:GetSetting('UseAssistList') then
         assistId = Modules:ExecModule("Combat", "GetGroupOrRaidAssistTargetId")
         assistTarget = mq.TLO.Spawn(assistId)
-        Logger.log_verbose("\ayFindAutoTarget Assist's Target via Group/Raid TLO :: %s (%s)",
+        Logger.log_verbose("\atGetMainAssistTargetID\aw() \ayFindAutoTarget Assist's Target via Group/Raid TLO :: %s (%s)",
             assistTarget.CleanName() or "None", assistId)
     else
         -- if we cant get a target any other way, just stay on our current one if its valid, rather then constantly retargeting an MA.
@@ -280,7 +280,7 @@ function Core.GetMainAssistTargetID()
                 Modules:ExecModule("Targeting", "SetTarget", assistSpawn.ID(), true)
                 assistTarget = mq.TLO.Me.TargetOfTarget
                 assistId = assistTarget.ID() or 0
-                Logger.log_verbose("\ayFindAutoTarget Assist's Target via TargetOfTarget :: %s ",
+                Logger.log_verbose("\atGetMainAssistTargetID\aw() \ayFindAutoTarget Assist's Target via TargetOfTarget :: %s ",
                     assistTarget.CleanName() or "None")
             end
         end
