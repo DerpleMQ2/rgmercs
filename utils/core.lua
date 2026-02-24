@@ -5,6 +5,7 @@ local Comms   = require("utils.comms")
 local Modules = require("utils.modules")
 local DanNet  = require('lib.dannet.helpers')
 local Logger  = require("utils.logger")
+local Strings = require("utils.strings")
 local LuaFS   = require('lfs')
 
 local Core    = { _version = '1.0', _name = "Core", _author = 'Derple', }
@@ -264,20 +265,21 @@ function Core.GetMainAssistTargetID()
         end
         -- Check for the Group/Raid Assist Target via TLO. Don't do this if we are using assist list, the assumption is we don't *want* to assist the group/raid
     elseif not Config:GetSetting('UseAssistList') then
-        assistId = Modules:ExecModule("Combat", "GetGroupOrRaidAssistTargetId")
+        assistId = Core.GetGroupOrRaidAssistTargetId()
         assistTarget = mq.TLO.Spawn(assistId)
         Logger.log_verbose("\atGetMainAssistTargetID\aw() \ayFindAutoTarget Assist's Target via Group/Raid TLO :: %s (%s)",
             assistTarget.CleanName() or "None", assistId)
     else
         -- if we cant get a target any other way, just stay on our current one if its valid, rather then constantly retargeting an MA.
-        if Modules:ExecModule("Combat", "ValidCombatTarget", Globals.AutoTargetID) then
+        if Core.ValidCombatTarget(Globals.AutoTargetID) then
             assistId = Globals.AutoTargetID
         else
             -- otherwise, manually target the MA to get their target of target. this is a last-ditch fallback. it would be much better to let a mercs toon be the MA.
             -- compromise here is to leave all mercs toons assisting a mercs MA, but the mercs MA setting an outsider to the MA, so we aren't all targeting randomly.
             local assistSpawn = Core.GetMainAssistSpawn()
             if assistSpawn and assistSpawn() then
-                Modules:ExecModule("Targeting", "SetTarget", assistSpawn.ID(), true)
+                Core.SetTarget(assistSpawn.ID(), true)
+
                 assistTarget = mq.TLO.Me.TargetOfTarget
                 assistId = assistTarget.ID() or 0
                 Logger.log_verbose("\atGetMainAssistTargetID\aw() \ayFindAutoTarget Assist's Target via TargetOfTarget :: %s ",
@@ -287,6 +289,45 @@ function Core.GetMainAssistTargetID()
     end
 
     return assistId, assistTargetIsNamed
+end
+
+--- Determines whether the target is valid for combat
+---
+--- @return boolean True if the target is present and alive, false if not.
+function Core.ValidCombatTarget(targetId)
+    if not targetId or targetId <= 0 then return false end
+    local targetSpawn = mq.TLO.Spawn(string.format("targetable id %d", targetId))
+    local targetCorpse = mq.TLO.Spawn(string.format("corpse id %d", targetId))
+    return targetSpawn() ~= nil and not targetSpawn.Dead() and not targetCorpse()
+end
+
+function Core.SetTarget(targetId, ignoreBuffPopulation)
+    if targetId == 0 then return end
+
+    local maxWaitBuffs = ((mq.TLO.EverQuest.Ping() * 2) + 500)
+
+    if targetId == mq.TLO.Target.ID() then return end
+    Logger.log_debug("SetTarget(): Setting Target: %d (buffPopWait: %d)", targetId, ignoreBuffPopulation and 0 or maxWaitBuffs)
+    if mq.TLO.Target.ID() ~= targetId then
+        mq.TLO.Spawn(targetId).DoTarget()
+        mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
+        local targetBuffsPopulated = (mq.TLO.Target() and mq.TLO.Target.BuffsPopulated() or false)
+        mq.delay(maxWaitBuffs, function() return (ignoreBuffPopulation or targetBuffsPopulated) end)
+    end
+    Logger.log_debug("SetTarget(): Set Target to: %d (buffsPopulated: %s)", targetId, Strings.BoolToColorString(mq.TLO.Target.BuffsPopulated() ~= nil))
+end
+
+--- Sets the AutoTarget to that of your group or raid MA.
+function Core.GetGroupOrRaidAssistTargetId()
+    local targetId = 0
+    if mq.TLO.Raid.Members() > 0 then
+        local assistTarg = Config:GetSetting('RaidAssistTarget')
+        targetId = ((mq.TLO.Me.RaidAssistTarget(assistTarg) and mq.TLO.Me.RaidAssistTarget(assistTarg).ID()) or 0)
+    elseif mq.TLO.Group.Members() > 0 then
+        --- @diagnostic disable-next-line: undefined-field
+        targetId = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
+    end
+    return targetId
 end
 
 --- Retrieves the percentage of hit points (HP) of the main assist.

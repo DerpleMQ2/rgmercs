@@ -25,19 +25,8 @@ end
 --- @param targetId number The ID of the target to be set.
 --- @param ignoreBuffPopulation boolean? Wait to return until buffs are populated Default: false
 function Targeting.SetTarget(targetId, ignoreBuffPopulation)
-    if targetId == 0 then return end
-
-    local maxWaitBuffs = ((mq.TLO.EverQuest.Ping() * 2) + 500)
-
-    if targetId == mq.TLO.Target.ID() then return end
-    Logger.log_debug("SetTarget(): Setting Target: %d (buffPopWait: %d)", targetId, ignoreBuffPopulation and 0 or maxWaitBuffs)
-    if Targeting.GetTargetID() ~= targetId then
-        mq.TLO.Spawn(targetId).DoTarget()
-        mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
-        local targetBuffsPopulated = (mq.TLO.Target() and mq.TLO.Target.BuffsPopulated() or false)
-        mq.delay(maxWaitBuffs, function() return (ignoreBuffPopulation or targetBuffsPopulated) end)
-    end
-    Logger.log_debug("SetTarget(): Set Target to: %d (buffsPopulated: %s)", targetId, Strings.BoolToColorString(mq.TLO.Target.BuffsPopulated() ~= nil))
+    -- avoid breaking change.
+    return Core.SetTarget(targetId, ignoreBuffPopulation)
 end
 
 --- Retrieves the current auto-target.

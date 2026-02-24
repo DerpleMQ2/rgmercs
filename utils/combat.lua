@@ -410,15 +410,8 @@ end
 
 --- Sets the AutoTarget to that of your group or raid MA.
 function Combat.GetGroupOrRaidAssistTargetId()
-    local targetId = 0
-    if mq.TLO.Raid.Members() > 0 then
-        local assistTarg = Config:GetSetting('RaidAssistTarget')
-        targetId = ((mq.TLO.Me.RaidAssistTarget(assistTarg) and mq.TLO.Me.RaidAssistTarget(assistTarg).ID()) or 0)
-    elseif mq.TLO.Group.Members() > 0 then
-        --- @diagnostic disable-next-line: undefined-field
-        targetId = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
-    end
-    return targetId
+    -- maintained so as to not cause a breaking change.
+    return Core.GetGroupOrRaidAssistTargetId()
 end
 
 --- This will find a valid target and set it to : Globals.AutoTargetID
@@ -744,10 +737,8 @@ end
 ---
 --- @return boolean True if the target is present and alive, false if not.
 function Combat.ValidCombatTarget(targetId)
-    if not targetId or targetId <= 0 then return false end
-    local targetSpawn = mq.TLO.Spawn(string.format("targetable id %d", targetId))
-    local targetCorpse = mq.TLO.Spawn(string.format("corpse id %d", targetId))
-    return targetSpawn() ~= nil and not targetSpawn.Dead() and not targetCorpse()
+    -- avoid breaking change
+    return Core.ValidCombatTarget(targetId)
 end
 
 --- Checks if we should be doing our camping functionality
