@@ -1633,7 +1633,7 @@ function Module:GiveTime()
 
                         if buffCheckPassed and Casting.ItemReady(item()) then
                             Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                            Casting.UseItem(item.Name(), targetId, true)
+                            Casting.UseItem(item.Name(), targetId)
                             clickiesUsedThisFrame = clickiesUsedThisFrame + 1
                             if maxClickiesPerFrame > 0 and clickiesUsedThisFrame >= maxClickiesPerFrame then
                                 Logger.log_debug("\ayClicky: \a-tMax Clickies Per Frame of \am%d\a-t reached, stopping for this frame and picking up with %d next frame.",

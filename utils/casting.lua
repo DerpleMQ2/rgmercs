@@ -1517,9 +1517,8 @@ end
 --- Uses an item on a specified target.
 --- @param itemName string The name of the item to be used.
 --- @param targetId? number The ID of the target on which the item will be used. If empty use implied target.
---- @param forceTarget? boolean Whether to force targeting even if the item does not require it - even if self.
 --- @return boolean
-function Casting.UseItem(itemName, targetId, forceTarget)
+function Casting.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
     if not itemName then
@@ -1574,7 +1573,7 @@ function Casting.UseItem(itemName, targetId, forceTarget)
     if targetId then
         local targetSpawn = mq.TLO.Spawn(targetId)
 
-        if targetId > 0 and targetId ~= oldTargetId and (forceTarget or targetId ~= mq.TLO.Me.ID()) then
+        if targetId > 0 and targetId ~= oldTargetId then
             if Config:GetSetting('StopAttackForPCs') and me.Combat() and (targetSpawn.Type() or ""):lower() == "pc" then -- don't use helper here, don't want fallback to current target
                 Logger.log_debug("\awUseItem():NOTICE:\ax Turning off autoattack to cast on a PC.")
                 Core.DoCmd("/attack off")
