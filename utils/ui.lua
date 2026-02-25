@@ -1962,7 +1962,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
 
     -- Animate thumb position
     local target_thumb = value and 1.0 or 0.0
-    local thumb_pos    = ImAnim.TweenFloat(ImHashStr(id), ImHashStr("thumb" .. id), target_thumb, 0.25, ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
+    local thumb_pos    = ImAnim.TweenFloat(ImHashStr(id), ImHashStr("thumb" .. id), target_thumb, 0.45, ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
 
     -- Animate background color
     local bg_color     = ImAnim.TweenColor(ImHashStr(id), ImHashStr("bg" .. id), value and on_color or off_color, 0.2, ImAnim.EasePreset(IamEaseType.OutCubic), IamPolicy.Crossfade,
@@ -1979,7 +1979,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
     local thumb_y = switch_pos.y + height * 0.5
 
     -- Thumb shadow
-    --draw_list:AddCircleFilled(ImVec2(thumb_x + 1, thumb_y + 2), thumb_radius, IM_COL32(0, 0, 0, 30))
+    draw_list:AddCircleFilled(ImVec2(thumb_x + 1, thumb_y + 2), thumb_radius, IM_COL32(0, 0, 0, 30))
 
     local final_knob_col = ImGui.GetColorU32(knob_color)
 
