@@ -880,7 +880,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 local distance = mq.TLO.Zone.Name() == data.Data.Zone and mq.TLO.Spawn(data.Data.ID).Distance() or 999
-                local distString = distance == 999 and "" or string.format("%6.2f", distance)
+                local distString = distance == 999 and "" or string.format("%d", distance)
                 ImGui.PushStyleColor(ImGuiCol.Text,
                     distance == 999 and Colors.ConditionDisabledColor or
                     distance > assistRange and Colors.ConditionFailColor or
