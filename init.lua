@@ -20,6 +20,9 @@ Logger.set_log_level(Config:GetSetting('LogLevel'))
 Logger.set_log_to_file(Config:GetSetting('LogToFile'))
 Logger.set_log_timestamps_to_console(Config:GetSetting('LogTimeStampsToConsole'))
 Logger.set_debug_tracer_enabled(Config:GetSetting('EnableLogTracer'))
+if Config:GetSetting('LogFilter') ~= "" then
+    Logger.set_log_filter(Config:GetSetting('LogFilter'))
+end
 
 local Binds = require('utils.binds')
 require('utils.event_handlers')

@@ -797,14 +797,16 @@ function Module:IAmStuck()
 
     if stuck then
         Logger.log_debug(
-            "\ayIAmStuck\aw(): \atStuck\aw: %s, \atNav.Active()\aw: %s, \amNav.Velocity()\aw: \ao%d\aw, \amTimeSinceLastPositionChange()\aw: \ao%d\aw, \amAttemptToFixStuckTimer()\aw: \ao%d\aw, \amLastNavCmdTime\aw: \ao%s, \amLastNavCmd\aw: \at%s",
-            Strings.BoolToColorString(stuck), Strings.BoolToColorString(Nav.Active()), Nav.Velocity(), Movement:GetTimeSinceLastPositionChange(),
+            "\ayIAmStuck\aw(): \atStuck\aw: %s, \atNav.Active()\aw: %s, \atNav.Paused()\aw: %s,\amNav.Velocity()\aw: \ao%d\aw, \amTimeSinceLastPositionChange()\aw: \ao%d\aw, \amAttemptToFixStuckTimer()\aw: \ao%d\aw, \amLastNavCmdTime\aw: \ao%s, \amLastNavCmd\aw: \at%s",
+            Strings.BoolToColorString(stuck), Strings.BoolToColorString(Nav.Active()), Strings.BoolToColorString(Nav.Paused()), Nav.Velocity(),
+            Movement:GetTimeSinceLastPositionChange(),
             Config:GetSetting('AttemptToFixStuckTimer'),
             Movement:GetTimeSinceLastNav(), Movement:GetLastNavCmd())
     else
         Logger.log_verbose(
-            "\ayIAmStuck\aw(): \atStuck\aw: %s, \atNav.Active()\aw: %s, \amNav.Velocity()\aw: \ao%d\aw, \amTimeSinceLastPositionChange()\aw: \ao%d\aw, \amAttemptToFixStuckTimer()\aw: \ao%d\aw, \amLastNavCmdTime\aw: \ao%s, \amLastNavCmd\aw: \at%s",
-            Strings.BoolToColorString(stuck), Strings.BoolToColorString(Nav.Active()), Nav.Velocity(), Movement:GetTimeSinceLastPositionChange(),
+            "\ayIAmStuck\aw(): \atStuck\aw: %s, \atNav.Active()\aw: %s, \atNav.Paused()\aw: %s, \amNav.Velocity()\aw: \ao%d\aw, \amTimeSinceLastPositionChange()\aw: \ao%d\aw, \amAttemptToFixStuckTimer()\aw: \ao%d\aw, \amLastNavCmdTime\aw: \ao%s, \amLastNavCmd\aw: \at%s",
+            Strings.BoolToColorString(stuck), Strings.BoolToColorString(Nav.Active()), Strings.BoolToColorString(Nav.Paused()), Nav.Velocity(),
+            Movement:GetTimeSinceLastPositionChange(),
             Config:GetSetting('AttemptToFixStuckTimer'),
             Movement:GetTimeSinceLastNav(), Movement:GetLastNavCmd())
     end
