@@ -873,12 +873,14 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Mana or 0, data_b.Data.Mana or 0
             end,
             render = function(peer, data)
-                if Config:GetSetting('StatusUseBars') then
-                    Ui.RenderFancyManaBar("MercsStatusManaBar" .. peer, math.ceil(data.Data.Mana or 0), ImGui.GetTextLineHeight())
-                else
-                    Ui.RenderColoredText(
-                        Ui.GetPercentageColor(data.Data.Mana or 0, { Colors.Cyan, Colors.LightBlue, Colors.Red, }),
-                        data.Data.Mana and "%d%%" or "", math.ceil(data.Data.Mana or 0) or "")
+                if math.ceil(data.Data.Mana or 0) > 0 then
+                    if Config:GetSetting('StatusUseBars') then
+                        Ui.RenderFancyManaBar("MercsStatusManaBar" .. peer, math.ceil(data.Data.Mana or 0), ImGui.GetTextLineHeight())
+                    else
+                        Ui.RenderColoredText(
+                            Ui.GetPercentageColor(data.Data.Mana or 0, { Colors.Cyan, Colors.LightBlue, Colors.Red, }),
+                            data.Data.Mana and "%d%%" or "", math.ceil(data.Data.Mana or 0) or "")
+                    end
                 end
             end,
 
