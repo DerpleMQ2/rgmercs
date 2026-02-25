@@ -1,50 +1,72 @@
-local mq                = require('mq')
-local Config            = require('utils.config')
-local Globals           = require('utils.globals')
-local Modules           = require("utils.modules")
-local Movement          = require("utils.movement")
-local Logger            = require("utils.logger")
-local Core              = require("utils.core")
-local Comms             = require("utils.comms")
-local Targeting         = require("utils.targeting")
-local Icons             = require('mq.ICONS')
-local Strings           = require("utils.strings")
-local Tables            = require("utils.tables")
-local ClassLoader       = require('utils.classloader')
-local Math              = require('utils.math')
-local Set               = require('mq.set')
-local ImGui             = require('ImGui')
-local ImAnim            = require('ImAnim')
+local mq                           = require('mq')
+local Config                       = require('utils.config')
+local Globals                      = require('utils.globals')
+local Modules                      = require("utils.modules")
+local Movement                     = require("utils.movement")
+local Logger                       = require("utils.logger")
+local Core                         = require("utils.core")
+local Comms                        = require("utils.comms")
+local Targeting                    = require("utils.targeting")
+local Icons                        = require('mq.ICONS')
+local Strings                      = require("utils.strings")
+local Tables                       = require("utils.tables")
+local ClassLoader                  = require('utils.classloader')
+local Math                         = require('utils.math')
+local Set                          = require('mq.set')
+local ImGui                        = require('ImGui')
+local ImAnim                       = require('ImAnim')
 
-local animSpellGems     = mq.FindTextureAnimation('A_SpellGems')
-local ICON_SIZE         = 20
+local animSpellGems                = mq.FindTextureAnimation('A_SpellGems')
+local ICON_SIZE                    = 20
 
-local Ui                = { _version = '1.0', _name = "Ui", _author = 'Derple', }
+local Ui                           = { _version = '1.0', _name = "Ui", _author = 'Derple', }
 
-Ui.__index              = Ui
-Ui.ConfigFilter         = ""
-Ui.ShowDownNamed        = false
+Ui.__index                         = Ui
+Ui.ConfigFilter                    = ""
+Ui.ShowDownNamed                   = false
 
-Ui.TempSettings         = {
+Ui.TempSettings                    = {
     SortedXT          = {},
     SortedXTIDToSlot  = {},
     SortedXTIDs       = Set.new({}),
-    progBarTrendState = {},
-    progBarAnimState  = {},
+    ProgBarTrendState = {},
+    ProgBarAnimState  = {},
+    TogglePulseState  = {},
 }
 
-Ui.ModalText            = ""
-Ui.ModalTitle           = "##UI Modal"
-Ui.ModalPrompt          = ""
-Ui.ModalCallbackFn      = nil
-Ui.ComboFilterText      = ""
+Ui.ModalText                       = ""
+Ui.ModalTitle                      = "##UI Modal"
+Ui.ModalPrompt                     = ""
+Ui.ModalCallbackFn                 = nil
+Ui.ComboFilterText                 = ""
 
 -- Themze support.
-Ui.Themez               = nil
-Ui.ThemezNames          = {}
-Ui.SelectedThemezImport = 1
+Ui.Themez                          = nil
+Ui.ThemezNames                     = {}
+Ui.SelectedThemezImport            = 1
 
-Ui.LoadThemez           = function()
+local CLIP_DL_RING                 = 0x3000
+local CLIP_DL_CH_RADIUS            = 0x3102
+local CLIP_DL_CH_ALPHA             = 0x3103
+
+local s_drawlist_clips_initialized = false
+
+function Ui.InitDrawListClips()
+    if s_drawlist_clips_initialized then return end
+    s_drawlist_clips_initialized = true
+
+    -- Pulsing ring - expand and fade
+    IamClip.Begin(CLIP_DL_RING)
+        :KeyFloat(CLIP_DL_CH_RADIUS, 0.0, 10.0, IamEaseType.OutCubic)
+        :KeyFloat(CLIP_DL_CH_RADIUS, 2.0, 15.0, IamEaseType.OutCubic)
+        :KeyFloat(CLIP_DL_CH_ALPHA, 0.0, 1.0, IamEaseType.Linear)
+        :KeyFloat(CLIP_DL_CH_ALPHA, 2.0, 0.0, IamEaseType.Linear)
+        :SetStagger(4, 0.5, 0.0) -- 4 rings, 0.5s apart
+        :SetLoop(true, IamDirection.Normal, -1)
+        :End()
+end
+
+Ui.LoadThemez = function()
     local themez, err = loadfile(mq.configDir .. '/MyThemez.lua')
     if err or not themez then
         Logger.log_warn("\ayNo Themez Lua found.")
@@ -811,9 +833,14 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.PctExp or 0, data_b.Data.PctExp or 0
             end,
             render = function(peer, data)
-                Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.PctExp or 0, { Colors.LightGreen, Colors.Orange, Colors.LightRed, }),
-                    data.Data.HPs and "%6.2f%%" or "", data.Data.PctExp or 0)
+                if Config:GetSetting('StatusUseBars') then
+                    Ui.RenderAnimatedPercentage("MercsStatusEnduranceBar" .. peer, math.ceil(data.Data.Endurance or 0), ImGui.GetTextLineHeight(), Colors.LightRed, Colors.Orange,
+                        Colors.LightGreen)
+                else
+                    Ui.RenderColoredText(
+                        Ui.GetPercentageColor(data.Data.PctExp or 0, { Colors.LightGreen, Colors.Orange, Colors.LightRed, }),
+                        data.Data.HPs and "%6.2f%%" or "", data.Data.PctExp or 0)
+                end
             end,
         },
         {
@@ -826,9 +853,13 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.HPs or 0, data_b.Data.HPs or 0
             end,
             render = function(peer, data)
-                Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.HPs or 0, { Colors.LightGreen, Colors.Yellow, Colors.Red, }),
-                    data.Data.HPs and "%d%%" or "", math.ceil(data.Data.HPs or 0) or "")
+                if Config:GetSetting('StatusUseBars') then
+                    Ui.RenderFancyHPBar("MercsStatusHPBar" .. peer, math.ceil(data.Data.HPs or 0), ImGui.GetTextLineHeight())
+                else
+                    Ui.RenderColoredText(
+                        Ui.GetPercentageColor(data.Data.HPs or 0, { Colors.LightGreen, Colors.Yellow, Colors.Red, }),
+                        data.Data.HPs and "%d%%" or "", math.ceil(data.Data.HPs or 0) or "")
+                end
             end,
 
         },
@@ -842,9 +873,13 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Mana or 0, data_b.Data.Mana or 0
             end,
             render = function(peer, data)
-                Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.Mana or 0, { Colors.Cyan, Colors.LightBlue, Colors.Red, }),
-                    data.Data.Mana and "%d%%" or "", math.ceil(data.Data.Mana or 0) or "")
+                if Config:GetSetting('StatusUseBars') then
+                    Ui.RenderFancyManaBar("MercsStatusManaBar" .. peer, math.ceil(data.Data.Mana or 0), ImGui.GetTextLineHeight())
+                else
+                    Ui.RenderColoredText(
+                        Ui.GetPercentageColor(data.Data.Mana or 0, { Colors.Cyan, Colors.LightBlue, Colors.Red, }),
+                        data.Data.Mana and "%d%%" or "", math.ceil(data.Data.Mana or 0) or "")
+                end
             end,
 
         },
@@ -858,9 +893,14 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Endurance or 0, data_b.Data.Endurance or 0
             end,
             render = function(peer, data)
-                Ui.RenderColoredText(
-                    Ui.GetPercentageColor(data.Data.Endurance or 0, { Colors.Yellow, Colors.Grey, Colors.Red, }),
-                    data.Data.Endurance and "%d%%" or "", math.ceil(data.Data.Endurance or 0) or "")
+                if Config:GetSetting('StatusUseBars') then
+                    Ui.RenderAnimatedPercentage("MercsStatusEnduranceBar" .. peer, math.ceil(data.Data.Endurance or 0), ImGui.GetTextLineHeight(), Colors.LightRed, Colors.Grey,
+                        Colors.Yellow)
+                else
+                    Ui.RenderColoredText(
+                        Ui.GetPercentageColor(data.Data.Endurance or 0, { Colors.Yellow, Colors.Grey, Colors.Red, }),
+                        data.Data.Endurance and "%d%%" or "", math.ceil(data.Data.Endurance or 0) or "")
+                end
             end,
 
         },
@@ -1860,6 +1900,156 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
     return showFailed, enabledRotationEntries, enabledRotationEntriesChanged
 end
 
+---@param id string Label and Id for the toggle button)
+---@param value boolean Current value of the toggle button
+---@param size? ImVec2|integer -- ImVec2 Size of the toggle button (width, height) or height value if single number and width will default to height * 2.0
+---@param on_color? ImVec4 Color for ON state, or number
+---@param off_color? ImVec4 ImVec4 Color for the Toggle when Off
+---@param knob_color? ImVec4 ImVec4 Color for the Knob
+---@param right_label? boolean if true the label will be on the right side of the toggle instead of the left
+---@param pulse_on_hover? boolean if true the knob will pulse when hovered
+---@param knob_border? boolean if true the knob will have a black border
+---@param center_vertically? boolean if true the toggle will be centered vertically in the frame
+---@return boolean value
+---@return boolean clicked
+function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_color, right_label, pulse_on_hover, knob_border, center_vertically)
+    local dt = Ui.GetDeltaTime()
+    local draw_list = ImGui.GetWindowDrawList()
+    local pos = ImGui.GetCursorScreenPosVec()
+    local row_pos = ImVec2(pos.x, pos.y)
+    if not id or value == nil then return false, false end
+    -- setup any defaults for mising params
+    size = type(size) == 'number' and ImVec2(size * 2, size) or size or ImVec2(32, 16)
+    local height = size.y or 16
+    local width = size.x or height * 2
+    local row_height = height
+    on_color = on_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBgActive)
+    off_color = off_color or ImGui.GetStyleColorVec4(ImGuiCol.FrameBg)
+    knob_color = knob_color or Globals.Constants.Colors.BrightWhite -- default white
+    label = label or ""
+    local label_length = ImGui.CalcTextSize(label) + ImGui.GetStyle().ItemSpacing.x
+
+    local clicked = false
+
+    if not right_label and label and label:len() > 0 then
+        local label_pos = ImVec2(pos.x, row_pos.y + (row_height - ImGui.GetTextLineHeight()) * 0.5)
+        draw_list:AddText(label_pos, IM_COL32(200, 200, 210, 255), label)
+
+        local text_len, _ = ImGui.CalcTextSize(label)
+        pos.x = pos.x + text_len + ImGui.GetStyle().ItemSpacing.x
+    end
+
+    -- center it in the frame
+    if center_vertically then
+        pos.y = pos.y + (ImGui.GetFrameHeight() * 0.5) - (height * 0.5)
+    end
+
+    -- Switch position (on the left)
+    local switch_pos = ImVec2(pos.x, row_pos.y + (((ImGui.GetStyle().ItemSpacing.y * 2))) * 0.5)
+
+    -- Click handler
+    ImGui.SetCursorScreenPos(switch_pos)
+
+    local btn_id = "##toggle_" .. id
+    if ImGui.InvisibleButton(btn_id, ImVec2(width, height)) then
+        clicked = true
+        value = not value
+    end
+
+    local hovered      = ImGui.IsItemHovered()
+
+    -- Animate thumb position
+    local target_thumb = value and 1.0 or 0.0
+    local thumb_pos    = ImAnim.TweenFloat(ImHashStr(id), ImHashStr("thumb" .. id), target_thumb, 0.25, ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
+
+    -- Animate background color
+    local bg_color     = ImAnim.TweenColor(ImHashStr(id), ImHashStr("bg" .. id), value and on_color or off_color, 0.2, ImAnim.EasePreset(IamEaseType.OutCubic), IamPolicy.Crossfade,
+        IamColorSpace.OKLAB, dt)
+
+    -- Draw track
+    local track_radius = height * 0.5
+    draw_list:AddRectFilled(switch_pos, ImVec2(switch_pos.x + width, switch_pos.y + height),
+        ImGui.ColorConvertFloat4ToU32(bg_color), track_radius)
+
+    -- Draw thumb
+    local thumb_radius = height * 0.5 - 3.0
+    local thumb_x = switch_pos.x + track_radius + thumb_pos * (width - height)
+    local thumb_y = switch_pos.y + height * 0.5
+
+    -- Thumb shadow
+    --draw_list:AddCircleFilled(ImVec2(thumb_x + 1, thumb_y + 2), thumb_radius, IM_COL32(0, 0, 0, 30))
+
+    local final_knob_col = ImGui.GetColorU32(knob_color)
+
+    local NUM_RINGS = 4
+
+    if pulse_on_hover and hovered then
+        Ui.InitDrawListClips()
+        if not Ui.TempSettings.TogglePulseState[id] then
+            Ui.TempSettings.TogglePulseState[id] = {
+                ring_inst_ids = {
+                    ImHashStr(id .. '_dl_ring_0'),
+                    ImHashStr(id .. '_dl_ring_1'),
+                    ImHashStr(id .. '_dl_ring_2'),
+                    ImHashStr(id .. '_dl_ring_3'),
+                },
+                started = false,
+            }
+            for i = 1, NUM_RINGS do
+                ImAnim.PlayStagger(CLIP_DL_RING, Ui.TempSettings.TogglePulseState[id].ring_inst_ids[i], i - 1)
+            end
+            Ui.TempSettings.TogglePulseState[id].started = true
+        end
+    end
+
+    local thumb_center = ImVec2(thumb_x, thumb_y)
+
+    if Config:GetSetting('DisableToggleButtonPulse') then
+        pulse_on_hover = false
+    end
+
+    -- Pulse
+    if pulse_on_hover and hovered and Ui.TempSettings.TogglePulseState[id] then
+        for i = 1, NUM_RINGS do
+            local radius, alpha = 10.0, 0.0
+            local inst = ImAnim.GetInstance(Ui.TempSettings.TogglePulseState[id].ring_inst_ids[i])
+            if inst:Valid() then
+                radius = inst:GetFloat(CLIP_DL_CH_RADIUS)
+                alpha = inst:GetFloat(CLIP_DL_CH_ALPHA)
+            end
+
+            if alpha > 0.01 then
+                local pulse_col = Globals.Constants.Colors.TogglePulseColor
+                local a = math.floor(alpha * 200)
+                draw_list:AddCircle(thumb_center, radius, IM_COL32(pulse_col.x * 255, pulse_col.y * 255, pulse_col.z * 255, a), 0, 2.0)
+            end
+        end
+    end
+
+    -- Thumb
+    draw_list:AddCircleFilled(thumb_center, thumb_radius, final_knob_col)
+
+    -- Draw outline
+    if knob_border then
+        draw_list:AddCircle(thumb_center, thumb_radius, ImGui.GetColorU32(0, 0, 0, 1), 32, .5)
+    end
+
+    -- Label (on the right of the toggle)
+    if right_label and label and label:len() > 0 then
+        local label_pos = ImVec2(pos.x + width + 16, row_pos.y + (row_height - ImGui.GetTextLineHeight()) * 0.5)
+        draw_list:AddText(label_pos, IM_COL32(200, 200, 210, 255), label)
+    end
+
+    ImGui.SetCursorScreenPos(ImVec2(pos.x + width + label_length, pos.y))
+    ImGui.Dummy(ImVec2(0, 0))
+
+    if label ~= "" then
+        ImGui.NewLine()
+    end
+
+    return value, clicked
+end
+
 --[[
     * RenderFancyToggle
     * A toggle button that can be used to switch between two states (on/off) (true/false).
@@ -1885,7 +2075,7 @@ end
 ---@param center_vertically? boolean if true the toggle will be centered vertically in the frame
 ---@return boolean value
 ---@return boolean clicked
-function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_color, right_label, pulse_on_hover, knob_border, center_vertically)
+function Ui.RenderFancyToggleOld(id, label, value, size, on_color, off_color, knob_color, right_label, pulse_on_hover, knob_border, center_vertically)
     if not id or value == nil then return false, false end
     -- setup any defaults for mising params
     size = type(size) == 'number' and ImVec2(size * 2, size) or size or ImVec2(32, 16)
@@ -2032,13 +2222,13 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
     local drawList = ImGui.GetWindowDrawList()
 
     local pct = targetPct
-    local animState = Ui.TempSettings.progBarAnimState[id]
+    local animState = Ui.TempSettings.ProgBarAnimState[id]
 
     if useImAnim and ImAnim then
         if not animState then
             -- First render: initialize with current target
             animState = { lastTarget = targetPct, }
-            Ui.TempSettings.progBarAnimState[id] = animState
+            Ui.TempSettings.ProgBarAnimState[id] = animState
         end
 
         -- Detect HP changes and update animation target
@@ -2063,7 +2253,7 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
         -- Fallback: direct value (no animation)
         if not animState then
             animState = { lastTarget = targetPct, }
-            Ui.TempSettings.progBarAnimState[id] = animState
+            Ui.TempSettings.ProgBarAnimState[id] = animState
         end
         animState.lastTarget = targetPct
         pct = targetPct
@@ -2071,10 +2261,10 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
 
     local fraction = pct / 100
 
-    local trend = Ui.TempSettings.progBarTrendState[id]
+    local trend = Ui.TempSettings.ProgBarTrendState[id]
     if not trend then
         trend = { lastPct = pct, direction = 1, }
-        Ui.TempSettings.progBarTrendState[id] = trend
+        Ui.TempSettings.ProgBarTrendState[id] = trend
     else
         -- Use a tiny dead-zone to avoid noisy direction flips from rounding jitter.
         if targetPct < (trend.lastPct - 0.05) then
@@ -2263,6 +2453,18 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     end
 
     return clicked
+end
+
+-- Draw a horizontal gradient HP bar using ImDrawList:AddRectFilledMultiColor.
+function Ui.RenderFancyManaBar(id, hpPct, height, burning)
+    local now = Globals.GetTimeSeconds()
+    local drawList = ImGui.GetWindowDrawList()
+
+    local manaLow = Globals.Constants.Colors.ManaLowColor
+    local manaMid = Globals.Constants.Colors.ManaMidColor
+    local manaHigh = Globals.Constants.Colors.ManaHighColor
+
+    return Ui.RenderAnimatedPercentage(id, hpPct, height, manaLow, manaMid, manaHigh)
 end
 
 function Ui.RenderFancyProgressBar(id, pctComplete, height, label)

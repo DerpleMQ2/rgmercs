@@ -940,7 +940,7 @@ function Module:RenderClickyControls(clickies, clickyIdx, headerCursorPos, heade
     local startingPosVec = ImGui.GetCursorPosVec()
     local offset_trash = 40
     local offset_enable = 160
-    local yOffset = ImGui.GetStyle().FramePadding.y
+    local yOffset = 0
 
     self:RenderClickyHeaderIcon(clickies[clickyIdx], headerScreenPos)
 

@@ -144,6 +144,7 @@ Globals.Constants.BasicColors         = {
     Grey        = ImVec4(0.7, 0.7, 0.7, 0.8),
     LightGrey   = ImVec4(0.9, 0.9, 0.9, 0.8),
     Cyan        = ImVec4(0.3, 0.8, 0.8, 0.8),
+    BrightWhite = ImVec4(1.0, 1.0, 1.0, 1.0),
     White       = ImVec4(0.8, 0.8, 0.8, 0.8),
     Black       = ImVec4(0.0, 0.0, 0.0, 1.0),
     NearBlack   = ImVec4(0.2, 0.2, 0.2, 0.8),
@@ -171,6 +172,10 @@ Globals.Constants.DefaultColors       = {
     HPHighColor             = ImVec4(0.20, 0.88, 0.30, 0.96),
     HPMidColor              = ImVec4(0.96, 0.72, 0.14, 0.96),
     HPLowColor              = ImVec4(0.95, 0.12, 0.12, 0.96),
+    ManaHighColor           = ImVec4(0.15, 0.55, 0.95, 0.96),
+    ManaMidColor            = ImVec4(0.55, 0.25, 0.90, 0.96),
+    ManaLowColor            = ImVec4(0.95, 0.12, 0.12, 0.96),
+    TogglePulseColor        = ImVec4(1.0, 0.85, 0.2, 1.0),
 }
 
 Globals.Constants.HeadingsShort       = {
