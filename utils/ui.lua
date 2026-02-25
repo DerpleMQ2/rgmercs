@@ -1972,7 +1972,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
         ImGui.ColorConvertFloat4ToU32(bg_color), track_radius)
 
     -- Draw thumb
-    local thumb_radius = height * 0.5 - 3.0
+    local thumb_radius = height * 0.5 - 2.0
     local thumb_x = switch_pos.x + track_radius + thumb_pos * (width - height)
     local thumb_y = switch_pos.y + height * 0.5
 
