@@ -550,6 +550,28 @@ function Ui.HandleStatusClickAction(peer, action)
     end
 end
 
+function Ui.GetGroupstatusText(peerName)
+    if peerName == Globals.CurLoadedChar then
+        return "F1"
+    end
+
+    if mq.TLO.Group.Members() > 0 then
+        local groupMember = mq.TLO.Group.Member(peerName)
+        if groupMember() then
+            return "F" .. ((groupMember.Index() or 0) + 1)
+        end
+    end
+
+    if mq.TLO.Raid.Members() > 0 then
+        local raidMember = mq.TLO.Raid.Member(peerName)
+        if raidMember() then
+            return "G" .. (raidMember.Group() or 0)
+        end
+    end
+
+    return "X"
+end
+
 function Ui.RenderMercsStatus(showPopout)
     if showPopout then
         if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
@@ -1080,6 +1102,20 @@ function Ui.RenderMercsStatus(showPopout)
                 ImGui.PopStyleColor()
             end,
 
+        },
+        {
+            name = 'Group Status',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 15.0,
+            sort = function(_, a, b)
+                local name_a, _ = Comms.GetCharAndServerFromPeer(a)
+                local name_b, _ = Comms.GetCharAndServerFromPeer(b)
+                return Ui.GetGroupstatusText(name_a), Ui.GetGroupstatusText(name_b)
+            end,
+            render = function(peer, _)
+                local name, _ = Comms.GetCharAndServerFromPeer(peer)
+                ImGui.TextColored(Colors.LightBlue, Ui.GetGroupstatusText(name))
+            end,
         },
     }
 
