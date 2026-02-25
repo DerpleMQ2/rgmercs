@@ -1788,6 +1788,17 @@ Config.DefaultConfig                                     = {
         Tooltip = "Enable animated tooltips (fade in/out). Disabling this will make tooltips appear/disappear instantly.",
         Default = true,
     },
+    ['FontScale']                        = {
+        DisplayName = "Font Scale %",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 22,
+        Tooltip = "Scale for all fonts used in the UI.",
+        Default = 0,
+        Min = 0,
+        Max = 100,
+    },
 
     -- [ UI Colors ] --
     ['MainButtonUnpausedColor']          = {

@@ -89,6 +89,7 @@ local function RGMercsGUI()
     ImGui.SetNextWindowSize(ImVec2(500, 600), ImGuiCond.FirstUseEver)
 
     if openGUI and Alive() and Config:SettingsLoaded() then
+        ImGui.PushFont(ImGui.GetFont(), ImGui.GetFontSize() * (1 + (Config:GetSetting('FontScale') / 100)))
         if initPctComplete < 100 then
             LoaderUI:RenderLoader(initPctComplete, initMsg)
         else
@@ -207,6 +208,7 @@ local function RGMercsGUI()
                 ImGui.PopStyleVar(themeStylePop)
             end
         end
+        ImGui.PopFont()
     end
 end
 

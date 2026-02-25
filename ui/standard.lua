@@ -192,10 +192,12 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
             Ui.RenderLogo(imgDisplayed:GetTextureID())
             ImGui.SameLine()
             local titlePos = ImGui.GetCursorPosVec()
+            ImGui.PushFont(ImGui.GetFont(), ImGui.GetFontSize() * 1.05)
             Ui.RenderText("RGMercs %s [Build: %s]",
                 Config._version,
                 CommitVersion.version or "None"
             )
+            ImGui.PopFont()
             titlePos = ImVec2(titlePos.x, titlePos.y + ImGui.GetTextLineHeightWithSpacing())
             ImGui.SetCursorPos(titlePos)
 
@@ -242,10 +244,13 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
 
             local availableWidth = ImGui.GetContentRegionAvailVec().x
 
+
+            ImGui.PushFont(ImGui.GetFont(), ImGui.GetFontSize() * 1.25)
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (availableWidth * .05) / 2)
             if Ui.AnimatedButton("##mercsmainbutton", pauseLabel, ImVec2(availableWidth * .95, 40)) then
                 Globals.PauseMain = not Globals.PauseMain
             end
+            ImGui.PopFont()
 
             ImGui.PopStyleColor(2)
 
