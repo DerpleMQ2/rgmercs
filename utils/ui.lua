@@ -654,7 +654,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
         },
         {
-            name = string.format('Sever'),
+            name = string.format('Server'),
             flags = bit32.bor(ImGuiTableColumnFlags.WidthStretch, ImGuiTableColumnFlags.DefaultHide),
             width = 150.0,
             sort = function(_, a, b)
