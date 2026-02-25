@@ -3367,6 +3367,66 @@ function Ui.GetAssistWarningString()
     Config.TempSettings.AssistWarning = warningString
 end
 
+function Ui.AnimatedButton(id, text, size, callbackFn)
+    local dt = Ui.GetDeltaTime()
+    local draw_list = ImGui.GetWindowDrawList()
+
+    -- Button states
+    local hovered = false
+    local pressed = false
+
+    local cursor = ImGui.GetCursorScreenPosVec()
+
+    -- Primary Button (Scale + Color)
+    local btn_pos = cursor
+
+    ImGui.SetCursorScreenPos(btn_pos)
+    ImGui.InvisibleButton('##btn_primary', size)
+    hovered = ImGui.IsItemHovered()
+    pressed = ImGui.IsItemClicked()
+    local rounding = ImGui.GetStyle().FrameRounding
+
+    if pressed and callbackFn then
+        callbackFn()
+    end
+
+    -- Determine target scale
+    local target_scale = 1.0
+    if pressed then
+        target_scale = 0.95
+    elseif hovered then
+        target_scale = 1.05
+    end
+
+    -- Animate scale
+    local scale = ImAnim.TweenFloat(id, ImHashStr(id .. "scale"), target_scale, 0.15, ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
+
+    -- Animate color
+    ImGui.GetStyleColorVec4(ImGuiCol.Button)
+    local base_color = ImGui.GetStyleColorVec4(ImGuiCol.Button)
+    local hover_color = ImGui.GetStyleColorVec4(ImGuiCol.ButtonHovered)
+    local press_color = ImGui.GetStyleColorVec4(ImGuiCol.ButtonActive)
+    local target_color = pressed and press_color or (hovered and hover_color or base_color)
+    local color = ImAnim.TweenColor(id, ImHashStr(id .. "color_id"), target_color, 0.2, ImAnim.EasePreset(IamEaseType.OutCubic), IamPolicy.Crossfade, IamColorSpace.OKLAB, dt)
+
+    -- Draw scaled button
+    local center = ImVec2(btn_pos.x + size.x * 0.5, btn_pos.y + size.y * 0.5)
+    local half_size = ImVec2(size.x * 0.5 * scale, size.y * 0.5 * scale)
+    draw_list:AddRectFilled(
+        ImVec2(center.x - half_size.x, center.y - half_size.y),
+        ImVec2(center.x + half_size.x, center.y + half_size.y),
+        ImGui.ColorConvertFloat4ToU32(color), rounding)
+
+    -- Text
+    local text_x, text_y = ImGui.CalcTextSize(text)
+    draw_list:AddText(ImVec2(center.x - text_x * 0.5, center.y - text_y * 0.5),
+        IM_COL32(255, 255, 255, 255), text)
+
+    ImGui.SetCursorScreenPos(ImGui.GetCursorScreenPosVec().x, cursor.y + 60)
+
+    return pressed
+end
+
 function Ui.InvisibleWithButtonText(id, text, size, callbackFn)
     local buttonPos = ImGui.GetCursorPosVec()
     if ImGui.InvisibleButton(id, size or ImVec2(0, 0)) then

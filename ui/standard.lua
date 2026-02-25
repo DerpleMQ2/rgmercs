@@ -225,8 +225,14 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
 
             if not Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.MainButtonUnpausedColor)
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
+                    IM_COL32(Globals.Constants.Colors.MainButtonUnpausedColor.x * 255, Globals.Constants.Colors.MainButtonUnpausedColor.y * 255,
+                        Globals.Constants.Colors.MainButtonUnpausedColor.z * 255, 255))
             else
                 ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.MainButtonPausedColor)
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
+                    IM_COL32(Globals.Constants.Colors.MainButtonPausedColor.x * 255, Globals.Constants.Colors.MainButtonPausedColor.y * 255,
+                        Globals.Constants.Colors.MainButtonPausedColor.z * 255, 128))
             end
 
             local pauseLabel = Globals.PauseMain and "PAUSED" or "Running"
@@ -234,10 +240,14 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
                 pauseLabel = pauseLabel .. " [Backoff]"
             end
 
-            if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX()), 40) then
+            local availableWidth = ImGui.GetContentRegionAvailVec().x
+
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (availableWidth * .05) / 2)
+            if Ui.AnimatedButton("##mercsmainbutton", pauseLabel, ImVec2(availableWidth * .95, 40)) then
                 Globals.PauseMain = not Globals.PauseMain
             end
-            ImGui.PopStyleColor()
+
+            ImGui.PopStyleColor(2)
 
             self:RenderTarget()
 
