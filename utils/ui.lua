@@ -54,14 +54,14 @@ local s_drawlist_clips_initialized = false
 function Ui.InitDrawListClips()
     if s_drawlist_clips_initialized then return end
     s_drawlist_clips_initialized = true
-
+    local pulse_time = 2.0
     -- Pulsing ring - expand and fade
     IamClip.Begin(CLIP_DL_RING)
-        :KeyFloat(CLIP_DL_CH_RADIUS, 0.0, 10.0, IamEaseType.OutCubic)
-        :KeyFloat(CLIP_DL_CH_RADIUS, 2.0, 15.0, IamEaseType.OutCubic)
+        :KeyFloat(CLIP_DL_CH_RADIUS, 0.0, 8.0, IamEaseType.OutCubic)
+        :KeyFloat(CLIP_DL_CH_RADIUS, pulse_time, 15.0, IamEaseType.OutCubic)
         :KeyFloat(CLIP_DL_CH_ALPHA, 0.0, 1.0, IamEaseType.Linear)
-        :KeyFloat(CLIP_DL_CH_ALPHA, 2.0, 0.0, IamEaseType.Linear)
-        :SetStagger(4, 0.5, 0.0) -- 4 rings, 0.5s apart
+        :KeyFloat(CLIP_DL_CH_ALPHA, pulse_time, 0.0, IamEaseType.Linear)
+        :SetStagger(4, pulse_time / 4, 0.0) -- 4 rings, 0.15s apart
         :SetLoop(true, IamDirection.Normal, -1)
         :End()
 end
@@ -2023,7 +2023,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
             if alpha > 0.01 then
                 local pulse_col = Globals.Constants.Colors.TogglePulseColor
                 local a = math.floor(alpha * 200)
-                draw_list:AddCircle(thumb_center, radius, IM_COL32(pulse_col.x * 255, pulse_col.y * 255, pulse_col.z * 255, a), 0, 2.0)
+                draw_list:AddCircle(thumb_center, radius, IM_COL32(pulse_col.x * 255, pulse_col.y * 255, pulse_col.z * 255, a), 0, 1.0)
             end
         end
     end
