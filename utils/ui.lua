@@ -26,12 +26,16 @@ Ui.ConfigFilter                    = ""
 Ui.ShowDownNamed                   = false
 
 Ui.TempSettings                    = {
-    SortedXT          = {},
-    SortedXTIDToSlot  = {},
-    SortedXTIDs       = Set.new({}),
-    ProgBarTrendState = {},
-    ProgBarAnimState  = {},
-    TogglePulseState  = {},
+    SortedXT              = {},
+    SortedXTIDToSlot      = {},
+    SortedXTIDs           = Set.new({}),
+    ProgBarTrendState     = {},
+    ProgBarAnimState      = {},
+    TogglePulseState      = {},
+    TooltipAnimationState = {
+        was_hovered = -1,
+        tooltip_time = 0.0,
+    },
 }
 
 Ui.ModalText                       = ""
@@ -3234,15 +3238,106 @@ end
 --- @param desc string: The description to be displayed in the tooltip.
 function Ui.Tooltip(desc)
     if ImGui.IsItemHovered() then
+        if type(desc) == "function" then
+            desc = desc()
+        end
+
+        if Config:GetSetting('EnableAnimatedTooltips') then
+            return Ui.AnimatedTooltip(desc)
+        end
+
         ImGui.BeginTooltip()
         ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0)
-        if type(desc) == "function" then
-            ImGui.Text(desc())
-        else
-            ImGui.Text(desc)
-        end
+        ImGui.Text(desc)
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
+    end
+end
+
+function Ui.AnimatedTooltip(desc)
+    local state = Ui.TempSettings.TooltipAnimationState
+    local item_size = ImGui.GetItemRectSizeVec()
+    local item_hovered = ImGui.IsItemHovered()
+
+    local dt = Ui.GetDeltaTime()
+
+    local draw_list = ImGui.GetForegroundDrawList()
+    local id = ImHashStr(desc)
+    local pos = ImGui.GetCursorScreenPosVec()
+    local item_center = ImVec2(pos.x + item_size.x * 0.5, pos.y - item_size.y * 0.5)
+    local content_avail = ImGui.GetContentRegionAvailVec()
+    local canvas_size = ImVec2(content_avail.x, 0)
+
+    -- Draw tooltip
+    if item_hovered then
+        if state.was_hovered == id then
+            state.tooltip_time = (state.tooltip_time or 0) + dt
+        else
+            state.tooltip_time = 0.0
+            state.was_hovered = id
+        end
+
+        local hover_radius = 18.0
+
+        -- Animate with delay - smooth fade without bouncing/flickering (accessibility)
+        local delay = 0.15
+
+        local anim_t = math.max(0.0, math.min((state.tooltip_time - delay) / 0.2, 1.0))
+        local ease_t = ImAnim.EvalPreset(IamEaseType.OutCubic, anim_t) -- Smooth ease without overshoot
+
+        if state.tooltip_time > delay then
+            local anchor = ImVec2(item_center.x, item_center.y - hover_radius)
+
+            local text_size = ImGui.CalcTextSizeVec(desc)
+            local padding = ImVec2(12, 8)
+            local tip_size = ImVec2(text_size.x + padding.x * 2, text_size.y + padding.y * 2)
+
+            -- Position above with animation
+            local y_offset = -tip_size.y - 10 + (1.0 - ease_t) * 10.0
+            local tip_pos = ImVec2(anchor.x - tip_size.x * 0.5, anchor.y + y_offset)
+
+            -- Clamp to canvas
+            if tip_pos.x < pos.x then
+                tip_pos = ImVec2(pos.x, tip_pos.y)
+            end
+            if tip_pos.x + tip_size.x > pos.x + canvas_size.x then
+                tip_pos = ImVec2(pos.x + canvas_size.x - tip_size.x, tip_pos.y)
+            end
+
+            local alpha = math.floor(255 * ease_t)
+            local bgColor = IM_COL32(50, 54, 65, alpha)
+            local borderColor = IM_COL32(250, 250, 250, alpha)
+
+            -- Shadow
+            draw_list:AddRectFilled(ImVec2(tip_pos.x + 2, tip_pos.y + 3),
+                ImVec2(tip_pos.x + tip_size.x + 2, tip_pos.y + tip_size.y + 3),
+                IM_COL32(0, 0, 0, math.floor(alpha / 4)), 6.0)
+
+            -- Background
+            draw_list:AddRectFilled(tip_pos, ImVec2(tip_pos.x + tip_size.x, tip_pos.y + tip_size.y),
+                bgColor, 6.0)
+
+            draw_list:AddRect(tip_pos, ImVec2(tip_pos.x + tip_size.x, tip_pos.y + tip_size.y),
+                borderColor, 6.0)
+
+            -- Arrow
+            local arrow_tip = ImVec2(anchor.x, tip_pos.y + tip_size.y + 6)
+            local arrow_left = ImVec2(anchor.x - 6, tip_pos.y + tip_size.y)
+            local arrow_right = ImVec2(anchor.x + 6, tip_pos.y + tip_size.y)
+            draw_list:AddTriangleFilled(arrow_left, arrow_right, arrow_tip, bgColor)
+            draw_list:AddTriangle(arrow_left, arrow_right, arrow_tip, borderColor, 1)
+            -- erase triangle top border
+            draw_list:AddTriangleFilled(ImVec2(arrow_left.x - 1, arrow_left.y - 1), ImVec2(arrow_right.x + 1, arrow_right.y - 1), ImVec2(arrow_tip.x, arrow_tip.y - 1), bgColor)
+
+            -- Text
+            draw_list:AddText(ImVec2(tip_pos.x + padding.x, tip_pos.y + padding.y),
+                IM_COL32(220, 220, 230, alpha), desc)
+        end
+    else
+        if state.was_hovered == id then
+            state.was_hovered = -1
+            state.tooltip_time = 0.0
+        end
     end
 end
 

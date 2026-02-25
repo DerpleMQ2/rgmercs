@@ -1779,6 +1779,15 @@ Config.DefaultConfig                                     = {
         Tooltip = "Disable the pulsing effect toggle buttons.",
         Default = false,
     },
+    ['EnableAnimatedTooltips']           = {
+        DisplayName = "Enable Animated Tooltips",
+        Group = "General",
+        Header = "Interface",
+        Category = "Interface",
+        Index = 21,
+        Tooltip = "Enable animated tooltips (fade in/out). Disabling this will make tooltips appear/disappear instantly.",
+        Default = true,
+    },
 
     -- [ UI Colors ] --
     ['MainButtonUnpausedColor']          = {
