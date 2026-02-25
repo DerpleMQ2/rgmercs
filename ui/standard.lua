@@ -244,7 +244,6 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
 
             local availableWidth = ImGui.GetContentRegionAvailVec().x
 
-
             ImGui.PushFont(ImGui.GetFont(), ImGui.GetFontSize() * 1.25)
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (availableWidth * .05) / 2)
             if Ui.AnimatedButton("##mercsmainbutton", pauseLabel, ImVec2(availableWidth * .95, 40)) then

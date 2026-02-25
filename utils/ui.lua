@@ -36,6 +36,7 @@ Ui.TempSettings                    = {
         was_hovered = -1,
         tooltip_time = 0.0,
     },
+    MarqueeScrollX        = {},
 }
 
 Ui.ModalText                       = ""
@@ -2539,6 +2540,59 @@ function Ui.SearchableCombo(id, curIdx, options, hideText)
     return curIdx, pressed
 end
 
+function Ui.MarqueeButton(text, height, width)
+    -- Delta time and font scale
+    local dt = Ui.GetDeltaTime() -- replace with your delta time function
+    local scale = ImGui.GetIO().FontGlobalScale
+
+    local draw_list = ImGui.GetWindowDrawList()
+    local id = ImHashStr("##marquee_btn_" .. text)
+
+    -- Persistent scroll value
+    Ui.TempSettings.MarqueeScrollX[id] = Ui.TempSettings.MarqueeScrollX[id] or 0
+    local scroll_x = Ui.TempSettings.MarqueeScrollX[id]
+
+    scroll_x = scroll_x - dt * 25.0 * scale -- adjust speed by scale
+    Ui.TempSettings.MarqueeScrollX[id] = scroll_x
+
+    local text_size = ImGui.CalcTextSizeVec(text)
+
+    -- Reset scroll when text goes off screen
+    if scroll_x < -text_size.x then
+        scroll_x = width
+        Ui.TempSettings.MarqueeScrollX[id] = scroll_x
+    end
+
+    -- Get top-left position
+    local pos = ImGui.GetCursorScreenPosVec()
+
+    pos.y = pos.y + (ImGui.GetFrameHeight() * 0.5) - (height * 0.5)
+
+    ImGui.InvisibleButton("##marquee_btn", ImVec2(width, height))
+    local afterPos = ImGui.GetCursorScreenPosVec()
+    -- Draw container background
+    draw_list:AddRectFilled(
+        pos,
+        ImVec2(pos.x + width, pos.y + height),
+        IM_COL32(40, 45, 55, 255),
+        4 * scale
+    )
+
+    -- Clip text to container
+    ImGui.PushClipRect(pos, ImVec2(pos.x + width, pos.y + height), true)
+    draw_list:AddText(
+        ImVec2(pos.x + scroll_x, pos.y + (height - ImGui.GetFontSize() * scale) * 0.5),
+        IM_COL32(255, 255, 255, 255),
+        text
+    )
+    ImGui.PopClipRect()
+
+    -- Move cursor below container
+    ImGui.SetCursorScreenPos(afterPos)
+
+    return ImGui.IsItemClicked()
+end
+
 function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
     local args = { ..., }
     local new_loadout, any_pressed, pressed = false, false, false
@@ -2557,14 +2611,12 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
     elseif type == "ClickyItem" or type == "ClickyItemWithConditions" then
         -- make a drag and drop target
         ImGui.PushFont(ImGui.ConsoleFont)
-        local displayCharCount = 11
         local itemName = type == "ClickyItemWithConditions" and setting.itemName or setting
         local nameLen = itemName:len()
-        local maxStart = (nameLen - displayCharCount) + 1
-        local startDisp = maxStart > 0 and (Globals.GetTimeSeconds() % maxStart) + 1 or 0
 
         ImGui.PushID(id .. "__btn")
-        if ImGui.SmallButton(nameLen > 0 and itemName:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
+        local width = ImGui.GetContentRegionAvailVec().x - 30
+        if Ui.MarqueeButton(nameLen > 0 and itemName or "[Drop Here]", 15, width) then
             if mq.TLO.Cursor() then
                 if type == "ClickyItemWithConditions" then
                     setting.itemName = mq.TLO.Cursor.Name()
