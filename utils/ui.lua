@@ -1510,8 +1510,8 @@ function Ui.RenderForceTargetList(showPopout)
                         draw_list:AddRectFilled(
                             min,
                             max,
-                            IM_COL32((r or 1) * 255, (g or 1) * 255, (b or 1) * 255,
-                                (a or 1) * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or (255 * Config:GetSetting('FTHPOverlayAlpha') / 100)))
+                            IM_COL32((math.floor(r) or 1) * 255, (math.floor(g) or 1) * 255, (math.floor(b) or 1) * 255,
+                                (math.floor(a) or 1) * ((Targeting.GetAutoTarget().ID() or 0) == xtarg.ID() and 255 or math.floor(255 * Config:GetSetting('FTHPOverlayAlpha') / 100)))
 
                         )
                         draw_list:PopClipRect()
@@ -2028,7 +2028,7 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
             if alpha > 0.01 then
                 local pulse_col = Globals.Constants.Colors.TogglePulseColor
                 local a = math.floor(alpha * 200)
-                draw_list:AddCircle(thumb_center, radius, IM_COL32(pulse_col.x * 255, pulse_col.y * 255, pulse_col.z * 255, a), 0, 1.0)
+                draw_list:AddCircle(thumb_center, radius, Ui.ImVec4ToColor(pulse_col))
             end
         end
     end
@@ -2323,11 +2323,13 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
         local fillRounding = math.min(barRounding, barH * 0.5, fillWidth * 0.5)
 
         -- Rounded base keeps the visible HP shape aligned with the rounded container.
-        local baseFillColor = IM_COL32(
-            (colLow.x + edge.x) * 128,
-            (colLow.y + edge.y) * 128,
-            (colLow.z + edge.z) * 128,
-            244)
+        local baseFillColor = Ui.ImVec4ToColor(colLow)
+        IM_COL32(
+            math.floor((colLow.x + edge.x) * 128),
+            math.floor((colLow.y + edge.y) * 128),
+            math.floor((colLow.z + edge.z) * 128),
+            244
+        )
 
         drawList:AddRectFilled(
             ImVec2(minX, minY),
@@ -2383,17 +2385,17 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
                     ImVec2(sheenLeft, minY),
                     ImVec2(sheenMid, maxY),
                     IM_COL32(255, 255, 255, 0),
-                    IM_COL32(255, 255, 255, sheenAlpha * 255),
-                    IM_COL32(255, 255, 255, (sheenAlpha * 0.55) * 255),
+                    IM_COL32(255, 255, 255, math.floor(sheenAlpha * 255)),
+                    IM_COL32(255, 255, 255, math.floor((sheenAlpha * 0.55) * 255)),
                     IM_COL32(255, 255, 255, 0)
                 )
                 drawList:AddRectFilledMultiColor(
                     ImVec2(sheenMid, minY),
                     ImVec2(sheenRight, maxY),
-                    IM_COL32(255, 255, 255, sheenAlpha * 255),
+                    IM_COL32(255, 255, 255, math.floor(sheenAlpha * 255)),
                     IM_COL32(255, 255, 255, 0),
                     IM_COL32(255, 255, 255, 0),
-                    IM_COL32(255, 255, 255, (sheenAlpha * 0.55) * 255)
+                    IM_COL32(255, 255, 255, math.floor((sheenAlpha * 0.55) * 255))
                 )
             end
         end
@@ -2407,7 +2409,7 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
         drawList:AddLine(
             ImVec2(tx, minY + 1),
             ImVec2(tx, maxY - 1),
-            IM_COL32(255, 255, 255, a * 255),
+            IM_COL32(255, 255, 255, math.floor(a * 255)),
             1.0
         )
     end
@@ -3295,7 +3297,7 @@ function Ui.Tooltip(desc)
         end
 
         if Config:GetSetting('EnableAnimatedTooltips') then
-            return Ui.AnimatedTooltip(desc)
+            return Ui.AnimatedTooltip(ImHashStr(desc), desc)
         end
 
         ImGui.BeginTooltip()
@@ -3306,7 +3308,7 @@ function Ui.Tooltip(desc)
     end
 end
 
-function Ui.AnimatedTooltip(desc)
+function Ui.AnimatedTooltip(id, desc)
     local state = Ui.TempSettings.TooltipAnimationState
     local item_size = ImGui.GetItemRectSizeVec()
     local item_hovered = ImGui.IsItemHovered()
@@ -3314,14 +3316,17 @@ function Ui.AnimatedTooltip(desc)
     local dt = Ui.GetDeltaTime()
 
     local draw_list = ImGui.GetForegroundDrawList()
-    local id = ImHashStr(desc)
 
     local min = ImGui.GetItemRectMinVec()
     local max = ImGui.GetItemRectMaxVec()
 
-    local pos = ImVec2((min.x + max.x) * 0.5, (min.y + max.y) * 0.5)
+    if Config:GetSetting('DrawTooltipDebugBox') then
+        draw_list:AddRect(min, max, IM_COL32(40, 255, 40, 255), 0, ImDrawFlags.RoundCornersAll, 2.0)
+    end
 
-    local item_center = ImVec2(pos.x + item_size.x * 0.5, pos.y - item_size.y * 0.5)
+    local pos = min
+
+    local item_center = ImVec2(pos.x + item_size.x * 0.5, pos.y + item_size.y * 0.1)
     local content_avail = ImGui.GetContentRegionAvailVec()
     local canvas_size = ImVec2(content_avail.x, 0)
 
@@ -3335,23 +3340,34 @@ function Ui.AnimatedTooltip(desc)
         end
 
         local hover_radius = 9.0
+        local rounding     = ImGui.GetStyle().FrameRounding
 
         -- Animate with delay - smooth fade without bouncing/flickering (accessibility)
-        local delay = 0.15
+        local delay        = 0.15
 
-        local anim_t = math.max(0.0, math.min((state.tooltip_time - delay) / 0.2, 1.0))
-        local ease_t = ImAnim.EvalPreset(IamEaseType.OutCubic, anim_t) -- Smooth ease without overshoot
+        local anim_t       = math.max(0.0, math.min((state.tooltip_time - delay) / 0.2, 1.0))
+        local ease_t       = ImAnim.EvalPreset(IamEaseType.OutCubic, anim_t) -- Smooth ease without overshoot
 
         if state.tooltip_time > delay then
             local anchor = ImVec2(item_center.x, item_center.y - hover_radius)
+            local text_size = ImVec2(0, 0)
 
-            local text_size = ImGui.CalcTextSizeVec(desc)
+            if type(desc) == "table" then
+                local fullText = ""
+                for _, line in ipairs(desc) do
+                    fullText = fullText .. (line.sameLine and "" or "\n") .. line.text
+                end
+                text_size = ImGui.CalcTextSizeVec(fullText) + ImGui.GetStyle().ItemSpacing
+            else
+                text_size = ImGui.CalcTextSizeVec(desc)
+            end
+
             local padding = ImVec2(12, 8)
             local tip_size = ImVec2(text_size.x + padding.x * 2, text_size.y + padding.y * 2)
 
             -- Position above with animation
             local y_offset = -tip_size.y - 10 + (1.0 - ease_t) * 10.0
-            local tip_pos = ImVec2(anchor.x - tip_size.x * 0.5, anchor.y + y_offset)
+            local tip_pos = ImVec2(anchor.x - tip_size.x * 0.5, math.floor(anchor.y + y_offset))
 
             -- Clamp to object
             if tip_pos.x < pos.x then
@@ -3362,7 +3378,7 @@ function Ui.AnimatedTooltip(desc)
             end
 
             -- Get display bounds
-            local display_size = ImGui.GetIO().DisplaySize
+            local display_size = ImGui.GetWindowViewport().Size
             local margin = 4.0
 
             -- Clamp X to screen
@@ -3391,7 +3407,7 @@ function Ui.AnimatedTooltip(desc)
             -- Shadow
             draw_list:AddRectFilled(ImVec2(tip_pos.x + 2, tip_pos.y + 3),
                 ImVec2(tip_pos.x + tip_size.x + 2, tip_pos.y + tip_size.y + 3),
-                IM_COL32(0, 0, 0, math.floor(alpha / 4)), 6.0)
+                IM_COL32(0, 0, 0, math.floor(alpha / 4)), rounding)
 
             -- Background
             draw_list:AddRectFilled(tip_pos, ImVec2(tip_pos.x + tip_size.x, tip_pos.y + tip_size.y),
@@ -3401,17 +3417,39 @@ function Ui.AnimatedTooltip(desc)
                 borderColor, 6.0)
 
             -- Arrow
-            local arrow_tip = ImVec2(anchor.x, tip_pos.y + tip_size.y + 6)
-            local arrow_left = ImVec2(anchor.x - 6, tip_pos.y + tip_size.y)
-            local arrow_right = ImVec2(anchor.x + 6, tip_pos.y + tip_size.y)
+            local arrow_half       = 6
+
+            -- Clamp arrow anchor X so it never gets close to rounded corners
+            local clamped_anchor_x = math.max(tip_pos.x + rounding + arrow_half + 4,
+                math.min(anchor.x, tip_pos.x + tip_size.x - rounding - arrow_half - 4))
+
+            local flipped          = tip_pos.y > anchor.y
+            local arrow_tip        = flipped and ImVec2(clamped_anchor_x, tip_pos.y - arrow_half) or ImVec2(clamped_anchor_x, tip_pos.y + tip_size.y + arrow_half)
+            local arrow_left       = flipped and ImVec2(clamped_anchor_x - arrow_half, tip_pos.y) or ImVec2(clamped_anchor_x - arrow_half, tip_pos.y + tip_size.y)
+            local arrow_right      = flipped and ImVec2(clamped_anchor_x + arrow_half, tip_pos.y) or ImVec2(clamped_anchor_x + arrow_half, tip_pos.y + tip_size.y)
+
             draw_list:AddTriangleFilled(arrow_left, arrow_right, arrow_tip, bgColor)
             draw_list:AddTriangle(arrow_left, arrow_right, arrow_tip, borderColor, 1)
-            -- erase triangle top border
+            -- erase border line where arrow overlaps
             draw_list:AddTriangleFilled(ImVec2(arrow_left.x - 1, arrow_left.y - 1), ImVec2(arrow_right.x + 1, arrow_right.y - 1), ImVec2(arrow_tip.x, arrow_tip.y - 1), bgColor)
+            printf("Arrow Points: %g, %g | %g, %g | %g, %g", arrow_left.x, arrow_left.y, arrow_right.x, arrow_right.y, arrow_tip.x, arrow_tip.y)
 
             -- Text
-            draw_list:AddText(ImVec2(tip_pos.x + padding.x, tip_pos.y + padding.y),
-                IM_COL32(220, 220, 230, alpha), desc)
+            if type(desc) == "table" then
+                local lineHeight = 0
+                local nextXOffset = 0
+                for i, line in ipairs(desc) do
+                    draw_list:AddText(ImVec2(tip_pos.x + padding.x + (line.sameLine and nextXOffset or 0), tip_pos.y + lineHeight + padding.y),
+                        line.color and Ui.ImVec4ToColor(line.color) or IM_COL32(220, 220, 230, alpha), tostring(line.text))
+                    if i + 1 <= #desc and desc[i + 1].sameLine ~= true then
+                        lineHeight = lineHeight + ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.y / 2
+                    end
+                    nextXOffset = ImGui.CalcTextSizeVec(tostring(line.text)).x + ImGui.GetStyle().ItemSpacing.x
+                end
+            else
+                draw_list:AddText(ImVec2(tip_pos.x + padding.x, tip_pos.y + padding.y),
+                    IM_COL32(220, 220, 230, alpha), desc)
+            end
         end
     else
         if state.was_hovered == id then
@@ -3425,6 +3463,10 @@ end
 --- @param lines table: { text = "", color = ImVec4, sameLine = bool }
 function Ui.MultilineTooltipWithColors(lines)
     if ImGui.IsItemHovered() then
+        if Config:GetSetting('EnableAnimatedTooltips') then
+            return Ui.AnimatedTooltip(ImHashStr(lines[1].text), lines)
+        end
+
         ImGui.BeginTooltip()
         ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0)
         for _, line in ipairs(lines) do
@@ -3486,8 +3528,7 @@ function Ui.MultiColorSmallButton(lines, addSpaces)
         if not line.color then line.color = defaultColor end
         local offset = ImGui.CalcTextSizeVec(fullText)
 
-        draw_list:AddText(ImVec2(style.FramePadding.x + min_x + offset.x, min_y), IM_COL32(line.color.x * 255, line.color.y * 255, line.color.z * 255, line.color.w * 255), line
-            .text)
+        draw_list:AddText(ImVec2(style.FramePadding.x + min_x + offset.x, min_y), Ui.ImVec4ToColor(line.color), line.text)
         fullText = fullText .. line.text .. (addSpaces and " " or "")
     end
 
@@ -3646,6 +3687,10 @@ function Ui.GetWindowTitle(title, idOverride)
     end
 
     return string.format("%s%s", title, idOverride and ('###' .. idOverride) or "")
+end
+
+function Ui.ImVec4ToColor(vec)
+    return IM_COL32(math.floor(vec.x * 255), math.floor(vec.y * 255), math.floor(vec.z * 255), math.floor(vec.w * 255))
 end
 
 return Ui

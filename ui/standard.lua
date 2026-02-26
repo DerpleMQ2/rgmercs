@@ -227,14 +227,10 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
 
             if not Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.MainButtonUnpausedColor)
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
-                    IM_COL32(Globals.Constants.Colors.MainButtonUnpausedColor.x * 255, Globals.Constants.Colors.MainButtonUnpausedColor.y * 255,
-                        Globals.Constants.Colors.MainButtonUnpausedColor.z * 255, 255))
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Ui.ImVec4ToColor(Globals.Constants.Colors.MainButtonUnpausedColor))
             else
                 ImGui.PushStyleColor(ImGuiCol.Button, Globals.Constants.Colors.MainButtonPausedColor)
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
-                    IM_COL32(Globals.Constants.Colors.MainButtonPausedColor.x * 255, Globals.Constants.Colors.MainButtonPausedColor.y * 255,
-                        Globals.Constants.Colors.MainButtonPausedColor.z * 255, 128))
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Ui.ImVec4ToColor(Globals.Constants.Colors.MainButtonPausedColor))
             end
 
             local pauseLabel = Globals.PauseMain and "PAUSED" or "Running"

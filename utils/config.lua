@@ -2213,6 +2213,15 @@ Config.DefaultConfig                                     = {
         ConfigType = "Advanced",
     },
 
+    ['DrawTooltipDebugBox']              = {
+        DisplayName = "Draw Tooltip Debug Box",
+        Category = "Internals",
+        Index = 2,
+        Tooltip = "Draw a box around the tooltip to help identify its boundaries for debugging purposes.",
+        Default = false,
+        ConfigType = "Advanced",
+    },
+
     ['LootModuleType']                   = {
         DisplayName = "Loot Module Type",
         Group = "General",
