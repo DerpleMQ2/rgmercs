@@ -508,7 +508,12 @@ function OptionsUI:RenderCategorySettings(category)
 
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ((row_height - text_height) / 2))
 
-                        ImGui.Text("%s", settingDefaults.DisplayName or (string.format("None %d", idx)))
+                        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, IM_COL32(0, 0, 0, 0))
+                        ImGui.PushStyleColor(ImGuiCol.HeaderActive, Ui.ChangeColorAlpoha(Globals.Constants.Colors.Green, 0.1))
+                        if ImGui.Selectable(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx)))) then
+                            ImGui.SetClipboardText(settingName)
+                        end
+                        ImGui.PopStyleColor(2)
 
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PopStyleColor(1)
