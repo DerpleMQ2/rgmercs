@@ -8,6 +8,7 @@ local Icons                     = require('mq.ICONS')
 local Modules                   = require('utils.modules')
 local Comms                     = require('utils.comms')
 local Tables                    = require('utils.tables')
+local ImAnim                    = require('ImAnim')
 local Set                       = require("mq.Set")
 
 local OptionsUI                 = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
@@ -21,6 +22,7 @@ OptionsUI.lastHighlightTime     = 0
 OptionsUI.selectedCharacter     = ""
 OptionsUI.lastPeerUpdate        = 0
 OptionsUI.bgImg                 = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/options_bg.png")
+OptionsUI.ToastStates           = {}
 
 function OptionsUI.LoadIcon(icon)
     return mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/" .. icon .. ".png")
@@ -512,6 +514,12 @@ function OptionsUI:RenderCategorySettings(category)
                         ImGui.PushStyleColor(ImGuiCol.HeaderActive, Ui.ChangeColorAlpoha(Globals.Constants.Colors.Green, 0.1))
                         if ImGui.Selectable(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx)))) then
                             ImGui.SetClipboardText(settingName)
+                            table.insert(self.ToastStates, {
+                                active = true,
+                                timer = 0,
+                                message = string.format("Setting name '%s' copied to clipboard", settingName),
+                                color = Ui.ImVec4ToColor(Globals.Constants.Colors.Green),
+                            })
                         end
                         ImGui.PopStyleColor(2)
 
@@ -763,10 +771,78 @@ function OptionsUI:RenderMainWindow(_, openGUI, flags)
         ImGui.EndChild()
         ImGui.PopID()
     end
-
+    self:RenderToastNotifications()
     ImGui.End()
 
     return openGUI
+end
+
+function OptionsUI:RenderToastNotifications()
+    local states = self.ToastStates
+    local dt = Ui.GetDeltaTime()
+
+    local canvas_pos = ImGui.GetCursorScreenPosVec()
+    local content_avail = ImGui.GetContentRegionAvailVec()
+    local canvas_size = ImVec2(content_avail.x, 180)
+    local draw_list = ImGui.GetForegroundDrawList()
+
+    -- cleanup defunct states
+    for i = #states, 1, -1 do
+        if not states[i].active then
+            table.remove(states, i)
+        end
+    end
+
+    local toast_height = 50.0
+    local toast_spacing = 8.0
+    local toast_padding = 32.0
+
+    local numToasts = #states
+    canvas_pos.y = (canvas_pos.y - ((toast_height * numToasts) + (toast_spacing * (numToasts))) - 16.0)
+
+    for i, state in ipairs(states) do
+        if state.active then
+            state.timer = state.timer + dt
+            local t = state.timer
+
+            local slide_progress = 0.0
+            local alpha = 1.0
+
+            if t < 0.3 then
+                slide_progress = ImAnim.EvalPreset(IamEaseType.OutBack, t / 0.3)
+            elseif t < 2.3 then
+                slide_progress = 1.0
+            elseif t < 2.6 then
+                local fade_t = (t - 2.3) / 0.3
+                slide_progress = 1.0
+                alpha = 1.0 - ImAnim.EvalPreset(IamEaseType.InQuad, fade_t)
+            else
+                state.active = false
+            end
+
+            if state.active then
+                local text_size = ImGui.CalcTextSizeVec(state.message)
+                local toast_width = text_size.x + toast_padding
+
+                local base_x = canvas_pos.x + canvas_size.x - toast_width - 16.0
+                local base_y = canvas_pos.y + 16.0 + (i - 1) * (toast_height + toast_spacing)
+
+                local x = base_x + (1.0 - slide_progress) * (toast_width + 32.0)
+                local y = base_y
+
+                -- Draw toast
+                local bg_color = IM_COL32(40, 40, 50, math.floor(alpha * 230))
+
+                draw_list:AddRectFilled(ImVec2(x, y), ImVec2(x + toast_width, y + toast_height), bg_color, 6.0)
+                draw_list:AddRectFilled(ImVec2(x, y), ImVec2(x + 4.0, y + toast_height), state.color or Ui.ImVec4ToColor(Globals.Constants.Colors.White), 6.0,
+                    ImDrawFlags.RoundCornersLeft)
+
+                -- Text
+                local text_color = IM_COL32(255, 255, 255, math.floor(alpha * 255))
+                draw_list:AddText(ImVec2(x + 16.0, y + (toast_height - ImGui.GetFontSize()) * 0.5), text_color, state.message)
+            end
+        end
+    end
 end
 
 return OptionsUI
