@@ -2127,6 +2127,19 @@ Config.DefaultConfig                                     = {
             Config.CacheCustomColors()
         end,
     },
+    ['TooltipTextColor']                 = {
+        DisplayName = "Tooltip Text Color",
+        Group = "General",
+        Header = "Interface",
+        Category = "Default Colors",
+        Index = 31,
+        Tooltip = "Color used for text in tooltips.",
+        Default = Tables.ImVec4ToTable(Globals.Constants.DefaultColors.TooltipTextColor),
+        Type = "Color",
+        OnChange = function(_, _)
+            Config.CacheCustomColors()
+        end,
+    },
 
     ['UserThemeOverrideClassTheme']      = {
         DisplayName = "Override Class Theme",

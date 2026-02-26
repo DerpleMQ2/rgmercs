@@ -7,6 +7,7 @@ local Ui                        = require('utils.ui')
 local Icons                     = require('mq.ICONS')
 local Modules                   = require('utils.modules')
 local Comms                     = require('utils.comms')
+local Tables                    = require('utils.tables')
 local Set                       = require("mq.Set")
 
 local OptionsUI                 = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
@@ -516,10 +517,37 @@ function OptionsUI:RenderCategorySettings(category)
                         if settingDefaults.Type == "Combo" then
                             defaultValue = string.format("%s - %s", settingDefaults.Default, settingDefaults.ComboOptions[settingDefaults.Default])
                         end
-                        Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
-                            settingTooltip,
-                            settingName,
-                            tostring(defaultValue)))
+                        if settingDefaults.Type == "Color" then
+                            defaultValue = string.format("R:%g, G:%g, B:%g, A:%g",
+                                math.floor(settingDefaults.Default.x * 255),
+                                math.floor(settingDefaults.Default.y * 255),
+                                math.floor(settingDefaults.Default.z * 255),
+                                math.floor((settingDefaults.Default.w or 1.0) * 255))
+                        end
+                        local tooltipColor = Globals.Constants.Colors.TooltipTextColor
+                        Ui.MultilineTooltipWithColors(
+                            {
+                                { text = settingTooltip, color = tooltipColor, },
+                                { text = "",             color = tooltipColor, },
+                                { text = "Variable: ",   color = Globals.Constants.Colors.LightBlue, padAfter = 4, },
+                                { text = settingName,    color = Globals.Constants.Colors.Orange,    sameLine = true, },
+                                { text = "Default: ",    color = Globals.Constants.Colors.LightBlue, padAfter = 4, },
+                                {
+                                    text = tostring(defaultValue),
+                                    render = settingDefaults.Type == "Color" and
+                                        function(draw_list, pos)
+                                            local size = ImGui.GetTextLineHeight()
+                                            -- if no draw_list then just return our size
+                                            if draw_list then
+                                                draw_list:AddRectFilled(pos, ImVec2(pos.x + size, pos.y + size), Ui.ImVec4ToColor(settingDefaults.Default), 4)
+                                            end
+
+                                            return size + 4, size
+                                        end or nil,
+                                    color = Globals.Constants.Colors.Orange,
+                                    sameLine = true,
+                                },
+                            })
 
                         if hasWarning then
                             ImGui.SameLine()

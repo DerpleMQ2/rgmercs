@@ -105,6 +105,7 @@ function Comms.SendHeartbeat(assist, chase)
         X             = mq.TLO.Me.X(),
         Y             = mq.TLO.Me.Y(),
         Z             = mq.TLO.Me.Z(),
+        Class         = mq.TLO.Me.Class.ShortName(),
         Poison        = tostring(mq.TLO.Me.Poisoned.ID()),
         Disease       = tostring(mq.TLO.Me.Diseased.ID()),
         Curse         = tostring(mq.TLO.Me.Cursed.ID()),

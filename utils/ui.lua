@@ -747,7 +747,7 @@ function Ui.RenderMercsStatus(showPopout)
                 end
 
                 Ui.MultilineTooltipWithColors({
-                    { text = "State:",                                           color = Colors.White, },
+                    { text = "State: ",                                          color = Colors.White,       padAfter = 4, },
                     {
                         text = data.Data.State or "None",
                         color = data.Data.State == "Paused" and Colors.MainButtonPausedColor or
@@ -755,21 +755,21 @@ function Ui.RenderMercsStatus(showPopout)
                             Colors.MainDowntimeColor,
                         sameLine = true,
                     },
-                    { text = "AutoTarget:",                                      color = Colors.White, },
+                    { text = "AutoTarget: ",                                     color = Colors.White,       padAfter = 4, },
                     { text = data.Data.AutoTarget or "None",                     color = Colors.LightRed,    sameLine = true, },
-                    { text = "Assist:",                                          color = Colors.White, },
+                    { text = "Assist: ",                                         color = Colors.White,       padAfter = 4, },
                     { text = data.Data.Assist or "None",                         color = Colors.Cyan,        sameLine = true, },
-                    { text = "Chase:",                                           color = Colors.White, },
+                    { text = "Chase: ",                                          color = Colors.White,       padAfter = 4, },
                     { text = data.Data.Chase or "None",                          color = Colors.Cyan,        sameLine = true, },
-                    { text = "Level:",                                           color = Colors.White, },
+                    { text = "Level: ",                                          color = Colors.White,       padAfter = 4, },
                     { text = tostring(data.Data.Level) or "0",                   color = Colors.Yellow,      sameLine = true, },
-                    { text = "Exp:",                                             color = Colors.White, },
+                    { text = "Exp: ",                                            color = Colors.White,       padAfter = 4, },
                     { text = string.format("%0.2f%%", data.Data.PctExp) or "0%", color = Colors.LightYellow, sameLine = true, },
-                    { text = "Unspent AA:",                                      color = Colors.White, },
+                    { text = "Unspent AA: ",                                     color = Colors.White,       padAfter = 4, },
                     { text = data.Data.UnSpentAA or "None",                      color = Colors.Orange,      sameLine = true, },
-                    { text = "Stringspent AA:",                                  color = Colors.White, },
+                    { text = "Spent AA: ",                                       color = Colors.White,       padAfter = 4, },
                     { text = data.Data.SpentAA or "None",                        color = Colors.Orange,      sameLine = true, },
-                    { text = "Total AA:",                                        color = Colors.White, },
+                    { text = "Total AA: ",                                       color = Colors.White,       padAfter = 4, },
                     { text = data.Data.TotalAA or "None",                        color = Colors.Orange,      sameLine = true, },
                 })
             end,
@@ -878,7 +878,7 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Mana or 0, data_b.Data.Mana or 0
             end,
             render = function(peer, data)
-                if math.ceil(data.Data.Mana or 0) > 0 then
+                if Globals.Constants.RGCasters:contains(data.Data.Class) then
                     if Config:GetSetting('StatusUseBars') then
                         Ui.RenderFancyManaBar("MercsStatusManaBar" .. peer, math.ceil(data.Data.Mana or 0), ImGui.GetTextLineHeight())
                     else
@@ -1039,13 +1039,13 @@ function Ui.RenderMercsStatus(showPopout)
 
                     Ui.MultilineTooltipWithColors(
                         {
-                            { text = "Name:",                       color = Colors.White, },
+                            { text = "Name: ",                      color = Colors.White,      padAfter = 4, },
                             { text = data.Data.PetName or "None",   color = Colors.LightGreen, sameLine = true, },
-                            { text = "Level:",                      color = Colors.White, },
+                            { text = "Level: ",                     color = Colors.White,      padAfter = 4, },
                             { text = data.Data.PetLevel or "None",  color = Colors.LightBlue,  sameLine = true, },
-                            { text = "HPs:",                        color = Colors.White, },
+                            { text = "HPs: ",                       color = Colors.White,      padAfter = 4, },
                             { text = data.Data.PetHPs or "None",    color = Colors.Cyan,       sameLine = true, },
-                            { text = "Target:",                     color = Colors.White, },
+                            { text = "Target: ",                    color = Colors.White,      padAfter = 4, },
                             { text = data.Data.PetTarget or "None", color = Colors.LightRed,   sameLine = true, },
                         })
                 end
@@ -3275,8 +3275,8 @@ end
 --- @param navLocOverride string? Nav YXZ string to use for /nav if the loc text is not compatible with the nav command
 function Ui.NavEnabledLoc(loc, navLocOverride)
     ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.Yellow)
-    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Globals.Constants.Colors.Grey)
-    ImGui.PushStyleColor(ImGuiCol.HeaderActive, Globals.Constants.Colors.Green)
+    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Ui.ChangeColorAlpoha(Globals.Constants.Colors.Grey, 0.1))
+    ImGui.PushStyleColor(ImGuiCol.HeaderActive, Ui.ChangeColorAlpoha(Globals.Constants.Colors.Green, 0.1))
     local navLoc = ImGui.Selectable(loc, false, ImGuiSelectableFlags.AllowDoubleClick)
     ImGui.PopStyleColor(3)
     if loc ~= "0,0,0" then
@@ -3297,7 +3297,7 @@ function Ui.Tooltip(desc)
         end
 
         if Config:GetSetting('EnableAnimatedTooltips') then
-            return Ui.AnimatedTooltip(ImHashStr(desc), desc)
+            return Ui.AnimatedTooltip(desc, desc)
         end
 
         ImGui.BeginTooltip()
@@ -3319,6 +3319,13 @@ function Ui.AnimatedTooltip(id, desc)
 
     local min = ImGui.GetItemRectMinVec()
     local max = ImGui.GetItemRectMaxVec()
+
+    if not id or id == "" then
+        -- generate a reaonsable Id
+        id = ImHashStr(string.format("tooltip_%d_%d", math.floor(min.x), math.floor(min.y)))
+    else
+        id = ImHashStr(id)
+    end
 
     if Config:GetSetting('DrawTooltipDebugBox') then
         draw_list:AddRect(min, max, IM_COL32(40, 255, 40, 255), 0, ImDrawFlags.RoundCornersAll, 2.0)
@@ -3350,19 +3357,27 @@ function Ui.AnimatedTooltip(id, desc)
 
         if state.tooltip_time > delay then
             local anchor = ImVec2(item_center.x, item_center.y - hover_radius)
+            local padding = ImVec2(12, 8)
             local text_size = ImVec2(0, 0)
 
             if type(desc) == "table" then
-                local fullText = ""
-                for _, line in ipairs(desc) do
-                    fullText = fullText .. (line.sameLine and "" or "\n") .. line.text
+                local xTotalLength = 0
+                local numLines = #desc
+                for i, line in ipairs(desc) do
+                    local render_width, render_height = 0, 0
+                    if line.render then
+                        render_width, render_height = line.render(nil, ImVec2(0, 0))
+                    end
+                    local size = ImGui.CalcTextSizeVec(tostring(line.text or "")) + ImVec2(render_width, render_height)
+                    xTotalLength = line.sameLine and (xTotalLength + size.x) or size.x
+                    xTotalLength = xTotalLength + (line.padAfter or 0)
+                    text_size.x = math.max(text_size.x, xTotalLength)
+                    text_size.y = text_size.y + (line.sameLine and 0 or (size.y + (i == numLines and 0 or padding.y / 2)))
                 end
-                text_size = ImGui.CalcTextSizeVec(fullText) + ImGui.GetStyle().ItemSpacing
             else
                 text_size = ImGui.CalcTextSizeVec(desc)
             end
 
-            local padding = ImVec2(12, 8)
             local tip_size = ImVec2(text_size.x + padding.x * 2, text_size.y + padding.y * 2)
 
             -- Position above with animation
@@ -3373,6 +3388,7 @@ function Ui.AnimatedTooltip(id, desc)
             if tip_pos.x < pos.x then
                 tip_pos = ImVec2(pos.x, tip_pos.y)
             end
+
             if tip_pos.x + tip_size.x > pos.x + canvas_size.x then
                 tip_pos = ImVec2(pos.x + canvas_size.x - tip_size.x, tip_pos.y)
             end
@@ -3432,19 +3448,39 @@ function Ui.AnimatedTooltip(id, desc)
             draw_list:AddTriangle(arrow_left, arrow_right, arrow_tip, borderColor, 1)
             -- erase border line where arrow overlaps
             draw_list:AddTriangleFilled(ImVec2(arrow_left.x - 1, arrow_left.y - 1), ImVec2(arrow_right.x + 1, arrow_right.y - 1), ImVec2(arrow_tip.x, arrow_tip.y - 1), bgColor)
-            printf("Arrow Points: %g, %g | %g, %g | %g, %g", arrow_left.x, arrow_left.y, arrow_right.x, arrow_right.y, arrow_tip.x, arrow_tip.y)
 
             -- Text
             if type(desc) == "table" then
-                local lineHeight = 0
-                local nextXOffset = 0
+                local lineHeight = padding.y
+                local nextXOffset = padding.x
                 for i, line in ipairs(desc) do
-                    draw_list:AddText(ImVec2(tip_pos.x + padding.x + (line.sameLine and nextXOffset or 0), tip_pos.y + lineHeight + padding.y),
-                        line.color and Ui.ImVec4ToColor(line.color) or IM_COL32(220, 220, 230, alpha), tostring(line.text))
-                    if i + 1 <= #desc and desc[i + 1].sameLine ~= true then
-                        lineHeight = lineHeight + ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.y / 2
+                    if line.render then
+                        local width, height = line.render(draw_list, ImVec2(
+                            tip_pos.x + nextXOffset,
+                            tip_pos.y + lineHeight
+                        ))
+                        nextXOffset = nextXOffset + width + (line.padAfter or 0)
+                        if i + 1 <= #desc and desc[i + 1].sameLine ~= true then
+                            lineHeight = lineHeight + height + padding.y / 2
+                            nextXOffset = padding.x
+                        end
                     end
-                    nextXOffset = ImGui.CalcTextSizeVec(tostring(line.text)).x + ImGui.GetStyle().ItemSpacing.x
+
+                    if line.text then
+                        draw_list:AddText(
+                            ImVec2(
+                                tip_pos.x + nextXOffset,
+                                tip_pos.y + lineHeight
+                            ),
+                            line.color and Ui.ImVec4ToColor(line.color) or IM_COL32(220, 220, 230, alpha),
+                            tostring(line.text))
+
+                        nextXOffset = nextXOffset + ImGui.CalcTextSizeVec(tostring(line.text)).x + (line.padAfter or 0)
+                        if i + 1 <= #desc and desc[i + 1].sameLine ~= true then
+                            lineHeight = lineHeight + ImGui.GetTextLineHeight() + padding.y / 2
+                            nextXOffset = padding.x
+                        end
+                    end
                 end
             else
                 draw_list:AddText(ImVec2(tip_pos.x + padding.x, tip_pos.y + padding.y),
@@ -3464,7 +3500,7 @@ end
 function Ui.MultilineTooltipWithColors(lines)
     if ImGui.IsItemHovered() then
         if Config:GetSetting('EnableAnimatedTooltips') then
-            return Ui.AnimatedTooltip(ImHashStr(lines[1].text), lines)
+            return Ui.AnimatedTooltip(lines[1].text, lines)
         end
 
         ImGui.BeginTooltip()
@@ -3476,6 +3512,13 @@ function Ui.MultilineTooltipWithColors(lines)
             if line.color then
                 ImGui.PushStyleColor(ImGuiCol.Text, line.color)
             end
+
+            if line.render then
+                local width, height = line.render(ImGui.GetForegroundDrawList(), ImGui.GetCursorScreenPosVec())
+                ImGui.Dummy(ImVec2(width, height))
+                ImGui.SameLine()
+            end
+
             ImGui.Text(line.text)
             if line.color then
                 ImGui.PopStyleColor()
@@ -3691,6 +3734,10 @@ end
 
 function Ui.ImVec4ToColor(vec)
     return IM_COL32(math.floor(vec.x * 255), math.floor(vec.y * 255), math.floor(vec.z * 255), math.floor(vec.w * 255))
+end
+
+function Ui.ChangeColorAlpoha(color, newAlpha)
+    return ImVec4(color.x, color.y, color.z, newAlpha)
 end
 
 return Ui

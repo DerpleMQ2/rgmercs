@@ -169,6 +169,7 @@ Globals.Constants.DefaultColors       = {
     MainButtonUnpausedColor = Globals.Constants.BasicColors.Green,
     MainCombatColor         = Globals.Constants.BasicColors.Red,
     MainDowntimeColor       = Globals.Constants.BasicColors.Green,
+    TooltipTextColor        = Globals.Constants.BasicColors.White,
     HPHighColor             = ImVec4(0.20, 0.88, 0.30, 0.96),
     HPMidColor              = ImVec4(0.96, 0.72, 0.14, 0.96),
     HPLowColor              = ImVec4(0.95, 0.12, 0.12, 0.96),
