@@ -3315,7 +3315,12 @@ function Ui.AnimatedTooltip(desc)
 
     local draw_list = ImGui.GetForegroundDrawList()
     local id = ImHashStr(desc)
-    local pos = ImGui.GetCursorScreenPosVec()
+
+    local min = ImGui.GetItemRectMinVec()
+    local max = ImGui.GetItemRectMaxVec()
+
+    local pos = ImVec2((min.x + max.x) * 0.5, (min.y + max.y) * 0.5)
+
     local item_center = ImVec2(pos.x + item_size.x * 0.5, pos.y - item_size.y * 0.5)
     local content_avail = ImGui.GetContentRegionAvailVec()
     local canvas_size = ImVec2(content_avail.x, 0)
@@ -3329,7 +3334,7 @@ function Ui.AnimatedTooltip(desc)
             state.was_hovered = id
         end
 
-        local hover_radius = 18.0
+        local hover_radius = 9.0
 
         -- Animate with delay - smooth fade without bouncing/flickering (accessibility)
         local delay = 0.15
@@ -3348,13 +3353,36 @@ function Ui.AnimatedTooltip(desc)
             local y_offset = -tip_size.y - 10 + (1.0 - ease_t) * 10.0
             local tip_pos = ImVec2(anchor.x - tip_size.x * 0.5, anchor.y + y_offset)
 
-            -- Clamp to canvas
+            -- Clamp to object
             if tip_pos.x < pos.x then
                 tip_pos = ImVec2(pos.x, tip_pos.y)
             end
             if tip_pos.x + tip_size.x > pos.x + canvas_size.x then
                 tip_pos = ImVec2(pos.x + canvas_size.x - tip_size.x, tip_pos.y)
             end
+
+            -- Get display bounds
+            local display_size = ImGui.GetIO().DisplaySize -- or however your binding exposes it
+            local margin = 4.0
+
+            -- Clamp X to screen
+            if tip_pos.x < margin then
+                tip_pos = ImVec2(margin, tip_pos.y)
+            end
+            if tip_pos.x + tip_size.x > display_size.x - margin then
+                tip_pos = ImVec2(display_size.x - tip_size.x - margin, tip_pos.y)
+            end
+
+            -- Clamp Y to screen (flip below item if tooltip would go off top)
+            if tip_pos.y < margin then
+                -- Not enough space above, render below instead
+                local y_offset_below = hover_radius + 10 + (1.0 - ease_t) * 10.0
+                tip_pos = ImVec2(tip_pos.x, anchor.y + y_offset_below)
+            end
+            if tip_pos.y + tip_size.y > display_size.y - margin then
+                tip_pos = ImVec2(tip_pos.x, display_size.y - tip_size.y - margin)
+            end
+
 
             local alpha = math.floor(255 * ease_t)
             local bgColor = IM_COL32(50, 54, 65, alpha)
