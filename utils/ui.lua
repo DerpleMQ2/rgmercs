@@ -866,7 +866,6 @@ function Ui.RenderMercsStatus(showPopout)
                         data.Data.HPs and "%d%%" or "", math.ceil(data.Data.HPs or 0) or "")
                 end
             end,
-
         },
         {
             name = 'Mana %',
@@ -888,7 +887,6 @@ function Ui.RenderMercsStatus(showPopout)
                     end
                 end
             end,
-
         },
         {
             name = 'End %',
@@ -909,7 +907,6 @@ function Ui.RenderMercsStatus(showPopout)
                         data.Data.Endurance and "%d%%" or "", math.ceil(data.Data.Endurance or 0) or "")
                 end
             end,
-
         },
         {
             name = "Distance",
