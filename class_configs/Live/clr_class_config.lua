@@ -368,6 +368,8 @@ local _ClassConfig = {
             "Valor",
             "Temperance",
             "Blessing of Temperance",
+            "Aegolism",
+            "Ancient: Gift of Aegolism",
             "Blessing of Aegolism",
             "Hand of Virtue",
             "Hand of Conviction",
