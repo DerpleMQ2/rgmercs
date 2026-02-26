@@ -3362,7 +3362,7 @@ function Ui.AnimatedTooltip(desc)
             end
 
             -- Get display bounds
-            local display_size = ImGui.GetIO().DisplaySize -- or however your binding exposes it
+            local display_size = ImGui.GetIO().DisplaySize
             local margin = 4.0
 
             -- Clamp X to screen
