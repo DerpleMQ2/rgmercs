@@ -47,17 +47,26 @@ function StandardUI:RenderTargetInfo()
     if math.floor(assistSpawn.Distance() or 0) >= 350 then
         ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.AssistSpawnFarColor)
     else
-        ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.BrightWhite)
     end
 
-    ImGui.Text("%s (%s) [%d %s] HP: %d%% Dist: %d ", assistSpawn.CleanName() or "",
-        assistSpawn.ID() or 0, assistSpawn.Level() or 0,
-        assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
+    ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
+    ImGui.Text("%s (%s) [", assistSpawn.CleanName() or "", assistSpawn.ID() or 0)
+    ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
+
+    ImGui.SameLine()
+    ImGui.Text("%d %s", assistSpawn.Level() or 0, assistSpawn.Class.ShortName() or "N/A")
+
+    ImGui.PopStyleColor(1)
+
+    ImGui.SameLine()
+    ImGui.Text("] HP: %d%% Dist: %d ", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
+    ImGui.PopStyleVar(1)
+    ImGui.PopStyleColor(1)
 
     ImGui.SameLine()
     local los = assistSpawn.LineOfSight()
     ImGui.TextColored(los and Globals.Constants.Colors.ConditionPassColor or Globals.Constants.Colors.ConditionFailColor, los and Icons.FA_EYE or Icons.FA_EYE_SLASH)
-    ImGui.PopStyleColor(1)
 end
 
 function StandardUI:RenderAutoTargetInfo()
@@ -72,13 +81,19 @@ function StandardUI:RenderAutoTargetInfo()
     if math.floor(assistSpawn.Distance() or 0) >= 350 then
         ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.AssistSpawnFarColor)
     else
-        ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
+        ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.BrightWhite)
     end
+    ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
+    ImGui.Text("%s (%s) [", assistSpawn.CleanName() or "", assistSpawn.ID() or 0)
 
-    ImGui.Text("%s (%s) [%d %s] HP: %d%% Dist: %d ", assistSpawn.CleanName() or "",
-        assistSpawn.ID() or 0, assistSpawn.Level() or 0,
-        assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
+    ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(Ui.GetConColorBySpawn(assistSpawn)))
+    ImGui.SameLine()
+    ImGui.Text("%d %s", assistSpawn.Level() or 0, assistSpawn.Class.ShortName() or "N/A")
+    ImGui.PopStyleColor(1)
 
+    ImGui.SameLine()
+    ImGui.Text("] HP: %d%% Dist: %d ", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0)
+    ImGui.PopStyleVar(1)
     ImGui.PopStyleColor(1)
 
     ImGui.SameLine()
