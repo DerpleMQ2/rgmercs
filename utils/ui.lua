@@ -3472,9 +3472,11 @@ function Ui.AnimatedTooltip(id, desc)
                             line.color and Ui.ImVec4ToColor(line.color) or IM_COL32(220, 220, 230, alpha),
                             tostring(line.text))
 
+                        local newLines = select(2, (tostring(line.text)):gsub("\n", ""))
+
                         nextXOffset = nextXOffset + ImGui.CalcTextSizeVec(tostring(line.text)).x + (line.padAfter or 0)
                         if i + 1 <= #desc and desc[i + 1].sameLine ~= true then
-                            lineHeight = lineHeight + ImGui.GetTextLineHeight() + padding.y / 2
+                            lineHeight = lineHeight + ImGui.GetTextLineHeight() + padding.y / 2 + (newLines * ImGui.GetTextLineHeight())
                             nextXOffset = padding.x
                         end
                     end
