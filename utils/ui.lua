@@ -2217,7 +2217,6 @@ function Ui.GetDeltaTime()
 end
 
 function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh, label)
-    local useImAnim = true -- set to true to enable ImAnim tweening for HP changes, false will just snap to the new value without animation
     local targetPct = Math.Clamp(tonumber(barPct) or 0, 0, 100)
     local availX = ImGui.GetContentRegionAvailVec().x
     local width = math.max(1, tonumber(availX) or 1)
@@ -2228,40 +2227,30 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
     local pct = targetPct
     local animState = Ui.TempSettings.ProgBarAnimState[id]
 
-    if useImAnim and ImAnim then
-        if not animState then
-            -- First render: initialize with current target
-            animState = { lastTarget = targetPct, }
-            Ui.TempSettings.ProgBarAnimState[id] = animState
-        end
-
-        -- Detect HP changes and update animation target
-        if targetPct ~= animState.lastTarget then
-            animState.lastTarget = targetPct
-        end
-
-        -- Tween the displayed HP value using ImAnim
-        -- Using OutCubic for a smooth deceleration as it approaches target
-        local easeDesc = ImAnim.EasePreset(IamEaseType.OutCubic)
-        pct = ImAnim.TweenFloat(
-            ImHashStr(id),               -- unique id for this bar
-            ImHashStr(id .. "_channel"), -- channel for HP value
-            targetPct,                   -- target value
-            0.25,                        -- duration (seconds) - snappy but smooth
-            easeDesc,                    -- easing function
-            IamPolicy.Crossfade,         -- policy for target changes
-            Ui.GetDeltaTime(),           -- delta time
-            targetPct                    -- initial value
-        )
-    else
-        -- Fallback: direct value (no animation)
-        if not animState then
-            animState = { lastTarget = targetPct, }
-            Ui.TempSettings.ProgBarAnimState[id] = animState
-        end
-        animState.lastTarget = targetPct
-        pct = targetPct
+    if not animState then
+        -- First render: initialize with current target
+        animState = { lastTarget = targetPct, }
+        Ui.TempSettings.ProgBarAnimState[id] = animState
     end
+
+    -- Detect HP changes and update animation target
+    if targetPct ~= animState.lastTarget then
+        animState.lastTarget = targetPct
+    end
+
+    -- Tween the displayed HP value using ImAnim
+    -- Using OutCubic for a smooth deceleration as it approaches target
+    local easeDesc = ImAnim.EasePreset(IamEaseType.OutCubic)
+    pct = ImAnim.TweenFloat(
+        ImHashStr(id),               -- unique id for this bar
+        ImHashStr(id .. "_channel"), -- channel for HP value
+        targetPct,                   -- target value
+        0.25,                        -- duration (seconds) - snappy but smooth
+        easeDesc,                    -- easing function
+        IamPolicy.Crossfade,         -- policy for target changes
+        Ui.GetDeltaTime(),           -- delta time
+        targetPct                    -- initial value
+    )
 
     local fraction = pct / 100
 
@@ -2366,7 +2355,7 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
         if fillWidth > 12 then
             -- When HP is animating, sheen sweeps in direction of change
             -- Otherwise, continuous gentle sweep
-            local isAnimating = useImAnim and ImAnim and math.abs(targetPct - pct) > 0.5
+            local isAnimating = math.abs(targetPct - pct) > 0.5
             local sweepSpeed = isAnimating and 1.2 or 0.65
             local sweepBase = (now * sweepSpeed) % 1
             local sweep = (isAnimating or trend.direction < 0) and (1.0 - sweepBase) or sweepBase
