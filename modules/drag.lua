@@ -128,10 +128,10 @@ function Module:GiveTime()
         if Config:GetSetting('DoActorsDrag') then
             local actors = Comms.GetPeers(true)
             for _, peerFullName in ipairs(actors) do
-                local peer, _ = Comms.GetCharAndServerFromPeer(peerFullName)
+                local peerName = Comms.GetNameFromPeer(peerFullName)
 
-                Logger.log_debug("Searching corpses for: %s", peer)
-                local currentSearch = string.format(corpseSearch, peer)
+                Logger.log_debug("Searching corpses for: %s", peerName)
+                local currentSearch = string.format(corpseSearch, peerName)
                 local numCorpses = mq.TLO.SpawnCount(currentSearch)()
 
                 for i = numCorpses, 1, -1 do

@@ -1,17 +1,18 @@
-local mq                 = require('mq')
-local Set                = require("mq.set")
-local Logger             = require("utils.logger")
-local Strings            = require("utils.strings")
-local Globals            = require("utils.globals")
+local mq                   = require('mq')
+local Set                  = require("mq.set")
+local Logger               = require("utils.logger")
+local Strings              = require("utils.strings")
+local Globals              = require("utils.globals")
 
-local Comms              = { _version = '1.0', _name = "Comms", _author = 'Derple', }
-Comms.__index            = Comms
-Comms.Actors             = require('actors')
-Comms.ScriptName         = "RGMercs"
-Comms.LastHeartbeat      = 0
-Comms.Peers              = Set.new({})
-Comms.PeersHeartbeats    = {}
-Comms.HeartbeatCoroutine = nil
+local Comms                = { _version = '1.0', _name = "Comms", _author = 'Derple', }
+Comms.__index              = Comms
+Comms.Actors               = require('actors')
+Comms.ScriptName           = "RGMercs"
+Comms.LastHeartbeat        = 0
+Comms.Peers                = Set.new({})
+Comms.PeersToServerNameMap = {}
+Comms.PeersHeartbeats      = {}
+Comms.HeartbeatCoroutine   = nil
 
 -- Putting this here for lack of a beter spot.
 --- @param peerName string? The character name string if not supplied then we use Me.DisplayName()
@@ -25,9 +26,22 @@ function Comms.GetPeerName(peerName)
     return string.format("%s (%s)", peerName and peerName or mq.TLO.Me.DisplayName(), server)
 end
 
-function Comms.GetCharAndServerFromPeer(peer)
-    --return peer:match("^(.-)%.(.-)$")
-    return peer:match("^(.-) %((.-)%)$")
+function Comms.GetNameAndServerFromPeer(peer)
+    local data = Comms.PeersToServerNameMap[peer]
+    if data then
+        return data.Name, data.Server
+    end
+
+    return nil, nil
+end
+
+function Comms.GetNameFromPeer(peer)
+    local data = Comms.PeersToServerNameMap[peer]
+    if data then
+        return data.Name
+    end
+
+    return nil
 end
 
 --- Broadcasts an update event to the specified module.
@@ -50,7 +64,7 @@ end
 --- @param event string The event type to broadcast.
 --- @param data table? The data associated with the event.
 function Comms.SendMessage(peer, module, event, data)
-    local char, server = Comms.GetCharAndServerFromPeer(peer)
+    local char, server = Comms.GetNameAndServerFromPeer(peer)
     Comms.Actors.send({ server = server, character = char, }, {
         From = Comms.GetPeerName(),
         Script = Comms.ScriptName,
@@ -182,6 +196,7 @@ end
 
 function Comms.UpdatePeerHeartbeat(peer, data)
     Comms.Peers:add(peer)
+    Comms.PeersToServerNameMap[peer] = { Server = data.Server, Name = data.Name, }
     Comms.PeersHeartbeats[peer] = { LastHeartbeat = Globals.GetTimeSeconds(), Data = data or {}, }
 end
 
@@ -193,6 +208,7 @@ function Comms.ValidatePeers(timeout)
             Logger.log_debug("\ayPeer \ag%s\ay has timed out, removing from active peer list.", peer)
             Comms.Peers:remove(peer)
             Comms.PeersHeartbeats[peer] = nil
+            Comms.PeersToServerNameMap[peer] = nil
         end
     end
 end

@@ -561,7 +561,7 @@ function Ui.RenderAAOverlay()
 end
 
 function Ui.HandleStatusClickAction(peer, action)
-    local name, _ = Comms.GetCharAndServerFromPeer(peer)
+    local name = Comms.GetNameFromPeer(peer)
     if name then
         local peerSpawn = mq.TLO.Spawn("=" .. name)
 
@@ -629,7 +629,7 @@ function Ui.RenderMercsStatus(showPopout)
                     ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionDisabledColor)
                 end
 
-                local name, _ = Comms.GetCharAndServerFromPeer(peer)
+                local name = Comms.GetNameFromPeer(peer)
                 if name then
                     local displayName = data.Data.Invis and "(" .. name .. ")" or name
                     ImGui.SmallButton(displayName)
@@ -1152,12 +1152,12 @@ function Ui.RenderMercsStatus(showPopout)
             flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
             width = 15.0,
             sort = function(_, a, b)
-                local name_a, _ = Comms.GetCharAndServerFromPeer(a)
-                local name_b, _ = Comms.GetCharAndServerFromPeer(b)
+                local name_a = Comms.GetNameFromPeer(a)
+                local name_b = Comms.GetNameFromPeer(b)
                 return Ui.GetGroupstatusText(name_a), Ui.GetGroupstatusText(name_b)
             end,
             render = function(peer, _)
-                local name, _ = Comms.GetCharAndServerFromPeer(peer)
+                local name = Comms.GetNameFromPeer(peer)
                 ImGui.TextColored(Colors.LightBlue, Ui.GetGroupstatusText(name))
             end,
         },

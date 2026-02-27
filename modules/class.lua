@@ -1221,25 +1221,21 @@ function Module:RunCureRotation(combat_state)
     -- if a peer is using Radiant Cure or Group Purify Soul on a group mate and we have set the option, don't bother checking for cures, let the cure process
     -- -- this may cause us to ocasionally skip curing a second group with radiant (if that group's healer is curing us for whatever reason)... this is preferred over double-tapping RC's
     if Config:GetSetting('StaggerGroupAACures') then
-        for peer, _ in pairs(actorPeers) do
-            local char, _ = Comms.GetCharAndServerFromPeer(peer)
-            if char then
-                local heartbeat = actorPeers[peer]
-                local data = heartbeat.Data
-                local casting = data and data.Casting or ""
+        for _, heartbeat in pairs(actorPeers) do
+            local data = heartbeat.Data
+            local casting = data and data.Casting or ""
 
-                --nested conditions here to avoid preemptive data/spawn checks
-                if casting == "Radiant Cure" or casting == "Group Purify Soul" then
-                    local target = data and data.Target
-                    local groupMate = mq.TLO.Group.Member(target)
+            --nested conditions here to avoid preemptive data/spawn checks
+            if casting == "Radiant Cure" or casting == "Group Purify Soul" then
+                local target = data and data.Target
+                local groupMate = mq.TLO.Group.Member(target)
 
-                    if groupMate and groupMate() then
-                        local recentHeartbeat = (Globals.GetTimeSeconds() - (heartbeat.LastHeartbeat or 0)) <= 3
+                if groupMate and groupMate() then
+                    local recentHeartbeat = (Globals.GetTimeSeconds() - (heartbeat.LastHeartbeat or 0)) <= 3
 
-                        if recentHeartbeat then
-                            Logger.log_debug("[Cures] %s is currently casting a group AA cure on my groupmate %s, bypassing cure checks.", char, target)
-                            return
-                        end
+                    if recentHeartbeat then
+                        Logger.log_debug("[Cures] %s is currently casting a group AA cure on my groupmate %s, bypassing cure checks.", heartbeat.Data.Name, target)
+                        return
                     end
                 end
             end
@@ -1264,9 +1260,8 @@ function Module:RunCureRotation(combat_state)
     local handledPeers = Set.new({})
     local handledPeerCount = 0
 
-    for peer, _ in pairs(actorPeers) do
-        local char, _ = Comms.GetCharAndServerFromPeer(peer)
-        local cureTarget = mq.TLO.Spawn(string.format("pc =%s", char))
+    for peer, heartbeat in pairs(actorPeers) do
+        local cureTarget = mq.TLO.Spawn(string.format("pc =%s", heartbeat.Data.Name))
         local cureTargetID = cureTarget.ID() --will return 0 if the spawn doesn't exist
         local handled = false
         --current max range on live with raid gear is 137, radiant cure still limited to 100 (300 on laz now but not changing this), but CureNow includes range checks
@@ -1285,7 +1280,7 @@ function Module:RunCureRotation(combat_state)
         Logger.log_verbose("\ay[Cures - Actors] %s :: Handled = %s", peer, tostring(handled))
 
         if handled then
-            handledPeers:add(char:lower())
+            handledPeers:add(heartbeat.Data.Name:lower())
             handledPeerCount = handledPeerCount + 1
         end
     end

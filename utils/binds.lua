@@ -390,7 +390,7 @@ Binds.Handlers    = {
             local angle_step = (2 * math.pi) / peerCount
 
             for i, peerFullName in ipairs(peers) do
-                local peer, _ = Comms.GetCharAndServerFromPeer(peerFullName)
+                local peerName = Comms.GetNameFromPeer(peerFullName)
                 local radians = (i - 1) * angle_step
                 local xMove = math.cos(radians) * (radius)
                 local yMove = math.sin(radians) * (radius)
@@ -398,8 +398,8 @@ Binds.Handlers    = {
                 local xOff = mq.TLO.Me.X() + math.floor(xMove)
                 local yOff = mq.TLO.Me.Y() + math.floor(yMove)
 
-                Core.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", peer, yOff, xOff, mq.TLO.Me.Z())
-                Core.DoCmd("/dex %s /timed 50 /face %s", peer, mq.TLO.Me.DisplayName())
+                Core.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", peerName, yOff, xOff, mq.TLO.Me.Z())
+                Core.DoCmd("/dex %s /timed 50 /face %s", peerName, mq.TLO.Me.DisplayName())
             end
         end,
     },
