@@ -132,6 +132,7 @@ function Comms.SendHeartbeat(assist, chase)
         Endurance     = useEnd and mq.TLO.Me.PctEndurance() or nil,
         Target        = mq.TLO.Target.DisplayName() or "None",
         TargetID      = mq.TLO.Target.ID() or 0,
+        AutoTargetID  = Globals.AutoTargetID,
         ForceTargetID = Globals.ForceTargetID,
         TargetIsNamed = Globals.AutoTargetIsNamed,
         Casting       = mq.TLO.Me.Casting.ID() ~= 0 and mq.TLO.Me.Casting.RankName() or "None",
