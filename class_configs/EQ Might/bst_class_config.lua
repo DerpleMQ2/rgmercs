@@ -321,6 +321,13 @@ return {
             end,
         },
         {
+            name = 'Growl',
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not mq.TLO.Me.Song("Growl")()
+            end,
+        },
+        {
             name = 'DPS',
             state = 1,
             steps = 1,
@@ -492,7 +499,16 @@ return {
                 type = "AA",
             },
         },
-        ['DPS']            = {
+        {
+            {
+                name = "PetGrowl",
+                type = "Spell",
+                cond = function(self, spell)
+                    return Casting.SelfBuffCheck(spell)
+                end,
+            },
+        },
+        ['DPS']       = {
             {
                 name = "PetSpell",
                 type = "Spell",
@@ -511,13 +527,6 @@ return {
                     if Casting.AAReady("Mass Group Buff") and Globals.AutoTargetIsNamed then
                         Casting.UseAA("Mass Group Buff", Globals.AutoTargetID)
                     end
-                end,
-            },
-            {
-                name = "PetGrowl",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -577,7 +586,7 @@ return {
                 end,
             },
         },
-        ['Weaves']         = {
+        ['Weaves']    = {
             {
                 name = "Summon Companion",
                 type = "AA",
@@ -624,7 +633,7 @@ return {
                 type = "AA",
             },
         },
-        ['GroupBuff']      = {
+        ['GroupBuff'] = {
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
@@ -687,7 +696,7 @@ return {
                 end,
             },
         },
-        ['PetSummon']      = {
+        ['PetSummon'] = {
             {
                 name = "Artifact of Razorclaw",
                 type = "Item",
@@ -715,7 +724,7 @@ return {
                 end,
             },
         },
-        ['Downtime']       = {
+        ['Downtime']  = {
             {
                 name = "Gelid Rending",
                 type = "AA",
@@ -728,7 +737,7 @@ return {
                 end,
             },
         },
-        ['PetBuff']        = {
+        ['PetBuff']   = {
             {
                 name = "Epic",
                 type = "Item",
