@@ -603,7 +603,6 @@ local _ClassConfig = {
                 type = "Item",
                 load_cond = function() return mq.TLO.Me.Level() >= 68 and mq.TLO.Me.Level() < 70 and mq.TLO.FindItem("=Artifact of the Dread Pyre")() end,
                 cond = function(self, itemName, target)
-                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.DotItemCheck(itemName, target)
                 end,
             },
@@ -612,7 +611,6 @@ local _ClassConfig = {
                 type = "Item",
                 load_cond = function() return mq.TLO.Me.Level() >= 68 and mq.TLO.FindItem("=Trinket of Suffocation")() end,
                 cond = function(self, itemName, target)
-                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
                     return Casting.DotItemCheck(itemName, target)
                 end,
             },

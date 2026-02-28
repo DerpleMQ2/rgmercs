@@ -520,12 +520,12 @@ return {
     },
 
     ["bothunder"] = {
-        "Agnarr the Stormlord",
+        "Agnarr the Storm Lord",
         "Emmerik Skyfury",
         "The Fabled Bordir Bjomolf",
         "The Fabled Valbrand",
         "The Fabled Wybjorn",
-        "The Fabled Agnarr the Stormlord",
+        "The Fabled Agnarr the Storm Lord",
         "The Fabled Brynju Thunderclap",
         "The Fabled Erech Eyford",
         "The Fabled Gaukr Sandstrom",

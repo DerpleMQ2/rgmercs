@@ -694,6 +694,7 @@ return {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
+                    if not Casting.CastReady(spell) then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -760,7 +761,7 @@ return {
                 { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
                 { name = "EvacSpell",    cond = function() return Config:GetSetting('KeepEvacMemmed') end, },
                 { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
-                { name = "JoltSpell", },
+                { name = "JoltSpell",    cond = function() return Config:GetSetting('DoJoltSpell') end, },
                 { name = "PBTimer4",     cond = function() return Core.IsModeActive('PBAE') end, },
                 { name = "FireJyll",     cond = function() return Core.IsModeActive('PBAE') end, },
                 { name = "IceJyll",      cond = function() return Core.IsModeActive('PBAE') end, },
@@ -935,13 +936,23 @@ return {
         },
 
         -- Utility
+        ['DoJoltSpell']          = {
+            DisplayName = "Use Jolt Spell",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Hate Reduction",
+            Index = 101,
+            Tooltip = "Memorize and cast your jolt line of spells.",
+            Default = true,
+            RequiresLoadoutChange = true,
+        },
         ['JoltAggro']            = {
             DisplayName = "Jolt Aggro %",
             Group = "Abilities",
             Header = "Utility",
             Category = "Hate Reduction",
-            Index = 101,
-            Tooltip = "Aggro at which to use Jolt",
+            Index = 102,
+            Tooltip = "Aggro at which to use Jolt and other similar abilities.",
             Default = 90,
             Min = 1,
             Max = 100,
