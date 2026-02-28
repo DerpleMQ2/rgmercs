@@ -2597,6 +2597,7 @@ end
 function Ui.MarqueeButton(text, height, width)
     -- Delta time and font scale
     local dt = Ui.GetDeltaTime() -- replace with your delta time function
+    ---@diagnostic disable-next-line: undefined-field
     local scale = ImGui.GetIO().FontGlobalScale
 
     local draw_list = ImGui.GetWindowDrawList()
