@@ -243,7 +243,7 @@ function Core.GetMainAssistTargetID()
 
     -- check if the MA is an actor peer
     if heartbeat and heartbeat.Data then
-        local targetID = tonumber(heartbeat.Data.TargetID) or 0
+        local targetID = tonumber(heartbeat.Data.AutoTargetID) or 0
         if targetID and type(targetID) == 'number' then
             assistId = targetID
             assistTarget = mq.TLO.Spawn(targetID)

@@ -1025,7 +1025,6 @@ return {
                 type = "Spell",
                 load_cond = function(self) return Core.IsTanking() end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoForPower') then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
