@@ -514,6 +514,13 @@ return {
                 end,
             },
             {
+                name = "PetGrowl",
+                type = "Spell",
+                cond = function(self, spell)
+                    return Casting.SelfBuffCheck(spell)
+                end,
+            },
+            {
                 name = "BloodDot",
                 type = "Spell",
                 cond = function(self, spell, target)
