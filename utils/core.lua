@@ -244,7 +244,7 @@ function Core.GetMainAssistTargetID()
     -- check if the MA is an actor peer
     if heartbeat and heartbeat.Data then
         local paused = heartbeat.Data.State == "Paused"
-        local rawTarget = paused and heartbeat.Data.Target or heartbeat.Data.AutoTargetID
+        local rawTarget = paused and heartbeat.Data.TargetID or heartbeat.Data.AutoTargetID
         local targetID = tonumber(rawTarget) or 0
         if targetID > 0 then
             assistId = targetID
