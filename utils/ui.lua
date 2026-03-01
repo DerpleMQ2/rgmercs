@@ -862,7 +862,7 @@ function Ui.RenderMercsStatus(showPopout)
                     Ui.RenderFancyHPBar("MercsStatusHPBar" .. peer, math.ceil(data.Data.HPs or 0), ImGui.GetTextLineHeight())
                 else
                     Ui.RenderColoredText(
-                        Ui.GetPercentageColor(data.Data.HPs or 0, { Colors.LightGreen, Colors.Yellow, Colors.Red, }),
+                        Ui.GetPercentageColor(data.Data.HPs or 0, { Colors.BrightGreen, Colors.Yellow, Colors.Red, }),
                         data.Data.HPs and "%d%%" or "", math.ceil(data.Data.HPs or 0) or "")
                 end
             end,
@@ -985,7 +985,13 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Target or "", data_b.Data.Target or ""
             end,
             render = function(peer, data)
-                ImGui.Text("%s", data.Data.Target or "None")
+                if data.Data.Target ~= "None" then
+                    ImGui.Text("%s", data.Data.Target)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionDisabledColor)
+                    ImGui.TextDisabled("None")
+                    ImGui.PopStyleColor()
+                end
             end,
 
         },
@@ -999,7 +1005,13 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.Casting or "", data_b.Data.Casting or ""
             end,
             render = function(peer, data)
-                ImGui.Text("%s", data.Data.Casting or "None")
+                if data.Data.Casting ~= "None" then
+                    ImGui.Text("%s", data.Data.Casting)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionDisabledColor)
+                    ImGui.TextDisabled("None")
+                    ImGui.PopStyleColor()
+                end
             end,
 
         },
@@ -1072,7 +1084,15 @@ function Ui.RenderMercsStatus(showPopout)
                 return data_a.Data.PetHPs or 0, data_b.Data.PetHPs or 0
             end,
             render = function(peer, data)
-                ImGui.Text(data.Data.PetID > 0 and string.format("%s", data.Data.PetHPs) or "")
+                if data.Data.PetID > 0 then
+                    if Config:GetSetting('StatusUseBars') then
+                        Ui.RenderFancyHPBar("MercsStatusPetHPBar" .. peer, math.ceil(data.Data.PetHPs or 0), ImGui.GetTextLineHeight())
+                    else
+                        Ui.RenderColoredText(
+                            Ui.GetPercentageColor(data.Data.PetHPs or 0, { Colors.BrightGreen, Colors.Yellow, Colors.Red, }),
+                            data.Data.PetHPs and "%d%%" or "", math.ceil(data.Data.PetHPs or 0) or "")
+                    end
+                end
             end,
         },
         {
@@ -1158,7 +1178,53 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, _)
                 local name = Comms.GetNameFromPeer(peer)
-                ImGui.TextColored(Colors.LightBlue, Ui.GetGroupstatusText(name))
+                ImGui.TextColored(Colors.Lavender, Ui.GetGroupstatusText(name))
+            end,
+        },
+        {
+            name = "Class",
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultSort),
+            width = 20.0,
+            sort = function(_, a, b)
+                return a or "", b or ""
+            end,
+            render = function(peer, data)
+                if data.Data.Zone ~= mq.TLO.Zone.Name() then
+                    ImGui.PushStyleColor(ImGuiCol.Text, Colors.ConditionDisabledColor)
+                end
+
+                local class = data.Data.Class
+                if class then
+                    local displayName = data.Data.Invis and "(" .. class .. ")" or class
+                    ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.BasicColors.Mint)
+                    ImGui.Text(displayName)
+                    ImGui.PopStyleColor()
+                    if class then
+                        if ImGui.IsItemClicked(ImGuiMouseButton.Left) then
+                            if (mq.TLO.Cursor.ID() or 0) > 0 and Config:GetSetting('StatusLeftClickCursorClickAction') == 1 then
+                                local peerSpawn = mq.TLO.Spawn("=" .. Comms.GetNameFromPeer(peer))
+                                if peerSpawn.ID() > 0 then
+                                    if peerSpawn.Distance() <= 15 then
+                                        peerSpawn.DoTarget()
+                                        Core.DoCmd("/timed 1 /click left target")
+                                        Core.DoCmd('/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
+                                        Comms.SendPeerDoCmd(peer, '/timed 10 /lua parse mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()')
+                                    end
+                                end
+                            else
+                                Ui.HandleStatusClickAction(peer, Config:GetSetting('StatusLeftClickAction'))
+                            end
+                        elseif ImGui.IsItemClicked(ImGuiMouseButton.Right) then
+                            Ui.HandleStatusClickAction(peer, Config:GetSetting('StatusRightClickAction'))
+                        end
+                        if ImGui.IsItemHovered() then
+                            ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, IM_COL32(255, 255, 255, 30))
+                        end
+                    end
+                    if data.Data.Zone ~= mq.TLO.Zone.Name() then
+                        ImGui.PopStyleColor()
+                    end
+                end
             end,
         },
     }
