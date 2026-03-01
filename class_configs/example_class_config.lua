@@ -309,10 +309,9 @@ local _ClassConfig = {
         },
         { -- SHD doesn't have group buffs! Listed as a reference as to where we get our table of buffable group IDs from!
             name = 'GroupBuff',
-            timer = 60,
-            targetId = function(self)
-                return Casting.GetBuffableGroupIDs()
-            end,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
                 -- much simpler conditions here! "OkayToBuff" has things like... am I moving, is nav active, etc. Search for this function in the Casting util file!
                 return combat_state == "Downtime" and Casting.OkayToBuff()
@@ -343,7 +342,7 @@ local _ClassConfig = {
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
             name = 'PetBuff',
-            timer = 60,
+            timer = 10,
             --The targetId here is simply a condition statement, if we have a pet, we return the ID in a table; if not, we return an empty table.
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)

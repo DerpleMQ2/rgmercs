@@ -353,10 +353,9 @@ local _ClassConfig = {
         },
         {
             name = 'GroupBuff',
-            timer = 60, -- only run every 60 seconds top.
-            targetId = function(self)
-                return Casting.GetBuffableGroupIDs()
-            end,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and Casting.OkayToBuff()
             end,
@@ -370,7 +369,7 @@ local _ClassConfig = {
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
             name = 'PetBuff',
-            timer = 60,
+            timer = 10,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
@@ -682,7 +681,8 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     if not Targeting.TargetIsAMelee(target) then return false end
-                    return Casting.GroupBuffCheck(spell, target) and Casting.PeerBuffCheck(5521, target, true) -- Don't cast if we have Hastening of Salik
+                    -- Don't cast if we have Hastening of Salik
+                    return Casting.GroupBuffCheck(spell, target) and Casting.AddedBuffCheck(5521, target)
                 end,
             },
             {

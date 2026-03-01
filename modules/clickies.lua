@@ -1633,7 +1633,7 @@ function Module:GiveTime()
                         elseif clicky.target == "Main Assist" then
                             ---@diagnostic disable-next-line: cast-local-type
                             target = Core.GetMainAssistSpawn()
-                            buffCheckPassed = Casting.PeerBuffCheck(item.Clicky.Spell.ID(), target, false)
+                            buffCheckPassed = Casting.GroupBuffItemCheck(clicky.itemName, target)
                         elseif clicky.target == "Auto Target" then
                             ---@diagnostic disable-next-line: cast-local-type
                             target = Targeting.GetAutoTarget()

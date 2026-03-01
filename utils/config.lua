@@ -9,7 +9,7 @@ local Files                                              = require("utils.files"
 local Globals                                            = require("utils.globals")
 
 local Config                                             = {
-    _version = '1.5.1',
+    _version = '1.6.0',
     _subVersion = "Shattering of Ro",
     _name = "Config",
     _AppName = "RGMercs Lua Edition",
@@ -71,7 +71,6 @@ Config.FAQ                                               = {
             "The command accepts a target ID, and will fall back to your current target's ID if one is not supplied.\n\n" ..
             "When commanded, the PC will add the target to the first XT slot and immediately force target.\n\n" ..
             "The force target state can be issued to any PC, but if issued by the MA, it will be broadcasted to peers via actors, and will allow the target to check as valid even when the 'Target Non-Aggressives' setting is disabled." ..
-            " Actors may need to be configured in MQ if all peers are not on the same PC. As an alternative, the setting above can be enabled temporarily.\n\n" ..
             "Only one Force Target can be directed at a time, and the state will be cleared automatically. It can be cleared manually with the /rgl forcetargetclear command.",
         Settings_Used = "",
     },
@@ -1249,6 +1248,47 @@ Config.DefaultConfig                                     = {
         Tooltip = "Break Invis as part of /rgl say, qsay or rsay commands.",
         Default = false,
     },
+    ['ActorBuffScope']             = {
+        DisplayName = "Actor Buff Scope",
+        Group = "Abilities",
+        Header = "Buffs",
+        Category = "Buff Rules",
+        Index = 6,
+        Tooltip =
+        "Choose who to use group buffs on. Please note that we will only buff raid/in-zone if they are actor peers (other PCs running RGMercs on the local computer/network).",
+        Default = 1,
+        Min = 1,
+        Max = 3,
+        Type = "Combo",
+        ComboOptions = { 'Group', 'Raid', 'Any In-Zone', },
+        ConfigType = "Advanced",
+    },
+    ['BuffAssistList']             = {
+        DisplayName = "Buff Assist List",
+        Group = "Abilities",
+        Header = "Buffs",
+        Category = "Buff Rules",
+        Index = 8,
+        Tooltip = "Process group buff rotations on members of the Asist List.",
+        Default = true,
+    },
+    ['DoActorPetBuffs']            = {
+        DisplayName = "Buff Pets as PCs",
+        Group = "Abilities",
+        Header = "Buffs",
+        Category = "Buff Rules",
+        Index = 6,
+        Tooltip =
+        "Allow group pets to be targeted in PC group buff rotations.\nNote that only the pets buffs of PCs who have this setting enabled are discoverable.\nFurther note this incurs a minor performance penalty and is not advised in most situations.",
+        Default = false,
+        OnChange = function(oldValue, newValue)
+            if newValue == false then
+                Globals.CurrentPetBuffs = nil
+                Globals.CurrentPetBlocked = nil
+            end
+        end,
+    },
+
     -- Buffs/Self
     ['DoAlliance']                 = {
         DisplayName = "Do Alliance",

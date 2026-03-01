@@ -382,7 +382,7 @@ return {
             name = 'CombatBuff',
             state = 1,
             steps = 1,
-            timer = 30, -- only run every 30 seconds at most.
+            timer = 10,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"

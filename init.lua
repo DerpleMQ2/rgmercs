@@ -311,7 +311,8 @@ local function RGInit(...)
     printf("\aw\awBy \ag%s", Config._author)
     printf("\aw****************************")
     -- keep these for easy editing/addition later
-    --  printf("\agThe new options panel is live! See our recent forum post or commit messages.")
+    printf("\agBuff handling has been revamped to rely on actors! See our recent forum post or commit messages.")
+    printf("\agYou may wish to take a moment to peruse the new options in Abilities > Buffs> Buff Rules.")
     printf("\awPlease visit us on the RG forums for the most recent news and updates.")
     printf("\aw Use \ag /rgl \aw or check our options panel for a list of commands.")
 
@@ -342,6 +343,8 @@ local function Main()
         Globals.CurInstance = mq.TLO.Me.Instance()
         return
     end
+
+    Core.UpdateBuffs()
 
     Events.DoEvents(true)
 
