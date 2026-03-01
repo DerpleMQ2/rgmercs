@@ -491,6 +491,19 @@ Module.LogicBlocks                      = {
     },
 
     {
+        name = "I Have a Curable Detrimental Effect",
+        cond = function(self)
+            local me = mq.TLO.Me
+            return me.Poisoned() ~= nil or me.Diseased() ~= nil or me.Cursed ~= nil or me.Corrupted() ~= nil
+        end,
+        tooltip = "Only use when you have a poison, disease, curse or corruption effect on you.",
+        render_header_text = function(self, cond)
+            return string.format("You have an effect with counters (poi/dis/cur/cor).")
+        end,
+        cond_targets = { "Self", },
+    },
+
+    {
         name = "I Have A Pet",
         cond = function(self, _, negate)
             if negate then
@@ -531,7 +544,7 @@ Module.LogicBlocks                      = {
     },
 
     {
-        name = "My Pet Has a Primary Equiped",
+        name = "My Pet Has a Primary Equipped",
         cond = function(self, _, negate)
             local primaryEquiped = mq.TLO.Me.Pet.Primary() > 0
             return ((not negate and primaryEquiped) or (negate and not primaryEquiped))
@@ -547,7 +560,7 @@ Module.LogicBlocks                      = {
     },
 
     {
-        name = "My Pet Has a Secondary Equiped",
+        name = "My Pet Has a Secondary Equipped",
         cond = function(self, _, negate)
             local secondaryEquiped = mq.TLO.Me.Pet.Secondary() > 0
             return ((not negate and secondaryEquiped) or (negate and not secondaryEquiped))
