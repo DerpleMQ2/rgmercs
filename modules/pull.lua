@@ -1898,28 +1898,28 @@ function Module:CheckForAbort(pullID, bNavigating)
 
     if pullID == 0 then return true end
 
-    Logger.log_verbose("Checking for abort on spawn id: %d", pullID)
+    Logger.log_verbose("PULL:Checking for abort on spawn id: %d", pullID)
     local spawn = mq.TLO.Spawn(pullID)
 
     if not spawn or spawn.Dead() or not spawn.ID() or spawn.ID() == 0 then
-        Logger.log_debug("\ar ALERT: Aborting mob died or despawned \ax")
+        Logger.log_debug("PULL:\ar ALERT: Aborting mob died or despawned \ax")
         return true
     end
 
     -- ignore distance and time if this is a manually requested pull
     if pullID ~= self.TempSettings.TargetSpawnID then
         if spawn.Distance() > Config:GetSetting("MaxPathRange") then
-            Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
+            Logger.log_debug("PULL:\ar ALERT: Aborting mob moved out of spawn distance \ax")
             return true
         end
 
         if not mq.TLO.Navigation.PathExists("id " .. pullID)() then
-            Logger.log_debug("\ar ALERT: Aborting mob no longer reachable on mesh \ax")
+            Logger.log_debug("PULL:\ar ALERT: Aborting mob no longer reachable on mesh \ax")
             return true
         end
 
         if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
-            Logger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targeting is enabled! \ax")
+            Logger.log_debug("PULL:\ar ALERT: Aborting mob is fighting a stranger and safe targeting is enabled! \ax")
             return true
         end
 
@@ -1969,10 +1969,10 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
     local maxMove = Config:GetSetting('MaxMoveTime') * 1000
     while mq.TLO.Navigation.Active() do
-        Logger.log_verbose("NavToWaypoint Waypoint: %d Aggro Count: %d", self.GetCurrentWpId(self), Targeting.GetXTHaterCount())
+        Logger.log_verbose("PULL:NavToWaypoint Waypoint: %d Aggro Count: %d", self.GetCurrentWpId(self), Targeting.GetXTHaterCount())
 
         if self.TempSettings.WayPointsToDelete:contains(self:GetCurrentWpId()) then
-            Logger.log_debug("\ar NOTICE:\ax Deleting waypoint %d while naving to it.", self:GetCurrentWpId())
+            Logger.log_debug("PULL:\arNOTICE:\ax Deleting waypoint %d while naving to it.", self:GetCurrentWpId())
             Movement:DoNav(false, "stop log=off")
             return false
         end
@@ -2006,7 +2006,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
     local distanceToWP = mq.TLO.Math.Distance(loc)()
     if distanceToWP > 50 then
-        Logger.log_verbose("NavToWaypoint Waypoint: Something went wrong. Current distance to WP: %d. (Possible manual interruption or conflicting nav command.)", distanceToWP)
+        Logger.log_verbose("PULL:NavToWaypoint Waypoint: Something went wrong. Current distance to WP: %d. (Possible manual interruption or conflicting nav command.)", distanceToWP)
         return false
     end
 
@@ -2119,7 +2119,7 @@ function Module:GiveTime()
             if campData.returnToCamp then
                 local distanceToCampSq = Math.GetDistanceSquared(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampY, campData.campSettings.AutoCampX)
                 if distanceToCampSq > (Config:GetSetting('AutoCampRadius') ^ 2) then
-                    Logger.log_debug("Distance to camp is %d and radius is %d - going closer.", math.sqrt(distanceToCampSq), Config:GetSetting('AutoCampRadius'))
+                    Logger.log_debug("PULL: Distance to camp is %d and radius is %d - going closer.", math.sqrt(distanceToCampSq), Config:GetSetting('AutoCampRadius'))
                     Movement:DoNav(false, "locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
                 end
             end
@@ -2196,7 +2196,7 @@ function Module:GiveTime()
     if self.TempSettings.TargetSpawnID > 0 then
         local targetSpawn = mq.TLO.Spawn(self.TempSettings.TargetSpawnID)
         if not targetSpawn() or targetSpawn.Dead() then
-            Logger.log_debug("\arDropping Manual target id %d - it is dead.", self.TempSettings.TargetSpawnID)
+            Logger.log_debug("PULL: \arDropping Manual target id %d - it is dead.", self.TempSettings.TargetSpawnID)
             self.TempSettings.TargetSpawnID = 0
         end
     end
@@ -2204,7 +2204,7 @@ function Module:GiveTime()
     if self.TempSettings.TargetSpawnID > 0 then
         self.TempSettings.PullID = self.TempSettings.TargetSpawnID
     else
-        Logger.log_debug("Finding Pull Target")
+        Logger.log_debug("PULL:Finding Pull Target")
         self.TempSettings.PullID = self:FindTarget()
     end
 
@@ -2262,13 +2262,13 @@ function Module:GiveTime()
     local start_z = mq.TLO.Me.Z()
 
     if campData.returnToCamp then
-        Logger.log_debug("\ayRTB: Storing Camp info to return to")
+        Logger.log_debug("PULL:\ayRTB: Storing Camp info to return to")
         start_x = campData.campSettings.AutoCampX
         start_y = campData.campSettings.AutoCampY
         start_z = campData.campSettings.AutoCampZ
     end
 
-    Logger.log_debug("\ayRTB Location: %d %d %d", start_y, start_x, start_z)
+    Logger.log_debug("PULL:\ayRTB Location: %d %d %d", start_y, start_x, start_z)
 
     -- if DoMed is set it will take care of standing us up
     if mq.TLO.Me.Sitting() then
@@ -2278,7 +2278,7 @@ function Module:GiveTime()
     mq.TLO.Me.Stand()
 
     self:SetPullState(PullStates.PULL_NAV_TO_TARGET, string.format("Id: %d", self.TempSettings.PullID))
-    Logger.log_debug("\ayFound Target: %d - Attempting to Nav", self.TempSettings.PullID)
+    Logger.log_debug("PULL:\ayFound Target: %d - Attempting to Nav", self.TempSettings.PullID)
 
     local pullAbility = self.TempSettings.ValidPullAbilities[Config:GetSetting('PullAbility')]
     local startingXTargs = Targeting.GetXTHaterIDs()
@@ -2406,7 +2406,7 @@ function Module:GiveTime()
                     Movement:DoNav(false, "id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
 
                     if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
-                        Logger.log_debug("\arXtargs changed heading back to camp!")
+                        Logger.log_debug("PULL:\arXtargs changed heading back to camp!")
                         break
                     end
 
@@ -2564,7 +2564,7 @@ function Module:GiveTime()
         while mq.TLO.Navigation.Active() and (combat_state == "Downtime" or Targeting.GetXTHaterCount() > 0) do
             Logger.log_super_verbose("Pathing to camp...")
             if mq.TLO.Me.State():lower() == "feign" or mq.TLO.Me.Sitting() then
-                Logger.log_debug("Standing up to Engage Target")
+                Logger.log_debug("PULL:Standing up to Engage Target")
                 mq.TLO.Me.Stand()
                 Movement:DoNav(false, "locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, Config:GetSetting('PullBackwards') and "facing=backward" or "")
                 mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
@@ -2677,7 +2677,7 @@ end
 function Module:StopNavAfterFailedMovingCheck()
     --if we were navigating during a rescan, cancel it.
     if self.TempSettings.PullState == PullStates.PULL_MOVING_CHECKS and mq.TLO.Navigation.Active() then
-        Logger.log_debug("\arNOTICE:\ax Moving Checks failed! Aborting nav.")
+        Logger.log_debug("PULL\arNOTICE:\ax Moving Checks failed! Aborting nav.")
         Movement:DoNav(false, "stop log=off")
         mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
     end
