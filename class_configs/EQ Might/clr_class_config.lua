@@ -370,7 +370,7 @@ local _ClassConfig = {
                     rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif staffReady then -- the lower 2 staves still cast faster or as fast as water sprinkler
                     rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
-                elseif mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
+                elseif mq.TLO.Me.ItemReady("=Water Sprinkler of Nem Ankh")() then
                     rezAction = okayToRez and Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 else
                     Logger.log_debug("DoRez: No fast rez options available in combat for %s.", mq.TLO.Spawn(corpseId).CleanName() or "Unknown")
@@ -380,9 +380,9 @@ local _ClassConfig = {
                     rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif staffReady then
                     rezAction = okayToRez and Casting.UseItem(rezStaff, corpseId)
-                elseif mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
-                    rezAction = okayToRez and Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
-                elseif not Casting.CanUseAA("Blessing of Resurrection") and combatState == "active" or combatState == "resting" then
+                elseif mq.TLO.Me.ItemReady("=Water Sprinkler of Nem Ankh")() then
+                    rezAction = okayToRez and Casting.UseItem("=Water Sprinkler of Nem Ankh", corpseId)
+                elseif not Casting.CanUseAA("Blessing of Resurrection") and (combatState == "active" or combatState == "resting") then
                     -- ^ if we have BoR, just wait for it, rather than taking the time to memorize a spell
                     if Casting.SpellReady(rezSpell, true) then
                         rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)

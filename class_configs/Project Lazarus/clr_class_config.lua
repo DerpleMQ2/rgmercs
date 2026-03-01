@@ -324,7 +324,7 @@ local _ClassConfig = {
             if combatState == "combat" and Config:GetSetting('DoBattleRez') and Core.OkayToNotHeal() then
                 if Casting.AAReady("Blessing of Resurrection") then
                     rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
-                elseif mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
+                elseif mq.TLO.FindItem("=Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("=Water Sprinkler of Nem Ankh")() then
                     rezAction = okayToRez and Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 end
             else
