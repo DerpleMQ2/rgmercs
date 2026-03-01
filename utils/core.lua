@@ -243,16 +243,18 @@ function Core.GetMainAssistTargetID()
 
     -- check if the MA is an actor peer
     if heartbeat and heartbeat.Data then
-        local targetID = tonumber(heartbeat.Data.AutoTargetID) or 0
-        if targetID and type(targetID) == 'number' then
+        local paused = heartbeat.Data.State == "Paused"
+        local rawTarget = paused and heartbeat.Data.Target or heartbeat.Data.AutoTargetID
+        local targetID = tonumber(rawTarget) or 0
+        if targetID > 0 then
             assistId = targetID
             assistTarget = mq.TLO.Spawn(targetID)
             Logger.log_verbose("\atGetMainAssistTargetID\aw() \ayFindAutoTarget Assist's Target via Actors :: %s (%s)",
                 assistTarget.CleanName() or "None", targetID)
-        end
-        if heartbeat.Data.TargetIsNamed then
-            Globals.AutoTargetIsNamed = true
-            assistTargetIsNamed = true
+            if heartbeat.Data.TargetIsNamed then
+                Globals.AutoTargetIsNamed = true
+                assistTargetIsNamed = true
+            end
         end
         -- check if the MA is a dannet peer
     elseif mq.TLO.DanNet(Globals.MainAssist)() then
