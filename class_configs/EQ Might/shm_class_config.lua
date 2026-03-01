@@ -240,6 +240,7 @@ local _ClassConfig = {
             -- "Spirit of the Leopard",
             "Talisman of the Jaguar", -- EQ Might Custom, Level 61
             "Spirit of the Jaguar",
+            "Talisman of the Puma",
             "Spirit of the Puma",
         },
         ["SlowProcBuff"] = {
@@ -1006,7 +1007,7 @@ local _ClassConfig = {
             {
                 name = "HasteBuff",
                 type = "Spell",
-                active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
+                load_cond = function() return Config:GetSetting('DoHaste') and not Casting.CanUseAA("Talisman of Celerity") end,
                 cond = function(self, spell, target)
                     if Casting.CanUseAA("Pet Affinity") then return false end
                     return Casting.PetBuffCheck(spell)
