@@ -35,13 +35,13 @@ return {
             "Frostbound Covenant",
             "Frostbound Alliance",
         },
-        ['DichoSpell'] = {
-            "Reciprocal Fire",
-            "Ecliptic Fire",
-            "Composite Fire",
-            "Dissident Fire",
-            "Dichotomic Fire",
-        },
+        -- ['DichoSpell'] = {
+        --     "Reciprocal Fire",
+        --     "Ecliptic Fire",
+        --     "Composite Fire",
+        --     "Dissident Fire",
+        --     "Dichotomic Fire",
+        -- },
         ['IceClaw'] = {
             "Claw of Tsikut",
             "Claw of the Void",

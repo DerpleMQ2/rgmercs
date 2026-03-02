@@ -545,7 +545,7 @@ return {
         "Ralthazor",
         " Ralthazor, Fabled Champion of Marr",
         " The Fabled Bromal Rythat",
-        " The Fabled Lord Mithaniel Marr",
+        " The Fabled Lord Mithaniel Marr ",
         " The Fabled Rydda`Dar", },
 
     ["poair"] = {
@@ -857,6 +857,7 @@ return {
         " Animated Granite Guardian",
         " Animated Granite Titan",
         " Celeste the Silent Paw",
+        "Grimblade Skittermaw",
         " Hartini the Smart",
         " Icehoof",
         " Nocturna the Stealth Striker",
