@@ -240,6 +240,10 @@ local function RGInit(...)
                 Globals.Minimized = true
                 break
             end
+            if v == "paused" then
+                Globals.PauseMain = true
+                break
+            end
         end
     end
 
