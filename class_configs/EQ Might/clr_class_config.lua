@@ -313,6 +313,7 @@ local _ClassConfig = {
             "Reproval",
             "Chromastrike",
             "Reproach",
+            "Ancient: Chaos Censure",
             "Order",
             "Condemnation",
             "Judgment",
