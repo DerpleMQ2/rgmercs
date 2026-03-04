@@ -342,7 +342,7 @@ local function Main()
             Globals.IgnoredTargetIDs = Set.new({})
             Globals.AutoTargetID = 0
             Globals.AutoTargetIsNamed = false
-            --Globals.AggroTargetID = 0
+            Globals.AggroTargetID = 0
         end
         mq.delay(100)
         Globals.CurZoneId = mq.TLO.Zone.ID()
@@ -434,9 +434,9 @@ local function Main()
         -- This will find a valid target and set it to : Globals.AutoTargetID
         Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
         -- finds the AggroTarget for a tank mode character
-        -- if Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') then
-        --     Combat.TankAggroScan()
-        -- end
+        if Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') then
+            Combat.TankAggroScan()
+        end
     end
 
     if Combat.OkToEngage(Globals.AutoTargetID) then

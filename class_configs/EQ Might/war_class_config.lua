@@ -198,8 +198,20 @@ local _ClassConfig = {
                 return combat_state == "Downtime" and Casting.OkayToBuff() and Casting.AmIBuffable()
             end,
         },
+        { --Actions to lock down xtarg haters
+            name = 'HateTools(AggroTarget)',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            load_cond = function() return Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') end,
+            targetId = function(self) return Targeting.CheckForAggroTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                return combat_state == "Combat"
+            end,
+        },
         { --Actions that establish or maintain hatred
-            name = 'HateTools',
+            name = 'HateTools(AutoTarget)',
             state = 1,
             steps = 1,
             doFullRotation = true,
@@ -316,7 +328,41 @@ local _ClassConfig = {
             },
 
         },
-        ['HateTools'] = {
+        ['HateTools(AggroTarget)'] = {
+            { --more valuable on laz because we have less hate tools and no other hatelist + 1 abilities
+                name = "Taunt",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return Targeting.GetTargetDistance(target) < 30
+                end,
+            },
+            {
+                name = "Attention",
+                type = "Disc",
+            },
+            {
+                name = "Xeno's Faceguard",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Xeno's Faceguard")() end,
+            },
+            {
+                name = "Blast of Anger",
+                type = "AA",
+            },
+            {
+                name = "Bladed Fang Mantle",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Bladed Fang Mantle")() end,
+            },
+            {
+                name = "AddHate",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return Casting.DetSpellCheck(discSpell)
+                end,
+            },
+        },
+        ['HateTools(AutoTarget)'] = {
             { --more valuable on laz because we have less hate tools and no other hatelist + 1 abilities
                 name = "Taunt",
                 type = "Ability",

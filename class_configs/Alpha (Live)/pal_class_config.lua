@@ -950,8 +950,20 @@ local _ClassConfig = {
                 return combat_state == "Downtime" and Casting.OkayToBuff()
             end,
         },
+        { --Actions to lock down xtarg haters
+            name = 'HateTools(AggroTarget)',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            load_cond = function() return Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') end,
+            targetId = function(self) return Targeting.CheckForAggroTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') then return false end
+                return combat_state == "Combat"
+            end,
+        },
         { --Actions that establish or maintain hatred
-            name = 'HateTools',
+            name = 'HateTools(AutoTarget)',
             state = 1,
             steps = 1,
             load_cond = function(self) return Core.IsTanking() end,
@@ -1260,7 +1272,36 @@ local _ClassConfig = {
                 type = "AA",
             },
         },
-        ['HateTools'] = {
+        ['HateTools(AggroTarget)'] = {
+            --used when we've lost hatred after it is initially established
+            {
+                name = "Force of Disruption",
+                type = "AA",
+            },
+            {
+                name = "CrushTimer6",
+                type = "Spell",
+            },
+            {
+                name = "StunTimer4",
+                type = "Spell",
+            },
+            {
+                name = "Taunt",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return Targeting.GetTargetDistance(target) < 30
+                end,
+            },
+            {
+                name = "ForHonor",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell)
+                end,
+            },
+        },
+        ['HateTools(Autotarget)'] = {
             --used when we've lost hatred after it is initially established
             {
                 name = "Ageless Enmity",

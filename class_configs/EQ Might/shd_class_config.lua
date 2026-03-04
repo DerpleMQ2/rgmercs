@@ -449,8 +449,20 @@ local _ClassConfig = {
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
             end,
         },
+        { --Actions to lock down xtarg haters
+            name = 'HateTools(AggroTarget)',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            load_cond = function() return Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') end,
+            targetId = function(self) return Targeting.CheckForAggroTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                return combat_state == "Combat"
+            end,
+        },
         { --Actions that establish or maintain hatred
-            name = 'HateTools',
+            name = 'HateTools(AutoTarget)',
             state = 1,
             steps = 1,
             doFullRotation = true,
@@ -740,7 +752,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['HateTools'] = {
+        ['HateTools(AutoTarget)'] = {
             { --more valuable on laz because we have less hate tools and no other hatelist + 1 abilities
                 name = "Taunt",
                 type = "Ability",
@@ -813,6 +825,41 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     return mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
                 end,
+            },
+        },
+        ['HateTools(AggroTarget)'] = {
+            {
+                name = "Taunt",
+                type = "Ability",
+                tooltip = Tooltips.Taunt,
+            },
+            {
+                name = "Xeno's Faceguard",
+                type = "Item",
+                load_cond = function(self) return mq.TLO.FindItem("=Xeno's Faceguard")() end,
+            },
+            {
+                name = "Terror",
+                type = "Spell",
+                tooltip = Tooltips.Terror,
+                load_cond = function(self) return Config:GetSetting('DoTerror') end,
+            },
+            {
+                name = "Terror2",
+                type = "Spell",
+                tooltip = Tooltips.Terror,
+                load_cond = function(self) return Config:GetSetting('DoTerror') end,
+            },
+            {
+                name = "Terror3",
+                type = "Spell",
+                tooltip = Tooltips.Terror,
+                load_cond = function(self) return Config:GetSetting('DoTerror') end,
+            },
+            {
+                name = "ForPower",
+                type = "Spell",
+                tooltip = Tooltips.ForPower,
             },
         },
         ['Burn'] = {
