@@ -30,7 +30,7 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           git log --no-merges --pretty=format:"- [%s](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H)%n%n%b%n~%an" ${PREV:+$PREV..}HEAD \
-          | awk '/^~/{print ""; print; next} {print}' > rg_release_notes.md
+          | awk '/^~/{print ""; print; next} /^$/{if(!blank){print}; blank=1; next} {blank=0; print}' > rg_release_notes.md
           cat rg_release_notes.md
 
       - name: Publish to RedGuides
