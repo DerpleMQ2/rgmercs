@@ -2452,6 +2452,10 @@ function Casting.StunImmuneTarget(target)
     return Modules:ExecModule("Class", "TargetIsImmune", "Stun", targetId)
 end
 
+function Casting.NoLevZone()
+    return Config.TempSettings.NoLevZone or false
+end
+
 --- Return the proper spell ID based on subscription level and "Spell Unlocker" purchase
 --- @param spell MQSpell The spell effect to check for
 --- @return number spellId The proper ID of the spell to use in (de)buff checks

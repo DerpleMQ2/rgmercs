@@ -546,3 +546,7 @@ mq.event('Flagged1', "You receive a character flag!", function()
         Config:GetSetting('AnnounceToRaidIfInRaid'))
 end)
 -- [ END Character Flag Events] --
+
+mq.event('NoLevZone', "You have entered an area where levitation effects do not function.", function()
+    Config.TempSettings.NoLevZone = true
+end)

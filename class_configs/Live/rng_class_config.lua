@@ -1146,6 +1146,7 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('DoRunSpeed') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
+                    if Config.TempSettings.NoLevZone then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
