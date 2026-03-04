@@ -630,6 +630,7 @@ return {
                     return Casting.IHaveBuff(Casting.GetAASpell(aaName))
                 end,
                 cond = function(self, aaName, target)
+                    if Config.TempSettings.NoLevZone then return false end
                     return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
@@ -639,6 +640,7 @@ return {
                 load_cond = function() return Config:GetSetting('DoMoveBuffs') and not Casting.CanUseAA("Spirit of Eagle") end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
+                    if Config.TempSettings.NoLevZone then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },

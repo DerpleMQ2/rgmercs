@@ -1271,9 +1271,11 @@ return {
         "Flowkeeper Berta ",
         "Gravitus Gargantua ",
         "Ignatius the Scorched Scarab ",
+        "Ignatius the Fallen Paladin", -- Scarab add
         "Lucinda the Luminous Ladybug ",
         "Sandbound Sentinel ",
         "Sirocco ",
+        "Mistral", -- Sirocco add, need to kill fast.
         "Geomancer Blackquill ",
     },
 

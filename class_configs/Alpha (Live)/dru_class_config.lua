@@ -1281,6 +1281,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     local bookSpell = self:GetResolvedActionMapItem('MoveSpells')
                     local aaSpell = Casting.GetAASpell(aaName)
+                    if Config.TempSettings.NoLevZone then return false end
                     if not Config:GetSetting('DoMoveBuffs') or (bookSpell and bookSpell.Level() or 999) > (aaSpell.Level() or 0) then return false end
 
                     return Casting.GroupBuffAACheck(aaName, target)
@@ -1291,6 +1292,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
+                    if Config.TempSettings.NoLevZone then return false end
                     local aaSpellLvl = mq.TLO.Me.AltAbility("Spirit of Eagles").Spell.Trigger(1).Level() or 0
                     if not Config:GetSetting("DoMoveBuffs") or aaSpellLvl >= (spell.Level() or 0) then return false end
                     return Casting.GroupBuffCheck(spell, target)
@@ -1590,7 +1592,7 @@ local _ClassConfig = {
             Category = "Group",
             Tooltip = "Use Temp HP Buff (Only for WAR, other tanks have their own)",
             RequiresLoadoutChange = true,
-            Default = true,
+            Default = false,
             FAQ = "Why isn't my Temp HP Buff being used?",
             Answer = "You either have [DoTempHP] disabled, or you don't have a Warrior in your group (Other tanks have their own Temp HP Buff).",
         },
