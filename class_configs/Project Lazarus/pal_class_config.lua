@@ -545,8 +545,20 @@ return {
                 return combat_state == "Downtime" and Casting.OkayToBuff() and Core.OkayToNotHeal()
             end,
         },
+        { --Actions to lock down xtarg haters
+            name = 'HateTools(AggroTarget)',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            load_cond = function() return Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') end,
+            targetId = function(self) return Targeting.CheckForAggroTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                return combat_state == "Combat"
+            end,
+        },
         { --Actions that establish or maintain hatred
-            name = 'HateTools',
+            name = 'HateTools(AutoTarget)',
             state = 1,
             steps = 1,
             doFullRotation = true,
@@ -803,7 +815,28 @@ return {
                 end,
             },
         },
-        ['HateTools'] = {
+        ['HateTools(AggroTarget)'] = {
+            { --more valuable on laz because we have less hate tools and no other hatelist + 1 abilities
+                name = "Taunt",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return Targeting.GetTargetDistance(target) < 30
+                end,
+            },
+            {
+                name = "Force of Disruption",
+                type = "AA",
+            },
+            {
+                name = "StunTimer5",
+                type = "Spell",
+            },
+            {
+                name = "StunTimer4",
+                type = "Spell",
+            },
+        },
+        ['HateTools(AutoTarget)'] = {
             { --more valuable on laz because we have less hate tools and no other hatelist + 1 abilities
                 name = "Taunt",
                 type = "Ability",

@@ -333,8 +333,20 @@ local _ClassConfig = {
                 return combat_state == "Downtime" and Casting.OkayToBuff() and Casting.AmIBuffable()
             end,
         },
+        { --Actions to lock down xtarg haters
+            name = 'HateTools(AggroTarget)',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            load_cond = function() return Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') end,
+            targetId = function(self) return Targeting.CheckForAggroTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') then return false end
+                return combat_state == "Combat"
+            end,
+        },
         { --Actions that establish or maintain hatred
-            name = 'HateTools',
+            name = 'HateTools(AutoTarget)',
             state = 1,
             steps = 1,
             load_cond = function() return Core.IsTanking() end,
@@ -489,64 +501,25 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['HateTools'] = {
-            --used when we've lost hatred after it is initially established
-            {
-                name = "Ageless Enmity",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
-                end,
-            },
-            --used to jumpstart hatred on named from the outset and prevent early rips from burns
+        ['HateTools(AutoTarget)'] = {
             {
                 name = "Attention",
                 type = "Disc",
-                cond = function(self, discSpell, target)
-                    return Globals.AutoTargetIsNamed
-                end,
             },
-            --used to reinforce hatred after it is initially established
             {
                 name = "Blast of Anger",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
-                end,
-            },
-            {
-                name = "Area Taunt",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    --if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
-                name = "Projection of Fury",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Globals.AutoTargetIsNamed and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
-                end,
             },
             {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
+                    return Targeting.GetTargetDistance(target) < 30
                 end,
             },
             {
                 name = "AbsorbTaunt",
                 type = "Disc",
-            },
-            {
-                name = "AEBlades",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    if not Config:GetSetting('DoAEDamage') then return false end
-                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
-                end,
             },
             {
                 name = "AddHate1",
@@ -559,21 +532,6 @@ local _ClassConfig = {
                 name = "AddHate2",
                 type = "Disc",
             },
-            {
-                name = "AggroPet",
-                type = "Disc",
-                cond = function(self, discSpell, target)
-                    return Globals.AutoTargetIsNamed
-                end,
-            },
-            -- { --this appears to have incredibly limited usage and the line was discontinued
-            --     name = "AERoar",
-            --     type = "Disc",
-            --     cond = function(self, discSpell)
-            --         return Core.IsModeActive("Tank") and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
-            --             Config:GetSetting('DoAEAggro')
-            --     end,
-            -- },
         },
         ['EmergencyDefenses'] = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation

@@ -408,6 +408,35 @@ function Combat.MATargetScan(radius, zradius)
     return killId
 end
 
+function Combat.TankAggroScan()
+    Globals.AggroTargetId = 0
+
+    if Globals.ForceTargetID > 0 then
+        Logger.log_verbose("TankAggroScan: Force Target detected, Aggro Target disabled.")
+        return
+    end
+
+    local xtCount = mq.TLO.Me.XTarget() or 0
+    local assistRange = Config:GetSetting('AssistRange')
+
+    for i = 1, xtCount do
+        local xtarg = mq.TLO.Me.XTarget(i)
+        if xtarg() then
+            local xtId = xtarg.ID() or 0
+            if xtId > 0 and xtId ~= Globals.AutoTargetID and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) then
+                if xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= assistRange and Globals.Constants.RGNotMezzedAnims:contains(xtarg.Animation()) then
+                    if Combat.OkToEngagePreValidateId(xtId) then
+                        Logger.log_verbose("TankAggroScan: Found Aggro Target: %s (id %d).", xtarg.DisplayName(), xtId)
+                        Config.Globals.AggroTargetID = xtId
+                        return
+                    end
+                end
+            end
+        end
+    end
+    Logger.log_verbose("TankAggroScan: No Aggro Target found.")
+end
+
 --- Sets the AutoTarget to that of your group or raid MA.
 function Combat.GetGroupOrRaidAssistTargetId()
     -- maintained so as to not cause a breaking change.

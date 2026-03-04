@@ -36,6 +36,13 @@ function Targeting.GetAutoTarget()
     return mq.TLO.Spawn(string.format("id %d", Globals.AutoTargetID))
 end
 
+--- Retrieves the current auto-target.
+---
+--- @return MQSpawn The current auto-target.
+function Targeting.GetAggroTarget()
+    return mq.TLO.Spawn(string.format("id %d", Globals.AggroTargetID))
+end
+
 --- Clears the current target.
 ---
 --- This function is used to clear any selected target in the game.
@@ -44,6 +51,7 @@ function Targeting.ClearTarget()
         Logger.log_debug("Clearing Target")
         Globals.AutoTargetID = 0
         Globals.AutoTargetIsNamed = false
+        Globals.AggroTargetID = 0
         if Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Globals.ForceTargetID) then Globals.ForceTargetID = 0 end
         Globals.ForceCombatID = 0
         if mq.TLO.Stick.Status():lower() == "on" then Movement:DoStickCmd("off") end
@@ -612,6 +620,10 @@ end
 
 function Targeting.CheckForAutoTargetID()
     return mq.TLO.Target.ID() == Globals.AutoTargetID and { Globals.AutoTargetID, } or {}
+end
+
+function Targeting.CheckForAggroTargetID()
+    return (Globals.AggroTargetID or 0) > 0 and { Globals.AggroTargetID, } or {}
 end
 
 function Targeting.InSpellRange(spell, target)
