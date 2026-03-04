@@ -60,9 +60,9 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Icon = Icons.FA_HEART,
         IconImage = OptionsUI.LoadIcon("swordicon"),
         Headers = {
-            { Name = 'Targeting',   Categories = { "Targeting Behavior", "MA Target Selection", }, },          -- Auto engage, med break, stay on target, etc
-            { Name = 'Assisting',   Categories = { "Assisting", }, },                                          -- this will include pet and merc percentages/commands
-            { Name = 'Positioning', Categories = { "General Positioning", "Tank Positioning", "Archery", }, }, -- stick, face, etc
+            { Name = 'Targeting',   Categories = { "Targeting Behavior", "MA Target Selection", "Tank Target Selection", }, }, -- Auto engage, med break, stay on target, etc
+            { Name = 'Assisting',   Categories = { "Assisting", }, },                                                          -- this will include pet and merc percentages/commands
+            { Name = 'Positioning', Categories = { "General Positioning", "Tank Positioning", "Archery", }, },                 -- stick, face, etc
             { Name = 'Burning',     Categories = { "Burning", }, },
             { Name = 'Tanking',     Categories = { "Tanking", }, },
         },
@@ -510,9 +510,12 @@ function OptionsUI:RenderCategorySettings(category)
 
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ((row_height - text_height) / 2))
 
+                        local columnWidth = ImGui.GetColumnWidth()
+                        local iconWidth = hasWarning and ImGui.CalcTextSize(Icons.MD_WARNING) or 0
+                        local selectableWidth = columnWidth - iconWidth - (hasWarning and ImGui.GetStyle().ItemSpacing.x or 0)
                         ImGui.PushStyleColor(ImGuiCol.HeaderHovered, IM_COL32(0, 0, 0, 0))
                         ImGui.PushStyleColor(ImGuiCol.HeaderActive, Ui.ChangeColorAlpoha(Globals.Constants.Colors.Green, 0.1))
-                        if ImGui.Selectable(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx)))) then
+                        if ImGui.Selectable(string.format("%s", settingDefaults.DisplayName or (string.format("None %d", idx))), false, ImGuiSelectableFlags.None, ImVec2(selectableWidth, 0)) then
                             ImGui.SetClipboardText(settingName)
                             table.insert(self.ToastStates, {
                                 active = true,
