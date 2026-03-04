@@ -310,7 +310,7 @@ _ClassConfig    = {
             "Lesser Shielding",
             "Minor Shielding",
         },
-        ['ShortDurDmgShield'] = {
+        ['SkinDS'] = {
             -- Use at the start of the DPS loop
             "Searing Skin XI",
             "Boiling Skin",
@@ -946,7 +946,17 @@ _ClassConfig    = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.SpellInCooldown()
+                return combat_state == "Combat"
+            end,
+        },
+        {
+            name = 'SkinDS',
+            state = 1,
+            steps = 1,
+            load_cond = function(self) return Config:GetSetting('DoSkinDS') and self:GetResolvedActionMapItem('SkinDS') end,
+            targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
             end,
         },
         {
@@ -1377,7 +1387,7 @@ _ClassConfig    = {
                 end,
             },
             {
-                name = "ShortDurDmgShield",
+                name = "SkinDS",
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.PetBuffCheck(spell)
@@ -1698,6 +1708,16 @@ _ClassConfig    = {
                 end,
             },
         },
+        ['SkinDS'] = {
+            {
+                name = "SkinDS",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Casting.CastReady(spell) then return false end
+                    return Casting.GroupBuffCheck(spell, target, false, true)
+                end,
+            },
+        },
     },
     ['Spells']            = {
         {
@@ -1735,6 +1755,7 @@ _ClassConfig    = {
                 { name = "TwinCast", },
                 { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malaise") end, },
                 { name = "PetHealSpell", },
+                { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1744,6 +1765,7 @@ _ClassConfig    = {
                 { name = "GroupCotH", },
                 { name = "ManaRodSummon", },
                 { name = "PetHealSpell", },
+                { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1752,6 +1774,7 @@ _ClassConfig    = {
             spells = {
                 { name = "FireOrbSummon", },
                 { name = "PetHealSpell", },
+                { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1762,6 +1785,7 @@ _ClassConfig    = {
                 { name = "PetManaNuke", },
                 { name = "PetHealSpell", },
                 { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
+                { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1771,6 +1795,7 @@ _ClassConfig    = {
             spells = {
                 { name = "GatherMana", },
                 { name = "PetHealSpell", },
+                { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1780,6 +1805,7 @@ _ClassConfig    = {
             spells = {
                 { name = "EarthPetItemSummon", },
                 { name = "PetHealSpell", },
+                { name = "SkinDS",             cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1789,6 +1815,7 @@ _ClassConfig    = {
             spells = {
                 { name = "FirePetItemSummon", },
                 { name = "PetHealSpell", },
+                { name = "SkinDS",            cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1798,6 +1825,7 @@ _ClassConfig    = {
             spells = {
                 { name = "SelfManaRodSummon", },
                 { name = "PetHealSpell", },
+                { name = "SkinDS",            cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1806,6 +1834,7 @@ _ClassConfig    = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "PetHealSpell", },
+                { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1813,6 +1842,7 @@ _ClassConfig    = {
             gem = 14,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "SkinDS",       cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "PetHealSpell", },
             },
         },
@@ -2032,6 +2062,15 @@ _ClassConfig    = {
             Min = 1,
             Max = 6,
             ConfigType = "Advanced",
+        },
+        ['DoSkinDS']       = {
+            DisplayName = "Use Skin DS",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Tooltip = "Use your short duration damage shield (Skin line) on the MA during combat.",
+            RequiresLoadoutChange = true,
+            Default = false,
         },
     },
     ['ClassFAQ']          = {
