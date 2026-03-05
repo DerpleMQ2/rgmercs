@@ -409,10 +409,10 @@ function Combat.MATargetScan(radius, zradius)
 end
 
 function Combat.TankAggroScan()
-    Globals.AggroTargetId = 0
+    Globals.AggroTargetID = 0
 
-    if Globals.ForceTargetID > 0 then
-        Logger.log_verbose("TankAggroScan: Force Target detected, Aggro Target disabled.")
+    if Globals.ForceTargetID > 0 and Config:GetSetting('AggroScanRespectFT') then
+        Logger.log_verbose("TankAggroScan: Respecting the Forced Target, aborting checks.")
         return
     end
 
@@ -427,7 +427,7 @@ function Combat.TankAggroScan()
                 if xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= assistRange and Globals.Constants.RGNotMezzedAnims:contains(xtarg.Animation()) then
                     if Combat.OkToEngagePreValidateId(xtId) then
                         Logger.log_verbose("TankAggroScan: Found Aggro Target: %s (id %d).", xtarg.DisplayName(), xtId)
-                        Config.Globals.AggroTargetID = xtId
+                        Globals.AggroTargetID = xtId
                         return
                     end
                 end
