@@ -752,6 +752,15 @@ Config.DefaultConfig                                     = {
             return false, ""
         end,
     },
+    ['AggroScanRespectFT']         = {
+        DisplayName = "Respect Forced Target",
+        Group = "Combat",
+        Header = "Targeting",
+        Category = "Tank Target Selection",
+        Index = 2,
+        Tooltip = "If the Tank Aggro Scan is enabled and the current Auto Target is forced, stay on that target without switching to an Aggro Target.",
+        Default = true,
+    },
 
     -- Assisting
     ['DoAutoEngage']               = {
