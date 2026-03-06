@@ -17,14 +17,14 @@ local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
-    _version            = "1.0 - Live",
-    _author             = "Derple, Grimmier",
+    _version            = "1.1 - Live",
+    _author             = "Derple, Grimmier, Algar",
     ['Modes']           = {
         'DPS',
     },
     ['ModeChecks']      = {
         -- necro can AA Rez
-        IsRezing   = function() return Config:GetSetting('BattleRez') or Targeting.GetXTHaterCount() == 0 end,
+        IsRezing   = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
         CanCharm   = function() return true end,
         IsCharming = function() return (Config:GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
     },
@@ -150,7 +150,7 @@ local _ClassConfig = {
             "Malevolent Covenant",
             "Malevolent Alliance",
         },
-        ['DichoSpell'] = {
+        ['DichoDot'] = {
             ---DichoSpell >= LVL101
             "Ecliptic Paroxysm",
             "Composite Paroxysm",
@@ -180,7 +180,7 @@ local _ClassConfig = {
             "Call Skeleton Crush",
             "Call Skeleton Swarm",
         },
-        ['HealthTaps'] = {
+        ['Lifetap'] = {
             ---HealthTaps >= LVL1
             "Soulrip VII",
             "Drain Essence XXIII",
@@ -244,6 +244,23 @@ local _ClassConfig = {
             "Dark Leech",
             "Leech",
         },
+        ['ManaDrain'] = {
+            --Mana Drain with Group Mana Recourse
+            "Mind Wrack XIV",
+            "Mind Disintegrate",
+            "Mind Atrophy",
+            "Mind Erosion",
+            "Mind Exorciation",
+            "Mind Extraction",
+            "Mind Strip",
+            "Mind Abrasion",
+            "Thought Flay",
+            "Mind Decomposition",
+            "Mental Vivisection",
+            "Mind Dissection",
+            "Mind Flay",
+            "Mind Wrack",
+        },
         ['PoisonNuke1'] = {
             ---PoisonNuke >=LVL21
             "Schisming Venin",
@@ -292,7 +309,7 @@ local _ClassConfig = {
             "Coruscate Bones",   -- Level 95
             "Scorch Bones",      -- Level 90
         },
-        ['FireDot1'] = {
+        ['SearingDot'] = {
             ---FireDot1 >= LVL80
             "Searing Shadow XI",
             "Raging Shadow",
@@ -306,7 +323,7 @@ local _ClassConfig = {
             "Scorching Shadow",
             "Searing Shadow",
         },
-        ['FireDot2'] = {
+        ['DreadDot'] = {
             ---FireDot2 >= LVL10
             "Dread Pyre XIII",
             "Pyre of Illandrin",
@@ -328,7 +345,7 @@ local _ClassConfig = {
             "Boil Blood",
             "Heat Blood",
         },
-        ['FireDot2_2'] = {
+        ['DreadDot2'] = {
             ---FireDot2 >= LVL10
             "Dread Pyre XIII",
             "Pyre of Illandrin",
@@ -350,7 +367,7 @@ local _ClassConfig = {
             "Boil Blood",
             "Heat Blood",
         },
-        ['FireDot3'] = {
+        ['FlashDot'] = {
             ---FireDot3 >= LVL88 (QuickDOT)
             "Marith's Flashblaze",
             "Arcanaforged's Flashblaze",
@@ -362,7 +379,7 @@ local _ClassConfig = {
             "Brimtav's Flashblaze",
             "Tenak's Flashblaze",
         },
-        ['FireDot4'] = {
+        ['MoriDot'] = {
             ---FireDot4 >= LVL73 DOT
             "Pyre of Mori XIX",
             "Pyre of the Abandoned",
@@ -377,7 +394,7 @@ local _ClassConfig = {
             "Pyre of the Lifeless",
             "Pyre of the Fallen",
         },
-        ['Magic1'] = {
+        ['WoundDot'] = {
             ---Magic1 >= LVL51 SlowDot
             "Necrotizing Wounds VIII",
             "Putrefying Wounds",
@@ -392,7 +409,7 @@ local _ClassConfig = {
             "Splort",
             "Splurt",
         },
-        ['Magic2'] = {
+        ['HorrorDot'] = {
             ---Magic2 >=LVL67 DOT
             "Horror XV",
             "Extermination",
@@ -410,7 +427,7 @@ local _ClassConfig = {
             "Dark Nightmare",
             "Horror",
         },
-        ['Magic2_2'] = {
+        ['HorrorDot2'] = {
             ---Magic2 >=LVL67 DOT
             "Horror XV",
             "Extermination",
@@ -428,7 +445,7 @@ local _ClassConfig = {
             "Dark Nightmare",
             "Horror",
         },
-        ['Magic3'] = {
+        ['DeconDot'] = {
             ---Magic3 >=LVL87 QuickDot
             "Xirrim's Swift Deconstruction",
             "Blevak's Swift Deconstruction",
@@ -440,13 +457,20 @@ local _ClassConfig = {
             "Hral's Swift Deconstruction",
             "Ninavero's Swift Deconstruction",
         },
-        ['Magic4'] = {
+        ['ScourgeDot'] = {
             ---Magic4 >=LVL 97 DOT
             "Scourge of Eternity", -- Level 123 TOB
             "Scourge of Destiny",
             "Scourge of Fates",
         },
-        ['Disease1'] = {
+        ['ComboDot'] = { ---Combines GripDot and DecayDot
+            "Goremand's Grip of Decay",
+            "Fleshrot's Grip of Decay",
+            "Danvid's Grip of Decay",
+            "Mourgis' Grip of Decay",
+            "Livianus' Grip of Decay",
+        },
+        ['DecayDot'] = {
             ---Decay Line of Disease Spells >=LVL56 Slow DOT
             "Pustim's Decay",
             "Goremand's Decay",
@@ -464,13 +488,10 @@ local _ClassConfig = {
             "Dark Plague",
             "Cessation of Cor",
         },
-        ['Disease2'] = {
+        ['GripDot'] = {
             ---Grip Line of Disease Spells =LVL1 HAS DEBUFF
             "Grip of Pustim",
-            "Goremand's Grip of Decay",
-            "Fleshrot's Grip of Decay",
             "Grip of Quietus",
-            "Danvid's Grip of Decay",
             "Grip of Zorglim",
             "Grip of Kraz",
             "Grip of Jabaum",
@@ -480,11 +501,11 @@ local _ClassConfig = {
             "Plague",
             "Asystole",
             "Scourge",
-            "Infectious Cloud",
+            -- "Infectious Cloud",
             "Heart Flutter",
             "Disease Cloud",
         },
-        ['Disease3'] = {
+        ['SwiftDiseaseDot'] = {
             ---Sickness Life of Disease Spells >=LVL89 QuickDOT
             "Wremms's Swift Sickness",
             "Ogna's Swift Sickness",
@@ -496,7 +517,7 @@ local _ClassConfig = {
             "Prox's Swift Sickness",
             "Rilfed's Swift Sickness",
         },
-        ['Poison1'] = {
+        ['SwiftPoisonDot'] = {
             ---Poison1 >= LVL86 (QuickDOT)
             "Lherre's Swift Venom",
             "Dotal's Swift Venom",
@@ -508,7 +529,7 @@ local _ClassConfig = {
             "Hyboram's Swift Venom",
             "Burlabis' Swift Venom",
         },
-        ['Poison2'] = {
+        ['VenomDot'] = {
             ---Poison2 >=LVL1 (DOT)
             "Silkwhisper Venom",
             "Luggald Venom",
@@ -528,7 +549,7 @@ local _ClassConfig = {
             "Venom of the Snake",
             "Poison Bolt",
         },
-        ['Poison2_2'] = {
+        ['VenomDot2'] = {
             ---Poison2 >=LVL1 (DOT)
             "Silkwhisper Venom",
             "Luggald Venom",
@@ -548,7 +569,7 @@ local _ClassConfig = {
             "Venom of the Snake",
             "Poison Bolt",
         },
-        ['Poison3'] = {
+        ['HazeDot'] = {
             ---Poison3 >= LVL79 DOT
             "Khrosik's Pallid Haze",
             "Uncia's Pallid Haze",
@@ -563,7 +584,7 @@ local _ClassConfig = {
             "Visziaj's Pallid Haze",
             "Chaos Venom",
         },
-        ['Corruption1'] = {
+        ['PutrefactionDot'] = {
             ---Corruption1 >= LVL77
             "Putrefaction XI",
             "Deterioration",
@@ -679,6 +700,7 @@ local _ClassConfig = {
             "Restless Assassin",
             "Reliving Assassin",
             "Restless Assassin",
+            "Revived Assassin",
             "Unearthed Assassin",
             "Reborn Assassin",
             "Raised Assassin",
@@ -751,6 +773,11 @@ local _ClassConfig = {
             "Intensify Death",
             "Focus Death",
         },
+        ['FleshBuff'] = {
+            "Flesh to Toxin",  -- Level 119
+            "Flesh to Venom",  -- Level 109
+            "Flesh to Poison", -- Level 99
+        },
     },
     ['RotationOrder']   = {
         -- Downtime doesn't have state because we run the whole rotation at once.
@@ -788,13 +815,24 @@ local _ClassConfig = {
             end,
         },
         {
-            -- this will always run first in combat to check for things like FD or stand up
-            -- if you add to it make sure it remains pretty short because everythign will be
-            -- evalutated before we move to combat.
-            name = 'Safety',
-            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            name = 'Emergency',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (Targeting.IHaveAggro(Config:GetSetting('StartFDPct')) or Casting.IAmFeigning())
+                return Targeting.GetXTHaterCount() > 0 and
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99))
+            end,
+        },
+        {
+            name = 'Scent',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoScentDebuff') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.OkayToDebuff()
             end,
         },
         { --Keep things from running
@@ -819,22 +857,22 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'Scent',
+            name = 'DPS(MobHighHP)',
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('DoScentDebuff') end,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.OkayToDebuff()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Targeting.MobNotLowHP(Targeting.GetAutoTarget())
             end,
         },
         {
-            name = 'DPS',
+            name = 'DPS(MobLowHP)',
             state = 1,
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Targeting.MobHasLowHP(Targeting.GetAutoTarget())
             end,
         },
     },
@@ -847,7 +885,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return Config:GetSetting('DoLich') and Casting.SelfBuffCheck(spell) and
                         (not Config:GetSetting('DoUnity') or not Casting.AAReady("Mortifier's Unity")) and
-                        mq.TLO.Me.PctHPs() > Config:GetSetting('StopLichHP') and mq.TLO.Me.PctMana() < Config:GetSetting('StopLichMana')
+                        mq.TLO.Me.PctHPs() > Config:GetSetting('StopLichHP') and mq.TLO.Me.PctMana() < Config:GetSetting('StartLichMana')
                 end,
             },
             {
@@ -856,42 +894,61 @@ local _ClassConfig = {
                 cond = function(self, _)
                     local lichSpell = Core.GetResolvedActionMapItem('LichSpell')
 
-                    return lichSpell and lichSpell() and Casting.IHaveBuff(lichSpell) and
+                    return not (Config:GetSetting('DoUnity') and Casting.CanUseAA("Mortifier's Unity")) and lichSpell and lichSpell() and Casting.IHaveBuff(lichSpell) and
                         (mq.TLO.Me.PctHPs() <= Config:GetSetting('StopLichHP') or mq.TLO.Me.PctMana() >= Config:GetSetting('StopLichMana'))
                 end,
                 custom_func = function(self)
                     Core.SafeCallFunc("Stop Necro Lich", self.ClassConfig.HelperFunctions.CancelLich, self)
                 end,
             },
+            {
+                name = "FleshControl",
+                type = "CustomFunc",
+                cond = function(self, _)
+                    local fleshSpell = self:GetResolvedActionMapItem('FleshBuff')
+
+                    return fleshSpell and fleshSpell() and Casting.IHaveBuff(fleshSpell) and mq.TLO.Me.PctHPs() <= Config:GetSetting('StopLichHP')
+                end,
+                custom_func = function(self)
+                    Core.SafeCallFunc("Stop Flesh Buff", self.ClassConfig.HelperFunctions.CancelFlesh, self)
+                end,
+            },
         },
-        ['Safety'] = {
+        ['Emergency']       = {
+            {
+                name = "Death's Effigy",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('AggroFeign') then return false end
+                    return (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99) or (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Targeting.IHaveAggro(100))
+                end,
+            },
             {
                 name = "Death Peace",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not Casting.IAmFeigning() and mq.TLO.Me.PctHPs() < 75
+                    if not Config:GetSetting('AggroFeign') then return false end
+                    return (Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 99) or (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Targeting.IHaveAggro(100))
                 end,
             },
             {
-                name = "Harm Shield",
+                name = "Dying Grasp",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not Casting.IAmFeigning() and mq.TLO.Me.PctHPs() >= 75
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
             },
             {
-                name = "Stand Back Up",
-                type = "CustomFunc",
-                cond = function(self)
-                    return Casting.IAmFeigning() and Targeting.GetHighestAggroPct() <= Config:GetSetting('StopFDPct')
-                end,
-                custom_func = function(_)
-                    Core.DoCmd("/stand")
-                    return true
-                end,
+                name = "Embalmer's Carapace",
+                type = "AA",
+            },
+            {
+                name = "Lifetap",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLifetap') end,
             },
         },
-        ['Scent'] = {
+        ['Scent']           = {
             {
                 name = "Scent of Thule",
                 type = "AA",
@@ -907,7 +964,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['DPS'] = {
+        ['DPS(MobHighHP)']  = {
             {
                 name = "Summon Companion",
                 type = "AA",
@@ -918,171 +975,204 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Wake the Dead",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.SpawnCount("corpse radius 100")() >= Config:GetSetting('WakeDeadCorpseCnt')
-                end,
-            },
-            {
-                name = "Death Bloom",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and mq.TLO.Me.PctMana() < Config:GetSetting('DeathBloomPercent') and mq.TLO.Me.PctHPs() > 50
-                end,
-            },
-            {
-                name = "Dying Grasp",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and mq.TLO.Me.PctAggro() <= 50
-                end,
-            },
-            {
-                name = "Silent Casting",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 60
-                end,
-            },
-            {
-                name = "Life Burn",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoLifeBurn') and mq.TLO.Me.PctAggro() <= 25
-                end,
-            },
-            {
-                name = "ChaoticDebuff",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell)
-                end,
-            },
-            {
-                name = "CripplingTap",
-                type = "Spell",
-                cond = function(self, spell, target) return Casting.DetSpellCheck(spell) end,
-            },
-            {
-                name = "DichoSpell",
-                type = "Spell",
-            },
-            {
-                name = "SwarmPet",
-                type = "Spell",
-            },
-            {
-                name = "Disease3",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Magic3",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "FireDot3",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Disease2",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Poison1",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Poison2",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Poison2_2",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Disease1",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Magic2_2",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Poison3",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "Magic1",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
-            },
-            {
-                name = "PoisonNuke2",
-                type = "Spell",
-                cond = function(self, _) return Targeting.GetTargetPctHPs() > 50 and Casting.OkayToNuke() end,
-            },
-            {
-                name = "PoisonNuke1",
-                type = "Spell",
-                cond = function(self, _) return Casting.OkayToNuke() end,
-            },
-            {
                 name = "DurationTap",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+                load_cond = function(self) return Config:GetSetting('DoDurationTap') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
             },
             {
-                name = "FireDot1",
+                name = "DreadDot",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+                load_cond = function(self) return Config:GetSetting('DoDreadDot') > 1 end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
             },
             {
-                name = "FireDot2",
+                name = "ManaDrain",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+                cond = function(self, spell, target)
+                    return not Casting.IHaveBuff(spell.Name() .. " Recourse") and
+                        (mq.TLO.Target.PctMana() or -1) > 0 and mq.TLO.Group.LowMana(40)() > 2
+                end,
             },
             {
-                name = "FireDot2_2",
+                name = "VenomDot",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+                load_cond = function(self) return Config:GetSetting('DoVenomDot') > 1 end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
             },
             {
-                name = "FireDot4",
+                name = "ComboDot",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+                load_cond = function(self) return Config:GetSetting('DoComboDot') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "HorrorDot",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHorrorDot') > 1 end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
             },
             {
                 name = "GroupLeech",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+                load_cond = function(self) return Config:GetSetting('DoGroupLeech') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
             },
             {
-                name = "Corruption1",
+                name = "DichoDot",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+                load_cond = function(self) return Config:GetSetting('DoDichoDot') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
             },
             {
-                name = "DurationTap",
+                name = "SearingDot",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DotSpellCheck(spell) end,
+                load_cond = function(self) return Config:GetSetting('DoSearingDot') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
             },
             {
-                name = "HealthTaps",
+                name = "MoriDot",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoMoriDot') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "WoundDot",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoWoundDot') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "DecayDot",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoDecayDot') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "GripDot",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoGripDot') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "HazeDot",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHazeDot') end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "DreadDot2",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoDreadDot') > 2 end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "VenomDot2",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoVenomDot') > 2 end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "HorrorDot2",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHorrorDot') > 2 end,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "SwarmPet",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Globals.AutoTargetIsNamed and Casting.OkayToNuke()
+                end,
+            },
+            {
+                name = "PoisonNuke2",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke()
+                end,
+            },
+            {
+                name = "PoisonNuke1",
+                type = "Spell",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem('PoisonNuke2') end,
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke()
+                end,
             },
         },
-        ['Snare'] = {
+        ['DPS(MobLowHP)']   = {
+            {
+                name = "Lifetap",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLifetap') end,
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke() and Targeting.LightHealsNeeded(mq.TLO.Me)
+                end,
+            },
+            {
+                name = "SwarmPet",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke()
+                end,
+            },
+            {
+                name = "PoisonNuke2",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke()
+                end,
+            },
+            {
+                name = "PoisonNuke1",
+                type = "Spell",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem('PoisonNuke2') end,
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke()
+                end,
+            },
+            {
+                name = "FireNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.OkayToNuke()
+                end,
+            },
+        },
+        ['Snare']           = {
             {
                 name = "Encroaching Darkness",
                 type = "AA",
@@ -1100,7 +1190,14 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Burn'] = {
+        ['Burn']            = { -- TODO: Needs optimization. For now its all just kinda thrown in. --Algar
+            {
+                name = "Scent of Thule",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Globals.AutoTargetIsNamed
+                end,
+            },
             {
                 name = "OoW_Chest",
                 type = "Item",
@@ -1151,25 +1248,40 @@ local _ClassConfig = {
                 name = "Spire of Necromancy",
                 type = "AA",
             },
-        },
-        ['Downtime'] = {
-            {
-                name = "Stand Back Up",
-                type = "CustomFunc",
-                cond = function(self)
-                    return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
-                end,
-                custom_func = function(_)
-                    Core.DoCmd("/stand")
-                    return true
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
+                type = "Item",
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
+                name = "BestowBuff",
+                type = "Spell",
+                cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "Silent Casting",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() > 60
+                end,
+            },
+            {
+                name = "Dying Grasp",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Globals.AutoTargetIsNamed and mq.TLO.Me.PctAggro() <= 50
+                end,
+            },
+        },
+        ['Downtime']        = {
+            {
                 name = "Mortifier's Unity",
                 type = "AA",
-                active_cond = function(self) return Casting.IHaveBuff("Shield of Darkness") and Casting.IHaveBuff("Otherside") end,
                 cond = function(self, aaName)
-                    return Config:GetSetting('DoUnity') and Casting.SelfBuffAACheck(aaName)
+                    return Config:GetSetting('DoUnity') and mq.TLO.Me.PctHPs() > Config:GetSetting('StopLichHP') and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1193,11 +1305,25 @@ local _ClassConfig = {
             {
                 name = "Death Bloom",
                 type = "AA",
-                active_cond = function(self, aaName) return Casting.IHaveBuff(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
+                active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
                 cond = function(self, aaName) return mq.TLO.Me.PctMana() < Config:GetSetting('DeathBloomPercent') end,
             },
+            {
+                name = "BestowBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "FleshBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell)
+                    return mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart') and Casting.SelfBuffCheck(spell)
+                end,
+            },
         },
-        ['PetSummon'] = { --TODO: Double check these lists to ensure someone leveling doesn't have to change options to keep pets current at lower levels
+        ['PetSummon']       = { --TODO: Double check these lists to ensure someone leveling doesn't have to change options to keep pets current at lower levels
             {
                 name = "PetSpellWar",
                 type = "Spell",
@@ -1231,7 +1357,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['PetBuff'] = {
+        ['PetBuff']         = {
             {
                 name = "PetHaste",
                 type = "Spell",
@@ -1244,6 +1370,13 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
                 cond = function(self, spell) return Casting.PetBuffCheck(spell) end,
             },
+            {
+                name = "Companion's Aegis",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.PetBuffAACheck(aaName)
+                end,
+            },
         },
     },
     ['HelperFunctions'] = {
@@ -1252,6 +1385,11 @@ local _ClassConfig = {
             -- spa is positive spell affect
             local lichName = mq.TLO.Me.FindBuff("detspa hp and spa mana")()
             Core.DoCmd("/removebuff %s", lichName)
+        end,
+
+        CancelFlesh = function(self)
+            local fleshName = self:GetResolvedActionMapItem('FleshBuff')
+            Core.DoCmd("/removebuff %s", fleshName)
         end,
 
         StartLich = function(self)
@@ -1270,112 +1408,40 @@ local _ClassConfig = {
             end
         end,
     },
-    ['Spells']          = {
+    ['SpellList']       = {
         {
-            gem = 1,
+            name = "Default",
+            -- cond = function(self) return true end, --Kept here for illustration, this line could be removed in this instance since we aren't using conditions.
             spells = {
-                { name = "Disease2", },
-                { name = "Poison3", },
-            },
-        },
-        {
-            gem = 2,
-            spells = {
-                { name = "Poison2",  cond = function(self) return mq.TLO.Me.Level() < 86 end, },
-                { name = "Poison1", },
-                { name = "FireDot2", },
-            },
-        },
-        {
-            gem = 3,
-            spells = {
-                { name = "FireDot2",   cond = function(self) return mq.TLO.Me.Level() < 51 end, },
-                { name = "Magic1", },
-                { name = "FireDot2_2", },
-                { name = "GroupLeech", },
-            },
-        },
-        {
-            gem = 4,
-            spells = {
-                { name = "PoisonNuke1", cond = function(self) return mq.TLO.Me.Level() < 75 end, },
+                { name = "PoisonNuke1", cond = function(self) return not Core.GetResolvedActionMapItem('PoisonNuke2') end, },
                 { name = "PoisonNuke2", },
-                { name = "Poison2_2", },
-            },
-        },
-        {
-            gem = 5,
-            spells = {
-                { name = "HealthTaps", },
-                { name = "Poison2", },
-            },
-        },
-        {
-            gem = 6,
-            spells = {
-                { name = "DurationTap", },
-                { name = "Magic2", },
-                { name = "LichSpell", },
-            },
-        },
-        {
-            gem = 7,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
+                { name = "FireNuke", },
+                { name = "Lifetap",     cond = function(self) return Config:GetSetting('DoLifetap') end, },
                 { name = "CharmSpell",  cond = function(self) return Config:GetSetting('CharmOn') end, },
+                { name = "SnareDot",    cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Enchroaching Darkness") end, },
                 { name = "ScentDebuff", cond = function(self) return Config:GetSetting('DoScentDebuff') and not Casting.CanUseAA("Scent of Thule") end, },
-                { name = "Disease3", },
-                { name = "Disease1", },
-                { name = "Disease2", },
-            },
-        },
-        {
-            gem = 8,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "SnareDot",   cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Enchroaching Darkness") end, },
-                { name = "Magic1",     cond = function(self) return mq.TLO.Me.Level() > 70 and mq.TLO.Me.Level() < 87 end, },
-                { name = "Magic3", },
-                { name = "HealthTaps", },
-            },
-        },
-        {
-            gem = 9,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "FireDot2", cond = function(self) return mq.TLO.Me.Level() < 89 end, },
-                { name = "FireDot3", },
-                { name = "FDSpell", },
-            },
-        },
-        {
-            gem = 10,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "Poison3",  cond = function(self) return mq.TLO.Me.Level() < 85 end, },
+                { name = "LichSpell",   cond = function(self) return not Config:GetSetting('DoUnity') end, },
                 { name = "SwarmPet", },
-            },
-        },
-        {
-            gem = 11,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "Poison3",       cond = function(self) return mq.TLO.Me.Level() < 93 end, },
-                { name = "ChaoticDebuff", },
-            },
-        },
-        {
-            gem = 12,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "DichoSpell", },
-            },
-        },
-        {
-            gem = 13,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "AllianceSpell", cond = function(self) return Config:GetSetting('DoAlliance') end, },
+                { name = "DurationTap", cond = function(self) return Config:GetSetting('DoDurationTap') end, },
+                { name = "DreadDot",    cond = function(self) return Config:GetSetting('DoDreadDot') > 1 end, },
+                { name = "VenomDot",    cond = function(self) return Config:GetSetting('DoVenomDot') > 1 end, },
+                { name = "HorrorDot",   cond = function(self) return Config:GetSetting('DoHorrorDot') > 1 end, },
+                { name = "ComboDot",    cond = function(self) return Config:GetSetting('DoComboDot') end, },
+                { name = "GroupLeech",  cond = function(self) return Config:GetSetting('DoGroupLeech') end, },
+                { name = "DichoDot",    cond = function(self) return Config:GetSetting('DoDichoDot') end, },
+                { name = "SearingDot",  cond = function(self) return Config:GetSetting('DoSearingDot') end, },
+                { name = "MoriDot",     cond = function(self) return Config:GetSetting('DoMoriDot') end, },
+                { name = "WoundDot",    cond = function(self) return Config:GetSetting('DoWoundDot') end, },
+                { name = "DecayDot",    cond = function(self) return Config:GetSetting('DoDecayDot') end, },
+                { name = "GripDot",     cond = function(self) return Config:GetSetting('DoGripDot') end, },
+                { name = "HazeDot",     cond = function(self) return Config:GetSetting('DoHazeDot') end, },
+                { name = "DreadDot2",   cond = function(self) return Config:GetSetting('DoDreadDot') > 2 end, },
+                { name = "VenomDot2",   cond = function(self) return Config:GetSetting('DoVenomDot') > 2 end, },
+                { name = "HorrorDot2",  cond = function(self) return Config:GetSetting('DoHorrorDot') > 2 end, },
+                { name = "ManaDrain", },
+                { name = "FleshBuff",   cond = function(self) return not Config:GetSetting('DoUnity') or not Casting.CanUseAA("Mortifier's Unity") end, },
+                { name = "BestowBuff", },
+                { name = "PetBuff", },
             },
         },
     },
@@ -1400,7 +1466,7 @@ local _ClassConfig = {
             Tooltip = "1 = War, 2 = Rog",
             Type = "Combo",
             ComboOptions = { 'War', 'Rog', },
-            Default = 1,
+            Default = 2,
             Min = 1,
             Max = 2,
         },
@@ -1461,26 +1527,6 @@ local _ClassConfig = {
             Min = 1,
             Max = 99,
         },
-        ['StartFDPct']        = {
-            DisplayName = "FD Aggro Pct",
-            Group = "Abilities",
-            Header = "Utility",
-            Category = "Emergency",
-            Tooltip = "Aggro % at which to FD",
-            Default = 90,
-            Min = 1,
-            Max = 99,
-        },
-        ['StopFDPct']         = {
-            DisplayName = "Stand Aggro Pct",
-            Group = "Abilities",
-            Header = "Utility",
-            Category = "Emergency",
-            Tooltip = "Aggro % at which to Stand up from FD",
-            Default = 80,
-            Min = 1,
-            Max = 99,
-        },
         ['WakeDeadCorpseCnt'] = {
             DisplayName = "WtD Corpse Count",
             Group = "Abilities",
@@ -1522,6 +1568,17 @@ local _ClassConfig = {
             Min = 1,
             Max = 101,
         },
+        ['StartLichMana']     = {
+            DisplayName = "Start Lich Mana",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
+            Tooltip = "Start Lich at Mana Pct [x]",
+            RequiresLoadoutChange = false,
+            Default = 70,
+            Min = 1,
+            Max = 100,
+        },
         ['DoScentDebuff']     = {
             DisplayName = "Use Scent Debuff",
             Group = "Abilities",
@@ -1531,12 +1588,195 @@ local _ClassConfig = {
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = false,
         },
+        ['DoLifetap']         = {
+            DisplayName = "Do Lifetap",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Taps",
+            Index = 101,
+            Tooltip = "Use the your ST Lifetap nuke line.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['EmergencyStart']    = {
+            DisplayName = "Emergency HP%",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 101,
+            Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
+            Default = 50,
+            Min = 1,
+            Max = 100,
+            ConfigType = "Advanced",
+        },
+        ['AggroFeign']        = {
+            DisplayName = "Emergency Feign",
+            Group = "Abilities",
+            Header = "Utility",
+            Category = "Emergency",
+            Index = 102,
+            Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a mob detected as a 'named' by RGMercs (see Named tab)..",
+            Default = true,
+        },
+        ['DoDurationTap']     = {
+            DisplayName = "Do Duration Tap",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 101,
+            Tooltip = "Use your duration tap line of dots.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoDreadDot']        = {
+            DisplayName = "Do Dread Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 102,
+            Tooltip = "Select the number of Dread (Fire) dots to use.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { "Disabled", "Current Tier", "Current + Last Tier", },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+        },
+        ['DoVenomDot']        = {
+            DisplayName = "Do Venom Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 103,
+            Tooltip = "Select the number of Venom (Poison) dots to use.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { "Disabled", "Current Tier", "Current + Last Tier", },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+        },
+        ['DoHorrorDot']       = {
+            DisplayName = "Do Horror Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 104,
+            Tooltip = "Select the number of Horror (Magic) dots to use.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { "Disabled", "Current Tier", "Current + Last Tier", },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+        },
+        ['DoComboDot']        = {
+            DisplayName = "Do Combo Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 105,
+            Tooltip = "Use your Disease combination (Grip+Decay) line of dots.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoGroupLeech']      = {
+            DisplayName = "Do Group Leech",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 106,
+            Tooltip = "Use your Group Leech dot line.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
+        ['DoDichoDot']        = {
+            DisplayName = "Do Dicho Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 107,
+            Tooltip = "Use your Dichotomic Paroxysm dot line.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
+        ['DoSearingDot']      = {
+            DisplayName = "Do Searing Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 108,
+            Tooltip = "Use your Searing (Fire) dot line.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoMoriDot']         = {
+            DisplayName = "Do Mori Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 109,
+            Tooltip = "Use your Mori (Fire) dot line.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoWoundDot']        = {
+            DisplayName = "Do Wound Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 110,
+            Tooltip = "Use your Wound (Magic) dot line.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
+        ['DoDecayDot']        = {
+            DisplayName = "Do Decay Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 111,
+            Tooltip = "Use your Decay (Disease) dot line.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
+        ['DoGripDot']         = {
+            DisplayName = "Do Grip Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 112,
+            Tooltip = "Use your Grip (Disease) dot line.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
+        ['DoHazeDot']         = {
+            DisplayName = "Do Haze Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 113,
+            Tooltip = "Use your Haze (Poison) dot line.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoChestClick']      = {
+            DisplayName = "Do Chest Click",
+            Group = "Items",
+            Header = "Clickies",
+            Category = "Class Config Clickies",
+            Index = 101,
+            Tooltip = "Click your equipped chest.",
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
+        },
     },
     ['ClassFAQ']        = {
         {
             Question = "What is the current status of this class config?",
             Answer = "This class config is a current release aimed at official servers.\n\n" ..
                 "  This config is largely a port from older code, and has seen only minor adjustments. It has been flagged for revamp when we have the chance!\n\n" ..
+                " Some revamps have occured to provide more spell/dot options, but it's still rough around the edges!\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
