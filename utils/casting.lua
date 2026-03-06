@@ -801,14 +801,14 @@ end
 --- Determines whether the the PC should be shrunk.
 --- @return boolean True if the PC should be shrunk, false otherwise.
 function Casting.ShouldShrink()
-    return Config:GetSetting('DoShrink') and mq.TLO.Me.Height() > 2.2 and
+    return Config:GetSetting('DoShrink') and mq.TLO.Me.Height() >= 2.3 and
         (Config:GetSetting('ShrinkItem'):len() > 0) and Casting.OkayToBuff()
 end
 
 --- Determines whether the pet should be shrunk.
 --- @return boolean True if the pet should be shrunk, false otherwise.
 function Casting.ShouldShrinkPet()
-    return Config:GetSetting('DoShrinkPet') and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() > 1.8 and
+    return Config:GetSetting('DoShrinkPet') and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() >= 1.9 and
         (Config:GetSetting('ShrinkPetItem'):len() > 0) and Casting.OkayToPetBuff()
 end
 
