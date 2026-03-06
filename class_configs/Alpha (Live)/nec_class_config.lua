@@ -1267,7 +1267,7 @@ local _ClassConfig = {
             Tooltip = "1 = War, 2 = Rog",
             Type = "Combo",
             ComboOptions = { 'War', 'Rog', },
-            Default = 1,
+            Default = 2,
             Min = 1,
             Max = 2,
         },
