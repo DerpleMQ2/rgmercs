@@ -214,8 +214,10 @@ local _ClassConfig = {
         },
         ['DivineBuff'] = {
             --Divine Buffs REQUIRES extra spell slot because of the 90s recast
-            "Death Pact",
+            "Divine Incursion",
+            "Divine Interaction",
             "Divine Intervention",
+            "Death Pact",
         },
         ['RezSpell'] = {
             "Spiritual Awakening",
