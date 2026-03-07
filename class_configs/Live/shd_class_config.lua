@@ -856,7 +856,7 @@ local _ClassConfig = {
             doFullRotation = true,
             load_cond = function()
                 return Core.IsTanking() and
-                    ((Config:GetSetting('AETauntSpell') > 1 and Core.GetResolvedActionMapItem('AETauntSpell')) or (Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))))
+                    ((Config:GetSetting('AETauntSpell') > 1 and Core.GetResolvedActionMapItem('AETaunt')) or (Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))))
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)

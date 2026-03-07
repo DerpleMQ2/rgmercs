@@ -482,7 +482,7 @@ local _ClassConfig = {
                 if not Core.IsTanking() then return false end
                 local bladeDisc = Config:GetSetting('BladeDiscUse') > 1 and Core.GetResolvedActionMapItem('BladeDisc')
                 local hateAA = Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))
-                local tauntSpell = Config:GetSetting('AETauntSpell') and Core.GetResolvedActionMapItem('AETaunt')
+                local tauntSpell = Config:GetSetting('AETauntSpell') and Core.GetResolvedActionMapItem('AETauntSpell')
                 return bladeDisc or hateAA or tauntSpell
             end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
