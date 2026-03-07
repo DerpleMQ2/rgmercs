@@ -462,7 +462,7 @@ local function Main()
     if Globals.CurrentState == "Combat" then
         if ((Globals.GetTimeSeconds() - Globals.LastPetCmd) > 2) then
             Globals.LastPetCmd = Globals.GetTimeSeconds()
-            if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
+            if Config:GetSetting('DoPetCommands') and mq.TLO.Pet.ID() > 0 and Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct') then
                 Combat.PetAttack(Globals.AutoTargetID, true)
             end
         end
