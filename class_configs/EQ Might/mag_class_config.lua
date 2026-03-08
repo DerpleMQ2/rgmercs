@@ -877,23 +877,25 @@ _ClassConfig    = {
             {
                 name = "BigFireDD",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('ElementChoice') == 1 end,
                 cond = function(self, spell, target)
+                    if Config:GetSetting('ElementChoice') ~= 1 then return false end
                     return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "FireDD",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('ElementChoice') == 1 end,
                 cond = function(self, spell, target)
+                    if Config:GetSetting('ElementChoice') ~= 1 then return false end
                     return Targeting.MobHasLowHP(target)
                 end,
             },
             {
                 name = "MagicDD",
                 type = "Spell",
-                load_cond = function() return Config:GetSetting('ElementChoice') == 2 end,
+                cond = function(self, spell, target)
+                    return Config:GetSetting('ElementChoice') == 2
+                end,
             },
             {
                 name = "Turn Summoned",
@@ -1197,7 +1199,6 @@ _ClassConfig    = {
             Default = 1,
             Min = 1,
             Max = 2,
-            RequiresLoadoutChange = true,
         },
         ['DoSwarmPet']     = {
             DisplayName = "Swarm Pet Spell:",

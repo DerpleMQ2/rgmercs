@@ -1559,6 +1559,11 @@ end
 function Module:GiveTime()
     local combat_state = Combat.GetCachedCombatState()
 
+    if combat_state == "Downtime" and mq.TLO.Me.Invis() then
+        Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \arSkipping, Invis during downtime!")
+        return
+    end
+
     -- Main Module logic goes here.
     self:ValidateClickies()
 
@@ -1567,6 +1572,7 @@ function Module:GiveTime()
     local startingClickyIdx = maxClickiesPerFrame > 0 and self.ClickyRotationIndex or 1
     local clickies = Config:GetSetting('Clickies') or {}
     local numClickies = #clickies
+    local moving = mq.TLO.Me.Moving() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving()
     for clickyIdx = startingClickyIdx, numClickies do
         local clicky = clickies[clickyIdx]
         if clicky.itemName:len() > 0 and (clicky.enabled == nil or clicky.enabled == true) then
@@ -1577,98 +1583,102 @@ function Module:GiveTime()
             self.TempSettings.ClickyState[clicky.itemName] = self.TempSettings.ClickyState[clicky.itemName] or {}
             self.TempSettings.ClickyState[clicky.itemName].item = item
 
-            if clicky.combat_state == "Any" or clicky.combat_state == combat_state then
-                local target = mq.TLO.Me
-                local allConditionsMet = true
-                local conditionsCache = {}
-                for _, cond in ipairs(clicky.conditions or {}) do
-                    local condBlock = self:GetLogicBlockByType(cond.type)
-                    if condBlock then
-                        if condBlock.cond_targets then
-                            if cond.target == "Main Assist" then
-                                ---@diagnostic disable-next-line: cast-local-type
-                                target = Core.GetMainAssistSpawn()
-                            elseif cond.target == "Pet" then
+            Logger.log_verbose("\ayClicky: \awLooking for clicky item: \am%s \awfound: %s", clicky.itemName, Strings.BoolToColorString(item() ~= nil))
+            if item and item.Clicky then
+                if not moving or (item.Clicky.CastTime() or -1) == 0 then
+                    if clicky.combat_state == "Any" or clicky.combat_state == combat_state then
+                        local target = mq.TLO.Me
+                        local allConditionsMet = true
+                        local conditionsCache = {}
+                        for _, cond in ipairs(clicky.conditions or {}) do
+                            local condBlock = self:GetLogicBlockByType(cond.type)
+                            if condBlock then
+                                if condBlock.cond_targets then
+                                    if cond.target == "Main Assist" then
+                                        ---@diagnostic disable-next-line: cast-local-type
+                                        target = Core.GetMainAssistSpawn()
+                                    elseif cond.target == "Pet" then
+                                        ---@diagnostic disable-next-line: cast-local-type
+                                        target = mq.TLO.Me.Pet
+                                    elseif cond.target == "Auto Target" then
+                                        ---@diagnostic disable-next-line: cast-local-type
+                                        target = Targeting.GetAutoTarget()
+                                    end
+                                end
+                                Logger.log_super_verbose("\ayClicky: \awTesting Condition: \at%s\aw on target: \at%s (%s)", cond.type,
+                                    target and (target.CleanName() or "None") or "None",
+                                    cond.target or "Self")
+
+                                ---@diagnostic disable-next-line: deprecated --LuaJIT is based off of 5.1
+                                if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
+                                    Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \arFailed!")
+                                    allConditionsMet = false
+                                    table.insert(conditionsCache, false)
+                                    break
+                                else
+                                    Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \agSuccess!")
+                                    table.insert(conditionsCache, true)
+                                end
+                            end
+                        end
+
+                        clicky.conditionsCache = conditionsCache
+
+                        if allConditionsMet then
+                            target = mq.TLO.Me
+                            local buffCheckPassed = true
+                            local targetId = nil
+
+                            if clicky.target == "Self" then
+                                target = mq.TLO.Me
+
+                                buffCheckPassed = Casting.SelfBuffItemCheck(clicky.itemName)
+                            elseif clicky.target == "Pet" then
                                 ---@diagnostic disable-next-line: cast-local-type
                                 target = mq.TLO.Me.Pet
-                            elseif cond.target == "Auto Target" then
+                                buffCheckPassed = mq.TLO.Me.Pet.ID() > 0 and Casting.PetBuffItemCheck(clicky.itemName)
+                            elseif clicky.target == "Main Assist" then
+                                ---@diagnostic disable-next-line: cast-local-type
+                                target = Core.GetMainAssistSpawn()
+                                buffCheckPassed = Casting.GroupBuffItemCheck(clicky.itemName, target)
+                            elseif clicky.target == "Auto Target" then
                                 ---@diagnostic disable-next-line: cast-local-type
                                 target = Targeting.GetAutoTarget()
+                                buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
                             end
-                        end
-                        Logger.log_super_verbose("\ayClicky: \awTesting Condition: \at%s\aw on target: \at%s (%s)", cond.type, target and (target.CleanName() or "None") or "None",
-                            cond.target or "Self")
 
-                        ---@diagnostic disable-next-line: deprecated --LuaJIT is based off of 5.1
-                        if not Core.SafeCallFunc("Test clicky Condition", self:GetLogicBlockByType(cond.type).cond, self, target, unpack(cond.args or {})) then
-                            Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \arFailed!")
-                            allConditionsMet = false
-                            table.insert(conditionsCache, false)
-                            break
-                        else
-                            Logger.log_super_verbose("\ayClicky: \aw\t|->\aw \agSuccess!")
-                            table.insert(conditionsCache, true)
-                        end
-                    end
-                end
-
-                clicky.conditionsCache = conditionsCache
-
-                if allConditionsMet then
-                    Logger.log_verbose("\ayClicky: \awLooking for clicky item: \am%s \awfound: %s", clicky.itemName, Strings.BoolToColorString(item() ~= nil))
-
-                    if item then
-                        target = mq.TLO.Me
-                        local buffCheckPassed = true
-                        local targetId = nil
-
-                        if clicky.target == "Self" then
-                            target = mq.TLO.Me
-
-                            buffCheckPassed = Casting.SelfBuffItemCheck(clicky.itemName)
-                        elseif clicky.target == "Pet" then
-                            ---@diagnostic disable-next-line: cast-local-type
-                            target = mq.TLO.Me.Pet
-                            buffCheckPassed = mq.TLO.Me.Pet.ID() > 0 and Casting.PetBuffItemCheck(clicky.itemName)
-                        elseif clicky.target == "Main Assist" then
-                            ---@diagnostic disable-next-line: cast-local-type
-                            target = Core.GetMainAssistSpawn()
-                            buffCheckPassed = Casting.GroupBuffItemCheck(clicky.itemName, target)
-                        elseif clicky.target == "Auto Target" then
-                            ---@diagnostic disable-next-line: cast-local-type
-                            target = Targeting.GetAutoTarget()
-                            buffCheckPassed = Casting.DetItemCheck(clicky.itemName)
-                        end
-
-                        if not clicky.no_target_change then
-                            targetId = target.ID()
-                        end
-
-                        if buffCheckPassed and Casting.ItemReady(item()) then
-                            Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                            Casting.UseItem(item.Name(), targetId)
-                            clickiesUsedThisFrame = clickiesUsedThisFrame + 1
-                            if maxClickiesPerFrame > 0 and clickiesUsedThisFrame >= maxClickiesPerFrame then
-                                Logger.log_debug("\ayClicky: \a-tMax Clickies Per Frame of \am%d\a-t reached, stopping for this frame and picking up with %d next frame.",
-                                    maxClickiesPerFrame, self.ClickyRotationIndex)
-                                break
+                            if not clicky.no_target_change then
+                                targetId = target.ID()
                             end
-                            self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
-                            break --ensure we stop after we process a single clicky to allow rotations to continue
-                        else
-                            if not buffCheckPassed then
-                                Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ar already active or would not stack!", item.Name(),
-                                    item.Clicky.Spell.RankName.Name())
+
+                            if buffCheckPassed and Casting.ItemReady(item()) then
+                                Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
+                                Casting.UseItem(item.Name(), targetId)
+                                clickiesUsedThisFrame = clickiesUsedThisFrame + 1
+                                if maxClickiesPerFrame > 0 and clickiesUsedThisFrame >= maxClickiesPerFrame then
+                                    Logger.log_debug("\ayClicky: \a-tMax Clickies Per Frame of \am%d\a-t reached, stopping for this frame and picking up with %d next frame.",
+                                        maxClickiesPerFrame, self.ClickyRotationIndex)
+                                    break
+                                end
+                                self.TempSettings.ClickyState[clicky.itemName].lastUsed = os.clock()
+                                break --ensure we stop after we process a single clicky to allow rotations to continue
                             else
-                                Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky: \at%s\ar Buff check failed, not using!", item.Name(), item.Clicky.Spell.RankName.Name())
+                                if not buffCheckPassed then
+                                    Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky Spell: \at%s\ar already active or would not stack!", item.Name(),
+                                        item.Clicky.Spell.RankName.Name())
+                                else
+                                    Logger.log_verbose("\ayClicky: \awItem \am%s\aw Clicky: \at%s\ar Buff check failed, not using!", item.Name(), item.Clicky.Spell.RankName.Name())
+                                end
                             end
                         end
+                    else
+                        Logger.log_super_verbose("\ayClicky: \arSkipping clicky entry: \am%s\ar due to Combat State mismatch (Clicky State: \at%s \arCurrent State: \at%s\ar)",
+                            clicky.itemName,
+                            clicky.combat_state, combat_state)
                     end
+                else
+                    Logger.log_super_verbose("\ayClicky: \arSkipping clicky entry: \am%s\ar due to movement.", clicky.itemName)
                 end
-            else
-                Logger.log_super_verbose("\ayClicky: \arSkipping clicky entry: \am%s\ar due to Combat State mismatch (Clicky State: \at%s \arCurrent State: \at%s\ar)",
-                    clicky.itemName,
-                    clicky.combat_state, combat_state)
             end
         end
     end
