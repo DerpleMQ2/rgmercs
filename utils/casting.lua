@@ -920,7 +920,7 @@ end
 function Casting.CheckOkayToBuff()
     local visible = not mq.TLO.Me.Invis()
     local safe = Targeting.GetXTHaterCount() == 0 and Globals.AutoTargetID == 0
-    local stationary = not (Config:GetSetting('BuffWaitMoveTimer') > Movement:GetTimeSinceLastMove() or mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active())
+    local stationary = not (Config:GetSetting('BuffWaitMoveTimer') > Movement:GetTimeSinceLastMove() or mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.Navigation.Active())
     local able = not (Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10)
 
     return visible and safe and stationary and able
@@ -1190,12 +1190,11 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     local startMem = Globals.GetTimeMS()
     while (me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not me.SpellReady(gem)())) and ((Globals.GetTimeMS() - startMem) < maxWait) do
         Logger.log_debug("\atMemorizeSpell\aw():\ay Waiting for '%s' to load in slot %d'...", spell, gem)
-        if (me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100)) or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+        if (me.CombatState():lower() == "combat" and Targeting.IHaveAggro(100)) or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() then
             Logger.log_debug(
-                "\atMemorizeSpell\aw():\ay I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s))",
+                "\atMemorizeSpell\aw():\ay I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s))",
                 spell, gem, me.CombatState(), me.Casting() or "None", Strings.BoolToColorString(me.Moving()), Strings.BoolToColorString(mq.TLO.Stick.Active()),
-                Strings.BoolToColorString(mq.TLO.Navigation.Active()), Strings.BoolToColorString(mq.TLO.MoveTo.Moving()),
-                Strings.BoolToColorString(mq.TLO.AdvPath.Following()))
+                Strings.BoolToColorString(mq.TLO.Navigation.Active()), Strings.BoolToColorString(mq.TLO.MoveTo.Moving()))
             break
         end
         if not me.Book(spell)() then
@@ -1272,9 +1271,9 @@ end
 -- Helper to retrieve a Clicky spell to be used in other checks.
 function Casting.GetClickySpell(itemName)
     local item = mq.TLO.FindItem(string.format("=%s", itemName or "None"))
-    if not (item and item()) then return false end
+    if not (item and item()) then return nil end
 
-    return item.Clicky and item.Clicky.Spell or "None"
+    return item.Clicky and item.Clicky.Spell
 end
 
 --- Retrieves the ID of the item summoned by a given spell.
@@ -2297,12 +2296,10 @@ function Casting.AutoMed()
     Movement:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
-    if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+    if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() then
         Logger.log_verbose(
-            "Sit check returning early due to movement. Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s)",
-            me.Casting() or "None", Strings.BoolToColorString(me.Moving()), Strings.BoolToColorString(mq.TLO.Stick.Active()),
-            Strings.BoolToColorString(mq.TLO.Navigation.Active()), Strings.BoolToColorString(mq.TLO.MoveTo.Moving()),
-            Strings.BoolToColorString(mq.TLO.AdvPath.Following()))
+            "Sit check returning early due to movement. Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s)", me.Casting() or "None", Strings.BoolToColorString(me.Moving()),
+            Strings.BoolToColorString(mq.TLO.Stick.Active()), Strings.BoolToColorString(mq.TLO.Navigation.Active()), Strings.BoolToColorString(mq.TLO.MoveTo.Moving()))
         return
     end
 

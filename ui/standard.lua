@@ -139,7 +139,7 @@ function StandardUI:RenderTarget()
     local warningMessage = Config.TempSettings.AssistWarning
 
     if mq.TLO.Plugin("MQ2AdvPath").IsLoaded() and mq.TLO.AdvPath ~= nil and mq.TLO.AdvPath.Following() then
-        warningMessage = 'AFOLLOW ("FOLLOW ME") ENGAGED - THIS WILL INTERFERE WITH RGMERCS!'
+        warningMessage = 'AFOLLOW ("FOLLOW ME") ENGAGED - THIS MAY INTERFERE WITH RGMERCS!'
     end
 
     if warningMessage then
