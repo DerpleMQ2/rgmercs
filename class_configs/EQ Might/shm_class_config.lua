@@ -235,13 +235,12 @@ local _ClassConfig = {
         },
         ["MeleeProcBuff"] = {
             "Talisman of the Panther",
-            -- "Spirit of the Panther", -- keep using leopard group clicky until we get talisman
+            -- "Spirit of the Panther", -- 69, group spell == less casting, longer duration, more avail to do other things
             --"Talisman of the Leopard", -- EQ Might Custom, but item only currently
-            -- "Spirit of the Leopard",
-            "Talisman of the Jaguar", -- EQ Might Custom, Level 61
-            "Spirit of the Jaguar",
-            "Talisman of the Puma",
-            "Spirit of the Puma",
+            -- "Spirit of the Leopard", -- 61, group spell == less casting, longer duration, more avail to do other things
+            "Talisman of the Jaguar", -- 61
+            --  "Spirit of the Jaguar", -- 57, group spell == less casting, longer duration, more avail to do other things
+            "Talisman of the Puma",   -- 55
         },
         ["SlowProcBuff"] = {
             "Lassitude",
@@ -453,6 +452,17 @@ local _ClassConfig = {
             end
 
             return true
+        end,
+
+        ProcBuffChoice = function()
+            local buffSpell = Core.GetResolvedActionMapItem('MeleeProcBuff')
+            local buffLevel = buffSpell and buffSpell.Level() or 0
+            if mq.TLO.FindItem("=Artifact of the Leopard")() and mq.TLO.Me.Level() >= 65 and buffLevel < 70 then
+                return "LeopardItem"
+            elseif mq.TLO.FindItem("=Artifact of the Jaguar")() and mq.TLO.Me.Level() >= 52 and buffLevel < 55 then
+                return "JaguarItem"
+            end
+            return "ProcSpell"
         end,
     },
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
@@ -669,13 +679,13 @@ local _ClassConfig = {
         },
         {
             name = 'MeleeProcBuff',
-            timer = 10,
             state = 1,
             steps = 1,
-            load_cond = function(self) return self:GetResolvedActionMapItem('MeleeProcBuff') or mq.TLO.FindItem("=Artifact of the Leopard")() end,
             targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                local downtime = combat_state == "Downtime" and Casting.OkayToBuff()
+                local combat = combat_state == "Combat"
+                return (downtime or combat) and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
         {
@@ -707,10 +717,15 @@ local _ClassConfig = {
             {
                 name = "Artifact of the Leopard",
                 type = "Item",
-                load_cond = function(self)
-                    return mq.TLO.FindItem("=Artifact of the Leopard")() and mq.TLO.Me.Level() >= 65 and
-                        (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 999) < 70
+                load_cond = function(self) return self.ClassConfig.HelperFunctions.ProcBuffChoice() == "LeopardItem" end,
+                cond = function(self, itemName, target)
+                    return Casting.GroupBuffItemCheck(itemName, target) and Casting.AddedBuffCheck(9975, target) --Panther Rk. II
                 end,
+            },
+            {
+                name = "Artifact of the Jaguar",
+                type = "Item",
+                load_cond = function(self) return self.ClassConfig.HelperFunctions.ProcBuffChoice() == "JaguarItem" end,
                 cond = function(self, itemName, target)
                     return Casting.GroupBuffItemCheck(itemName, target) and Casting.AddedBuffCheck(9975, target) --Panther Rk. II
                 end,
@@ -718,10 +733,7 @@ local _ClassConfig = {
             {
                 name = "MeleeProcBuff",
                 type = "Spell",
-                load_cond = function(self)
-                    return not mq.TLO.FindItem("=Artifact of the Leopard")() or mq.TLO.Me.Level() < 65 or
-                        (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 0) == 70
-                end,
+                load_cond = function(self) return self.ClassConfig.HelperFunctions.ProcBuffChoice() == "ProcSpell" end,
                 cond = function(self, spell, target)
                     if not Casting.CastReady(spell) then return false end                                 --avoid constant group buff checks
                     return Casting.GroupBuffCheck(spell, target) and Casting.AddedBuffCheck(9975, target) --Panther Rk. II
@@ -1132,17 +1144,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Artifact of the Leopard",
-                type = "Item",
-                load_cond = function(self)
-                    return mq.TLO.FindItem("=Artifact of the Leopard")() and mq.TLO.Me.Level() >= 65 and
-                        (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 999) < 70
-                end,
-                cond = function(self, itemName, target)
-                    return Casting.GroupBuffItemCheck(itemName, target) and Casting.AddedBuffCheck(9975, target) --Panther Rk. II
-                end,
-            },
-            {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoRunSpeed') and not Casting.CanUseAA("Communion of the Cheetah") end,
@@ -1227,20 +1228,15 @@ local _ClassConfig = {
                 { name = "CrippleSpell",    cond = function(self) return Config:GetSetting('DoCripple') end, },
                 { name = "PutridDecay",     cond = function(self) return Config:GetSetting('DoPutrid') end, },
                 { name = "CanniSpell",      cond = function(self) return Config:GetSetting('DoSpellCanni') end, },
-                {
-                    name = "MeleeProcBuff",
-                    cond = function(self)
-                        return (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 0) == 70 or not mq.TLO.FindItem("=Artifact of the Leopard")() or mq.TLO.Me.Level() < 65
-                    end,
-                },
+                { name = "MeleeProcBuff",   cond = function(self) return self.ClassConfig.HelperFunctions.ProcBuffChoice() == "ProcSpell" end, },
                 { name = "SlowProcBuff", },
-                { name = "LowLvlAtkBuff", cond = function(self) return not mq.TLO.FindItem("=Artifact of the Champion")() or mq.TLO.Me.Level() < 68 end, },
-                { name = "ColdNuke",      cond = function(self) return Config:GetSetting('DoColdNuke') end, },
-                { name = "PoisonNuke",    cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
-                { name = "CurseDot",      cond = function(self) return Config:GetSetting('DoCurseDot') end, },
-                { name = "SaryrnDot",     cond = function(self) return Config:GetSetting('DoSaryrnDot') end, },
-                { name = "UltorDot",      cond = function(self) return Config:GetSetting('DoUltorDot') end, },
-                { name = "PBAEPoison",    cond = function(self) return Config:GetSetting('DoPBAE') end, },
+                { name = "LowLvlAtkBuff",   cond = function(self) return not mq.TLO.FindItem("=Artifact of the Champion")() or mq.TLO.Me.Level() < 68 end, },
+                { name = "ColdNuke",        cond = function(self) return Config:GetSetting('DoColdNuke') end, },
+                { name = "PoisonNuke",      cond = function(self) return Config:GetSetting('DoPoisonNuke') end, },
+                { name = "CurseDot",        cond = function(self) return Config:GetSetting('DoCurseDot') end, },
+                { name = "SaryrnDot",       cond = function(self) return Config:GetSetting('DoSaryrnDot') end, },
+                { name = "UltorDot",        cond = function(self) return Config:GetSetting('DoUltorDot') end, },
+                { name = "PBAEPoison",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
             },
         },
         {
@@ -1248,20 +1244,15 @@ local _ClassConfig = {
             cond = function(self) return Core.IsModeActive("Hybrid") end,
             spells = {
                 { name = "HealSpell", },
-                { name = "SlowSpell",    cond = function(self) return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow') end, },
-                { name = "AESlowSpell",  cond = function(self) return not Casting.CanUseAA("Tigir's Insect Swarm") and Config:GetSetting('DoAESlow') end, },
-                { name = "DiseaseSlow",  cond = function(self) return Config:GetSetting('DoSTSlow') and Config:GetSetting('DoDiseaseSlow') end, },
-                { name = "MaloSpell",    cond = function(self) return not Casting.CanUseAA("Malosinete") and Config:GetSetting('DoSTMalo') end, },
-                { name = "AEMaloSpell",  cond = function(self) return Config:GetSetting('DoAEMalo') end, },
-                { name = "CrippleSpell", cond = function(self) return Config:GetSetting('DoCripple') end, },
-                { name = "PutridDecay",  cond = function(self) return Config:GetSetting('DoPutrid') end, },
-                { name = "CanniSpell",   cond = function(self) return Config:GetSetting('DoSpellCanni') end, },
-                {
-                    name = "MeleeProcBuff",
-                    cond = function(self)
-                        return (Core.GetResolvedActionMapItem('MeleeProcBuff').Level() or 0) == 70 or not mq.TLO.FindItem("=Artifact of the Leopard")() or mq.TLO.Me.Level() < 65
-                    end,
-                },
+                { name = "SlowSpell",       cond = function(self) return not Casting.CanUseAA("Turgur's Swarm") and Config:GetSetting('DoSTSlow') end, },
+                { name = "AESlowSpell",     cond = function(self) return not Casting.CanUseAA("Tigir's Insect Swarm") and Config:GetSetting('DoAESlow') end, },
+                { name = "DiseaseSlow",     cond = function(self) return Config:GetSetting('DoSTSlow') and Config:GetSetting('DoDiseaseSlow') end, },
+                { name = "MaloSpell",       cond = function(self) return not Casting.CanUseAA("Malosinete") and Config:GetSetting('DoSTMalo') end, },
+                { name = "AEMaloSpell",     cond = function(self) return Config:GetSetting('DoAEMalo') end, },
+                { name = "CrippleSpell",    cond = function(self) return Config:GetSetting('DoCripple') end, },
+                { name = "PutridDecay",     cond = function(self) return Config:GetSetting('DoPutrid') end, },
+                { name = "CanniSpell",      cond = function(self) return Config:GetSetting('DoSpellCanni') end, },
+                { name = "MeleeProcBuff",   cond = function(self) return self.ClassConfig.HelperFunctions.ProcBuffChoice() == "ProcSpell" end, },
                 { name = "SlowProcBuff", },
                 { name = "LowLvlAtkBuff",   cond = function(self) return not mq.TLO.FindItem("=Artifact of the Champion")() or mq.TLO.Me.Level() < 68 end, },
                 { name = "ColdNuke",        cond = function(self) return Config:GetSetting('DoColdNuke') end, },
