@@ -771,7 +771,7 @@ return {
             Category = "Self",
             Index = 101,
             Tooltip = "Use Hide/Sneak during Downtime",
-            Default = true,
+            Default = false,
         },
         ['DoOpener']        = {
             DisplayName = "Use Openers",
