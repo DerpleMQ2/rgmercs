@@ -494,7 +494,7 @@ Module.LogicBlocks                      = {
         name = "I Have a Curable Detrimental Effect",
         cond = function(self)
             local me = mq.TLO.Me
-            return me.Poisoned() ~= nil or me.Diseased() ~= nil or me.Cursed ~= nil or me.Corrupted() ~= nil
+            return me.Poisoned() ~= nil or me.Diseased() ~= nil or me.Cursed() ~= nil or me.Corrupted() ~= nil
         end,
         tooltip = "Only use when you have a poison, disease, curse or corruption effect on you.",
         render_header_text = function(self, cond)
