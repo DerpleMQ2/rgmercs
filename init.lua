@@ -366,7 +366,6 @@ local function Main()
     if Globals.PauseMain then
         mq.delay(100)
         mq.doevents()
-        Events.DoEvents()
         if Config:GetSetting('RunMovePaused') then
             Modules:ExecModule("Movement", "GiveTime")
         end
