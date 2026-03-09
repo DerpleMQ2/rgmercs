@@ -1,15 +1,14 @@
-local mq                  = require('mq')
-local Config              = require('utils.config')
-local Globals             = require('utils.globals')
-local Core                = require("utils.core")
-local Modules             = require("utils.modules")
-local Logger              = require("utils.logger")
-local Comms               = require("utils.comms")
+local mq       = require('mq')
+local Config   = require('utils.config')
+local Globals  = require('utils.globals')
+local Core     = require("utils.core")
+local Modules  = require("utils.modules")
+local Logger   = require("utils.logger")
+local Comms    = require("utils.comms")
 
-local Events              = { _version = '1.0', _name = "Events", _author = 'Derple', }
+local Events   = { _version = '1.0', _name = "Events", _author = 'Derple', }
 
-Events.__index            = Events
-Events.HeartbeatCoroutine = nil
+Events.__index = Events
 
 --- Handles the death event for RGMercs.
 --- This function is triggered when a death event occurs and performs necessary operations.
@@ -47,33 +46,12 @@ function Events.HandleDeath()
     end
 end
 
-function Events.CreateHeartBeat()
-    Events.HeartbeatCoroutine = coroutine.create(function()
-        while (1) do
-            Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(),
-                Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
-            coroutine.yield()
-        end
-    end)
-end
-
 function Events.DoEvents(force)
     if not force and not Config:GetSetting('RunCoroutinesDuringLoops') then
         return
     end
 
-    if Events.HeartbeatCoroutine then
-        if coroutine.status(Events.HeartbeatCoroutine) ~= 'dead' then
-            local success, err = coroutine.resume(Events.HeartbeatCoroutine)
-            if not success then
-                Logger.log_error("\arError in Heartbeat Coroutine: %s", err)
-            end
-        else
-            Events.CreateHeartBeat()
-        end
-    else
-        Events.CreateHeartBeat()
-    end
+    Comms.SendHeartbeat(Core.GetMainAssistSpawn().DisplayName(), Config:GetSetting('ChaseOn') and Config:GetSetting('ChaseTarget') or "Chase Off")
 
     Modules:ExecAll("DoEvents")
 end

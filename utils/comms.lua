@@ -12,7 +12,6 @@ Comms.LastHeartbeat        = 0
 Comms.Peers                = Set.new({})
 Comms.PeersToServerNameMap = {}
 Comms.PeersHeartbeats      = {}
-Comms.HeartbeatCoroutine   = nil
 
 -- Putting this here for lack of a beter spot.
 --- @param peerName string? The character name string if not supplied then we use Me.DisplayName()
