@@ -800,7 +800,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoQuickNuke') end,
                 cond = function(self)
-                    return Casting.OkayToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
@@ -809,7 +809,7 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('DoUndeadNuke') end,
                 cond = function(self, aaName, target)
                     if not Targeting.TargetBodyIs(target, "Undead") then return false end
-                    return Casting.OkayToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
@@ -817,7 +817,7 @@ local _ClassConfig = {
                 type = "Spell",
                 load_cond = function(self) return Config:GetSetting('DoMagicNuke') end,
                 cond = function(self)
-                    return Casting.OkayToNuke()
+                    return Casting.OkayToNuke(true)
                 end,
             },
             {
@@ -844,7 +844,7 @@ local _ClassConfig = {
                 allowDead = true,
                 load_cond = function(self) return Config:GetSetting('DoPBAENuke') end,
                 cond = function(self, spell, target)
-                    return Casting.OkayToNuke() and Targeting.InSpellRange(spell, target)
+                    return Casting.OkayToNuke(true) and Targeting.InSpellRange(spell, target)
                 end,
             },
         },
