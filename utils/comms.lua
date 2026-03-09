@@ -203,7 +203,15 @@ end
 function Comms.UpdatePeerHeartbeat(peer, data)
     Comms.Peers:add(peer)
     Comms.PeersToServerNameMap[peer] = { Server = data.Server, Name = data.Name, }
-    Comms.PeersHeartbeats[peer] = { LastHeartbeat = Globals.GetTimeSeconds(), Data = data or {}, }
+
+    -- tables that are empty come across actors as nil so we need to fix them up.
+    data.Buffs                       = data.Buffs or {}
+    data.Songs                       = data.Songs or {}
+    data.Blocked                     = data.Blocked or {}
+    data.PetBuffs                    = data.PetBuffs or {}
+    data.PetBlocked                  = data.PetBlocked or {}
+
+    Comms.PeersHeartbeats[peer]      = { LastHeartbeat = Globals.GetTimeSeconds(), Data = data or {}, }
 end
 
 function Comms.ValidatePeers(timeout)
