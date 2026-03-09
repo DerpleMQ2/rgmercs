@@ -747,7 +747,7 @@ function Ui.RenderMercsStatus(showPopout)
                 end
 
                 Ui.MultilineTooltipWithColors({
-                    { text = "State: ",                                          color = Colors.White,       padAfter = 4, },
+                    { text = "State: ",                                       color = Colors.White,       padAfter = 4, },
                     {
                         text = data.Data.State or "None",
                         color = data.Data.State == "Paused" and Colors.MainButtonPausedColor or
@@ -755,22 +755,22 @@ function Ui.RenderMercsStatus(showPopout)
                             Colors.MainDowntimeColor,
                         sameLine = true,
                     },
-                    { text = "AutoTarget: ",                                     color = Colors.White,       padAfter = 4, },
-                    { text = data.Data.AutoTarget or "None",                     color = Colors.LightRed,    sameLine = true, },
-                    { text = "Assist: ",                                         color = Colors.White,       padAfter = 4, },
-                    { text = data.Data.Assist or "None",                         color = Colors.Cyan,        sameLine = true, },
-                    { text = "Chase: ",                                          color = Colors.White,       padAfter = 4, },
-                    { text = data.Data.Chase or "None",                          color = Colors.Cyan,        sameLine = true, },
-                    { text = "Level: ",                                          color = Colors.White,       padAfter = 4, },
-                    { text = tostring(data.Data.Level) or "0",                   color = Colors.Yellow,      sameLine = true, },
-                    { text = "Exp: ",                                            color = Colors.White,       padAfter = 4, },
-                    { text = string.format("%0.2f%%", data.Data.PctExp) or "0%", color = Colors.LightYellow, sameLine = true, },
-                    { text = "Unspent AA: ",                                     color = Colors.White,       padAfter = 4, },
-                    { text = data.Data.UnSpentAA or "None",                      color = Colors.Orange,      sameLine = true, },
-                    { text = "Spent AA: ",                                       color = Colors.White,       padAfter = 4, },
-                    { text = data.Data.SpentAA or "None",                        color = Colors.Orange,      sameLine = true, },
-                    { text = "Total AA: ",                                       color = Colors.White,       padAfter = 4, },
-                    { text = data.Data.TotalAA or "None",                        color = Colors.Orange,      sameLine = true, },
+                    { text = "AutoTarget: ",                                  color = Colors.White,       padAfter = 4, },
+                    { text = data.Data.AutoTarget or "None",                  color = Colors.LightRed,    sameLine = true, },
+                    { text = "Assist: ",                                      color = Colors.White,       padAfter = 4, },
+                    { text = data.Data.Assist or "None",                      color = Colors.Cyan,        sameLine = true, },
+                    { text = "Chase: ",                                       color = Colors.White,       padAfter = 4, },
+                    { text = data.Data.Chase or "None",                       color = Colors.Cyan,        sameLine = true, },
+                    { text = "Level: ",                                       color = Colors.White,       padAfter = 4, },
+                    { text = tostring(data.Data.Level) or "0",                color = Colors.Yellow,      sameLine = true, },
+                    { text = "Exp: ",                                         color = Colors.White,       padAfter = 4, },
+                    { text = string.format("%0.2f%%", data.Data.PctExp or 0), color = Colors.LightYellow, sameLine = true, },
+                    { text = "Unspent AA: ",                                  color = Colors.White,       padAfter = 4, },
+                    { text = data.Data.UnSpentAA or "None",                   color = Colors.Orange,      sameLine = true, },
+                    { text = "Spent AA: ",                                    color = Colors.White,       padAfter = 4, },
+                    { text = data.Data.SpentAA or "None",                     color = Colors.Orange,      sameLine = true, },
+                    { text = "Total AA: ",                                    color = Colors.White,       padAfter = 4, },
+                    { text = data.Data.TotalAA or "None",                     color = Colors.Orange,      sameLine = true, },
                 })
             end,
 
