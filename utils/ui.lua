@@ -1227,6 +1227,24 @@ function Ui.RenderMercsStatus(showPopout)
                 end
             end,
         },
+        {
+            name = 'Buff Slots',
+            flags = bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.DefaultHide),
+            width = 15.0,
+            sort = function(mercs, a, b)
+                local data_a = mercs[a]
+                local data_b = mercs[b]
+                return data_a.Data.OpenBuffSlots or 0, data_b.Data.OpenBuffSlots or 0
+            end,
+            render = function(peer, data)
+                ImGui.PushStyleColor(ImGuiCol.Text,
+                    data.Data.OpenBuffSlots >= math.floor(data.Data.MaxBuffSlots * .6) and Colors.ConditionPassColor or
+                    data.Data.OpenBuffSlots >= math.floor(data.Data.MaxBuffSlots * .3) and Colors.ConditionMidColor or
+                    Colors.ConditionFailColor)
+                ImGui.Text("%d", data.Data.OpenBuffSlots or 0)
+                ImGui.PopStyleColor()
+            end,
+        },
     }
 
     Ui.RenderTableData("MercStatusTable", tableColumns,
@@ -3713,7 +3731,7 @@ function Ui.AnimatedButton(id, text, size, callbackFn)
     end
 
     -- Animate scale
-    local scale = ImAnim.TweenFloat(id, ImHashStr(id .. "scale"), target_scale, 0.15, ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
+    local scale = ImAnim.TweenFloat(ImHashStr(id), ImHashStr(id .. "scale"), target_scale, 0.15, ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
 
     -- Animate color
     ImGui.GetStyleColorVec4(ImGuiCol.Button)
@@ -3721,7 +3739,8 @@ function Ui.AnimatedButton(id, text, size, callbackFn)
     local hover_color = ImGui.GetStyleColorVec4(ImGuiCol.ButtonHovered)
     local press_color = ImGui.GetStyleColorVec4(ImGuiCol.ButtonActive)
     local target_color = pressed and press_color or (hovered and hover_color or base_color)
-    local color = ImAnim.TweenColor(id, ImHashStr(id .. "color_id"), target_color, 0.2, ImAnim.EasePreset(IamEaseType.OutCubic), IamPolicy.Crossfade, IamColorSpace.OKLAB, dt)
+    local color = ImAnim.TweenColor(ImHashStr(id), ImHashStr(id .. "color_id"), target_color, 0.2, ImAnim.EasePreset(IamEaseType.OutCubic), IamPolicy.Crossfade, IamColorSpace.OKLAB,
+        dt)
 
     -- Draw scaled button
     local center = ImVec2(btn_pos.x + size.x * 0.5, btn_pos.y + size.y * 0.5)

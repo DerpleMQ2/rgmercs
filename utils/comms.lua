@@ -157,6 +157,8 @@ function Comms.SendHeartbeat(assist, chase)
         Blocked       = Globals.CurrentBlocked,
         PetBuffs      = Globals.CurrentPetBuffs,
         PetBlocked    = Globals.CurrentPetBlocked,
+        OpenBuffSlots = mq.TLO.Me.MaxBuffSlots() - mq.TLO.Me.BuffCount(),
+        MaxBuffSlots  = mq.TLO.Me.MaxBuffSlots(),
     }
     Comms.BroadcastMessage("RGMercs", "Heartbeat", heartBeat)
     -- update our own heartbeat too
