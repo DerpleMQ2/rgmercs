@@ -543,7 +543,7 @@ function Ui.RenderAAOverlay()
                         end
                     end,
                     function()
-                        for _, entry in ipairs(Ui.TempSettings.SortedAAOverlay) do
+                        for _, entry in ipairs(Ui.TempSettings.SortedAAOverlay or {}) do
                             ImGui.PushID(string.format("##aa_overlay_table_entry_%s", entry.TableIndex))
                             for _, colData in ipairs(tableColumns) do
                                 ImGui.TableNextColumn()
