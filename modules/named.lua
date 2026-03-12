@@ -120,7 +120,10 @@ function Module:IsNamed(spawn)
     self:RefreshNamedCache()
 
     local cleanNameFixed = spawn.CleanName()
-    -- if last character is a space then remove it.
+    -- if first or last character is a space then remove it.
+    if cleanNameFixed:sub(1, 1) == " " then
+        cleanNameFixed = cleanNameFixed:sub(2)
+    end
     if cleanNameFixed:sub(-1) == " " then
         cleanNameFixed = cleanNameFixed:sub(1, -2)
     end
