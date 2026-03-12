@@ -89,9 +89,12 @@ function Module:CheckZoneNamed()
     self:RefreshNamedCache()
 
     local tmpTbl = {}
-    for name, _ in pairs(self.NamedList) do
-        local spawnList = mq.getFilteredSpawns(function(spawn) return spawn.CleanName() == name and spawn.Type() == "NPC" end)
-        local spawn = spawnList[1]
+    local namedSpawns = mq.getFilteredSpawns(function(spawn)
+        return self:IsNamed(spawn) and spawn.Type() == "NPC"
+    end)
+
+    for _, spawn in ipairs(namedSpawns) do
+        local name = spawn.CleanName()
         table.insert(tmpTbl, { Name = name, Spawn = spawn, Distance = spawn and spawn.Distance() or 9999, Loc = spawn and spawn.LocYXZ() or "0,0,0", })
     end
 
@@ -116,7 +119,13 @@ function Module:IsNamed(spawn)
 
     self:RefreshNamedCache()
 
-    if self.NamedList[spawn.Name()] or self.NamedList[spawn.CleanName()] then return true end
+    local cleanNameFixed = spawn.CleanName()
+    -- if last character is a space then remove it.
+    if cleanNameFixed:sub(-1) == " " then
+        cleanNameFixed = cleanNameFixed:sub(1, -2)
+    end
+
+    if self.NamedList[spawn.Name()] or self.NamedList[spawn.CleanName()] or self.NamedList[cleanNameFixed] then return true end
 
     ---@diagnostic disable-next-line: undefined-field
     if Config:GetSetting('CheckSMForNamed') and mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil and mq.TLO.SpawnMaster.HasSpawn(spawn.ID())() then return true end
