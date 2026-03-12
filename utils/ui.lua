@@ -2475,11 +2475,17 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh
     for i = 1, 9 do
         local tx = minX + (barW * (i / 10))
         local reached = tx <= (minX + fillWidth)
-        local a = reached and 0.14 or 0.07
+
+        drawList:AddLine(
+            ImVec2(tx - 1, minY + 1),
+            ImVec2(tx - 1, maxY - 1),
+            IM_COL32(0, 0, 0, math.floor((reached and 0.15 or 0.3) * 255)),
+            1.0
+        )
         drawList:AddLine(
             ImVec2(tx, minY + 1),
             ImVec2(tx, maxY - 1),
-            IM_COL32(255, 255, 255, math.floor(a * 255)),
+            IM_COL32(255, 255, 255, math.floor((reached and 0.3 or 0.15) * 255)),
             1.0
         )
     end
