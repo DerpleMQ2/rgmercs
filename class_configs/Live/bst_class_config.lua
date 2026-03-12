@@ -113,7 +113,6 @@ return {
             "Kromrif Lance",         -- Level 99 - Timer 7
             "Frostbite Lance",       -- Level 107 - Timer 7
             "Crystalline Lance",     -- Level 117 - Timer 7
-            "Ankexfen Lance",        -- Level 122 - Timer 7
         },
         ['Icelance2'] = {
             -- Lance 2 Timer 11 Ice Nuke Fast Cast
@@ -126,6 +125,7 @@ return {
             "Frostrift Lance", -- Level 94 - Timer 11
             "Kromtus Lance",   -- Level 102 - Timer 11
             "Restless Lance",  -- Level 112 - Timer 11
+            "Ankexfen Lance",  -- Level 122 - Timer 11
         },
         ['AERoar'] = {
             -- PBAE Roar Timer 11 Ice Nuke Fast Cast
