@@ -241,6 +241,7 @@ local _ClassConfig = {
             "Talisman of the Jaguar", -- 61
             --  "Spirit of the Jaguar", -- 57, group spell == less casting, longer duration, more avail to do other things
             "Talisman of the Puma",   -- 55
+            "Spirit of the Puma",     -- 50
         },
         ["SlowProcBuff"] = {
             "Lassitude",
