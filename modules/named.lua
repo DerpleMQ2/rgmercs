@@ -4,9 +4,6 @@ local Config       = require('utils.config')
 local Globals      = require("utils.globals")
 local Targeting    = require("utils.targeting")
 local Ui           = require("utils.ui")
-local Comms        = require("utils.comms")
-local Logger       = require("utils.logger")
-local Strings      = require("utils.strings")
 local NamedDefault = require("namedlist.named_default")
 local NamedEQMight = require("namedlist.named_eqmight")
 local Base         = require("modules.base")
@@ -87,8 +84,9 @@ end
 
 function Module:CheckZoneNamed()
     self:RefreshNamedCache()
-
+    local upNameds = {}
     local tmpTbl = {}
+
     local namedSpawns = mq.getFilteredSpawns(function(spawn)
         return self:IsNamed(spawn) and spawn.Type() == "NPC"
     end)
@@ -96,6 +94,13 @@ function Module:CheckZoneNamed()
     for _, spawn in ipairs(namedSpawns) do
         local name = spawn.CleanName()
         table.insert(tmpTbl, { Name = name, Spawn = spawn, Distance = spawn and spawn.Distance() or 9999, Loc = spawn and spawn.LocYXZ() or "0,0,0", })
+        upNameds[name] = true
+    end
+
+    for name, _ in pairs(self.NamedList) do
+        if not upNameds[name] then
+            table.insert(tmpTbl, { Name = name, Spawn = nil, Distance = 9999, Loc = "0,0,0", })
+        end
     end
 
     table.sort(tmpTbl, function(a, b)
