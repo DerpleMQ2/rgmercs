@@ -991,6 +991,14 @@ function Casting.GetBuffableInZoneIDs()
     -- if we aren't foregrounded, check ourselves after we've already buffed the group (tank is likeliest to be first ID this way)
     zoneIds:add(mq.TLO.Me.ID())
 
+    if Config:GetSetting("DoActorPetBuffs") then
+        if mq.TLO.Pet.ID() > 0 then
+            if not (mq.TLO.Pet.CleanName() or "familiar"):lower():find("familiar") then
+                zoneIds:add(mq.TLO.Pet.ID())
+            end
+        end
+    end
+
     for _, peer in ipairs(Comms.GetPeers(false)) do
         local peerName = Comms.GetNameFromPeer(peer)
         if checkCorpses and Casting.HasNearbyCorpse(peerName) then
@@ -1053,6 +1061,14 @@ function Casting.GetBuffableRaidIDs()
 
     -- if we aren't foregrounded, check ourselves after we've already buffed the group (tank is likeliest to be first ID this way)
     raidIds:add(mq.TLO.Me.ID())
+
+    if Config:GetSetting("DoActorPetBuffs") then
+        if mq.TLO.Pet.ID() > 0 then
+            if not (mq.TLO.Pet.CleanName() or "familiar"):lower():find("familiar") then
+                raidIds:add(mq.TLO.Pet.ID())
+            end
+        end
+    end
 
     for _, peer in ipairs(Comms.GetPeers(false)) do
         local peerName = Comms.GetNameFromPeer(peer)
@@ -1126,6 +1142,14 @@ function Casting.GetBuffableGroupIDs()
 
     -- if we aren't foregrounded, check ourselves after we've already buffed the group (tank is likeliest to be first ID this way)
     groupIds:add(mq.TLO.Me.ID())
+
+    if Config:GetSetting("DoActorPetBuffs") then
+        if mq.TLO.Pet.ID() > 0 then
+            if not (mq.TLO.Pet.CleanName() or "familiar"):lower():find("familiar") then
+                groupIds:add(mq.TLO.Pet.ID())
+            end
+        end
+    end
 
     if Config:GetSetting("BuffAssistList") then
         for _, name in ipairs(Config:GetSetting('AssistList')) do
