@@ -420,7 +420,7 @@ function Module:IsValidCharmTarget(mobId)
 	if self:IsCharmImmune(mobId) then
 		Logger.log_debug(
 			"\ayUpdateCharmList: Skipping \aoMob ID: \at%d \aoName: \at%s \aoLevel: \at%d \ayas it is in our immune list.",
-			spawn.ID(), spawn.CleanName(), spawn.Level())
+			spawn.ID() or 0, spawn.CleanName() or "Unknown", spawn.Level() or 0)
 		return false
 	end
 	-- Here's where we can add a necro check to see if the spawn is undead or not. If it's not
@@ -429,34 +429,33 @@ function Module:IsValidCharmTarget(mobId)
 		if spawn.Body.Name() ~= "Animal" then
 			Logger.log_debug(
 				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.",
-				spawn.ID(),
-				spawn.CleanName(), spawn.Level())
+				spawn.ID() or 0,
+				spawn.CleanName() or "Unknown", spawn.Level() or 0)
 			return false
 		end
 	elseif Core.MyClassIs('NEC') then
 		if spawn.Body.Name() ~= "Undead" then
 			Logger.log_debug(
 				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.",
-				spawn.ID(),
-				spawn.CleanName(), spawn.Level())
+				spawn.ID() or 0, spawn.CleanName() or "Unknown", spawn.Level() or 0)
 			return false
 		end
 	end
 	if not spawn.LineOfSight() then
-		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - No LOS.", spawn.ID(),
-			spawn.CleanName(), spawn.Level())
+		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - No LOS.", spawn.ID() or 0,
+			spawn.CleanName() or "Unknown", spawn.Level() or 0)
 		return false
 	end
 
 	if (spawn.PctHPs() or 0) < Config:GetSetting('CharmStopHPs') then
-		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID(),
-			spawn.CleanName(), spawn.Level())
+		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID() or 0,
+			spawn.CleanName() or "Unknown", spawn.Level() or 0)
 		return false
 	end
 
 	if (spawn.Distance() or 999) > Config:GetSetting('CharmRadius') then
 		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - Out of Charm Radius",
-			spawn.ID(), spawn.CleanName(), spawn.Level())
+			spawn.ID() or 0, spawn.CleanName() or "Unknown", spawn.Level() or 0)
 		return false
 	end
 
