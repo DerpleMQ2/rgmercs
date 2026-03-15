@@ -1,12 +1,14 @@
-local mq           = require('mq')
-local Config       = require('utils.config')
-local Globals      = require("utils.globals")
-local Core         = require("utils.core")
-local Targeting    = require("utils.Targeting")
-local Casting      = require("utils.casting")
-local ItemManager  = require("utils.item_manager")
-local Logger       = require("utils.logger")
-local Set          = require('mq.set')
+local mq          = require('mq')
+local Config      = require('utils.config')
+local Globals     = require("utils.globals")
+local Core        = require("utils.core")
+local Targeting   = require("utils.targeting")
+local Casting     = require("utils.casting")
+local ItemManager = require("utils.item_manager")
+local Logger      = require("utils.logger")
+local Set         = require('mq.set')
+local Combat      = require("utils.combat")
+
 
 local _ClassConfig = {
     _version            = "2.2 - Live",
@@ -252,47 +254,8 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
-        --function to determine if we should AE taunt and optionally, if it is safe to do so
-        AETauntCheck = function(printDebug)
-            local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
-            local xtCount = mq.TLO.Me.XTarget() or 0
-
-            if (mobs or xtCount) < Config:GetSetting('AETauntCnt') then return false end
-
-            local tauntme = Set.new({})
-            for i = 1, xtCount do
-                local xtarg = mq.TLO.Me.XTarget(i)
-                if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= 50 then
-                    if printDebug then
-                        Logger.log_verbose("AETauntCheck(): XT(%d) Counting %s(%d) as a hater eligible to AE Taunt.", i, xtarg.CleanName() or "None",
-                            xtarg.ID())
-                    end
-                    tauntme:add(xtarg.ID())
-                end
-                if not Config:GetSetting('SafeAETaunt') and #tauntme:toList() > 0 then return true end --no need to find more than one if we don't care about safe taunt
-            end
-            return #tauntme:toList() > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme:toList() < mobs)
-        end,
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
-        AETargetCheck = function(printDebug)
-            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
-            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
-            local totalHaters = haters + haterPets
-            if totalHaters < Config:GetSetting('AETargetCnt') or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
 
-            if Config:GetSetting('SafeAEDamage') then
-                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
-                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
-                if totalHaters < (npcs + npcPets) then
-                    if printDebug then
-                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
-                    end
-                    return false
-                end
-            end
-
-            return true
-        end,
         --function to determine if we have enough mobs in range to use a defensive disc
         DefensiveDiscCheck = function(printDebug)
             local xtCount = mq.TLO.Me.XTarget() or 0
@@ -804,7 +767,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting("DoAEDamage") then return false end
-                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    return Combat.AETargetCheck(true)
                 end,
             },
             {
@@ -910,59 +873,6 @@ local _ClassConfig = {
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
         },
-        ['DoAEDamage']       = {
-            DisplayName = "Do AE Damage",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 101,
-            Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
-            Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
-        },
-        ['AETargetCnt']      = {
-            DisplayName = "AE Target Count",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 102,
-            Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
-            Default = 2,
-            Min = 1,
-            Max = 10,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
-            Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
-        },
-        ['MaxAETargetCnt']   = {
-            DisplayName = "Max AE Targets",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 103,
-            Tooltip =
-            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
-            Default = 5,
-            Min = 2,
-            Max = 30,
-            FAQ = "How do I take advantage of the Max AE Targets setting?",
-            Answer =
-            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
-        },
-        ['SafeAEDamage']     = {
-            DisplayName = "AE Proximity Check",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 104,
-            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
-            Default = false,
-            FAQ = "Can you better explain the AE Proximity Check?",
-            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
-                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
-                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
-        },
         ['DoAETaunt']        = {
             DisplayName = "Do AE Taunts",
             Group = "Abilities",
@@ -974,32 +884,7 @@ local _ClassConfig = {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['AETauntCnt']       = {
-            DisplayName = "AE Taunt Count",
-            Group = "Abilities",
-            Header = "Tanking",
-            Category = "Hate Tools",
-            Index = 102,
-            Tooltip = "Minimum number of haters before using AE Taunt Discs or AA.",
-            Default = 2,
-            Min = 1,
-            Max = 30,
-            FAQ = "Why don't we use AE taunts on single targets?",
-            Answer =
-            "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
-        },
-        ['SafeAETaunt']      = {
-            DisplayName = "AE Taunt Safety Check",
-            Group = "Abilities",
-            Header = "Tanking",
-            Category = "Hate Tools",
-            Index = 103,
-            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE taunts are used. May result in non-use due to false positives.",
-            Default = false,
-            FAQ = "Can you better explain the AE Taunt Safety Check?",
-            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the taunt.\n" ..
-                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the taunt not being used when it is safe to do so.",
-        },
+
         --Defenses
         ['DiscCount']        = {
             DisplayName = "Def. Disc. Count",

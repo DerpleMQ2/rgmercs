@@ -7,6 +7,7 @@ local Math      = require("utils.math")
 local Comms     = require("utils.comms")
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
+local Set       = require('mq.set')
 local Strings   = require("utils.strings")
 local Movement  = require("utils.movement")
 local Events    = require("utils.events")
@@ -1045,6 +1046,52 @@ function Combat.FindWorstHurtXT(minHPs)
     end
 
     return worstId
+end
+
+--function to determine if we should AE taunt and optionally, if it is safe to do so
+function Combat.AETauntCheck(printDebug)
+    local xtCount = mq.TLO.Me.XTarget() or 0
+    if xtCount < Config:GetSetting('AETauntCnt') then return false end
+
+    local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
+    if mobs < Config:GetSetting('AETauntCnt') then return false end
+
+    local tauntme = Set.new({})
+    for i = 1, xtCount do
+        local xtarg = mq.TLO.Me.XTarget(i)
+        if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID) and xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= 50 then
+            if printDebug then
+                Logger.log_verbose("AETauntCheck(): XT(%d) Counting %s(%d) as a hater eligible to AE Taunt.", i, xtarg.CleanName() or "None",
+                    xtarg.ID())
+            end
+            tauntme:add(xtarg.ID())
+        end
+        if not Config:GetSetting('SafeAETaunt') and #tauntme:toList() > 0 then return true end --no need to find more than one if we don't care about safe taunt
+    end
+    return #tauntme:toList() > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme:toList() < mobs)
+end
+
+--function to determine if we should use AE damage abilities
+function Combat.AETargetCheck(printDebug, minCount)
+    if not minCount then minCount = Config:GetSetting('AETargetCnt') end
+
+    local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+    local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+    local totalHaters = haters + haterPets
+    if totalHaters < minCount or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
+
+    if Config:GetSetting('SafeAEDamage') then
+        local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+        local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+        if totalHaters < (npcs + npcPets) then
+            if printDebug then
+                Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+            end
+            return false
+        end
+    end
+
+    return true
 end
 
 return Combat

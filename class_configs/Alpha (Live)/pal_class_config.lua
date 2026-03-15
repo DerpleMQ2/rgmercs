@@ -2,12 +2,13 @@ local mq           = require('mq')
 local Config       = require('utils.config')
 local Globals      = require('utils.globals')
 local Core         = require("utils.core")
-local Targeting    = require("utils.Targeting")
+local Targeting    = require("utils.targeting")
 local Ui           = require("utils.ui")
 local Casting      = require("utils.casting")
 local ItemManager  = require("utils.item_manager")
 local Logger       = require("utils.logger")
 local Set          = require('mq.set')
+local Combat       = require("utils.combat")
 
 local _ClassConfig = {
     _version              = "Alpha 2.0 - Live",
@@ -759,27 +760,6 @@ local _ClassConfig = {
             if Casting.CanUseAA("Divine Protector's Unity") and not Config:GetSetting('OverwriteDPUBuffs') then return false end
             return true
         end,
-        --function to determine if we should AE taunt and optionally, if it is safe to do so
-        AETauntCheck = function(printDebug)
-            local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
-            local xtCount = mq.TLO.Me.XTarget() or 0
-
-            if (mobs or xtCount) < Config:GetSetting('AETauntCnt') then return false end
-
-            local tauntme = Set.new({})
-            for i = 1, xtCount do
-                local xtarg = mq.TLO.Me.XTarget(i)
-                if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= 50 then
-                    if printDebug then
-                        Logger.log_verbose("AETauntCheck(): XT(%d) Counting %s(%d) as a hater eligible to AE Taunt.", i, xtarg.CleanName() or "None",
-                            xtarg.ID())
-                    end
-                    tauntme:add(xtarg.ID())
-                end
-                if not Config:GetSetting('SafeAETaunt') and #tauntme:toList() > 0 then return true end --no need to find more than one if we don't care about safe taunt
-            end
-            return #tauntme:toList() > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme:toList() < mobs)
-        end,
         --function to determine if we have enough mobs in range to use a defensive disc
         DefensiveDiscCheck = function(printDebug)
             local xtCount = mq.TLO.Me.XTarget() or 0
@@ -959,7 +939,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
-                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                return combat_state == "Combat" and Combat.AETauntCheck(true)
             end,
         },
         { --Dynamic weapon swapping if UseBandolier is toggled
@@ -1905,32 +1885,6 @@ local _ClassConfig = {
             Tooltip = "Use AE Taunt AA.",
             Default = true,
             ConfigType = "Advanced",
-        },
-        ['AETauntCnt']        = {
-            DisplayName = "AE Taunt Count",
-            Group = "Abilities",
-            Header = "Tanking",
-            Category = "Hate Tools",
-            Index = 102,
-            Tooltip = "Minimum number of haters before using AE Taunt Spells or AA.",
-            Default = 2,
-            Min = 1,
-            Max = 30,
-            FAQ = "Why don't we use AE taunts on single targets?",
-            Answer =
-            "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
-        },
-        ['SafeAETaunt']       = {
-            DisplayName = "AE Taunt Safety Check",
-            Group = "Abilities",
-            Header = "Tanking",
-            Category = "Hate Tools",
-            Index = 103,
-            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE taunts are used. May result in non-use due to false positives.",
-            Default = false,
-            FAQ = "Can you better explain the AE Taunt Safety Check?",
-            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the taunt.\n" ..
-                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the taunt not being used when it is safe to do so.",
         },
 
         --Defenses
