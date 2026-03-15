@@ -260,7 +260,7 @@ function Module:ExportFAQToWiki()
 end
 
 function Module:FaqFind(question)
-	self.TempSettings.Search = question
+	self.TempSettings.Search = question:lower()
 	for cmd, data in pairs(Binds.Handlers) do
 		if cmd ~= "help" then
 			if self:MatchSearch(data.usage, data.about, cmd) then

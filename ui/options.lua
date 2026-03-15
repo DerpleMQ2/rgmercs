@@ -144,11 +144,11 @@ OptionsUI.Groups                = { --- Add a default of the same name for any k
         Headers = {
         },
         HiddenOnSearch = function(self)
-            return not Modules:ExecModule("FAQ", "SearchMatches", self.configFilter)
+            return not Modules:ExecModule("FAQ", "SearchMatches", self.configFilter:lower())
         end,
 
         HeaderRender = function(self)
-            return Modules:ExecModule("FAQ", "RenderConfig", self.configFilter)
+            return Modules:ExecModule("FAQ", "RenderConfig", self.configFilter:lower())
         end,
     },
     {
