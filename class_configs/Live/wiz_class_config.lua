@@ -1244,7 +1244,7 @@ return {
             gem = 1,
             spells = {
                 { name = "VortexNuke", cond = function() return mq.TLO.Me.Level() > 102 end, },
-                { name = "SnapNuke", },
+                { name = "SnapNuke",   cond = function() return Core.GetResolvedActionMapItem('ChaosNuke') or Core.GetResolvedActionMapItem('WildNuke') end, },
                 --1-70
                 { name = "FireNuke",   cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
                 { name = "IceNuke",    cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
@@ -1255,7 +1255,7 @@ return {
         {
             gem = 2,
             spells = {
-                { name = "FireEtherealNuke", },
+                { name = "FireEtherealNuke", cond = function() return Core.GetResolvedActionMapItem('ChaosNuke') or Core.GetResolvedActionMapItem('WildNuke') end, },
                 --1-70
                 { name = "BigFireNuke",      cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
                 { name = "BigIceNuke",       cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
