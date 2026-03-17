@@ -666,7 +666,7 @@ function Module:ProcessMezList()
                 if data.duration > (spell.MyCastTime() / 100) or spawn.Distance() > Config:GetSetting('MezRadius') or not spawn.LineOfSight() then
                     Logger.log_debug("\ayProcessMezList(%d) :: Timer(%s > %s) Distance(%d) LOS(%s)", id,
                         Strings.FormatTime(data.duration / 1000),
-                        Strings.FormatTime(spell.MyCastTime() / 100), spawn.Distance(),
+                        Strings.FormatTime(spell.MyCastTime() / 100), spawn.Distance() or 0,
                         Strings.BoolToColorString(spawn.LineOfSight()))
                 else
                     if id == Globals.AutoTargetID then
