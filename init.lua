@@ -338,6 +338,7 @@ local function RGInit(...)
 end
 
 local function Main()
+    Logger.log_debug("Starting Main loop.")
     if mq.TLO.Zone.ID() ~= Globals.CurZoneId or mq.TLO.Me.Instance() ~= Globals.CurInstance then
         if notifyZoning then
             Modules:ExecAll("OnZone")
@@ -527,6 +528,7 @@ local function Main()
     Modules:ExecAll("WriteSettings")
 
     mq.doevents()
+    Logger.log_debug("Completed Main loop.")
     mq.delay(10)
 end
 
