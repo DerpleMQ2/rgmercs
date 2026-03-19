@@ -102,7 +102,7 @@ function Comms.SendAllPeersDoCmd(inZoneOnly, includeSelf, cmd, ...)
 end
 
 function Comms.SendHeartbeat(assist, chase)
-    --if Globals.GetTimeSeconds() - Comms.LastHeartbeat < 1 then return end
+    if Globals.GetTimeSeconds() - Comms.LastHeartbeat < 1 then return end
     local useMana = Globals.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName())
     local useEnd = Globals.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName())
     local curAutoTarget = mq.TLO.Spawn(string.format("id %d", Globals.AutoTargetID))
