@@ -2595,7 +2595,7 @@ function Ui.SearchableCombo(id, curIdx, options, hideText)
             ImGui.SetKeyboardFocusHere()
         end
 
-        Ui.ComboFilterText = ImGui.InputText("##combo_search", Ui.ComboFilterText)
+        Ui.ComboFilterText = ImGui.InputTextWithHint("##combo_search", "Search...", Ui.ComboFilterText)
 
         ImGui.Separator()
 
