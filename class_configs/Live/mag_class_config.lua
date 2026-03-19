@@ -966,17 +966,18 @@ _ClassConfig    = {
             load_cond = function(self) return not self:GetResolvedActionMapItem('ChaoticNuke') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Casting.OkayToNuke()
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             load_cond = function(self) return self:GetResolvedActionMapItem('ChaoticNuke') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Casting.OkayToNuke()
             end,
         },
         {
@@ -1342,6 +1343,13 @@ _ClassConfig    = {
                 end,
             },
             {
+                name = "TwinCast",
+                type = "Spell",
+                cond = function(self)
+                    return not mq.TLO.Me.Buff("Twincast")()
+                end,
+            },
+            {
                 name = "Servant of Ro",
                 type = "AA",
             },
@@ -1427,42 +1435,33 @@ _ClassConfig    = {
             {
                 name = "SwarmPet",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.OkayToNuke()
-                end,
-            },
-            {
-                name = "ChaoticNuke",
-                type = "Spell",
-                cond = function(self, _)
-                    return Casting.OkayToNuke()
-                end,
-            },
-            {
-                name = "SpearNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.OkayToNuke()
-                end,
             },
             {
                 name = "VolleyNuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.OkayToNuke()
-                end,
+            },
+            {
+                name = "ChaoticNuke",
+                type = "Spell",
             },
             {
                 name = "Turn Summoned",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.TargetBodyIs(target, "Undead Pet") and Targeting.AggroCheckOkay()
+                    return Targeting.TargetBodyIs(target, "Undead Pet")
                 end,
             },
             {
-                name = "TwinCast",
+                name = "SummonedNuke",
                 type = "Spell",
-                cond = function(self, spell) return not mq.TLO.Me.Buff("Twincast")() end,
+                load_cond = function(self) return Config:GetSetting('DoSummonedNuke') end,
+                cond = function(self, spell, target)
+                    return Targeting.TargetBodyIs(target, "Undead Pet")
+                end,
+            },
+            {
+                name = "SpearNuke",
+                type = "Spell",
             },
             --   {
             --       name = "AllianceBuff",
@@ -1475,34 +1474,40 @@ _ClassConfig    = {
         },
         ['DPS(LowLevel)'] = {
             {
+                name = "SummonedNuke",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSummonedNuke') end,
+                cond = function(self, spell, target)
+                    return Targeting.TargetBodyIs(target, "Undead Pet")
+                end,
+            },
+            {
                 name = "BigFireDD",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('ElementChoice') ~= 1 then return false end
-                    return Casting.OkayToNuke() and Targeting.MobNotLowHP(target)
+                    return Targeting.MobNotLowHP(target)
                 end,
             },
             {
                 name = "FireDD",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Config:GetSetting('ElementChoice') ~= 1 then return false end
-                    return Casting.OkayToNuke()
+                    return Config:GetSetting('ElementChoice') == 1
                 end,
             },
             {
                 name = "MagicDD",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Config:GetSetting('ElementChoice') ~= 2 then return false end
-                    return Casting.OkayToNuke()
+                    return Config:GetSetting('ElementChoice') == 2
                 end,
             },
             {
                 name = "Turn Summoned",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.TargetBodyIs(target, "Undead Pet") and Targeting.AggroCheckOkay()
+                    return Targeting.TargetBodyIs(target, "Undead Pet")
                 end,
             },
         },
@@ -1762,6 +1767,7 @@ _ClassConfig    = {
         {
             gem = 6,
             spells = {
+                { name = "SummonedNuke",     cond = function(self) return Config:GetSetting('DoSummonedNuke') end, },
                 { name = "GroupCotH", },
                 { name = "ManaRodSummon", },
                 { name = "PetHealSpell", },
@@ -1775,6 +1781,7 @@ _ClassConfig    = {
                 { name = "FireOrbSummon", },
                 { name = "PetHealSpell", },
                 { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
+                { name = "GroupCotH", },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1786,6 +1793,7 @@ _ClassConfig    = {
                 { name = "PetHealSpell", },
                 { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
                 { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
+                { name = "GroupCotH", },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1796,6 +1804,7 @@ _ClassConfig    = {
                 { name = "GatherMana", },
                 { name = "PetHealSpell", },
                 { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
+                { name = "GroupCotH", },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1806,6 +1815,7 @@ _ClassConfig    = {
                 { name = "EarthPetItemSummon", },
                 { name = "PetHealSpell", },
                 { name = "SkinDS",             cond = function(self) return Config:GetSetting('DoSkinDS') end, },
+                { name = "GroupCotH", },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1816,6 +1826,7 @@ _ClassConfig    = {
                 { name = "FirePetItemSummon", },
                 { name = "PetHealSpell", },
                 { name = "SkinDS",            cond = function(self) return Config:GetSetting('DoSkinDS') end, },
+                { name = "GroupCotH", },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1826,6 +1837,7 @@ _ClassConfig    = {
                 { name = "SelfManaRodSummon", },
                 { name = "PetHealSpell", },
                 { name = "SkinDS",            cond = function(self) return Config:GetSetting('DoSkinDS') end, },
+                { name = "GroupCotH", },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1835,6 +1847,7 @@ _ClassConfig    = {
             spells = {
                 { name = "PetHealSpell", },
                 { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
+                { name = "GroupCotH", },
                 { name = "LongDurDmgShield", },
             },
         },
@@ -1844,6 +1857,7 @@ _ClassConfig    = {
             spells = {
                 { name = "SkinDS",       cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "PetHealSpell", },
+                { name = "GroupCotH", },
             },
         },
     },
@@ -1962,7 +1976,8 @@ _ClassConfig    = {
             Group = "Abilities",
             Header = "Damage",
             Category = "Direct",
-            Tooltip = "Use Force of Elements AA",
+            Index = 103,
+            Tooltip = "Use Force of Elements AA.",
             Default = true,
         },
         ['ElementChoice']  = {
@@ -1978,6 +1993,15 @@ _ClassConfig    = {
             Min = 1,
             Max = 2,
             RequiresLoadoutChange = true,
+        },
+        ['DoSummonedNuke'] = {
+            DisplayName = "Do Summoned Nuke",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 102,
+            Tooltip = "Memorize and use your anti-summoned mob nuke line ('x the Unnatural').",
+            Default = false,
         },
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
