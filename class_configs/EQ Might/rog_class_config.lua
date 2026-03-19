@@ -143,6 +143,13 @@ return {
                 end,
             },
             {
+                name = "Envenomed Blades",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
                 name = "OoW_Chest",
                 type = "Item",
                 cond = function(self, itemName, target)
@@ -290,13 +297,6 @@ return {
                 end,
                 cond = function(self)
                     return Casting.SelfBuffItemCheck(Config:GetSetting('PoisonName'))
-                end,
-            },
-            {
-                name = "Envenomed Blades",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
