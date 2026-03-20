@@ -216,6 +216,11 @@ return {
         ['BiteNuke'] = {
             "Bite of the Empress",
         },
+        ["HasteBuff"] = {
+            -- Haste Buff - 26 - 64
+            "Celerity",
+            "Alacrity",
+        },
     },
     ['HealRotationOrder'] = {
         { -- configured as a backup healer, will not cast in the mainpoint
@@ -639,8 +644,8 @@ return {
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRunSpeed') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoRunSpeed') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -694,6 +699,14 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoAvatar') or not Targeting.TargetIsAMelee(target) then return false end
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "HasteBuff",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHaste') end,
+                cond = function(self, spell, target)
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1055,6 +1068,15 @@ return {
             Category = "Group",
             Index = 102,
             Tooltip = "Buff Group/Pet with Infusion of Spirit",
+            Default = false,
+        },
+        ['DoHaste']        = {
+            DisplayName = "Use Haste",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 103,
+            Tooltip = "Do Haste Spells",
             Default = false,
         },
         --Combat
