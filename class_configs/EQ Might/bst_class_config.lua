@@ -216,6 +216,11 @@ return {
         ['BiteNuke'] = {
             "Bite of the Empress",
         },
+		["HasteBuff"] = {
+            -- Haste Buff - 26 - 64
+            "Celerity",
+            "Alacrity",
+        },
     },
     ['HealRotationOrder'] = {
         { -- configured as a backup healer, will not cast in the mainpoint
@@ -697,6 +702,14 @@ return {
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
+			{
+                name = "HasteBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoRunSpeed') then return false end
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
         },
         ['PetSummon'] = {
             {
@@ -1055,6 +1068,15 @@ return {
             Category = "Group",
             Index = 102,
             Tooltip = "Buff Group/Pet with Infusion of Spirit",
+            Default = false,
+        },
+		['DoHaste']             = {
+            DisplayName = "Use Haste",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Group",
+            Index = 104,
+            Tooltip = "Do Haste Spells/AAs",
             Default = false,
         },
         --Combat
