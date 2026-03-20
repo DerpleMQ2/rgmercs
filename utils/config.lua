@@ -3471,7 +3471,7 @@ end
 function Config.ShouldMount()
     if Config:GetSetting('DoMount') == 1 then return false end
 
-    local passBasicChecks = Config:GetSetting('MountItem'):len() > 0 and mq.TLO.Zone.Outdoor()
+    local passBasicChecks = Config:GetSetting('MountItem'):len() > 0 and mq.TLO.Me.CanMount()
 
     local passCheckMountOne = (not Config:GetSetting('DoMelee') and (Config:GetSetting('DoMount') == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0))
     local passCheckMountTwo = ((Config:GetSetting('DoMount') == 3 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
