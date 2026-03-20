@@ -216,7 +216,7 @@ return {
         ['BiteNuke'] = {
             "Bite of the Empress",
         },
-		["HasteBuff"] = {
+        ["HasteBuff"] = {
             -- Haste Buff - 26 - 64
             "Celerity",
             "Alacrity",
@@ -644,8 +644,8 @@ return {
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRunSpeed') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoRunSpeed') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -702,11 +702,11 @@ return {
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
-			{
+            {
                 name = "HasteBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHaste') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoRunSpeed') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1070,13 +1070,13 @@ return {
             Tooltip = "Buff Group/Pet with Infusion of Spirit",
             Default = false,
         },
-		['DoHaste']             = {
+        ['DoHaste']        = {
             DisplayName = "Use Haste",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 104,
-            Tooltip = "Do Haste Spells/AAs",
+            Index = 103,
+            Tooltip = "Do Haste Spells",
             Default = false,
         },
         --Combat

@@ -17,5 +17,6 @@ return {
         "guest01",
         "Fargrim",
         "gennro",
+        "Nunno",
     },
 }
