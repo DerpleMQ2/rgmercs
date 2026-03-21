@@ -17,6 +17,7 @@ function LoaderUI:RenderLoader(initPctComplete, initMsg)
 
     ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 15)
     ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 15)
+    ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 1.25)
     ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 100)
     ImGui.SetNextWindowSize(ImVec2(400, 80), ImGuiCond.Always)
     ImGui.SetNextWindowPos(ImVec2(ImGui.GetIO().DisplaySize.x / 2 - 200, ImGui.GetIO().DisplaySize.y / 3 - 75), ImGuiCond.Always)
@@ -32,7 +33,7 @@ function LoaderUI:RenderLoader(initPctComplete, initMsg)
     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 70)
     Ui.RenderAnimatedPercentage("RGMercsLoadProgressBar", initPctComplete, 16, Globals.Constants.Colors.LightBlue, Globals.Constants.Colors.LightGreen,
         Globals.Constants.Colors.Green, initMsg)
-    ImGui.PopStyleVar(3)
+    ImGui.PopStyleVar(4)
     ImGui.End()
 end
 

@@ -49,7 +49,9 @@ function Combat.SetMainAssist()
                 end
             end
         end
-    elseif inRaid then
+    end
+
+    if inRaid then
         local raidAssistSpawn = mq.TLO.Raid.MainAssist(Config:GetSetting('RaidAssistTarget'))
         if raidAssistSpawn() and raidAssistSpawn.ID() > 0 and not raidAssistSpawn.Dead() then
             if raidAssistSpawn.ID() ~= Core.GetMainAssistId() then
@@ -67,7 +69,9 @@ function Combat.SetMainAssist()
             end
             return
         end
-    else
+    end
+
+    if not inRaid and not inGroup then
         Combat.SetMAToSelf()
         return
     end

@@ -102,7 +102,8 @@ Module.Constants.PullAbilities         = {
         DisplayName = "Pet Pull",
         LOS = false,
         cond = function(self)
-            return Globals.Constants.RGPetClass:contains(Globals.CurLoadedClass) and Config:GetSetting('DoPetCommands')
+            return (Globals.Constants.RGPetClass:contains(Globals.CurLoadedClass) or (mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Pet.Name():lower():find("familiar") == nil)) and
+            Config:GetSetting('DoPetCommands')
         end,
     },
     {
