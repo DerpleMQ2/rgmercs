@@ -330,10 +330,7 @@ function Targeting.GetXTHaterIDsSet(printDebug)
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        local idValid = xtarg and xtarg.ID() and xtarg.ID() > 0
-        local notDead = xtarg and not xtarg.Dead() and (xtarg.Type() or "Corpse") ~= "Corpse"
-        local isAggressive = xtarg and (xtarg.Aggressive() or (xtarg.TargetType() or ""):lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID)
-        if idValid and notDead and isAggressive then
+        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (xtarg.Type() or "Corpse") ~= "Corpse" and (xtarg.Aggressive() or (xtarg.TargetType() or ""):lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID) then
             if printDebug then
                 Logger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
             end
