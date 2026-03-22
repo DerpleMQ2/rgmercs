@@ -68,6 +68,15 @@ function ClassLoader.load(class)
         else
             local classConfig
             classConfig = config()
+
+            if classConfig.Deprecated then
+                Logger.log_warn("The class config '%s' is marked as deprecated. Deleting.", classConfigFile)
+                Files.delete_file(classConfigFile)
+                Config:SetSetting('ClassConfigDir', ClassLoader.getFallbackClassConfigFolder())
+                Core.ScanConfigDirs()
+                return ClassLoader.load(class) -- try loading again to get the non-deprecated config, if it exists
+            end
+
             classConfig.IsCustom = customConfig
             return classConfig
         end
