@@ -10,33 +10,41 @@ local Logger       = require("utils.logger")
 local Set          = require('mq.set')
 
 local _ClassConfig = {
-    _version              = "Alpha 1.5 - Live (Modern Era Tank Only)",
+    _version              = "Alpha 2.0 - Live",
     _author               = "Algar",
     ['ModeChecks']        = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
         IsHealing = function() return true end,
         IsCuring = function() return Config:GetSetting('DoCureAA') or Config:GetSetting('DoCureSpells') end,
-        IsRezing = function() return (Config:GetSetting('DoBattleRez') and not Core.IsTanking()) or Targeting.GetXTHaterCount() == 0 end,
-        --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
+        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Tank',
-        --'DPS',
+        'DPS',
     },
     ['Cures']             = {
         GetCureSpells = function(self)
-            --(re)initialize the table for loadout changes
-            self.TempSettings.CureSpells = {}
-
-            -- Find the map for each cure spell we need
+            -- These are the default cure choices. I prefer PurityCure but a user may wish to change this to something else.
+            -- -- I chose not to add the option to use CurseCure or keep that memmed like emu because this is aimed and Live.
             local neededCures = {
-                ['Poison'] = 'PurityCure',
-                ['Disease'] = 'PurityCure',
-                ['Curse'] = Casting.GetFirstMapItem({ "PurityCure", "CureCurse", }),
-                ['Corruption'] = 'CureCorrupt',
+                Poison     = 'PurityCure',
+                Disease    = 'PurityCure',
+                Curse      = 'PurityCure',
+                Corruption = 'CureCorrupt',
             }
 
-            -- iterate to actually resolve the selected map item, if it is valid, add it to the cure table
+            -- If we have chose the option, and have a splash heal in our books, use that instead
+            if Config:GetSetting('SplashHealAsCure') and Core.GetResolvedActionMapItem('SplashHeal') then
+                neededCures = {
+                    Poison     = 'SplashHeal',
+                    Disease    = 'SplashHeal',
+                    Curse      = 'SplashHeal',
+                    Corruption = 'SplashHeal',
+                }
+            end
+
+            -- Make sure that we have the curespell, and then place into the tempsettings table for CureNow to use
+            self.TempSettings.CureSpells = {}
             for k, v in pairs(neededCures) do
                 local cureSpell = Core.GetResolvedActionMapItem(v)
                 if cureSpell then
@@ -79,14 +87,9 @@ local _ClassConfig = {
             "Nightbane, Sword of the Valiant",
             "Redemption",
         },
-        ['Coating'] = {
-            "Spirit Drinker's Coating",
-            "Blood Drinker's Coating",
-        },
     },
     ['AbilitySets']       = {
         ["CrushTimer6"] = {
-            -- Timer 6 - Crush (with damage)
             "Crush of Eminence",     -- Level 129
             "Crush of Compunction",  -- Level 85
             "Crush of Repentance",   -- Level 90
@@ -110,8 +113,7 @@ local _ClassConfig = {
             "Crush of the Twilight Sea",  -- Level 117
             "Crush of the Wayunder",      -- Level 122
         },
-        ["HealNuke"] = {
-            -- Timer 7 - HealNuke
+        ["TwinHealNuke"] = {
             "Brilliant Expurgation",  -- Level 130
             "Glorious Vindication",   -- Level 85
             "Glorious Exoneration",   -- Level 90
@@ -136,7 +138,6 @@ local _ClassConfig = {
             "Unwavering Stance",
         },
         ["Preservation"] = {
-            -- Timer 12 - Preservation
             "Preservation of Quellious",    -- Level 130
             "Ward of Tunare",               -- Level 70
             "Sustenance of Tunare",         -- Level 80
@@ -149,8 +150,7 @@ local _ClassConfig = {
             "Preservation of the Basilica", -- Level 120
             "Preservation of the Fern",     -- Level 125
         },
-        ["Lowaggronuke"] = {
-            --- Nuke Heal Target - Censure
+        ["HealNuke"] = {
             "Denouncement IX",
             "Denouncement",
             "Reprimand",
@@ -161,8 +161,7 @@ local _ClassConfig = {
             "Upbraid",
             "Chastise",
         },
-        ["Incoming"] = {
-            -- Harmonius Blessing - Empires of Kunark spell
+        ["BlessingProc"] = {
             "Harmonious Blessing",
             "Concordant Blessing",
             "Confluent Blessing",
@@ -170,7 +169,6 @@ local _ClassConfig = {
             "Paradoxical Blessing",
         },
         ["DebuffNuke"] = {
-            -- Undead DebuffNuke
             "Committal",    -- Level 126
             "Last Rites",   -- Level 68 - Timer 7
             "Burial Rites", -- Level 71 - Timer 7
@@ -185,8 +183,7 @@ local _ClassConfig = {
             "Hymnal",       -- Level 116
             "Revelation",   -- Level 121
         },
-        ["Healproc"] = {
-            --- Proc Buff Heal target of Target => LVL 97
+        ["SteelProc"] = {   --Proc Heal ToT
             "Rejuvenating Steel VII",
             "Restoring Steel",
             "Regenerating Steel",
@@ -231,7 +228,6 @@ local _ClassConfig = {
             "Aurora of Realizing",
         },
         ["StunTimer5"] = {
-            -- Timer 5 - Hate Stun
             "Force of Akera XV",          -- Level 130
             "Desist",                     -- Level 13 - Not Timer 5, use for TLP Low Level Stun
             "Stun",                       -- Level 28
@@ -251,7 +247,6 @@ local _ClassConfig = {
             "Force of the Wayunder",      -- Level 125
         },
         ["StunTimer4"] = {
-            -- Timer 4 - Hate Stun
             "Eminent Force",   -- Level 126
             "Cease",           -- Level 7 - Not Timer 4, use for TLP Low Level Stun
             "Force of Akilae", -- Level 62
@@ -269,7 +264,6 @@ local _ClassConfig = {
             "Avowed Force",    -- Level 121
         },
         ["HealStun"] = {
-            --- Heal Stuns T3 12s recast
             "Force of Eminence",   -- Level 129
             "Force of the Avowed", --Level 124
             "Force of Generosity",
@@ -278,8 +272,7 @@ local _ClassConfig = {
             "Force of Mercy",
             "Force of Sincerity",
         },
-        ["HealWard"] = {
-            --- Healing ward Heals Target of target and wards self. Divination based heal/ward
+        ["HealWard"] = { -- Heal ToT, Ward on Self
             "Protective Confession X",
             "Protective Acceptance",
             "Protective Revelation",
@@ -292,7 +285,6 @@ local _ClassConfig = {
             "Protective Consecration",
         },
         ["Aego"] = {
-            --- Pally Aegolism
             "Hand of Austerity XVII",        -- Level 127 - Group
             "Austerity",                     -- Level 55
             "Blessing of Austerity",         -- Level 58 - Group
@@ -335,7 +327,7 @@ local _ClassConfig = {
             "Brell's Steadfast Aegis",
             "Brell's Unbreakable Palisade",
         },
-        ["Splashcure"] = {
+        ["SplashHeal"] = {
             "Splash of Eminence",
             "Splash of Heroism",
             "Splash of Repentance",
@@ -346,8 +338,7 @@ local _ClassConfig = {
             "Splash of Depuration",
             "Splash of Exaltation",
         },
-        ["Healtaunt"] = {
-            --- Valiant Taunt With Built in heal.
+        ["HealTaunt"] = {
             "Valiant Defiance",
             "Valiant Disruption",
             "Valiant Deflection",
@@ -355,8 +346,7 @@ local _ClassConfig = {
             "Valiant Diversion",
             "Valiant Deterrence",
         },
-        ["Affirmation"] = {
-            --- Improved Super Taunt - Gets you Aggro for X seconds and reduces other Haters generation.
+        ["Affirmation"] = { --- Improved Super Taunt - Gets you Aggro for X seconds and reduces other Haters generation.
             "Unquestioned Affirmation",
             "Unconditional Affirmation",
             "Unending Affirmation",
@@ -366,30 +356,9 @@ local _ClassConfig = {
             "Unflinching Affirmation",
             "Unyielding Affirmation",
         },
-        ["WaveHeal"] = {
-            --- Group Wave heal 39-124
+        ["WaveHeal"] = { -- Group Heal
             "Wave of Inspiriation",
             "Wave of Regret",
-            "Wave of Bereavement",
-            "Wave of Propitiation",
-            "Wave of Expiation",
-            "Wave of Grief",
-            "Wave of Sorrow",
-            "Wave of Contrition",
-            "Wave of Penitence",
-            "Wave of Remitment",
-            "Wave of Absolution",
-            "Wave of Forgiveness",
-            "Wave of Piety",
-            "Wave of Marr",
-            "Wave of Trushar",
-            "Healing Wave of Prexus",
-            "Wave of Healing",
-            "Wave of Life",
-        },
-        ["WaveHeal2"] = {
-            --- Group Wave heal 39-115
-            "Wave of Inspiriation",
             "Wave of Bereavement",
             "Wave of Propitiation",
             "Wave of Expiation",
@@ -432,26 +401,24 @@ local _ClassConfig = {
             "Mark of the Eclipsed Cohort",
             "Mark of the Forgotten Hero",
         },
-        ["Cleansehot"] = {
-            --- Pally Hot
-            "Ethereal Cleansing",   -- Level 44
-            "Celestial Cleansing",  -- Level 59
-            "Supernal Cleansing",   -- Level 64
-            "Pious Cleansing",      -- Level 69
-            "Sacred Cleansing",     -- Level 73
-            "Solemn Cleansing",     -- Level 78
-            "Devout Cleansing",     -- Level 93
-            "Earnest Cleansing",    -- Level 88
-            "Zealous Cleansing",    -- Level 93
-            "Reverent Cleansing",   -- Level 98
-            "Ardent Cleansing",     -- Level 103
-            "Merciful Cleansing",   -- Level 108
-            "Sincere Cleansing",    -- Level 113
-            "Forthright Cleansing", -- Level 118
-            "Avowed Cleansing",     -- Level 123
-        },
-        ["BurstHeal"] = {
-            --- Burst Heal - heals target or Target of target 73-115
+        -- ["Cleansing"] = {           -- ST HoT
+        --     "Ethereal Cleansing",   -- Level 44
+        --     "Celestial Cleansing",  -- Level 59
+        --     "Supernal Cleansing",   -- Level 64
+        --     "Pious Cleansing",      -- Level 69
+        --     "Sacred Cleansing",     -- Level 73
+        --     "Solemn Cleansing",     -- Level 78
+        --     "Devout Cleansing",     -- Level 93
+        --     "Earnest Cleansing",    -- Level 88
+        --     "Zealous Cleansing",    -- Level 93
+        --     "Reverent Cleansing",   -- Level 98
+        --     "Ardent Cleansing",     -- Level 103
+        --     "Merciful Cleansing",   -- Level 108
+        --     "Sincere Cleansing",    -- Level 113
+        --     "Forthright Cleansing", -- Level 118
+        --     "Avowed Cleansing",     -- Level 123
+        -- },
+        ["BurstHeal"] = { -- Smart Heal, Target or ToT
             "Burst of Sunlight XII",
             "Burst of Sunlight",
             "Burst of Morrow",
@@ -466,7 +433,6 @@ local _ClassConfig = {
             "Burst of Sunspring",
         },
         ["ArmorSelfBuff"] = {
-            --- Self Buff Armor Line Ac/Hp/Mana regen
             "Armor of Unyielding Faith",  -- Level 128
             "Aura of the Crusader",       -- Level 64
             "Armor of the Champion",      -- Level 69
@@ -513,8 +479,7 @@ local _ClassConfig = {
             "Symbol of Sevalak",
             "Symbol of Thormir",
         },
-        ["LessonStun"] = {
-            --- Lesson Stun - Timer 6
+        ["StunTimer6"] = {                    -- Timer 6, less damage than timer 6 crush, but inlcudes stun. Has Push.
             "Lesson of Penitence XV",         -- Level 127
             "Quellious' Word of Tranquility", -- Level 54
             "Quellious' Word of Serenity",    -- Level 64
@@ -529,28 +494,18 @@ local _ClassConfig = {
             "Lesson of Expiation",            -- Level 107
             "Lesson of Propitiation",         -- Level 112
             "Lesson of Guilt",                -- Level 117
-            "Lesson of Remembrance",          -- Level 117
+            "Lesson of Remembrance",          -- Level 122
         },
-        ["Audacity"] = {
-            -- Hate magic Debuff Over time
+        ["Audacity"] = {                      -- Magic Resist debuff, Hate over time
             "Impassioned Audacity",
             "Fanatical Audacity",
-            "Ardent Audacity,",
-            "Fervent Audacity,",
-            "Sanctimonious Audacity,",
-            "Devout Audacity,",
-            "Righteous Audacity,",
+            "Ardent Audacity",
+            "Fervent Audacity",
+            "Sanctimonious Audacity",
+            "Devout Audacity",
+            "Righteous Audacity",
         },
-        ["LightHeal"] = {
-            -- Target Light Heal
-            "Salve",            -- Level 1
-            "Minor Healing",    -- Level 6
-            "Light Healing",    -- Level 12
-            "Healing",          -- Level 27
-            "Greater Healing",  -- Level 36
-            "Superior Healing", -- Level 48
-        },
-        ["TotLightHeal"] = {
+        ["LightHeal"] = {      --ToT Heal
             "Eminent Light",   -- Level 127
             "Light of Life",   -- Level 52
             "Light of Nife",   -- Level 63
@@ -568,21 +523,20 @@ local _ClassConfig = {
             "Raptured Light",  -- Level 117
             "Avowed Light",    -- Level 122
         },
-        ["Pacify"] = {
-            "Assuring Words",
-            "Placating Words",
-            "Tranquil Words",
-            "Propitiate",
-            "Mollify",
-            "Reconcile",
-            "Dulcify",
-            "Soothe",
-            "Pacify",
-            "Calm",
-            "Lull",
-        },
+        -- ["Pacify"] = {
+        --     "Assuring Words",
+        --     "Placating Words",
+        --     "Tranquil Words",
+        --     "Propitiate",
+        --     "Mollify",
+        --     "Reconcile",
+        --     "Dulcify",
+        --     "Soothe",
+        --     "Pacify",
+        --     "Calm",
+        --     "Lull",
+        -- },
         ["TouchHeal"] = {
-            --- Touch Heal Line LVL61
             "Eminent Touch",
             "Touch of Nife",
             "Touch of Piety",
@@ -597,6 +551,11 @@ local _ClassConfig = {
             "Sincere Touch",
             "Soothing Touch",
             "Avowed Touch",
+            "Superior Healing", -- Level 48
+            "Healing",          -- Level 27
+            "Light Healing",    -- Level 12
+            "Minor Healing",    -- Level 6
+            "Salve",            -- Level 1
         },
         ["Dicho"] = {
             --- Dissident Stun
@@ -606,8 +565,7 @@ local _ClassConfig = {
             "Ecliptic Force",
             "Reciprocal Force",
         },
-        ["PurityCure"] = {
-            --- Purity Cure Poison/Diease Cure Half Power to curse
+        ["PurityCure"] = { --- Purity Cure Poison/Diease Cure Half Power to curse
             "Mastery: Balanced Purity",
             "Balanced Purity",
             "Devoted Purity",
@@ -617,18 +575,24 @@ local _ClassConfig = {
             "Ardent Purity",
             "Merciful Purity",
         },
-        ["CureCurse"] = {
-            -- Curse Cure Line
-            "Remove Minor Curse",
-            "Remove Lesser Curse",
-            "Remove Curse",
-            "Remove Greater Curse",
-        },
+        -- ["CureCurse"] = {
+        --     "Remove Minor Curse",
+        --     "Remove Lesser Curse",
+        --     "Remove Curse",
+        --     "Remove Greater Curse",
+        --     "Eradicate Curse",
+        -- },
         ['CureCorrupt'] = {
             "Mastery: Consecrate",
+            "Consecrate",
+            "Sanctify",
+            "Depurate",
+            "Expurgate",
+            "Purify",
+            "Cleanse",
+            "Cure Corruption",
         },
-        ["ForHonor"] = {
-            --- Challenge Taunt Over time Debuff
+        ["ForHonor"] = { --- Challenge Taunt Over time Debuff
             "Duel for Honor",
             "Challenge for Honor",
             "Trial For Honor",
@@ -642,22 +606,18 @@ local _ClassConfig = {
             "Parlay for Honor",
             "Petition for Honor",
         },
-        ["Piety"] = {
-            -- One Off Buffs
+        ["Piety"] = { -- Spell Resist Buff
             "Silent Piety",
         },
-        ["Remorse"] = {
-            -- Remorse
-            "Remorse for the fallen",
+        ["Remorse"] = { -- Killshot buff
             "Penitence for the Fallen",
+            "Remorse for the Fallen",
         },
-        ["Aurabuff"] = {
-            -- Aura Buffs
+        ["HealAura"] = {
             "Blessed Aura",
             "Holy Aura",
         },
-        ["AntiUndeadNuke"] = {
-            -- Undead Nuke
+        ["UndeadNuke"] = {
             "Doctrine of Revocation",  -- Level 128
             "Doctrine of Repudiation", -- Level 121
             "Ward Undead",             -- Level 14
@@ -677,17 +637,9 @@ local _ClassConfig = {
             "Doctrine of Annulment",   -- Level 116
         },
         ["AllianceNuke"] = {
-            -- Pally Alliance Spell
             "Holy Alliance",
             "Stormwall Coalition",
             "Aureate Covariance",
-        },
-        ["CurseCure"] = {
-            -- Curse Cure Line
-            "Remove Minor Curse",
-            "Remove Lesser Curse",
-            "Remove Curse",
-            "Remove Greater Curse",
         },
         ['EndRegen'] = {
             --Timer 13, can't be used in combat
@@ -708,7 +660,6 @@ local _ClassConfig = {
             "Convalesce",
         },
         ["MeleeMit"] = {
-            -- Withstand Combat Line of Defense - Update to format once tested
             "Impede",
             "Withstand",
             "Defy",
@@ -745,7 +696,6 @@ local _ClassConfig = {
             "Sincere Penitence",
         },
         ["Mantle"] = {
-            ---Mantle Line of Discipline Timer 5 defensive burn
             "Mantle of Eminence",
             "Supernal Mantle",
             "Mantle of the Sapphire Cohort",
@@ -849,87 +799,113 @@ local _ClassConfig = {
         end,
     },
     ['HealRotationOrder'] = {
-        {
-            name = 'EmergencyHealing', --Self-only combat healing
-            state = 1,
-            steps = 1,
-            cond = function(self, target, combat_state)
-                if target.ID() ~= mq.TLO.Me.ID() then return false end
-                return combat_state == "Combat" and (target.PctHPs() or 999) < Config:GetSetting('EmergencyStart')
-            end,
-        },
-        {
-            name = 'MainHealPoint',
-            state = 1,
-            steps = 1,
-            cond = function(self, target) return Targeting.MainHealsNeeded(target) end,
+        ['HealRotationOrder'] = {
+            {
+                name = 'GroupHeal',
+                state = 1,
+                steps = 1,
+                cond = function(self, target) return Targeting.GroupHealsNeeded() end,
+            },
+            {
+                name = 'BigHeal',
+                state = 1,
+                steps = 1,
+                cond = function(self, target)
+                    return Targeting.BigHealsNeeded(target) and not Targeting.TargetIsType("pet", target)
+                end,
+            },
+            {
+                name = 'MainHeal',
+                state = 1,
+                steps = 1,
+                cond = function(self, target)
+                    return Targeting.MainHealsNeeded(target)
+                end,
+            },
         },
     },
     ['HealRotations']     = {
-        ["MainHealPoint"] = {
-            {
-                name = "Gift of Life",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not mq.TLO.Group() then return false end
-                    return self.CombatState == "Combat" and Targeting.BigGroupHealsNeeded()
-                end,
-            },
+        ["GroupHeal"] = {
             {
                 name = "Hand of Piety",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not mq.TLO.Group() then return false end
                     return self.CombatState == "Combat" and Targeting.BigGroupHealsNeeded()
                 end,
             },
             {
-                name = "Lay on Hands",
+                name = "Gift of Life",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return self.CombatState == "Combat" and Targeting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
+                    if not Targeting.GroupedWithTarget(target) then return false end
+                    return self.CombatState == "Combat" and Targeting.BigGroupHealsNeeded()
                 end,
+            },
+            {
+                name = "SplashHeal",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('KeepSplashMemmed') end,
             },
             {
                 name = "WaveHeal",
                 type = "Spell",
-                cond = function(self, spell)
-                    if not mq.TLO.Group() then return false end
-                    return Casting.CastReady(spell) and Targeting.GroupHealsNeeded()
-                end,
-            },
-            {
-                name = "Aurora",
-                type = "Spell",
-                cond = function(self, spell)
-                    if not mq.TLO.Group() then return false end
-                    return Casting.CastReady(spell) and Targeting.GroupHealsNeeded()
-                end,
+                load_cond = function(self) return Config:GetSetting('DoWaveHeal') end,
             },
         },
-        ['EmergencyHealing'] = {
+        ["BigHeal"] = {
             {
                 name = "Lay on Hands",
                 type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() < 25
+                cond = function(self, aaName, target)
+                    return self.CombatState == "Combat" and Targeting.GetTargetPctHPs() < Config:GetSetting('HPCritical')
                 end,
             },
             {
                 name = "SelfHeal",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSelfHeal') end,
+                cond = function(self, spell, target)
+                    return self.CombatState == "Combat" and Targeting.TargetIsMyself(target)
+                end,
             },
             {
                 name = "Marr's Gift",
                 type = "AA",
+                cond = function(self, aaName, target)
+                    return self.CombatState == "Combat" and Targeting.TargetIsMyself(target)
+                end,
             },
             {
                 name = "Hand of Piety",
                 type = "AA",
+                cond = function(self, aaName, target)
+                    if not Targeting.GroupedWithTarget(target) then return false end
+                    return self.CombatState == "Combat" and (Targeting.TargetIsMyself(target) or Targeting.GetTargetPctHPs(target) < Config:GetSetting('HPCritical'))
+                end,
             },
             {
                 name = "Gift of Life",
                 type = "AA",
+                cond = function(self, aaName, target)
+                    if not Targeting.GroupedWithTarget(target) then return false end
+                    return self.CombatState == "Combat" and (Targeting.TargetIsMyself(target) or Targeting.GetTargetPctHPs(target) < Config:GetSetting('HPCritical'))
+                end,
+            },
+            {
+                name = "TouchHeal",
+                type = "Spell",
+                load_cond = function() return Config:GetSetting("DoTouchHeal") == 1 end,
+            },
+        },
+        ["MainHeal"] = {
+            {
+                name = "BurstHeal",
+                type = "Spell",
+            },
+            {
+                name = "TouchHeal",
+                type = "Spell",
+                load_cond = function() return Config:GetSetting("DoTouchHeal") == 2 end,
             },
         },
     },
@@ -938,7 +914,7 @@ local _ClassConfig = {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.OkayToBuff() and Casting.AmIBuffable()
+                return combat_state == "Downtime" and Casting.OkayToBuff() and Core.OkayToNotHeal() and Casting.AmIBuffable()
             end,
         },
         {
@@ -947,7 +923,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Casting.GetBuffableIDs() end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.OkayToBuff()
+                return combat_state == "Downtime" and Casting.OkayToBuff() and Core.OkayToNotHeal()
             end,
         },
         { --Actions to lock down xtarg haters
@@ -958,7 +934,7 @@ local _ClassConfig = {
             load_cond = function() return Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') end,
             targetId = function(self) return Targeting.CheckForAggroTargetID() end,
             cond = function(self, combat_state)
-                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') then return false end
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
                 return combat_state == "Combat"
             end,
         },
@@ -966,16 +942,40 @@ local _ClassConfig = {
             name = 'HateTools(AutoTarget)',
             state = 1,
             steps = 1,
-            load_cond = function(self) return Core.IsTanking() end,
+            doFullRotation = true,
+            load_cond = function() return Core.IsTanking() end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.IsTanking() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                return combat_state == "Combat" and Targeting.HateToolsNeeded()
+            end,
+        },
+        { --Actions that establish or maintain hatred
+            name = 'AEHateTools',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            load_cond = function() return Core.IsTanking() and Config:GetSetting('AETauntAA') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+            end,
+        },
+        { --Dynamic weapon swapping if UseBandolier is toggled
+            name = 'Weapon Management',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('UseBandolier') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
             end,
         },
         { --Defensive actions triggered by low HP
             name = 'EmergencyDefenses',
             state = 1,
-            steps = 1,
+            steps = 2, -- help ensure that we cancel visage when needed
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -989,18 +989,7 @@ local _ClassConfig = {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
-            end,
-        },
-        { --Dynamic weapon swapping if UseBandolier is toggled
-            name = 'Weapon Management',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Config:GetSetting('UseBandolier') end,
-            doFullRotation = true,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and Targeting.LightHealsNeeded(mq.TLO.Me.TargetOfTarget)
             end,
         },
         { --Defensive actions used proactively to prevent emergencies
@@ -1009,26 +998,33 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                --need to look at rotation and decide if it should fire during emergencies. leaning towards no
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and Targeting.IHaveAggro(100) and
+                    -- we are under our defense start HP
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or
+                        -- we have met our defense count threshold
+                        self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true) or
+                        -- we are fighting a named and we are (presumably) tanking it
+                        (Globals.AutoTargetIsNamed and Targeting.GetAutoTargetAggroPct() >= 100))
+            end,
+        },
+        {
+            name = 'Debuff',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat" and Core.OkayToNotHeal()
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
             name = 'Burn',
             state = 1,
-            steps = 2,
+            steps = 4,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
-            end,
-        },
-        { --Non-spell actions that can be used during/between casts
-            name = 'CombatWeave',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat" and Casting.BurnCheck() and Core.OkayToNotHeal()
             end,
         },
         { --DPS Spells, includes recourse/gift maintenance
@@ -1037,7 +1033,8 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat" and Core.OkayToNotHeal()
             end,
         },
     },
@@ -1046,8 +1043,8 @@ local _ClassConfig = {
             {
                 name = "EndRegen",
                 type = "Disc",
+                load_cond = function(self) return not Core.GetResolvedActionMapItem("CombatEndRegen") end,
                 cond = function(self, discSpell)
-                    if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
                     return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
@@ -1056,6 +1053,14 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return mq.TLO.Me.PctEndurance() < 15
+                end,
+            },
+            {
+                name = "HealAura",
+                type = "Spell",
+                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.BaseName()) end,
+                cond = function(self, spell)
+                    return (spell and spell() and not Casting.AuraActiveByName(spell.BaseName()))
                 end,
             },
             {
@@ -1113,34 +1118,39 @@ local _ClassConfig = {
             {
                 name = "Preservation",
                 type = "Spell",
+                load_cond = function(self) return Core.IsTanking() end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank") and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 30
+                    if not Casting.CastReady(spell) then return false end
+                    return Casting.SelfBuffCheck(spell) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
             {
                 name = "TempHP",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoTempHP') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoTempHP') then return false end
+                    if not Casting.CastReady(spell) then return false end
                     return spell.RankName.Stacks() and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
                 end,
             },
             {
-                name = "Incoming",
+                name = "BlessingProc",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return spell.RankName.Stacks() and Core.IsModeActive("Tank") and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 15
+                    return spell.RankName.Stacks() and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
             {
                 name = "HealWard",
                 type = "Spell",
+                load_cond = function(self) return Core.IsTanking() end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    return spell.RankName.Stacks() and Core.IsModeActive("Tank") and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
+                    if not Casting.CastReady(spell) then return false end
+                    return spell.RankName.Stacks() and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
             { --Charm Click, name function stops errors in rotation window when slot is empty
@@ -1153,54 +1163,54 @@ local _ClassConfig = {
             },
         },
         ['GroupBuff'] = {
-            --These intentionally only check the tank so he isn't constantly switching targets to check stacking/pausing to rebuff others with single target spells. Considering removing or splitting single target versions of buffs.
             {
                 name = "Brells",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoBrells') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    if not Config:GetSetting('DoBrells') then return false end
-                    return Casting.SelfBuffCheck(spell)
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "Aego",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('AegoSymbol') == 1 end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    if Config:GetSetting('AegoSymbol') ~= 1 then return false end
-                    return Casting.SelfBuffCheck(spell)
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "Symbol",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('AegoSymbol') == 2 end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    if Config:GetSetting('AegoSymbol') ~= 2 then return false end
-                    return Casting.SelfBuffCheck(spell)
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "Marr's Salvation",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoSalvation') end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoSalvation') then return false end
                     return Casting.GroupBuffAACheck(aaName, target)
+                end,
+                post_active = function(self, aaName, success)
+                    if success and Core.IsTanking() and Casting.IHaveBuff("Marr's Salvation") then
+                        Core.DoCmd("/removebuff \"Marr's Salvation\"")
+                    end
                 end,
             },
         },
         ['EmergencyDefenses'] = {
-            --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
-            --Abilities should be placed in order of lowest to highest triggered HP thresholds
-            --Side Note: I reserve Bargain for manual use while driving, the omission is intentional.
-            --Some conditionals are commented out while I tweak percentages (or determine if they are necessary)
             {
                 name = "Armor of Experience",
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoVetAA') end,
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() < 25
+                    return mq.TLO.Me.PctHPs() < Config:GetSetting('HPCritical')
                 end,
             },
             --Note that on named we may already have a mantle/carapace running already, could make this remove other discs, but meh, Shield Flash still a thing.
@@ -1213,7 +1223,7 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and Casting.NoDiscActive() and
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') and Casting.NoDiscActive() and
                         (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000
                 end,
             },
@@ -1233,8 +1243,9 @@ local _ClassConfig = {
             {
                 name = "Penitent",
                 type = "Disc",
+                load_cond = function(self) return Core.IsTanking() end,
                 cond = function(self, discSpell)
-                    return Casting.NoDiscActive() and Core.IsTanking()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -1254,8 +1265,8 @@ local _ClassConfig = {
             { --Chest Click, name function stops errors in rotation window when slot is empty
                 name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
+                load_cond = function(self) return Config:GetSetting('DoChestClick') end,
                 cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
@@ -1266,31 +1277,21 @@ local _ClassConfig = {
                     return Casting.NoDiscActive()
                 end,
             },
-            --if we made it this far let's reset our dicho/dire and hope for the best!
             {
                 name = "Forceful Rejuvenation",
                 type = "AA",
             },
         },
         ['HateTools(AggroTarget)'] = {
-            --used when we've lost hatred after it is initially established
             {
-                name = "Force of Disruption",
-                type = "AA",
-            },
-            {
-                name = "CrushTimer6",
+                name = "HealTaunt",
                 type = "Spell",
             },
             {
-                name = "StunTimer4",
+                name = "Audacity",
                 type = "Spell",
-            },
-            {
-                name = "Taunt",
-                type = "Ability",
-                cond = function(self, abilityName, target)
-                    return Targeting.GetTargetDistance(target) < 30
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell, target)
                 end,
             },
             {
@@ -1300,14 +1301,63 @@ local _ClassConfig = {
                     return Casting.DetSpellCheck(spell)
                 end,
             },
+            {
+                name = "Force of Disruption",
+                type = "AA",
+            },
+            {
+                name = "Taunt",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return Targeting.GetTargetDistance(target) < 30
+                end,
+            },
+            {
+                name = "CrushTimer5",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer5Choice') == 1 end,
+            },
+            {
+                name = "CrushTimer6",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer6Choice') == 1 end,
+            },
+            {
+                name = "StunTimer5",
+                type = "Spell",
+                load_cond = function(self)
+                    return Config:GetSetting('Timer5Choice') == 2 or ((Config:GetSetting('Timer5Choice') == 1)) and not Core.GetResolvedActionMapItem('CrushTimer5')
+                end,
+            },
+            {
+                name = "StunTimer4",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer4Choice') end,
+            },
+            {
+                name = "StunTimer6",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer6Choice') == 2 end,
+            },
         },
-        ['HateTools(Autotarget)'] = {
+        ['HateTools(AutoTarget)'] = {
+            {
+                name = "Force of Disruption",
+                type = "AA",
+            },
+            {
+                name = "HealTaunt",
+                type = "Spell",
+                cond = function(self, abilityName, target)
+                    return Targeting.LostAutoTargetAggro()
+                end,
+            },
             --used when we've lost hatred after it is initially established
             {
                 name = "Ageless Enmity",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.GetAutoTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
+                    return Globals.AutoTargetIsNamed and Targeting.GetAutoTargetPctHPs() < 90 and Targeting.LostAutoTargetAggro()
                 end,
             },
             --used to jumpstart hatred on named from the outset and prevent early rips from burns
@@ -1316,30 +1366,6 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Globals.AutoTargetIsNamed
-                end,
-            },
-            {
-                name = "Heroic Leap",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
-                name = "Beacon of the Righteous",
-                type = "AA",
-                cond = function(self, aaName)
-                    if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
-                name = "Hallowed Lodestar",
-                type = "AA",
-                cond = function(self, aaName)
-                    if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
@@ -1353,13 +1379,72 @@ local _ClassConfig = {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
+                    return Targeting.LostAutoTargetAggro() and Targeting.GetTargetDistance(target) < 30
+                end,
+            },
+            {
+                name = "Audacity",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell, target)
                 end,
             },
             {
                 name = "ForHonor",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell)
+                end,
+            },
+            {
+                name = "CrushTimer5",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer5Choice') == 1 end,
+                cond = function(self, spell, target)
+                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                end,
+            },
+            {
+                name = "CrushTimer6",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer6Choice') == 1 end,
+                cond = function(self, spell, target)
+                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                end,
+            },
+        },
+        ['AEHateTools'] = {
+            {
+                name = "Heroic Leap",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return not mq.TLO.Me.HeadWet()
+                end,
+            },
+            {
+                name = "Beacon of the Righteous",
+                type = "AA",
+            },
+            {
+                name = "Hallowed Lodestar",
+                type = "AA",
+            },
+        },
+        ['Debuff'] = {
+            {
+                name = "Audacity",
+                type = "Spell",
+                load_cond = function(self) return Core.IsTanking end,
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell, target)
+                end,
+            },
+            {
+                name = "ReverseDS",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoReverseDS') < 3 end,
+                cond = function(self, spell, target)
+                    if Config:GetSetting('DoReverseDS') == 2 and not Globals.AutoTargetIsNamed then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1386,51 +1471,42 @@ local _ClassConfig = {
                 name = "Thunder of Karana",
                 type = "AA",
             },
-            --add this back in with tanking Check
-            -- {
-            -- name = "Inquisitor's Judgment",
-            -- type = "AA",
-            -- },
+            {
+                name = "Inquisitor's Judgment",
+                type = "AA",
+                load_cond = function(self) return not Core.IsTanking() end,
+            },
         },
         ['Defenses'] = {
             {
                 name = "MeleeMit",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if not Core.IsTanking() then return false end
                     return not ((discSpell.Level() or 0) < 108 and not Casting.NoDiscActive)
                 end,
             },
             {
                 name = "ArmorDisc",
                 type = "Disc",
+                load_cond = function(self) return Core.IsTanking() end,
                 cond = function(self, discSpell, target)
-                    if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Globals.AutoTargetIsNamed or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    return Casting.NoDiscActive()
                 end,
             },
             {
                 name = "Mantle",
                 type = "Disc",
+                load_cond = function(self) return Core.IsTanking() end,
                 cond = function(self, discSpell, target)
-                    if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Globals.AutoTargetIsNamed or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    return Casting.NoDiscActive()
                 end,
             },
             {
                 name = "Guardian",
                 type = "Disc",
+                load_cond = function(self) return Core.IsTanking() end,
                 cond = function(self, discSpell, target)
-                    if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Globals.AutoTargetIsNamed or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
-                end,
-            },
-            {
-                name = "Coating",
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoCoating') then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -1445,32 +1521,31 @@ local _ClassConfig = {
             {
                 name = "Dicho",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoDicho') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDicho') then return false end
-                    local myHP = mq.TLO.Me.PctHPs()
-                    return (myHP <= Config:GetSetting('EmergencyStart') or (Casting.HaveManaToNuke() and myHP <= Config:GetSetting('StartDicho')))
+                    return Targeting.GroupHealsNeeded() or Targeting.BigHealsNeeded(mq.TLO.Me)
                 end,
             },
             {
                 name = "BurstHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('StartBurstToT')
+                    return Targeting.MainHealsNeeded(mq.TLO.Me.TargetOfTarget)
                 end,
             },
             {
-                name = "TotLightHeal",
+                name = "HealTaunt",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
-                end,
+                load_cond = function(self) return Core.IsTanking() end,
             },
             {
-                name = "Lowaggronuke",
+                name = "HealNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
-                end,
+            },
+            {
+                name = "LightHeal",
+                type = "Spell",
+                load_cond = function() return Config:GetSetting("DoLightHeal") end,
             },
         },
         ['CombatWeave'] = {
@@ -1509,8 +1584,9 @@ local _ClassConfig = {
         },
         ['Combat'] = {
             {
-                name = "StunTimer4",
+                name = "ForHonor",
                 type = "Spell",
+                load_cond = function(self) return Core.IsTanking() end,
                 cond = function(self, spell, target)
                     return Casting.DetSpellCheck(spell)
                 end,
@@ -1519,21 +1595,22 @@ local _ClassConfig = {
                 name = "HealStun",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell) and spell.RankName.Stacks() and (mq.TLO.Me.Song(spell.Trigger(1).Name).Duration.TotalSeconds() or 0) < 12
+                    return Targeting.MainHealsNeeded(mq.TLO.Me) or
+                        (Core.IsTanking() and spell.RankName.Stacks() and (mq.TLO.Me.Song(spell.Trigger(1).Name).Duration.TotalSeconds() or 0) < 12)
                 end,
             },
             {
                 name = "HealWard",
                 type = "Spell",
-                cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
+                load_cond = function(self) return Core.IsTanking() end,
+                cond = function(self, spell)
+                    return Casting.SelfBuffCheck(spell)
+                end,
             },
             {
-                name = "CrushTimer6",
+                name = "TwinHealNuke",
                 type = "Spell",
-            },
-            {
-                name = "HealNuke",
-                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoTwinHealNuke') end,
             },
             {
                 name = "Disruptive Persecution",
@@ -1543,8 +1620,36 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "CrushTimer5",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer5Choice') == 1 end,
+            },
+            {
+                name = "CrushTimer6",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer6Choice') == 1 end,
+            },
+            {
+                name = "StunTimer5",
+                type = "Spell",
+                load_cond = function(self)
+                    return Config:GetSetting('Timer5Choice') == 2 or ((Config:GetSetting('Timer5Choice') == 1)) and not Core.GetResolvedActionMapItem('CrushTimer5')
+                end,
+            },
+            {
+                name = "StunTimer4",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer4Choice') end,
+            },
+            {
+                name = "StunTimer6",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('Timer6Choice') == 2 end,
+            },
+            {
                 name = "Force of Disruption",
                 type = "AA",
+                load_cond = function(self) return Core.IsTanking() end,
             },
         },
         ['Weapon Management'] = {
@@ -1575,93 +1680,42 @@ local _ClassConfig = {
             },
         },
     },
-    ['Spells']            = {
+    ['SpellList']         = {
         {
-            gem = 1,
+            name = "Default",
+            -- cond = function(self) return true end, --Kept here for illustration, this line could be removed in this instance since we aren't using conditions.
             spells = {
-                { name = "StunTimer4", },
-            },
-        },
-        {
-            gem = 2,
-            spells = {
-                { name = "HealStun", },
-                { name = "TotLightHeal", },
-            },
-        },
-        {
-            gem = 3,
-            spells = {
-                --{ name = "LessonStun", },
-                { name = "CrushTimer6", },
-            },
-        },
-        {
-            gem = 4,
-            spells = {
-                { name = "Lowaggronuke", },
-            },
-        },
-        {
-            gem = 5,
-            spells = {
-                { name = "HealNuke", },
-            },
-        },
-        {
-            gem = 6,
-            spells = {
-                { name = "SelfHeal", },
-            },
-        },
-        {
-            gem = 7,
-            spells = {
+                { name = "TouchHeal",   cond = function(self) return Config:GetSetting('DoTouchHeal') < 3 end, },
+                { name = "LightHeal",   cond = function(self) return Config:GetSetting('DoLightHeal') end, },
                 { name = "BurstHeal", },
-            },
-        },
-        {
-            gem = 8,
-            spells = {
-                { name = "ForHonor", },
-            },
-        },
-        {
-            gem = 9,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "Dicho", },
-                { name = "Preservation", },
-            },
-        },
-        {
-            gem = 10,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "Preservation", },
-                { name = "TempHP", },
-            },
-        },
-        {
-            gem = 11,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "TempHP", },
-                { name = "HealWard", },
-            },
-        },
-        {
-            gem = 12,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "HealWard", },
-            },
-        },
-        {
-            gem = 13,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "Incoming", },
+                { name = "SelfHeal",    cond = function(self) return Config:GetSetting('DoSelfHeal') end, },
+                { name = "SplashHeal",  cond = function(self) return Config:GetSetting('KeepSplashMemmed') end, },
+                { name = "WaveHeal",    cond = function(self) return Config:GetSetting('DoWaveHeal') end, },
+                { name = "HealTaunt",   cond = function(self) return Core.IsTanking() end, },
+                { name = "Audacity",    cond = function(self) return Core.IsTanking() end, },
+                { name = "ForHonor",    cond = function(self) return Core.IsTanking() end, },
+                { name = "StunTimer4",  cond = function(self) return Core.IsTanking() and Config:GetSetting('Timer4Choice') end, },
+                { name = "CrushTimer5", cond = function(self) return Core.IsTanking() and Config:GetSetting('Timer5Choice') == 1 end, },
+                {
+                    name = "StunTimer5",
+                    cond = function(self)
+                        return Core.IsTanking() and
+                            (Config:GetSetting('Timer5Choice') == 2 or ((Config:GetSetting('Timer5Choice') == 1)) and not Core.GetResolvedActionMapItem('CrushTimer5'))
+                    end,
+                },
+                { name = "CrushTimer6",  cond = function(self) return Core.IsTanking() and Config:GetSetting('Timer6Choice') == 1 end, },
+                { name = "StunTimer6",   cond = function(self) return Core.IsTanking() and Config:GetSetting('Timer6Choice') == 2 end, },
+                { name = "Preservation", cond = function(self) return Core.IsTanking() end, },
+                { name = "TempHP",       cond = function(self) return Core.IsTanking() and Config:GetSetting('DoTempHP') end, },
+                { name = "HealStun", },
+                { name = "HealNuke", },
+                { name = "Dicho",        cond = function(self) return Config:GetSetting('DoDicho') end, },
+                { name = "TwinHealNuke", cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
+                { name = "ReverseDS",    cond = function(self) return Config:GetSetting('DoReverseDS') < 3 end, },
+                { name = "HealWard",     cond = function(self) return Core.IsTanking() end, },
+                { name = "PurityCure",   cond = function(self) return Config:GetSetting('KeepPurityMemmed') end, },
+                { name = "CureCorrupt",  cond = function(self) return Config:GetSetting('KeepCorruptMemmed') end, },
+                { name = "BlessingProc", },
             },
         },
     },
@@ -1674,6 +1728,18 @@ local _ClassConfig = {
             AbilityRange = 150,
             cond = function(self)
                 local resolvedSpell = Core.GetResolvedActionMapItem('StunTimer4')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
+            id = 'Audacity',
+            Type = "Spell",
+            DisplayName = function() return Core.GetResolvedActionMapItem('Audacity').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('Audacity').RankName.Name() or "" end,
+            AbilityRange = 200,
+            cond = function(self)
+                local resolvedSpell = Core.GetResolvedActionMapItem('Audacity')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
@@ -1703,12 +1769,12 @@ local _ClassConfig = {
             Min = 1,
             Max = 2,
             FAQ = "What do the different Modes do?",
-            Answer = "Tank Mode will focus on tanking and aggro, while DPS mode will focus on DPS.",
+            Answer = "Tank Mode will focus on tanking and aggro, while DPS mode will focus on DPS. Both have a secondary focus of healing.",
         },
 
         --Buffs and Debuffs
         ['DoTempHP']          = {
-            DisplayName = "Use HP Buff",
+            DisplayName = "Temp HP Buff",
             Group = "Abilities",
             Header = "Buffs",
             Category = "Self",
@@ -1774,69 +1840,62 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Tooltip = "Use your group hatred reduction buff AA.",
-            Default = false,
+            Tooltip = "Use your group hatred reduction buff AA (The Paladin will cancel it on themself if in Tank Mode).",
+            Default = true,
         },
-        --Healing
-        ['TotHealPoint']      = {
-            DisplayName = "ToT HealPoint",
+
+        --Hate Tools
+        ['Timer4Choice']      = {
+            DisplayName = "Use Timer 4 Stun",
             Group = "Abilities",
-            Header = "Recovery",
-            Category = "Healing Thresholds",
+            Header = "Tanking",
+            Category = "Hate Tools",
             Index = 101,
-            Tooltip = "HP % before we use Target of Target heals.",
-            Default = 30,
-            Min = 1,
-            Max = 100,
+            Tooltip = "Use your Timer 4 'Force' line of stuns.",
+            Default = mq.TLO.Me.Level() < 92 and true or false,
+            RequiresLoadoutChange = true,
         },
-        ['LayHandsPct']       = {
-            DisplayName = "Use Lay on Hands",
+        ['Timer5Choice']      = {
+            DisplayName = "Timer 5 Choice:",
             Group = "Abilities",
-            Header = "Recovery",
-            Category = "Healing Thresholds",
+            Header = "Tanking",
+            Category = "Hate Tools",
+            Index = 101,
+            Tooltip =
+            "Choose which Timer 5 spell line to use (For the best experience for leveling, the standard stun will be used until others are available.\nIt is recommended to switch this line out for the Timer 3 'Healstun' once it is available.).",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Crush', 'Standard Stun', 'Disabled', },
+            Default = mq.TLO.Me.Level() < 99 and 1 or 3,
+            Min = 1,
+            Max = 4,
+            ConfigType = "Advanced",
+        },
+        ['Timer6Choice']      = {
+            DisplayName = "Timer 6 Choice:",
+            Group = "Abilities",
+            Header = "Tanking",
+            Category = "Hate Tools",
             Index = 102,
-            Tooltip = "HP % before we use Lay on Hands on others (Will be used on self in extreme emergencies).",
-            Default = 35,
+            Tooltip = "Choose which Timer 6 spell line to use.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Crush', '"Lesson" Stun', 'Disabled', },
+            Default = 3,
             Min = 1,
-            Max = 100,
-        },
-        ['StartBurstToT']     = {
-            DisplayName = "HP % for Burst ToT",
-            Group = "Abilities",
-            Header = "Recovery",
-            Category = "Healing Thresholds",
-            Index = 103,
-            Tooltip = "ToT HP % before we use Burst heal.",
-            Default = 85,
-            Min = 1,
-            Max = 100,
+            Max = 3,
             ConfigType = "Advanced",
         },
         ['DoDicho']           = {
             DisplayName = "Cast Dicho",
             Group = "Abilities",
-            Header = "Recovery",
-            Category = "General Healing",
-            Index = 101,
-            Tooltip = function() return Ui.GetDynamicTooltipForSpell("Dicho") end,
+            Header = "Tanking",
+            Category = "Hate Tools",
+            Index = 104,
+            Tooltip = "Use your Dichotomic Hate/Stun/GroupHeal spell.",
             RequiresLoadoutChange = true,
             Default = true,
-            ConfigType = "Advanced",
         },
-        ['StartDicho']        = {
-            DisplayName = "HP % for Dicho",
-            Group = "Abilities",
-            Header = "Recovery",
-            Category = "Healing Thresholds",
-            Index = 104,
-            Tooltip = "Your HP % before we use Dicho.",
-            Default = 70,
-            Min = 1,
-            Max = 100,
-            ConfigType = "Advanced",
-        },
-
-        --Hate Tools
         ['AETauntAA']         = {
             DisplayName = "Use AE Taunt AA",
             Group = "Abilities",
@@ -1887,26 +1946,39 @@ local _ClassConfig = {
             Max = 10,
             ConfigType = "Advanced",
         },
-        ['EmergencyStart']    = {
-            DisplayName = "Emergency Start",
+        ['DefenseStart']      = {
+            DisplayName = "Defense HP",
             Group = "Abilities",
-            Header = "Utility",
-            Category = "Emergency",
+            Header = "Tanking",
+            Category = "Defenses",
             Index = 102,
-            Tooltip = "Your HP % before we begin to use emergency abilities.",
-            Default = 55,
+            Tooltip = "The HP % where we will use defensive actions like discs, epics, etc.\nNote that fighting a named will also trigger these actions.",
+            Default = 60,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
         },
-        ['EmergencyLockout']  = {
-            DisplayName = "Emergency Only",
+        ['EmergencyStart']    = {
+            DisplayName = "Emergency Start",
             Group = "Abilities",
-            Header = "Utility",
-            Category = "Emergency",
+            Header = "Tanking",
+            Category = "Defenses",
             Index = 103,
-            Tooltip = "Your HP % before standard DPS rotations are cut in favor of emergency abilities.",
-            Default = 35,
+            Tooltip = "The HP % before all but essential rotations are cut in favor of emergency or defensive abilities.",
+            Default = 40,
+            Min = 1,
+            Max = 100,
+            ConfigType = "Advanced",
+        },
+        ['HPCritical']        = {
+            DisplayName = "HP Critical",
+            Group = "Abilities",
+            Header = "Tanking",
+            Category = "Defenses",
+            Index = 104,
+            Tooltip =
+            "The HP % that we will use abilities like Lay on Hands or Gift of Life.\nMost other rotations are cut to give our full focus to survival.",
+            Default = 20,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
@@ -1929,15 +2001,6 @@ local _ClassConfig = {
             Category = "Class Config Clickies",
             Index = 102,
             Tooltip = "Click your charm for Geomantra.",
-            Default = false,
-        },
-        ['DoCoating']         = {
-            DisplayName = "Use Coating",
-            Group = "Items",
-            Header = "Clickies",
-            Category = "Class Config Clickies",
-            Index = 103,
-            Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
             Default = false,
         },
         ['UseBandolier']      = {
@@ -1985,41 +2048,125 @@ local _ClassConfig = {
             FAQ = "Why does my PAL switch to a Shield on puny gray named?",
             Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
         },
-        --ORPHANED PLACEHOLDERS
-        ['DoNuke']            = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
+        ['DoTouchHeal']       = {
+            DisplayName = "Touch Heal Use:",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 101,
+            Tooltip = "Choose when the Paladin will use the single-target Touch-line healing spell.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Emergency Use(BigHeal)', 'Standard Use(MainHeal)', 'Never', },
+            Default = mq.TLO.Me.Level() > 72 and 3 or 2,
+            Min = 1,
+            Max = 3,
+        },
+        ['DoLightHeal']       = {
+            DisplayName = "Do Light Heal",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 102,
+            Tooltip = "Use your ToT heal ('... Light') line of spells.",
+            RequiresLoadoutChange = true,
             Default = false,
+        },
+        ['DoSelfHeal']        = {
+            DisplayName = "Do Self Heal",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 102,
+            Tooltip = "Use your emergency self-heal line of spells.",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoWaveHeal']        = {
+            DisplayName = "Do Wave Heal",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 102,
+            Tooltip = "Use your group heal ('Wave of ...') line of spells.",
+            RequiresLoadoutChange = true,
+            Default = mq.TLO.Me.Level() < 83 and true or false,
+        },
+        ['KeepSplashMemmed']  = {
+            DisplayName = "Mem Splash Heal",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 104,
+            Tooltip =
+            "Memorize your 'Splash' line AE heal/cure, and use it as a group heal or cure. (If unchecked, we may mem/use it out of combat as a cure, depending on other settings.)",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['DoTwinHealNuke']    = {
+            DisplayName = "Twin Heal Nuke",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Direct",
+            Index = 101,
+            Tooltip = "Use Twin Heal Nuke Spells",
+            RequiresLoadoutChange = true,
+            Default = true,
+        },
+        ['KeepPurityMemmed']  = {
+            DisplayName = "Mem Purity Cure",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
+            Index = 101,
+            Tooltip = "Memorize your Purity line (cure poi/dis/curse) when possible (depending on other selected options). \n" ..
+                "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if enabled.",
+            RequiresLoadoutChange = true,
+            Default = false,
+        },
+        ['KeepCorruptMemmed'] = {
+            DisplayName = "Mem Cure Corruption",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
+            Index = 102,
+            Tooltip = "Memorize cure corruption spell when possible (depending on other selected options). \n" ..
+                "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
+            RequiresLoadoutChange = true,
+            Default = false,
+            ConfigType = "Advanced",
+        },
+        ['SplashHealAsCure']  = {
+            DisplayName = "Use Splash Heal to Cure",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Curing",
+            Index = 103,
+            Tooltip = "If the Splash Heal is available, use it to cure detrimental effects.",
+            Default = true,
+            ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
         },
         ['DoReverseDS']       = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-        },
-        ['DoBandolier']       = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-        },
-        ['FlashHP']           = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
+            DisplayName = "Reverse DS",
+            Group = "Abilities",
+            Header = "Debuffs",
+            Category = "Misc Debuffs",
+            Index = 101,
+            Tooltip = "Choose when to use your Reverse DS ('Mark of ...') line of debuffs.",
+            Type = "Combo",
+            ComboOptions = { 'Always', 'Only on Named', 'Never', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            RequiresLoadoutChange = true,
         },
     },
     ['ClassFAQ']          = {
         {
             Question = "What is the current status of this class config?",
-            Answer = "This class config is an Alpha config aimed at late game live.\n\n" ..
-                "  It should perform well as a group tank, but may be lacking typical options or configuration.\n\n" ..
+            Answer = "This class config is an Alpha config, lacking playtesting.\n\n" ..
+                "  The defaults are aimed towards late game live tanking, but it has the options for other modes or methods.\n\n" ..
                 "  Community effort and feedback are required for robust, resilient class configs, and PRs are highly encouraged!",
             Settings_Used = "",
         },
