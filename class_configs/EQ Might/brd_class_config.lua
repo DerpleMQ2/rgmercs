@@ -429,6 +429,10 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
+                name = "Fierce Eye",
+                type = "AA",
+            },
+            {
                 name = "Funeral Dirge",
                 type = "AA",
             },
