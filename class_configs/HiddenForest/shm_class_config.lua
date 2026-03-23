@@ -1450,6 +1450,7 @@ local _ClassConfig = {
             Header = "Buffs",
             Category = "Group",
             Index = 102,
+            RequiresLoadoutChange = true,
             Tooltip = "Use Group Shrink Buff",
             Default = true,
             FAQ = "Group Shrink is enabled, why are my dudes still big?",
