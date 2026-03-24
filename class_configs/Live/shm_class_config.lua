@@ -108,14 +108,6 @@ local _ClassConfig = {
             "Talisman of the Usurper",    -- Level 120 - Group
             "Talisman of the Heroic",     -- Level 125 - Group
         },
-        ["SingleFocusSpell"] = {
-            -- Focus Spell - Single Spells will only be used on the Tank if they are better than the Group Version to cut incredibly long buff cycles.
-            "Unity of the Doomscale", -- Level 101 - Single
-            "Unity of the Wulthan",   -- Level 106 - Single
-            "Unity of the Kromrif",   -- Level 111 - Single
-            "Unity of the Vampyre",   -- Level 116 - Single
-            "Celeritous Unity",       -- Level 121 - Single
-        },
         ["RunSpeedBuff"] = {
             -- Run Speed Buff - 9 - 74
             "Spirit of Tala'Tak",
@@ -1465,13 +1457,6 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-            { --If our single target is better than the group spell above, we will use it on the Tank
-                name = "SingleFocusSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Targeting.TargetIsATank(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             { --Only cast below 86 because past that our focus spells take over. Could check which unity we have, but expensive.
