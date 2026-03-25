@@ -244,6 +244,11 @@ Globals.Constants.DebuffChoice      = { "Never", "Based on Con Color", "Always",
 Globals.Constants.ScanNamedPriority = { "Named", "No Preference", "Non-Named", }
 Globals.Constants.ScanHPPriority    = { "Lowest HP%", "No Preference", "Highest HP%", }
 
+Globals.Constants.TankMercStances   = { "aggressive", "assist", }
+Globals.Constants.HealerMercStances = { "balanced", "reactive", "efficient", }
+Globals.Constants.MeleeMercStances  = { "balanced", "burn", }
+Globals.Constants.CasterMercStances = { "balanced", "burn", "burnae", }
+
 function Globals.GetTimeSeconds()
     return mq.gettime() / 1000
 end

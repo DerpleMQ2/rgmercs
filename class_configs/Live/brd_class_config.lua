@@ -355,6 +355,7 @@ local _ClassConfig = {
             "Radiwol's Melodic Binding",
             "Dekloaz's Melodic Binding",
             "Protan's Melodic Binding",
+            "Selo's Assonant Strain",
             "Largo's Melodic Binding",
         },
         ['AccelerandoSong'] = {
