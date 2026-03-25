@@ -478,14 +478,27 @@ local function Main()
 
             if merc() and merc.ID() then
                 if Combat.MercEngage() then
-                    if merc.Class.ShortName():lower() == "war" and merc.Stance():lower() ~= "aggressive" then
-                        Core.DoCmd("/squelch /stance aggressive")
+                    local class = merc.Class.ShortName():lower()
+                    local stanceGroups = {
+                        war = Globals.Constants.TankMercStances,
+                        clr = Globals.Constants.HealerMercStances,
+                        rog = Globals.Constants.MeleeMercStances,
+                        wiz = Globals.Constants.CasterMercStances,
+                    }
+                    local stances = stanceGroups[class]
+                    if stances and merc.Stance() then
+                        local desiredStance = stances[Config:GetSetting("MercStance")]
+                        if desiredStance then
+                            if merc.Stance():lower() ~= desiredStance then
+                                Core.DoCmd("/squelch /stance %s", desiredStance)
+                            end
+                        else
+                            local fallbackStance = stances[1]
+                            if merc.Stance():lower() ~= fallbackStance then
+                                Core.DoCmd("/squelch /stance %s", fallbackStance)
+                            end
+                        end
                     end
-
-                    if merc.Class.ShortName():lower() ~= "war" and merc.Stance():lower() ~= "balanced" then
-                        Core.DoCmd("/squelch /stance balanced")
-                    end
-
                     Combat.MercAssist()
                 else
                     if merc.Class.ShortName():lower() ~= "clr" and merc.Stance():lower() ~= "passive" then
