@@ -8,6 +8,7 @@ local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 local Logger       = require("utils.logger")
 local Set          = require('mq.set')
+local Combat       = require("utils.combat")
 
 --todo: add a LOT of tooltips or scrap them entirely. Hopefully the former.
 local Tooltips     = {
@@ -296,27 +297,6 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
-        --function to determine if we should AE taunt and optionally, if it is safe to do so
-        AETauntCheck = function(printDebug)
-            local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
-            local xtCount = mq.TLO.Me.XTarget() or 0
-
-            if (mobs or xtCount) < Config:GetSetting('AETauntCnt') then return false end
-
-            local tauntme = Set.new({})
-            for i = 1, xtCount do
-                local xtarg = mq.TLO.Me.XTarget(i)
-                if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= 50 then
-                    if printDebug then
-                        Logger.log_verbose("AETauntCheck(): XT(%d) Counting %s(%d) as a hater eligible to AE Taunt.", i, xtarg.CleanName() or "None",
-                            xtarg.ID())
-                    end
-                    tauntme:add(xtarg.ID())
-                end
-                if not Config:GetSetting('SafeAETaunt') and #tauntme:toList() > 0 then return true end --no need to find more than one if we don't care about safe taunt
-            end
-            return #tauntme:toList() > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme:toList() < mobs)
-        end,
         --function to determine if we have enough mobs in range to use a defensive disc
         DefensiveDiscCheck = function(printDebug)
             local xtCount = mq.TLO.Me.XTarget() or 0
@@ -342,25 +322,7 @@ local _ClassConfig = {
             end
             return true
         end,
-        AETargetCheck = function(printDebug)
-            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
-            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
-            local totalHaters = haters + haterPets
-            if totalHaters < Config:GetSetting('AETargetCnt') or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
 
-            if Config:GetSetting('SafeAEDamage') then
-                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
-                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
-                if totalHaters < (npcs + npcPets) then
-                    if printDebug then
-                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
-                    end
-                    return false
-                end
-            end
-
-            return true
-        end,
     },
     ['RotationOrder']   = {
         { --Self Buffs
@@ -421,7 +383,7 @@ local _ClassConfig = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
-                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                return combat_state == "Combat" and Combat.AETauntCheck(true)
             end,
         },
         { --Dynamic weapon swapping if UseBandolier is toggled
@@ -943,7 +905,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.AELifeTap,
                 cond = function(self, spell)
                     if not (Config:GetSetting('DoAELifeTap') and Config:GetSetting('DoAEDamage')) or not spell or not spell() then return false end
-                    return Casting.SelfBuffCheck(spell) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    return Casting.SelfBuffCheck(spell) and Combat.AETargetCheck(true)
                 end,
             },
             {
@@ -1358,24 +1320,12 @@ local _ClassConfig = {
         },
 
         -- AE Damage
-        ['DoAEDamage']      = {
-            DisplayName = "Do AE Damage",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 101,
-            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
-                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
-            Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
-        },
         ['DoAESpearNuke']   = {
             DisplayName = "Use AE Spear",
             Group = "Abilities",
             Header = "Damage",
             Category = "AE",
-            Index = 102,
+            Index = 101,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("AESpearNuke") end,
             Default = false,
             RequiresLoadoutChange = true,
@@ -1389,49 +1339,10 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Damage",
             Category = "AE",
-            Index = 103,
+            Index = 102,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("AELifeTap") end,
             RequiresLoadoutChange = true,
             Default = false,
-        },
-        ['AETargetCnt']     = {
-            DisplayName = "AE Target Count",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 104,
-            Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
-            Default = 2,
-            Min = 1,
-            Max = 10,
-        },
-        ['MaxAETargetCnt']  = {
-            DisplayName = "Max AE Targets",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 105,
-            Tooltip =
-            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
-            Default = 5,
-            Min = 2,
-            Max = 30,
-            FAQ = "How do I take advantage of the Max AE Targets setting?",
-            Answer =
-            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
-        },
-        ['SafeAEDamage']    = {
-            DisplayName = "AE Proximity Check",
-            Group = "Abilities",
-            Header = "Damage",
-            Category = "AE",
-            Index = 106,
-            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
-            Default = false,
-            FAQ = "Can you better explain the AE Proximity Check?",
-            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
-                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
-                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
 
         --Hate Tools
@@ -1479,32 +1390,6 @@ local _ClassConfig = {
             Tooltip = "Use your AE Taunt spell line.",
             Default = true,
             ConfigType = "Advanced",
-        },
-        ['AETauntCnt']      = {
-            DisplayName = "AE Taunt Count",
-            Group = "Abilities",
-            Header = "Tanking",
-            Category = "Hate Tools",
-            Index = 104,
-            Tooltip = "Minimum number of haters before using AE Taunt Spells or AA.",
-            Default = 2,
-            Min = 1,
-            Max = 30,
-            FAQ = "Why don't we use AE taunts on single targets?",
-            Answer =
-            "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
-        },
-        ['SafeAETaunt']     = {
-            DisplayName = "AE Taunt Safety Check",
-            Group = "Abilities",
-            Header = "Tanking",
-            Category = "Hate Tools",
-            Index = 105,
-            Tooltip = "Limit unintended pulls with AE Taunt Spells or AA. May result in non-use due to false positives.",
-            Default = false,
-            FAQ = "Can you better explain the AE Taunt Safety Check?",
-            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the taunt.\n" ..
-                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the taunt not being used when it is safe to do so.",
         },
 
         --Defenses
