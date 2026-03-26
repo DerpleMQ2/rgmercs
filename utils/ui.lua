@@ -32,6 +32,7 @@ Ui.TempSettings                    = {
     ProgBarTrendState     = {},
     ProgBarAnimState      = {},
     TogglePulseState      = {},
+    SmoothPctId           = ImHashStr("smooth_pct"),
     TooltipAnimationState = {
         was_hovered = -1,
         tooltip_time = 0.0,
@@ -2324,15 +2325,15 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, width, colLow, colMid, 
     end
 
     animState.smoothPct = ImAnim.TweenFloat(
-        ImHashStr(id),                         -- unique id for this bar
-        ImHashStr(id .. "_smooth"),            -- separate channel for smooth value
-        targetPct * 100.0,                     -- target value
-        .5,                                    -- duration (seconds) - slower for smoothness
-        ImAnim.EasePreset(IamEaseType.Linear), -- linear easing for consistent speed
-        IamPolicy.Crossfade,                   -- policy for target changes
-        dt,                                    -- delta time
-        animState.smoothPct * 100.0            -- initial value (scaled to 0-100)
-    ) / 100.0
+        ImHashStr(id),
+        Ui.TempSettings.SmoothPctId,
+        targetPct,
+        .5,
+        ImAnim.EasePreset(IamEaseType.Linear),
+        IamPolicy.Crossfade,
+        dt,
+        animState.smoothPct
+    )
 
     ImGui.InvisibleButton(id, width, height)
     local min = ImGui.GetItemRectMinVec()
