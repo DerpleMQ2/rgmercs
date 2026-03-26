@@ -504,7 +504,7 @@ local _ClassConfig = {
             end,
         },
         {
-            e = 'DPS',
+            name = 'DPS',
             state = 1,
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() < 71 end,
