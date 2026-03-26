@@ -278,7 +278,7 @@ function OptionsUI:ApplySearchFilter()
                     local customSetting           = (settingDefaults.Type == "Custom")
                     local showAdv                 = Config:GetSetting('ShowAdvancedOpts') or (settingDefaults.ConfigType == nil or settingDefaults.ConfigType:lower() == "normal")
 
-                    if showAdv and not customSetting and (headerMatches or categoryMatches or settingDisplayNameLower:find(filter, 1, true) ~= nil or
+                    if showAdv and not customSetting and (headerMatches or categoryMatches or settingName:lower():find(filter, 1, true) ~= nil or settingDisplayNameLower:find(filter, 1, true) ~= nil or
                             settingTooltipLower:find(filter, 1, true) ~= nil) then
                         self.FilteredSettingsByCat[category] = self.FilteredSettingsByCat[category] or {}
                         table.insert(self.FilteredSettingsByCat[category], settingName)
