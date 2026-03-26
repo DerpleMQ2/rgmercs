@@ -31,7 +31,7 @@ function LoaderUI:RenderLoader(initPctComplete, initMsg)
     ImGui.Text("RGMercs %s: Loading...", Config._version)
     ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 35)
     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 70)
-    Ui.RenderAnimatedPercentage("RGMercsLoadProgressBar", initPctComplete, 16, Globals.Constants.Colors.LightBlue, Globals.Constants.Colors.LightGreen,
+    Ui.RenderAnimatedPercentage("RGMercsLoadProgressBar", initPctComplete, 16, 0, Globals.Constants.Colors.LightBlue, Globals.Constants.Colors.LightGreen,
         Globals.Constants.Colors.Green, initMsg)
     ImGui.PopStyleVar(4)
     ImGui.End()

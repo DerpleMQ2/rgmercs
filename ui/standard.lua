@@ -69,8 +69,7 @@ function StandardUI:RenderTargetInfo()
     ImGui.TextColored(los and Globals.Constants.Colors.ConditionPassColor or Globals.Constants.Colors.ConditionFailColor, los and Icons.FA_EYE or Icons.FA_EYE_SLASH)
 end
 
-function StandardUI:RenderAutoTargetInfo()
-    local assistSpawn = Targeting.GetAutoTarget()
+function StandardUI:RenderAutoTargetInfo(assistSpawn)
     local pctHPs = assistSpawn and (assistSpawn.PctHPs() or 0) or 0
 
     if not assistSpawn or assistSpawn.ID() == 0 then
@@ -152,7 +151,10 @@ function StandardUI:RenderTarget()
         assistSpawn = mq.TLO.Target
     end
 
-    local pctHPs, burning = self:RenderAutoTargetInfo()
+    local pctHPs, burning = self:RenderAutoTargetInfo(assistSpawn)
+    if Config:GetSetting('OverrideHP') > 0 then
+        pctHPs = Config:GetSetting('OverrideHP')
+    end
     Ui.RenderFancyHPBar("##AutoTargetHPBar", pctHPs, 25, burning)
     self:RenderForceBurnButton()
 end

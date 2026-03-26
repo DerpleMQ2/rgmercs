@@ -56,6 +56,13 @@ local CLIP_DL_CH_ALPHA             = 0x3103
 
 local s_drawlist_clips_initialized = false
 
+function Ui.ReduceAlpha(col, factor)
+    local a = bit.band(bit.rshift(col, 24), 0xFF)
+    a = math.floor(a * factor)
+
+    return bit.bor(bit.band(col, 0x00FFFFFF), bit.lshift(a, 24))
+end
+
 function Ui.InitDrawListClips()
     if s_drawlist_clips_initialized then return end
     s_drawlist_clips_initialized = true
@@ -839,7 +846,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 if Config:GetSetting('StatusUseBars') then
-                    Ui.RenderAnimatedPercentage("MercsStatusEnduranceBar" .. peer, math.ceil(data.Data.Endurance or 0), ImGui.GetTextLineHeight(), Colors.LightRed, Colors.Orange,
+                    Ui.RenderAnimatedPercentage("MercsStatusEnduranceBar" .. peer, math.ceil(data.Data.Endurance or 0), ImGui.GetTextLineHeight(), 0, Colors.LightRed, Colors.Orange,
                         Colors.LightGreen)
                 else
                     Ui.RenderColoredText(
@@ -899,7 +906,7 @@ function Ui.RenderMercsStatus(showPopout)
             end,
             render = function(peer, data)
                 if Config:GetSetting('StatusUseBars') then
-                    Ui.RenderAnimatedPercentage("MercsStatusEnduranceBar" .. peer, math.ceil(data.Data.Endurance or 0), ImGui.GetTextLineHeight(), Colors.LightRed, Colors.Grey,
+                    Ui.RenderAnimatedPercentage("MercsStatusEnduranceBar" .. peer, math.ceil(data.Data.Endurance or 0), ImGui.GetTextLineHeight(), 0, Colors.LightRed, Colors.Grey,
                         Colors.Yellow)
                 else
                     Ui.RenderColoredText(
@@ -2300,7 +2307,157 @@ function Ui.GetDeltaTime()
     return dt
 end
 
-function Ui.RenderAnimatedPercentage(id, barPct, height, colLow, colMid, colHigh, label)
+function Ui.RenderAnimatedPercentage(id, barPct, height, width, colLow, colMid, colHigh, label)
+    local targetPct = Math.Clamp(tonumber(barPct) or 0, 0, 100) / 100.0
+    local dt = Ui.GetDeltaTime()
+    local drawList = ImGui.GetWindowDrawList()
+
+    if width == 0 then width = ImGui.GetContentRegionAvailVec().x end
+    height = height or 16
+
+    local animState = Ui.TempSettings.ProgBarAnimState[id]
+
+    if not animState then
+        -- First render: initialize with current target
+        animState = { lastTarget = targetPct, smoothPct = targetPct - 1.0, } -- needs to be slighly different so that the tween is initialized
+        Ui.TempSettings.ProgBarAnimState[id] = animState
+    end
+
+    animState.smoothPct = ImAnim.TweenFloat(
+        ImHashStr(id),                         -- unique id for this bar
+        ImHashStr(id .. "_smooth"),            -- separate channel for smooth value
+        targetPct * 100.0,                     -- target value
+        .5,                                    -- duration (seconds) - slower for smoothness
+        ImAnim.EasePreset(IamEaseType.Linear), -- linear easing for consistent speed
+        IamPolicy.Crossfade,                   -- policy for target changes
+        dt,                                    -- delta time
+        animState.smoothPct * 100.0            -- initial value (scaled to 0-100)
+    ) / 100.0
+
+    ImGui.InvisibleButton(id, width, height)
+    local min = ImGui.GetItemRectMinVec()
+    local max = ImGui.GetItemRectMaxVec()
+    local fillWidth = width * animState.smoothPct
+    local fillMaxX = min.x + fillWidth
+    local fillWidthTarget = width * targetPct
+    local fillMaxTargetX = min.x + fillWidthTarget
+
+    local innerMin = min + ImVec2(1, 1)
+    local innerMax = max - ImVec2(1, 1)
+    local fillMax = ImVec2(fillMaxX, max.y)
+    local fillMaxTarget = ImVec2(fillMaxTargetX, max.y)
+    local innerFillMax = fillMax - ImVec2(1, 1)
+    local innerFillMaxTarget = fillMaxTarget - ImVec2(1, 1)
+
+    -- Background shell
+    local bgTop = IM_COL32(28, 30, 41, 247)
+    local bgBottom = IM_COL32(10, 13, 20, 247)
+
+    -- Dark background
+    drawList:AddRectFilledMultiColor(
+        innerMin, innerMax,
+        bgTop, bgTop, bgBottom, bgBottom
+    )
+
+    drawList:AddRectFilled(
+        innerMin,
+        ImVec2(max.x - 1, min.y + math.max(2, height * 0.35)),
+        IM_COL32(255, 255, 255, 14),
+        3.0
+    )
+
+    if fillWidth > 0 then
+        -- Red -> amber -> green edge color based on current HP
+        local edge
+
+        if animState.smoothPct < 0.5 then
+            edge = Math.ColorLerp(colLow, colMid, animState.smoothPct / 0.5)
+        else
+            edge = Math.ColorLerp(colMid, colHigh, (animState.smoothPct - 0.5) / 0.5)
+        end
+
+        local topLeft = ImGui.GetColorU32(colLow)
+        local topRight = ImGui.GetColorU32(edge)
+        local bottomLeft = topLeft
+        local bottomRight = topRight
+
+        local fillRounding = math.min(2.0, height * 0.5, fillWidth * 0.5)
+
+        if fillMax.x > innerMin.x and fillMax.y > innerMin.y then
+            local reduceAlphaPrimary = 0.7
+            local reduceAlphaSecondary = 0.5
+            if animState.smoothPct < targetPct then
+                -- Growing: fill to current, then overlay the growing portion with a darker shade
+                drawList:AddRectFilledMultiColor(
+                    innerMin,
+                    innerFillMax,
+                    Ui.ReduceAlpha(topLeft, reduceAlphaPrimary), Ui.ReduceAlpha(topRight, reduceAlphaPrimary), Ui.ReduceAlpha(bottomRight, reduceAlphaPrimary),
+                    Ui.ReduceAlpha(bottomLeft, reduceAlphaPrimary)
+                )
+                drawList:AddRectFilledMultiColor(
+                    innerMin, innerFillMaxTarget, Ui.ReduceAlpha(topLeft, reduceAlphaSecondary), Ui.ReduceAlpha(topRight, reduceAlphaSecondary),
+                    Ui.ReduceAlpha(bottomRight, reduceAlphaSecondary), Ui.ReduceAlpha(bottomLeft, reduceAlphaSecondary)
+                )
+            else
+                -- Shrinking: fill to target, then overlay the shrinking portion with a darker shade
+                drawList:AddRectFilledMultiColor(
+                    innerMin, innerFillMaxTarget, Ui.ReduceAlpha(topLeft, reduceAlphaPrimary), Ui.ReduceAlpha(topRight, reduceAlphaPrimary),
+                    Ui.ReduceAlpha(bottomRight, reduceAlphaPrimary),
+                    Ui.ReduceAlpha(bottomLeft, reduceAlphaPrimary))
+                drawList:AddRectFilledMultiColor(
+                    innerMin, innerFillMax, Ui.ReduceAlpha(topLeft, reduceAlphaSecondary), Ui.ReduceAlpha(topRight, reduceAlphaSecondary),
+                    Ui.ReduceAlpha(bottomRight, reduceAlphaSecondary), Ui.ReduceAlpha(bottomLeft, reduceAlphaSecondary))
+            end
+
+            local glossMaxY = math.min(innerMax.y, min.y + math.max(2, height * 0.45))
+
+            drawList:AddRectFilledMultiColor(
+                innerMin,
+                ImVec2(innerFillMax.x, glossMaxY),
+                IM_COL32(255, 255, 255, 14), IM_COL32(255, 255, 255, 8),
+                IM_COL32(255, 255, 255, 2), IM_COL32(255, 255, 255, 8)
+            )
+        else
+            drawList:AddRectFilled(
+                min, fillMax,
+                ImGui.GetColorU32(colLow),
+                fillRounding)
+        end
+    end
+
+    -- Segment ticks (10% each).
+    for i = 1, 9 do
+        local tx = min.x + (width * (i / 10))
+        local reached = tx <= (min.x + fillWidth)
+
+        drawList:AddLine(
+            ImVec2(tx - 1, min.y + 1),
+            ImVec2(tx - 1, max.y - 1),
+            IM_COL32(0, 0, 0, (reached and 0.3 or 0.15) * 255),
+            1.0
+        )
+        drawList:AddLine(
+            ImVec2(tx, min.y + 1),
+            ImVec2(tx, max.y - 1),
+            IM_COL32(255, 255, 255, (reached and 0.3 or 0.15) * 255),
+            1.0
+        )
+    end
+
+    drawList:AddRect(
+        min, max,
+        IM_COL32(255, 255, 255, 255), 3.0, 0, 1.0
+    )
+
+    local text = label or string.format('%d%%', math.floor((targetPct * 100.0) + 0.5))
+    local textW = ImGui.CalcTextSize(text)
+    local textX = min.x + ((max.x - min.x - textW) * 0.5)
+    local textY = min.y + ((height - ImGui.GetTextLineHeight()) * 0.5)
+    drawList:AddText(ImVec2(textX + 1, textY + 1), IM_COL32(0, 0, 0, 230), text)
+    drawList:AddText(ImVec2(textX, textY), IM_COL32(255, 255, 255, 255), text)
+end
+
+function Ui.RenderAnimatedPercentageOld(id, barPct, height, colLow, colMid, colHigh, label)
     local targetPct = Math.Clamp(tonumber(barPct) or 0, 0, 100)
     local availX = ImGui.GetContentRegionAvailVec().x
     local width = math.max(1, tonumber(availX) or 1)
@@ -2518,7 +2675,7 @@ function Ui.RenderFancyHPBar(id, hpPct, height, burning)
     local hpMid = Globals.Constants.Colors.HPMidColor
     local hpHigh = Globals.Constants.Colors.HPHighColor
 
-    local clicked = Ui.RenderAnimatedPercentage(id, hpPct, height, hpLow, hpMid, hpHigh)
+    local clicked = Ui.RenderAnimatedPercentage(id, hpPct, height, 0, hpLow, hpMid, hpHigh)
 
     local minX, minY = ImGui.GetItemRectMin()
     local maxX, maxY = ImGui.GetItemRectMax()
@@ -2549,11 +2706,11 @@ function Ui.RenderFancyManaBar(id, hpPct, height, burning)
     local manaMid = Globals.Constants.Colors.ManaMidColor
     local manaHigh = Globals.Constants.Colors.ManaHighColor
 
-    return Ui.RenderAnimatedPercentage(id, hpPct, height, manaLow, manaMid, manaHigh)
+    return Ui.RenderAnimatedPercentage(id, hpPct, height, 0, manaLow, manaMid, manaHigh)
 end
 
 function Ui.RenderFancyProgressBar(id, pctComplete, height, label)
-    return Ui.RenderAnimatedPercentage(id, pctComplete, height, Globals.Constants.Colors.LightOrange, Globals.Constants.Colors.LightBlue, Globals.Constants.Colors.Green, label)
+    return Ui.RenderAnimatedPercentage(id, pctComplete, height, 0, Globals.Constants.Colors.LightOrange, Globals.Constants.Colors.LightBlue, Globals.Constants.Colors.Green, label)
 end
 
 --- Renders a numerical option with a specified range and step.

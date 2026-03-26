@@ -1724,6 +1724,17 @@ Config.DefaultConfig                                     = {
         Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
         Default = false,
     },
+    ['OverrideHP']                       = {
+        DisplayName = "Override HP Display",
+        Group = "General",
+        Header = "Interface",
+        Category = "Main Panel",
+        Index = 2,
+        Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
+        Default = 0,
+        Min = 0,
+        Max = 100,
+    },
     ['AlwaysShowMiniButton']             = {
         DisplayName = "Always Show Mini Button",
         Group = "General",
