@@ -155,7 +155,15 @@ function StandardUI:RenderTarget()
     if Config:GetSetting('OverrideHP') > 0 then
         pctHPs = Config:GetSetting('OverrideHP')
     end
-    Ui.RenderFancyHPBar("##AutoTargetHPBar", pctHPs, 25, burning)
+
+    local hpLowOverride, hpMidOverride, hpHighOverride = nil, nil, nil
+    if Config:GetSetting('HPBarStyle') == 2 then
+        hpLowOverride = ImVec4(Ui.GetConColorBySpawn(assistSpawn))
+        hpMidOverride = ImVec4(Ui.GetConColorBySpawn(assistSpawn))
+        hpHighOverride = ImVec4(Ui.GetConColorBySpawn(assistSpawn))
+    end
+
+    Ui.RenderFancyHPBar("##AutoTargetHPBar", pctHPs, 25, burning, 1.0, hpLowOverride, hpMidOverride, hpHighOverride)
     self:RenderForceBurnButton()
 end
 

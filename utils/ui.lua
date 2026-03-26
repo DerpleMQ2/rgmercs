@@ -2673,13 +2673,13 @@ function Ui.RenderAnimatedPercentageOld(id, barPct, height, colLow, colMid, colH
 end
 
 -- Draw a horizontal gradient HP bar using ImDrawList:AddRectFilledMultiColor.
-function Ui.RenderFancyHPBar(id, hpPct, height, burning, borderThickness)
+function Ui.RenderFancyHPBar(id, hpPct, height, burning, borderThickness, hpLowOverride, hpMidOverride, hpHighOverride)
     local now = Globals.GetTimeSeconds()
     local drawList = ImGui.GetWindowDrawList()
 
-    local hpLow = Globals.Constants.Colors.HPLowColor
-    local hpMid = Globals.Constants.Colors.HPMidColor
-    local hpHigh = Globals.Constants.Colors.HPHighColor
+    local hpLow = hpLowOverride or Globals.Constants.Colors.HPLowColor
+    local hpMid = hpMidOverride or Globals.Constants.Colors.HPMidColor
+    local hpHigh = hpHighOverride or Globals.Constants.Colors.HPHighColor
 
     local clicked = Ui.RenderAnimatedPercentage(id, hpPct, height, 0, hpLow, hpMid, hpHigh, nil, borderThickness)
 

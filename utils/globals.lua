@@ -249,6 +249,8 @@ Globals.Constants.HealerMercStances = { "balanced", "reactive", "efficient", }
 Globals.Constants.MeleeMercStances  = { "balanced", "burn", }
 Globals.Constants.CasterMercStances = { "balanced", "burn", "burnae", }
 
+Globals.Constants.HPBarStyles       = { "Multi-Color", "Con-Color", }
+
 function Globals.GetTimeSeconds()
     return mq.gettime() / 1000
 end
