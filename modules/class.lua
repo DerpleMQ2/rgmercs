@@ -1535,7 +1535,7 @@ function Module:GiveTime()
             end
 
             if timeCheckPassed then
-                local start = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                local start = string.format("%.03f", Globals.GetTimeMS())
                 local targetTable = Core.SafeCallFunc("Rotation Target Table", r.targetId)
                 if targetTable and #targetTable > 0 then
                     if Core.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
@@ -1552,7 +1552,7 @@ function Module:GiveTime()
                         r.lastCondCheck = false
                     end
                 end
-                local stop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                local stop = string.format("%.03f", Globals.GetTimeMS())
 
                 r.lastTimeSpent = stop - start
             else

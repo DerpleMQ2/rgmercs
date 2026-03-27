@@ -293,7 +293,7 @@ function Rotation.Run(caller, rotationTable, targetTable, resolvedActionMap, ste
     for idx, entry in ipairs(rotationTable) do
         if enabledRotationEntries[entry.name] ~= false then
             if idx >= start_step then
-                local tStart = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                local tStart = string.format("%.03f", Globals.GetTimeMS())
                 caller:SetCurrentRotationState(idx)
 
                 if Globals.PauseMain then
@@ -301,22 +301,22 @@ function Rotation.Run(caller, rotationTable, targetTable, resolvedActionMap, ste
                 end
 
                 if fnRotationCond then
-                    local start = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                    local start = string.format("%.03f", Globals.GetTimeMS())
 
                     if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, Combat.GetCachedCombatState()) then
                         Logger.log_verbose("\arStopping Rotation Due to condition check failure!")
                         break
                     end
-                    local stop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                    local stop = string.format("%.03f", Globals.GetTimeMS())
                     entry.lastRotationCondTimeSpent = stop - start
                 end
 
                 if Config:GetSetting('ChaseOn') then
-                    local start = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                    local start = string.format("%.03f", Globals.GetTimeMS())
                     if Config.ShouldPriorityFollow() then
                         break
                     end
-                    local stop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                    local stop = string.format("%.03f", Globals.GetTimeMS())
                     entry.lastFollowTimeSpent = stop - start
                 else
                     entry.lastFollowTimeSpent = 0
@@ -333,9 +333,9 @@ function Rotation.Run(caller, rotationTable, targetTable, resolvedActionMap, ste
 
                 for _, targetId in ipairs(targetTable) do
                     if targetId and targetId > 0 then
-                        local condStart = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                        local condStart = string.format("%.03f", Globals.GetTimeMS())
                         local pass, active = Rotation.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
-                        local condStop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                        local condStop = string.format("%.03f", Globals.GetTimeMS())
                         entry.lastCondTimeSpent = entry.lastCondTimeSpent + (condStop - condStart)
 
                         if pass then entryPass = true end
@@ -345,9 +345,9 @@ function Rotation.Run(caller, rotationTable, targetTable, resolvedActionMap, ste
                             start_step, steps, idx, targetId, Strings.BoolToColorString(pass))
 
                         if pass == true then
-                            local rStart = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                            local rStart = string.format("%.03f", Globals.GetTimeMS())
                             local res, isGroup = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
-                            local rStop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                            local rStop = string.format("%.03f", Globals.GetTimeMS())
                             entry.lastExecTimeSpent = entry.lastExecTimeSpent + (rStop - rStart)
 
                             Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: ExecEntry(target(%d)) => %s",
@@ -382,7 +382,7 @@ function Rotation.Run(caller, rotationTable, targetTable, resolvedActionMap, ste
                     Logger.log_verbose("\aoFailed Condition RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
                 end
 
-                local tStop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
+                local tStop = string.format("%.03f", Globals.GetTimeMS())
                 entry.lastTotalTimeSpent = tStop - tStart
             end
         end
