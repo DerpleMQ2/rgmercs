@@ -57,6 +57,7 @@ Globals.Constants.ModRods             = { "Modulation Shard", "Transvergence", "
 Globals.Constants.ModRodUse           = { "Never", "Combat", "Anytime", }
 Globals.Constants.SpellBookSlots      = 1120
 Globals.Constants.CastCompleted       = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
+Globals.Constants.GroupTargetTypes    = Set.new({ "Group v1", "Group v2", "AE PC v1", "AE PC v2", })
 
 Globals.Constants.CastResults         = {
     ['CAST_RESULT_NONE'] = 0,

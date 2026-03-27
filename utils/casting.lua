@@ -21,6 +21,13 @@ Casting.Memorizing = false
 -- cached for UI display
 Casting.UseGem     = mq.TLO.Me.NumGems()
 
+--- Checks if a spell target type is a group-affecting type (group buffs, AE PC buffs, etc.)
+--- @param targetType string|nil The TargetType() value from a spell.
+--- @return boolean
+function Casting.IsGroupSpell(targetType)
+    return Globals.Constants.GroupTargetTypes:contains(targetType)
+end
+
 --- Simple (no trigger or stacking checks) check to see if the player has a buff. Can pass a spell(userdata), ID, or effect name(string).
 --- @param effect MQSpell|string|integer|nil The effect to check for.
 --- @return boolean Returns true if the player has the buff, false otherwise.
@@ -1520,7 +1527,8 @@ end
 --- @param bAllowMem boolean Whether to allow the spell to be memorized if not already.
 --- @param bAllowDead boolean? Whether to allow casting the spell on a dead target.
 --- @param retryCount number? The number of times to retry casting the spell if it fails.
---- @return boolean Returns true if the spell was successfully cast, false otherwise.
+--- @return boolean success Returns true if the spell was successfully cast, false otherwise.
+--- @return boolean|nil isGroup Returns true if the spell is a group-affecting target type.
 function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount)
     local me = mq.TLO.Me
     if not targetId then targetId = mq.TLO.Target.ID() end
@@ -1668,7 +1676,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
             Logger.log_debug("UseSpell(): Retargeting previous target after spell use.")
             Targeting.SetTarget(oldTargetId, true)
         end
-        return true
+        return true, Casting.IsGroupSpell(spell.TargetType())
     end
 
     Logger.log_verbose("\arCasting Failed: Invalid Spell Name")
@@ -1861,7 +1869,8 @@ end
 --- Uses a discipline spell on a specified target.
 --- @param discSpell MQSpell The name of the discipline spell to use.
 --- @param targetId? number The ID of the target on which to use the discipline spell.
---- @return boolean True if we were able to fire the Disc false otherwise.
+--- @return boolean success True if we were able to fire the Disc, false otherwise.
+--- @return boolean|nil isGroup True if the disc is a group-affecting target type.
 function Casting.UseDisc(discSpell, targetId)
     local me = mq.TLO.Me
     if not targetId then targetId = mq.TLO.Target.ID() end
@@ -1920,7 +1929,7 @@ function Casting.UseDisc(discSpell, targetId)
                 Targeting.SetTarget(oldTargetId, true)
             end
 
-            return true
+            return true, Casting.IsGroupSpell(discSpell.TargetType())
         end
     end
 end
@@ -1928,7 +1937,8 @@ end
 --- Uses the specified Alternate Advancement (AA) ability on a given target.
 --- @param aaName string The name of the AA ability to use.
 --- @param targetId? number The ID of the target on which to use the AA ability.
---- @return boolean True if the AA ability was successfully used, false otherwise.
+--- @return boolean success True if the AA ability was successfully used, false otherwise.
+--- @return boolean|nil isGroup True if the AA is a group-affecting target type.
 function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     local me = mq.TLO.Me
     if not targetId then targetId = mq.TLO.Target.ID() end
@@ -2016,7 +2026,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
         end
     end
 
-    return true
+    return true, Casting.IsGroupSpell(aaAbility.Spell.TargetType())
 end
 
 --- Uses the specified ability.
@@ -2032,7 +2042,8 @@ end
 --- Uses an item on a specified target.
 --- @param itemName string The name of the item to be used.
 --- @param targetId? number The ID of the target on which the item will be used. If empty use implied target.
---- @return boolean
+--- @return boolean success True if the item was successfully used, false otherwise.
+--- @return boolean|nil isGroup True if the item's spell is a group-affecting target type.
 function Casting.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
@@ -2147,7 +2158,7 @@ function Casting.UseItem(itemName, targetId)
         Targeting.SetTarget(oldTargetId, true)
     end
 
-    return true
+    return true, Casting.IsGroupSpell(item.Spell.TargetType())
 end
 
 --- Prepares the necessary actions for the Casting module.

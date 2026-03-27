@@ -96,9 +96,11 @@ end
 --- @param targetId any The ID of the target for the action.
 --- @param resolvedActionMap table A table containing resolved actions.
 --- @param bAllowMem boolean A flag indicating whether memory actions are allowed.
---- @return boolean True if exec of entry was successful, false otherwise.
+--- @return boolean success True if exec of entry was successful, false otherwise.
+--- @return boolean|nil isGroup True if the entry's action is a group-affecting target type.
 function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
     local ret = false
+    local isGroup = nil
 
     if entry.type == nil then return false end -- bad data.
 
@@ -118,7 +120,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
         if Casting.ItemReady(itemName) then
             Rotation.RunPreActivate(caller, resolvedActionMap, entry)
-            ret = Casting.UseItem(itemName, targetId)
+            ret, isGroup = Casting.UseItem(itemName, targetId)
         end
         Logger.log_verbose("Trying to use item %s :: %s", itemName, ret and "\agSuccess" or "\arFailed!")
     end
@@ -131,7 +133,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
         if Casting.ItemReady(itemName) then
             Rotation.RunPreActivate(caller, resolvedActionMap, entry)
-            ret = Casting.UseItem(itemName, targetId)
+            ret, isGroup = Casting.UseItem(itemName, targetId)
         end
         Logger.log_verbose("Trying to use clickyitem %s :: %s", itemName, ret and "\agSuccess" or "\arFailed!")
     end
@@ -147,7 +149,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
         if Casting.SpellReady(spell, bAllowMem) then
             Rotation.RunPreActivate(caller, resolvedActionMap, entry)
-            ret = Casting.UseSpell(spell.RankName(), targetId, bAllowMem, entry.allowDead, entry.retries)
+            ret, isGroup = Casting.UseSpell(spell.RankName(), targetId, bAllowMem, entry.allowDead, entry.retries)
         end
         Logger.log_verbose("(Spell) Trying to use %s - %s :: %s", entry.name, spell.RankName(), ret and "\agSuccess" or "\arFailed!")
     end
@@ -171,7 +173,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
         if Casting.DiscReady(discSpell) then
             Rotation.RunPreActivate(caller, resolvedActionMap, entry)
-            ret = Casting.UseDisc(discSpell, targetId)
+            ret, isGroup = Casting.UseDisc(discSpell, targetId)
         end
         Logger.log_verbose("(Disc) Trying to use %s - %s :: %s", entry.name, discSpell.RankName(), ret and "\agSuccess" or "\arFailed!")
     end
@@ -179,7 +181,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
     if entry.type:lower() == "aa" then
         if Casting.AAReady(entry.name) then
             Rotation.RunPreActivate(caller, resolvedActionMap, entry)
-            ret = Casting.UseAA(entry.name, targetId, entry.allowDead, entry.retries)
+            ret, isGroup = Casting.UseAA(entry.name, targetId, entry.allowDead, entry.retries)
         end
         Logger.log_verbose("(AA) Trying to use %s :: %s", entry.name, ret and "\agSuccess" or "\arFailed!")
     end
@@ -205,7 +207,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
         entry.post_activate(caller, Rotation.GetEntryConditionArg(resolvedActionMap, entry), ret)
     end
 
-    return ret
+    return ret, isGroup
 end
 
 --- Retrieves the argument for the entry condition from the specified map.
@@ -344,7 +346,7 @@ function Rotation.Run(caller, rotationTable, targetTable, resolvedActionMap, ste
 
                         if pass == true then
                             local rStart = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
-                            local res = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
+                            local res, isGroup = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
                             local rStop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
                             entry.lastExecTimeSpent = entry.lastExecTimeSpent + (rStop - rStart)
 
@@ -353,6 +355,7 @@ function Rotation.Run(caller, rotationTable, targetTable, resolvedActionMap, ste
 
                             if res == true then
                                 entryHadSuccess = true
+                                if isGroup then break end
                             end
                         end
 
