@@ -956,94 +956,95 @@ local _ClassConfig = {
             {
                 name = "Talisman of Celerity",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoHaste') and Casting.CanUseAA("Talisman of Celerity") end,
                 active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoHaste') then return false end
-                    return mq.TLO.Me.Level() < 111 and Casting.GroupBuffAACheck(aaName, target)
+                    return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
             {
                 name = "HasteBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoHaste') and not Casting.CanUseAA("Talisman of Celerity") end,
                 active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHaste') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "GroupRegenBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRegenBuff') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoRegenBuff') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "SingleRegenBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRegenBuff') and not Core.GetResolvedActionMapItem('GroupRegenBuff') end,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoRegenBuff') or Core.GetResolvedActionMapItem('GroupRegenBuff') then return false end --We don't need this once we can use the group version
                     return (Targeting.TargetIsATank(target) or Targeting.TargetIsMyself(target)) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoRunSpeed') end,
                 cond = function(self, spell, target) --We get Tala'tak at 74, but don't get the AA version until 90
-                    if not Config:GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility("Lupine Spirit").Rank() or -1) > 3 then return false end
+                    if (mq.TLO.Me.AltAbility("Lupine Spirit").Rank() or -1) > 3 then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "Group Shrink",
                 type = "AA",
+                load_cond = function(self) return Config:GetSetting('DoGroupShrink') end,
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoGroupShrink') then return false end
                     return Targeting.GetTargetHeight(target) > 2.2
                 end,
             },
             {
                 name = "ShrinkSpell",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoGroupShrink') and not Casting.CanUseAA("Group Shrink") end,
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoGroupShrink') or Casting.CanUseAA("Group Shrink") then return false end
                     return Targeting.GetTargetHeight(target) > 2.2
                 end,
             },
             {
                 name = "LowLvlHPBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLHPBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLHPBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and Targeting.TargetIsATank(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "LowLvlAgiBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLAgiBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLAgiBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and Targeting.TargetIsATank(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "LowLvlStaBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLStaBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLStaBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and Targeting.TargetIsATank(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "LowLvlStrBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoLLStrBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoLLStrBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and Targeting.TargetIsAMelee(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },

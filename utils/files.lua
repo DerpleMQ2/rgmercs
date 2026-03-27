@@ -110,7 +110,7 @@ function Files.delete_file(path)
         end
         return true
     else
-        Logger.log_debug("File not found for deletion: %s", path)
+        Logger.log_error("File not found for deletion: %s", path)
         return false
     end
 end

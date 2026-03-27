@@ -1433,7 +1433,7 @@ local _ClassConfig = {
                 name = "Spirit Guardian",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not Targeting.TargetIsMA(target) then return false end
+                    if not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
