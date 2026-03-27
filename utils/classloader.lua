@@ -5,46 +5,38 @@ local Globals     = require('utils.globals')
 local Modules     = require("utils.modules")
 local Files       = require("utils.files")
 local Logger      = require("utils.logger")
+local Tables      = require("utils.tables")
 
 local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple', }
 
 function ClassLoader.getClassConfigFileName(class)
     local baseConfigDir = Globals.ScriptDir .. "/class_configs"
     local classConfigDir = Config:GetSetting('ClassConfigDir') -- now defaults to current server
-    local useCustomConfig = (classConfigDir:find("Custom: ") ~= nil)
+    local configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
+    local deprecated = Tables.TableContains(Globals.Constants.DeprecatedConfigs[class] or {}, classConfigDir)
 
-    -- temp fix to patch incorrect initial config dir settings due to a previous bug
-    if Core.OnEMU() and not useCustomConfig then
-        local defaultConfig
-        for _, server in ipairs(Globals.ClassConfigDirs) do
-            if server == classConfigDir then
-                defaultConfig = true
-                break
-            end
-        end
-        if not defaultConfig then
-            Config:SetSetting('ClassConfigDir', "Live")
-            Config:SaveSettings()
-            classConfigDir = "Live"
-        end
+    if deprecated then
+        Logger.log_warn("\ayThe class config '%s' is marked as deprecated. Removing.", classConfigDir)
+        local depFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
+        Files.delete_file(depFile)
+        Core.ScanConfigDirs()
     end
 
-    local configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
-
-    if useCustomConfig then
+    if classConfigDir:find("Custom: ") ~= nil then
         classConfigDir = classConfigDir:sub(9) -- remove "Custom:"
         configFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, classConfigDir, class:lower())
     end
 
-    if not Files.file_exists(configFile) then
+    if deprecated or not Files.file_exists(configFile) then
         -- Fall back to the appropriate config.
-        local oldConfig = configFile
-        useCustomConfig = false
+        Logger.log_error("Class Config not found or deprecated: \ay%s\aw. Returning to Default!", classConfigDir)
         local folder = ClassLoader.getFallbackClassConfigFolder()
+        Config:SetSetting('ClassConfigDir', folder)
+        Config:SaveSettings()
         configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, folder, class:lower())
     end
 
-    return configFile, useCustomConfig
+    return configFile
 end
 
 function ClassLoader.getFallbackClassConfigFolder()
@@ -58,7 +50,7 @@ end
 
 ---@param class string # EQ Class ShortName
 function ClassLoader.load(class)
-    local classConfigFile, customConfig = ClassLoader.getClassConfigFileName(class)
+    local classConfigFile = ClassLoader.getClassConfigFileName(class)
     Logger.log_debug("Loading Base Config:\n\ag%s", classConfigFile)
 
     if Files.file_exists(classConfigFile) then
@@ -69,14 +61,6 @@ function ClassLoader.load(class)
             local classConfig
             classConfig = config()
 
-            if classConfig.Deprecated then
-                Logger.log_warn("\ayThe class config '%s' is marked as deprecated. Ignoring...", classConfigFile)
-                Config:SetSetting('ClassConfigDir', ClassLoader.getFallbackClassConfigFolder())
-                Core.ScanConfigDirs()
-                return ClassLoader.load(class) -- try loading again to get the non-deprecated config, if it exists
-            end
-
-            classConfig.IsCustom = customConfig
             return classConfig
         end
     end

@@ -662,7 +662,7 @@ local _ClassConfig = {
         },
         ["MeleeMit"] = {
             "Impede",
-            "Withstand",
+            -- "Withstand",
             "Defy",
             "Renounce",
             "Reprove",

@@ -886,8 +886,8 @@ local _ClassConfig = {
             {
                 name = "AegoBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('AegoBuff') <= 2 end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('AegoSymbol') > 2 then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -920,24 +920,27 @@ local _ClassConfig = {
             {
                 name = "ACBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoACBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoACBuff') or ((spell.TargetType() or ""):lower() == "single" and target.ID() ~= Core.GetMainAssistId()) then return false end
+                    if (spell.TargetType() or ""):lower() == "single" and not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "SingleVieBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoVieBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoVieBuff') or self:GetResolvedActionMapItem('GroupVieBuff') or not Targeting.TargetIsATank(target) then return false end
+                    if not Targeting.TargetIsATank(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "DivineBuff",
                 type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoDivineBuff') end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDivineBuff') or not Targeting.TargetIsATank(target) then return false end
+                    if not Targeting.TargetIsATank(target) then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },

@@ -696,7 +696,7 @@ return {
         ["meleemit"] = {
             -- Withstand Combat Line of Defense - Update to format once tested
             "Impede",
-            "Withstand",
+            -- "Withstand",
             "Defy",
             "Renounce",
             "Reprove",

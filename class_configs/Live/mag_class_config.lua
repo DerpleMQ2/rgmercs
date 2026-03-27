@@ -1884,22 +1884,6 @@ _ClassConfig    = {
             RequiresLoadoutChange = true,
             Default = false,
         },
-        ['DoPetArmor']     = {
-            DisplayName = "Do Pet Armor",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Tooltip = "Summon Armor for Pets",
-            Default = false,
-        },
-        ['DoPetWeapons']   = {
-            DisplayName = "Do Pet Weapons",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Tooltip = "Summon Weapons for Pets",
-            Default = false,
-        },
         ['PetType']        = {
             DisplayName = "Pet Type",
             Group = "Abilities",
@@ -1911,14 +1895,6 @@ _ClassConfig    = {
             Default = 2,
             Min = 1,
             Max = 4,
-        },
-        ['DoPetHeirlooms'] = {
-            DisplayName = "Do Pet Heirlooms",
-            Group = "Items",
-            Header = "Item Summoning",
-            Category = "Item Summoning",
-            Tooltip = "Summon Heirlooms for Pets",
-            Default = false,
         },
         ['DoPetHealSpell'] = {
             DisplayName = "Pet Heal Spell",

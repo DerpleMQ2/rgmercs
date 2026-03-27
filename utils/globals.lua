@@ -44,7 +44,7 @@ Globals.CurrentPetBlocked             = nil
 
 Globals.Constants                     = {}
 
-Globals.Constants.SupportedEmuServers = Set.new({ "Project Lazarus", "HiddenForest", "EQ Might", })
+Globals.Constants.SupportedEmuServers = Set.new({ "Project Lazarus", "EQ Might", })
 Globals.Constants.LootModuleTypes     = { 'None', 'LootNScoot', 'SmartLoot', }
 Globals.Constants.RGCasters           = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
     "SHM", "WIZ", })
@@ -250,6 +250,10 @@ Globals.Constants.MeleeMercStances  = { "balanced", "burn", }
 Globals.Constants.CasterMercStances = { "balanced", "burn", "burnae", }
 
 Globals.Constants.HPBarStyles       = { "Multi-Color", "Con-Color", }
+
+Globals.Constants.DeprecatedConfigs = {
+    ['NEC'] = { "Alpha (Live)", },
+}
 
 function Globals.GetTimeSeconds()
     return mq.gettime() / 1000
