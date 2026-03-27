@@ -963,7 +963,7 @@ function Module:HealById(id)
                 -- If we need to heal others we should wait on the cooldown.
                 Casting.WaitGlobalCoolDown("Healing: ")
 
-                local newState, wasRun = Rotation.Run(self, self:GetHealRotationTable(selectedRotation.name), id,
+                local newState, wasRun = Rotation.Run(self, self:GetHealRotationTable(selectedRotation.name), { id, },
                     self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0,
                     self.CombatState == "Downtime", selectedRotation.doFullRotation or false, nil, Config:GetSetting('EnabledRotationEntries') or {})
                 if selectedRotation.state then selectedRotation.state = newState end
@@ -1537,24 +1537,19 @@ function Module:GiveTime()
             if timeCheckPassed then
                 local start = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
                 local targetTable = Core.SafeCallFunc("Rotation Target Table", r.targetId)
-                if targetTable ~= false then
-                    for _, targetId in ipairs(targetTable) do
-                        -- only do combat with a target.
-                        if targetId and targetId > 0 then
-                            if Core.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
-                                r.lastCondCheck = true
-                                Logger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
-                                self.CurrentRotation = { name = r.name, state = r.state or 0, }
-                                local newState = Rotation.Run(self, self:GetRotationTable(r.name), targetId,
-                                    self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime", r.doFullRotation or false, r.cond,
-                                    Config:GetSetting('EnabledRotationEntries') or {})
+                if targetTable and #targetTable > 0 then
+                    if Core.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
+                        r.lastCondCheck = true
+                        Logger.log_verbose("\aw:::RUN ROTATION::: \am%s", r.name)
+                        self.CurrentRotation = { name = r.name, state = r.state or 0, }
+                        local newState = Rotation.Run(self, self:GetRotationTable(r.name), targetTable,
+                            self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime", r.doFullRotation or false, r.cond,
+                            Config:GetSetting('EnabledRotationEntries') or {})
 
-                                if r.state then r.state = newState end
-                                self.TempSettings.RotationTimers[r.name] = Globals.GetTimeSeconds()
-                            else
-                                r.lastCondCheck = false
-                            end
-                        end
+                        if r.state then r.state = newState end
+                        self.TempSettings.RotationTimers[r.name] = Globals.GetTimeSeconds()
+                    else
+                        r.lastCondCheck = false
                     end
                 end
                 local stop = string.format("%.03f", Globals.GetTimeSeconds() / 1000)
