@@ -66,7 +66,7 @@ Config.FAQ                                               = {
         Settings_Used = "",
     },
     {
-        Question = "How do I force auto combat on a target that isn't aggressive or isn't hostile?",
+        Question = "How do I force auto combat on a target that isn't aggressive or isn't hostile, like a target dummy, object, or special NPC?",
         Answer = "This is accomplished with the /rgl forcetarget <id?> command:\n\n" ..
             "The command accepts a target ID, and will fall back to your current target's ID if one is not supplied.\n\n" ..
             "When commanded, the PC will add the target to the first XT slot and immediately force target.\n\n" ..

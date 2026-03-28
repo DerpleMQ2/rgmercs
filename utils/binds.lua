@@ -121,32 +121,10 @@ Binds.Handlers    = {
             Logger.log_info("\awIgnored targets cleared.")
         end,
     },
-    ['forcecombat'] = {
-        usage = "/rgl forcecombat <id?>",
-        about =
-        "Alias for /rgl forcetarget. Will force the current target or <id> to be your autotarget no matter what until it is no longer valid. Can force combat on non-hostiles.",
-        handler = function(targetId)
-            local forcedTarget = targetId and mq.TLO.Spawn(targetId) or mq.TLO.Target
-            if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget) or Targeting.TargetIsType("object", forcedTarget)) then
-                Globals.ForceTargetID = forcedTarget.ID()
-                Logger.log_info("\awForced Target: %s", forcedTarget.CleanName() or "None")
-            end
-            Logger.log_warning("This command has been deprecated! The forcecombat command has been replaced by /rgl forcetarget and is slated for eventual removal.")
-        end,
-    },
-    ['forcecombatclear'] = {
-        usage = "/rgl forcecombatclear",
-        about = "Alias for /rgl forcetargetclear. Will clear the current forced target.",
-        handler = function()
-            Globals.ForceTargetID = 0
-            Logger.log_info("\awForced target cleared.")
-            Logger.log_warning(
-                "This command has been deprecated! The forcecombatclear command has been replaced by /rgl forcetargetclear and is slated for eventual removal.")
-        end,
-    },
     ['forcetarget'] = {
         usage = "/rgl forcetarget <id?>",
-        about = "Will force the current target or <id> to be your autotarget no matter what until it is no longer valid. Can force combat on non-hostiles.",
+        about =
+        "Will force the current target or <id> to be your autotarget no matter what until it is no longer valid. Can force combat on non-hostiles like objects, a special NPC, or a target dummy. If no ID is supplied, uses the current target's ID.",
         handler = function(targetId)
             local forcedTarget = targetId and mq.TLO.Spawn(targetId) or mq.TLO.Target
             if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget) or Targeting.TargetIsType("object", forcedTarget)) then
