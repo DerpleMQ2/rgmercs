@@ -144,6 +144,8 @@ local _ClassConfig = {
             "Kaficus' Song of Suffering",
             "Hykast's Song of Suffering",
             "Noira's Song of Suffering",
+            "Storm Blade",
+            "Song of the Storm",
         },
         ['SprySonataSong'] = {
             "Boberstler's Spry Sonata",
