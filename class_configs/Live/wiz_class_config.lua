@@ -977,8 +977,9 @@ return {
                 name = "AEBeam",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoAEBeam') end,
                 cond = function(self)
-                    if not (Config:GetSetting('DoAEBeam') and Config:GetSetting('DoAEDamage')) then return false end
+                    if not Config:GetSetting('DoAEDamage') then return false end
                     return Combat.AETargetCheck(true, Config:GetSetting('BeamTargetCnt'))
                 end,
             },
@@ -993,8 +994,9 @@ return {
                 name = "PBFlame",
                 type = "Spell",
                 allowDead = true,
+                load_cond = function(self) return Config:GetSetting('DoPBAE') end,
                 cond = function(self)
-                    if not (Config:GetSetting('DoPBAE') and Config:GetSetting('DoAEDamage')) then return false end
+                    if not Config:GetSetting('DoAEDamage') then return false end
                     return Combat.AETargetCheck(true)
                 end,
             },

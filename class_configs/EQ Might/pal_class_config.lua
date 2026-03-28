@@ -1080,9 +1080,7 @@ return {
             {
                 name_func = function(self) return Casting.GetFirstAA({ "Hand of Disruption", "Divine Stun", }) end,
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return not Core.IsTanking() or not Casting.CanUseAA("Force of Disruption")
-                end,
+                load_cond = function(self) return not Core.IsTanking() or not Casting.CanUseAA("Force of Disruption") end,
             },
             {
                 name = "Bash",
