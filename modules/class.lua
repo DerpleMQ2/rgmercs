@@ -490,8 +490,22 @@ end
 function Module:Render()
     Base.Render(self)
 
-    ImGui.Text("Combat State: %s", self.CombatState)
-    ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
+    ImGui.BeginTable("##ClassInfoTable", 2, bit32.bor(ImGuiTableFlags.BordersInner, ImGuiTableFlags.SizingFixedFit))
+    ImGui.TableNextColumn()
+    ImGui.Text("Combat State")
+    ImGui.TableNextColumn()
+    Ui.RenderColoredText(Combat.GetCachedCombatState() == "Combat" and Globals.Constants.Colors.MainCombatColor or Globals.Constants.Colors.MainDowntimeColor,
+        "%s", Combat.GetCachedCombatState() or "N/A")
+    ImGui.TableNextColumn()
+    ImGui.Text("Rotation")
+    ImGui.TableNextColumn()
+    Ui.RenderColoredText(Globals.Constants.BasicColors.Cyan, self.CurrentRotation.name)
+    ImGui.TableNextColumn()
+    ImGui.Text("State")
+    ImGui.TableNextColumn()
+    Ui.RenderColoredText(Globals.Constants.BasicColors.LightYellow, self.CurrentRotation.state)
+    ImGui.TableNextColumn()
+    ImGui.EndTable()
 
     ---@type boolean|nil
     local pressed = false
