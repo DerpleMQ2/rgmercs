@@ -2025,7 +2025,7 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Do AE Malo Spells/AAs",
             RequiresLoadoutChange = true,
-            Default = false,
+            Default = true,
         },
         ['DoSTSlow']            = {
             DisplayName = "Do ST Slow",
@@ -2045,7 +2045,7 @@ local _ClassConfig = {
             Index = 102,
             Tooltip = "Do AE Slow Spells/AAs",
             RequiresLoadoutChange = true,
-            Default = false,
+            Default = true,
         },
         ['AESlowCount']         = {
             DisplayName = "AE Slow Count",

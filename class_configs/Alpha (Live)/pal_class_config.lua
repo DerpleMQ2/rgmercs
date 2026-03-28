@@ -1141,6 +1141,16 @@ local _ClassConfig = {
                     return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
+            {
+                name = "SteelProc",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSteelProc') end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell)
+                    if not Casting.CastReady(spell) then return false end
+                    return spell.RankName.Stacks() and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
+                end,
+            },
         },
         ['GroupBuff'] = {
             {
@@ -1175,10 +1185,12 @@ local _ClassConfig = {
                 type = "AA",
                 load_cond = function(self) return Config:GetSetting('DoSalvation') end,
                 cond = function(self, aaName, target)
+                    if Targeting.TargetIsATank() then return false end
                     return Casting.GroupBuffAACheck(aaName, target)
                 end,
-                post_active = function(self, aaName, success)
-                    if success and Core.IsTanking() and Casting.IHaveBuff("Marr's Salvation") then
+                post_activate = function(self, aaName, success)
+                    -- mq.delay(200, function() return mq.TLO.Me.Buff("Marr's Salvation")() ~= nil end)
+                    if success and Core.IsTanking() and mq.TLO.Me.Buff("Marr's Salvation")() then
                         Core.DoCmd("/removebuff \"Marr's Salvation\"")
                     end
                 end,
@@ -1282,7 +1294,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Force of Disruption",
+                name_func = function(self) return Casting.GetFirstAA({ "Force of Disruption", "Divine Stun", }) end,
                 type = "AA",
             },
             {
@@ -1322,7 +1334,7 @@ local _ClassConfig = {
         },
         ['HateTools(AutoTarget)'] = {
             {
-                name = "Force of Disruption",
+                name_func = function(self) return Casting.GetFirstAA({ "Force of Disruption", "Divine Stun", }) end,
                 type = "AA",
             },
             {
@@ -1452,9 +1464,60 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
+                name = "Hand of Tunare",
+                type = "AA",
+            },
+            {
+                name = "Holyforge",
+                type = "Disc",
+                load_cond = function(self) return not Core.IsTanking() end,
+                cond = function(self, discSpell, target)
+                    return Casting.NoDiscActive() and Targeting.TargetBodyIs(target, "Undead")
+                end,
+            },
+            {
+                name = "Pureforge",
+                type = "Disc",
+                load_cond = function(self) return not Core.IsTanking() end,
+                cond = function(self, discSpell)
+                    return Casting.NoDiscActive()
+                end,
+            },
+            {
                 name = "Inquisitor's Judgment",
                 type = "AA",
-                load_cond = function(self) return not Core.IsTanking() end,
+            },
+            {
+                name = "Preservation",
+                type = "Spell",
+                load_cond = function(self) return Core.IsTanking() end,
+                cond = function(self, spell)
+                    if not Casting.CastReady(spell) then return false end
+                    return Casting.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "BlessingProc",
+                type = "Spell",
+                cond = function(self, spell)
+                    return Casting.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "SteelProc",
+                type = "Spell",
+                load_cond = function(self) return Config:GetSetting('DoSteelProc') end,
+                cond = function(self, spell)
+                    if not Casting.CastReady(spell) then return false end
+                    return Casting.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "Marr's Gift",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return mq.TLO.Me.PctMana() < 10
+                end,
             },
         },
         ['Defenses'] = {
@@ -1627,7 +1690,7 @@ local _ClassConfig = {
                 load_cond = function(self) return Config:GetSetting('Timer6Choice') == 2 end,
             },
             {
-                name = "Force of Disruption",
+                name_func = function(self) return Casting.GetFirstAA({ "Force of Disruption", "Divine Stun", }) end,
                 type = "AA",
                 load_cond = function(self) return Core.IsTanking() end,
             },
@@ -1686,7 +1749,8 @@ local _ClassConfig = {
                 { name = "CrushTimer6",  cond = function(self) return Core.IsTanking() and Config:GetSetting('Timer6Choice') == 1 end, },
                 { name = "StunTimer6",   cond = function(self) return Core.IsTanking() and Config:GetSetting('Timer6Choice') == 2 end, },
                 { name = "Preservation", cond = function(self) return Core.IsTanking() end, },
-                { name = "TempHP",       cond = function(self) return Core.IsTanking() and Config:GetSetting('DoTempHP') end, },
+                { name = "TempHP",       cond = function(self) return Config:GetSetting('DoTempHP') end, },
+                { name = "SteelProc",    cond = function(self) return Config:GetSetting('DoSteelProc') end, },
                 { name = "HealStun", },
                 { name = "HealNuke", },
                 { name = "Dicho",        cond = function(self) return Config:GetSetting('DoDicho') end, },
@@ -1794,6 +1858,16 @@ local _ClassConfig = {
             Tooltip = "Use Undead proc over Fury proc until Fury is rolled into Divine Protector's Unity (Level 80).",
             Default = false,
         },
+        ['DoSteelProc']       = {
+            DisplayName = "Use Steel Proc",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
+            Index = 3,
+            Tooltip = "Use your Steel Proc line.",
+            Default = false,
+            RequiresLoadoutChange = true,
+        },
         ['DoBrells']          = {
             DisplayName = "Do Brells",
             Group = "Abilities",
@@ -1822,6 +1896,7 @@ local _ClassConfig = {
             Category = "Group",
             Tooltip = "Use your group hatred reduction buff AA (The Paladin will cancel it on themself if in Tank Mode).",
             Default = true,
+            RequiresLoadoutChange = true,
         },
 
         --Hate Tools

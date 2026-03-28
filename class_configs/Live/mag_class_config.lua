@@ -1768,9 +1768,9 @@ _ClassConfig    = {
             gem = 6,
             spells = {
                 { name = "SummonedNuke",     cond = function(self) return Config:GetSetting('DoSummonedNuke') end, },
+                { name = "PetHealSpell", },
                 { name = "GroupCotH", },
                 { name = "ManaRodSummon", },
-                { name = "PetHealSpell", },
                 { name = "SkinDS",           cond = function(self) return Config:GetSetting('DoSkinDS') end, },
                 { name = "LongDurDmgShield", },
             },
@@ -2027,7 +2027,7 @@ _ClassConfig    = {
             Category = "Resist",
             Tooltip = "Do AE Malo Spells/AAs",
             RequiresLoadoutChange = true,
-            Default = false,
+            Default = true,
         },
         ['CombatModRod']   = {
             DisplayName = "Combat Mod Rods",
