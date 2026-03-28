@@ -253,6 +253,7 @@ Globals.Constants.HPBarStyles       = { "Multi-Color", "Con-Color", }
 
 Globals.Constants.DeprecatedConfigs = {
     ['NEC'] = { "Alpha (Live)", },
+    ['PAL'] = { "Alpha (Live)", },
 }
 
 function Globals.GetTimeSeconds()
