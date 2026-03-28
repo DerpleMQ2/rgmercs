@@ -11,7 +11,7 @@ local Set          = require('mq.set')
 local Combat       = require("utils.combat")
 
 local _ClassConfig = {
-    _version              = "Alpha 2.0 - Live",
+    _version              = "2.0 - Live",
     _author               = "Algar",
     ['ModeChecks']        = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
