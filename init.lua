@@ -359,7 +359,7 @@ local function Main()
 
     Core.UpdateBuffs()
 
-    Events.DoEvents(true)
+    Events.DoEvents()
 
     Config:ValidatePeers()
 

@@ -2386,15 +2386,6 @@ Config.DefaultConfig                                     = {
         ConfigType = "Advanced",
     },
 
-    ['RunCoroutinesDuringLoops']         = {
-        DisplayName = "Run Coroutines During Loops",
-        Category = "Internals",
-        Index = 1,
-        Tooltip = "Allow coroutines to run during blocking loops (such as casting, pulling, combat, etc.)",
-        Default = true,
-        ConfigType = "Advanced",
-    },
-
     ['DrawTooltipDebugBox']              = {
         DisplayName = "Draw Tooltip Debug Box",
         Category = "Internals",

@@ -51,6 +51,7 @@ function Combat.SetMainAssist()
             end
         end
     elseif inRaid then
+        Logger.log_verbose("SetMainAssist: Checking Raid Assist.")
         local raidAssistSpawn = mq.TLO.Raid.MainAssist(Config:GetSetting('RaidAssistTarget'))
         if raidAssistSpawn() and raidAssistSpawn.ID() > 0 and not raidAssistSpawn.Dead() then
             if raidAssistSpawn.ID() ~= Core.GetMainAssistId() then
@@ -60,6 +61,7 @@ function Combat.SetMainAssist()
             return
         end
     elseif inGroup then
+        Logger.log_verbose("SetMainAssist: Checking Group Assist.")
         local groupAssistSpawn = mq.TLO.Group.MainAssist
         if groupAssistSpawn() and groupAssistSpawn.ID() > 0 and not groupAssistSpawn.Dead() then
             if groupAssistSpawn.ID() ~= Core.GetMainAssistId() then
