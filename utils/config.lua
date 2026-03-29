@@ -712,28 +712,27 @@ Config.DefaultConfig                                     = {
         Max = 200,
         ConfigType = "Advanced",
     },
-    -- Add the word legacy and change default to false when New scan beta is finished, or remove. Can decide later
-    ['MAScanAggro']                = {
-        DisplayName = "Legacy MA Aggro Scan",
+    ['MAAggroScan']                = {
+        DisplayName = "MA Aggro Scan",
         Group = "Combat",
         Header = "Targeting",
         Category = "MA Target Selection",
         Index = 5,
         Tooltip =
-        "Scan hate levels of XT haters and set the AutoTarget to those who aren't aggroed on this PC.\nThis is legacy behavior that will be removed, kept as a grace period for custom configs.",
-        Default = true,
+        "Scan hate levels of XT haters and set the AutoTarget to those who aren't aggroed on this PC. This may be necessary for MAs in Tank Mode who lack snap aggro abilities, but can also lead to further aggro issues on other targets. Use with caution.",
+        Default = false,
         ConfigType = "Advanced",
         Warning = function()
-            if Config:GetSetting('MAScanAggro') and Config:GetSetting('NewAggroScanBeta') then
+            if Config:GetSetting('MAAggroScan') and Config:GetSetting('TankAggroScan') then
                 return true,
-                    "Warning: Legacy MA Aggro Scan and Tank Aggro scan are both enabled, legacy checks could choose a target better suited to being designated an AggroTarget."
+                    "Warning: MA Aggro Scan and Tank Aggro Scan are both enabled, this may be inefficient (it is possible for them to both find the same target Id)."
             end
             return false, ""
         end,
     },
     --Remove the word "Beta" and change the default to true when the beta period is finished.
-    ['NewAggroScanBeta']           = {
-        DisplayName = "Tank Aggro Scan (Beta)",
+    ['TankAggroScan']              = {
+        DisplayName = "Tank Aggro Scan",
         Group = "Combat",
         Header = "Targeting",
         Category = "Tank Target Selection",
@@ -742,12 +741,12 @@ Config.DefaultConfig                                     = {
             "Allow a PC in Tank Mode to independently select an xtarget to attempt to reclaim aggro, without affecting or changing the AutoTarget, even if they are also the MA.\n" ..
             "The tank will continue to engage the AutoTarget, but will periodically change to the Aggro Target to use abilities found in the HateTools(AggroTarget) rotation.\n" ..
             "If this tank is the MA, they will continue to broadcast the AutoTarget to any assisting RGMercs peer.",
-        Default = false,
+        Default = true,
         ConfigType = "Advanced",
         Warning = function()
-            if Config:GetSetting('MAScanAggro') and Config:GetSetting('NewAggroScanBeta') then
+            if Config:GetSetting('MAAggroScan') and Config:GetSetting('TankAggroScan') then
                 return true,
-                    "Warning: Legacy MA Aggro Scan and Tank Aggro scan are both enabled, legacy checks could choose a target better suited to being designated an AggroTarget."
+                    "Warning: MA Aggro Scan and Tank Aggro Scan are both enabled, this may be inefficient (it is possible for them to both find the same target Id)."
             end
             return false, ""
         end,

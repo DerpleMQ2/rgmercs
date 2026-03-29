@@ -321,10 +321,9 @@ local function RGInit(...)
     printf("\aw\awBy \ag%s", Config._author)
     printf("\aw****************************")
     -- keep these for easy editing/addition later
-    printf("\agBuff handling has been revamped to rely on actors! See our recent forum post or commit messages.")
-    printf("\agYou may wish to take a moment to peruse the new options in Abilities > Buffs> Buff Rules.")
+    printf("\agRGMercs! Where even fun has an option and a command attached.")
     printf("\awPlease visit us on the RG forums for the most recent news and updates.")
-    printf("\aw Use \ag /rgl \aw or check our options panel for a list of commands.")
+    printf("\awFAQs, Commands and Settings are searchable from the options panel!")
 
     -- store initial positioning data.
     initPctComplete = 90
@@ -440,7 +439,7 @@ local function Main()
         -- This will find a valid target and set it to : Globals.AutoTargetID
         Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
         -- finds the AggroTarget for a tank mode character
-        if Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') then
+        if Core.IsTanking() and Config:GetSetting('TankAggroScan') then
             Combat.TankAggroScan()
         end
     end

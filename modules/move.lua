@@ -732,7 +732,7 @@ function Module:GiveTime()
         if Config:GetSetting('UseActorNav') then
             local heartbeat = Comms.GetPeerHeartbeatByName(chaseTarg)
             local data = heartbeat and heartbeat.Data
-            if data and data.X and data.Y and data.Z then
+            if data and data.Zone == mq.TLO.Zone.Name() and data.X and data.Y and data.Z then
                 local peerLoc = string.format("%d, %d, %d", data.Y, data.X, data.Z)
                 chaseSpawnDist = math.floor(mq.TLO.Math.Distance(peerLoc)()) -- math.distance returns 0 on invalid string
                 -- Algar note: Emu server code seems to give constant updates up to 300, and periodic updates up to 600. Over 600, stops updating. Tested on EQMight 11/2025

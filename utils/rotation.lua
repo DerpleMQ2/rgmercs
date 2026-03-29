@@ -296,7 +296,7 @@ function Rotation.Run(caller, rotationTable, targetTable, resolvedActionMap, ste
                 local tStart = string.format("%.03f", Globals.GetTimeMS())
                 caller:SetCurrentRotationState(idx)
 
-                if Globals.PauseMain then
+                if Globals.PauseMain or Globals.StopCast then
                     break
                 end
 

@@ -1526,6 +1526,9 @@ function Module:GiveTime()
     local numClickies = #clickies
     local moving = mq.TLO.Me.Moving() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving()
     for clickyIdx = startingClickyIdx, numClickies do
+        if Globals.PauseMain or Globals.StopCast then
+            break
+        end
         local clicky = clickies[clickyIdx]
         if clicky.itemName:len() > 0 and (clicky.enabled == nil or clicky.enabled == true) then
             self.ClickyRotationIndex = (clickyIdx % numClickies) + 1

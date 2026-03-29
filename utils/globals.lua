@@ -18,6 +18,7 @@ Globals.CurrentState                  = "None"
 Globals.IgnoredTargetIDs              = Set.new({})
 Globals.SubmodulesLoaded              = false
 Globals.PauseMain                     = false
+Globals.StopCast                      = false
 Globals.BackOffFlag                   = false
 Globals.InMedState                    = false
 Globals.LastPetCmd                    = 0
