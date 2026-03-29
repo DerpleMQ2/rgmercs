@@ -311,7 +311,7 @@ function Combat.MATargetScan(radius, zradius)
                     Logger.log_verbose("MATargetScan Found %s [%d] Distance: %d", xtName, spawnId, xtSpawn.Distance() or 0)
                     if (xtSpawn.Distance() or 999) <= radius then
                         -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can only get aggro data from xtargs
-                        if Config:GetSetting("MAScanAggro") and mq.TLO.Me.Level() >= 20 then
+                        if Config:GetSetting("MAAggroScan") and mq.TLO.Me.Level() >= 20 then
                             -- Added move check to prevent false positives on the pull from things like bard song aggro. Testing. Algar 3/5/25
                             if xtSpawn.PctAggro() < 100 and not xtSpawn.Moving() and Core.IsTanking() then
                                 -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
@@ -1061,7 +1061,7 @@ function Combat.AETauntCheck(printDebug)
     local tauntme = Set.new({})
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID) and xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= 50 then
+        if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater" or xtarg.ID() == Globals.ForceTargetID) and xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= 50 and Globals.Constants.RGNotMezzedAnims:contains(xtarg.Animation()) then
             if printDebug then
                 Logger.log_verbose("AETauntCheck(): XT(%d) Counting %s(%d) as a hater eligible to AE Taunt.", i, xtarg.CleanName() or "None",
                     xtarg.ID())

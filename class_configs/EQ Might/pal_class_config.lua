@@ -585,7 +585,7 @@ return {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            load_cond = function() return Core.IsTanking() and Config:GetSetting('NewAggroScanBeta') end,
+            load_cond = function() return Core.IsTanking() and Config:GetSetting('TankAggroScan') end,
             targetId = function(self) return Targeting.CheckForAggroTargetID() end,
             cond = function(self, combat_state)
                 if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end

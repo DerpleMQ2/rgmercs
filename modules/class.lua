@@ -278,6 +278,14 @@ Module.CommandHandlers                       = {
             return true
         end,
     },
+    ['stopcast'] = {
+        usage = "/rgl stopcast",
+        about =
+        "Stops the current cast, removes all retry attempts, and prevents any other rotations or clickies from running until after queued actions have processed.\nMost useful in hotkeys before priority abilities, gate, throne, etc.",
+        handler = function(config, value)
+            Globals.StopCast = true
+        end,
+    },
 }
 
 function Module:New()
@@ -957,6 +965,9 @@ function Module:HealById(id)
     local selectedRotation = nil
 
     for idx, rotation in ipairs(self.TempSettings.HealRotationStates or {}) do
+        if Globals.PauseMain or Globals.StopCast then
+            break
+        end
         self.TempSettings.CurrentRotationStateType = 2
         self.TempSettings.CurrentRotationStateId = idx
 
@@ -1007,7 +1018,7 @@ function Module:HealById(id)
     self.TempSettings.CurrentRotationStateType = 0
 
     if selectedRotation == nil then
-        Logger.log_verbose("\ayHealById(%d):: No appropriate heal rotation found. Bailling.", id)
+        Logger.log_verbose("\ayHealById(%d):: No appropriate heal rotation found. Bailing.", id)
         return
     end
 end
@@ -1452,6 +1463,8 @@ function Module:GiveTime()
         return
     end
 
+    Globals.StopCast = false
+
     if self:ProcessQueuedEvents() then
         -- more to do next frame.
         return
@@ -1533,6 +1546,9 @@ function Module:GiveTime()
 
     -- Downtime rotation will just run a full rotation to completion
     for idx, r in ipairs(self.TempSettings.RotationStates) do
+        if Globals.PauseMain or Globals.StopCast then
+            break
+        end
         Logger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
         self.TempSettings.CurrentRotationStateType = 1
         self.TempSettings.CurrentRotationStateId = idx

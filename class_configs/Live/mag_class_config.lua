@@ -1908,12 +1908,10 @@ _ClassConfig    = {
         },
         ['PetHealPct']     = {
             DisplayName = "Pet Heal Spell HP%",
-
             Group = "Abilities",
             Header = "Recovery",
             Category = "Healing Thresholds",
             Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
-
             Default = 80,
             Min = 1,
             Max = 99,
@@ -1999,7 +1997,6 @@ _ClassConfig    = {
             FAQ = "Why do I always have items stuck on the cursor?",
             Answer = "You can adjust the delay before autoinventory by adjusting the item summoning delay settings.\n" ..
                 "Increase the delay if you notice items left on cursors regularly.",
-
         },
         ['AIGroupDelay']   = {
             DisplayName = "Autoinv Delay (Group)",

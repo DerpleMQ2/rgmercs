@@ -294,13 +294,13 @@ Binds.Handlers    = {
             Config:SetSetting('LogFilter', "")
         end,
     },
-    -- ['iamnofun'] = {
-    --     usage = "/rgl iamnofun",
-    --     about = "Let the RGMercs devs know you don't like pranks or funny business.",
-    --     handler = function()
-    --         Config:SetSetting('EnableAFUI', false)
-    --     end,
-    -- },
+    ['iamnofun'] = {
+        usage = "/rgl iamnofun",
+        about = "Let the RGMercs devs know you don't like pranks or funny business.",
+        handler = function()
+            Config:SetSetting('EnableAFUI', false)
+        end,
+    },
     ['togglepause'] = {
         usage = "/rgl togglepause",
         about = "Toggle the pause state of your RGMercs Main Loop.",
@@ -451,7 +451,6 @@ Binds.Handlers    = {
             Logger.log_info("\agOptions Window position will be reset on next open.")
         end,
     },
-
 }
 
 return Binds

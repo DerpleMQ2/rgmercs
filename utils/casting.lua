@@ -25,6 +25,7 @@ Casting.UseGem     = mq.TLO.Me.NumGems()
 --- @param targetType string|nil The TargetType() value from a spell.
 --- @return boolean
 function Casting.IsGroupSpell(targetType)
+    if not targetType then return false end
     return Globals.Constants.GroupTargetTypes:contains(targetType)
 end
 
@@ -1664,6 +1665,10 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, retryCount
             mq.delay("1s", function() return mq.TLO.Me.Casting() ~= nil end)
             Logger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
             Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
+            if Globals.StopCast then
+                Logger.log_verbose("\atUseSpell(): Canceled casting %s due to stopcast command.", spellName)
+                return false
+            end
             mq.doevents()
             Events.DoEvents()
             mq.delay(1)
@@ -1806,6 +1811,10 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
                         Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%d, range %d) is out of spell range(%d)", songName, targetSpawn.ID(),
                             Targeting.GetTargetDistance(), spellRange)
                         break
+                    elseif Globals.StopCast then
+                        Core.DoCmd("/stopsong")
+                        Logger.log_debug("UseSong(): Canceled singing %s because of stopcast command.", songName)
+                        break
                     end
                 end
                 mq.delay(20)
@@ -1858,6 +1867,10 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
         if mq.TLO.Target.ID() ~= oldTargetId and Combat.ValidCombatTarget(oldTargetId) and (oldTargetId == Globals.AutoTargetID or not Config:GetSetting('DoAutoTarget')) then
             Logger.log_debug("UseSong(): Retargeting previous target after song use.")
             Targeting.SetTarget(oldTargetId, true)
+        end
+
+        if Globals.StopCast then
+            return false
         end
 
         return Casting.GetLastCastResultId() == Globals.Constants.CastResults.CAST_SUCCESS
@@ -2011,6 +2024,10 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
             mq.delay("1s", function() return mq.TLO.Me.Casting() ~= nil end)
             Logger.log_verbose("\ayUseAA(): Started to cast: %s - waiting to finish", aaName)
             Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
+            if Globals.StopCast then
+                Logger.log_verbose("\atUseAA(): Canceled casting %s due to stopcast command.", aaName)
+                return false
+            end
             mq.doevents()
             Events.DoEvents()
             mq.delay(1)
@@ -2060,6 +2077,8 @@ function Casting.UseItem(itemName, targetId)
     end
 
     local castTime = item.CastTime()
+    local itemSpell = item.Spell
+    local targetType = itemSpell and itemSpell.TargetType()
 
     local allowCastWindow = Core.MyClassIs("BRD") and (castTime or -1) == 0
     if (mq.TLO.Window("CastingWindow").Open() or me.Casting()) and not allowCastWindow then
@@ -2074,12 +2093,12 @@ function Casting.UseItem(itemName, targetId)
         end
 
         -- validate this wont kill us.
-        if item.Spell() and item.Spell.HasSPA(0)() then
-            for i = 1, item.Spell.NumEffects() do
-                if item.Spell.Attrib(i)() == 0 then
-                    if mq.TLO.Me.CurrentHPs() + item.Spell.Base(i)() <= 0 then
-                        Logger.log_verbose("\awUseItem(\ag%s\aw): \arTried to use item - but it would kill me!: %s! HPs: %d SpaHP: %d", itemName, item.Spell.Name(),
-                            mq.TLO.Me.CurrentHPs(), item.Spell.Base(i)())
+        if itemSpell() and itemSpell.HasSPA(0)() then
+            for i = 1, itemSpell.NumEffects() do
+                if itemSpell.Attrib(i)() == 0 then
+                    if mq.TLO.Me.CurrentHPs() + itemSpell.Base(i)() <= 0 then
+                        Logger.log_verbose("\awUseItem(\ag%s\aw): \arTried to use item - but it would kill me!: %s! HPs: %d SpaHP: %d", itemName, itemSpell.Name(),
+                            mq.TLO.Me.CurrentHPs(), itemSpell.Base(i)())
                         return false
                     end
                 end
@@ -2133,7 +2152,7 @@ function Casting.UseItem(itemName, targetId)
             Events.DoEvents()
             -- in case very fast casts serverside don't make it to the client
             -- this was originally added for 100ms clickies on laz that don't ever show casting (which has now been addressed above), but left as a fallback
-            if not me.ItemReady(itemName) then
+            if not me.ItemReady(itemName)() then
                 Logger.log_verbose("No start cast noted, but item now reports on cooldown, moving on.")
                 break
             end
@@ -2143,6 +2162,10 @@ function Casting.UseItem(itemName, targetId)
 
         -- pick up any additonal server lag.
         while me.Casting() do
+            if Globals.StopCast then
+                Logger.log_verbose("\atUseItem(): Canceled using %s due to stopcast command.", itemName)
+                return false
+            end
             mq.delay(10)
             mq.doevents()
             Events.DoEvents()
@@ -2158,7 +2181,7 @@ function Casting.UseItem(itemName, targetId)
         Targeting.SetTarget(oldTargetId, true)
     end
 
-    return true, Casting.IsGroupSpell(item.Spell.TargetType())
+    return true, Casting.IsGroupSpell(targetType)
 end
 
 --- Prepares the necessary actions for the Casting module.
@@ -2229,6 +2252,11 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
             Comms.PrintGroupMessage(msg)
 
             --Core.DoCmd("/alt act 511")
+            mq.TLO.Me.StopCast()
+            return
+        end
+
+        if Globals.StopCast then
             mq.TLO.Me.StopCast()
             return
         end
