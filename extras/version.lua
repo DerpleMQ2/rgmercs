@@ -1,1 +1,1 @@
-return { version = 2522, }
+return { version = 2523, }
