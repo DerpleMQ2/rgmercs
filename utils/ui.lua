@@ -33,6 +33,9 @@ Ui.TempSettings                    = {
     ProgBarAnimState      = {},
     TogglePulseState      = {},
     SmoothPctId           = ImHashStr("smooth_pct"),
+    ThumbId               = ImHashStr("thumb"),
+    BgId                  = ImHashStr("bg"),
+    LastAnimCleanupTime   = Globals.GetTimeSeconds(),
     TooltipAnimationState = {
         was_hovered = -1,
         tooltip_time = 0.0,
@@ -2056,10 +2059,10 @@ function Ui.RenderFancyToggle(id, label, value, size, on_color, off_color, knob_
 
     -- Animate thumb position
     local target_thumb = value and 1.0 or 0.0
-    local thumb_pos    = ImAnim.TweenFloat(ImHashStr(id), ImHashStr("thumb" .. id), target_thumb, 0.45, ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
+    local thumb_pos    = ImAnim.TweenFloat(ImHashStr(id), Ui.TempSettings.ThumbId, target_thumb, 0.45, ImAnim.EasePreset(IamEaseType.OutBack), IamPolicy.Crossfade, dt)
 
     -- Animate background color
-    local bg_color     = ImAnim.TweenColor(ImHashStr(id), ImHashStr("bg" .. id), value and on_color or off_color, 0.2, ImAnim.EasePreset(IamEaseType.OutCubic), IamPolicy.Crossfade,
+    local bg_color     = ImAnim.TweenColor(ImHashStr(id), Ui.TempSettings.BgId, value and on_color or off_color, 0.2, ImAnim.EasePreset(IamEaseType.OutCubic), IamPolicy.Crossfade,
         IamColorSpace.OKLAB, dt)
 
     -- Draw track
@@ -2321,12 +2324,23 @@ function Ui.RenderAnimatedPercentage(id, barPct, height, width, colLow, colMid, 
 
     if not animState then
         -- First render: initialize with current target
-        animState = { lastTarget = targetPct, smoothPct = targetPct - 1.0, } -- needs to be slighly different so that the tween is initialized
+        animState = { hashId = ImHashStr(id), lastTarget = targetPct, smoothPct = targetPct - 0.01, } -- needs to be slighly different so that the tween is initialized
         Ui.TempSettings.ProgBarAnimState[id] = animState
     end
 
+    animState.lastRenderTime = Globals.GetTimeSeconds()
+
+    if Globals.GetTimeSeconds() - Ui.TempSettings.LastAnimCleanupTime > 10 then
+        for key, state in pairs(Ui.TempSettings.ProgBarAnimState) do
+            if Globals.GetTimeSeconds() - (state.lastRenderTime or 0) > 30 then
+                Ui.TempSettings.ProgBarAnimState[key] = nil
+            end
+        end
+        Ui.TempSettings.LastAnimCleanupTime = Globals.GetTimeSeconds()
+    end
+
     animState.smoothPct = ImAnim.TweenFloat(
-        ImHashStr(id),
+        animState.hashId,
         Ui.TempSettings.SmoothPctId,
         targetPct,
         .5,

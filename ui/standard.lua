@@ -163,7 +163,7 @@ function StandardUI:RenderTarget()
         hpHighOverride = ImVec4(Ui.GetConColorBySpawn(assistSpawn))
     end
 
-    Ui.RenderFancyHPBar("##AutoTargetHPBar", pctHPs, 25, burning, 1.0, hpLowOverride, hpMidOverride, hpHighOverride)
+    Ui.RenderFancyHPBar("##AutoTargetHPBar" .. tostring(assistSpawn.ID()), pctHPs, 25, burning, 1.0, hpLowOverride, hpMidOverride, hpHighOverride)
     self:RenderForceBurnButton()
 end
 
