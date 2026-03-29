@@ -2470,8 +2470,7 @@ Config.DefaultConfig                                     = {
         Default = false,
     },
     ['EnableAFUI']                       = {
-        DisplayName = "Enable Very Special UI",
-        Type = "Custom",
+        DisplayName = "Enable Very Fun UI",
         Group = "General",
         Header = "Interface",
         Category = "Interface",
