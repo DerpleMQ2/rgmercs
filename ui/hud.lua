@@ -133,6 +133,7 @@ function HudUI:RenderToggleHud()
         end
 
         if enableAFUI then
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 25)
             ImGui.Separator()
             for k, displayName in pairs(self.Settings) do
                 ImGui.SetCursorPosX(toggleXPos)
