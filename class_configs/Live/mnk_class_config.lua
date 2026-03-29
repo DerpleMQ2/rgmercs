@@ -400,18 +400,30 @@ local _ClassConfig = {
             {
                 name = "Heel",
                 type = "Disc",
+                cond = function(self, discSpell)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                end,
             },
             {
                 name = "Speed",
                 type = "Disc",
+                cond = function(self, discSpell)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                end,
             },
             {
                 name = "FistDisc",
                 type = "Disc",
+                cond = function(self, discSpell)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                end,
             },
             {
                 name = "Palm",
                 type = "Disc",
+                cond = function(self, discSpell)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                end,
             },
             {
                 name = "Spire of the Sensei",

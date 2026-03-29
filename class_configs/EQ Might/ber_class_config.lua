@@ -43,7 +43,7 @@ return {
             "Vengeful Flurry Discipline",
         },
         ['RageDisc'] = {
-            "Blind Rage Discipline",
+            --"Blind Rage Discipline",
             "Cleaving Rage Discipline",
         },
         ['AngerDisc'] = {
@@ -200,29 +200,47 @@ return {
             },
         },
         ['Burn(Active Discs)'] = {
-            { -- Goes to disc window on laz
-                name = "Savage Spirit",
-                type = "AA",
-            },
             {
-                name = "AngerDisc",
+                name = "FlurryDisc",
                 type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.NoDiscActive()
+                end,
             },
             {
                 name = "RageDisc",
                 type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.NoDiscActive()
+                end,
             },
-            {
-                name = "FlurryDisc",
-                type = "Disc",
-            },
-            { --goes to disc window on laz
+            { -- goes to disc window
                 name_func = function(self) return Casting.GetFirstAA({ "Cascading Rage", "Untamed Rage", }) end,
                 type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.NoDiscActive()
+                end,
+            },
+            { -- goes to disc window
+                name = "Savage Spirit",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.NoDiscActive()
+                end,
+            },
+            {
+                name = "AngerDisc",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.NoDiscActive()
+                end,
             },
             {
                 name = "DmgModProc",
                 type = "Disc",
+                cond = function(self, discSpell, target)
+                    return Casting.NoDiscActive()
+                end,
             },
         },
         ['Burn'] = {
@@ -250,15 +268,15 @@ return {
                 end,
             },
             {
-                name = "Blinding Fury",
-                type = "AA",
-            },
-            {
                 name = "Blood Pact",
                 type = "AA",
             },
             {
                 name = "Vehement Rage",
+                type = "AA",
+            },
+            {
+                name = "Blinding Fury",
                 type = "AA",
             },
             {
