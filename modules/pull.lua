@@ -3957,8 +3957,8 @@ function Module:FindTarget()
 
     if #pullTargets > 0 then
         local pullTarget = pullTargets[1]
-        local pullID = pullTarget.ID()
-        local meta = metaData[pullID]
+        local pullID     = pullTarget.ID()
+        local meta       = metaData[pullID]
         Logger.log_info("\atPULL::FindPullTarget \agPulling %s [%d] with Distance: %d", pullTarget.CleanName(), pullID, meta and meta.distance or -1)
         return pullID
     end
@@ -4467,16 +4467,16 @@ function Module:OpenAttempt(ctx, pullID, source)
     Movement:DoNav(false, "id %d distance=%d lineofsight=%s log=off", pullID, self:GetPullAbilityRange(), requireLOS)
 
     self.TempSettings.Attempt = {
-        targetId = pullID,
-        source = source,
-        policy = ctx.policy,
-        ability = pullAbility,
-        requireLOS = requireLOS,
+        targetId       = pullID,
+        source         = source,
+        policy         = ctx.policy,
+        ability        = pullAbility,
+        requireLOS     = requireLOS,
         startingXTargs = startingXTargs,
-        returnLoc = { y = start_y, x = start_x, z = start_z, },
-        startedAt = ctx.nowSec,
-        navIssuedAt = ctx.now,
-        moveDeadline = ctx.now + Config:GetSetting('MaxMoveTime') * 1000,
+        returnLoc      = { y = start_y, x = start_x, z = start_z, },
+        startedAt      = ctx.nowSec,
+        navIssuedAt    = ctx.now,
+        moveDeadline   = ctx.now + Config:GetSetting('MaxMoveTime') * 1000,
     }
 end
 
@@ -4844,16 +4844,18 @@ function Module:GiveTime()
             Config:SetSetting('DoPull', true)
         end
     end
-
-    self:PullTick()
-
     -- Hold the frame while a pull attempt is in flight so no other module acts on a half-finished pull.
     local holdZone = mq.TLO.Zone.ID()
-    while self:IsAttemptActive() and not mq.TLO.Me.Hovering() and mq.TLO.Zone.ID() == holdZone do
+    while true do
+        self:PullTick()
+
+        if not self:IsAttemptActive() or mq.TLO.Me.Hovering() or mq.TLO.Zone.ID() ~= holdZone then
+            break
+        end
+
         mq.doevents()
         Events.DoEvents()
         mq.delay(10)
-        self:PullTick()
     end
 end
 
