@@ -353,10 +353,9 @@ local _ClassConfig = {
         },
     },
     ['Mez']           = {
-        { type = "AA",    name = "Stasis",          cond = function() return Globals.AutoTargetIsNamed end, },
-        { type = "Spell", name = "MezSpell", },
-        { type = "Spell", name = "MezAESpell", },
-        { type = "AA",    name = "Beam of Slumber", cond = function() return Config:GetSetting('DoAAMez') end, },
+        { type = "Spell", name = "MezSpell",        cond = function() return Config:GetSetting('DoSTMez') end, },
+        { type = "Spell", name = "MezAESpell",      cond = function() return Config:GetSetting('DoAEMez') end, },
+        { type = "AA",    name = "Beam of Slumber", cond = function() return Config:GetSetting('DoAEMez') and Config:GetSetting('DoAAMez') end, },
     },
     ['Charm']         = {
         ['Abilities'] = {
@@ -1006,12 +1005,6 @@ local _ClassConfig = {
             --     type = "AA",
             -- },
             {
-                name = "Nightmare Stasis",
-                type = "AA",
-                IgnoreImmuneCheck = true,
-                cond = function(self, aaName, target) return Globals.AutoTargetIsNamed end,
-            },
-            {
                 name = "Tarnished Skeleton Key",
                 type = "Item",
             },
@@ -1171,6 +1164,37 @@ local _ClassConfig = {
             Max = 1,
             FAQ = "What are the different Modes about?",
             Answer = "The Default Mode is designed for all levels on Project Lazarus.",
+        },
+
+        --Mez
+        ['DoSTMez']            = {
+            DisplayName = "ST Mez Spells",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 3,
+            Default = true,
+            Tooltip = "Enable the memorization and use of your single-target mez spells.",
+            RequiresLoadoutChange = true,
+        },
+        ['DoAEMez']            = {
+            DisplayName = "AE Mez Spells",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 4,
+            Default = true,
+            Tooltip = "Enable the memorization and use of your AE mez spells.",
+            RequiresLoadoutChange = true,
+        },
+        ['DoAAMez']            = {
+            DisplayName = "Use Mez AA",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 5,
+            Default = true,
+            Tooltip = "Use Beam of Slumber to mez.",
         },
 
         --Buffs

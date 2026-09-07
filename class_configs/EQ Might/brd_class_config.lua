@@ -431,8 +431,8 @@ local _ClassConfig = {
         end,
     },
     ['Mez']               = {
-        { type = "Song", name = "MezSong", },
-        { type = "Song", name = "MezAESong", },
+        { type = "Song", name = "MezSong",   cond = function() return Config:GetSetting('DoSTMez') end, },
+        { type = "Song", name = "MezAESong", cond = function() return Config:GetSetting('DoAEMez') end, },
     },
     ['Charm']             = {
         ['Abilities'] = {
@@ -1020,6 +1020,27 @@ local _ClassConfig = {
             Max = 1,
             FAQ = "What do the different combat modes do?",
             Answer = "Currently Bards only have one general mode. More modes may be added in the future.",
+        },
+        -- Mez
+        ['DoSTMez']         = {
+            DisplayName = "ST Mez Song",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 3,
+            Default = true,
+            Tooltip = "Enable the memorization and use of your single-target mez song.",
+            RequiresLoadoutChange = true,
+        },
+        ['DoAEMez']         = {
+            DisplayName = "AE Mez Song",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 4,
+            Default = true,
+            Tooltip = "Enable the memorization and use of your AE mez song.",
+            RequiresLoadoutChange = true,
         },
         -- Buffs
         ['UseRunBuff']      = {

@@ -384,8 +384,8 @@ local _ClassConfig = {
         end,
     },
     ['Mez']               = {
-        { type = "AA",   name = "Dirge of the Sleepwalker", cond = function() return Config:GetSetting('DoAAMez') end, },
-        { type = "Song", name = "MezSong", },
+        { type = "AA",   name = "Dirge of the Sleepwalker", cond = function() return Config:GetSetting('DoSTMez') and Config:GetSetting('DoAAMez') end, },
+        { type = "Song", name = "MezSong",                  cond = function() return Config:GetSetting('DoSTMez') end, },
     },
     ['RotationOrder']     = {
         {
@@ -948,6 +948,26 @@ local _ClassConfig = {
             Max = 1,
             FAQ = "What do the different combat modes do?",
             Answer = "Currently Bards only have one general mode. More modes may be added in the future.",
+        },
+        -- Mez
+        ['DoSTMez']         = {
+            DisplayName = "ST Mez Song",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 3,
+            Default = true,
+            Tooltip = "Enable the memorization and use of your single-target mez song.",
+            RequiresLoadoutChange = true,
+        },
+        ['DoAAMez']         = {
+            DisplayName = "Use Mez AA",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 4,
+            Default = true,
+            Tooltip = "Use Dirge of the Sleepwalker to mez.",
         },
         -- Buffs
         ['UseRunBuff']      = {
