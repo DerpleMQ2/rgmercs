@@ -22,10 +22,12 @@ local _ClassConfig = {
         'DPS',
     },
     ['ModeChecks']      = {
-        IsCuring = function() return Config:GetSetting('DoCures') end,
+        IsCuring  = function() return Config:GetSetting('DoCures') end,
         -- necro can AA Rez
-        IsRezing = function() return Casting.CanUseAA("Convergence") and (Config:GetSetting('DoBattleRez') or not Targeting.HasXTHaters()) end,
-        CanCharm = function() return true end,
+        IsRezing  = function() return Casting.CanUseAA("Convergence") and (Config:GetSetting('DoBattleRez') or not Targeting.HasXTHaters()) end,
+        CanCharm  = function() return true end,
+        CanMez    = function() return true end,
+        IsMezzing = function() return Config:GetSetting('MezOn') end,
     },
     ['Rez']             = {
         ['Combat'] = {
@@ -171,6 +173,39 @@ local _ClassConfig = {
         ['FDSpell'] = {
             -- Fd Spell
             "Death Peace", -- Level 60
+        },
+        ['MezSpell'] = {
+            -- ST Mez
+            "Screaming Terror XIII", -- Level 126 (up to 128)
+            "Horrifying Shriek",     -- Level 121 (up to 123)
+            "Lunatic Shriek",        -- Level 118
+            "Nightmarish Shriek",    -- Level 113
+            "Hair-Raising Shriek",   -- Level 108
+            "Dreadful Shriek",       -- Level 103
+            "Foreboding",            -- Level 98
+            "Dread",                 -- Level 93
+            "Dismay",                -- Level 88
+            "Bone-Rattling Shriek",  -- Level 83
+            "Spine-Chilling Shriek", -- Level 78
+            "Bloodcurdling Shriek",  -- Level 73
+            "Screaming Terror",      -- Level 22 (up to 55)
+        },
+        ['MezUndeadSpell'] = {
+            -- ST Mez, undead only
+            "Riftbone Manacles XIV", -- Level 128 (up to 130)
+            "Reminiscence Manacles", -- Level 123 (up to 125)
+            "Penumbra Manacles",     -- Level 118 (up to 120)
+            "Shadowbone Manacles",   -- Level 113 (up to 115)
+            "Helot Manacles",        -- Level 108 (up to 110)
+            "Darkwater Manacles",    -- Level 103 (up to 105)
+            "Deathclutch Manacles",  -- Level 98 (up to 100)
+            "Shadeslither Manacles", -- Level 93 (up to 95)
+            "Soulbound Manacles",    -- Level 88 (up to 90)
+            "Voidwhisper Manacles",  -- Level 83 (up to 85)
+            "Riftbone Manacles",     -- Level 78 (up to 80)
+            "Rimebone Shackles",     -- Level 73 (up to 75)
+            "Dark Hold",             -- Level 69 (up to 70)
+            "Death's Silence",       -- Level 63 (up to 65)
         },
         ['CharmSpell'] = {
             -- Charm Spells >= 20
@@ -829,6 +864,10 @@ local _ClassConfig = {
             "Flesh to Venom",  -- Level 109
             "Flesh to Poison", -- Level 99
         },
+    },
+    ['Mez']             = {
+        { type = "Spell", name = "MezUndeadSpell", cond = function() return Config:GetSetting('DoSTMez') and Config:GetSetting('DoUndeadMez') end, },
+        { type = "Spell", name = "MezSpell",       cond = function() return Config:GetSetting('DoSTMez') end, },
     },
     ['Charm']           = {
         ['Abilities'] = {
@@ -1553,34 +1592,36 @@ local _ClassConfig = {
             name = "Default",
             -- cond = function(self) return true end, --Kept here for illustration, this line could be removed in this instance since we aren't using conditions.
             spells = {
-                { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
-                { name = "PoisonNuke1",  cond = function(self) return not Core.GetResolvedActionMapItem('PoisonNuke2') end, },
+                { name = "PetHealSpell",   cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
+                { name = "PoisonNuke1",    cond = function(self) return not Core.GetResolvedActionMapItem('PoisonNuke2') end, },
                 { name = "PoisonNuke2", },
                 { name = "FireNuke", },
-                { name = "Lifetap",      cond = function(self) return Config:GetSetting('DoLifetap') end, },
-                { name = "CharmSpell",   cond = function(self, spell) return Config:GetSetting('CharmOn') and Core.IsSelectedCharmSpell(spell) end, },
-                { name = "SnareDot",     cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Enchroaching Darkness") end, },
-                { name = "ScentDebuff",  cond = function(self) return Config:GetSetting('DoScentDebuff') and not Casting.CanUseAA("Scent of Thule") end, },
-                { name = "LichSpell",    cond = function(self) return not Config:GetSetting('DoUnity') end, },
+                { name = "Lifetap",        cond = function(self) return Config:GetSetting('DoLifetap') end, },
+                { name = "MezSpell",       cond = function(self) return Config:GetSetting('DoSTMez') end, },
+                { name = "MezUndeadSpell", cond = function(self) return Config:GetSetting('DoSTMez') and Config:GetSetting('DoUndeadMez') end, },
+                { name = "CharmSpell",     cond = function(self, spell) return Config:GetSetting('CharmOn') and Core.IsSelectedCharmSpell(spell) end, },
+                { name = "SnareDot",       cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Enchroaching Darkness") end, },
+                { name = "ScentDebuff",    cond = function(self) return Config:GetSetting('DoScentDebuff') and not Casting.CanUseAA("Scent of Thule") end, },
+                { name = "LichSpell",      cond = function(self) return not Config:GetSetting('DoUnity') end, },
                 { name = "SwarmPet", },
-                { name = "DurationTap",  cond = function(self) return Config:GetSetting('DoDurationTap') end, },
-                { name = "DreadDot",     cond = function(self) return Config:GetSetting('DoDreadDot') > 1 end, },
-                { name = "VenomDot",     cond = function(self) return Config:GetSetting('DoVenomDot') > 1 end, },
-                { name = "HorrorDot",    cond = function(self) return Config:GetSetting('DoHorrorDot') > 1 end, },
-                { name = "ComboDot",     cond = function(self) return Config:GetSetting('DoComboDot') end, },
-                { name = "GroupLeech",   cond = function(self) return Config:GetSetting('DoGroupLeech') end, },
-                { name = "DichoDot",     cond = function(self) return Config:GetSetting('DoDichoDot') end, },
-                { name = "SearingDot",   cond = function(self) return Config:GetSetting('DoSearingDot') end, },
-                { name = "MoriDot",      cond = function(self) return Config:GetSetting('DoMoriDot') end, },
-                { name = "WoundDot",     cond = function(self) return Config:GetSetting('DoWoundDot') end, },
-                { name = "DecayDot",     cond = function(self) return Config:GetSetting('DoDecayDot') end, },
-                { name = "GripDot",      cond = function(self) return Config:GetSetting('DoGripDot') end, },
-                { name = "HazeDot",      cond = function(self) return Config:GetSetting('DoHazeDot') end, },
-                { name = "DreadDot2",    cond = function(self) return Config:GetSetting('DoDreadDot') > 2 end, },
-                { name = "VenomDot2",    cond = function(self) return Config:GetSetting('DoVenomDot') > 2 end, },
-                { name = "HorrorDot2",   cond = function(self) return Config:GetSetting('DoHorrorDot') > 2 end, },
+                { name = "DurationTap",    cond = function(self) return Config:GetSetting('DoDurationTap') end, },
+                { name = "DreadDot",       cond = function(self) return Config:GetSetting('DoDreadDot') > 1 end, },
+                { name = "VenomDot",       cond = function(self) return Config:GetSetting('DoVenomDot') > 1 end, },
+                { name = "HorrorDot",      cond = function(self) return Config:GetSetting('DoHorrorDot') > 1 end, },
+                { name = "ComboDot",       cond = function(self) return Config:GetSetting('DoComboDot') end, },
+                { name = "GroupLeech",     cond = function(self) return Config:GetSetting('DoGroupLeech') end, },
+                { name = "DichoDot",       cond = function(self) return Config:GetSetting('DoDichoDot') end, },
+                { name = "SearingDot",     cond = function(self) return Config:GetSetting('DoSearingDot') end, },
+                { name = "MoriDot",        cond = function(self) return Config:GetSetting('DoMoriDot') end, },
+                { name = "WoundDot",       cond = function(self) return Config:GetSetting('DoWoundDot') end, },
+                { name = "DecayDot",       cond = function(self) return Config:GetSetting('DoDecayDot') end, },
+                { name = "GripDot",        cond = function(self) return Config:GetSetting('DoGripDot') end, },
+                { name = "HazeDot",        cond = function(self) return Config:GetSetting('DoHazeDot') end, },
+                { name = "DreadDot2",      cond = function(self) return Config:GetSetting('DoDreadDot') > 2 end, },
+                { name = "VenomDot2",      cond = function(self) return Config:GetSetting('DoVenomDot') > 2 end, },
+                { name = "HorrorDot2",     cond = function(self) return Config:GetSetting('DoHorrorDot') > 2 end, },
                 { name = "ManaDrain", },
-                { name = "FleshBuff",    cond = function(self) return not Config:GetSetting('DoUnity') or not Casting.CanUseAA("Mortifier's Unity") end, },
+                { name = "FleshBuff",      cond = function(self) return not Config:GetSetting('DoUnity') or not Casting.CanUseAA("Mortifier's Unity") end, },
                 { name = "BestowBuff", },
                 { name = "PetBuff", },
             },
@@ -1598,6 +1639,26 @@ local _ClassConfig = {
             Max = 1,
             FAQ = "What do the different Modes Do?",
             Answer = "Currently Necros only have one mode, which is DPS. This mode will focus on DPS and some utility.",
+        },
+        ['DoSTMez']           = {
+            DisplayName = "ST Mez Spells",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 3,
+            Default = false,
+            Tooltip = "Enable the memorization and use of your mez spells.",
+            RequiresLoadoutChange = true,
+        },
+        ['DoUndeadMez']       = {
+            DisplayName = "Use Undead Mez Line",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 4,
+            Default = false,
+            Tooltip = "Also use your undead-only mez line, which holds higher level targets.",
+            RequiresLoadoutChange = true,
         },
         ['PetType']           = {
             DisplayName = "Pet Class",

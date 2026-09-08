@@ -860,9 +860,9 @@ local _ClassConfig = {
         },
     },
     ['Mez']               = {
-        { type = "AA",   name = "Dirge of the Sleepwalker", cond = function() return Config:GetSetting('DoAAMez') end, },
-        { type = "Song", name = "MezSong", },
-        { type = "Song", name = "MezAESong", },
+        { type = "AA",   name = "Dirge of the Sleepwalker", cond = function() return Config:GetSetting('DoSTMez') and Config:GetSetting('DoAAMez') end, },
+        { type = "Song", name = "MezSong",                  cond = function() return Config:GetSetting('DoSTMez') end, },
+        { type = "Song", name = "MezAESong",                cond = function() return Config:GetSetting('DoAEMez') end, },
     },
     ['Charm']             = {
         ['Abilities'] = {
@@ -1560,6 +1560,35 @@ local _ClassConfig = {
         },
 
         --Abilities
+        ['DoSTMez']         = {
+            DisplayName = "ST Mez Song",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 3,
+            Default = true,
+            Tooltip = "Enable the memorization and use of your single-target mez song.",
+            RequiresLoadoutChange = true,
+        },
+        ['DoAEMez']         = {
+            DisplayName = "AE Mez Song",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 4,
+            Default = true,
+            Tooltip = "Enable the memorization and use of your AE mez song.",
+            RequiresLoadoutChange = true,
+        },
+        ['DoAAMez']         = {
+            DisplayName = "Use Mez AA",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 5,
+            Default = true,
+            Tooltip = "Use Dirge of the Sleepwalker to mez.",
+        },
         ['SelfManaPct']     = {
             DisplayName = "Self Min Mana %",
             Group = "Abilities",

@@ -119,6 +119,12 @@ Config.DefaultConfig                                     = {
         Type = "Custom",
         Default = {},
     },
+    -- DEPRECATED 9/26 - sunset 12/6/26. DELETE with Config:DiscardStaleMezOn.
+    ['StaleMezOnDiscarded']        = {
+        DisplayName = "Stale MezOn Discarded",
+        Type = "Custom",
+        Default = false,
+    },
     ['ShowAdvancedOpts']           = {
         DisplayName = "Show Advanced Options",
         Type = "Custom",
@@ -3066,6 +3072,19 @@ function Config.GetConfigFileName(moduleName, returnExisting)
     return latest
 end
 
+-- DEPRECATED 9/26 - sunset 12/6/26. MezOn is stored true for every character from when it defaulted on for all
+-- classes; discard it where the class never had a mez table so the class-aware default applies. The marker is
+-- what stops it deleting the value again after a necro deliberately enables mezzing. DELETE at sunset.
+function Config:DiscardStaleMezOn()
+    if Config:GetSetting('StaleMezOnDiscarded') then return end
+
+    if Globals.CurLoadedClass ~= "BRD" and Globals.CurLoadedClass ~= "ENC" then
+        self.Db:deleteValue(Globals.CurServer, Globals.CurLoadedChar, Globals.CurLoadedClass, "Mez", 'MezOn')
+    end
+
+    Config:SetSetting('StaleMezOnDiscarded', true)
+end
+
 function Config:LoadSettings()
     -- handle update to db before anything else.
     if not self:CharacterExistsInDb() then
@@ -3089,6 +3108,8 @@ function Config:LoadSettings()
     local settings, firstSaveRequired = Config:GetAllModuleSettingsFromDb(coreModuleName, Config.DefaultConfig)
 
     Config:RegisterModuleSettings(coreModuleName, settings, Config.DefaultConfig, Config.FAQ, firstSaveRequired)
+
+    Config:DiscardStaleMezOn()
 
     -- setup our script path for later usage since getting it kind of sucks, but only on the first run (personas)
     if Globals.ScriptDir == "" then
