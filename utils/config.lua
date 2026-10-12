@@ -928,7 +928,7 @@ Config.DefaultConfig                                     = {
         Tooltip = "Engage the combat target when it is within this distance.",
         Default = 100,
         Min = 0,
-        Max = 300,
+        Max = 400,
     },
     ['DoMelee']                    = {
         DisplayName = "Enable Melee Combat",
