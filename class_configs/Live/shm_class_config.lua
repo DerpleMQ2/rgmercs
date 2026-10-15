@@ -440,8 +440,6 @@ local _ClassConfig = {
             "Ancestral Intervention",    -- Level 78
         },
         ['GroupRenewalHoT'] = {
-            -- Prior to 70 Breath of Trushar, single HoTs will be used including the
-            --- the Torpor/Stoicism line. LVL 44 is the lowest level.
             "Ghost of Renewal XIII", -- Level 128
             "Reverie of Renewal",    -- Level 125
             "Spirit of Renewal",     -- Level 120
@@ -455,11 +453,24 @@ local _ClassConfig = {
             "Shade of Renewal",      -- Level 80
             "Specter of Renewal",    -- Level 75
             "Ghost of Renewal",      -- Level 70
-            "Spiritual Serenity",    -- Level 70
-            "Breath of Trushar",     -- Level 65
-            "Quiescence",            -- Level 65
-            "Torpor",                -- Level 60
-            "Stoicism",              -- Level 44
+        },
+        ['SingleHot'] = {
+            "Halcyon Gale",       -- Level 123
+            "Halcyon Squall",     -- Level 118
+            "Halcyon Wind",       -- Level 113
+            "Halcyon Billow",     -- Level 108
+            "Halcyon Bluster",    -- Level 103
+            "Halcyon Shear",      -- Level 98
+            "Halcyon Breath",     -- Level 93
+            "Halcyon Gust",       -- Level 88
+            "Halcyon Whisper",    -- Level 83
+            "Halcyon Zephyr",     -- Level 78
+            "Halcyon Breeze",     -- Level 73
+            "Spiritual Serenity", -- Level 70
+            "Breath of Trushar",  -- Level 65
+            "Quiescence",         -- Level 65
+            "Torpor",             -- Level 60
+            "Stoicism",           -- Level 44
         },
         ['CanniSpell'] = {
             -- Convert Health to Mana - Level  23+
@@ -769,6 +780,7 @@ local _ClassConfig = {
             "Talisman of the Stalwart",      -- Level 79
             "Talisman of the Stoic One",     -- Level 74
             "Talisman of Perseverance",      -- Level 69
+            "Blessing of Replenishment",     -- Level 63
             "Regrowth of Dar Khura",         -- Level 56
         },
         ['SingleRegenBuff'] = {
@@ -782,6 +794,16 @@ local _ClassConfig = {
         },
     },
     ['Helpers']           = {
+        --- Returns true if single HoTs should be memorized and used, per Use HoTs and the pre-Synergy HoT choice.
+        ShouldUseSingleHot = function()
+            if not Config:GetSetting('DoHealOverTime') or Casting.CanUseAA("Luminary's Synergy") then return false end
+            return not Core.GetResolvedActionMapItem('GroupRenewalHoT') or Config:GetSetting('PreSynergyHots') ~= 3
+        end,
+        --- Returns true if the group HoT should be memorized and used as a group heal, per Use HoTs and the pre-Synergy HoT choice.
+        ShouldUseGroupHot = function()
+            if not Config:GetSetting('DoHealOverTime') then return false end
+            return Casting.CanUseAA("Luminary's Synergy") or Config:GetSetting('PreSynergyHots') ~= 2
+        end,
     },
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
     -- of just slamming through the base ordered list.
@@ -832,17 +854,18 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "RecklessHeal1",
+                name = "SingleHot",
                 type = "Spell",
+                load_cond = function(self) return self.Helpers.ShouldUseSingleHot() end,
+                cond = function(self, spell, target)
+                    if (spell.TargetType() or ""):lower() == "single in group" and not Targeting.GroupedWithTarget(target) then return false end
+                    if not Casting.CastReady(spell) then return false end
+                    return not Targeting.BigHealsNeeded(target) and Casting.GroupBuffCheck(spell, target)
+                end,
             },
             {
-                name = "GroupRenewalHoT",
+                name = "RecklessHeal1",
                 type = "Spell",
-                load_cond = function(self) return Config:GetSetting('DoHealOverTime') end,
-                cond = function(self, spell, target)
-                    if not Targeting.GroupedWithTarget(target) or not Casting.CastReady(spell) then return false end --avoid constant group buff checks
-                    return Casting.GroupBuffCheck(spell, target)
-                end,
             },
         },
         ['GroupHealPoint'] = {
@@ -884,7 +907,7 @@ local _ClassConfig = {
             {
                 name = "GroupRenewalHoT",
                 type = "Spell",
-                load_cond = function(self) return Config:GetSetting('DoHealOverTime') end,
+                load_cond = function(self) return self.Helpers.ShouldUseGroupHot() end,
                 cond = function(self, spell, target)
                     if not Targeting.GroupedWithTarget(target) or not Casting.CastReady(spell) then return false end --avoid constant group buff checks
                     return Casting.GroupBuffCheck(spell, target)
@@ -934,6 +957,16 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Targeting.TargetIsTanking(target)
+                end,
+            },
+            {
+                name = "SingleHot",
+                type = "Spell",
+                load_cond = function(self) return self.Helpers.ShouldUseSingleHot() end,
+                cond = function(self, spell, target)
+                    if (spell.TargetType() or ""):lower() == "single in group" and not Targeting.GroupedWithTarget(target) then return false end
+                    if not Casting.CastReady(spell) then return false end
+                    return not Targeting.BigHealsNeeded(target) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1055,6 +1088,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'TankHot',
+            state = 1,
+            steps = 1,
+            load_cond = function(self) return self.Helpers.ShouldUseSingleHot() and Core.GetResolvedActionMapItem('SingleHot') end,
+            targetId = function(self) return Casting.GetBuffableTankingIDs() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and (not Config:GetSetting('TankHotNamedOnly') or Targeting.HasXTNamed()) and Core.CombatActionsCheck()
+            end,
+        },
+        {
             name = 'ProcBuff',
             state = 1,
             steps = 1,
@@ -1105,6 +1148,17 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target) then return false end
                     if not Casting.CastReady(spell) then return false end --avoid constant group buff checks
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+        },
+        ['TankHot'] = {
+            {
+                name = "SingleHot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if (spell.TargetType() or ""):lower() == "single in group" and not Targeting.GroupedWithTarget(target) then return false end
+                    if not Casting.CastReady(spell) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1635,10 +1689,11 @@ local _ClassConfig = {
                 { name = "LowLvlAtkBuff",     cond = function(self) return mq.TLO.Me.Level() < 86 end, }, -- 60-85
 
                 -- Utility
-                { name = "CanniSpell",        cond = function(self) return Config:GetSetting('DoSpellCanni') end, },   -- 23 - ???
-                { name = "GroupRenewalHoT",   cond = function(self) return Config:GetSetting('DoHealOverTime') end, }, -- 44-125 Heal
+                { name = "CanniSpell",        cond = function(self) return Config:GetSetting('DoSpellCanni') end, }, -- 23 - ???
+                { name = "SingleHot",         cond = function(self) return self.Helpers.ShouldUseSingleHot() end, },
+                { name = "GroupRenewalHoT",   cond = function(self) return self.Helpers.ShouldUseGroupHot() end, },  -- 70-128 Heal
                 { name = "SingleRegenBuff",   cond = function(self) return Config:GetSetting('DoRegenBuff') and not Core.GetResolvedActionMapItem('GroupRegenBuff') end, },
-                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },       -- 81-125
+                { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },     -- 81-125
                 { name = "CureSpell",         cond = function(self) return Config:GetSetting('MemCureSpell') end, },
 
                 -- DPS
@@ -1698,7 +1753,8 @@ local _ClassConfig = {
 
                 -- Utility, Filler
                 { name = "CanniSpell",        cond = function(self) return Config:GetSetting('DoSpellCanni') end, },   -- 23 - ???
-                { name = "GroupRenewalHoT",   cond = function(self) return Config:GetSetting('DoHealOverTime') end, }, -- 44-125 Heal
+                { name = "SingleHot",         cond = function(self) return self.Helpers.ShouldUseSingleHot() end, },
+                { name = "GroupRenewalHoT",   cond = function(self) return self.Helpers.ShouldUseGroupHot() end, },    -- 70-128 Heal
                 { name = "SingleRegenBuff",   cond = function(self) return Config:GetSetting('DoRegenBuff') and not Core.GetResolvedActionMapItem('GroupRegenBuff') end, },
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },       -- 81-125
                 { name = "TwinHealNuke",      cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, }, -- 85-125
@@ -1859,6 +1915,30 @@ local _ClassConfig = {
             ConfigType = "Advanced",
             FAQ = "Why does my Shaman randomly use HoTs in downtime?",
             Answer = "Maintaining HoTs prevents emergencies and hopefully allows for better DPS. It also grants Synergy Procs at high level.",
+        },
+        ['PreSynergyHots']    = {
+            DisplayName = "HoTs Before Synergy:",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 102,
+            Tooltip = "Choose which HoTs to use once you have a group HoT but not yet Luminary's Synergy.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Both', 'Single only', 'Group only', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+        },
+        ['TankHotNamedOnly']  = {
+            DisplayName = "Tank HoT Named Only",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "General Healing",
+            Index = 103,
+            Tooltip = "Before Luminary's Synergy, only keep a single HoT on your tanks in combat when a named is on your XTarget.",
+            Default = true,
         },
         ['MemCureSpell']      = {
             DisplayName = "Mem Cure Spell",
