@@ -472,6 +472,11 @@ local _ClassConfig = {
             local useChest = mq.TLO.Me.Level() >= 69 and mq.TLO.FindItem("=Ultrafabled Rune Etched Chestplate")
             return useChest and "Chestplate" or "Spell"
         end,
+        UseSnareHot = function()
+            if not Config:GetSetting('DoSnareHot') then return false end
+            local snareHot = Core.GetResolvedActionMapItem('SnareHot')
+            return (snareHot and snareHot.Level() or 0) >= 69 or not Config:GetSetting('DoSingleHot') or not Core.GetResolvedActionMapItem('SingleHot')
+        end,
     },
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
     -- of just slamming through the base ordered list.
@@ -535,7 +540,7 @@ local _ClassConfig = {
             {
                 name = "SnareHot",
                 type = "Spell",
-                load_cond = function(self) return Config:GetSetting('DoSnareHot') end,
+                load_cond = function(self) return self.Helpers.UseSnareHot() end,
                 cond = function(self, spell, target)
                     if Combat.GetCachedCombatState() ~= "Combat" then return false end
                     return Casting.GroupBuffCheck(spell, target)
@@ -720,7 +725,7 @@ local _ClassConfig = {
             name = 'SnareHotBuff',
             state = 1,
             steps = 1,
-            load_cond = function(self) return Config:GetSetting('DoSnareHot') and Core.GetResolvedActionMapItem('SnareHot') end,
+            load_cond = function(self) return self.Helpers.UseSnareHot() and Core.GetResolvedActionMapItem('SnareHot') end,
             targetId = function(self) return Casting.GetBuffableTankingIDs() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and (not Config:GetSetting('SnareHotNamedOnly') or Targeting.HasXTNamed()) and Core.CombatActionsCheck()
@@ -1331,7 +1336,7 @@ local _ClassConfig = {
                 { name = "HealSpell", },
                 { name = "GroupRenewalHoT", },
                 { name = "SingleHot",       cond = function(self) return Config:GetSetting('DoSingleHot') end, },
-                { name = "SnareHot",        cond = function(self) return Config:GetSetting('DoSnareHot') end, },
+                { name = "SnareHot",        cond = function(self) return self.Helpers.UseSnareHot() end, },
                 { name = "CurePoison",      cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
                 { name = "CureDisease",     cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",       cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
@@ -1378,7 +1383,7 @@ local _ClassConfig = {
                 { name = "UltorDot",        cond = function(self) return Config:GetSetting('DoUltorDot') end, },
                 { name = "PBAEPoison",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
                 { name = "SingleHot",       cond = function(self) return Config:GetSetting('DoSingleHot') end, },
-                { name = "SnareHot",        cond = function(self) return Config:GetSetting('DoSnareHot') end, },
+                { name = "SnareHot",        cond = function(self) return self.Helpers.UseSnareHot() end, },
                 { name = "GroupRenewalHoT", },
                 { name = "CurePoison",      cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
                 { name = "CureDisease",     cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
@@ -1504,7 +1509,7 @@ local _ClassConfig = {
             Header = "Recovery",
             Category = "General Healing",
             Index = 102,
-            Tooltip = "Use snaring HoTs like torpor as an emergency heal and as a combat buff on your tanks.",
+            Tooltip = "Use snaring HoTs as an emergency heal and as a combat buff on your tanks. We may still prioritize superior single-target HoTs at some level ranges.",
             RequiresLoadoutChange = true,
             Default = false,
         },
