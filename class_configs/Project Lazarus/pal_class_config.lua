@@ -10,7 +10,7 @@ local Logger      = require("utils.logger")
 local Targeting   = require("utils.targeting")
 
 return {
-    _version              = "2.3 - Project Lazarus",
+    _version              = "2.4 - Project Lazarus",
     _author               = "Derple, Algar",
     ['ModeChecks']        = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -963,7 +963,7 @@ return {
                 type = "AA",
             },
             {
-                name = "Inquisitor's Judgment",
+                name = "Inquisitor's Judgement",
                 type = "AA",
                 load_cond = function(self) return not Core.IsTanking() end,
             },

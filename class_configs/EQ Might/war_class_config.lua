@@ -11,7 +11,7 @@ local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
     -- Added Mayhem line for AE taunt
-    _version          = "3.2 - EQ Might",
+    _version          = "3.3 - EQ Might",
     _author           = "Algar, Derple",
     ['ModeChecks']    = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -660,6 +660,13 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
+                name = "Resplendent Glory",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Core.IsTanking()
+                end,
+            },
+            {
                 name = "BattlecryHeal",
                 type = "Disc",
                 cond = function(self, discSpell, target)
@@ -832,7 +839,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Tanking",
             Category = "Hate Tools",
-            Index = 100,
+            Index = 101,
             Tooltip = "Use AE hatred Discs and AA.",
             RequiresLoadoutChange = true,
             Default = true,

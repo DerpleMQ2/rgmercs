@@ -6,7 +6,7 @@ local Globals      = require("utils.globals")
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version            = "2.1 - Project Lazarus",
+    _version            = "2.2 - Project Lazarus",
     _author             = "Algar, Derple",
     ['Modes']           = {
         'DPS',
@@ -477,13 +477,6 @@ local _ClassConfig = {
             {
                 name = "Embalmer's Carapace",
                 type = "AA",
-            },
-            {
-                name = "Harm Shield",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Core.AtCriticalHP()
-                end,
             },
         },
         ['Scent(Terris)']    = {

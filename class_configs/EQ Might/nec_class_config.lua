@@ -6,7 +6,7 @@ local Globals      = require("utils.globals")
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version            = "2.1 - EQ Might",
+    _version            = "2.2 - EQ Might",
     _author             = "Algar, Derple",
     ['Modes']           = {
         'DPS',
@@ -546,15 +546,16 @@ local _ClassConfig = {
                     return Casting.OkayToCombatEscape()
                 end,
             },
-            {
-                name = "Harm Shield",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Core.AtCriticalHP()
-                end,
-            },
         },
         ['Scent(Terris)']     = {
+            {
+                name = "Scent of Terris",
+                type = "AA",
+                load_cond = function(self) return Casting.CanUseAA("Scent of Terris") end,
+                cond = function(self, aaName, target)
+                    return Casting.DetAACheck(aaName)
+                end,
+            },
             {
                 name_func = function(self)
                     local scentItems = { "Legendary Fabled Nightshade Scented Staff", "Fabled Nightshade Scented Staff", "Scent of Terris", }
@@ -566,7 +567,7 @@ local _ClassConfig = {
                     return "No Scent Item Found"
                 end,
                 type = "Item",
-                load_cond = function(self) return self.Helpers.GetScentItem ~= nil end,
+                load_cond = function(self) return self.Helpers.GetScentItem(self) ~= nil end,
                 cond = function(self, itemName, target)
                     return Casting.DetItemCheck(itemName)
                 end,
@@ -574,7 +575,7 @@ local _ClassConfig = {
             {
                 name = "ScentDebuff",
                 type = "Spell",
-                load_cond = function(self) return not self.Helpers.GetScentItem end,
+                load_cond = function(self) return not self.Helpers.GetScentItem(self) and not Casting.CanUseAA("Scent of Terris") end,
                 cond = function(self, spell, target)
                     return Casting.DetSpellCheck(spell)
                 end,
@@ -1018,7 +1019,7 @@ local _ClassConfig = {
                     return v
                 end
             end
-            return "No Scent Item Found"
+            return nil
         end,
     },
     ['SpellList']       = { -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
@@ -1029,7 +1030,13 @@ local _ClassConfig = {
                 { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "CharmSpell",   cond = function(self, spell) return Config:GetSetting('CharmOn') and Core.IsSelectedCharmSpell(spell) end, },
                 { name = "SnareDot",     cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Encroaching Darkness") end, },
-                { name = "ScentDebuff",  cond = function(self) return Config:GetSetting('ScentDebuffUse') == 2 and not self.Helpers.GetScentItem end, },
+                {
+                    name = "ScentDebuff",
+                    cond = function(self)
+                        return Config:GetSetting('ScentDebuffUse') == 2 and not self.Helpers.GetScentItem(self) and
+                            not Casting.CanUseAA("Scent of Terris")
+                    end,
+                },
                 { name = "ScentDebuff2", cond = function(self) return Config:GetSetting('ScentDebuffUse') == 3 end, },
                 { name = "PoisonNuke", },
                 { name = "FireDot",      cond = function(self) return Config:GetSetting('DoFireDot') > 1 end, },
@@ -1124,7 +1131,7 @@ local _ClassConfig = {
             Tooltip =
                 "Choose which scent resist debuff to use, if any.\n" ..
                 "Terris denotes the standard scent debuffs, up to and including Scent of Terris (and the AA version).\n" ..
-                "Midnight denotes the level 70 Scent of Midnight, which uses different slots and has different stacking.",
+                "Midnight denotes the level 68 Scent of Midnight line, which uses different slots and has different stacking.",
             Type = "Combo",
             ComboOptions = { 'Disabled', 'Terris', 'Midnight', },
             Default = 2,
@@ -1133,7 +1140,7 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
             FAQ = "Why is Scent of Midnight a separate option from Scent of Terris?",
-            Answer = "Scent of Midnight has been customized on Laz to use different slots, but also stack with other resist debuffs.",
+            Answer = "Scent of Midnight uses different slots than the Terris line, so it stacks with other resist debuffs.",
         },
         ['DoSnare']           = {
             DisplayName = "Use Snares",
@@ -1215,7 +1222,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Damage",
             Category = "Over Time",
-            Index = 104,
+            Index = 105,
             Tooltip = "Use your plague (disease) line of dots.",
             RequiresLoadoutChange = true,
             Default = true,
@@ -1225,7 +1232,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Damage",
             Category = "Over Time",
-            Index = 105,
+            Index = 106,
             Tooltip = "Use your grave (cold) line of dots.",
             RequiresLoadoutChange = true,
             Default = true,

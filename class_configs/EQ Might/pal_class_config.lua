@@ -10,7 +10,7 @@ local Logger      = require("utils.logger")
 local Targeting   = require("utils.targeting")
 
 return {
-    _version              = "2.2 - EQ Might",
+    _version              = "2.3 - EQ Might",
     _author               = "Derple, Algar",
     ['ModeChecks']        = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -1029,7 +1029,7 @@ return {
                 load_cond = function(self) return Config:GetSetting('DoValorousRage') end,
             },
             {
-                name = "Inquisitor's Judgment",
+                name = "Inquisitor's Judgement",
                 type = "AA",
             },
             {

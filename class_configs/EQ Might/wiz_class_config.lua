@@ -12,7 +12,7 @@ local Globals   = require("utils.globals")
 local Targeting = require("utils.targeting")
 
 return {
-    _version          = "2.3 - EQ Might",
+    _version          = "2.4 - EQ Might",
     _author           = "Derple, Algar",
     ['ModeChecks']    = {
         IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or not Targeting.HasXTHaters()) end,
@@ -733,9 +733,9 @@ return {
         },
         ['DPS(Magic)'] = {
             {
-                name = "Acromancy",
+                name = "Arcomancy",
                 type = "AA",
-                load_cond = function(self) return Casting.CanUseAA("Acromancy") end,
+                load_cond = function(self) return Casting.CanUseAA("Arcomancy") end,
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName)
                 end,

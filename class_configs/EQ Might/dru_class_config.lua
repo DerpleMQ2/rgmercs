@@ -7,7 +7,7 @@ local Globals      = require("utils.globals")
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version              = "2.1 - EQ Might",
+    _version              = "2.2 - EQ Might",
     _author               = "Algar",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
@@ -1020,6 +1020,14 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "Preincarnation",
+                type = "AA",
+                active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
             },
         },
         ['PetSummon']        = {

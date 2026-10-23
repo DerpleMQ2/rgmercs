@@ -7,7 +7,7 @@ local Globals   = require('utils.globals')
 local Targeting = require("utils.targeting")
 
 return {
-    _version              = "1.8 - EQ Might",
+    _version              = "1.9 - EQ Might",
     _author               = "Derple, Algar",
     ['Modes']             = {
         'DPS',
@@ -992,7 +992,7 @@ return {
             Group = "Abilities",
             Header = "Recovery",
             Category = "Healing Thresholds",
-            Index = 101,
+            Index = 102,
             Tooltip = "Use your pet heal spell when your pet is at or below this HP percentage.",
             Default = 60,
             Min = 1,

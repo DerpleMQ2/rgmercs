@@ -16,7 +16,7 @@ local Globals      = require("utils.globals")
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version            = "1.1 - Live",
+    _version            = "1.2 - Live",
     _author             = "Derple, Grimmier, Algar",
     ['Modes']           = {
         'DPS',
@@ -1645,7 +1645,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 3,
+            Index = 101,
             Default = false,
             Tooltip = "Enable the memorization and use of your mez spells.",
             RequiresLoadoutChange = true,
@@ -1655,7 +1655,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 4,
+            Index = 102,
             Default = false,
             Tooltip = "Also use your undead-only mez line, which holds higher level targets.",
             RequiresLoadoutChange = true,

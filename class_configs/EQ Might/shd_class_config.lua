@@ -77,7 +77,7 @@ local Tooltips     = {
 
 local _ClassConfig = {
     -- Added low level proc self-buffs, separated the proc lines by buff slot
-    _version          = "2.8 - EQ Might",
+    _version          = "2.9 - EQ Might",
     _author           = "Algar, Derple",
     ['ModeChecks']    = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -937,6 +937,14 @@ local _ClassConfig = {
                 tooltip = Tooltips.ThoughtLeech,
                 cond = function(self, aaName, target)
                     return Config:GetSetting('DoLeechTouch') ~= 1
+                end,
+            },
+            {
+                name = "Scourge Skin",
+                type = "AA",
+                cond = function(self, aaName)
+                    if not Core.IsTanking() then return false end
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {

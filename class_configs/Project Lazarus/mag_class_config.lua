@@ -11,7 +11,7 @@ local Logger       = require("utils.logger")
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version          = "1.5 - Project Lazarus",
+    _version          = "1.6 - Project Lazarus",
     _author           = "Derple, Morisato, Algar",
     ['Modes']         = {
         'DPS',
@@ -1143,7 +1143,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Damage",
             Category = "Direct",
-            Index = 1,
+            Index = 101,
             Tooltip = "Choose an element to focus on under level 71.",
             Type = "Combo",
             ComboOptions = { 'Fire', 'Magic', },

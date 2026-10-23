@@ -8,7 +8,7 @@ local Globals      = require('utils.globals')
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version              = "3.2 - EQ Might",
+    _version              = "3.3 - EQ Might",
     _author               = "Algar, Derple",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
@@ -373,6 +373,9 @@ local _ClassConfig = {
             "Scourge",               -- Level 31
             "Affliction",            -- Level 19
             "Sicken",                -- Level 4
+        },
+        ['TapDot'] = {
+            "Ancient: Chiasa's Kiss", -- Level 70 EQM Custom
         },
         ['PBAEPoison'] = {
             "Yoppa's Rain of Venom", -- Level 68
@@ -931,6 +934,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Virulent Talon",
+                type = "AA",
+                cond = function(self, aaName)
+                    return (mq.TLO.Me.Pet.ID() or 0) > 0
+                end,
+            },
+            {
                 name = "OoW_Chest",
                 type = "Item",
             },
@@ -1059,6 +1069,15 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "TapDot",
+                type = "Spell",
+                load_cond = function() return Config:GetSetting('DoTapDot') end,
+                cond = function(self, spell, target)
+                    if Config:GetSetting('DotNamedOnly') and not Globals.AutoTargetIsNamed then return false end
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
+                end,
+            },
+            {
                 name = "ColdNuke",
                 type = "Spell",
                 load_cond = function() return Config:GetSetting('DoColdNuke') end,
@@ -1139,6 +1158,14 @@ local _ClassConfig = {
                 load_cond = function() return not Casting.CanUseAA("Group Pact of the Wolf") end,
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName, nil, true)
+                end,
+            },
+            {
+                name = "Preincarnation",
+                type = "AA",
+                active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
         },
@@ -1357,6 +1384,7 @@ local _ClassConfig = {
                 { name = "CurseDot",        cond = function(self) return Config:GetSetting('DoCurseDot') end, },
                 { name = "SaryrnDot",       cond = function(self) return Config:GetSetting('DoSaryrnDot') end, },
                 { name = "UltorDot",        cond = function(self) return Config:GetSetting('DoUltorDot') end, },
+                { name = "TapDot",          cond = function(self) return Config:GetSetting('DoTapDot') end, },
                 { name = "PBAEPoison",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
             },
         },
@@ -1381,6 +1409,7 @@ local _ClassConfig = {
                 { name = "CurseDot",        cond = function(self) return Config:GetSetting('DoCurseDot') end, },
                 { name = "SaryrnDot",       cond = function(self) return Config:GetSetting('DoSaryrnDot') end, },
                 { name = "UltorDot",        cond = function(self) return Config:GetSetting('DoUltorDot') end, },
+                { name = "TapDot",          cond = function(self) return Config:GetSetting('DoTapDot') end, },
                 { name = "PBAEPoison",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
                 { name = "SingleHot",       cond = function(self) return Config:GetSetting('DoSingleHot') end, },
                 { name = "SnareHot",        cond = function(self) return self.Helpers.UseSnareHot() end, },
@@ -1481,12 +1510,22 @@ local _ClassConfig = {
             Default = false,
             RequiresLoadoutChange = true,
         },
+        ['DoTapDot']          = {
+            DisplayName = "Lifetap Dot",
+            Group = "Abilities",
+            Header = "Damage",
+            Category = "Over Time",
+            Index = 104,
+            Tooltip = "Use Ancient: Chiasa's Kiss (magic lifetap dot, single target).",
+            Default = false,
+            RequiresLoadoutChange = true,
+        },
         ['DotNamedOnly']      = {
             DisplayName = "Only Dot Named",
             Group = "Abilities",
             Header = "Damage",
             Category = "Over Time",
-            Index = 104,
+            Index = 105,
             Tooltip = "Any selected dot above will only be used on a named mob.",
             Default = true,
         },
@@ -1812,7 +1851,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Debuffs",
             Category = "Resist",
-            Index = 101,
+            Index = 104,
             Tooltip = "Use your disease/poison resist debuff.",
             RequiresLoadoutChange = true,
             Default = true,

@@ -7,7 +7,7 @@ local Globals      = require("utils.globals")
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version          = "2.0 - Live",
+    _version          = "2.1 - Live",
     _author           = "Algar, Derple",
     ['Modes']         = {
         'DPS',
@@ -681,7 +681,7 @@ local _ClassConfig = {
             AbilityName = 'Distant Strike',
             AbilityRange = 300,
             cond = function(self)
-                return mq.TLO.Me.AltAbility('Distant Strike')
+                return Casting.CanUseAA('Distant Strike')
             end,
         },
     },

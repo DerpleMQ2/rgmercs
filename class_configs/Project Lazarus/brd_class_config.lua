@@ -39,7 +39,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version              = "3.3 - Project Lazarus",
+    _version              = "3.4 - Project Lazarus",
     _author               = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
     ['Modes']             = { --other modes to reorder spell priorities may be added back in at a later date.
         'General',
@@ -960,7 +960,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 3,
+            Index = 101,
             Default = true,
             Tooltip = "Enable the memorization and use of your single-target mez song.",
             RequiresLoadoutChange = true,
@@ -970,7 +970,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 4,
+            Index = 102,
             Default = true,
             Tooltip = "Use Dirge of the Sleepwalker to mez.",
         },

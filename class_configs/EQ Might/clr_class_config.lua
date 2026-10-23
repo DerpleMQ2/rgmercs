@@ -7,18 +7,27 @@ local Globals      = require('utils.globals')
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version              = "2.3 - EQ Might",
+    _version              = "2.4 - EQ Might",
     _author               = "Algar, Derple, Robban",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return Config:GetSetting('DoCures') end,
         IsRezing = function()
-            local rezAction = Casting.CanUseAA("Blessing of Resurrection") or mq.TLO.FindItem("=Water Sprinkler of Nem Ankh")() or Core.GetResolvedActionMapItem('RezStaff')
+            local rezAction = Casting.CanUseAA("Blessing of Resurrection") or Casting.CanUseAA("Divine Resurrection") or mq.TLO.FindItem("=Water Sprinkler of Nem Ankh")() or
+                Core.GetResolvedActionMapItem('RezStaff')
             return ((Core.GetResolvedActionMapItem('RezSpell') or rezAction) and not Targeting.HasXTHaters()) or (Config:GetSetting('DoBattleRez') and rezAction)
         end,
     },
     ['Rez']               = {
         ['Combat'] = {
+            {
+                type = "AA",
+                name = "Divine Resurrection",
+                load_cond = function(self) return Config:GetSetting('DoDivineRez') end,
+                cond = function(self, aaName, corpse)
+                    return Targeting.TargetIsATank(corpse)
+                end,
+            },
             {
                 type = "Item",
                 name = "Legendary Fabled Staff of Forbidden Rites",
@@ -1183,7 +1192,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Recovery",
             Category = "Healing Thresholds",
-            Index = 101,
+            Index = 102,
             Tooltip = "Pct we will use Complete Heal on a tank class.",
             Default = 80,
             Min = 1,
@@ -1281,12 +1290,22 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Recovery",
             Category = "Curing",
-            Index = 104,
+            Index = 105,
             Tooltip = "If Word of Replenishment or Vivification are available, use these to cure instead of individual cure spells. \n" ..
                 "Please note that we will prioritize single target cures if you have selected to keep them memmed above (due to the counter disparity).",
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
+        },
+        ['DoDivineRez']       = {
+            DisplayName = "Use Divine Resurrection",
+            Group = "Abilities",
+            Header = "Recovery",
+            Category = "Rezzing",
+            Index = 101,
+            Tooltip = "Use Divine Resurrection in combat on tank-class corpses.",
+            RequiresLoadoutChange = true,
+            Default = true,
         },
         ['DoPBAENuke']        = {
             DisplayName = "Use PBAE Nuke",
