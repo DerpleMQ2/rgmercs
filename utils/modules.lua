@@ -89,6 +89,7 @@ end
 function Modules:unloadModule(moduleName)
     if self.ModuleList[moduleName] ~= nil then
         local module = self.ModuleList[moduleName]
+        if module == nil then return end
         local shutdownOk, shutdownError = pcall(function() module:Shutdown() end)
         if not shutdownOk then
             Logger.log_error("\ar%s errored during shutdown: %s", moduleName, shutdownError)

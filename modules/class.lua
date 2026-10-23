@@ -2250,7 +2250,7 @@ function Module:RunDispel(combat_state)
 
     -- resolve the ability first; with nothing ready the buff walk's result is unusable either way
     local entry, spell, resolvedName = self:GetReadyDispelEntry(target)
-    if not entry then return end
+    if not entry or not spell then return end
     local entryType = (entry.type or ""):lower()
     local manaFree = entryType == "item" or entryType == "ability" or (spell.Mana() or 0) == 0
     if not Casting.OkayToDebuff(false, manaFree) then return end
