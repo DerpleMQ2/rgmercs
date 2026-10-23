@@ -40,7 +40,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version              = "3.4 - EQ Might",
+    _version              = "3.5 - EQ Might",
     _author               = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
     ['Modes']             = { --other modes to reorder spell priorities may be added back in at a later date.
         'General',
@@ -265,6 +265,9 @@ local _ClassConfig = {
         },
         ['Steelwrath'] = {
             "Steelwrath Discipline", -- Level 67 EQM Custom
+        },
+        ['Deftdance'] = {
+            "Deftdance Discipline", -- Level 55
         },
         ['ProcSong'] = {
             "Storm Blade",       -- Level 69
@@ -604,6 +607,15 @@ local _ClassConfig = {
                 name = "Steelwrath",
                 type = "Disc",
                 midSong = true,
+                cond = function(self, discSpell, target)
+                    return Casting.NoDiscActive()
+                end,
+            },
+            {
+                name = "Deftdance",
+                type = "Disc",
+                midSong = true,
+                load_cond = function(self) return Config:GetSetting('UseDeftdance') end,
                 cond = function(self, discSpell, target)
                     return Casting.NoDiscActive()
                 end,
@@ -1027,7 +1039,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 3,
+            Index = 101,
             Default = true,
             Tooltip = "Enable the memorization and use of your single-target mez song.",
             RequiresLoadoutChange = true,
@@ -1037,7 +1049,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 4,
+            Index = 102,
             Default = true,
             Tooltip = "Enable the memorization and use of your AE mez song.",
             RequiresLoadoutChange = true,
@@ -1142,7 +1154,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 104,
+            Index = 110,
             Tooltip = Tooltips.ResistSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1156,7 +1168,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 105,
+            Index = 111,
             Tooltip = Tooltips.MitigationSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1324,7 +1336,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 103,
+            Index = 104,
             Tooltip = Tooltips.AriaSong,
             Type = "Combo",
             ComboOptions = { 'None', 'AoE', 'Group', },
@@ -1338,7 +1350,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 104,
+            Index = 105,
             Tooltip = Tooltips.AriaSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1352,7 +1364,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 108,
+            Index = 109,
             Tooltip = "Use available Aria clickies (Such as Ancient Artifact of Power or Echo of Trusik Lute) instead of the song.",
             Default = true,
             RequiresLoadoutChange = true,
@@ -1362,7 +1374,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 105,
+            Index = 106,
             Tooltip = Tooltips.WarMarchSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1376,7 +1388,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 107,
+            Index = 108,
             Tooltip = Tooltips.ProcSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1390,7 +1402,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Buffs",
             Category = "Group",
-            Index = 106,
+            Index = 107,
             Tooltip = Tooltips.ArcaneSong,
             Type = "Combo",
             ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', },
@@ -1467,6 +1479,16 @@ local _ClassConfig = {
             Max = 4,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
+        },
+        ['UseDeftdance']    = {
+            DisplayName = "Use Deftdance",
+            Group = "Abilities",
+            Header = "Buffs",
+            Category = "Self",
+            Index = 103,
+            Tooltip = "Use Deftdance during burns (shares a timer with Skal's Stance).",
+            Default = false,
+            RequiresLoadoutChange = true,
         },
 
         -- Song Duration Adjustment

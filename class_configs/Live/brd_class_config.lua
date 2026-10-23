@@ -56,7 +56,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version              = "2.4 - Live",
+    _version              = "2.5 - Live",
     _author               = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
     ['Modes']             = {
         'General',
@@ -1565,7 +1565,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 3,
+            Index = 101,
             Default = true,
             Tooltip = "Enable the memorization and use of your single-target mez song.",
             RequiresLoadoutChange = true,
@@ -1575,7 +1575,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 4,
+            Index = 102,
             Default = true,
             Tooltip = "Enable the memorization and use of your AE mez song.",
             RequiresLoadoutChange = true,
@@ -1585,7 +1585,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 5,
+            Index = 103,
             Default = true,
             Tooltip = "Use Dirge of the Sleepwalker to mez.",
         },

@@ -17,7 +17,7 @@ local auraSpellToName = {
 }
 
 local _ClassConfig    = {
-    _version          = "1.6 - EQ Might",
+    _version          = "1.7 - EQ Might",
     _author           = "Derple, Grimmier, Algar, Robban",
     ['ModeChecks']    = {
         CanMez       = function() return true end,
@@ -418,8 +418,9 @@ local _ClassConfig    = {
         },
     },
     ['Mez']           = {
-        { type = "Spell", name = "MezSpell",   cond = function() return Config:GetSetting('DoSTMez') end, },
-        { type = "Spell", name = "MezAESpell", cond = function() return Config:GetSetting('DoAEMez') end, },
+        { type = "Spell", name = "MezSpell",        cond = function() return Config:GetSetting('DoSTMez') end, },
+        { type = "Spell", name = "MezAESpell",      cond = function() return Config:GetSetting('DoAEMez') end, },
+        { type = "AA",    name = "Beam of Slumber", cond = function() return Config:GetSetting('DoAEMez') and Config:GetSetting('DoAAMez') end, },
     },
     ['Charm']         = {
         ['Abilities'] = {
@@ -1224,14 +1225,6 @@ local _ClassConfig    = {
         },
         ['Slow']              = {
             {
-                name = "Enveloping Helix",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Targeting.HasXTHaters(Config:GetSetting('AECount')) then return false end
-                    return Casting.DetAACheck(aaName) and not Casting.SlowImmuneTarget(target)
-                end,
-            },
-            {
                 name = "Dreary Deeds",
                 type = "AA",
                 load_cond = function() return Casting.CanUseAA("Dreary Deeds") end,
@@ -1329,7 +1322,7 @@ local _ClassConfig    = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 3,
+            Index = 101,
             Default = true,
             Tooltip = "Enable the memorization and use of your single-target mez spells.",
             RequiresLoadoutChange = true,
@@ -1339,10 +1332,19 @@ local _ClassConfig    = {
             Group = "Abilities",
             Header = "Mez",
             Category = "Mez General",
-            Index = 4,
+            Index = 102,
             Default = true,
             Tooltip = "Enable the memorization and use of your AE mez spells.",
             RequiresLoadoutChange = true,
+        },
+        ['DoAAMez']            = {
+            DisplayName = "Use Mez AA",
+            Group = "Abilities",
+            Header = "Mez",
+            Category = "Mez General",
+            Index = 103,
+            Default = true,
+            Tooltip = "Use Beam of Slumber to mez.",
         },
 
         --Buffs

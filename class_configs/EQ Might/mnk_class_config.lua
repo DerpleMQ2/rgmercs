@@ -7,7 +7,7 @@ local Globals      = require("utils.globals")
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version          = "2.2 - EQ Might",
+    _version          = "2.3 - EQ Might",
     _author           = "Algar, Derple",
     ['ModeChecks']    = {
         IsCuring = function() return Config:GetSetting('DoCures') end,
@@ -339,6 +339,16 @@ local _ClassConfig = {
             AbilityRange = 50,
             cond = function(self)
                 return Casting.CanUseAA('Grappling Strike')
+            end,
+        },
+        {
+            id = 'Distant Strike',
+            Type = "AA",
+            DisplayName = 'Distant Strike',
+            AbilityName = 'Distant Strike',
+            AbilityRange = 300,
+            cond = function(self)
+                return Casting.CanUseAA('Distant Strike')
             end,
         },
     },

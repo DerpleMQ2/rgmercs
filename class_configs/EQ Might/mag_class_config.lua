@@ -11,7 +11,7 @@ local Logger       = require("utils.logger")
 local Targeting    = require("utils.targeting")
 
 local _ClassConfig = {
-    _version          = "1.5 - EQ Might",
+    _version          = "1.6 - EQ Might",
     _author           = "Derple, Morisato, Algar",
     ['ModeChecks']    = {
         IsRezing = function() return Core.GetResolvedActionMapItem('RezStaff') ~= nil and (Config:GetSetting('DoBattleRez') or not Targeting.HasXTHaters()) end,
@@ -731,6 +731,10 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
+                name = "Virulent Talon",
+                type = "AA",
+            },
+            {
                 name = "Spire",
                 type = "AA",
             },
@@ -1103,7 +1107,7 @@ local _ClassConfig = {
             Group = "Abilities",
             Header = "Damage",
             Category = "Direct",
-            Index = 1,
+            Index = 101,
             Tooltip = "Pick the element strategy for nukes. Auto rotates Fire and Magic based on target immunity. " ..
                 "See FAQ for details on Skip<Element>Spells conflicts.",
             Type = "Combo",

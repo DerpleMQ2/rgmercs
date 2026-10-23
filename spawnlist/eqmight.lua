@@ -440,6 +440,13 @@ return {
         { name = "Skeletal Monk",              statusImmunities = { Slow = true, }, },
         { name = "Voras the Spider Matriarch", elementalImmunities = { Cold = true, Poison = true, }, },
     },
+    ["mird"] = {
+        "Boo the Buffetmaster",
+        "Fronk the Forcefeeder",
+        "Glyphhoarding Table",
+        "The Gluttonous Ooze",
+        "Xerthis the Starved",
+    },
     ["mistmoore"] = {
         "Garton Viswin",
         "Maid Issis",
@@ -454,6 +461,7 @@ return {
         { name = "an immortal shade", named = false, elementalImmunities = { Fire = true, Poison = true, Disease = true, }, },
         "Bloodstice",
         "Count Drakvish",
+        "Duke Valerius Nightwing",
         { name = "Madame Chiasa",          statusImmunities = { Slow = true, }, },
         { name = "Nightrage Sanguinarch",  statusImmunities = { Slow = true, }, elementalImmunities = { Cold = true, Magic = true, Poison = true, Disease = true, }, },
         { name = "Queen Vaelrosa Nyxfang", statusImmunities = { Slow = true, }, },
@@ -472,8 +480,9 @@ return {
         { name = "an immortal black gate sentinel", statusImmunities = { Slow = true, }, },
         { name = "Glyphhoarder Issus",              elementalImmunities = { Magic = true, }, statusImmunities = { Slow = true, }, },
         { name = "Harvester of Souls",              statusImmunities = { Slow = true, }, },
-        { name = "Morvath, Soul Tyrant of Nadox",   statusImmunities = { Slow = true, }, },
-        { name = "The Dread Archivist",             statusImmunities = { Slow = true, }, },
+        "Moria the Undying",
+        { name = "Morvath, Soul Tyrant of Nadox", statusImmunities = { Slow = true, }, },
+        { name = "The Dread Archivist",           statusImmunities = { Slow = true, }, },
     },
     ["natimbi"] = {
         "Cragbeast Queen",
