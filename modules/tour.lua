@@ -2,6 +2,7 @@ local mq            = require('mq')
 local ImGui         = require('ImGui')
 local Base          = require("modules.base")
 local Config        = require('utils.config')
+local Core          = require('utils.core')
 local Globals       = require('utils.globals')
 local Modules       = require("utils.modules")
 local OptionsUI     = require('ui.options')
@@ -260,7 +261,7 @@ Module.Steps           = {
     },
     {
         Title = "Charming",
-        Show = function() return Modules:ExecModule("Class", "CanCharm") end,
+        Show = function() return Core.CanCharm() end,
         Tab = "Charm",
         Anchors = { "Tab:Charm", },
         Faq = "charm",
@@ -309,6 +310,7 @@ function Module:Start()
     self.TempSettings.RestoreAdvanced = not Config:GetSetting('ShowAdvancedOpts')
     if self.TempSettings.RestoreAdvanced then
         Config:SetSetting('ShowAdvancedOpts', true)
+        OptionsUI:SetSearchFilter("")
     end
     self:GoToStep(1)
 end
