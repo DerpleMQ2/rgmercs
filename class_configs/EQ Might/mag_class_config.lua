@@ -733,6 +733,9 @@ local _ClassConfig = {
             {
                 name = "Virulent Talon",
                 type = "AA",
+                cond = function(self, aaName)
+                    return (mq.TLO.Me.Pet.ID() or 0) > 0
+                end,
             },
             {
                 name = "Spire",

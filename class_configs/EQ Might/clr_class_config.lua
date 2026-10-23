@@ -13,7 +13,8 @@ local _ClassConfig = {
         IsHealing = function() return true end,
         IsCuring = function() return Config:GetSetting('DoCures') end,
         IsRezing = function()
-            local rezAction = Casting.CanUseAA("Blessing of Resurrection") or mq.TLO.FindItem("=Water Sprinkler of Nem Ankh")() or Core.GetResolvedActionMapItem('RezStaff')
+            local rezAction = Casting.CanUseAA("Blessing of Resurrection") or Casting.CanUseAA("Divine Resurrection") or mq.TLO.FindItem("=Water Sprinkler of Nem Ankh")() or
+                Core.GetResolvedActionMapItem('RezStaff')
             return ((Core.GetResolvedActionMapItem('RezSpell') or rezAction) and not Targeting.HasXTHaters()) or (Config:GetSetting('DoBattleRez') and rezAction)
         end,
     },
@@ -24,7 +25,7 @@ local _ClassConfig = {
                 name = "Divine Resurrection",
                 load_cond = function(self) return Config:GetSetting('DoDivineRez') end,
                 cond = function(self, aaName, corpse)
-                    return Globals.Constants.RGTank:contains(corpse.Class.ShortName() or "")
+                    return Targeting.TargetIsATank(corpse)
                 end,
             },
             {
