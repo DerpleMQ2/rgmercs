@@ -1166,6 +1166,7 @@ function Module:Render()
             Config:SetSetting('Mode', newMode)
             self:RescanLoadout()
         end
+        Modules:ExecModule("Tour", "Anchor", "ClassMode")
 
         Ui.RenderConfigSelector()
 

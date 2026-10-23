@@ -1719,6 +1719,11 @@ function Ui.RenderForceTargetList(showPopout)
                     Ui.TempSettings.SortedXTIDToSlot[xtargID] = { Name = xtarg.CleanName() or "None", Slot = i, ID = xtargID, }
                 end
             end
+            local sampleXTarget = Modules:ExecModule("Tour", "SampleXTarget")
+            if sampleXTarget and #Ui.TempSettings.SortedXT == 0 then
+                table.insert(Ui.TempSettings.SortedXT, sampleXTarget)
+                Ui.TempSettings.SortedXTIDToSlot[sampleXTarget.ID()] = { Name = sampleXTarget.CleanName(), Slot = 0, ID = sampleXTarget.ID(), }
+            end
             if sort_specs then sort_specs.SpecsDirty = true end
 
             if sort_specs and sort_specs.SpecsDirty then
@@ -1829,6 +1834,7 @@ function Ui.RenderForceTargetList(showPopout)
                 ImGui.PopID()
             end
         end)
+    Modules:ExecModule("Tour", "Anchor", "ForceTargetList")
 end
 
 --- Generic sortable table helper: sets up columns, calls sortFn with sort

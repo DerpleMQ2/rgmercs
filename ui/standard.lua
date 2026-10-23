@@ -21,7 +21,7 @@ StandardUI.__index  = StandardUI
 function StandardUI:renderModulesTabs()
     if not Config:SettingsLoaded() then return end
 
-    if ImGui.BeginTabItem("Main") then
+    if ImGui.BeginTabItem("Main", nil, Modules:ExecModule("Tour", "TabFlags", "Main")) then
         if ImGui.BeginChild("##RGMercsMainBody", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.None), bit32.bor(ImGuiWindowFlags.None)) then
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2(0, 0))
 
@@ -77,19 +77,26 @@ function StandardUI:renderModulesTabs()
 
             ImGui.NewLine()
 
-            if ImGui.CollapsingHeader("Assist List") then
+            Modules:ExecModule("Tour", "Prepare", "AssistList")
+            local assistListOpen = ImGui.CollapsingHeader("Assist List")
+            Modules:ExecModule("Tour", "Anchor", "AssistList")
+            if assistListOpen then
                 ImGui.Indent()
                 Ui.RenderList("AssistList", true)
                 ImGui.Unindent()
             end
 
-            if ImGui.CollapsingHeader("Heal List") then
+            Modules:ExecModule("Tour", "Prepare", "HealList")
+            local healListOpen = ImGui.CollapsingHeader("Heal List")
+            Modules:ExecModule("Tour", "Anchor", "HealList")
+            if healListOpen then
                 ImGui.Indent()
                 Ui.RenderList("HealList", false)
                 ImGui.Unindent()
             end
 
             if not Config:GetSetting('PopOutForceTarget') then
+                Modules:ExecModule("Tour", "Prepare", "ForceTarget")
                 if ImGui.CollapsingHeader("Force Target") then
                     ImGui.Indent()
                     Ui.RenderForceTargetList(true)
@@ -112,7 +119,8 @@ function StandardUI:renderModulesTabs()
 
     for _, name in ipairs(Modules:GetModuleOrderedNames()) do
         if Modules:ExecModule(name, "ShouldRender") and not Config:GetSetting(name .. "_Popped", true) then
-            if ImGui.BeginTabItem(name) then
+            if ImGui.BeginTabItem(name, nil, Modules:ExecModule("Tour", "TabFlags", name)) then
+                Modules:ExecModule("Tour", "Anchor", "Tab:" .. name)
                 if ImGui.BeginChild("##RGMercsTabBody", ImVec2(0, 0), bit32.bor(ImGuiChildFlags.None), bit32.bor(ImGuiWindowFlags.None)) then
                     Modules:ExecModule(name, "Render")
                     ImGui.Separator()
@@ -295,6 +303,7 @@ function StandardUI:RenderWindowControls()
         Config:ClearAllHighlightedModules()
         Config:SetSetting('EnableOptionsUI', not Config:GetSetting('EnableOptionsUI'))
     end
+    Modules:ExecModule("Tour", "Anchor", "OptionsButton")
     Ui.Tooltip("Open the RGMercs Options Window")
     ImGui.SameLine()
 
@@ -307,6 +316,7 @@ function StandardUI:RenderWindowControls()
     if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
         Globals.Minimized = true
     end
+    Modules:ExecModule("Tour", "Anchor", "MiniButton")
     Ui.Tooltip("Activate Mini Mode")
 
     ImGui.SetCursorPos(position)
@@ -370,6 +380,7 @@ function StandardUI:RenderMainWindow(imgui_style, openGUI, flags)
                 if Ui.AnimatedButton("##mercsmainbutton", pauseLabel, ImVec2(availableWidth * .95, 40)) then
                     Globals.PauseMain = not Globals.PauseMain
                 end
+                Modules:ExecModule("Tour", "Anchor", "PauseButton")
                 ImGui.PopFont()
 
                 ImGui.PopStyleColor(2)

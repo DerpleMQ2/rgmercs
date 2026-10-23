@@ -223,6 +223,8 @@ local function RGMercsGUI()
                 end
             end
 
+            Modules:ExecModule("Tour", "RenderOverlay")
+
             ImGui.PopStyleVar(3)
 
             if themeColorPop > 0 then

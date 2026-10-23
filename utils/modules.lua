@@ -19,6 +19,7 @@ Modules.ModuleOrder           = {
     "Perf",
     "Contributors",
     "FAQ",
+    "Tour",
     "UserModules",
     "Debug",
 }
@@ -43,6 +44,7 @@ Modules.BuiltInModulePaths    = {
     Perf         = "modules.performance",
     Contributors = "modules.contributors",
     FAQ          = "modules.faq",
+    Tour         = "modules.tour",
     Debug        = "modules.debug",
 }
 
@@ -73,6 +75,7 @@ function Modules:load(lootModule)
         Perf         = require("modules.performance"):New(),
         Contributors = require("modules.contributors"):New(),
         FAQ          = require("modules.faq"):New(),
+        Tour         = require("modules.tour"):New(),
         UserModules  = require("modules.usermodules"):New(),
         Debug        = require("modules.debug"):New(),
         LootNScoot   = lootModule == "LootNScoot" and require("modules.lootnscoot"):New() or nil,

@@ -387,13 +387,12 @@ function OptionsUI:ApplySearchFilter()
             end
 
             for _, renderCategory in ipairs(header.RenderCategories or {}) do
-                local categoryMatches = true
-                if renderCategory.Search then
-                    categoryMatches = renderCategory.Search(filter)
-                end
+                local renderHeaderMatches = headerMatches or (renderCategory.Header or ""):lower():find(filter, 1, true) ~= nil
 
-                if categoryMatches then
-                    table.insert(newRenderCategories, renderCategory)
+                if renderHeaderMatches or not renderCategory.Search or renderCategory.Search(filter) then
+                    local newRenderCategory = shallow_copy(renderCategory)
+                    newRenderCategory.ShowAll = renderHeaderMatches
+                    table.insert(newRenderCategories, newRenderCategory)
                 end
             end
 
@@ -480,6 +479,7 @@ function OptionsUI:RenderCategorySeperator(category)
     end
 
     ImGui.SeparatorText(category)
+    Modules:ExecModule("Tour", "Anchor", "Category:" .. category)
 
     if self.HighlightedCategories:contains(category) then
         ImGui.PopStyleColor(1)
@@ -495,6 +495,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
                 ImGui.PushStyleColor(ImGuiCol.Text, Globals.Constants.Colors.SearchHighlightColor)
             end
 
+            Modules:ExecModule("Tour", "Prepare", "Header:" .. header.Name)
             if ImGui.CollapsingHeader(header.Name) then
                 if header.highlighted then
                     ImGui.PopStyleColor(1)
@@ -518,7 +519,7 @@ function OptionsUI:RenderOptionsPanel(groupName)
                         end
 
                         if RenderCategory.Render then
-                            RenderCategory.Render(self.configFilter)
+                            RenderCategory.Render(RenderCategory.ShowAll and "" or self.configFilter)
                         end
                     end
                 end
@@ -598,6 +599,7 @@ function OptionsUI:RenderCategorySettings(category)
                             })
                         end
                         ImGui.PopStyleColor(2)
+                        Modules:ExecModule("Tour", "Anchor", "Setting:" .. settingName)
 
                         if self.HighlightedSettings:contains(settingName) then
                             ImGui.PopStyleColor(1)
@@ -1348,6 +1350,7 @@ function OptionsUI:RenderMainWindow(_, openGUI, flags)
             end
             Ui.Tooltip("Clear Search Text")
             local showAdvancedOpts, showAdvancedOptsChanged = Ui.RenderOptionToggle("show_adv_tog###OptionsUI", "Show Advanced Options", Config:GetSetting('ShowAdvancedOpts'))
+            Modules:ExecModule("Tour", "Anchor", "AdvancedToggle")
             if showAdvancedOptsChanged then
                 Config:SetSetting('ShowAdvancedOpts', showAdvancedOpts)
                 self:ApplySearchFilter()
